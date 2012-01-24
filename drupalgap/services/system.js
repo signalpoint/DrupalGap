@@ -1,11 +1,24 @@
+var drupalgap_services_system_connect_result; // global variable used to hold the latest system connect service resource call result
+
+/**
+ * Makes an synchronous call to Drupal's System Connect Service Resource.
+ *
+ * @return
+ *   A JSON object containing information about the drupal user who made the service call, and NULL if the service call failed.
+ */
 function drupalgap_services_system_connect () {
-	var system_connect_url = drupalgap_settings.services_endpoint_default + "/system/connect.json";
-	console.log(system_connect_url);
 	try {
+		// build url path to service call
+		var system_connect_url = drupalgap_settings.services_endpoint_default + "/system/connect.json";
+		// force clear any previous system connect result
+		drupalgap_services_system_connect_result = null;
+		// make the service call...
+		console.log(system_connect_url);
 	    $.ajax({
 	      url: system_connect_url,
 	      type: 'post',
 	      dataType: 'json',
+	      async: false,
 	      error: function (XMLHttpRequest, textStatus, errorThrown) {
 	    	alert('drupalgap_services_system_connect - failed to connect');
 	    	console.log("drupalgap_services_system_connect");
@@ -14,15 +27,9 @@ function drupalgap_services_system_connect () {
 	        console.log(JSON.stringify(errorThrown));
 	      },
 	      success: function (data) {
-	        var drupal_user = data.user;
-	        if (drupal_user.uid == 0) { // user is not logged in, show the login button, hide the logout button
-	          $('#drupalgap_button_user_login').show();
-	          $('#drupalgap_button_user_logout').hide();
-	        }
-	        else { // user is logged in, hide the login button, show the logout button
-	          $('#drupalgap_button_user_login').hide();
-	          $('#drupalgap_button_user_logout').show();
-	        }
+	    	  // save JSON result in global variable so others can access it
+	    	  drupalgap_services_system_connect_result = data;
+	    	  console.log(JSON.stringify(drupalgap_services_system_connect_result));
 	      }
 	    });
 	}
@@ -30,4 +37,5 @@ function drupalgap_services_system_connect () {
 		alert("drupalgap_services_system_connect - " + error);
 		consoloe.log("drupalgap_services_system_connect - " + error);
 	}
+	return drupalgap_services_system_connect_result;
 }
