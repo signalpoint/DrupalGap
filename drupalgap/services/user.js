@@ -1,6 +1,8 @@
-var drupalgap_services_user_login_result; // global variable used to hold the latest user login service resource call result json
-var drupalgap_services_user_logout_result; // global variable used to hold the latest user logout service resource call result json
-var drupalgap_services_user_update_result; // global variable used to hold the latest user update service resource call result json
+// define global variables to hold the latest service resource call result json
+var drupalgap_services_user_login_result;
+var drupalgap_services_user_logout_result;
+var drupalgap_services_user_update_result;
+var drupalgap_services_user_register_result;
 
 /**
  * Makes a synchronous call to Drupal's User Login Service Resource. 
@@ -74,7 +76,13 @@ function drupalgap_services_user_login (name, pass) {
 		      drupalgap_services_user_login_result = data; // hold on to a copy of the json that came back
 		      drupalgap_user = data.user; // save user json object in global drupalgap_user variable
 		      console.log(JSON.stringify(drupalgap_services_user_login_result));
-		      successful = true;
+		      
+		      // make sure the user account is active
+		      if (drupalgap_user.status == 1) { successful = true; }
+		      else {
+		    	  // set the response statusText
+		    	  drupalgap_services_user_login_result.statusText = "The username " + drupalgap_user.name + " has not been activated or is blocked.";
+		      }
 		      drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
 		    }
 		});
@@ -174,6 +182,71 @@ function drupalgap_services_user_update (user) {
 	catch (error) {
 		console.log("drupalgap_services_user_update - " + error);
 		alert("drupalgap_services_user_update - " + error);	
+	}
+	return false; // if it made it this fair, the user update call failed
+}
+
+function drupalgap_services_user_register (name,mail) {
+	
+	// example success json
+	/* {
+	 *   "uid":"2",
+	 *   "uri":"http://localhost/drupal-7.10/?q=drupalgap/user/2"
+	 * }*/
+	
+	// example failure json
+	/* {
+	 *   "form_errors":{
+	 *     "name":"Username field is required.",
+	 *     "mail":"E-mail address field is required."
+	 *   }
+	 * }
+	 */
+	
+	try {
+		
+		// validate input
+		if (!name) {
+			alert("drupalgap_services_user_register - name empty");
+			return false;
+		}
+		if (!mail) {
+			alert("drupalgap_services_user_register - mail empty");
+			return false;
+		}
+	  
+		// build url path to user login service resource call
+		var user_register_url = drupalgap_settings.services_endpoint_default + "/user/register.json";
+		console.log(user_register_url);
+	  
+		// make the service call...
+		var successful = false;
+		$.ajax({
+		    url: user_register_url,
+		    type: 'post',
+		    data: 'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail),
+		    dataType: 'json',
+		    async: false,
+		    error: function(XMLHttpRequest, textStatus, errorThrown) {
+				drupalgap_services_user_register_result = XMLHttpRequest; // hold on to a copy of the json that came back
+				console.log(JSON.stringify(XMLHttpRequest));
+				console.log(JSON.stringify(textStatus));
+				console.log(JSON.stringify(errorThrown));
+		    },
+		    success: function (data) {
+		    	drupalgap_services_user_register_result = data; // hold on to a copy of the json that came back
+		    	//drupalgap_user = null; // clear global drupalgap_user variable
+		    	console.log(JSON.stringify(drupalgap_services_user_register_result));
+		    	successful = true;
+		    	//drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+		    }
+		});
+		return successful;
+	  
+	}
+	catch (error) {
+		console.log("drupalgap_services_user_register - " + error);
+		alert("drupalgap_services_user_register - " + error);	
 	}
 	return false; // if it made it this fair, the user update call failed
 }

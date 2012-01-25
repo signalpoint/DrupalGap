@@ -1,6 +1,8 @@
-var drupalgap_settings = {
-		"services_endpoint_default":"http://10.0.2.2/drupal-7.10/?q=drupalgap"
-}
+var drupalgap_settings = { }
+drupalgap_settings.site_path = "http://10.0.2.2/drupal-7.10";
+drupalgap_settings.base_path = drupalgap_settings.site_path + "/?q=";
+drupalgap_settings.services_endpoint_default = drupalgap_settings.base_path + "drupalgap";
+
 var drupalgap_user;
 
 $(document).ready(function() {

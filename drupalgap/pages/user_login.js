@@ -2,15 +2,15 @@
  * Handles the login page show event.
  *
  */
-$('#drupalgap_page_login').live('pageshow',function(){
+$('#drupalgap_page_user_login').live('pageshow',function(){
   try {
-	    if (drupalgap_services_system_connect_result.user.uid != 0) { // user is not logged in, show the login button, hide the logout button
-          alert("Already logged in");
+	    if (drupalgap_services_system_connect_result.user.uid != 0) {
+          alert("Already logged in!");
           $.mobile.changePage("dashboard.html", "slideup");
         }
   }
   catch (error) {
-	  console.log("drupalgap_page_login - " + error);
+	  console.log("drupalgap_page_user_login - " + error);
   }
 });
 
@@ -35,7 +35,7 @@ $('#drupalgap_user_login_submit').live('click',function() {
 		  $.mobile.changePage("user.html", "slideup");
 	  }
 	  else { // login failed...
-		  alert(drupalgap_services_user_login_result.statusText); // show user result error msg
+		  $('#drupalgap_page_user_login_messages').html(drupalgap_services_user_login_result.statusText).show(); // show user result error msg
 		  $('#drupalgap_user_login_pass').val(""); // clear password field
 	  }
 	  

@@ -1,4 +1,6 @@
-var drupalgap_services_system_connect_result; // global variable used to hold the latest system connect service resource call result
+// global variables used to hold the latest system resource call results
+var drupalgap_services_system_connect_result; 
+var drupalgap_services_system_get_variable_result;
 
 /**
  * Makes an synchronous call to Drupal's System Connect Service Resource.
@@ -87,4 +89,54 @@ function drupalgap_services_system_connect () {
 		alert("drupalgap_services_system_connect - " + error);
 	}
 	return drupalgap_services_system_connect_result;
+}
+
+/**
+ * Makes an synchronous call to Drupal's System Get Variable Resource.
+ *
+ * @param 
+ *   name The name of the Drupal Variable to retrieve.
+ *   
+ * @return
+ *   The value of the drupal variable, FALSE otherwise.
+ */
+function drupalgap_services_system_get_variable (name) {
+	try {
+		if (!name) {
+			alert("drupalgap_services_system_get_variable - name was empty");
+			return false;
+		}
+		
+		// build url path to system get variable resource call
+		var get_variable_url = drupalgap_settings.services_endpoint_default + "/system/get_variable.json";
+		console.log(get_variable_url);
+	  
+		// make the service call...
+		var successful = false;
+		$.ajax({
+		    url: get_variable_url,
+		    type: 'post',
+		    data: 'name=' + encodeURIComponent(name),
+		    dataType: 'json',
+		    async: false,
+		    error: function(XMLHttpRequest, textStatus, errorThrown) {
+			drupalgap_services_system_get_variable_result = XMLHttpRequest; // hold on to a copy of the json that came back
+				console.log(JSON.stringify(XMLHttpRequest));
+				console.log(JSON.stringify(textStatus));
+				console.log(JSON.stringify(errorThrown));
+		    },
+		    success: function (data) {
+		    	drupalgap_services_system_get_variable_result = data; // hold on to a copy of the json that came back
+		    	console.log(JSON.stringify(drupalgap_services_system_get_variable_result));
+		    	successful = true;
+		    }
+		});
+		if (!successful) { return false; }
+		else { return drupalgap_services_system_get_variable_result; }
+	}
+	catch (error) {
+		console.log("drupalgap_services_system_get_variable - " + error);
+		alert("drupalgap_services_system_get_variable - " + error);
+	}
+	return false;
 }
