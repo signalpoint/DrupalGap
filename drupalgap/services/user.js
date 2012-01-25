@@ -1,5 +1,6 @@
 var drupalgap_services_user_login_result; // global variable used to hold the latest user login service resource call result json
 var drupalgap_services_user_logout_result; // global variable used to hold the latest user logout service resource call result json
+var drupalgap_services_user_update_result; // global variable used to hold the latest user update service resource call result json
 
 /**
  * Makes a synchronous call to Drupal's User Login Service Resource. 
@@ -71,6 +72,7 @@ function drupalgap_services_user_login (name, pass) {
 		    },
 		    success: function (data) {
 		      drupalgap_services_user_login_result = data; // hold on to a copy of the json that came back
+		      drupalgap_user = data.user; // save user json object in global drupalgap_user variable
 		      console.log(JSON.stringify(drupalgap_services_user_login_result));
 		      successful = true;
 		      drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
@@ -79,7 +81,7 @@ function drupalgap_services_user_login (name, pass) {
 		return successful;
 	}
 	catch (error) {
-		consoloe.log("drupalgap_services_user_login - " + error);
+		console.log("drupalgap_services_user_login - " + error);
 	}
 	return false; // if it made it this fair, the user login call failed
 }
@@ -119,6 +121,7 @@ function drupalgap_services_user_logout () {
 		    },
 		    success: function (data) {
 		      drupalgap_services_user_logout_result = data; // hold on to a copy of the json that came back
+		      drupalgap_user = null; // clear global drupalgap_user variable
 		      console.log(JSON.stringify(drupalgap_services_user_logout_result));
 		      successful = true;
 		      drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
@@ -127,8 +130,50 @@ function drupalgap_services_user_logout () {
 	  return successful;
 	}
 	catch (error) {
-		consoloe.log("drupalgap_services_user_logout - " + error);
+		console.log("drupalgap_services_user_logout - " + error);
 		alert("drupalgap_services_user_logout - " + error);	
 	}
 	return false; // if it made it this fair, the user logout call failed
+}
+
+function drupalgap_services_user_update (user) {
+	try {
+		if (!user) {
+			alert("drupalgap_services_user_update - user empty");
+			return false;
+		}
+	  
+		// build url path to user login service resource call
+		var user_update_url = drupalgap_settings.services_endpoint_default + "/user/" + user.uid  + ".json";
+		console.log(user_update_url);
+	  
+		// make the service call...
+		var successful = false;
+		$.ajax({
+		    url: user_update_url,
+		    type: 'put',
+		    /*data: 'data[name]=' + encodeURIComponent(user.name) + '&data[mail]=' + encodeURIComponent(user.mail) + '&data[pass]=' + encodeURIComponent(user.pass),*/
+		    dataType: 'json',
+		    async: false,
+		    error: function(XMLHttpRequest, textStatus, errorThrown) {
+			drupalgap_services_user_update_result = XMLHttpRequest; // hold on to a copy of the json that came back
+		      console.log(JSON.stringify(XMLHttpRequest));
+		      console.log(JSON.stringify(textStatus));
+		      console.log(JSON.stringify(errorThrown));
+		    },
+		    success: function (data) {
+		    	drupalgap_services_user_update_result = data; // hold on to a copy of the json that came back
+		      //drupalgap_user = null; // clear global drupalgap_user variable
+		      console.log(JSON.stringify(drupalgap_services_user_update_result));
+		      successful = true;
+		      //drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+		    }
+		});
+	  return successful;
+	}
+	catch (error) {
+		console.log("drupalgap_services_user_update - " + error);
+		alert("drupalgap_services_user_update - " + error);	
+	}
+	return false; // if it made it this fair, the user update call failed
 }
