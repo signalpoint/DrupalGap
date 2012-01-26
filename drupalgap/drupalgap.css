@@ -1,0 +1,7 @@
+.messages {
+	border: 1px solid black;
+	padding: 1em;
+	margin-bottom: 1em;
+	min-height: 0px;
+	display: none;
+}
