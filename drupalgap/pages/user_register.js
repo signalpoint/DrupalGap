@@ -35,7 +35,7 @@ $('#drupalgap_user_register_submit').live('click',function() {
 		 $.mobile.changePage("user.html", "slideup");
 	  }
 	  else { // register failed...
-		  $('#drupalgap_page_user_register_messages').html(drupalgap_services_user_register_result.statusText).show();
+		  $('#drupalgap_page_user_register_messages').html(drupalgap_services_resource_call_result.errorThrown).show();
 	  }
 	  
 	}

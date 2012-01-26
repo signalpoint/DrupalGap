@@ -56,37 +56,30 @@ function drupalgap_services_system_connect () {
 	    }
 	  }
 	*/
-
+	
+	
+	
+	
 	try {
-		// build url path to service call
-		var system_connect_url = drupalgap_settings.services_endpoint_default + "/system/connect.json";
-		// force clear any previous system connect result
-		drupalgap_services_system_connect_result = null;
-		// make the service call...
-		console.log(system_connect_url);
-	    $.ajax({
-	      url: system_connect_url,
-	      type: 'post',
-	      dataType: 'json',
-	      async: false,
-	      error: function (XMLHttpRequest, textStatus, errorThrown) {
-	    	alert('drupalgap_services_system_connect - failed to connect');
-	    	console.log("drupalgap_services_system_connect");
-	        console.log(JSON.stringify(XMLHttpRequest));
-	        console.log(JSON.stringify(textStatus));
-	        console.log(JSON.stringify(errorThrown));
-	      },
-	      success: function (data) {
-	    	  // save JSON result in global variables so others can access it
-	    	  drupalgap_services_system_connect_result = data;
-	    	  drupalgap_user = data.user; // save user json
-	    	  console.log(JSON.stringify(drupalgap_services_system_connect_result));
-	      }
-	    });
+		// make the service call
+		drupalgap_services_system_connect_result = drupalgap_services_resource_call({"resource_path":"system/connect.json"});
+		
+		// save a copy of the current user
+		drupalgap_user = drupalgap_services_system_connect_result.user;
+		
+		// make sure authenticated user's account is active
+		if (drupalgap_user.uid != 0 && drupalgap_user.status != 1) {
+			// @todo - this alert doesn't work... the forced logout seems to work though...
+			alert("The username " + drupalgap_user.name + " has not been activated or is blocked.");
+			drupalgap_services_user_logout();
+		}
+	    
+		// return the result
+		return drupalgap_services_system_connect_result;
 	}
 	catch (error) {
-		console.log("drupalgap_services_system_connect - " + error);
-		alert("drupalgap_services_system_connect - " + error);
+		console.log("drupalgap_services_system_connect");
+		console.log(error);
 	}
 	return drupalgap_services_system_connect_result;
 }
@@ -136,7 +129,6 @@ function drupalgap_services_system_get_variable (name) {
 	}
 	catch (error) {
 		console.log("drupalgap_services_system_get_variable - " + error);
-		alert("drupalgap_services_system_get_variable - " + error);
 	}
 	return false;
 }

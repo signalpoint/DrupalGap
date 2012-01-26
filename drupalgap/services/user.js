@@ -55,41 +55,19 @@ function drupalgap_services_user_login (name, pass) {
 	 */ 
 	try {
 		if (!name || !pass) { return false; }
-		// build url path to user login service resource call
-		var user_login_url = drupalgap_settings.services_endpoint_default + "/user/login.json";
-		console.log(user_login_url);  
-		// make the service call...
-		var successful = false;
-		$.ajax({
-		    url: user_login_url,
-		    type: 'post',
-		    data: 'username=' + encodeURIComponent(name) + '&password=' + encodeURIComponent(pass),
-		    dataType: 'json',
-		    async: false,
-		    error: function(XMLHttpRequest, textStatus, errorThrown) {
-		      drupalgap_services_user_login_result = XMLHttpRequest; // hold on to a copy of the json that came back
-		      console.log(JSON.stringify(XMLHttpRequest));
-		      console.log(JSON.stringify(textStatus));
-		      console.log(JSON.stringify(errorThrown));
-		    },
-		    success: function (data) {
-		      drupalgap_services_user_login_result = data; // hold on to a copy of the json that came back
-		      drupalgap_user = data.user; // save user json object in global drupalgap_user variable
-		      console.log(JSON.stringify(drupalgap_services_user_login_result));
-		      
-		      // make sure the user account is active
-		      if (drupalgap_user.status == 1) { successful = true; }
-		      else {
-		    	  // set the response statusText
-		    	  drupalgap_services_user_login_result.statusText = "The username " + drupalgap_user.name + " has not been activated or is blocked.";
-		      }
-		      drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
-		    }
-		});
-		return successful;
+		
+		// make the service call
+		drupalgap_services_user_login_result = drupalgap_services_resource_call({"resource_path":"user/login.json","data":'username=' + encodeURIComponent(name) + '&password=' + encodeURIComponent(pass)});
+		
+		if (drupalgap_services_user_login_result.errorThrown) { return false; }
+		else {
+			drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+			return true;
+		}
 	}
 	catch (error) {
-		console.log("drupalgap_services_user_login - " + error);
+		console.log("drupalgap_services_user_login");
+		console.log(error);
 	}
 	return false; // if it made it this fair, the user login call failed
 }
@@ -110,32 +88,16 @@ function drupalgap_services_user_logout () {
 	} */
 
 	try {
-	  // build url path to user login service resource call
-	  var user_logout_url = drupalgap_settings.services_endpoint_default + "/user/logout.json";
-	  console.log(user_logout_url);
-	  
-	  // make the service call...
-	  var successful = false;
-	  $.ajax({
-		    url: user_logout_url,
-		    type: 'post',
-		    dataType: 'json',
-		    async: false,
-		    error: function(XMLHttpRequest, textStatus, errorThrown) {
-		      drupalgap_services_user_logout_result = XMLHttpRequest; // hold on to a copy of the json that came back
-		      console.log(JSON.stringify(XMLHttpRequest));
-		      console.log(JSON.stringify(textStatus));
-		      console.log(JSON.stringify(errorThrown));
-		    },
-		    success: function (data) {
-		      drupalgap_services_user_logout_result = data; // hold on to a copy of the json that came back
-		      drupalgap_user = null; // clear global drupalgap_user variable
-		      console.log(JSON.stringify(drupalgap_services_user_logout_result));
-		      successful = true;
-		      drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
-		    }
-		});
-	  return successful;
+		
+		// make the service call
+		drupalgap_services_user_logout_result = drupalgap_services_resource_call({"resource_path":"user/logout.json"});
+		
+		if (drupalgap_services_user_logout_result.errorThrown) { return false; }
+		else {
+			drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+			return true;
+		}
+	
 	}
 	catch (error) {
 		console.log("drupalgap_services_user_logout - " + error);
@@ -147,7 +109,7 @@ function drupalgap_services_user_logout () {
 function drupalgap_services_user_update (user) {
 	try {
 		if (!user) {
-			alert("drupalgap_services_user_update - user empty");
+			console.log("drupalgap_services_user_update - user empty");
 			return false;
 		}
 	  
@@ -181,7 +143,6 @@ function drupalgap_services_user_update (user) {
 	}
 	catch (error) {
 		console.log("drupalgap_services_user_update - " + error);
-		alert("drupalgap_services_user_update - " + error);	
 	}
 	return false; // if it made it this fair, the user update call failed
 }
@@ -214,39 +175,20 @@ function drupalgap_services_user_register (name,mail) {
 			alert("drupalgap_services_user_register - mail empty");
 			return false;
 		}
-	  
-		// build url path to user login service resource call
-		var user_register_url = drupalgap_settings.services_endpoint_default + "/user/register.json";
-		console.log(user_register_url);
-	  
-		// make the service call...
-		var successful = false;
-		$.ajax({
-		    url: user_register_url,
-		    type: 'post',
-		    data: 'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail),
-		    dataType: 'json',
-		    async: false,
-		    error: function(XMLHttpRequest, textStatus, errorThrown) {
-				drupalgap_services_user_register_result = XMLHttpRequest; // hold on to a copy of the json that came back
-				console.log(JSON.stringify(XMLHttpRequest));
-				console.log(JSON.stringify(textStatus));
-				console.log(JSON.stringify(errorThrown));
-		    },
-		    success: function (data) {
-		    	drupalgap_services_user_register_result = data; // hold on to a copy of the json that came back
-		    	//drupalgap_user = null; // clear global drupalgap_user variable
-		    	console.log(JSON.stringify(drupalgap_services_user_register_result));
-		    	successful = true;
-		    	//drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
-		    }
-		});
-		return successful;
+		
+		// make the service call
+		drupalgap_services_user_register_result = drupalgap_services_resource_call({"resource_path":"user/register.json","data":'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail)});
+		
+		if (drupalgap_services_user_register_result.errorThrown) { return false; }
+		else {
+			// @todo - we need to inform the user of what happened depending on drupal's user registration settings...
+			return true; 
+		}
 	  
 	}
 	catch (error) {
-		console.log("drupalgap_services_user_register - " + error);
-		alert("drupalgap_services_user_register - " + error);	
+		console.log("drupalgap_services_user_register");
+		console.log(error);	
 	}
-	return false; // if it made it this fair, the user update call failed
+	return false; // if it made it this fair, the user register call failed
 }

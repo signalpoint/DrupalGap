@@ -35,14 +35,13 @@ $('#drupalgap_user_login_submit').live('click',function() {
 		  $.mobile.changePage("user.html", "slideup");
 	  }
 	  else { // login failed...
-		  $('#drupalgap_page_user_login_messages').html(drupalgap_services_user_login_result.statusText).show(); // show user result error msg
+		  $('#drupalgap_page_user_login_messages').html(drupalgap_services_resource_call_result.errorThrown).show(); // show user result error msg
 		  $('#drupalgap_user_login_pass').val(""); // clear password field
 	  }
 	  
 	}
 	catch (error) {
 	  console.log("drupalgap_user_login_submit - " + error);
-	  alert("drupalgap_user_login_submit - " + error);
 	}
 	
   return false; // stop the click from executing any further
