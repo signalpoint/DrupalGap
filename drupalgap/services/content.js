@@ -45,10 +45,10 @@ function drupalgap_services_content_types_list () {
 }
 
 function drupalgap_services_content_type_load (type) {
+	if (!type) { return null; }
 	content_type = null;
 	content_types = drupalgap_services_resource_call({"resource_path":"drupalgap_content/content_types_list.json"});
 	$.each(content_types,function(index,value){
-		console.log(value.type + " ?= " + type);
 		if (value.type == type) { content_type = value; return; }
 	});
 	return content_type;

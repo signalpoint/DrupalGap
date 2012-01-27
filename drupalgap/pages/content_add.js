@@ -8,7 +8,7 @@ $('#drupalgap_page_content_add').live('pageshow',function(){
 			// if they have create permissions, show add button for this content type
 			if (permissions.create) {
 				content_type = drupalgap_services_content_type_load(type);
-				if (content_type) { $("#drupalgap_page_content_add_list").append($("<li></li>",{"html":"<a href='#'>" + content_type.name + "</a>"})); }
+				if (content_type) { $("#drupalgap_page_content_add_list").append($("<li></li>",{"html":"<a href='node_edit.html' id='" + content_type.type + "'>" + content_type.name + "</a>"})); }
 			}
 		});
 		$("#drupalgap_page_content_add_list").listview("destroy").listview(); // refresh the content type list
@@ -16,4 +16,8 @@ $('#drupalgap_page_content_add').live('pageshow',function(){
 	catch (error) {
 		console.log("drupalgap_page_content_add - " + error);
 	}
+});
+
+$("#drupalgap_page_content_add_list li a").live("click",function(){
+	drupalgap_page_node_edit_type = $(this).attr('id'); // let the node_edit page know what type of node we're creating
 });
