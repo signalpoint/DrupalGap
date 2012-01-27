@@ -6,7 +6,7 @@ var drupalgap_services_node_delete_result;
 
 function drupalgap_services_node_create (node) {
 	try {
-		data = "node[type]=" + encodeURIComponent(node.type) + "&node[title]=" + encodeURIComponent(node.title) + "&node[language]=und";
+		data = "node[type]=" + encodeURIComponent(node.type) + "&node[title]=" + encodeURIComponent(node.title) + "&node[language]=und&node[body][und][0][value]=" + encodeURIComponent(node.body);
 		drupalgap_services_node_create_result = drupalgap_services_resource_call({"resource_path":"node.json","data":data});
 	}
 	catch (error) {
@@ -29,7 +29,7 @@ function drupalgap_services_node_retrieve (nid) {
 
 function drupalgap_services_node_update (node) {
 	try {
-		drupalgap_services_node_update_result = drupalgap_services_resource_call({"resource_path":"node/" + encodeURIComponent(node.nid) + ".json","type":"put","data":"node[type]=" + node.type + "&node[title]=" + encodeURIComponent(node.title) + "&node[language]=und"});
+		drupalgap_services_node_update_result = drupalgap_services_resource_call({"resource_path":"node/" + encodeURIComponent(node.nid) + ".json","type":"put","data":"node[type]=" + node.type + "&node[title]=" + encodeURIComponent(node.title) + "&node[language]=und&node[body][und][0][value]=" + encodeURIComponent(node.body)});
 	}
 	catch (error) {
 		console.log("drupalgap_services_node_update");

@@ -8,6 +8,7 @@ $('#drupalgap_page_node').live('pageshow',function(){
 			return false;
 		}
 		$('#drupalgap_page_node h1').html(drupalgap_page_node.title);
+		$('#drupalgap_page_node .content').html(drupalgap_page_node.body.und[0].safe_value);
 	}
 	catch (error) {
 		console.log("drupalgap_page_node");

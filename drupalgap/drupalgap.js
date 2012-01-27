@@ -8,5 +8,6 @@ var drupalgap_user;
 $(document).ready(function() {
 	drupalgap_services_system_connect();
 	//$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");
-	$.mobile.changePage("drupalgap/pages/content_add.html", "slideup");
+	//$.mobile.changePage("drupalgap/pages/content_add.html", "slideup");
+	$.mobile.changePage("drupalgap/pages/content.html", "slideup");
 });
