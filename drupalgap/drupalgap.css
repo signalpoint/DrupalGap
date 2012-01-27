@@ -5,3 +5,7 @@
 	min-height: 0px;
 	display: none;
 }
+
+label {
+	font-weight: bold;
+}

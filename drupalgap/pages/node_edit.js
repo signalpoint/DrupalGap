@@ -2,20 +2,21 @@ var drupalgap_page_node_edit_nid;
 var drupalgap_page_node_edit_type;
 $('#drupalgap_page_node_edit').live('pageshow',function(){
 	try {
-		if (!drupalgap_page_node_edit_nid) {
+		
+		// clear form fields
+		$('#drupalgap_page_node_edit_title').val("");
+		$('#drupalgap_page_node_edit_body').val("");
+		
+		if (!drupalgap_page_node_edit_nid) { // new node...
 			content_type = drupalgap_services_content_type_load(drupalgap_page_node_edit_type);
-			
 			if (!content_type) {
 				alert("drupalgap_page_node_edit - failed to load content type (" + drupalgap_page_node_edit_type + ")");
 				return false;
 			}
-			
-			// new node...
 			$('#drupalgap_page_node_edit h1').html("Create " + content_type.name);
 			$('#drupalgap_page_node_edit_delete').hide();
 		}
-		else {
-			// existing node...
+		else { // existing node...
 			node = drupalgap_services_node_retrieve(drupalgap_page_node_edit_nid);
 			content_type = drupalgap_services_content_type_load(node.type);
 			$('#drupalgap_page_node_edit h1').html("Edit " + content_type.name);
@@ -61,7 +62,11 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 			}
 		  	node.title = title;
 		  	node.body = body;
-		  	drupalgap_services_node_update(node);
+		  	result = drupalgap_services_node_update(node);
+		  	if (result.errorThrown) {
+		  		alert(result.errorThrown);
+				return false;
+		  	}
 		  	$.mobile.changePage("node.html");
 	  	}
 	}
@@ -80,10 +85,12 @@ $('#drupalgap_page_node_edit_delete').live('click',function(){
 			return false;
 		}
 		if (confirm("Are you sure you want to delete \"" + node.title + "\"? This cannot be undone.")) {
-			if (drupalgap_services_node_delete(node.nid))
+			result = drupalgap_services_node_delete(node.nid); 
+			if (result == true)
 				$.mobile.changePage("dashboard.html");
-			else
-				alert("drupalgap_page_node_edit_delete - failed to delete node, check console log for more information");
+			else {
+				alert(result.errorThrown);
+			}
 		}
 	}
 	catch (error) {

@@ -38,7 +38,18 @@ function drupalgap_services_node_update (node) {
 	return drupalgap_services_node_update_result;
 }
 
-// returns true if delete successfull, otherwise????
+/* returns true if delete was successful, otherwise returns standard services failed object, for example:
+ * {
+    	"jqXHR": {
+        	"readyState": 4,
+        	"responseText": "null",
+        	"status": 401,
+        	"statusText": "Unauthorized: Access denied for user anonymous"
+    	},
+    	"textStatus": "error",
+    	"errorThrown": "Unauthorized: Access denied for user anonymous"
+	}
+ */
 function drupalgap_services_node_delete (nid) {
 	try {
 		drupalgap_services_node_delete_result = drupalgap_services_resource_call({"resource_path":"node/" + encodeURIComponent(nid) + ".json","type":"delete"});

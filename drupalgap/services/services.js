@@ -20,13 +20,14 @@ function drupalgap_services_resource_call (options) {
 		if (!options.dataType) { options.dataType = "json"; }
 		
 		// build url path to service call
-		var service_resource_call_url = drupalgap_settings.services_endpoint_default + "/" + options.resource_path;
+		var service_resource_call_url = drupalgap_settings.site_path + drupalgap_settings.base_path + drupalgap_settings.services_endpoint_default + "/" + options.resource_path;
 		
 		// clear previous service call result stored in global var
 		drupalgap_services_resource_call_result = null;
 		
 		// make the service call...
 		console.log(service_resource_call_url);
+		console.log(JSON.stringify(options));
 	    $.ajax({
 		      url: service_resource_call_url,
 		      type: options.type,

@@ -95,37 +95,9 @@ function drupalgap_services_system_connect () {
  */
 function drupalgap_services_system_get_variable (name) {
 	try {
-		if (!name) {
-			alert("drupalgap_services_system_get_variable - name was empty");
-			return false;
-		}
-		
-		// build url path to system get variable resource call
-		var get_variable_url = drupalgap_settings.services_endpoint_default + "/system/get_variable.json";
-		console.log(get_variable_url);
-	  
-		// make the service call...
-		var successful = false;
-		$.ajax({
-		    url: get_variable_url,
-		    type: 'post',
-		    data: 'name=' + encodeURIComponent(name),
-		    dataType: 'json',
-		    async: false,
-		    error: function(XMLHttpRequest, textStatus, errorThrown) {
-			drupalgap_services_system_get_variable_result = XMLHttpRequest; // hold on to a copy of the json that came back
-				console.log(JSON.stringify(XMLHttpRequest));
-				console.log(JSON.stringify(textStatus));
-				console.log(JSON.stringify(errorThrown));
-		    },
-		    success: function (data) {
-		    	drupalgap_services_system_get_variable_result = data; // hold on to a copy of the json that came back
-		    	console.log(JSON.stringify(drupalgap_services_system_get_variable_result));
-		    	successful = true;
-		    }
-		});
-		if (!successful) { return false; }
-		else { return drupalgap_services_system_get_variable_result; }
+		if (!name) { return false; }
+		drupalgap_services_system_get_variable_result = drupalgap_services_resource_call({"resource_path":"system/get_variable.json","data":'name=' + encodeURIComponent(name)});
+		return drupalgap_services_system_get_variable_result;
 	}
 	catch (error) {
 		console.log("drupalgap_services_system_get_variable - " + error);
