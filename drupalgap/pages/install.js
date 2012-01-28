@@ -1,5 +1,7 @@
 $('#drupalgap_page_install').live('pageshow',function(){
 	try {
+		// @todo - perform system connect test to drupalgap.com
+	  	// @todo - implement a service resource that performs an initial system connect handshake
 	}
 	catch (error) {
 		console.log("drupalgap_page_install");

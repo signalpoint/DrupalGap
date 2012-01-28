@@ -106,7 +106,32 @@ function drupalgap_services_user_logout () {
 	return false; // if it made it this fair, the user logout call failed
 }
 
+/*
+ * example failed response:
+ * 
+ * {
+    	"form_errors": {
+        	"current_pass": "Your current password is missing or incorrect; it's required to change the <em class=\"placeholder\">E-mail address</em>.",
+        	"mail": ""
+    	}
+	}
+	
+	example success responses:
+	
+	{
+		"name":"chooch",
+		"uid":"11",
+		"roles":{
+			"2":"authenticated user"
+		}
+	}
+	
+	// @todo - security issue here?
+	{"name":"chotchkey","mail":"tyler.frankenstein@gmail.com","current_pass":"password","uid":"11","roles":{"2":"authenticated user"}}
+ */
 function drupalgap_services_user_update (user) {
+	alert("drupalgap_services_user_update - not implemeneted yet");
+	return false;
 	try {
 		if (!user) {
 			console.log("drupalgap_services_user_update - user empty");
@@ -147,7 +172,7 @@ function drupalgap_services_user_update (user) {
 	return false; // if it made it this fair, the user update call failed
 }
 
-function drupalgap_services_user_register (name,mail) {
+function drupalgap_services_user_register (name,mail,pass) {
 	
 	// example success json
 	/* {
@@ -175,16 +200,17 @@ function drupalgap_services_user_register (name,mail) {
 			alert("drupalgap_services_user_register - mail empty");
 			return false;
 		}
+		if (!pass) {
+			alert("drupalgap_services_user_register - pass empty");
+			return false;
+		}
 		
 		// make the service call
-		drupalgap_services_user_register_result = drupalgap_services_resource_call({"resource_path":"user/register.json","data":'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail)});
+		drupalgap_services_user_register_result = drupalgap_services_resource_call({"resource_path":"user/register.json","data":'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail) + '&pass=' + encodeURIComponent(pass)});
 		
-		if (drupalgap_services_user_register_result.errorThrown) { return false; }
-		else {
-			// @todo - we need to inform the user of what happened depending on drupal's user registration settings...
-			return true; 
-		}
-	  
+		drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+		
+		return drupalgap_services_user_register_result;
 	}
 	catch (error) {
 		console.log("drupalgap_services_user_register");

@@ -1,9 +1,10 @@
 // global variables used to hold the latest system resource call results
 var drupalgap_services_system_connect_result; 
 var drupalgap_services_system_get_variable_result;
+var drupalgap_services_system_site_settings_result;
 
 /**
- * Makes an synchronous call to Drupal's System Connect Service Resource.
+ * Makes a synchronous call to Drupal's System Connect Service Resource.
  *
  * @return
  *   A JSON object containing information about the drupal user who made the service call, and NULL if the service call failed.
@@ -73,6 +74,12 @@ function drupalgap_services_system_connect () {
 			alert("The username " + drupalgap_user.name + " has not been activated or is blocked.");
 			drupalgap_services_user_logout();
 		}
+		else {
+			// load drupalgap system settings (WARNING: this is a nested service call, need to figure out a way to bundle this
+			// into one call and setup some caching and expiration feature layer on top of the main service resource call function
+			// that utilizes local storage!)
+			drupalgap_site_settings = drupalgap_services_system_site_settings();
+		}
 	    
 		// return the result
 		return drupalgap_services_system_connect_result;
@@ -100,7 +107,26 @@ function drupalgap_services_system_get_variable (name) {
 		return drupalgap_services_system_get_variable_result;
 	}
 	catch (error) {
-		console.log("drupalgap_services_system_get_variable - " + error);
+		console.log("drupalgap_services_system_get_variable");
+		console.log(error);
 	}
-	return false;
+	return FALSE;
+}
+
+/**
+ * Makes an synchronous call to DrupalGap's system site settings resource.
+ *   
+ * @return
+ *   The result of the service call, FALSE otherwise.
+ */
+function drupalgap_services_system_site_settings () {
+	try {
+		drupalgap_services_system_site_settings_result = drupalgap_services_resource_call({"resource_path":"drupalgap_system/site_settings.json"});
+		return drupalgap_services_system_site_settings_result;
+	}
+	catch (error) {
+		console.log("drupalgap_services_system_site_settings");
+		console.log(error);
+	}
+	return FALSE;
 }

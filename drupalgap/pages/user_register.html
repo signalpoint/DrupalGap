@@ -16,7 +16,18 @@
       <p>A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.</p>
     </div>
     <fieldset>
-      <div><button type="button" data-theme="b" id="drupalgap_user_register_submit">Register</button></div>
+	    <div>
+	      <label for="drupalgap_user_register_pass">Password</label>
+	      <input type="password" id="drupalgap_user_register_pass" />
+	    </div>
+	    <div>
+	      <label for="drupalgap_user_register_confirm_pass">Confirm password</label>
+	      <input type="password" id="drupalgap_user_register_confirm_pass" />
+	      <p>Provide a password for the new account in both fields.</p>
+	    </div>
+    </fieldset>
+    <fieldset>
+      <div><button type="button" data-theme="b" id="drupalgap_user_register_submit">Create new account</button></div>
     </fieldset>
   </div><!-- /content -->
 </div><!-- /page -->

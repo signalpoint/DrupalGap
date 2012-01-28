@@ -67,6 +67,8 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 		  		alert(result.errorThrown);
 				return false;
 		  	}
+		  	drupalgap_page_node_edit_nid = null; // clear value before redirecting
+		  	drupalgap_page_node_edit_type = null; // clear value before redirecting
 		  	$.mobile.changePage("node.html");
 	  	}
 	}
@@ -87,7 +89,7 @@ $('#drupalgap_page_node_edit_delete').live('click',function(){
 		if (confirm("Are you sure you want to delete \"" + node.title + "\"? This cannot be undone.")) {
 			result = drupalgap_services_node_delete(node.nid); 
 			if (result == true)
-				$.mobile.changePage("dashboard.html");
+				$.mobile.changePage("contennt.html");
 			else {
 				alert(result.errorThrown);
 			}
