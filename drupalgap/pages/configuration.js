@@ -1,5 +1,7 @@
 $('#drupalgap_page_configuration').live('pageshow',function(){
 	try {
+		// show the site url path
+		$('#drupalgap_page_configuration fieldset p').html(drupalgap_settings.site_path);
 	}
 	catch (error) {
 		console.log("drupalgap_page_configuration");

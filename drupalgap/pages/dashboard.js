@@ -1,21 +1,18 @@
 $('#drupalgap_page_dashboard').live('pageshow',function(){
 	try {
 		
+		// display site name
 		site_name = drupalgap_services_system_get_variable("site_name");
 		if (!site_name) { site_name = "DrupalGap"; }
 		$('#drupalgap_page_dashboard h1').html(site_name);
 		
 		if (drupalgap_services_system_connect_result.user.uid == 0) { // user is not logged in...
-			$('#drupalgap_button_user_account').hide();
-			$('#drupalgap_button_user_login').show();
-			$('#drupalgap_button_user_logout').hide();
-			$('#drupalgap_button_user_register').show();
+			$('#drupalgap_page_dashboard_navbar_anonymous').show();
+			$('#drupalgap_page_dashboard_navbar_authenticated').hide();
         }
         else { // user is logged in...
-        	$('#drupalgap_button_user_account').show();
-        	$('#drupalgap_button_user_login').hide();
-        	$('#drupalgap_button_user_logout').show();
-        	$('#drupalgap_button_user_register').hide();
+        	$('#drupalgap_page_dashboard_navbar_anonymous').hide();
+        	$('#drupalgap_page_dashboard_navbar_authenticated').show();
         }
 		
 	}
