@@ -107,13 +107,25 @@ function drupalgap_services_user_logout () {
 }
 
 /*
- * example failed response:
+ * example failed responses:
  * 
  * {
     	"form_errors": {
         	"current_pass": "Your current password is missing or incorrect; it's required to change the <em class=\"placeholder\">E-mail address</em>.",
         	"mail": ""
     	}
+	}
+	
+	
+	{
+    	"jqXHR": {
+        	"readyState": 4,
+        	"responseText": "{\"form_errors\":{\"current_pass\":\"Your current password is missing or incorrect; it's required to change the <em class=\\\"placeholder\\\">E-mail address</em>.\",\"mail\":\"\"}}",
+        	"status": 406,
+        	"statusText": "Not Acceptable: Your current password is missing or incorrect; it's required to change the <em class=\"placeholder\">E-mail address</em>."
+    	},
+    	"textStatus": "error",
+    	"errorThrown": "Not Acceptable: Your current password is missing or incorrect; it's required to change the <em class=\"placeholder\">E-mail address</em>."
 	}
 	
 	example success responses:
@@ -125,49 +137,53 @@ function drupalgap_services_user_logout () {
 			"2":"authenticated user"
 		}
 	}
-	
-	// @todo - security issue here?
-	{"name":"chotchkey","mail":"tyler.frankenstein@gmail.com","current_pass":"password","uid":"11","roles":{"2":"authenticated user"}}
  */
 function drupalgap_services_user_update (user) {
-	alert("drupalgap_services_user_update - not implemeneted yet");
-	return false;
 	try {
-		if (!user) {
+		
+		drupalgap_services_user_update_result = null; // clear previous call
+		
+		if (!user) { // @todo, do a better job validating incoming user...
 			console.log("drupalgap_services_user_update - user empty");
 			return false;
 		}
-	  
-		// build url path to user login service resource call
-		var user_update_url = drupalgap_settings.services_endpoint_default + "/user/" + user.uid  + ".json";
-		console.log(user_update_url);
-	  
-		// make the service call...
-		var successful = false;
-		$.ajax({
-		    url: user_update_url,
-		    type: 'put',
-		    /*data: 'data[name]=' + encodeURIComponent(user.name) + '&data[mail]=' + encodeURIComponent(user.mail) + '&data[pass]=' + encodeURIComponent(user.pass),*/
-		    dataType: 'json',
-		    async: false,
-		    error: function(XMLHttpRequest, textStatus, errorThrown) {
-			drupalgap_services_user_update_result = XMLHttpRequest; // hold on to a copy of the json that came back
-		      console.log(JSON.stringify(XMLHttpRequest));
-		      console.log(JSON.stringify(textStatus));
-		      console.log(JSON.stringify(errorThrown));
-		    },
-		    success: function (data) {
-		    	drupalgap_services_user_update_result = data; // hold on to a copy of the json that came back
-		      //drupalgap_user = null; // clear global drupalgap_user variable
-		      console.log(JSON.stringify(drupalgap_services_user_update_result));
-		      successful = true;
-		      //drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
-		    }
-		});
-	  return successful;
+		
+		// @todo - implement user name change (if they have permission) and password changing
+		
+		// make the service call depending on what they're doing to their account...
+		
+		// drupal user form input names
+		// user.current_pass
+		// user.pass1
+		// user.pass2
+		
+		// working example to change name & e-mail, by providing current password
+		// name=foobar&mail=new.email.for%40foobar.com&current_pass=12345678
+		
+		// add name and e-mail to resource call data
+		data = "";
+		//data += "name=" + encodeURIComponent(user.name);
+		data += "&mail=" + encodeURIComponent(user.mail);
+		
+		if (user.current_pass)
+			data += "&current_pass=" + encodeURIComponent(user.current_pass);
+		// @todo - get change password working... (not sure this option is even provided by the services user update resouce)
+		/*if (user.pass1)
+			data += "&account[pass1]=" + encodeURIComponent(user.pass1);
+		if (user.pass2)
+			data += "&account[pass2]=" + encodeURIComponent(user.pass2);*/
+		
+		drupalgap_services_user_update_result = drupalgap_services_resource_call({"resource_path":"user/" + user.uid + ".json","data":data,"type":"put"});
+		
+		// make another call to system connect to refresh global variables if there wasn't any problems
+		if (!drupalgap_services_user_update_result.errorThrown)
+			drupalgap_services_system_connect(); 
+		
+		return drupalgap_services_user_update_result;
 	}
 	catch (error) {
-		console.log("drupalgap_services_user_update - " + error);
+		console.log("drupalgap_services_user_update");
+		console.log(error);
 	}
 	return false; // if it made it this fair, the user update call failed
 }

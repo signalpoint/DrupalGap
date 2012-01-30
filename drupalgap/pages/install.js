@@ -9,6 +9,15 @@ $('#drupalgap_page_install').live('pageshow',function(){
 	}
 });
 
+// when the site url text field is clicked...
+$('#drupalgap_page_install_site_url').live('click',function(){
+	
+	// remove 'drupalgap.com' from the text field for quick-n-easy user experience
+	if ($('#drupalgap_page_install_site_url').val() == "http://www.drupalgap.com")
+		$('#drupalgap_page_install_site_url').val("http://www.");
+		
+});
+
 $('#drupalgap_page_install_connect').live('click',function(){
 	try {
 		var url = $('#drupalgap_page_install_site_url').val();

@@ -47,7 +47,7 @@ function drupalgap_services_content_types_list () {
 function drupalgap_services_content_type_load (type) {
 	if (!type) { return null; }
 	content_type = null;
-	content_types = drupalgap_services_resource_call({"resource_path":"drupalgap_content/content_types_list.json"});
+	content_types = drupalgap_services_content_types_list();
 	$.each(content_types,function(index,value){
 		if (value.type == type) { content_type = value; return; }
 	});
@@ -82,34 +82,4 @@ function drupalgap_services_content_type_load (type) {
  */
 function drupalgap_services_content_types_user_permissions () {
 	return drupalgap_services_resource_call({"resource_path":"drupalgap_content/content_types_user_permissions.json"});
-    // example response
-	try {
-		// build url path to service call
-		var content_types_user_permissions_url = drupalgap_settings.services_endpoint_default + "/drupalgap_content/content_types_user_permissions.json";
-		// force clear any previous system connect result
-		drupalgap_services_content_types_user_permissions_result = null;
-		// make the service call...
-		console.log(content_types_user_permissions_url);
-	    $.ajax({
-	      url: content_types_user_permissions_url,
-	      type: 'post',
-	      dataType: 'json',
-	      async: false,
-	      error: function (XMLHttpRequest, textStatus, errorThrown) {
-	    	console.log("drupalgap_services_content_types_user_permissions");
-	        console.log(JSON.stringify(XMLHttpRequest));
-	        console.log(JSON.stringify(textStatus));
-	        console.log(JSON.stringify(errorThrown));
-	      },
-	      success: function (data) {
-	    	  // save JSON result in global variables so others can access it
-	    	  drupalgap_services_content_types_user_permissions_result = data;
-	    	  console.log(JSON.stringify(drupalgap_services_content_types_user_permissions_result));
-	      }
-	    });
-	}
-	catch (error) {
-		console.log("drupalgap_services_content_types_user_permissions - " + error);
-	}
-	return drupalgap_services_content_types_user_permissions_result;
 }

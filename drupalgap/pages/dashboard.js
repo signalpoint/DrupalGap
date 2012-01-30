@@ -9,6 +9,7 @@ $('#drupalgap_page_dashboard').live('pageshow',function(){
 		if (drupalgap_user.uid == 0) { // user is not logged in...
 			$('#drupalgap_page_dashboard_navbar_anonymous').show();
 			$('#drupalgap_page_dashboard_navbar_authenticated').hide();
+			$('#drupalgap_page_dashboard_header_user h2').hide();
 			
 			// determine what to do with the user registration button based on the site settings
 			switch (drupalgap_site_settings.variable.user_register) {
@@ -27,6 +28,7 @@ $('#drupalgap_page_dashboard').live('pageshow',function(){
         else { // user is logged in...
         	$('#drupalgap_page_dashboard_navbar_anonymous').hide();
         	$('#drupalgap_page_dashboard_navbar_authenticated').show();
+        	$('#drupalgap_page_dashboard_header_user h2').html("Hi, " + drupalgap_user.name);
         }
 		
 	}

@@ -79,6 +79,22 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 	return false;
 });
 
+// cancel button clicked...
+$('#drupalgap_page_node_edit_cancel').live('click',function(){
+	try {
+		// if it's a new node, send back to content add, otherwise send back to node
+		if (!drupalgap_page_node_edit_nid)
+			$.mobile.changePage("content_add.html");
+		else
+			$.mobile.changePage("node.html");
+	}
+	catch (error) {
+		console.log("drupalgap_page_node_edit_cancel");
+		console.log(error);
+	}
+	return false;
+});
+
 $('#drupalgap_page_node_edit_delete').live('click',function(){
 	try {
 		node = drupalgap_services_node_retrieve(drupalgap_page_node_edit_nid);
@@ -89,7 +105,7 @@ $('#drupalgap_page_node_edit_delete').live('click',function(){
 		if (confirm("Are you sure you want to delete \"" + node.title + "\"? This cannot be undone.")) {
 			result = drupalgap_services_node_delete(node.nid); 
 			if (result == true)
-				$.mobile.changePage("contennt.html");
+				$.mobile.changePage("content.html");
 			else {
 				alert(result.errorThrown);
 			}
