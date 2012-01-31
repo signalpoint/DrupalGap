@@ -25,9 +25,15 @@ function drupalgap_services_resource_call (options) {
 		// clear previous service call result stored in global var
 		drupalgap_services_resource_call_result = null;
 		
+		// make sure the fetch from cache isn't empty, if it is, just continue with the service call
+		
+		//$.mobile.showPageLoadingMsg(); // this doesn't work for some reason...
+		
 		// make the service call...
+		// @todo - perhaps use $.get instead since we aren't using async, does .get allow post, put, delete, though?
 		console.log(service_resource_call_url);
 		console.log(JSON.stringify(options));
+		
 	    $.ajax({
 		      url: service_resource_call_url,
 		      type: options.type,
@@ -39,10 +45,12 @@ function drupalgap_services_resource_call (options) {
 	    				"jqXHR":jqXHR,
 	    				"textStatus":textStatus,
 	    				"errorThrown":errorThrown,
-	    		};
+	    			};
+	    			//$.mobile.hidePageLoadingMsg();
 		      },
 		      success: function (data) {
 		    	  drupalgap_services_resource_call_result = data;
+		    	  //$.mobile.hidePageLoadingMsg();
 		      }
 	    });
 	    console.log(JSON.stringify(drupalgap_services_resource_call_result));
