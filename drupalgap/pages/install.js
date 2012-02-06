@@ -20,8 +20,19 @@ $('#drupalgap_page_install_site_url').live('click',function(){
 
 $('#drupalgap_page_install_connect').live('click',function(){
 	try {
+		
+		// grab input url and validate
+		// @todo - better validation here
 		var url = $('#drupalgap_page_install_site_url').val();
 	  	if (!url) { alert("Enter your Drupal site's URL."); return false; }
+	  	
+	  	// warn user if they are trying to connect to localhost
+	  	if (url.indexOf("localhost") != -1) {
+	  		warning_msg = "Warning: Entering localhost has known problems with Android devices and emulators. ";
+	  		warning_msg += 	"You may have to use 10.0.2.2 instead. Do you want to continue?";
+	  		if (!confirm(warning_msg))
+	  			return false;
+	  	}
 	  	
 	  	// update settings with new site url path
 	  	settings = drupalgap_settings_load();
@@ -31,11 +42,14 @@ $('#drupalgap_page_install_connect').live('click',function(){
 	  	// perform system connect to see if drupalgap is setup properly on drupal site
 	  	result = drupalgap_services_system_connect();
 	  	
-	  	if (result.errorThrown) { // something went wrong...
+	  	if (result.errorThrown || result.textStatus == "error") { // something went wrong...
 	  		// clear the site path and re-save the settings to start over
 	  		settings.site_path = "";
 		  	drupalgap_settings_save(settings);
-		  	alert(result.errorThrown);
+		  	if (result.errorThrown)
+		  		alert(result.errorThrown);
+		  	else
+		  		alert("Error connecting. Please check that the URL is typed correctly, with no trailing slashes.");
 	  	}
 	  	else { // session id came back, everything is ok...
 	  		alert("Setup Complete!");

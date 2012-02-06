@@ -7,6 +7,9 @@ $('#drupalgap_page_node_edit').live('pageshow',function(){
 		$('#drupalgap_page_node_edit_title').val("");
 		$('#drupalgap_page_node_edit_body').val("");
 		
+		// re-enable the submit button (in case it was disabled)
+		$('#drupalgap_page_node_edit_submit').removeAttr("disabled");
+		
 		if (!drupalgap_page_node_edit_nid) { // new node...
 			content_type = drupalgap_services_content_type_load(drupalgap_page_node_edit_type);
 			if (!content_type) {
@@ -37,11 +40,14 @@ $('#drupalgap_page_node_edit').live('pageshow',function(){
 $('#drupalgap_page_node_edit_submit').live('click',function(){
 	try {
 		
+		// grab input and validate
 		var title = $('#drupalgap_page_node_edit_title').val();
 	  	if (!title) { alert('Please enter a title.'); return false; }
-	  	
 	  	var body = $('#drupalgap_page_node_edit_body').val();
 	  	if (!body) { alert('Please enter some body content.'); return false; }
+	  	
+	    // disable the submit button to prevent double submit
+		$('#drupalgap_page_node_edit_submit').attr("disabled","disabled");
 	  
 	  	if (!drupalgap_page_node_edit_nid) { // new nodes...
 		  	node = drupalgap_services_node_create({"type":drupalgap_page_node_edit_type,"title":title,"body":body});
@@ -58,24 +64,29 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 		  	node = drupalgap_services_node_retrieve(drupalgap_page_node_edit_nid);
 		  	if (!node) {
 				alert("drupalgap_page_node_edit_submit - failed to load node (" + drupalgap_page_node_edit_nid + ")");
-				return false;
 			}
-		  	node.title = title;
-		  	node.body = body;
-		  	result = drupalgap_services_node_update(node);
-		  	if (result.errorThrown) {
-		  		alert(result.errorThrown);
-				return false;
+		  	else {
+		  		// node was retrieved, update its values
+			  	node.title = title;
+			  	node.body = body;
+			  	result = drupalgap_services_node_update(node);
+			  	if (result.errorThrown) {
+			  		alert(result.errorThrown);
+			  	}
+			  	else {
+			  		// node was updated properly
+				  	drupalgap_page_node_edit_nid = null; // clear value before redirecting
+				  	drupalgap_page_node_edit_type = null; // clear value before redirecting
+				  	$.mobile.changePage("node.html");
+			  	}
 		  	}
-		  	drupalgap_page_node_edit_nid = null; // clear value before redirecting
-		  	drupalgap_page_node_edit_type = null; // clear value before redirecting
-		  	$.mobile.changePage("node.html");
 	  	}
 	}
 	catch (error) {
 		console.log("drupalgap_page_node_edit_submit");
 		console.log(error);
 	}
+	
 	return false;
 });
 
@@ -104,8 +115,9 @@ $('#drupalgap_page_node_edit_delete').live('click',function(){
 		}
 		if (confirm("Are you sure you want to delete \"" + node.title + "\"? This cannot be undone.")) {
 			result = drupalgap_services_node_delete(node.nid); 
-			if (result == true)
+			if (result == true) {
 				$.mobile.changePage("content.html");
+			}
 			else {
 				alert(result.errorThrown);
 			}

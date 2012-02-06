@@ -16,7 +16,7 @@ $(document).ready(function() {
 		
 		// go to the dashboard
 		$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");
-		//$.mobile.changePage("drupalgap/pages/user.html", "slideup");
+		//$.mobile.changePage("drupalgap/pages/content.html", "slideup");
 	}
 });
 

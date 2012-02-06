@@ -10,20 +10,43 @@ $('#drupalgap_page_node').live('pageshow',function(){
 			return false;
 		}
 		
-		// clear any previous node edit id reference
+		// Clear any previous node edit id reference.
 		drupalgap_page_node_edit_nid = null;
 		
-		// fill in placeholders
+		// Fill in placeholders.
 		$('#drupalgap_page_node h1').html(drupalgap_page_node.title);
 		$('#drupalgap_page_node .content').html(drupalgap_page_node.body.und[0].safe_value);
 		
-		// set edit button visibility
-		
-		// if user is not user 1 and user is not node author, hide the edit button, otherwise show it
-		if (drupalgap_user.uid != 1 && drupalgap_user.uid != drupalgap_page_node.uid)
+		// Set edit button visibility
+		// If user is not user 1 and user is not node author, hide the edit button, otherwise show it.
+		if (drupalgap_user.uid != 1 && drupalgap_user.uid != drupalgap_page_node.uid) {	
 			$('#drupalgap_page_node_button_edit').hide();
-		else
+		}
+		else {
 			$('#drupalgap_page_node_button_edit').show();
+		}
+		
+		// Set comments and comment button visibility.
+		switch (drupalgap_page_node.comment) {
+			case 0: // comments hidden
+			case "0": // comments hidden
+				$('#drupalgap_page_node_comments').hide();
+				$('#drupalgap_page_node_button_comment').hide();
+				$('#drupalgap_page_node_button_comments').hide();
+				break;
+			case 1: // comments closed
+			case "1": // comments closed
+				$('#drupalgap_page_node_comments').show();
+				$('#drupalgap_page_node_button_comment').hide();
+				$('#drupalgap_page_node_button_comments').show();
+				break;
+			case 2: // comments open
+			case "2": // comments open
+				$('#drupalgap_page_node_comments').show();
+				$('#drupalgap_page_node_button_comment').show();
+				$('#drupalgap_page_node_button_comments').show();
+				break;
+		}
 		
 	}
 	catch (error) {

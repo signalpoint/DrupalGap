@@ -162,7 +162,7 @@ function drupalgap_services_user_update (user) {
 		
 		// add name and e-mail to resource call data
 		data = "";
-		//data += "name=" + encodeURIComponent(user.name);
+		data += "name=" + encodeURIComponent(user.name);
 		data += "&mail=" + encodeURIComponent(user.mail);
 		
 		if (user.current_pass)

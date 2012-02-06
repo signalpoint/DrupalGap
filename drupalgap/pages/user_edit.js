@@ -25,17 +25,17 @@ $('#drupalgap_user_edit_submit').live('click',function() {
 		
 		// grab form input...
 		
-		//name = $('#drupalgap_user_edit_name').val();
+		name = $('#drupalgap_user_edit_name').val();
 		current_pass = $('#drupalgap_user_edit_current_pass').val();
 		mail = $('#drupalgap_user_edit_mail').val();
-		//pass1 = $('#drupalgap_user_edit_pass1').val();
-		//pass2 = $('#drupalgap_user_edit_pass2').val();
+		pass1 = $('#drupalgap_user_edit_pass1').val();
+		pass2 = $('#drupalgap_user_edit_pass2').val();
 		
 		// validate user name
-		/*if (!name) {
+		if (!name) {
 			alert("Enter Username");
 			return false;
-		}*/
+		}
 		
 		// validate e-mail
 		if (!mail) {
@@ -64,7 +64,7 @@ $('#drupalgap_user_edit_submit').live('click',function() {
 		}*/
 		
 		var temp_user = drupalgap_user;
-		//temp_user.name = name;
+		temp_user.name = name;
 		temp_user.mail = mail;
 		temp_user.current_pass = current_pass;
 		//temp_user.pass1 = pass1;

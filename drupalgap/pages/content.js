@@ -28,6 +28,8 @@ $('#drupalgap_page_content').live('pageshow',function(){
 		});
 		if (!can_create)
 			$('#drupalgap_page_content_button_add').hide();
+		else
+			$('#drupalgap_page_content_button_add').show();
 		
 		// refresh the list
 		$("#drupalgap_page_content_list").listview("destroy").listview();

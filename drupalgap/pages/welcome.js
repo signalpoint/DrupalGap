@@ -1,6 +1,14 @@
+$('#drupalgap_page_welcome').live('pageshow',function(){
+  try {
+  }
+  catch (error) {
+	  console.log("drupalgap_page_welcome");
+	  console.log(error);
+  }
+});
+
 $('#drupalgap_page_welcome_button_demo').live('click',function(){
 	try {
-	  	
 	  	// update settings with new site url path
 	  	settings = drupalgap_settings_load();
 	  	settings.site_path = "http://www.drupalgap.com";

@@ -19,7 +19,8 @@ $('#drupalgap_page_user_login').live('pageshow',function(){
 	    }
   }
   catch (error) {
-	  console.log("drupalgap_page_user_login - " + error);
+	  console.log("drupalgap_page_user_login");
+	  console.log(error);
   }
 });
 
