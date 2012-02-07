@@ -52,7 +52,7 @@ $('#drupalgap_user_edit_submit').live('click',function() {
 		
 		// if user is changing passwords, make sure the new passwords match 
 		// and their current password was provided
-		/*if (pass1 && pass2) {
+		if (pass1 && pass2) {
 			if (pass1 != pass2) {
 				alert("New passwords do not match!");
 				return false;
@@ -61,14 +61,14 @@ $('#drupalgap_user_edit_submit').live('click',function() {
 				alert("Enter your current password to change your password.");
 				return false;
 			}
-		}*/
+		}
 		
 		var temp_user = drupalgap_user;
 		temp_user.name = name;
 		temp_user.mail = mail;
 		temp_user.current_pass = current_pass;
-		//temp_user.pass1 = pass1;
-		//temp_user.pass2 = pass2;
+		temp_user.pass1 = pass1;
+		temp_user.pass2 = pass2;
 		
 		var user_update = drupalgap_services_user_update(temp_user);
 		

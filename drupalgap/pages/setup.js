@@ -1,29 +1,29 @@
-$('#drupalgap_page_install').live('pageshow',function(){
+$('#drupalgap_page_setup').live('pageshow',function(){
 	try {
 		// @todo - perform system connect test to drupalgap.com
 	  	// @todo - implement a service resource that performs an initial system connect handshake
 	}
 	catch (error) {
-		console.log("drupalgap_page_install");
+		console.log("drupalgap_page_setup");
 		console.log(error);
 	}
 });
 
 // when the site url text field is clicked...
-$('#drupalgap_page_install_site_url').live('click',function(){
+$('#drupalgap_page_setup_site_url').live('click',function(){
 	
 	// remove 'drupalgap.com' from the text field for quick-n-easy user experience
-	if ($('#drupalgap_page_install_site_url').val() == "http://www.drupalgap.com")
-		$('#drupalgap_page_install_site_url').val("http://www.");
+	if ($('#drupalgap_page_setup_site_url').val() == "http://www.drupalgap.com")
+		$('#drupalgap_page_setup_site_url').val("http://www.");
 		
 });
 
-$('#drupalgap_page_install_connect').live('click',function(){
+$('#drupalgap_page_setup_connect').live('click',function(){
 	try {
 		
 		// grab input url and validate
 		// @todo - better validation here
-		var url = $('#drupalgap_page_install_site_url').val();
+		var url = $('#drupalgap_page_setup_site_url').val();
 	  	if (!url) { alert("Enter your Drupal site's URL."); return false; }
 	  	
 	  	// warn user if they are trying to connect to localhost
@@ -57,13 +57,13 @@ $('#drupalgap_page_install_connect').live('click',function(){
 	  	}
 	}
 	catch (error) {
-		console.log("drupalgap_page_install_connect");
+		console.log("drupalgap_page_setup_connect");
 		console.log(error);
 	}
 	return false;
 });
 
-$('#drupalgap_page_install_help').live('click',function(){
+$('#drupalgap_page_setup_help').live('click',function(){
 	alert("Please visit the DrupalGap project page for help topics.");
 	return false;
 });

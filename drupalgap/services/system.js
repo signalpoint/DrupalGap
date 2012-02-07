@@ -65,20 +65,29 @@ function drupalgap_services_system_connect () {
 		// make the service call
 		drupalgap_services_system_connect_result = drupalgap_services_resource_call({"resource_path":"system/connect.json"});
 		
-		// save a copy of the current user
-		drupalgap_user = drupalgap_services_system_connect_result.user;
-		
-		// make sure authenticated user's account is active
-		if (drupalgap_user.uid != 0 && drupalgap_user.status != 1) {
-			// @todo - this alert doesn't work... the forced logout seems to work though...
-			alert("The username " + drupalgap_user.name + " has not been activated or is blocked.");
-			drupalgap_services_user_logout();
+		if (drupalgap_services_system_connect_result.textStatus == "error") { // there was a problem connecting...
+			if (drupalgap_services_system_connect_result.errorThrown) {
+				alert(drupalgap_services_system_connect_result.errorThrown);
+			}
+			else {
+				alert(drupalgap_services_system_connect_result.textStatus);
+			}
 		}
-		else {
-			// load drupalgap system settings (WARNING: this is a nested service call, need to figure out a way to bundle this
-			// into one call and setup some caching and expiration feature layer on top of the main service resource call function
-			// that utilizes local storage!)
-			drupalgap_site_settings = drupalgap_services_system_site_settings();
+		else { // the connect was successful...
+			// save a copy of the current user
+			drupalgap_user = drupalgap_services_system_connect_result.user;
+			// make sure authenticated user's account is active
+			if (drupalgap_user.uid != 0 && drupalgap_user.status != 1) {
+				// @todo - this alert doesn't work... the forced logout seems to work though...
+				alert("The username " + drupalgap_user.name + " has not been activated or is blocked.");
+				drupalgap_services_user_logout();
+			}
+			else {
+				// load drupalgap system settings (WARNING: this is a nested service call, need to figure out a way to bundle this
+				// into one call and setup some caching and expiration feature layer on top of the main service resource call function
+				// that utilizes local storage!)
+				drupalgap_site_settings = drupalgap_services_system_site_settings();
+			}
 		}
 	    
 		// return the result

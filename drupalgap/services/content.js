@@ -6,38 +6,53 @@
  *   
  *  An example response:
  *
- *  [
-	    {
-	        "type": "article",
-	        "name": "Article",
-	        "base": "node_content",
-	        "module": "node",
-	        "description": "Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.",
-	        "help": "",
-	        "has_title": "1",
-	        "title_label": "Title",
-	        "custom": "1",
-	        "modified": "1",
-	        "locked": "0",
-	        "disabled": "0",
-	        "orig_type": "article"
-	    },
-	    {
-	        "type": "page",
-	        "name": "Basic page",
-	        "base": "node_content",
-	        "module": "node",
-	        "description": "Use <em>basic pages</em> for your static content, such as an 'About us' page.",
-	        "help": "",
-	        "has_title": "1",
-	        "title_label": "Title",
-	        "custom": "1",
-	        "modified": "1",
-	        "locked": "0",
-	        "disabled": "0",
-	        "orig_type": "page"
-	    }
-	]
+ *  
+ [
+	{
+        "type": "article",
+        "name": "Article",
+        "base": "node_content",
+        "module": "node",
+        "description": "Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.",
+        "help": "",
+        "has_title": "1",
+        "title_label": "Title",
+        "custom": "1",
+        "modified": "1",
+        "locked": "0",
+        "disabled": "0",
+        "orig_type": "article",
+        "comment_anonymous": 0,
+        "comment": "2",
+        "comment_default_mode": 1,
+        "comment_default_per_page": "50",
+        "comment_form_location": 1,
+        "comment_preview": "1",
+        "comment_subject_field": 1
+    },
+    {
+        "type": "page",
+        "name": "Basic page",
+        "base": "node_content",
+        "module": "node",
+        "description": "Use <em>basic pages</em> for your static content, such as an 'About us' page.",
+        "help": "",
+        "has_title": "1",
+        "title_label": "Title",
+        "custom": "1",
+        "modified": "1",
+        "locked": "0",
+        "disabled": "0",
+        "orig_type": "page",
+        "comment_anonymous": 0,
+        "comment_default_mode": 1,
+        "comment_default_per_page": "50",
+        "comment_form_location": 1,
+        "comment": "0",
+        "comment_preview": "1",
+        "comment_subject_field": 1
+    },
+]
  *
  */
 function drupalgap_services_content_types_list () {

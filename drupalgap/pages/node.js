@@ -13,6 +13,9 @@ $('#drupalgap_page_node').live('pageshow',function(){
 		// Clear any previous node edit id reference.
 		drupalgap_page_node_edit_nid = null;
 		
+		// Clear any previous node comment nid reference.
+		drupalgap_page_comment_edit_nid = null;
+		
 		// Fill in placeholders.
 		$('#drupalgap_page_node h1').html(drupalgap_page_node.title);
 		$('#drupalgap_page_node .content').html(drupalgap_page_node.body.und[0].safe_value);
@@ -28,19 +31,16 @@ $('#drupalgap_page_node').live('pageshow',function(){
 		
 		// Set comments and comment button visibility.
 		switch (drupalgap_page_node.comment) {
-			case 0: // comments hidden
 			case "0": // comments hidden
 				$('#drupalgap_page_node_comments').hide();
 				$('#drupalgap_page_node_button_comment').hide();
 				$('#drupalgap_page_node_button_comments').hide();
 				break;
-			case 1: // comments closed
 			case "1": // comments closed
 				$('#drupalgap_page_node_comments').show();
 				$('#drupalgap_page_node_button_comment').hide();
 				$('#drupalgap_page_node_button_comments').show();
 				break;
-			case 2: // comments open
 			case "2": // comments open
 				$('#drupalgap_page_node_comments').show();
 				$('#drupalgap_page_node_button_comment').show();
@@ -56,5 +56,11 @@ $('#drupalgap_page_node').live('pageshow',function(){
 });
 
 $('#drupalgap_page_node_button_edit').live("click",function(){
+	// Set the node edit nid.
 	drupalgap_page_node_edit_nid = drupalgap_page_node_nid;
+});
+
+$('#drupalgap_page_node_button_comment').live("click",function(){
+	// Set the comment nid.
+	drupalgap_page_comment_edit_nid = drupalgap_page_node_nid;
 });
