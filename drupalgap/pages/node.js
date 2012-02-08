@@ -42,6 +42,7 @@ $('#drupalgap_page_node').live('pageshow',function(){
 				$('#drupalgap_page_node_button_comments').show();
 				break;
 			case "2": // comments open
+				// @todo - check user's permissions for comments before showing buttons
 				$('#drupalgap_page_node_comments').show();
 				$('#drupalgap_page_node_button_comment').show();
 				$('#drupalgap_page_node_button_comments').show();

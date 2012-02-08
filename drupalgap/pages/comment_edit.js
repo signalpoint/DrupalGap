@@ -3,6 +3,8 @@ var drupalgap_page_comment_edit_content_type;
 $('#drupalgap_page_comment_edit').live('pageshow',function(){
 	try {
 		
+		// @todo - Check the user's permissions before even attempting to do stuff with comments...
+		
 		// Load node.
 		drupalgap_page_comment_edit_node = drupalgap_services_node_retrieve(drupalgap_page_comment_edit_nid);
 		if (!drupalgap_page_comment_edit_node) {
@@ -68,15 +70,15 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 	  		return false; 
 	  	}
 	  	
-	  	comment = drupalgap_services_comment_create({"nid":drupalgap_page_comment_edit_nid,"body":body});
+	  	comment_create_result = drupalgap_services_comment_create({"nid":drupalgap_page_comment_edit_nid,"body":body});
 	  	
-	  	if (comment.cid) {
-	  		alert("Comment posted!");
-	  		$.mobile.changePage("node.html");
+	  	if (comment_create_result.errorThrown) {
+	  		alert(comment_create_result.errorThrown);
 	  	}
 	  	else {
-	  		// @todo - display a more informative message here.
-	  		alert("There was a problem posting the comment. Please review the console for more information.")''
+	  		//comment_create_result.cid
+	  		alert("Comment posted!");
+	  		$.mobile.changePage("node.html");
 	  	}
 	}
 	catch (error) {
