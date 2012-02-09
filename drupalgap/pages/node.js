@@ -33,20 +33,40 @@ $('#drupalgap_page_node').live('pageshow',function(){
 		switch (drupalgap_page_node.comment) {
 			case "0": // comments hidden
 				$('#drupalgap_page_node_comments').hide();
-				$('#drupalgap_page_node_button_comment').hide();
+				$('#drupalgap_page_node_button_comment_edit').hide();
 				$('#drupalgap_page_node_button_comments').hide();
 				break;
 			case "1": // comments closed
 				$('#drupalgap_page_node_comments').show();
-				$('#drupalgap_page_node_button_comment').hide();
+				$('#drupalgap_page_node_button_comment_edit').hide();
 				$('#drupalgap_page_node_button_comments').show();
 				break;
 			case "2": // comments open
 				// @todo - check user's permissions for comments before showing buttons
 				$('#drupalgap_page_node_comments').show();
-				$('#drupalgap_page_node_button_comment').show();
+				$('#drupalgap_page_node_button_comment_edit').show();
 				$('#drupalgap_page_node_button_comments').show();
 				break;
+		}
+		
+		// If there are any comments, show the comment count on the view comments button
+		if (drupalgap_page_node.comment_count) {
+			count = parseInt(drupalgap_page_node.comment_count);
+			if (count > 0) {
+				text = "View " + count + " Comments";
+				if (count == 1) { text = "View " + count + " Comment" }
+				$('#drupalgap_page_node_button_comments span').html(text);
+			}
+		}
+		
+		// As a last resort, check the user's access permissions for comments.
+		// Check to make sure the user has permission view comments.
+		if (!drupalgap_services_user_access("access comments")) {
+			$('#drupalgap_page_node_button_comments').hide();
+		}
+		// Check to make sure the user has permission to post comments.
+		if (!drupalgap_services_user_access("post comments")) {
+			$('#drupalgap_page_node_button_comment_edit').hide();
 		}
 		
 	}
@@ -61,7 +81,12 @@ $('#drupalgap_page_node_button_edit').live("click",function(){
 	drupalgap_page_node_edit_nid = drupalgap_page_node_nid;
 });
 
-$('#drupalgap_page_node_button_comment').live("click",function(){
+$('#drupalgap_page_node_button_comments').live("click",function(){
+	// Set the comment nid.
+	drupalgap_page_comments_nid = drupalgap_page_node_nid;
+});
+
+$('#drupalgap_page_node_button_comment_edit').live("click",function(){
 	// Set the comment nid.
 	drupalgap_page_comment_edit_nid = drupalgap_page_node_nid;
 });

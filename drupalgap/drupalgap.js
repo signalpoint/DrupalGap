@@ -15,8 +15,8 @@ $(document).ready(function() {
 		drupalgap_services_system_connect(); // @todo - do something if system connect fails...
 		
 		// go to the dashboard
-		//$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");
-		$.mobile.changePage("drupalgap/pages/content.html", "slideup");
+		$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");
+		//$.mobile.changePage("drupalgap/pages/content.html", "slideup");
 	}
 });
 

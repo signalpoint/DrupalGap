@@ -3,6 +3,8 @@ var drupalgap_services_user_login_result;
 var drupalgap_services_user_logout_result;
 var drupalgap_services_user_update_result;
 var drupalgap_services_user_register_result;
+var drupalgap_services_user_access_result;
+var drupalgap_services_user_roles_and_permissions_result;
 
 /**
  * Makes a synchronous call to Drupal's User Login Service Resource. 
@@ -233,4 +235,56 @@ function drupalgap_services_user_register (name,mail,pass) {
 		console.log(error);	
 	}
 	return false; // if it made it this fair, the user register call failed
+}
+
+function drupalgap_services_user_access(permission) {
+	try {
+		// Clear the previous call.
+		drupalgap_services_user_access_result = null;
+		
+		// Validate the input.
+		valid = true;
+		if (!permission) {
+			alert("drupalgap_services_user_access - no permission provided");
+		}
+		
+		// Make the service call.
+		if (valid) {
+			resource_path = "drupalgap_user/access.json";
+			data = 'permission=' + encodeURIComponent(permission);
+			drupalgap_services_user_access_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data});
+		}
+	}
+	catch (error) {
+		console.log("drupalgap_services_user_access");
+		console.log(error);	
+	}
+	return drupalgap_services_user_access_result;
+}
+
+function drupalgap_services_user_roles_and_permissions(uid) {
+	try {
+		
+		// Clear the previous call.
+		drupalgap_services_user_roles_and_permissions_result = null;
+		
+		// Validate the user id.
+		valid = true;
+		if (!uid) {
+			valid = false;
+			alert("drupalgap_services_user_roles_and_permissions - no user id provided");
+		}
+		
+		if (valid) {
+			// Make the service call.
+			resource_path = "drupalgap_user/roles_and_permissions.json";
+			data = 'uid=' + encodeURIComponent(uid);
+			drupalgap_services_user_roles_and_permissions_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data});
+		}
+	}
+	catch (error) {
+		console.log("drupalgap_services_user_roles_and_permissions");
+		console.log(error);	
+	}
+	return drupalgap_services_user_roles_and_permissions_result;
 }

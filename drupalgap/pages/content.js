@@ -17,7 +17,7 @@ $('#drupalgap_page_content').live('pageshow',function(){
 			$("#drupalgap_page_content_list").append($("<li></li>",{"html":"Sorry, there is no published content."}));
 		}
 		
-		// if the user doesn't have at least one create permission for each content type, hide the add button
+		// If the user doesn't have at least one create permission for each content type, hide the add button.
 		var can_create = false;
 		permissions = drupalgap_services_content_types_user_permissions();
 		$.each(permissions,function(index,value){
@@ -31,7 +31,7 @@ $('#drupalgap_page_content').live('pageshow',function(){
 		else
 			$('#drupalgap_page_content_button_add').show();
 		
-		// refresh the list
+		// Refresh the list.
 		$("#drupalgap_page_content_list").listview("destroy").listview();
 	}
 	catch (error) {
@@ -40,6 +40,8 @@ $('#drupalgap_page_content').live('pageshow',function(){
 	}
 });
 
+// When a content list item is clicked...
 $('#drupalgap_page_content_list a').live("click",function(){
+	// Save a reference to the node id.
 	drupalgap_page_node_nid = $(this).attr('id');
 });

@@ -1,9 +1,18 @@
 var drupalgap_page_comment_edit_nid; // other's set this nid so this page knows which node to load
 var drupalgap_page_comment_edit_content_type;
+var drupalgap_page_comment_edit_cid; // other's set this cid so this page knows which comment to load (if any)
 $('#drupalgap_page_comment_edit').live('pageshow',function(){
 	try {
-		
-		// @todo - Check the user's permissions before even attempting to do stuff with comments...
+
+		if (drupalgap_page_comment_edit_cid) {
+			// Existing comment.
+			alert("existing comment");
+			return false;
+		}
+		else {
+			// New comment.
+			alert("new comment");
+		}
 		
 		// Load node.
 		drupalgap_page_comment_edit_node = drupalgap_services_node_retrieve(drupalgap_page_comment_edit_nid);
@@ -65,7 +74,7 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 	  		return false;
 	  	}
 	  	
-	  	if (!body) { 
+	  	if (!body) {
 	  		alert('No comment entered.'); 
 	  		return false; 
 	  	}
