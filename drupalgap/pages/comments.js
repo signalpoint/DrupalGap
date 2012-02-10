@@ -2,12 +2,18 @@ var drupalgap_page_comments_nid; // others set this node id so this page knows w
 $('#drupalgap_page_comments').live('pageshow',function(){
 	try {
 		
+		// Clear any previous comment edit id.
+		drupalgap_page_comment_edit_cid = null;
+		
 		// Load node.
 		drupalgap_page_comments_node = drupalgap_services_node_retrieve(drupalgap_page_comments_nid);
 		if (!drupalgap_page_comments_node) {
 			alert("drupalgap_page_comments - failed to load node (" + drupalgap_page_comments_nid + ")");
 			return false;
 		}
+		
+		// Set the comment edit node id.
+		drupalgap_page_comment_edit_nid = drupalgap_page_comments_node.nid;
 		
 		// Set node title header text.
 		$('#drupalgap_page_comments h3').html(drupalgap_page_comments_node.title);
@@ -18,32 +24,20 @@ $('#drupalgap_page_comments').live('pageshow',function(){
 		// Clear the list.
 		$("#drupalgap_page_comments_list").html("");
 		
-		// Can the user administer comments?
-		administer_comments = drupalgap_services_user_access("administer comments");
-		
-		// Can the user edit their own comments?
-		edit_own_comments = drupalgap_services_user_access("edit own comments");
+		// If the comments are open, check to see if user has permission to post comments.
+		// If they do, show the add comment button
+		if (drupalgap_page_comments_node.comment == "2") {
+			post_comments = drupalgap_services_user_access("post comments");
+			if (post_comments) {
+				$('#drupalgap_page_comments_button_comment_add').show();
+			}
+		}
 		
 		// If there are any comments, add each to the container, otherwise show an empty message.
-		$.each(comments,function(index,comment){
-			
-			// Extract comment creation date.
-			created = new Date(parseInt(comment.created)*1000);
-			
-			// Determine if edit link should be shown.
-			show_edit_link = false;
-			if (administer_comments || (edit_own_comments && comment.uid == drupalgap_user.uid)) {
-				show_edit_link = true;
-			}
+		$.each(comments,function(index,obj){
 			
 			// Build comment html.
-			html = "<div><strong>" + comment.subject + "</strong></div>";
-			html += "<div><p>" + comment.name + " | " + created.toDateString() + "</p></div>";
-			html += "<div><p>" + comment.comment_body_value + "</p></div>";
-			if (show_edit_link) {
-				html += "<div><a href='comment_edit.html' cid='" + comment.cid + "' nid='" + comment.nid + "'>edit</a></div>";
-			}
-			html += "<div><hr /></div>";
+			html = drupalgap_services_comment_render(obj.comment);
 			
 			// Add comment html to comment container.
 			$("#drupalgap_page_comments_list").append(html);
@@ -53,10 +47,4 @@ $('#drupalgap_page_comments').live('pageshow',function(){
 		console.log("drupalgap_page_comments");
 		console.log(error);
 	}
-});
-
-// When a comment list item is clicked...
-$('#drupalgap_page_comments a').live("click",function(){
-	drupalgap_page_comment_edit_cid = $(this).attr('cid');
-	drupalgap_page_comment_edit_nid = $(this).attr('nid');
 });

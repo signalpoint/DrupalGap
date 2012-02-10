@@ -7,7 +7,6 @@ $(document).ready(function() {
 	if (!drupalgap_settings.site_path) { // app doesn't have a default site path...
 		// send user to welcome page
 		$.mobile.changePage("drupalgap/pages/welcome.html", "slideup");
-		//$.mobile.changePage("drupalgap/pages/content.html", "slideup");
 	}
 	else { // app does have a default site path... begin initialization...
 		
@@ -16,7 +15,6 @@ $(document).ready(function() {
 		
 		// go to the dashboard
 		$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");
-		//$.mobile.changePage("drupalgap/pages/content.html", "slideup");
 	}
 });
 

@@ -9,6 +9,10 @@ $('#drupalgap_page_node').live('pageshow',function(){
 			alert("drupalgap_page_node - failed to load node (" + drupalgap_page_node_nid + ")");
 			return false;
 		}
+		if (drupalgap_page_node.errorThrown) {
+			alert(drupalgap_page_node.errorThrown);
+			return false;
+		}
 		
 		// Clear any previous node edit id reference.
 		drupalgap_page_node_edit_nid = null;
@@ -49,7 +53,8 @@ $('#drupalgap_page_node').live('pageshow',function(){
 				break;
 		}
 		
-		// If there are any comments, show the comment count on the view comments button
+		// If there are any comments, show the comment count on the view comments button.
+		// Otherwise, hide the view comments button
 		if (drupalgap_page_node.comment_count) {
 			count = parseInt(drupalgap_page_node.comment_count);
 			if (count > 0) {
@@ -57,6 +62,12 @@ $('#drupalgap_page_node').live('pageshow',function(){
 				if (count == 1) { text = "View " + count + " Comment" }
 				$('#drupalgap_page_node_button_comments span').html(text);
 			}
+			else {
+				$('#drupalgap_page_node_button_comments').hide();
+			}
+		}
+		else {
+			$('#drupalgap_page_node_button_comments').hide();
 		}
 		
 		// As a last resort, check the user's access permissions for comments.

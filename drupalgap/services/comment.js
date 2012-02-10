@@ -1,6 +1,8 @@
 // global variables used to hold the latest system resource call results
 var drupalgap_services_comment_create_result;
-var drupalgap_services_comment_retrieve_result
+var drupalgap_services_comment_retrieve_result;
+var drupalgap_services_comment_update_result;
+var drupalgap_services_comment_delete_result;
 var drupalgap_services_comment_node_comments_result;
 
 function drupalgap_services_comment_create (comment) {
@@ -57,7 +59,7 @@ function drupalgap_services_comment_retrieve (cid) {
 		// If everything is valid, make the service resource call.
 		if (valid) {
 			resource_path = "comment/" + encodeURIComponent(cid) + ".json";
-			drupalgap_services_comment_retrieve_result = drupalgap_services_resource_call({"resource_path":resource_path});
+			drupalgap_services_comment_retrieve_result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"get"});
 		}
 	}
 	catch (error) {
@@ -65,6 +67,43 @@ function drupalgap_services_comment_retrieve (cid) {
 		console.log(error);
 	}
 	return drupalgap_services_comment_retrieve_result;
+}
+
+function drupalgap_services_comment_update(comment) {
+	try {
+		// Clear last result.
+		drupalgap_services_comment_update_result = null;
+		
+		// Build the data string.
+		data = "comment_body[und][0][value]=" + encodeURIComponent(comment.comment_body.und[0].value);
+		
+		// If they provided a subject, add it to the data string.
+		if (comment.subject) {
+			data += "&subject=" + encodeURIComponent(comment.subject);
+		}
+		
+		// Make the call.
+		resource_path = "comment/" + comment.cid + ".json";
+		drupalgap_services_comment_update_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data,"type":"put"});
+		
+	}
+	catch (error) {
+		console.log("drupalgap_services_comment_update");
+		console.log(error);
+	}
+	return drupalgap_services_comment_update_result;
+}
+
+function drupalgap_services_comment_delete(cid) {
+	try {
+		resource_path = "comment/" + encodeURIComponent(cid) + ".json";
+		drupalgap_services_comment_delete_result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"delete"});
+	}
+	catch (error) {
+		console.log("drupalgap_services_comment_delete");
+		console.log(error);
+	}
+	return drupalgap_services_comment_delete_result;
 }
 
 function drupalgap_services_comment_node_comments(nid) {
@@ -81,9 +120,10 @@ function drupalgap_services_comment_node_comments(nid) {
 		
 		// If everything is valid, make the service resource call.
 		if (valid) {
-			resource_path = "drupalgap_comment/node_comments.json";
-			data = "nid=" + encodeURIComponent(nid);
-			drupalgap_services_comment_node_comments_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data});
+			// retrieve comments
+			path = "views_datasource/drupalgap_comments/" + nid;
+			drupalgap_services_comment_node_comments_result = drupalgap_views_datasource_retrieve({"path":path});
+			drupalgap_services_comment_node_comments_result = drupalgap_services_comment_node_comments_result.comments;
 		}
 	}
 	catch (error) {
@@ -92,3 +132,69 @@ function drupalgap_services_comment_node_comments(nid) {
 	}
 	return drupalgap_services_comment_node_comments_result;
 }
+
+function drupalgap_services_comment_render (comment) {
+	try {
+		
+		// Can the user administer comments?
+		administer_comments = drupalgap_services_user_access("administer comments");
+		
+		// Can the user edit their own comments?
+		edit_own_comments = drupalgap_services_user_access("edit own comments");
+		
+		// Determine if edit link should be shown.
+		show_edit_link = false;
+		if (administer_comments || (edit_own_comments && comment.uid == drupalgap_user.uid)) {
+			show_edit_link = true;
+		}
+		
+		// Extract comment creation date depending on where it came from.
+		if (comment.created % 1 != 0) {
+			// Views datasource returns a formatted date string.
+			created = comment.created;
+		}
+		else {
+			// The comment retrieve service resource returns an integer timestamp.
+			created = new Date(parseInt(comment.created)*1000);
+			created = created.toDateString();
+		}
+		
+		// Try to grab the comment body, if it doesn't work, try to grab from alternate location.
+		/*body = comment.comment_body_value;
+		if (!body) {
+			body = comment.comment_body.und[0].value;
+		}*/
+		
+		// Extract body depending on where it came from.
+		if (typeof(comment.comment_body) == 'object') {
+			// The comment retrieve service resource returns the body stuffed into an object.
+			body = comment.comment_body.und[0].value;
+		}
+		else {
+			// Views datasource returns the body as a field.
+			body = comment.comment_body;
+		}
+		
+		// Build comment html.
+		html = "<div><strong>" + comment.subject + "</strong></div>";
+		html += "<div><p>" + comment.name + "</p></div>";
+		html += "<div><p>" + created + "</p></div>";
+		html += "<div><p>" + body + "</p></div>";
+		
+		if (show_edit_link) {
+			html += "<div><a href='comment_edit.html' cid='" + comment.cid + "' nid='" + comment.nid + "' class='drupalgap_comment_edit'>edit</a></div>";
+		}
+		html += "<div><hr /></div>";
+		return html;
+	}
+	catch (error) {
+		console.log("drupalgap_services_comment_render");
+		console.log(error);
+	}
+}
+
+// When a comment list item is clicked...
+$('a.drupalgap_comment_edit').live("click",function(){
+	drupalgap_page_comment_edit_cid = $(this).attr('cid');
+	drupalgap_page_comment_edit_nid = $(this).attr('nid');
+});

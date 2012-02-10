@@ -3,22 +3,16 @@ var drupalgap_page_comment_edit_content_type;
 var drupalgap_page_comment_edit_cid; // other's set this cid so this page knows which comment to load (if any)
 $('#drupalgap_page_comment_edit').live('pageshow',function(){
 	try {
-
-		if (drupalgap_page_comment_edit_cid) {
-			// Existing comment.
-			alert("existing comment");
-			return false;
-		}
-		else {
-			// New comment.
-			alert("new comment");
-		}
 		
 		// Load node.
 		drupalgap_page_comment_edit_node = drupalgap_services_node_retrieve(drupalgap_page_comment_edit_nid);
 		if (!drupalgap_page_comment_edit_node) {
 			alert("drupalgap_page_comment_edit - failed to load node (" + drupalgap_page_comment_edit_nid + ")");
 			return false;
+		}
+		else {
+			// Set the page nid in case it wasn't set.
+			drupalgap_page_node_nid = drupalgap_page_comment_edit_nid;
 		}
 		
 		// Check the status of this node's comments.
@@ -41,15 +35,42 @@ $('#drupalgap_page_comment_edit').live('pageshow',function(){
 		drupalgap_page_comment_edit_content_type = null;
 		drupalgap_page_comment_edit_content_type = drupalgap_services_content_type_load(drupalgap_page_comment_edit_node.type);
 		
-		// Set header text.
-		$('#drupalgap_page_comment_edit h1').html("Add Comment");
-		
 		// Set node title header text.
 		$('#drupalgap_page_comment_edit h3').html(drupalgap_page_comment_edit_node.title);
 		
 		// Set the visibility on the subject field
 		if (drupalgap_page_comment_edit_content_type.comment_subject_field != "1") {
 			$('#drupalgap_page_comment_edit_subject_container').hide();
+		}
+		
+		if (drupalgap_page_comment_edit_cid) {
+			// Existing comment.
+			
+			// Load the comment.
+			comment = drupalgap_services_comment_retrieve(drupalgap_page_comment_edit_cid);
+			
+			if (!comment) {
+				alert("drupalgap_page_comment_edit - Failed to load comment! (" + drupalgap_page_comment_edit_cid + ")");
+				return false;
+			}
+			
+			// Set header text.
+			$('#drupalgap_page_comment_edit h1').html("Edit Comment");
+			
+			// Add comment details to form fields.
+			$('#drupalgap_page_comment_edit_subject').val(comment.subject);
+			$('#drupalgap_page_comment_edit_body').val(comment.comment_body.und[0].value);
+			
+			// If the user can administer the comment, show the delete button.
+			if (drupalgap_services_user_access("administer comments")) {
+				$('#drupalgap_page_comment_edit_delete').show();
+			}
+		}
+		else {
+			// New comment.
+			
+			// Set header text.
+			$('#drupalgap_page_comment_edit h1').html("Add Comment");
 		}
 		
 	}
@@ -79,16 +100,43 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 	  		return false; 
 	  	}
 	  	
-	  	comment_create_result = drupalgap_services_comment_create({"nid":drupalgap_page_comment_edit_nid,"body":body});
-	  	
-	  	if (comment_create_result.errorThrown) {
-	  		alert(comment_create_result.errorThrown);
-	  	}
-	  	else {
-	  		//comment_create_result.cid
-	  		alert("Comment posted!");
-	  		$.mobile.changePage("node.html");
-	  	}
+	  	if (drupalgap_page_comment_edit_cid) {
+			// Existing comment.
+	  		
+	  		// retrieve the comment, update the values
+		  	comment = drupalgap_services_comment_retrieve(drupalgap_page_comment_edit_cid);
+		  	if (!comment) {
+				alert("drupalgap_page_comment_edit_submit - failed to load comment (" + drupalgap_page_comment_edit_cid + ")");
+			}
+		  	else {
+		  		// comment was retrieved, update its values
+			  	comment.subject = subject;
+			  	comment.comment_body.und[0].value = body;
+			  	result = drupalgap_services_comment_update(comment);
+			  	if (result.errorThrown) {
+			  		alert(result.errorThrown);
+			  	}
+			  	else {
+			  		// comment was updated properly
+			  		drupalgap_page_comment_edit_cid = null; // clear value before redirecting
+				  	$.mobile.changePage("node.html");
+			  	}
+		  	}
+		}
+		else {
+			// New comment.
+			
+			// Create the comment.
+			comment_create_result = drupalgap_services_comment_create({"nid":drupalgap_page_comment_edit_nid,"body":body,"subject":subject});
+		  	
+		  	if (comment_create_result.errorThrown) {
+		  		alert(comment_create_result.errorThrown);
+		  	}
+		  	else {
+		  		alert("Comment posted!");
+		  		$.mobile.changePage("node.html");
+		  	}
+		}
 	}
 	catch (error) {
 		console.log("drupalgap_page_comment_edit_submit");
@@ -113,6 +161,20 @@ $('#drupalgap_page_comment_edit_cancel').live('click',function(){
 
 $('#drupalgap_page_comment_edit_delete').live('click',function(){
 	try {
+		comment = drupalgap_services_comment_retrieve(drupalgap_page_comment_edit_cid);
+	  	if (!comment) {
+			alert("drupalgap_page_comment_edit_delete - failed to comment (" + drupalgap_page_comment_edit_cid + ")");
+			return false;
+		}
+		if (confirm("Are you sure you want to delete \"" + comment.subject + "\"? This cannot be undone.")) {
+			result = drupalgap_services_comment_delete(comment.cid); 
+			if (result == true) {
+				$.mobile.changePage("node.html");
+			}
+			else {
+				alert(result.errorThrown);
+			}
+		}
 	}
 	catch (error) {
 		console.log("drupalgap_page_comment_edit_delete");
