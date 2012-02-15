@@ -46,10 +46,12 @@ possible for the iPhone, iPad, etc.
 | Mobile Application Features for Drupal Websites |
 |=================================================|
 
-Access  Content
-Register User Account
-User Login, Logout and Account Update
-Content Create, Retrieve, Update and Delete - (C.R.U.D.)
+ + Access  Content
+ + Register User Account
+ + User Login, Logout and Account Update
+ + Create, Retrieve, Update and Delete - (C.R.U.D.)
+   - Content
+   - Comments
 
 |=======================|
 | Who is DrupalGap For? |
