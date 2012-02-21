@@ -42,7 +42,7 @@ $('#drupalgap_user_login_submit').live('click',function() {
 	  
 	  // make call to the user login service resource
 	  if (drupalgap_services_user_login(name,pass)) {
-		  $.mobile.changePage("user.html", "slideup");
+		  $.mobile.changePage("dashboard.html", "slideup");
 	  }
 	  else { // login failed...
 		  $('#drupalgap_page_user_login_messages').html(drupalgap_services_resource_call_result.errorThrown).show(); // show user result error msg
