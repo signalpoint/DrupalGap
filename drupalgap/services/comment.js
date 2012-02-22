@@ -26,7 +26,15 @@ function drupalgap_services_comment_create (comment) {
 		if (valid) {
 			
 			// Build the data string.
-			data = "nid=" + encodeURIComponent(comment.nid) + "&comment_body[und][0][value]=" + encodeURIComponent(comment.body);
+			
+			var body;
+			if (drupalgap_site_settings.variable.drupal_core == "6") {
+				body = "comment=" + encodeURIComponent(comment.body);
+			}
+			else if (drupalgap_site_settings.variable.drupal_core == "7") {
+				body = "comment_body[und][0][value]=" + encodeURIComponent(comment.body);
+			}
+			data = "nid=" + encodeURIComponent(comment.nid) + "&" + body;
 			
 			// If they provided a subject, add it to the data string.
 			if (comment.subject) {
@@ -75,7 +83,13 @@ function drupalgap_services_comment_update(comment) {
 		drupalgap_services_comment_update_result = null;
 		
 		// Build the data string.
-		data = "comment_body[und][0][value]=" + encodeURIComponent(comment.comment_body.und[0].value);
+		data = "";
+		if (drupalgap_site_settings.variable.drupal_core == "6") {
+			data = "comment=" + encodeURIComponent(comment.body);
+		}
+		else if (drupalgap_site_settings.variable.drupal_core == "7") {
+			data = "comment_body[und][0][value]=" + encodeURIComponent(comment.body);
+		}
 		
 		// If they provided a subject, add it to the data string.
 		if (comment.subject) {
@@ -149,30 +163,48 @@ function drupalgap_services_comment_render (comment) {
 		}
 		
 		// Extract comment creation date depending on where it came from.
-		if (comment.created % 1 != 0) {
-			// Views datasource returns a formatted date string.
-			created = comment.created;
+		if (drupalgap_site_settings.variable.drupal_core == "6") {
+			if (comment.timestamp % 1 != 0) {
+				// Views JSON.
+				created = comment.timestamp;
+			}
+			else {
+				// Comment Retrieve.
+				created = new Date(parseInt(comment.timestamp)*1000);
+				created = created.toDateString();
+			}
 		}
-		else {
-			// The comment retrieve service resource returns an integer timestamp.
-			created = new Date(parseInt(comment.created)*1000);
-			created = created.toDateString();
+		else if (drupalgap_site_settings.variable.drupal_core == "7") {
+			if (comment.created % 1 != 0) {
+				// Views JSON.
+				created = comment.created;
+			}
+			else {
+				// Comment Retrieve.
+				created = new Date(parseInt(comment.created)*1000);
+				created = created.toDateString();
+			}
 		}
-		
-		// Try to grab the comment body, if it doesn't work, try to grab from alternate location.
-		/*body = comment.comment_body_value;
-		if (!body) {
-			body = comment.comment_body.und[0].value;
-		}*/
 		
 		// Extract body depending on where it came from.
+		var body;
 		if (typeof(comment.comment_body) == 'object') {
 			// The comment retrieve service resource returns the body stuffed into an object.
-			body = comment.comment_body.und[0].value;
+			if (drupalgap_site_settings.variable.drupal_core == "6") {
+				body = comment.comment;
+			}
+			else if (drupalgap_site_settings.variable.drupal_core == "7") {
+				body = comment.comment_body.und[0].value;
+			}
 		}
 		else {
 			// Views datasource returns the body as a field.
-			body = comment.comment_body;
+			if (drupalgap_site_settings.variable.drupal_core == "6") {
+				body = comment.comment;
+			}
+			else if (drupalgap_site_settings.variable.drupal_core == "7") {
+				body = comment.comment_body;
+			}
 		}
 		
 		// Build comment html.

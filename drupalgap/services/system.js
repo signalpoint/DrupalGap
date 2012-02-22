@@ -76,6 +76,7 @@ function drupalgap_services_system_connect () {
 		else { // the connect was successful...
 			// save a copy of the current user
 			drupalgap_user = drupalgap_services_system_connect_result.user;
+			console.log(JSON.stringify(drupalgap_user));
 			// make sure authenticated user's account is active
 			if (drupalgap_user.uid != 0 && drupalgap_user.status != 1) {
 				// @todo - this alert doesn't work... the forced logout seems to work though...

@@ -21,12 +21,24 @@ $('#drupalgap_page_node').live('pageshow',function(){
 		drupalgap_page_comment_edit_nid = null;
 		
 		// Fill in placeholders.
+		
+		// Node title.
 		$('#drupalgap_page_node h1').html(drupalgap_page_node.title);
-		$('#drupalgap_page_node .content').html(drupalgap_page_node.body.und[0].safe_value);
+		
+		// Node body.
+		var body;
+		if (drupalgap_site_settings.variable.drupal_core == "6") {
+			body = drupalgap_page_node.body;
+		}
+		else if (drupalgap_site_settings.variable.drupal_core == "7") {
+			body = drupalgap_page_node.body.und[0].safe_value;
+		}
+		$('#drupalgap_page_node .content').html(body);
 		
 		// Set edit button visibility
 		// If user is not user 1 and user is not node author, hide the edit button, otherwise show it.
-		if (drupalgap_user.uid != 1 && drupalgap_user.uid != drupalgap_page_node.uid) {	
+		// @todo - this needs to be more dynamic and check permissions
+		if (drupalgap_user.uid == "0" || (drupalgap_user.uid != "1" && drupalgap_user.uid != drupalgap_page_node.uid)) {	
 			$('#drupalgap_page_node_button_edit').hide();
 		}
 		else {

@@ -59,7 +59,16 @@ $('#drupalgap_page_comment_edit').live('pageshow',function(){
 			
 			// Add comment details to form fields.
 			$('#drupalgap_page_comment_edit_subject').val(comment.subject);
-			$('#drupalgap_page_comment_edit_body').val(comment.comment_body.und[0].value);
+			
+			// Comment body.
+			var body;
+			if (drupalgap_site_settings.variable.drupal_core == "6") {
+				body = comment.comment;
+			}
+			else if (drupalgap_site_settings.variable.drupal_core == "7") {
+				body = comment.comment_body.und[0].value;
+			}
+			$('#drupalgap_page_comment_edit_body').val(body);
 			
 			// If the user can administer the comment, show the delete button.
 			if (drupalgap_services_user_access("administer comments")) {
@@ -111,7 +120,7 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 		  	else {
 		  		// comment was retrieved, update its values
 			  	comment.subject = subject;
-			  	comment.comment_body.und[0].value = body;
+			  	comment.body = body;
 			  	result = drupalgap_services_comment_update(comment);
 			  	if (result.errorThrown) {
 			  		alert(result.errorThrown);

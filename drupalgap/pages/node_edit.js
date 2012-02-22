@@ -28,7 +28,14 @@ $('#drupalgap_page_node_edit').live('pageshow',function(){
 				return false;
 			}
 			$('#drupalgap_page_node_edit_title').val(node.title);
-			$('#drupalgap_page_node_edit_body').val(node.body.und[0].safe_value);
+			var body;
+			if (drupalgap_site_settings.variable.drupal_core == "6") {
+				body = node.body;
+			}
+			else if (drupalgap_site_settings.variable.drupal_core == "7") {
+				body = node.body.und[0].safe_value;
+			}
+			$('#drupalgap_page_node_edit_body').val(body);
 		}
 	}
 	catch (error) {
