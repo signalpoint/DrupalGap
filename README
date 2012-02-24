@@ -10,18 +10,13 @@ DrupalGap consists of two parts:
 | DrupalGap - Drupal Module (6.x and 7.x) |
 |=========================================|
 
-Sandbox: http://drupal.org/sandbox/signalpoint/1414540
+http://drupal.org/project/drupalgap
 
 This module allows mobile applications to utilize the power of Drupal websites.
 DrupalGap exposes Drupal's content and user features to mobile devices through
 the DrupalGap mobile application, or through your own custom mobile application.
 Leveraging the power of existing Drupal modules such as Views and Services,
 DrupalGap integrates mobile device applications with Drupal.
-
-The DrupalGap module is currently going through the application process with
-Drupal to become a full project:
-
-http://drupal.org/node/1423558
 
 |================================|
 | DrupalGap - Mobile Application |
