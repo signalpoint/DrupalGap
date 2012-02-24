@@ -2,7 +2,18 @@ DrupalGap bridges the gap between Drupal and mobile device applications. This
 open source project is built around PhoneGap and utilizes the power of JQuery,
 JQuery Mobile and of course Drupal. 
 
-Project Homepage: http://www.tylerfrankenstein.com/drupalgap
+Project Homepage: http://www.drupalgap.org
+
+|=================================================|
+| Mobile Application Features for Drupal Websites |
+|=================================================|
+
+ + Access  Content
+ + Register User Account
+ + User Login, Logout and Account Update
+ + Create, Retrieve, Update and Delete - (C.R.U.D.)
+   - Content
+   - Comments
 
 DrupalGap consists of two parts:
 
@@ -34,20 +45,6 @@ The mobile application is available in the Android marketplace.
 
 https://market.android.com/details?id=com.drupalgap
 
-DrupalGap is seeking Drupal/iOS developer contributions to help make this
-possible for the iPhone, iPad, etc.
-
-|=================================================|
-| Mobile Application Features for Drupal Websites |
-|=================================================|
-
- + Access  Content
- + Register User Account
- + User Login, Logout and Account Update
- + Create, Retrieve, Update and Delete - (C.R.U.D.)
-   - Content
-   - Comments
-
 |=======================|
 | Who is DrupalGap For? |
 |=======================|
@@ -70,7 +67,7 @@ power of their Drupal websites.
 
 For complete details visit the DrupalGap project homepage:
 
-http://www.tylerfrankenstein.com/drupalgap
+http://www.drupalgap.org
 
 1. Download PhoneGap
 
