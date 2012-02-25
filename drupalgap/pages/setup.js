@@ -1,6 +1,6 @@
 $('#drupalgap_page_setup').live('pageshow',function(){
 	try {
-		// @todo - perform system connect test to drupalgap.com
+		// @todo - perform system connect test to drupalgap.org
 	  	// @todo - implement a service resource that performs an initial system connect handshake
 	}
 	catch (error) {
@@ -12,8 +12,8 @@ $('#drupalgap_page_setup').live('pageshow',function(){
 // when the site url text field is clicked...
 $('#drupalgap_page_setup_site_url').live('click',function(){
 	
-	// remove 'drupalgap.com' from the text field for quick-n-easy user experience
-	if ($('#drupalgap_page_setup_site_url').val() == "http://www.drupalgap.com")
+	// remove 'drupalgap.org' from the text field for quick-n-easy user experience
+	if ($('#drupalgap_page_setup_site_url').val() == "http://www.drupalgap.org")
 		$('#drupalgap_page_setup_site_url').val("http://www.");
 		
 });

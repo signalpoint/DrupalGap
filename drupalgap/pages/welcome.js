@@ -11,7 +11,7 @@ $('#drupalgap_page_welcome_button_demo').live('click',function(){
 	try {
 	  	// update settings with new site url path
 	  	settings = drupalgap_settings_load();
-	  	settings.site_path = "http://www.drupalgap.com";
+	  	settings.site_path = "http://www.drupalgap.org";
 	  	drupalgap_settings.demo = true;
 	  	drupalgap_settings_save(settings);
 	  	
@@ -25,7 +25,7 @@ $('#drupalgap_page_welcome_button_demo').live('click',function(){
 		  	alert(result.errorThrown);
 	  	}
 	  	else { // session id came back, everything is ok...
-	  		alert("Connected to DrupalGap.com, the demo is ready, enjoy!");
+	  		alert("Connected to DrupalGap.org, the demo is ready, enjoy!");
 	  		$.mobile.changePage("dashboard.html", "slideup");
 	  	}
 	}
