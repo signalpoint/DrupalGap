@@ -5,14 +5,15 @@ $('#drupalgap_page_comment_edit').live('pageshow',function(){
 	try {
 		
 		// Load node.
-		drupalgap_page_comment_edit_node = drupalgap_services_node_retrieve(drupalgap_page_comment_edit_nid);
+		nid = drupalgap_page_comment_edit_nid;
+		drupalgap_page_comment_edit_node = drupalgap_services_node_retrieve({"nid":nid});
 		if (!drupalgap_page_comment_edit_node) {
-			alert("drupalgap_page_comment_edit - failed to load node (" + drupalgap_page_comment_edit_nid + ")");
+			alert("drupalgap_page_comment_edit - failed to load node (" + nid + ")");
 			return false;
 		}
 		else {
 			// Set the page nid in case it wasn't set.
-			drupalgap_page_node_nid = drupalgap_page_comment_edit_nid;
+			drupalgap_page_node_nid = nid;
 		}
 		
 		// Check the status of this node's comments.
@@ -71,7 +72,7 @@ $('#drupalgap_page_comment_edit').live('pageshow',function(){
 			$('#drupalgap_page_comment_edit_body').val(body);
 			
 			// If the user can administer the comment, show the delete button.
-			if (drupalgap_services_user_access("administer comments")) {
+			if (drupalgap_services_user_access({"permission":"administer comments"})) {
 				$('#drupalgap_page_comment_edit_delete').show();
 			}
 		}

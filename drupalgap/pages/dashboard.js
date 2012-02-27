@@ -32,8 +32,8 @@ $('#drupalgap_page_dashboard').live('pageshow',function(){
         }
 		
 		// Load user access permissions.
-		access_content = drupalgap_services_user_access("access content");
-		access_comments = drupalgap_services_user_access("access comments");
+		access_content = drupalgap_services_user_access({"permission":"access content"});
+		access_comments = drupalgap_services_user_access({"permission":"access comments"});
 		
 		// Set visibility on other buttons.
 		if (access_content) { $('#drupalgap_button_content').show(); }

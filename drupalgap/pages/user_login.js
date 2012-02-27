@@ -5,14 +5,15 @@
 $('#drupalgap_page_user_login').live('pageshow',function(){
   try {
 	  	// if user is already logged in, send them to the dashboard
-	    if (drupalgap_services_system_connect_result.user.uid != 0) {
+	    if (drupalgap_user.uid != 0) {
           alert("Already logged in!");
           $.mobile.changePage("dashboard.html", "slideup");
           return;
         }
 	    
 	    // if in demo mode, prepopulate login fields
-	    // @todo - this type of code should live in the future idea of hook_page_user_login, since it is custom for a particular app
+	    // TODO - this type of code should live in the future idea of
+	    // hook_page_user_login, since it is custom for a particular app
 	    if (drupalgap_settings.demo) {
 	    	$('#drupalgap_user_login_name').val("demo");
 	    	$('#drupalgap_user_login_pass').val("drupalgap2012");

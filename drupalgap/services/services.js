@@ -29,10 +29,7 @@ function drupalgap_services_resource_call (options) {
 		
 		//$.mobile.showPageLoadingMsg(); // this doesn't work for some reason...
 		
-		// make the service call...
-		// @todo - perhaps use $.get instead since we aren't using async, does .get allow post, put, delete, though?
-		console.log(service_resource_call_url);
-		console.log(JSON.stringify(options));
+		// Make the service call.
 		
 	    $.ajax({
 		      url: service_resource_call_url,
@@ -53,6 +50,7 @@ function drupalgap_services_resource_call (options) {
 		    	  //$.mobile.hidePageLoadingMsg();
 		      }
 	    });
+	    console.log(JSON.stringify({"path":service_resource_call_url,"options":options}));
 	    console.log(JSON.stringify(drupalgap_services_resource_call_result));
 	}
 	catch (error) {

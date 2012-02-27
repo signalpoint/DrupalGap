@@ -1,21 +1,32 @@
 var drupalgap_settings;
 var drupalgap_user;
 var drupalgap_site_settings;
+var drupalgap_user_roles_and_permissions;
+var drupalgap_content_types_list;
+var drupalgap_content_types_user_permissions;
 
 $(document).ready(function() {
+	
+	//window.localStorage.clear(); // clear all local storage, used for testing
+	
 	drupalgap_settings_load();
-	if (!drupalgap_settings.site_path) { // app doesn't have a default site path...
-		// send user to welcome page
+	
+	if (!drupalgap_settings.site_path) {
+		// The app doesn't have a default site path, send user to welcome page.
 		$.mobile.changePage("drupalgap/pages/welcome.html", "slideup");
 	}
-	else { // app does have a default site path... begin initialization...
+	else {
 		
-		// make a call to the system connect service resource
-		drupalgap_services_system_connect(); // @todo - do something if system connect fails...
+		// App has a default site path.
 		
-		// go to the dashboard
+		// Make a call to the DrupalGap bundled system connect resource.
+		// TODO - do something if the system connect fails.
+		drupalgap_services_resource_system_connect();
+		
+		// Go to the dashboard.
 		$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");
 	}
+	
 });
 
 function drupalgap_settings_load () {
@@ -29,16 +40,12 @@ function drupalgap_settings_load () {
 		drupalgap_settings_save(drupalgap_settings);
 	}
 	else {
-		console.log("drupalgap_settings_load - loaded from local storage");
 		drupalgap_settings = JSON.parse(drupalgap_settings);
-		console.log(JSON.stringify(drupalgap_settings));
 	}
 	return drupalgap_settings;
 }
 
 function drupalgap_settings_save (settings) {
-	console.log("drupalgap_settings_save - saving to local storage");
-	console.log(JSON.stringify(settings));
 	window.localStorage.setItem("drupalgap_settings",JSON.stringify(settings));
 	drupalgap_settings = settings;
 	return drupalgap_settings;

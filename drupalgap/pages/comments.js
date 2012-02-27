@@ -6,9 +6,10 @@ $('#drupalgap_page_comments').live('pageshow',function(){
 		drupalgap_page_comment_edit_cid = null;
 		
 		// Load node.
-		drupalgap_page_comments_node = drupalgap_services_node_retrieve(drupalgap_page_comments_nid);
+		nid = drupalgap_page_comments_nid;
+		drupalgap_page_comments_node = drupalgap_services_node_retrieve({"nid":nid});
 		if (!drupalgap_page_comments_node) {
-			alert("drupalgap_page_comments - failed to load node (" + drupalgap_page_comments_nid + ")");
+			alert("drupalgap_page_comments - failed to load node (" + nid + ")");
 			return false;
 		}
 		
@@ -27,7 +28,7 @@ $('#drupalgap_page_comments').live('pageshow',function(){
 		// If the comments are open, check to see if user has permission to post comments.
 		// If they do, show the add comment button
 		if (drupalgap_page_comments_node.comment == "2") {
-			post_comments = drupalgap_services_user_access("post comments");
+			post_comments = drupalgap_services_user_access({"permission":"post comments"});
 			if (post_comments) {
 				$('#drupalgap_page_comments_button_comment_add').show();
 			}

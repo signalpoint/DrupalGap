@@ -18,52 +18,19 @@ var drupalgap_services_user_roles_and_permissions_result;
  *   TRUE if the login is successful, false otherwise.
  */
 function drupalgap_services_user_login (name, pass) {
-	/* if the login is successful, the json result will be something like this:
-	 * {
-	 *   "sessid":"random-session-id-here",
-	 *   "session_name":"random-session-name-here",
-	 *   "user":{
-	 *     "uid":"1",
-	 *     "name":"admin",
-	 *     "mail":"admin@example.com",
-	 *     "theme":"",
-	 *     "signature":"",
-	 *     "signature_format":null,
-	 *     "created":"1327346051",
-	 *     "access":"1327429006",
-	 *     "login":1327429219,
-	 *     "status":"1",
-	 *     "timezone":"America/New_York",
-	 *     "language":"",
-	 *     "picture":null,
-	 *     "init":"admin@example.com",
-	 *     "data":false,
-	 *     "roles":{
-	 *       "2":"authenticated user",
-	 *       "3":"administrator"
-	 *     },
-	 *     "rdf_mapping":{
-	 *       "rdftype":["sioc:UserAccount"],
-	 *       "name":{
-	 *         "predicates":["foaf:name"]
-	 *       },
-	 *       "homepage":{
-	 *         "predicates":["foaf:page"],
-	 *         "type":"rel"
-	 *       }
-	 *     }
-	 *   }
-	 * } 
-	 */ 
 	try {
 		if (!name || !pass) { return false; }
 		
-		// make the service call
+		// Make the service call.
 		drupalgap_services_user_login_result = drupalgap_services_resource_call({"resource_path":"user/login.json","data":'username=' + encodeURIComponent(name) + '&password=' + encodeURIComponent(pass)});
 		
 		if (drupalgap_services_user_login_result.errorThrown) { return false; }
 		else {
-			drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+			// Make another call to system connect to refresh global variables.
+			// TODO - this is a nested service resource call, ideally we should
+			// create a custom drupalgap user login resource that bundles up 
+			// the drupalgap system connect in the results as well.
+			drupalgap_services_resource_system_connect(); 
 			return true;
 		}
 	}
@@ -81,14 +48,6 @@ function drupalgap_services_user_login (name, pass) {
  *   TRUE if the logout was successful, false otherwise.
  */
 function drupalgap_services_user_logout () {
-	/* example json result if logout failed: 
-	{
-		"readyState":4,
-		"responseText":"null",
-		"status":406,
-		"statusText":"Not Acceptable: User is not logged in."
-	} */
-
 	try {
 		
 		// make the service call
@@ -96,7 +55,11 @@ function drupalgap_services_user_logout () {
 		
 		if (drupalgap_services_user_logout_result.errorThrown) { return false; }
 		else {
-			drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+			// Make another call to system connect to refresh global variables.
+			// TODO - this is a nested service resource call, ideally we should
+			// create a custom drupalgap user logout resource that bundles up 
+			// the drupalgap system connect in the results as well.
+			drupalgap_services_resource_system_connect();
 			return true;
 		}
 	
@@ -108,38 +71,6 @@ function drupalgap_services_user_logout () {
 	return false; // if it made it this fair, the user logout call failed
 }
 
-/*
- * example failed responses:
- * 
- * {
-    	"form_errors": {
-        	"current_pass": "Your current password is missing or incorrect; it's required to change the <em class=\"placeholder\">E-mail address</em>.",
-        	"mail": ""
-    	}
-	}
-	
-	
-	{
-    	"jqXHR": {
-        	"readyState": 4,
-        	"responseText": "{\"form_errors\":{\"current_pass\":\"Your current password is missing or incorrect; it's required to change the <em class=\\\"placeholder\\\">E-mail address</em>.\",\"mail\":\"\"}}",
-        	"status": 406,
-        	"statusText": "Not Acceptable: Your current password is missing or incorrect; it's required to change the <em class=\"placeholder\">E-mail address</em>."
-    	},
-    	"textStatus": "error",
-    	"errorThrown": "Not Acceptable: Your current password is missing or incorrect; it's required to change the <em class=\"placeholder\">E-mail address</em>."
-	}
-	
-	example success responses:
-	
-	{
-		"name":"chooch",
-		"uid":"11",
-		"roles":{
-			"2":"authenticated user"
-		}
-	}
- */
 function drupalgap_services_user_update (user) {
 	try {
 		
@@ -178,8 +109,13 @@ function drupalgap_services_user_update (user) {
 		drupalgap_services_user_update_result = drupalgap_services_resource_call({"resource_path":"user/" + user.uid + ".json","data":data,"type":"put"});
 		
 		// make another call to system connect to refresh global variables if there wasn't any problems
-		if (!drupalgap_services_user_update_result.errorThrown)
-			drupalgap_services_system_connect(); 
+		if (!drupalgap_services_user_update_result.errorThrown) {
+			// Make another call to system connect to refresh global variables.
+			// TODO - this is a nested service resource call, ideally we should
+			// create a custom drupalgap user update resource that bundles up 
+			// the drupalgap system connect in the results as well.
+			drupalgap_services_resource_system_connect();
+		}
 		
 		return drupalgap_services_user_update_result;
 	}
@@ -191,21 +127,6 @@ function drupalgap_services_user_update (user) {
 }
 
 function drupalgap_services_user_register (name,mail,pass) {
-	
-	// example success json
-	/* {
-	 *   "uid":"2",
-	 *   "uri":"http://localhost/drupal-7.10/?q=drupalgap/user/2"
-	 * }*/
-	
-	// example failure json
-	/* {
-	 *   "form_errors":{
-	 *     "name":"Username field is required.",
-	 *     "mail":"E-mail address field is required."
-	 *   }
-	 * }
-	 */
 	
 	try {
 		
@@ -226,7 +147,11 @@ function drupalgap_services_user_register (name,mail,pass) {
 		// make the service call
 		drupalgap_services_user_register_result = drupalgap_services_resource_call({"resource_path":"user/register.json","data":'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail) + '&pass=' + encodeURIComponent(pass)});
 		
-		drupalgap_services_system_connect(); // make another call to system connect to refresh global variables
+		// Make another call to system connect to refresh global variables.
+		// TODO - this is a nested service resource call, ideally we should
+		// create a custom drupalgap user register resource that bundles up 
+		// the drupalgap system connect in the results as well.
+		drupalgap_services_resource_system_connect();
 		
 		return drupalgap_services_user_register_result;
 	}
@@ -237,22 +162,37 @@ function drupalgap_services_user_register (name,mail,pass) {
 	return false; // if it made it this fair, the user register call failed
 }
 
-function drupalgap_services_user_access(permission) {
+function drupalgap_services_user_access(options) {
 	try {
 		// Clear the previous call.
-		drupalgap_services_user_access_result = null;
+		drupalgap_services_user_access_result = false;
 		
 		// Validate the input.
-		valid = true;
-		if (!permission) {
+		if (!options.permission) {
 			alert("drupalgap_services_user_access - no permission provided");
+			return false;
 		}
 		
-		// Make the service call.
-		if (valid) {
-			resource_path = "drupalgap_user/access.json";
-			data = 'permission=' + encodeURIComponent(permission);
-			drupalgap_services_user_access_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data});
+		// If we have the user's roles and permissions already stored from
+		// a call to drupalgap system connect, iterate over the collection
+		// to see if the user has access to the permission.
+		if (drupalgap_user_roles_and_permissions) {
+			$.each(drupalgap_user_roles_and_permissions,function(index,object){
+				if (object.permission == options.permission) {
+					drupalgap_services_user_access_result = true;
+					return;
+				}
+			});
+		}
+		else {
+			// We did not have the user's roles and permissions stored, make
+			// a call to the drupalgap user access resource to see if the user
+			// has the requested permission.
+			if (valid) {
+				resource_path = "drupalgap_user/access.json";
+				data = 'permission=' + encodeURIComponent(options.permission);
+				drupalgap_services_user_access_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data});
+			}
 		}
 	}
 	catch (error) {

@@ -151,10 +151,10 @@ function drupalgap_services_comment_render (comment) {
 	try {
 		
 		// Can the user administer comments?
-		administer_comments = drupalgap_services_user_access("administer comments");
+		administer_comments = drupalgap_services_user_access({"permission":"administer comments"});
 		
 		// Can the user edit their own comments?
-		edit_own_comments = drupalgap_services_user_access("edit own comments");
+		edit_own_comments = drupalgap_services_user_access({"permission":"edit own comments"});
 		
 		// Determine if edit link should be shown.
 		show_edit_link = false;

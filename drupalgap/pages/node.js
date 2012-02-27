@@ -4,7 +4,7 @@ $('#drupalgap_page_node').live('pageshow',function(){
 	try {
 		
 		// load node
-		drupalgap_page_node = drupalgap_services_node_retrieve(drupalgap_page_node_nid);
+		drupalgap_page_node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_nid});
 		if (!drupalgap_page_node) {
 			alert("drupalgap_page_node - failed to load node (" + drupalgap_page_node_nid + ")");
 			return false;
@@ -37,7 +37,7 @@ $('#drupalgap_page_node').live('pageshow',function(){
 		
 		// Set edit button visibility
 		// If user is not user 1 and user is not node author, hide the edit button, otherwise show it.
-		// @todo - this needs to be more dynamic and check permissions
+		// TODO - this needs to be more dynamic and check permissions
 		if (drupalgap_user.uid == "0" || (drupalgap_user.uid != "1" && drupalgap_user.uid != drupalgap_page_node.uid)) {	
 			$('#drupalgap_page_node_button_edit').hide();
 		}
@@ -84,11 +84,11 @@ $('#drupalgap_page_node').live('pageshow',function(){
 		
 		// As a last resort, check the user's access permissions for comments.
 		// Check to make sure the user has permission view comments.
-		if (!drupalgap_services_user_access("access comments")) {
+		if (!drupalgap_services_user_access({"permission":"access comments"})) {
 			$('#drupalgap_page_node_button_comments').hide();
 		}
 		// Check to make sure the user has permission to post comments.
-		if (!drupalgap_services_user_access("post comments")) {
+		if (!drupalgap_services_user_access({"permission":"post comments"})) {
 			$('#drupalgap_page_node_button_comment_edit').hide();
 		}
 		

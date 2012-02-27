@@ -43,16 +43,25 @@ $('#drupalgap_page_setup_connect').live('click',function(){
 	  	result = drupalgap_services_system_connect();
 	  	
 	  	if (result.errorThrown || result.textStatus == "error") { // something went wrong...
-	  		// clear the site path and re-save the settings to start over
+	  		// Clear the site path and re-save the settings to start over.
 	  		settings.site_path = "";
 		  	drupalgap_settings_save(settings);
-		  	if (result.errorThrown)
+		  	if (result.errorThrown) {
 		  		alert(result.errorThrown);
-		  	else
+		  	}
+		  	else {
 		  		alert("Error connecting. Please check that the URL is typed correctly, with no trailing slashes.");
+		  	}
 	  	}
-	  	else { // session id came back, everything is ok...
+	  	else { 
+	  		
+	  		// Session id came back, everything is ok...
 	  		alert("Setup Complete!");
+	  		
+	  		// Make a call to the DrupalGap bundled system connect resource.
+			drupalgap_services_resource_system_connect();
+			
+			// Go to the dashboard.
 	  		$.mobile.changePage("dashboard.html", "slideup");
 	  	}
 	}

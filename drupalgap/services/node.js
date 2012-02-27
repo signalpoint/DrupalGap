@@ -23,9 +23,45 @@ function drupalgap_services_node_create (node) {
 	return drupalgap_services_node_create_result;
 }
 
-function drupalgap_services_node_retrieve (nid) {
+/** 
+ * Retrieves a drupal node.
+ * 
+ * options.nid
+ * 		the node id you want to load
+ * options.from_local_storage
+ * 		load node from local storage
+ * 		"0" = force reload from node retrieve resource
+ * 		"1" = grab from local storage if possible (default)
+ */
+function drupalgap_services_node_retrieve (options) {
 	try {
-		drupalgap_services_node_retrieve_result = drupalgap_services_resource_call({"resource_path":"node/" + encodeURIComponent(nid) + ".json","type":"get"});
+		
+		// If no from_cache option is set, set default.
+		if (!options.from_local_storage) {
+			options.from_local_storage = "1";
+		}
+		
+		// Try to load the node from local storage if loading from cache.
+		node = null;
+		if (options.from_local_storage == "1") {
+			node = window.localStorage.getItem("node." + options.nid);
+		}
+		
+		// If we don't have the node in local storage, make a node retrieve
+		// resource call, then save it in local storage. Otherwise, return
+		// the local storage version of the node.
+		if (!node) {
+			resource_path = "node/" + encodeURIComponent(options.nid) + ".json";
+			node = drupalgap_services_resource_call({"resource_path":resource_path,"type":"get"});
+			window.localStorage.setItem("node." + options.nid, JSON.stringify(node));
+			console.log("saving node to local storage (" + options.nid +")");
+		}
+		else {
+			console.log("loaded node from local storage (" + options.nid +")");
+			node = JSON.parse(node);
+		}
+		
+		drupalgap_services_node_retrieve_result = node;
 	}
 	catch (error) {
 		console.log("drupalgap_services_node_retrieve");
@@ -52,21 +88,16 @@ function drupalgap_services_node_update (node) {
 	return drupalgap_services_node_update_result;
 }
 
-/* returns true if delete was successful, otherwise returns standard services failed object, for example:
- * {
-    	"jqXHR": {
-        	"readyState": 4,
-        	"responseText": "null",
-        	"status": 401,
-        	"statusText": "Unauthorized: Access denied for user anonymous"
-    	},
-    	"textStatus": "error",
-    	"errorThrown": "Unauthorized: Access denied for user anonymous"
-	}
- */
+// Returns true if delete was successful, otherwise returns standard services
+// failed object.
 function drupalgap_services_node_delete (nid) {
 	try {
-		drupalgap_services_node_delete_result = drupalgap_services_resource_call({"resource_path":"node/" + encodeURIComponent(nid) + ".json","type":"delete"});
+		resource_path = "node/" + encodeURIComponent(nid) + ".json";
+		result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"delete"});
+		if (result) {
+			window.localStorage.removeItem("node." + nid);
+		}
+		drupalgap_services_node_delete_result = result;
 	}
 	catch (error) {
 		console.log("drupalgap_services_node_delete");

@@ -1,13 +1,15 @@
 $('#drupalgap_page_content').live('pageshow',function(){
 	try {
 		
-		// retrieve content
-		content = drupalgap_views_datasource_retrieve({"path":"views_datasource/drupalgap_content"});
+		// Retrieve content.
+		path = "views_datasource/drupalgap_content";
+		content = drupalgap_views_datasource_retrieve({"path":path});
 		
-		// clear the list
+		// Clear the list.
 		$("#drupalgap_page_content_list").html("");
 		
-		// if there is any content, add each to the list, otherwise show an empty message
+		// If there is any content, add each to the list, otherwise show an
+		// empty message.
 		if ($(content.nodes).length > 0) {
 			$.each(content.nodes,function(index,obj){
 				$("#drupalgap_page_content_list").append($("<li></li>",{"html":"<a href='node.html' id='" + obj.node.nid + "'>" + obj.node.title + "</a>"}));
@@ -17,11 +19,12 @@ $('#drupalgap_page_content').live('pageshow',function(){
 			$("#drupalgap_page_content_list").append($("<li></li>",{"html":"Sorry, there is no published content."}));
 		}
 		
-		// If the user doesn't have at least one create permission for each content type, hide the add button.
+		// If the user doesn't have at least one create permission for each
+		// content type, hide the add button.
 		var can_create = false;
 		permissions = drupalgap_services_content_types_user_permissions();
 		$.each(permissions,function(index,value){
-			if (value.create) { 
+			if (value.create) {
 				can_create = true; 
 				return;
 			}
