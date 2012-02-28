@@ -72,7 +72,7 @@ http://www.drupalgap.org
 1. Download PhoneGap
 
 2. Complete the PhoneGap Getting Started Guide for Android to create your new
-	Android Application in PhoneGap
+Android Application in PhoneGap
 
 3. Download JQuery 1.6.4 & JQuery Mobile 1.0 to PhoneGap's assets/www directory
 	a. http://code.jquery.com/jquery-1.6.4.min.js
@@ -80,7 +80,10 @@ http://www.drupalgap.org
 	c. http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css
 
 4. Download DrupalGap and extract to PhoneGap's assets/www directory so
-	DrupalGap's JavaScript file is located at assets/www/drupalgap/drupalgap.js
+DrupalGap's JavaScript file is located at assets/www/drupalgap/drupalgap.js
+Download Link: https://github.com/signalpoint/DrupalGap/tags
+The recommended version is 1.01, do not download the master branch unless you
+want to get dirty in code sauce.
 
 5. Run your new Android Application!
 
