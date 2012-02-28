@@ -6,6 +6,12 @@ var drupalgap_services_user_register_result;
 var drupalgap_services_user_access_result;
 var drupalgap_services_user_roles_and_permissions_result;
 
+// TODO - the user login resource should be extended (just like system connect)
+// and bundle up the logged in user's settings/roles/permissions during the service
+// call. This will need a new drupalgap_user login resource in the module.
+// That way, when we login a user, it doesn't need to perform the
+// subsequent system connect resource call that is currently in place.
+
 /**
  * Makes a synchronous call to Drupal's User Login Service Resource. 
  *
@@ -22,7 +28,9 @@ function drupalgap_services_user_login (name, pass) {
 		if (!name || !pass) { return false; }
 		
 		// Make the service call.
-		drupalgap_services_user_login_result = drupalgap_services_resource_call({"resource_path":"user/login.json","data":'username=' + encodeURIComponent(name) + '&password=' + encodeURIComponent(pass)});
+		resource_path = "user/login.json";
+		data = 'username=' + encodeURIComponent(name) + '&password=' + encodeURIComponent(pass);
+		drupalgap_services_user_login_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data});
 		
 		if (drupalgap_services_user_login_result.errorThrown) { return false; }
 		else {

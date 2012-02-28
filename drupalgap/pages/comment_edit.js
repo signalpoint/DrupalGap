@@ -48,7 +48,7 @@ $('#drupalgap_page_comment_edit').live('pageshow',function(){
 			// Existing comment.
 			
 			// Load the comment.
-			comment = drupalgap_services_comment_retrieve(drupalgap_page_comment_edit_cid);
+			comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid});
 			
 			if (!comment) {
 				alert("drupalgap_page_comment_edit - Failed to load comment! (" + drupalgap_page_comment_edit_cid + ")");
@@ -114,7 +114,7 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 			// Existing comment.
 	  		
 	  		// retrieve the comment, update the values
-		  	comment = drupalgap_services_comment_retrieve(drupalgap_page_comment_edit_cid);
+		  	comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid,"from_local_storage":"0"});
 		  	if (!comment) {
 				alert("drupalgap_page_comment_edit_submit - failed to load comment (" + drupalgap_page_comment_edit_cid + ")");
 			}
@@ -171,7 +171,7 @@ $('#drupalgap_page_comment_edit_cancel').live('click',function(){
 
 $('#drupalgap_page_comment_edit_delete').live('click',function(){
 	try {
-		comment = drupalgap_services_comment_retrieve(drupalgap_page_comment_edit_cid);
+		comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid});
 	  	if (!comment) {
 			alert("drupalgap_page_comment_edit_delete - failed to comment (" + drupalgap_page_comment_edit_cid + ")");
 			return false;

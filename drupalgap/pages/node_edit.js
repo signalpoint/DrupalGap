@@ -81,11 +81,7 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 			  		alert(result.errorThrown);
 			  	}
 			  	else {
-			  		// Node was updated properly, clear local storage reference
-			  		// and node editing variables.
-			  		// TODO - this local storage removal call might make more
-			  		// sense in the node.js services file...
-			  		window.localStorage.removeItem("node." + node.nid);
+			  		// Node was updated properly, clear node editing variables.
 				  	drupalgap_page_node_edit_nid = null; // clear value before redirecting
 				  	drupalgap_page_node_edit_type = null; // clear value before redirecting
 				  	$.mobile.changePage("node.html");

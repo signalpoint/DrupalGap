@@ -6,6 +6,8 @@ var drupalgap_services_node_delete_result;
 
 function drupalgap_services_node_create (node) {
 	try {
+		
+		// Build the body parameter.
 		var body;
 		if (drupalgap_site_settings.variable.drupal_core == "6") {
 			body = "node[body]=" + encodeURIComponent(node.body);
@@ -13,8 +15,17 @@ function drupalgap_services_node_create (node) {
 		else if (drupalgap_site_settings.variable.drupal_core == "7") {
 			body = "node[language]=und&node[body][und][0][value]=" + encodeURIComponent(node.body);
 		}
+		
+		// Make the service call to the node create resource.
 		data = "node[type]=" + encodeURIComponent(node.type) + "&node[title]=" + encodeURIComponent(node.title) + "&" + body;
-		drupalgap_services_node_create_result = drupalgap_services_resource_call({"resource_path":"node.json","data":data});
+		result = drupalgap_services_resource_call({"resource_path":"node.json","data":data});
+		
+		// If the node creation didn't have a problem, remove the default
+		// views json content from local storage.
+		if (!result.errorThrown) {
+			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_content");
+		}
+		drupalgap_services_node_create_result = result;
 	}
 	catch (error) {
 		console.log("drupalgap_services_node_create");
@@ -24,7 +35,7 @@ function drupalgap_services_node_create (node) {
 }
 
 /** 
- * Retrieves a drupal node.
+ * Retrieves a Drupal node.
  * 
  * options.nid
  * 		the node id you want to load
@@ -36,29 +47,39 @@ function drupalgap_services_node_create (node) {
 function drupalgap_services_node_retrieve (options) {
 	try {
 		
-		// If no from_cache option is set, set default.
-		if (!options.from_local_storage) {
-			options.from_local_storage = "1";
+		// Validate incoming parameters.
+		valid = true;
+		if (!options.nid) {
+			alert("drupalgap_services_node_retrieve - no node id provided");
+			valid = false;
 		}
 		
-		// Try to load the node from local storage if loading from cache.
 		node = null;
-		if (options.from_local_storage == "1") {
-			node = window.localStorage.getItem("node." + options.nid);
-		}
 		
-		// If we don't have the node in local storage, make a node retrieve
-		// resource call, then save it in local storage. Otherwise, return
-		// the local storage version of the node.
-		if (!node) {
-			resource_path = "node/" + encodeURIComponent(options.nid) + ".json";
-			node = drupalgap_services_resource_call({"resource_path":resource_path,"type":"get"});
-			window.localStorage.setItem("node." + options.nid, JSON.stringify(node));
-			console.log("saving node to local storage (" + options.nid +")");
-		}
-		else {
-			console.log("loaded node from local storage (" + options.nid +")");
-			node = JSON.parse(node);
+		if (valid) {
+			
+			// If no from_local_storage option is set, set default.
+			if (!options.from_local_storage) {
+				options.from_local_storage = "1";
+			}
+			
+			// Try to load the node from local storage if loading from cache.
+			if (options.from_local_storage == "1") {
+				node = window.localStorage.getItem("node." + options.nid);
+			}
+			
+			// If we don't have the node in local storage, make a node retrieve
+			// resource call, then save it in local storage. Otherwise, return
+			// the local storage version of the node.
+			if (!node) {
+				resource_path = "node/" + encodeURIComponent(options.nid) + ".json";
+				node = drupalgap_services_resource_call({"resource_path":resource_path,"type":"get"});
+				window.localStorage.setItem("node." + options.nid, JSON.stringify(node));
+			}
+			else {
+				node = JSON.parse(node);
+			}
+			
 		}
 		
 		drupalgap_services_node_retrieve_result = node;
@@ -72,6 +93,8 @@ function drupalgap_services_node_retrieve (options) {
 
 function drupalgap_services_node_update (node) {
 	try {
+		
+		// Build body argument according to Drupal version.
 		var body;
 		if (drupalgap_site_settings.variable.drupal_core == "6") {
 			body = "node[body]=" + encodeURIComponent(node.body);
@@ -79,7 +102,19 @@ function drupalgap_services_node_update (node) {
 		else if (drupalgap_site_settings.variable.drupal_core == "7") {
 			body = "node[language]=und&node[body][und][0][value]=" + encodeURIComponent(node.body);
 		}
-		drupalgap_services_node_update_result = drupalgap_services_resource_call({"resource_path":"node/" + encodeURIComponent(node.nid) + ".json","type":"put","data":"node[type]=" + node.type + "&node[title]=" + encodeURIComponent(node.title)+ "&" + body});
+		
+		// Make the service call to node update resource.
+		resource_path = "node/" + encodeURIComponent(node.nid) + ".json";
+		data = "node[type]=" + node.type + "&node[title]=" + encodeURIComponent(node.title)+ "&" + body;
+		drupalgap_services_node_update_result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"put","data":data});
+		
+		// If update didn't have any problems, clear the local storage node and
+		// the default views json content.
+		if (!drupalgap_services_node_update_result.errorThrown) {
+			window.localStorage.removeItem("node." + node.nid);
+			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_content");
+	  	}
+		
 	}
 	catch (error) {
 		console.log("drupalgap_services_node_update");
@@ -92,11 +127,17 @@ function drupalgap_services_node_update (node) {
 // failed object.
 function drupalgap_services_node_delete (nid) {
 	try {
+		// Make the service call to the node delete service.
 		resource_path = "node/" + encodeURIComponent(nid) + ".json";
 		result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"delete"});
+		
+		// If the deletion was successful, remove the node from local storage
+		// and the default views json content.
 		if (result) {
 			window.localStorage.removeItem("node." + nid);
+			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_content");
 		}
+		
 		drupalgap_services_node_delete_result = result;
 	}
 	catch (error) {
