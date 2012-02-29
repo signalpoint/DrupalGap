@@ -20,7 +20,7 @@ $('#drupalgap_page_node_edit').live('pageshow',function(){
 			$('#drupalgap_page_node_edit_delete').hide();
 		}
 		else { // existing node...
-			node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_edit_nid,"from_local_storage":"0"});
+			node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_edit_nid,"load_from_local_storage":"0"});
 			content_type = drupalgap_services_content_type_load(node.type);
 			$('#drupalgap_page_node_edit h1').html("Edit " + content_type.name);
 			if (!node) {
@@ -68,7 +68,7 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 	  	}
 	  	else { // existing nodes...
 		  	// retrieve the node, update the values
-		  	node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_edit_nid,"from_local_storage":"0"});
+		  	node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_edit_nid,"load_from_local_storage":"0"});
 		  	if (!node) {
 				alert("drupalgap_page_node_edit_submit - failed to load node (" + drupalgap_page_node_edit_nid + ")");
 			}

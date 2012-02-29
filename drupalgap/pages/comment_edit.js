@@ -114,7 +114,7 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 			// Existing comment.
 	  		
 	  		// retrieve the comment, update the values
-		  	comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid,"from_local_storage":"0"});
+		  	comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid,"load_from_local_storage":"0"});
 		  	if (!comment) {
 				alert("drupalgap_page_comment_edit_submit - failed to load comment (" + drupalgap_page_comment_edit_cid + ")");
 			}

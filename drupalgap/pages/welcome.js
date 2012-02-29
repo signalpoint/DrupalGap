@@ -16,7 +16,8 @@ $('#drupalgap_page_welcome_button_demo').live('click',function(){
 	  	drupalgap_settings_save(settings);
 	  	
 	  	// perform system connect to see if drupalgap is setup properly on drupal site
-	  	result = drupalgap_services_system_connect();
+	  	//result = drupalgap_services_system_connect();
+	  	result = drupalgap_services_system_connect.resource_call();
 	  	
 	  	if (result.errorThrown) { // something went wrong...
 	  		// clear the site path and re-save the settings to start over

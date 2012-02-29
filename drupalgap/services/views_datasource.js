@@ -5,7 +5,7 @@ var drupalgap_views_datasource_retrieve_result;
  * 
  * options.path
  * 		the path to the views json display
- * options.from_local_storage
+ * options.load_from_local_storage
  * 		load node from local storage
  * 		"0" = force reload from views datasource
  * 		"1" = grab from local storage if possible (default)
@@ -13,13 +13,13 @@ var drupalgap_views_datasource_retrieve_result;
 function drupalgap_views_datasource_retrieve (options) {
 	try {
 		
-		// If no from_local_storage option is set, set default.
-		if (!options.from_local_storage) {
-			options.from_local_storage = "1";
+		// If no load_from_local_storage option is set, set default.
+		if (!options.load_from_local_storage) {
+			options.load_from_local_storage = "1";
 		}
 		
 		// Try to load the views json from local storage, if necessary.
-		if (options.from_local_storage == "1") {
+		if (options.load_from_local_storage == "1") {
 			views_json = window.localStorage.getItem("views_datasource." + options.path);
 		}
 		

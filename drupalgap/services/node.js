@@ -39,7 +39,7 @@ function drupalgap_services_node_create (node) {
  * 
  * options.nid
  * 		the node id you want to load
- * options.from_local_storage
+ * options.load_from_local_storage
  * 		load node from local storage
  * 		"0" = force reload from node retrieve resource
  * 		"1" = grab from local storage if possible (default)
@@ -58,13 +58,13 @@ function drupalgap_services_node_retrieve (options) {
 		
 		if (valid) {
 			
-			// If no from_local_storage option is set, set default.
-			if (!options.from_local_storage) {
-				options.from_local_storage = "1";
+			// If no load_from_local_storage option is set, set default.
+			if (!options.load_from_local_storage) {
+				options.load_from_local_storage = "1";
 			}
 			
 			// Try to load the node from local storage if loading from cache.
-			if (options.from_local_storage == "1") {
+			if (options.load_from_local_storage == "1") {
 				node = window.localStorage.getItem("node." + options.nid);
 			}
 			
