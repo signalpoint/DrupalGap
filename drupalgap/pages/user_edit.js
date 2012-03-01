@@ -1,5 +1,8 @@
 $('#drupalgap_page_user_edit').live('pageshow',function(){
 	try {
+		// TODO - Once the user retrieve service resource is implemented,
+		// we will probably want to use it here instead of relying on
+		// drupalgap_user which is populated by system connect.
 		$('#drupalgap_user_edit_name').val(drupalgap_user.name);
 		$('#drupalgap_user_edit_mail').val(drupalgap_user.mail);
     }

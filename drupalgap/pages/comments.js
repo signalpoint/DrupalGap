@@ -7,7 +7,7 @@ $('#drupalgap_page_comments').live('pageshow',function(){
 		
 		// Load node.
 		nid = drupalgap_page_comments_nid;
-		drupalgap_page_comments_node = drupalgap_services_node_retrieve({"nid":nid});
+		drupalgap_page_comments_node = drupalgap_services_node_retrieve.resource_call({"nid":nid});
 		if (!drupalgap_page_comments_node) {
 			alert("drupalgap_page_comments - failed to load node (" + nid + ")");
 			return false;

@@ -1,6 +1,5 @@
 // global variables used to hold the latest system resource call results
 var drupalgap_services_node_create_result;
-var drupalgap_services_node_retrieve_result;
 var drupalgap_services_node_update_result;
 var drupalgap_services_node_delete_result;
 
@@ -18,13 +17,8 @@ function drupalgap_services_node_create (node) {
 		
 		// Make the service call to the node create resource.
 		data = "node[type]=" + encodeURIComponent(node.type) + "&node[title]=" + encodeURIComponent(node.title) + "&" + body;
-		result = drupalgap_services_resource_call({"resource_path":"node.json","data":data});
-		
-		// If the node creation didn't have a problem, remove the default
-		// views json content from local storage.
-		if (!result.errorThrown) {
-			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_content");
-		}
+		options = {"resource_path":"node.json","data":data, "save_to_local_storage":"0"};
+		result = drupalgap_services_resource_call(options);
 		drupalgap_services_node_create_result = result;
 	}
 	catch (error) {
@@ -34,62 +28,80 @@ function drupalgap_services_node_create (node) {
 	return drupalgap_services_node_create_result;
 }
 
-/** 
- * Retrieves a Drupal node.
- * 
- * options.nid
- * 		the node id you want to load
- * options.load_from_local_storage
- * 		load node from local storage
- * 		"0" = force reload from node retrieve resource
- * 		"1" = grab from local storage if possible (default)
- */
-function drupalgap_services_node_retrieve (options) {
-	try {
+var drupalgap_services_node_retrieve = {
+	
+	"resource_path":function(options) {
+		// TODO - Need nid validation here.
+		return "node/" + encodeURIComponent(options.nid) + ".json";
+	},
+	"resource_type":"get",
+	"resource_result":"",
+	
+	/** 
+	 * Retrieves a Drupal node.
+	 * 
+	 * options.nid
+	 * 		the node id you want to load
+	 */
+	"resource_call":function(options) {
+		try {
 		
-		// Validate incoming parameters.
-		valid = true;
-		if (!options.nid) {
-			alert("drupalgap_services_node_retrieve - no node id provided");
-			valid = false;
+			this.resource_result = null;
+			node = null;
+			
+			// Validate incoming parameters.
+			// TODO - Do a better job validating.
+			valid = true;
+			if (!options.nid) {
+				alert("drupalgap_services_node_retrieve - no node id provided");
+				valid = false;
+			}
+			
+			if (valid) {
+				// Build the options for the service call.
+				resource_path = this.resource_path(options);
+				options.resource_path = resource_path;
+				options.type = "get";
+				
+				// If no load_from_local_storage option has been set yet, try to be
+				// smart about whether or not to load from local storage depending
+				// on which page the call came from.
+				// TODO - this should be moved into services.js for now... keep this area clean.
+				if (!options.load_from_local_storage) {
+					switch ($.mobile.activePage.attr('id')) {
+						case "drupalgap_page_node_edit":
+							options.load_from_local_storage = "0";
+							break;
+					}
+				}
+				
+				// Retrieve the node.
+				node = drupalgap_services_resource_call(options);
+			}
+			
+			this.resource_result = node;
 		}
-		
-		node = null;
-		
-		if (valid) {
-			
-			// If no load_from_local_storage option is set, set default.
-			if (!options.load_from_local_storage) {
-				options.load_from_local_storage = "1";
-			}
-			
-			// Try to load the node from local storage if loading from cache.
-			if (options.load_from_local_storage == "1") {
-				node = window.localStorage.getItem("node." + options.nid);
-			}
-			
-			// If we don't have the node in local storage, make a node retrieve
-			// resource call, then save it in local storage. Otherwise, return
-			// the local storage version of the node.
-			if (!node) {
-				resource_path = "node/" + encodeURIComponent(options.nid) + ".json";
-				node = drupalgap_services_resource_call({"resource_path":resource_path,"type":"get"});
-				window.localStorage.setItem("node." + options.nid, JSON.stringify(node));
-			}
-			else {
-				node = JSON.parse(node);
-			}
-			
+		catch (error) {
+			console.log("drupalgap_services_node_retrieve");
+			console.log(error);
 		}
-		
-		drupalgap_services_node_retrieve_result = node;
-	}
-	catch (error) {
-		console.log("drupalgap_services_node_retrieve");
-		console.log(error);
-	}
-	return drupalgap_services_node_retrieve_result;
-}
+		return this.resource_result;
+	},
+	
+	/**
+	 * Removes a node from local storage.
+	 * 
+	 * options.nid
+	 * 		The node id of the node to remove.
+	 */
+	"local_storage_remove":function(options) {
+		type = this.resource_type;
+		resource_path = this.resource_path(options);
+		key = drupalgap_services_default_local_storage_key(type,resource_path);
+		window.localStorage.removeItem(key);
+		console.log("Removed from local storage (" + key + ")");
+	},
+};
 
 function drupalgap_services_node_update (node) {
 	try {
@@ -106,7 +118,13 @@ function drupalgap_services_node_update (node) {
 		// Make the service call to node update resource.
 		resource_path = "node/" + encodeURIComponent(node.nid) + ".json";
 		data = "node[type]=" + node.type + "&node[title]=" + encodeURIComponent(node.title)+ "&" + body;
-		drupalgap_services_node_update_result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"put","data":data});
+		options = {
+			"resource_path":resource_path,
+			"type":"put",
+			"data":data,"save_to_local_storage":"0",
+			"nid":node.nid,
+		};
+		drupalgap_services_node_update_result = drupalgap_services_resource_call(options);
 		
 		// If update didn't have any problems, clear the local storage node and
 		// the default views json content.
@@ -129,7 +147,8 @@ function drupalgap_services_node_delete (nid) {
 	try {
 		// Make the service call to the node delete service.
 		resource_path = "node/" + encodeURIComponent(nid) + ".json";
-		result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"delete"});
+		options = {"resource_path":resource_path,"type":"delete", "save_to_local_storage":"0"};
+		result = drupalgap_services_resource_call(options);
 		
 		// If the deletion was successful, remove the node from local storage
 		// and the default views json content.

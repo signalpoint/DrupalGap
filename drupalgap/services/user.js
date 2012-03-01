@@ -12,6 +12,8 @@ var drupalgap_services_user_roles_and_permissions_result;
 // That way, when we login a user, it doesn't need to perform the
 // subsequent system connect resource call that is currently in place.
 
+// TODO - We need a user retrieve service resource implementation here.
+
 /**
  * Makes a synchronous call to Drupal's User Login Service Resource. 
  *
@@ -30,7 +32,8 @@ function drupalgap_services_user_login (name, pass) {
 		// Make the service call.
 		resource_path = "user/login.json";
 		data = 'username=' + encodeURIComponent(name) + '&password=' + encodeURIComponent(pass);
-		drupalgap_services_user_login_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data});
+		options = {"resource_path":resource_path,"data":data,"save_to_local_storage":"0"};
+		drupalgap_services_user_login_result = drupalgap_services_resource_call(options);
 		
 		if (drupalgap_services_user_login_result.errorThrown) { return false; }
 		else {
@@ -38,7 +41,8 @@ function drupalgap_services_user_login (name, pass) {
 			// TODO - this is a nested service resource call, ideally we should
 			// create a custom drupalgap user login resource that bundles up 
 			// the drupalgap system connect in the results as well.
-			drupalgap_services_resource_system_connect(); 
+			//drupalgap_services_resource_system_connect();
+			drupalgap_services_resource_system_connect.resource_call();
 			return true;
 		}
 	}
@@ -59,7 +63,8 @@ function drupalgap_services_user_logout () {
 	try {
 		
 		// make the service call
-		drupalgap_services_user_logout_result = drupalgap_services_resource_call({"resource_path":"user/logout.json"});
+		options = {"resource_path":"user/logout.json", "save_to_local_storage":"0"};
+		drupalgap_services_user_logout_result = drupalgap_services_resource_call(options);
 		
 		if (drupalgap_services_user_logout_result.errorThrown) { return false; }
 		else {
@@ -67,7 +72,8 @@ function drupalgap_services_user_logout () {
 			// TODO - this is a nested service resource call, ideally we should
 			// create a custom drupalgap user logout resource that bundles up 
 			// the drupalgap system connect in the results as well.
-			drupalgap_services_resource_system_connect();
+			//drupalgap_services_resource_system_connect();
+			drupalgap_services_resource_system_connect.resource_call();
 			return true;
 		}
 	
@@ -84,12 +90,13 @@ function drupalgap_services_user_update (user) {
 		
 		drupalgap_services_user_update_result = null; // clear previous call
 		
-		if (!user) { // @todo, do a better job validating incoming user...
+		if (!user) {
+			// TODO - do a better job validating incoming user...
 			console.log("drupalgap_services_user_update - user empty");
 			return false;
 		}
 		
-		// @todo - implement user name change (if they have permission) and password changing
+		// TODO - implement user name change (if they have permission) and password changing
 		
 		// make the service call depending on what they're doing to their account...
 		
@@ -114,7 +121,8 @@ function drupalgap_services_user_update (user) {
 		if (user.pass2)
 			data += "&account[pass2]=" + encodeURIComponent(user.pass2);*/
 		
-		drupalgap_services_user_update_result = drupalgap_services_resource_call({"resource_path":"user/" + user.uid + ".json","data":data,"type":"put"});
+		options = {"resource_path":"user/" + user.uid + ".json", "data":data, "type":"put", "save_to_local_storage":"0"};
+		drupalgap_services_user_update_result = drupalgap_services_resource_call(options);
 		
 		// make another call to system connect to refresh global variables if there wasn't any problems
 		if (!drupalgap_services_user_update_result.errorThrown) {
@@ -122,7 +130,8 @@ function drupalgap_services_user_update (user) {
 			// TODO - this is a nested service resource call, ideally we should
 			// create a custom drupalgap user update resource that bundles up 
 			// the drupalgap system connect in the results as well.
-			drupalgap_services_resource_system_connect();
+			//drupalgap_services_resource_system_connect();
+			drupalgap_services_resource_system_connect.resource_call();
 		}
 		
 		return drupalgap_services_user_update_result;
@@ -153,13 +162,16 @@ function drupalgap_services_user_register (name,mail,pass) {
 		}
 		
 		// make the service call
-		drupalgap_services_user_register_result = drupalgap_services_resource_call({"resource_path":"user/register.json","data":'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail) + '&pass=' + encodeURIComponent(pass)});
+		data = 'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail) + '&pass=' + encodeURIComponent(pass);
+		options = {"resource_path":"user/register.json", "data":data, "save_to_local_storage":"0"};
+		drupalgap_services_user_register_result = drupalgap_services_resource_call(options);
 		
 		// Make another call to system connect to refresh global variables.
 		// TODO - this is a nested service resource call, ideally we should
 		// create a custom drupalgap user register resource that bundles up 
 		// the drupalgap system connect in the results as well.
-		drupalgap_services_resource_system_connect();
+		//drupalgap_services_resource_system_connect();
+		drupalgap_services_resource_system_connect.resource_call();
 		
 		return drupalgap_services_user_register_result;
 	}

@@ -1,7 +1,9 @@
 $('#drupalgap_page_comments_all').live('pageshow',function(){
 	try {
 		// retrieve comments
-		comments_result = drupalgap_views_datasource_retrieve({"path":"views_datasource/drupalgap_comments"});
+		//comments_result = drupalgap_views_datasource_retrieve({"path":"views_datasource/drupalgap_comments"});
+		views_options = {"path":"views_datasource/drupalgap_comments"};
+		comments_result = drupalgap_views_datasource_retrieve.resource_call(views_options);
 		
 		// clear the list
 		$("#drupalgap_page_comments_all_list").html("");

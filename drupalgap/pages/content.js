@@ -2,8 +2,10 @@ $('#drupalgap_page_content').live('pageshow',function(){
 	try {
 		
 		// Retrieve content.
-		path = "views_datasource/drupalgap_content";
-		content = drupalgap_views_datasource_retrieve({"path":path});
+		//path = "views_datasource/drupalgap_content";
+		//content = drupalgap_views_datasource_retrieve({"path":path});
+		views_options = {"path":"views_datasource/drupalgap_content"};
+		content = drupalgap_views_datasource_retrieve.resource_call(views_options);
 		
 		// Clear the list.
 		$("#drupalgap_page_content_list").html("");
@@ -12,11 +14,13 @@ $('#drupalgap_page_content').live('pageshow',function(){
 		// empty message.
 		if ($(content.nodes).length > 0) {
 			$.each(content.nodes,function(index,obj){
-				$("#drupalgap_page_content_list").append($("<li></li>",{"html":"<a href='node.html' id='" + obj.node.nid + "'>" + obj.node.title + "</a>"}));
+				html = "<a href='node.html' id='" + obj.node.nid + "'>" + obj.node.title + "</a>";
+				$("#drupalgap_page_content_list").append($("<li></li>",{"html":html}));
 			});
 		}
 		else {
-			$("#drupalgap_page_content_list").append($("<li></li>",{"html":"Sorry, there is no published content."}));
+			html = "Sorry, there is no published content.";
+			$("#drupalgap_page_content_list").append($("<li></li>",{"html":html}));
 		}
 		
 		// If the user doesn't have at least one create permission for each

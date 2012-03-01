@@ -7,7 +7,8 @@ var drupalgap_content_types_user_permissions;
 
 $(document).ready(function() {
 	
-	//window.localStorage.clear(); // clear all local storage, used for testing
+	// Clear all local storage, used for testing.
+	//window.localStorage.clear();
 	
 	drupalgap_settings_load();
 	
@@ -21,7 +22,10 @@ $(document).ready(function() {
 		
 		// Make a call to the DrupalGap bundled system connect resource.
 		// TODO - do something if the system connect fails.
-		drupalgap_services_resource_system_connect();
+		// TODO - if app is online, we should probably force a reload on this,
+		// otherwise fall back to the local storage session.
+		//drupalgap_services_resource_system_connect();
+		drupalgap_services_resource_system_connect.resource_call();
 		
 		// Go to the dashboard.
 		$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");

@@ -4,7 +4,7 @@ $('#drupalgap_page_node').live('pageshow',function(){
 	try {
 		
 		// load node
-		drupalgap_page_node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_nid});
+		drupalgap_page_node = drupalgap_services_node_retrieve.resource_call({"nid":drupalgap_page_node_nid});
 		if (!drupalgap_page_node) {
 			alert("drupalgap_page_node - failed to load node (" + drupalgap_page_node_nid + ")");
 			return false;

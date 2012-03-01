@@ -181,6 +181,7 @@ function drupalgap_services_comment_node_comments(nid) {
 	try {
 		// Clear last result.
 		drupalgap_services_comment_node_comments_result = null;
+		result = null;
 		
 		// Validate incoming parameters.
 		valid = true;
@@ -191,10 +192,12 @@ function drupalgap_services_comment_node_comments(nid) {
 		
 		// If everything is valid, make the service resource call.
 		if (valid) {
-			// retrieve comments
-			path = "views_datasource/drupalgap_comments/" + nid;
-			drupalgap_services_comment_node_comments_result = drupalgap_views_datasource_retrieve({"path":path});
-			drupalgap_services_comment_node_comments_result = drupalgap_services_comment_node_comments_result.comments;
+			// Retrieve comments.
+			//path = "views_datasource/drupalgap_comments/" + nid;
+			//result = drupalgap_views_datasource_retrieve({"path":path});
+			views_options = {"path":"views_datasource/drupalgap_comments/" + nid};
+			result = drupalgap_views_datasource_retrieve.resource_call(views_options);
+			drupalgap_services_comment_node_comments_result = result.comments;
 		}
 	}
 	catch (error) {

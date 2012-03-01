@@ -1,41 +1,51 @@
-var drupalgap_views_datasource_retrieve_result;
+//var drupalgap_views_datasource_retrieve_result;
 
-/** 
- * Retrieves a Drupal Views JSON result.
- * 
- * options.path
- * 		the path to the views json display
- * options.load_from_local_storage
- * 		load node from local storage
- * 		"0" = force reload from views datasource
- * 		"1" = grab from local storage if possible (default)
- */
-function drupalgap_views_datasource_retrieve (options) {
+var drupalgap_views_datasource_retrieve = {
+		
+	"resource_path":"",
+	"resource_type":"get",
+	"resource_result":"",
+	
+	/** 
+	 * Retrieves a Drupal Views JSON result.
+	 * 
+	 * views_options.path
+	 * 		The path to the views json display.
+	 */
+	"resource_call":function(views_options){
+		try {
+			// TODO - Validate views json display path.
+			this.resource_result = null;
+			this.resource_path = views_options.path;
+			options = {"resource_path":this.resource_path, "type":this.resource_type};
+			this.resource_result = drupalgap_services_resource_call(options);
+			return this.resource_result; 
+		}
+		catch (error) {
+			console.log("drupalgap_views_datasource_retrieve");
+			console.log(error);
+		}
+	},
+	/**
+	 * Removes a views datasource JSON from local storage.
+	 * 
+	 * views_options.path
+	 * 		The path to the views json display.
+	 */
+	"local_storage_remove":function(views_options){
+		type = this.resource_type;
+		resource_path = views_options.path;
+		key = drupalgap_services_default_local_storage_key(type,resource_path);
+		window.localStorage.removeItem(key);
+		console.log("Removed from local storage (" + key + ")");
+	},
+};
+
+
+/*function drupalgap_views_datasource_retrieve (options) {
 	try {
-		
-		// If no load_from_local_storage option is set, set default.
-		if (!options.load_from_local_storage) {
-			options.load_from_local_storage = "1";
-		}
-		
-		// Try to load the views json from local storage, if necessary.
-		if (options.load_from_local_storage == "1") {
-			views_json = window.localStorage.getItem("views_datasource." + options.path);
-		}
-		
-		// If we don't have the views json in local storage, make a views json
-		// call, then save it in local storage. Otherwise, return
-		// the local storage version of the views json.
-		if (!views_json) {
-			views_json = drupalgap_services_resource_call({"resource_path":options.path,"type":"get"});
-			window.localStorage.setItem("views_datasource." + options.path, JSON.stringify(views_json));
-			console.log("saving views json to local storage (" + options.path +")");
-		}
-		else {
-			console.log("loaded views json from local storage (" + options.path +")");
-			views_json = JSON.parse(views_json);
-		}
-		
+		drupalgap_views_datasource_retrieve_result = null;
+		views_json = drupalgap_services_resource_call({"resource_path":options.path,"type":"get"});
 		drupalgap_views_datasource_retrieve_result = views_json;
 	}
 	catch (error) {
@@ -44,3 +54,4 @@ function drupalgap_views_datasource_retrieve (options) {
 	}
 	return drupalgap_views_datasource_retrieve_result;
 }
+*/

@@ -20,14 +20,23 @@ $('#drupalgap_page_node_edit').live('pageshow',function(){
 			$('#drupalgap_page_node_edit_delete').hide();
 		}
 		else { // existing node...
-			node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_edit_nid,"load_from_local_storage":"0"});
-			content_type = drupalgap_services_content_type_load(node.type);
-			$('#drupalgap_page_node_edit h1').html("Edit " + content_type.name);
+			
+			// Retrieve the node.
+			node = drupalgap_services_node_retrieve.resource_call({"nid":drupalgap_page_node_edit_nid});
 			if (!node) {
 				alert("drupalgap_page_node_edit - failed to load node (" + drupalgap_page_node_edit_nid + ")");
 				return false;
 			}
+			
+			// Grab the node's content type.
+			content_type = drupalgap_services_content_type_load(node.type);
+			
+			// Fill in page place holders.
+			$('#drupalgap_page_node_edit h1').html("Edit " + content_type.name);
 			$('#drupalgap_page_node_edit_title').val(node.title);
+			// TODO - the body should really be filled in by the node retrieve
+			// resource, that way the body can be accessed through node.body here
+			// regardless of which Drupal (6 or 7) version is on the back end.
 			var body;
 			if (drupalgap_site_settings.variable.drupal_core == "6") {
 				body = node.body;
@@ -67,8 +76,8 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 		  	}
 	  	}
 	  	else { // existing nodes...
-		  	// retrieve the node, update the values
-		  	node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_edit_nid,"load_from_local_storage":"0"});
+		  	// Retrieve the node, update the values.
+		  	node = drupalgap_services_node_retrieve.resource_call({"nid":drupalgap_page_node_edit_nid});
 		  	if (!node) {
 				alert("drupalgap_page_node_edit_submit - failed to load node (" + drupalgap_page_node_edit_nid + ")");
 			}
@@ -115,7 +124,7 @@ $('#drupalgap_page_node_edit_cancel').live('click',function(){
 
 $('#drupalgap_page_node_edit_delete').live('click',function(){
 	try {
-		node = drupalgap_services_node_retrieve({"nid":drupalgap_page_node_edit_nid});
+		node = drupalgap_services_node_retrieve.resource_call({"nid":drupalgap_page_node_edit_nid});
 	  	if (!node) {
 			alert("drupalgap_page_node_edit_delete - failed to load node (" + drupalgap_page_node_edit_nid + ")");
 			return false;

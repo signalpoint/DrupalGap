@@ -71,21 +71,19 @@ function drupalgap_services_resource_call (options) {
 		
 		// Set default local storage key if one wasn't provided.
 		if (!options.local_storage_key) {
-			options.local_storage_key = drupalgap_services_default_local_storage_key(options.type,service_resource_call_url);
+			options.local_storage_key = drupalgap_services_default_local_storage_key(options.type,options.resource_path);
 		}
 		
 		// If no load_from_local_storage option was set, set the default
 		// for best performance based on the service resource call.
 		if (!options.load_from_local_storage) {
 			options.load_from_local_storage = "1";
-			// Services -> System -> Connect
-			/*if (options.resource_path.indexOf("system/connect") != -1) {
-				// We'll assume all calls to system connect should not go
-				// into local storage.
-				alert("system connect, no local storage");
-				options.load_from_local_storage = "0";
-			}*/
 		}
+		
+		if (!options.save_to_local_storage) {
+			options.save_to_local_storage = "1";
+		}
+		
 		// If we are attempting to load the service resource result call from
 		// localstorage, do it now.
 		if (options.load_from_local_storage == "1") {
@@ -99,7 +97,7 @@ function drupalgap_services_resource_call (options) {
 			result = JSON.parse(result);
 		}
 		else {
-			// The result wasn't in local storage, make the service call.
+			// Make the service call.
 		    $.ajax({
 			      url: service_resource_call_url,
 			      type: options.type,
@@ -125,9 +123,21 @@ function drupalgap_services_resource_call (options) {
 		    // If there wasn't an error from the service call...
 		    if (!result.errorThrown) {
 		    	
-		    	// Save the result to local storage.
-			    window.localStorage.setItem(options.local_storage_key, JSON.stringify(result));
-				console.log("saving service resource to local storage (" + options.local_storage_key +")");
+		    	// Save the result to local storage, if necessary.
+		    	if (options.save_to_local_storage == "1") {
+		    		// TODO - The decision to save something into local storage
+		    		// here needs to be more intelligent. i.e. In offline mode
+		    		// we would want to store in local storage. Basically, we know
+		    		// 'put', 'delete' and some 'post' calls don't need local storage
+		    		// unless in offline mode. Right now the C.U.D. implementations
+		    		// decide this setting which is ok, but we could bring that decision into
+		    		// here so the C.U.D. implementations are cleaner.
+		    		window.localStorage.setItem(options.local_storage_key, JSON.stringify(result));
+		    		console.log("saving service resource to local storage (" + options.local_storage_key +")");
+		    	}
+		    	else {
+		    		console.log("NOT saving service resource to local storage (" + options.local_storage_key +")");
+		    	}
 				
 				// If this service resource call has local storage items dependent on
 				// result, then remove those items from local storage.
@@ -136,15 +146,46 @@ function drupalgap_services_resource_call (options) {
 				 * 		node: create/update/delete
 				 * 		comment: create/update/delete
 				 */
+		    	// TODO - Need to use regex here instead of indexOf...
+		    	// TODO - Our JS implementation of these service resources
+		    	// should include an array variable that allows us to stack
+		    	// a list of local storage keys, that way this dependency
+		    	// removal mechanism can be more dynamic/automated.
 				switch (options.type.toLowerCase()) {
 					case "get":
 						break;
 					case "post":
-						if (options.resource_path.indexOf("user/login") != -1) {
-							
+						// User login/logout/register resources.
+						if (
+							options.resource_path.indexOf("user/login") != -1 || 
+							options.resource_path.indexOf("user/logout") != -1 ||
+							options.resource_path.indexOf("user/register") != -1
+						) {
+							// system/connect.json
+							drupalgap_services_system_connect.local_storage_remove();
+							// drupalgap_system/connect.json
+							drupalgap_services_resource_system_connect.local_storage_remove();
 						}
 						break;
 					case "put":
+						
+						// User update resource.
+						if (options.resource_path.indexOf("user/") != -1) {
+							// Remove system/connect.json.
+							drupalgap_services_system_connect.local_storage_remove();
+							// Remove drupalgap_system/connect.json.
+							drupalgap_services_resource_system_connect.local_storage_remove();
+						}
+						// Node update resource.
+						if (options.resource_path.indexOf("node/") != -1) {
+							// Remove the node from local storage.
+							// TODO - Node id validation here.
+							drupalgap_services_node_retrieve.local_storage_remove({"nid":options.nid});
+							// Remove views datasource content json.
+							views_options = {"path":"views_datasource/drupalgap_content"};
+							drupalgap_views_datasource_retrieve.local_storage_remove(views_options);
+						}
+						
 						break;
 					case "delete":
 						break;
@@ -197,8 +238,8 @@ function drupalgap_services_resource_url(options) {
  * type
  * 		The method to use: get, post, put, delete
  * url
- * 		The full URL to the service resource.
+ * 		The full URL to the service resource. (e.g. system/connect.json)
  */
-function drupalgap_services_default_local_storage_key(type,url) {
-	return type + "." + url;
+function drupalgap_services_default_local_storage_key(type,resource_path) {
+	return type + "." + resource_path;
 }
