@@ -1,6 +1,5 @@
 // global variables used to hold the latest system resource call results
 var drupalgap_services_comment_create_result;
-var drupalgap_services_comment_retrieve_result;
 var drupalgap_services_comment_update_result;
 var drupalgap_services_comment_delete_result;
 var drupalgap_services_comment_node_comments_result;
@@ -42,15 +41,8 @@ function drupalgap_services_comment_create (comment) {
 			}
 			
 			// Make the call.
-			result = drupalgap_services_resource_call({"resource_path":"comment.json","data":data});
-			
-			// If there wasn'at a problem, clear the views json comments listing.
-			if (!result.errorThrown) {
-				// TODO - this needs to be an easy to call function since this one line of code
-				// is being used multiple times and has a whacky variable.
-				window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_comments");
-		  	}
-			
+			options = {"resource_path":"comment.json", "data":data, "nid":comment.nid};
+			result = drupalgap_services_resource_call(options);
 			drupalgap_services_comment_create_result = result;
 		}
 	}
@@ -61,65 +53,63 @@ function drupalgap_services_comment_create (comment) {
 	return drupalgap_services_comment_create_result;
 }
 
-/** 
- * Retrieves a Drupal comment.
- * 
- * options.cid
- * 		the comment id you want to load
- * options.load_from_local_storage
- * 		load comment from local storage
- * 		"0" = force reload from comment retrieve resource
- * 		"1" = grab from local storage if possible (default)
- */
-function drupalgap_services_comment_retrieve (options) {
-	try {
-		
-		// Validate incoming parameters.
-		valid = true;
-		if (!options.cid) {
-			alert("drupalgap_services_comment_retrieve - no comment id provided");
-			valid = false;
-		}
-		
-		comment = null;
-		
-		// If everything is valid, retrieve the comment.
-		if (valid) {
+var drupalgap_services_comment_retrieve = {
+	
+	"resource_path":function(options) {
+		// TODO - Need cid validation here.
+		return "comment/" + encodeURIComponent(options.cid) + ".json";
+	},
+	"resource_type":"get",
+	"resource_result":"",
+	
+	/** 
+	 * Retrieves a Drupal comment.
+	 * 
+	 * options.cid
+	 * 		the comment id you want to load
+	 */
+	"resource_call":function(options) {
+		try {
 			
-			// If no load_from_local_storage option is set, set default.
-			if (!options.load_from_local_storage) {
-				options.load_from_local_storage = "1";
+			// Clear the previous result.
+			this.resource_result = null;
+			
+			// Validate incoming parameters.
+			valid = true;
+			if (!options.cid) {
+				alert("drupalgap_services_comment_retrieve - no comment id provided");
+				valid = false;
 			}
 			
-			// Try to load the comment from local storage if loading from cache.
-			if (options.load_from_local_storage == "1") {
-				comment = window.localStorage.getItem("comment." + options.cid);
-			}
-			
-			// If we don't have the comment in local storage, make a comment retrieve
-			// resource call, then save it in local storage. Otherwise, return
-			// the local storage version of the comment.
-			if (!comment) {
+			// If everything is valid, retrieve the comment.
+			if (valid) {
 				resource_path = "comment/" + encodeURIComponent(options.cid) + ".json";
-				comment = drupalgap_services_resource_call({"resource_path":resource_path,"type":"get"});
-				window.localStorage.setItem("comment." + options.cid, JSON.stringify(comment));
-				console.log("saving comment to local storage (" + options.cid +")");
+				options.resource_path = resource_path;
+				options.type = "get";
+				this.resource_result = drupalgap_services_resource_call(options);
 			}
-			else {
-				console.log("loaded comment from local storage (" + options.cid +")");
-				comment = JSON.parse(comment);
-			}
-			
 		}
-		
-		drupalgap_services_comment_retrieve_result = comment;
-	}
-	catch (error) {
-		console.log("drupalgap_services_comment_retrieve");
-		console.log(error);
-	}
-	return drupalgap_services_comment_retrieve_result;
-}
+		catch (error) {
+			console.log("drupalgap_services_comment_retrieve");
+			console.log(error);
+		}
+		return this.resource_result;
+	},
+	
+	/**
+	 * Removes a comment from local storage.
+	 * 
+	 * options.cid
+	 * 		The comment id of the comment to remove.
+	 */
+	"local_storage_remove":function(options) {
+		type = this.resource_type;
+		resource_path = this.resource_path(options);
+		key = drupalgap_services_default_local_storage_key(type,resource_path);
+		window.localStorage.removeItem(key);
+		console.log("Removed from local storage (" + key + ")");
+	},
+};
 
 function drupalgap_services_comment_update(comment) {
 	try {
@@ -142,38 +132,47 @@ function drupalgap_services_comment_update(comment) {
 		
 		// Make the call.
 		resource_path = "comment/" + comment.cid + ".json";
-		drupalgap_services_comment_update_result = drupalgap_services_resource_call({"resource_path":resource_path,"data":data,"type":"put"});
-		
-		// If update didn't have any problems, clear the local storage comment
-		// and the default comments views json.
-		if (!drupalgap_services_comment_update_result.errorThrown) {
-			window.localStorage.removeItem("comment." + comment.cid);
-			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_comments");
-	  	}
+		options = {
+			"resource_path":resource_path,
+			"data":data,
+			"type":"put",
+			"cid":comment.cid,
+			"nid":comment.nid,
+		};
+		drupalgap_services_comment_update_result = drupalgap_services_resource_call(options);
 	}
 	catch (error) {
 		console.log("drupalgap_services_comment_update");
 		console.log(error);
 	}
+	
+	// Clear the comment edit cid.
+	drupalgap_page_comment_edit_cid = null;
+	
 	return drupalgap_services_comment_update_result;
 }
 
 function drupalgap_services_comment_delete(cid) {
 	try {
+		comment = drupalgap_services_comment_retrieve.resource_call({"cid":cid});
 		resource_path = "comment/" + encodeURIComponent(cid) + ".json";
-		result = drupalgap_services_resource_call({"resource_path":resource_path,"type":"delete"});
-		// If the deletion was successful, remove the node from local storage,
-		// and the default comments views json.
-		if (result) {
-			window.localStorage.removeItem("comment." + cid);
-			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_comments");
-		}
+		options = {
+			"resource_path":resource_path,
+			"type":"delete",
+			"cid":cid,
+			"nid":comment.nid
+		};
+		result = drupalgap_services_resource_call(options);
 		drupalgap_services_comment_delete_result = result;
 	}
 	catch (error) {
 		console.log("drupalgap_services_comment_delete");
 		console.log(error);
 	}
+	
+	// Clear the comment edit cid.
+	drupalgap_page_comment_edit_cid = null;
+	
 	return drupalgap_services_comment_delete_result;
 }
 
@@ -193,8 +192,6 @@ function drupalgap_services_comment_node_comments(nid) {
 		// If everything is valid, make the service resource call.
 		if (valid) {
 			// Retrieve comments.
-			//path = "views_datasource/drupalgap_comments/" + nid;
-			//result = drupalgap_views_datasource_retrieve({"path":path});
 			views_options = {"path":"views_datasource/drupalgap_comments/" + nid};
 			result = drupalgap_views_datasource_retrieve.resource_call(views_options);
 			drupalgap_services_comment_node_comments_result = result.comments;

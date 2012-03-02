@@ -32,7 +32,8 @@ function drupalgap_services_user_login (name, pass) {
 		// Make the service call.
 		resource_path = "user/login.json";
 		data = 'username=' + encodeURIComponent(name) + '&password=' + encodeURIComponent(pass);
-		options = {"resource_path":resource_path,"data":data,"save_to_local_storage":"0"};
+		//,"save_to_local_storage":"0"
+		options = {"resource_path":resource_path,"data":data};
 		drupalgap_services_user_login_result = drupalgap_services_resource_call(options);
 		
 		if (drupalgap_services_user_login_result.errorThrown) { return false; }
@@ -62,8 +63,9 @@ function drupalgap_services_user_login (name, pass) {
 function drupalgap_services_user_logout () {
 	try {
 		
-		// make the service call
-		options = {"resource_path":"user/logout.json", "save_to_local_storage":"0"};
+		// Make the service call.
+		//, "save_to_local_storage":"0"
+		options = {"resource_path":"user/logout.json"};
 		drupalgap_services_user_logout_result = drupalgap_services_resource_call(options);
 		
 		if (drupalgap_services_user_logout_result.errorThrown) { return false; }
@@ -121,7 +123,8 @@ function drupalgap_services_user_update (user) {
 		if (user.pass2)
 			data += "&account[pass2]=" + encodeURIComponent(user.pass2);*/
 		
-		options = {"resource_path":"user/" + user.uid + ".json", "data":data, "type":"put", "save_to_local_storage":"0"};
+		//, "save_to_local_storage":"0"
+		options = {"resource_path":"user/" + user.uid + ".json", "data":data, "type":"put"};
 		drupalgap_services_user_update_result = drupalgap_services_resource_call(options);
 		
 		// make another call to system connect to refresh global variables if there wasn't any problems
@@ -163,7 +166,8 @@ function drupalgap_services_user_register (name,mail,pass) {
 		
 		// make the service call
 		data = 'name=' + encodeURIComponent(name) + '&mail=' + encodeURIComponent(mail) + '&pass=' + encodeURIComponent(pass);
-		options = {"resource_path":"user/register.json", "data":data, "save_to_local_storage":"0"};
+		//, "save_to_local_storage":"0"
+		options = {"resource_path":"user/register.json", "data":data};
 		drupalgap_services_user_register_result = drupalgap_services_resource_call(options);
 		
 		// Make another call to system connect to refresh global variables.

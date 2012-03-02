@@ -90,9 +90,7 @@ $('#drupalgap_page_node_edit_submit').live('click',function(){
 			  		alert(result.errorThrown);
 			  	}
 			  	else {
-			  		// Node was updated properly, clear node editing variables.
-				  	drupalgap_page_node_edit_nid = null; // clear value before redirecting
-				  	drupalgap_page_node_edit_type = null; // clear value before redirecting
+			  		// Node was updated properly.
 				  	$.mobile.changePage("node.html");
 			  	}
 		  	}

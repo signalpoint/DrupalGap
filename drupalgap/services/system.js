@@ -73,7 +73,8 @@ var drupalgap_services_system_connect = {
 function drupalgap_services_system_get_variable (name) {
 	try {
 		if (!name) { return false; }
-		drupalgap_services_system_get_variable_result = drupalgap_services_resource_call({"resource_path":"system/get_variable.json","data":'name=' + encodeURIComponent(name)});
+		options = {"resource_path":"system/get_variable.json","data":'name=' + encodeURIComponent(name)};
+		drupalgap_services_system_get_variable_result = drupalgap_services_resource_call(options);
 		return drupalgap_services_system_get_variable_result;
 	}
 	catch (error) {

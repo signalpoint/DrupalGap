@@ -17,7 +17,8 @@ function drupalgap_services_node_create (node) {
 		
 		// Make the service call to the node create resource.
 		data = "node[type]=" + encodeURIComponent(node.type) + "&node[title]=" + encodeURIComponent(node.title) + "&" + body;
-		options = {"resource_path":"node.json","data":data, "save_to_local_storage":"0"};
+		// "save_to_local_storage":"0"
+		options = {"resource_path":"node.json","data":data,};
 		result = drupalgap_services_resource_call(options);
 		drupalgap_services_node_create_result = result;
 	}
@@ -62,19 +63,6 @@ var drupalgap_services_node_retrieve = {
 				resource_path = this.resource_path(options);
 				options.resource_path = resource_path;
 				options.type = "get";
-				
-				// If no load_from_local_storage option has been set yet, try to be
-				// smart about whether or not to load from local storage depending
-				// on which page the call came from.
-				// TODO - this should be moved into services.js for now... keep this area clean.
-				if (!options.load_from_local_storage) {
-					switch ($.mobile.activePage.attr('id')) {
-						case "drupalgap_page_node_edit":
-							options.load_from_local_storage = "0";
-							break;
-					}
-				}
-				
 				// Retrieve the node.
 				node = drupalgap_services_resource_call(options);
 			}
@@ -121,23 +109,21 @@ function drupalgap_services_node_update (node) {
 		options = {
 			"resource_path":resource_path,
 			"type":"put",
-			"data":data,"save_to_local_storage":"0",
+			"data":data,
 			"nid":node.nid,
 		};
 		drupalgap_services_node_update_result = drupalgap_services_resource_call(options);
-		
-		// If update didn't have any problems, clear the local storage node and
-		// the default views json content.
-		if (!drupalgap_services_node_update_result.errorThrown) {
-			window.localStorage.removeItem("node." + node.nid);
-			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_content");
-	  	}
 		
 	}
 	catch (error) {
 		console.log("drupalgap_services_node_update");
 		console.log(error);
 	}
+	
+	// Clear node edit values.
+	drupalgap_page_node_edit_nid = null;
+  	drupalgap_page_node_edit_type = null;
+  	
 	return drupalgap_services_node_update_result;
 }
 
@@ -147,21 +133,18 @@ function drupalgap_services_node_delete (nid) {
 	try {
 		// Make the service call to the node delete service.
 		resource_path = "node/" + encodeURIComponent(nid) + ".json";
-		options = {"resource_path":resource_path,"type":"delete", "save_to_local_storage":"0"};
+		options = {"resource_path":resource_path,"type":"delete", "nid":nid};
 		result = drupalgap_services_resource_call(options);
-		
-		// If the deletion was successful, remove the node from local storage
-		// and the default views json content.
-		if (result) {
-			window.localStorage.removeItem("node." + nid);
-			window.localStorage.removeItem("views_datasource.views_datasource/drupalgap_content");
-		}
-		
 		drupalgap_services_node_delete_result = result;
 	}
 	catch (error) {
 		console.log("drupalgap_services_node_delete");
 		console.log(error);
 	}
+	
+	// Clear node edit values.
+	drupalgap_page_node_edit_nid = null;
+  	drupalgap_page_node_edit_type = null;
+  	
 	return drupalgap_services_node_delete_result;
 }

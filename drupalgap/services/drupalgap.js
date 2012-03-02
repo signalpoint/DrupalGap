@@ -27,7 +27,8 @@ var drupalgap_services_resource_system_connect = {
 					
 					// Clear the last resource result and make the service call.
 					this.resource_result = null;
-					this.resource_result = drupalgap_services_resource_call({"resource_path":this.resource_path,"type":this.resource_type});
+					options = {"resource_path":this.resource_path,"type":this.resource_type};
+					this.resource_result = drupalgap_services_resource_call(options);
 					
 					if (this.resource_result.textStatus == "error") {
 						if (this.resource_result.errorThrown) {
@@ -97,7 +98,8 @@ var drupalgap_services_resource_system_connect = {
  */
 function drupalgap_services_system_site_settings () {
 	try {
-		drupalgap_services_system_site_settings_result = drupalgap_services_resource_call({"resource_path":"drupalgap_system/site_settings.json"});
+		options = {"resource_path":"drupalgap_system/site_settings.json"};
+		drupalgap_services_system_site_settings_result = drupalgap_services_resource_call(options);
 		return drupalgap_services_system_site_settings_result;
 	}
 	catch (error) {

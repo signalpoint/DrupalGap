@@ -48,7 +48,8 @@ $('#drupalgap_page_comment_edit').live('pageshow',function(){
 			// Existing comment.
 			
 			// Load the comment.
-			comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid});
+			options = {"cid":drupalgap_page_comment_edit_cid};
+			comment = drupalgap_services_comment_retrieve.resource_call(options);
 			
 			if (!comment) {
 				alert("drupalgap_page_comment_edit - Failed to load comment! (" + drupalgap_page_comment_edit_cid + ")");
@@ -113,8 +114,9 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 	  	if (drupalgap_page_comment_edit_cid) {
 			// Existing comment.
 	  		
-	  		// retrieve the comment, update the values
-		  	comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid,"load_from_local_storage":"0"});
+	  		// Retrieve the comment, update the values.
+	  		options = {"cid":drupalgap_page_comment_edit_cid};
+		  	comment = drupalgap_services_comment_retrieve.resource_call(options);
 		  	if (!comment) {
 				alert("drupalgap_page_comment_edit_submit - failed to load comment (" + drupalgap_page_comment_edit_cid + ")");
 			}
@@ -128,7 +130,6 @@ $('#drupalgap_page_comment_edit_submit').live('click',function(){
 			  	}
 			  	else {
 			  		// comment was updated properly
-			  		drupalgap_page_comment_edit_cid = null; // clear value before redirecting
 				  	$.mobile.changePage("node.html");
 			  	}
 		  	}
@@ -171,7 +172,8 @@ $('#drupalgap_page_comment_edit_cancel').live('click',function(){
 
 $('#drupalgap_page_comment_edit_delete').live('click',function(){
 	try {
-		comment = drupalgap_services_comment_retrieve({"cid":drupalgap_page_comment_edit_cid});
+		options = {"cid":drupalgap_page_comment_edit_cid};
+		comment = drupalgap_services_comment_retrieve.resource_call(options);
 	  	if (!comment) {
 			alert("drupalgap_page_comment_edit_delete - failed to comment (" + drupalgap_page_comment_edit_cid + ")");
 			return false;

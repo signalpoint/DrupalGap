@@ -1,5 +1,3 @@
-//var drupalgap_views_datasource_retrieve_result;
-
 var drupalgap_views_datasource_retrieve = {
 		
 	"resource_path":"",
@@ -40,18 +38,3 @@ var drupalgap_views_datasource_retrieve = {
 		console.log("Removed from local storage (" + key + ")");
 	},
 };
-
-
-/*function drupalgap_views_datasource_retrieve (options) {
-	try {
-		drupalgap_views_datasource_retrieve_result = null;
-		views_json = drupalgap_services_resource_call({"resource_path":options.path,"type":"get"});
-		drupalgap_views_datasource_retrieve_result = views_json;
-	}
-	catch (error) {
-		console.log("drupalgap_views_datasource_retrieve");
-		console.log(error);
-	}
-	return drupalgap_views_datasource_retrieve_result;
-}
-*/
