@@ -43,7 +43,7 @@ function drupalgap_services_user_login (name, pass) {
 			// create a custom drupalgap user login resource that bundles up 
 			// the drupalgap system connect in the results as well.
 			//drupalgap_services_resource_system_connect();
-			drupalgap_services_resource_system_connect.resource_call();
+			drupalgap_services_resource_system_connect.resource_call({});
 			return true;
 		}
 	}
@@ -74,8 +74,7 @@ function drupalgap_services_user_logout () {
 			// TODO - this is a nested service resource call, ideally we should
 			// create a custom drupalgap user logout resource that bundles up 
 			// the drupalgap system connect in the results as well.
-			//drupalgap_services_resource_system_connect();
-			drupalgap_services_resource_system_connect.resource_call();
+			drupalgap_services_resource_system_connect.resource_call({});
 			return true;
 		}
 	
@@ -133,8 +132,7 @@ function drupalgap_services_user_update (user) {
 			// TODO - this is a nested service resource call, ideally we should
 			// create a custom drupalgap user update resource that bundles up 
 			// the drupalgap system connect in the results as well.
-			//drupalgap_services_resource_system_connect();
-			drupalgap_services_resource_system_connect.resource_call();
+			drupalgap_services_resource_system_connect.resource_call({});
 		}
 		
 		return drupalgap_services_user_update_result;
@@ -174,8 +172,7 @@ function drupalgap_services_user_register (name,mail,pass) {
 		// TODO - this is a nested service resource call, ideally we should
 		// create a custom drupalgap user register resource that bundles up 
 		// the drupalgap system connect in the results as well.
-		//drupalgap_services_resource_system_connect();
-		drupalgap_services_resource_system_connect.resource_call();
+		drupalgap_services_resource_system_connect.resource_call({});
 		
 		return drupalgap_services_user_register_result;
 	}

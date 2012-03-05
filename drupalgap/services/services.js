@@ -61,10 +61,16 @@ function drupalgap_services_resource_call (options) {
 		if (!options.load_from_local_storage) {
 			options = drupalgap_services_get_load_from_local_storage_default(options);
 		}
+		else {
+			console.log("we were instructed on load_from_local_storage (" + options.load_from_local_storage + ")");
+		}
 		
 		// If no save to local storage option has been set, set the default.
 		if (!options.save_to_local_storage) {
 			options = drupalgap_services_get_save_to_local_storage_default(options);
+		}
+		else {
+			console.log("we were instructed on save_to_local_storage (" + options.save_to_local_storage + ")");
 		}
 		
 		// If we are attempting to load the service resource result call from

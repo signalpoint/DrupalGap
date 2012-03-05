@@ -24,8 +24,8 @@ $(document).ready(function() {
 		// TODO - do something if the system connect fails.
 		// TODO - if app is online, we should probably force a reload on this,
 		// otherwise fall back to the local storage session.
-		//drupalgap_services_resource_system_connect();
-		drupalgap_services_resource_system_connect.resource_call();
+		options = {"load_from_local_storage":"0"};
+		drupalgap_services_resource_system_connect.resource_call(options);
 		
 		// Go to the dashboard.
 		$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");

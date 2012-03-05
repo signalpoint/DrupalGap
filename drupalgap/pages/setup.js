@@ -60,8 +60,8 @@ $('#drupalgap_page_setup_connect').live('click',function(){
 	  		alert("Setup Complete!");
 	  		
 	  		// Make a call to the DrupalGap bundled system connect resource.
-			//drupalgap_services_resource_system_connect();
-	  		drupalgap_services_resource_system_connect.resource_call();
+	  		options = {"load_from_local_storage":"0"};
+	  		drupalgap_services_resource_system_connect.resource_call(options);
 			
 			// Go to the dashboard.
 	  		$.mobile.changePage("dashboard.html", "slideup");
