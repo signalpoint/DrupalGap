@@ -1,57 +1,76 @@
 // global variables used to hold the latest system resource call results
-var drupalgap_services_comment_create_result;
-var drupalgap_services_comment_update_result;
-var drupalgap_services_comment_delete_result;
 var drupalgap_services_comment_node_comments_result;
 
-function drupalgap_services_comment_create (comment) {
-	try {
-		
-		// Clear last result.
-		drupalgap_services_comment_create_result = null;
-		
-		// Validate incoming parameters.
-		valid = true;
-		if (!comment.nid) {
-			alert("drupalgap_services_comment_create - no node id provided");
-			valid = false;
+var drupalgap_services_comment_create  = {
+	"resource_path":"comment.json",
+	"resource_type":"post",
+	
+	"resource_call":function(caller_options) {
+		try {
+			
+			// Extract comment from caller options.
+			comment = caller_options.comment;
+			
+			// Validate incoming parameters.
+			valid = true;
+			if (!comment.nid) {
+				alert("drupalgap_services_comment_create - no node id provided");
+				valid = false;
+			}
+			if (!comment.body) {
+				alert("drupalgap_services_comment_create - no comment body provided");
+				valid = false;
+			}
+			
+			// If everything is valid, make the service resource call.
+			if (valid) {
+				
+				// Build the data string.
+				
+				var body;
+				if (drupalgap_site_settings.variable.drupal_core == "6") {
+					body = "comment=" + encodeURIComponent(comment.body);
+				}
+				else if (drupalgap_site_settings.variable.drupal_core == "7") {
+					body = "comment_body[und][0][value]=" + encodeURIComponent(comment.body);
+				}
+				data = "nid=" + encodeURIComponent(comment.nid) + "&" + body;
+				
+				// If they provided a subject, add it to the data string.
+				if (comment.subject) {
+					data += "&subject=" + encodeURIComponent(comment.subject);
+				}
+				
+				// Make the call.
+				options = {
+					"resource_path":this.resource_path,
+					"type":this.resource_type,
+					"async":true,
+					"data":data,
+					"nid":comment.nid,
+					"error":function(jqXHR, textStatus, errorThrown) {
+					},
+					"success":function(data) {
+					},
+				};
+				
+				// Attach error/success hooks if provided.
+				if (caller_options.error) {
+					options.hook_error = caller_options.error;
+				}
+				if (caller_options.success) {
+					options.hook_success = caller_options.success;
+				}
+				
+				drupalgap_services.resource_call(options);
+			}
 		}
-		if (!comment.body) {
-			alert("drupalgap_services_comment_create - no comment body provided");
-			valid = false;
-		}
-		
-		// If everything is valid, make the service resource call.
-		if (valid) {
-			
-			// Build the data string.
-			
-			var body;
-			if (drupalgap_site_settings.variable.drupal_core == "6") {
-				body = "comment=" + encodeURIComponent(comment.body);
-			}
-			else if (drupalgap_site_settings.variable.drupal_core == "7") {
-				body = "comment_body[und][0][value]=" + encodeURIComponent(comment.body);
-			}
-			data = "nid=" + encodeURIComponent(comment.nid) + "&" + body;
-			
-			// If they provided a subject, add it to the data string.
-			if (comment.subject) {
-				data += "&subject=" + encodeURIComponent(comment.subject);
-			}
-			
-			// Make the call.
-			options = {"resource_path":"comment.json", "data":data, "nid":comment.nid};
-			result = drupalgap_services_resource_call(options);
-			drupalgap_services_comment_create_result = result;
+		catch (error) {
+			console.log("drupalgap_services_comment_create");
+			console.log(error);
 		}
 	}
-	catch (error) {
-		console.log("drupalgap_services_comment_create");
-		console.log(error);
-	}
-	return drupalgap_services_comment_create_result;
-}
+};
 
 var drupalgap_services_comment_retrieve = {
 	
@@ -60,7 +79,6 @@ var drupalgap_services_comment_retrieve = {
 		return "comment/" + encodeURIComponent(options.cid) + ".json";
 	},
 	"resource_type":"get",
-	"resource_result":"",
 	
 	/** 
 	 * Retrieves a Drupal comment.
@@ -68,32 +86,47 @@ var drupalgap_services_comment_retrieve = {
 	 * options.cid
 	 * 		the comment id you want to load
 	 */
-	"resource_call":function(options) {
+	"resource_call":function(caller_options) {
 		try {
-			
-			// Clear the previous result.
-			this.resource_result = null;
 			
 			// Validate incoming parameters.
 			valid = true;
-			if (!options.cid) {
+			if (!caller_options.cid) {
 				alert("drupalgap_services_comment_retrieve - no comment id provided");
 				valid = false;
 			}
 			
 			// If everything is valid, retrieve the comment.
 			if (valid) {
-				resource_path = "comment/" + encodeURIComponent(options.cid) + ".json";
-				options.resource_path = resource_path;
-				options.type = "get";
-				this.resource_result = drupalgap_services_resource_call(options);
+				
+				// Build the options for the service call.
+				options = {
+					"resource_path":this.resource_path({"cid":caller_options.cid}),
+					"type":this.resource_type,
+					"async":true,
+					"error":function(jqXHR, textStatus, errorThrown) {
+					},
+					"success":function(data) {
+						
+					},
+				};
+				
+				// Attach error/success hooks if provided.
+				if (caller_options.error) {
+					options.hook_error = caller_options.error;
+				}
+				if (caller_options.success) {
+					options.hook_success = caller_options.success;
+				}
+				
+				// Make the service call.
+				drupalgap_services.resource_call(options);
 			}
 		}
 		catch (error) {
 			console.log("drupalgap_services_comment_retrieve");
 			console.log(error);
 		}
-		return this.resource_result;
 	},
 	
 	/**
@@ -111,98 +144,163 @@ var drupalgap_services_comment_retrieve = {
 	},
 };
 
-function drupalgap_services_comment_update(comment) {
-	try {
-		// Clear last result.
-		drupalgap_services_comment_update_result = null;
-		
-		// Build the data string.
-		data = "";
-		if (drupalgap_site_settings.variable.drupal_core == "6") {
-			data = "comment=" + encodeURIComponent(comment.body);
-		}
-		else if (drupalgap_site_settings.variable.drupal_core == "7") {
-			data = "comment_body[und][0][value]=" + encodeURIComponent(comment.body);
-		}
-		
-		// If they provided a subject, add it to the data string.
-		if (comment.subject) {
-			data += "&subject=" + encodeURIComponent(comment.subject);
-		}
-		
-		// Make the call.
-		resource_path = "comment/" + comment.cid + ".json";
-		options = {
-			"resource_path":resource_path,
-			"data":data,
-			"type":"put",
-			"cid":comment.cid,
-			"nid":comment.nid,
-		};
-		drupalgap_services_comment_update_result = drupalgap_services_resource_call(options);
-	}
-	catch (error) {
-		console.log("drupalgap_services_comment_update");
-		console.log(error);
-	}
+var drupalgap_services_comment_update = {
 	
-	// Clear the comment edit cid.
-	drupalgap_page_comment_edit_cid = null;
+	"resource_path":function(options) {
+		// TODO - Need cid validation here.
+		return "comment/" + encodeURIComponent(options.cid) + ".json";
+	},
+	"resource_type":"put",
 	
-	return drupalgap_services_comment_update_result;
-}
+	"resource_call":function(caller_options) {
+		try {
+			// Extract the comment from the caller options.
+			comment = caller_options.comment;
+			
+			// Build the data string.
+			data = "";
+			if (drupalgap_site_settings.variable.drupal_core == "6") {
+				data = "comment=" + encodeURIComponent(comment.body);
+			}
+			else if (drupalgap_site_settings.variable.drupal_core == "7") {
+				data = "comment_body[und][0][value]=" + encodeURIComponent(comment.body);
+			}
+			
+			// If they provided a subject, add it to the data string.
+			if (comment.subject) {
+				data += "&subject=" + encodeURIComponent(comment.subject);
+			}
+			
+			// Build the options for the service call.
+			options = {
+				"resource_path":this.resource_path({"cid":comment.cid}),
+				"type":this.resource_type,
+				"data":data,
+				"cid":comment.cid,
+				"nid":comment.nid,
+				"async":true,
+				"error":function(jqXHR, textStatus, errorThrown) {
+				},
+				"success":function(data) {
+					// Clear the comment edit cid.
+					drupalgap_page_comment_edit_cid = null;
+				},
+			};
+			
+			// Attach error/success hooks if provided.
+			if (caller_options.error) {
+				options.hook_error = caller_options.error;
+			}
+			if (caller_options.success) {
+				options.hook_success = caller_options.success;
+			}
+			
+			// Make the service call.
+			drupalgap_services.resource_call(options);
+		}
+		catch (error) {
+			console.log("drupalgap_services_comment_update");
+			console.log(error);
+		}
+	}
+};
 
-function drupalgap_services_comment_delete(cid) {
-	try {
-		comment = drupalgap_services_comment_retrieve.resource_call({"cid":cid});
-		resource_path = "comment/" + encodeURIComponent(cid) + ".json";
-		options = {
-			"resource_path":resource_path,
-			"type":"delete",
-			"cid":cid,
-			"nid":comment.nid
-		};
-		result = drupalgap_services_resource_call(options);
-		drupalgap_services_comment_delete_result = result;
-	}
-	catch (error) {
-		console.log("drupalgap_services_comment_delete");
-		console.log(error);
-	}
+var drupalgap_services_comment_delete = {
 	
-	// Clear the comment edit cid.
-	drupalgap_page_comment_edit_cid = null;
+	"resource_path":function(options) {
+		// TODO - Need cid validation here.
+		return "comment/" + encodeURIComponent(options.cid) + ".json";
+	},
+	"resource_type":"delete",
 	
-	return drupalgap_services_comment_delete_result;
-}
+	"resource_call":function(caller_options) {
+		try {
+			
+			// Build the options to retrieve the comment.
+			options = {
+				"cid":caller_options.cid,
+				"error":function(jqXHR, textStatus, errorThrown) {
+				},
+				"success":function(comment) {
+					
+					// Build the service call options to delete the comment.
+					resource_path = "comment/" + encodeURIComponent(comment.cid) + ".json";
+					comment_delete_options = {
+						"resource_path":resource_path,
+						"type":"delete",
+						"async":true,
+						"cid":comment.cid,
+						"nid":comment.nid,
+						"error":function(jqXHR, textStatus, errorThrown) {
+						},
+						"success":function(data) {
+							// Clear the comment edit cid.
+							drupalgap_page_comment_edit_cid = null;
+						},
+					};
+					
+					// Attach error/success hooks if provided.
+					if (caller_options.error) {
+						comment_delete_options.hook_error = caller_options.error;
+					}
+					if (caller_options.success) {
+						comment_delete_options.hook_success = caller_options.success;
+					}
+					
+					// Make the service call to delete the comment.
+					drupalgap_services.resource_call(comment_delete_options);
+				},
+			};
+			
+			// Make the service call to retrieve the comment.
+			drupalgap_services_comment_retrieve.resource_call(options);
+		}
+		catch (error) {
+			console.log("drupalgap_services_comment_delete");
+			console.log(error);
+		}
+	}
+};
 
-function drupalgap_services_comment_node_comments(nid) {
-	try {
-		// Clear last result.
-		drupalgap_services_comment_node_comments_result = null;
-		result = null;
-		
-		// Validate incoming parameters.
-		valid = true;
-		if (!nid) {
-			alert("drupalgap_services_comment_node_comments - no node id provided");
-			valid = false;
+var drupalgap_services_comment_node_comments = {
+	"resource_path":function(options){
+		return "views_datasource/drupalgap_comments/" + options.nid;
+	},
+	"resource_call":function(caller_options) {
+		try {
+			
+			// Validate incoming parameters.
+			valid = true;
+			if (!caller_options) {
+				alert("drupalgap_services_comment_node_comments - no node id provided");
+				valid = false;
+			}
+			
+			// If everything is valid, make the service resource call.
+			if (valid) {
+				
+				views_options = {
+					"path":this.resource_path({"nid":caller_options.nid}),
+				};
+				
+				// Override error/success hooks if provided.
+				// (this is a views datasource special case)
+				if (caller_options.error) {
+					views_options.error = caller_options.error;
+				}
+				if (caller_options.success) {
+					views_options.success = caller_options.success;
+				}
+				
+				drupalgap_views_datasource_retrieve.resource_call(views_options);
+			}
 		}
-		
-		// If everything is valid, make the service resource call.
-		if (valid) {
-			// Retrieve comments.
-			views_options = {"path":"views_datasource/drupalgap_comments/" + nid};
-			result = drupalgap_views_datasource_retrieve.resource_call(views_options);
-			drupalgap_services_comment_node_comments_result = result.comments;
+		catch (error) {
+			console.log("drupalgap_services_comment_node_comments");
+			console.log(error);
 		}
 	}
-	catch (error) {
-		console.log("drupalgap_services_comment_node_comments");
-		console.log(error);
-	}
-	return drupalgap_services_comment_node_comments_result;
-}
+};
 
 function drupalgap_services_comment_render (comment) {
 	try {

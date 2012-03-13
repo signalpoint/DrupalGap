@@ -10,7 +10,7 @@ function drupalgap_services_content_types_list () {
 	// service call.
 	if (!drupalgap_content_types_list) {
 		resource_path = "drupalgap_content/content_types_list.json";
-		drupalgap_content_types_list = drupalgap_services_resource_call({"resource_path":resource_path});
+		drupalgap_content_types_list = drupalgap_services.resource_call({"resource_path":resource_path});
 	}
 	return drupalgap_content_types_list;
 }
@@ -36,7 +36,7 @@ function drupalgap_services_content_types_user_permissions () {
 	// otherwise make the service call.
 	if (!drupalgap_content_types_user_permissions) {
 		resource_path = "drupalgap_content/content_types_user_permissions.json";
-		drupalgap_content_types_user_permissions = drupalgap_services_resource_call({"resource_path":resource_path});
+		drupalgap_content_types_user_permissions = drupalgap_services.resource_call({"resource_path":resource_path});
 	}
 	return drupalgap_content_types_user_permissions;
 }

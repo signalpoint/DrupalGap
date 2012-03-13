@@ -37,43 +37,72 @@ $('#drupalgap_user_register_submit').live('click',function() {
 	  if (!pass2) { alert('Please confirm your password.'); return false; }
 	  if (pass != pass2) { alert("Passwords do not match."); return false; }
 	  
-	  // Make call to the user register service resource.
-	  user_registration = drupalgap_services_user_register(name,mail,pass);
-	  if (user_registration.uid) { // user registration successful...
+	  // Build service call options.
+	  //user_registration = drupalgap_services_user_register(name,mail,pass);
+	  options = {
+		"name":name,
+		"mail":mail,
+		"pass":pass,
+		
+		"error":function(jqXHR, textStatus, errorThrown) {
+			if (errorThrown) {
+				alert(errorThrown);
+			}
+			else {
+				alert(textStatus);
+			}
+	  	},
+	  	
+		"success":function(data){
+	  	  
+	  	  if (data._user_resource_create.uid) {
+	  		  
+	  		  // User registration was successful...
+	  		  
+			  // Show message depending on site's user registration settings.
+			  site_name = drupalgap_site_settings.variable.site_name;
+			  
+			  // Who can create accounts?
+			  // TODO - take into account the 'require e-mail verification when a
+			  // visitor creates an account' checkbox on the drupal site
+			  switch (drupalgap_site_settings.variable.user_register) {
+				case 1: // Visitors
+				case "1":
+					alert("Registration complete! Please check your e-mail to verify your new account at " + site_name + ".");
+					break;
+				case 2: // Visitors, but administrator approval is required
+				case "2":
+					alert("Registration complete! An administrator from " + site_name  + " must now approve your new account.");
+					break;
+				default:
+					alert("Registration complete!"); // TODO - this should be more informative, instruct user what's next.
+					break;
+			  }
+			  
+			  $.mobile.changePage("dashboard.html", "slideup");
+			  
+	  	  }
 		  
-		  // Show message depending on site's user registration settings.
-		  site_name = drupalgap_site_settings.variable.site_name;
-		  
-		  // Who can create accounts?
-		  // TODO - take into account the 'require e-mail verification when a
-		  // visitor creates an account' checkbox on the drupal site
-		  switch (drupalgap_site_settings.variable.user_register) {
-			case 1: // Visitors
-			case "1":
-				alert("Registration complete! Please check your e-mail to verify your new account at " + site_name + ".");
-				break;
-			case 2: // Visitors, but administrator approval is required
-			case "2":
-				alert("Registration complete! An administrator from " + site_name  + " must now approve your new account.");
-				break;
-			default:
-				alert("Registration complete!"); // @todo - this should be more informative, instruct user what's next.
-				break;
+	  	  else {
+			// User registration was not successful...
+			  
+			// Clear any existing messages.
+			$('#drupalgap_page_user_register_messages').html("");
+			
+			// Show error messages.
+			$.each(user_registration.form_errors,function(field,message){
+				$('#drupalgap_page_user_register_messages').append("<li>" + message + "</li>"); 
+			});
+			$('#drupalgap_page_user_register_messages').show();
+			
 		  }
-		  
-		  $.mobile.changePage("dashboard.html", "slideup");
-	  }
-	  else {
-		  // Registration failed.
-		  
-		  // Clear any existing messages.
-		  $('#drupalgap_page_user_register_messages').html("");
-		  $.each(user_registration.form_errors,function(field,message){
-			  $('#drupalgap_page_user_register_messages').append("<li>" + message + "</li>"); 
-		  });
-		  $('#drupalgap_page_user_register_messages').show();
-	  }
+	  	  
+	  	},
+	  };
 	  
+	  // Make the service call.
+	  //drupalgap_services_user_register.resource_call(options);
+	  drupalgap_services_drupalgap_user_register.resource_call(options);
 	}
 	catch (error) {
 	  console.log("drupalgap_user_register_submit - " + error);

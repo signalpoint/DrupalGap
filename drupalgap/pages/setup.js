@@ -39,33 +39,43 @@ $('#drupalgap_page_setup_connect').live('click',function(){
 	  	settings.site_path = url;
 	  	drupalgap_settings_save(settings);
 	  	
-	  	// perform system connect to see if drupalgap is setup properly on drupal site
-	  	//result = drupalgap_services_system_connect();
-	  	result = drupalgap_services_system_connect.resource_call();
-	  	
-	  	if (result.errorThrown || result.textStatus == "error") { // something went wrong...
-	  		// Clear the site path and re-save the settings to start over.
-	  		settings.site_path = "";
-		  	drupalgap_settings_save(settings);
-		  	if (result.errorThrown) {
-		  		alert(result.errorThrown);
-		  	}
-		  	else {
-		  		alert("Error connecting. Please check that the URL is typed correctly, with no trailing slashes.");
-		  	}
-	  	}
-	  	else { 
-	  		
-	  		// Session id came back, everything is ok...
-	  		alert("Setup Complete!");
-	  		
-	  		// Make a call to the DrupalGap bundled system connect resource.
-	  		options = {"load_from_local_storage":"0"};
-	  		drupalgap_services_resource_system_connect.resource_call(options);
-			
-			// Go to the dashboard.
-	  		$.mobile.changePage("dashboard.html", "slideup");
-	  	}
+	  	// Perform system connect to see if DrupalGap is setup properly on Drupal site.
+	  	options = {
+	  		"error":function(jqXHR, textStatus, errorThrown){
+	  			// Clear the site path and re-save the settings to start over.
+		  		settings.site_path = "";
+			  	drupalgap_settings_save(settings);
+			  	if (errorThrown) {
+			  		alert(errorThrown);
+			  	}
+			  	else {
+			  		alert("Error connecting. Please check that the URL is typed correctly, with no trailing slashes.");
+			  	}
+	  		},
+	  		"success":function(inner_data){
+	  			// Session id came back, everything is ok...
+		  		alert("Setup Complete!");
+		  		
+		  		// Make a call to the DrupalGap bundled system connect resource.
+		  		inner_options = {
+		  			"load_from_local_storage":"0",
+		  			"error":function (jqXHR, textStatus, errorThrown) {
+			  			if (errorThrown) {
+					  		alert(errorThrown);
+					  	}
+					  	else {
+					  		alert("Error connecting. Please check that the URL is typed correctly, with no trailing slashes.");
+					  	}
+		  			},
+		  			"success":function () {
+		  				// Go to the dashboard.
+		  				$.mobile.changePage("dashboard.html", "slideup");
+		  			}
+		  		};
+		  		drupalgap_services_resource_system_connect.resource_call(inner_options);
+	  		},
+	  	};
+	  	drupalgap_services_system_connect.resource_call(options);
 	}
 	catch (error) {
 		console.log("drupalgap_page_setup_connect");

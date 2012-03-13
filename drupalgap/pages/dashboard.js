@@ -1,14 +1,17 @@
-$('#drupalgap_page_dashboard').live('pageshow',function(){
+$('#drupalgap_page_dashboard').live('pagebeforeshow',function(){
 	try {
 		
-		// display site name
+		// Display site name.
 		site_name = drupalgap_site_settings.variable.site_name;
 		if (!site_name) { site_name = "DrupalGap"; }
 		$('#drupalgap_page_dashboard h1').html(site_name);
 		
+		// Hide both navbars (logic below will show them).
+		$('#drupalgap_page_dashboard_navbar_anonymous').hide();
+    	$('#drupalgap_page_dashboard_navbar_authenticated').hide();
+		
 		if (drupalgap_user.uid == 0) { // user is not logged in...
 			$('#drupalgap_page_dashboard_navbar_anonymous').show();
-			$('#drupalgap_page_dashboard_navbar_authenticated').hide();
 			$('#drupalgap_page_dashboard_header_user h2').hide();
 			
 			// determine what to do with the user registration button based on the site settings
@@ -26,7 +29,6 @@ $('#drupalgap_page_dashboard').live('pageshow',function(){
 			}
         }
         else { // user is logged in...
-        	$('#drupalgap_page_dashboard_navbar_anonymous').hide();
         	$('#drupalgap_page_dashboard_navbar_authenticated').show();
         	$('#drupalgap_page_dashboard_header_user h2').html("Hi, " + drupalgap_user.name);
         }
@@ -48,12 +50,25 @@ $('#drupalgap_page_dashboard').live('pageshow',function(){
 
 $('#drupalgap_button_user_logout').live("click",function(){
 	try {
-		if (drupalgap_services_user_logout()) {
-			$.mobile.changePage("dashboard.html",{reloadPage:true},{allowSamePageTranstion:true},{transition:'none'});
-		}
-		else { // logout failed...
-			alert(drupalgap_services_user_logout_result.statusText);
-		}
+		// Build the service call options.
+		options = {
+			"error":function (jqXHR, textStatus, errorThrown) {
+				if (errorThrown) {
+					alert(errorThrown);
+				}
+				else {
+					alert(textStatus);
+				}
+			},
+			"success":function(){
+				// TODO - changing to the dashboard here has strange behavior,
+				// it would be best to go to the dashboard instead.
+				$.mobile.changePage("user_login.html", "slideup");
+				//$.mobile.changePage("dashboard.html",{reloadPage:true},{allowSamePageTranstion:true},{transition:'none'});
+			},
+		};
+		// Make the service call.
+		drupalgap_services_drupalgap_user_logout.resource_call(options);
 	}
 	catch (error) {
 		console.log("drupalgap_button_user_logout - " + error);	

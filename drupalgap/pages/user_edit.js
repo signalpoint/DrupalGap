@@ -66,6 +66,7 @@ $('#drupalgap_user_edit_submit').live('click',function() {
 			}
 		}
 		
+		// Build a temp user object to send to the update service resource.
 		var temp_user = drupalgap_user;
 		temp_user.name = name;
 		temp_user.mail = mail;
@@ -73,16 +74,32 @@ $('#drupalgap_user_edit_submit').live('click',function() {
 		temp_user.pass1 = pass1;
 		temp_user.pass2 = pass2;
 		
-		var user_update = drupalgap_services_user_update(temp_user);
+		// Build the service resource call options.
+		options = {
+			"user":temp_user,
+			"error":function (jqXHR, textStatus, errorThrown) {
+				if (errorThrown) {
+					alert(errorThrown);
+				}
+				else {
+					alert(textStatus);
+				}
+			},
+			"success":function (data) {
+				if (data.uid) { // user update successful...
+					$.mobile.changePage("user.html", "slideup");
+				}
+				else { // update failed...
+					$('#drupalgap_page_user_edit_messages').html(""); // clear any existing messages
+					$('#drupalgap_page_user_edit_messages').append("<li>" + data.errorThrown + "</li>");
+					$('#drupalgap_page_user_edit_messages').show();
+				}
+			}
+		};
 		
-		if (user_update.uid) { // user update successful...
-			$.mobile.changePage("user.html", "slideup");
-		}
-		else { // update failed...
-			$('#drupalgap_page_user_edit_messages').html(""); // clear any existing messages
-			$('#drupalgap_page_user_edit_messages').append("<li>" + user_update.errorThrown + "</li>");
-			$('#drupalgap_page_user_edit_messages').show();
-		}
+		// Make the service resource call.
+		drupalgap_services_user_update.resource_call(options);
+		
 	}
 	catch (error) {
 	  console.log("drupalgap_user_edit_submit");

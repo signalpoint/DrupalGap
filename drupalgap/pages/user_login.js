@@ -41,15 +41,27 @@ $('#drupalgap_user_login_submit').live('click',function() {
 	  var pass = $('#drupalgap_user_login_pass').val();
 	  if (!pass) { alert('Please enter your password.'); return false; }
 	  
-	  // make call to the user login service resource
-	  if (drupalgap_services_user_login(name,pass)) {
-		  $.mobile.changePage("dashboard.html", "slideup");
-	  }
-	  else { // login failed...
-		  $('#drupalgap_page_user_login_messages').html(drupalgap_services_resource_call_result.errorThrown).show(); // show user result error msg
-		  $('#drupalgap_user_login_pass').val(""); // clear password field
-	  }
-	  
+	  // Make call to the bundled user login service resource.
+	  options = {
+		"name":name,
+		"pass":pass,
+		"error":function (jqXHR, textStatus, errorThrown) {
+			if (errorThrown) {
+				alert(errorThrown);
+			}
+			else {
+				alert(textStatus);
+			}
+			$('#drupalgap_page_user_login_messages').html(drupalgap_services_resource_call_result.errorThrown).show(); // show user result error msg
+			$('#drupalgap_user_login_pass').val(""); // clear password field
+		},
+		"success":function () {
+			$.mobile.changePage("dashboard.html", "slideup");
+		}
+	  };
+	  //drupalgap_services_user_login.resource_call(options);
+	  drupalgap_services_drupalgap_user_login.resource_call(options);
+
 	}
 	catch (error) {
 	  console.log("drupalgap_user_login_submit - " + error);
