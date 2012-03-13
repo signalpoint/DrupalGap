@@ -14,7 +14,7 @@ $(document).ready(function() {
 	
 	if (!drupalgap_settings.site_path) {
 		// The app doesn't have a default site path, send user to welcome page.
-		$.mobile.changePage("drupalgap/pages/welcome.html", "slideup");
+		$.mobile.changePage("drupalgap/pages/welcome.html", { transition: "fade"});
 	}
 	else {
 		
@@ -36,7 +36,7 @@ $(document).ready(function() {
 			},
 			"success":function(){
 				// Go to the dashboard.
-				$.mobile.changePage("drupalgap/pages/dashboard.html", "slideup");
+				$.mobile.changePage("drupalgap/pages/dashboard.html", { transition: "fade"});
 			}
 		};
 		drupalgap_services_resource_system_connect.resource_call(options);
