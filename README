@@ -82,8 +82,6 @@ Android Application in PhoneGap
 4. Download DrupalGap and extract to PhoneGap's assets/www directory so
 DrupalGap's JavaScript file is located at assets/www/drupalgap/drupalgap.js
 Download Link: https://github.com/signalpoint/DrupalGap/tags
-The recommended version is 1.01, do not download the master branch unless you
-want to get dirty in code sauce.
 
 5. Run your new Android Application!
 
