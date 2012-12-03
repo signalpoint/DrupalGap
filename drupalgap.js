@@ -1,49 +1,27 @@
 var drupalgap = {
   'settings':{
-    'site_path':'http://10.0.2.2/mobile.lib.umich.edu',
+    'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'debug':true,
   },
-  'user':{},
+  'user':{
+	  'uid':0, /* do not change uid value */
+	  'name':'Anonymous',
+  },
   'api':{
-	  'options':{
-		  'url':'',
-		  'type':'get',
-		  'async':true,
-		  'data':'',
-		  'dataType':'json',
-		  'endpoint':'drupalgap',
-		  'error':function(jqXHR, textStatus, errorThrown){
-			  if (drupalgap.settings.debug) {
-				  console.log(JSON.stringify({
-					"jqXHR":jqXHR,
-					"textStatus":textStatus,
-					"errorThrown":errorThrown,
-				  }));  
-			  }
-			  navigator.notification.alert(
-			    errorThrown,
-				function(){},
-				'Error',
-				'OK'
-		     );
-		  },
-		  'success':function(result){
-			  if (drupalgap.settings.debug) {
-				  console.log(JSON.stringify(result));  
-			  }  
-		  },
-	  },
+	  'options':{ /* these are set by drupalgap_api_default_options() */ },
 	  'call':function(options){
 		  try {
-			  
-			  // Get the default api options, then adjust them to make the call to Drupal
-			  api_options = drupalgap.api.options;
+			  // Get the default api options, then adjust to the caller's options if they are present.
+			  api_options = drupalgap_api_default_options();
 			  if (options.type) { api_options.type = options.type; }
 			  if (options.async) { api_options.async = options.async; }
 			  if (options.data) { api_options.data = options.data; }
 			  if (options.dataType) { api_options.dataType = options.dataType; }
 			  if (options.endpoint) { api_options.endpoint = options.endpoint; }
+			  
+			  // Now assemble the callbacks together.
+			  api_options = drupalgap_chain_callbacks(api_options, options);
 			  
 			  // Build the Drupal URL path to call.
 			  api_options.url = drupalgap.settings.site_path + drupalgap.settings.base_path + '?q=';
@@ -53,11 +31,12 @@ var drupalgap = {
 			  api_options.url += options.path;
 			  
 			  if (drupalgap.settings.debug) {
-				  console.log(api_options.url);
-				  console.log(api_options);
+				  console.log(JSON.stringify(api_options));
 			  }
 			  
-			  // Make the call.
+			  // Make the call...
+			  
+			  // Asynchronous call.
 			  if (api_options.async) {
 				  $.ajax({
 					  url: api_options.url,
@@ -69,11 +48,12 @@ var drupalgap = {
 				      success: api_options.success,
 				  });
 			  }
+			  // Synchronous call.
 			  else {
 				navigator.notification.alert(
 					'Only async calls are supported for now!',
 					function(){},
-					'Error',
+					'DrupalGap API Error',
 					'OK'
 				);
 			  }
@@ -82,7 +62,7 @@ var drupalgap = {
 			navigator.notification.alert(
 				error,
 				function(){},
-				'Error',
+				'DrupalGap API Error',
 				'OK'
 			);
 		  }
@@ -93,15 +73,125 @@ var drupalgap = {
 		'connect':{
 			'options':{
 				'type':'post',
-				'path':'drupalgap_system/connect.json',
+				'path':'system/connect.json',
+				'success':function(data){
+					drupalgap.user = data.user;
+				},
 			},
-			'call':function(){
-				options = drupalgap.services.system.connect.options;
-				options.success = function(){};
-				drupalgap.api.call(options);
-			}
+			'call':function(options){
+				try {
+					drupalgap.api.call(drupalgap_chain_callbacks(drupalgap.services.system.connect.options, options));
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'System Connect Error',
+						'OK'
+					);
+				}
+			},
 		},
-	}  
+	},
+	'user':{
+		'login':{
+			'options':{
+				'type':'post',
+				'path':'user/login.json',
+				'success':function(data){
+					drupalgap.user = data.user;
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.name || !options.pass) {
+						if (drupalgap.settings.debug) {
+							console.log('drupalgap.services.user.login.call - missing user name or password');
+						}
+						return false;
+					}
+					api_options = drupalgap_chain_callbacks(drupalgap.services.user.login.options, options);
+					api_options.data = 'username=' + encodeURIComponent(options.name);
+					api_options.data += '&password=' + encodeURIComponent(options.pass);
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Login Error',
+						'OK'
+					);
+				}
+			},
+		},
+		'logout':{
+			'options':{
+				'type':'post',
+				'path':'user/logout.json',
+				'success':function(data){
+					drupalgap.user = {'uid':0};
+				},
+			},
+			'call':function(options){
+				try {
+					drupalgap.api.call(drupalgap_chain_callbacks(drupalgap.services.user.logout.options, options));
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Logout Error',
+						'OK'
+					);
+				}
+			},
+		},
+		'register':{
+			'options':{
+				'type':'post',
+				'path':'user/register.json',
+				'success':function(data){
+					// TODO - depending on the site's user registration settings,
+					// display an informative message about what to do next.
+					navigator.notification.alert(
+						  'Registration Complete!',
+						  function(){},
+						  'Notification',
+						  'OK'
+					  );
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.name) {
+						if (drupalgap.settings.debug) {
+							console.log('drupalgap.services.user.register.call - missing user name');
+						}
+						return false;
+					}
+					if (!options.mail) {
+						if (drupalgap.settings.debug) {
+							console.log('drupalgap.services.user.register.call - missing user mail');
+						}
+						return false;
+					}
+					api_options = drupalgap_chain_callbacks(drupalgap.services.user.register.options, options);
+					api_options.data = 'name=' + encodeURIComponent(options.name);
+					api_options.data += '&mail=' + encodeURIComponent(options.mail);
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Registration Error',
+						'OK'
+					);
+				}
+			},
+		},
+	},
   },
 };
 
@@ -113,24 +203,37 @@ function drupalgap_onload() {
 }
 
 /**
- * Cordova is loaded and it is now safe to make calls Cordova methods.
+ * Cordova is loaded and it is now safe to make calls to Cordova methods.
  */
 function drupalgap_deviceready() {
+	// Verify site path is set.
+	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
+		navigator.notification.alert(
+		    'You must specify a site path to your Drupal site in drupalgap.js settings!',
+		    function(){},
+		    'Error',
+		    'OK'
+		);
+		return false;
+	}
 	// Check device connection.
 	if (drupalgap_check_connection() == 'No network connection') {
-		// Device is offline.
+		// Device is off-line.
 		navigator.notification.alert(
-		    'No network connection!',
+		    'Warning, no network connection!',
 		    function(){},
 		    'Offline',
 		    'OK'
 		);
+		$.mobile.changePage('dashboard.html');
 	}
 	else {
-		// Device is online, let's make a call to the System Connect Service
-		// Resource.
-		drupalgap.services.system.connect.call();
-		
+		// Device is online, let's make a call to the System Connect Service Resource.
+		drupalgap.services.system.connect.call({
+			'success':function(result){
+				$.mobile.changePage('dashboard.html');
+			}
+		});
 	}
 }
 
@@ -151,4 +254,74 @@ function drupalgap_check_connection() {
     states[Connection.NONE]     = 'No network connection';
 
     return states[networkState];
+}
+
+function drupalgap_api_default_options() {
+	return {
+		'url':'',
+		'type':'get',
+		'async':true,
+		'data':'',
+		'dataType':'json',
+		'endpoint':'drupalgap',
+		'success':function(result){
+			if (drupalgap.settings.debug) {
+				console.log(JSON.stringify(result));  
+			} 
+		},
+		'error':function(jqXHR, textStatus, errorThrown){
+			console.log(JSON.stringify({
+				"jqXHR":jqXHR,
+				"textStatus":textStatus,
+				"errorThrown":errorThrown,
+			}));
+			navigator.notification.alert(
+				textStatus + ' (' + errorThrown + ')',
+				function(){},
+				'DrupalGap API Error',
+				'OK'
+			);
+		},
+	};
+}
+
+/**
+ * Takes option set 2, grabs the success/error callback(s), if any, 
+ * and appends them onto option set 1's callback(s), then returns
+ * the newly assembled option set 1.
+ */
+function drupalgap_chain_callbacks(options_set_1, options_set_2) {
+	if (options_set_2.success) {
+		if (options_set_1.success) {
+			if ($.isArray(options_set_1.success)) {
+				$(options_set_1.success).add(options_set_2.success);
+			}
+			else {
+				var success = [];
+				success.push(options_set_1.success);
+				success.push(options_set_2.success);
+				options_set_1.success = success;
+			}
+		}
+		else {
+			options_set_1.success = options_set_2.success;
+		}
+	}
+	if (options_set_2.error) {
+		if (options_set_1.error) {
+			if ($.isArray(options_set_1.error)) {
+				$(options_set_1.error).add(options_set_2.error);
+			}
+			else {
+				var error = [];
+				error.push(options_set_1.error);
+				error.push(options_set_2.error);
+				options_set_1.error = error;
+			}
+		}
+		else {
+			options_set_1.error = options_set_2.error;
+		}
+	}
+	return options_set_1;
 }
