@@ -2,10 +2,10 @@ var drupalgap = {
   'settings':{
     'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
-    'debug':true,
+    'debug':true, /* set to true to see console.log debug information */
   },
   'user':{
-	  'uid':0, /* do not change uid value */
+	  'uid':0, /* do not change this user id value */
 	  'name':'Anonymous',
   },
   'api':{
@@ -119,7 +119,7 @@ var drupalgap = {
 					navigator.notification.alert(
 						error,
 						function(){},
-						'Login Error',
+						'User Login Error',
 						'OK'
 					);
 				}
@@ -141,7 +141,7 @@ var drupalgap = {
 					navigator.notification.alert(
 						error,
 						function(){},
-						'Logout Error',
+						'User Logout Error',
 						'OK'
 					);
 				}
@@ -185,7 +185,37 @@ var drupalgap = {
 					navigator.notification.alert(
 						error,
 						function(){},
-						'Registration Error',
+						'User Registration Error',
+						'OK'
+					);
+				}
+			},
+		},
+		'retrieve':{
+			'options':{
+				'type':'get',
+				'path':'user/%uid.json',
+				'success':function(data){
+					
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.uid) {
+						if (drupalgap.settings.debug) {
+							console.log('drupalgap.services.user.retrieve.call - missing uid');
+						}
+						return false;
+					}
+					api_options = drupalgap_chain_callbacks(drupalgap.services.user.retrieve.options, options);
+					api_options.path = 'user/' + options.uid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'User Retrieve Error',
 						'OK'
 					);
 				}
@@ -209,7 +239,7 @@ function drupalgap_deviceready() {
 	// Verify site path is set.
 	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
 		navigator.notification.alert(
-		    'You must specify a site path to your Drupal site in drupalgap.js settings!',
+		    'You must specify a site path to your Drupal site in the drupalgap.js settings file!',
 		    function(){},
 		    'Error',
 		    'OK'
