@@ -18,3 +18,12 @@ $('#drupalgap_page_node_add').live('pageshow',function(){
 		}
 	}
 });
+
+/**
+ * When a content type is clicked, set the drupalgap node_edit type
+ * and send the user to the node_edit.html page.
+ */
+$('#node_add_list a').live('click', function(){
+	drupalgap.node_edit.type = $(this).attr('id');
+	$.mobile.changePage('node_edit.html');
+});

@@ -2,12 +2,13 @@ var drupalgap = {
   'settings':{
     'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
+    'language':'und',
     'debug':true, /* set to true to see console.log debug information */
-  },
+  }, // <!-- settings -->
   'user':{
 	  'uid':0, /* do not change this user id value */
 	  'name':'Anonymous',
-  },
+  }, // <!-- user -->
   'api':{
 	  'options':{ /* these are set by drupalgap_api_default_options() */ },
 	  'call':function(options){
@@ -67,7 +68,7 @@ var drupalgap = {
 			);
 		  }
 	  },
-  },
+  }, // <!-- api -->
   'services':{
 	'system':{
 		'connect':{
@@ -91,8 +92,8 @@ var drupalgap = {
 					);
 				}
 			},
-		},
-	},
+		}, // <!-- connect -->
+	}, // <!-- system -->
 	'user':{
 		'login':{
 			'options':{
@@ -124,7 +125,7 @@ var drupalgap = {
 					);
 				}
 			},
-		},
+		}, // <!-- login -->
 		'logout':{
 			'options':{
 				'type':'post',
@@ -146,7 +147,7 @@ var drupalgap = {
 					);
 				}
 			},
-		},
+		}, // <!-- logout -->
 		'register':{
 			'options':{
 				'type':'post',
@@ -190,7 +191,7 @@ var drupalgap = {
 					);
 				}
 			},
-		},
+		}, // <!-- register -->
 		'retrieve':{
 			'options':{
 				'type':'get',
@@ -220,8 +221,35 @@ var drupalgap = {
 					);
 				}
 			},
-		},
-	},
+		}, // <!-- retrieve -->
+	}, // <!-- user -->
+	'node':{
+		'create':{
+			'options':{
+				'type':'post',
+				'path':'node.json',
+			},
+			'call':function(options){
+				try {
+					api_options = drupalgap_chain_callbacks(drupalgap.services.node.create.options, options);
+					api_options.data = 'node[language]=' + drupalgap.settings.language +
+						'&node[type]=' + encodeURIComponent(options.node.type) +
+						'&node[title]=' + encodeURIComponent(options.node.title);
+						/*'&node[body][' + drupalgap.settings.language + '][0][value]=' + 
+						encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);*/
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Node Create Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- create -->
+	}, // <!-- node -->
 	'drupalgap_content':{
 		'content_types_user_permissions':{
 			'options':{
@@ -244,10 +272,15 @@ var drupalgap = {
 					);
 				}
 			},
-		},
-	},
-  },
-};
+		}, // <!-- content_types_user_permissions -->
+	}, // <!-- drupalgap_content -->
+  }, // <!-- services -->
+  'node_edit':{
+	  'nid':null,
+	  'type':null,
+	  'destination':null,
+  }, // <!-- node_edit -->
+}; // <!-- drupalgap -->
 
 /**
  * 
@@ -285,7 +318,8 @@ function drupalgap_deviceready() {
 		// Device is online, let's make a call to the System Connect Service Resource.
 		drupalgap.services.system.connect.call({
 			'success':function(result){
-				$.mobile.changePage('dashboard.html');
+				//$.mobile.changePage('dashboard.html');
+				$.mobile.changePage('node_add.html');
 			},
 			'error':function(jqXHR, textStatus, errorThrown) {
 				if (errorThrown == 'Not Found') {
