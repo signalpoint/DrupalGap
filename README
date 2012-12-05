@@ -61,29 +61,55 @@ Mobile application developers can use the open source DrupalGap framework to get
 a jump start on building custom mobile applications in PhoneGap that utilize the
 power of their Drupal websites.
 
-|===================================|
-| DrupalGap - PhoneGap Installation |
-|===================================|
+|==============================================|
+| Installation: DrupalGap + PhoneGap + Android |
+|==============================================|
 
-For complete details visit the DrupalGap project homepage:
+0. Enable the DrupalGap Module on your Drupal Site
 
-http://www.drupalgap.org
+1. Complete the PhoneGap Getting Started Guide for Android
 
-1. Download PhoneGap
+   http://docs.phonegap.com/en/2.2.0/guide_getting-started_index.md.html
 
-2. Complete the PhoneGap Getting Started Guide for Android to create your new
-Android Application in PhoneGap
+2. Download the files needed for the latest version of jQuery & jQueryMobile,
+   and save each file to PhoneGap's assets/www directory:
 
-3. Download JQuery 1.6.4 & JQuery Mobile 1.0 to PhoneGap's assets/www directory
-	a. http://code.jquery.com/jquery-1.6.4.min.js
-	b. http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js
-	c. http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css
+   a. http://code.jquery.com/jquery-1.8.3.min.js
+   b. http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js
+   c. http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css
+	
+3. Download the jQueryMobile zip file and extract the images directory from it
+   into PhoneGap's assets/www directory.
+   
+   assets/www/images
+   
+   This is different than the img directory that is created by PhoneGap's
+   getting started guide.
 
-4. Download DrupalGap and extract to PhoneGap's assets/www directory so
-DrupalGap's JavaScript file is located at assets/www/drupalgap/drupalgap.js
-Download Link: https://github.com/signalpoint/DrupalGap/tags
+4. Download DrupalGap and extract its contents to PhoneGap's assets/www
+directory so drupalgap.js is located here:
 
-5. Run your new Android Application!
+   assets/www/DrupalGap/drupalgap.js
+
+   Download Link: https://github.com/signalpoint/DrupalGap/tags
+
+5. Replace the assets/www/index.html file with the default.index.html file
+   that comes with DrupalGap:
+   
+   assets/www/DrupalGap/default.index.html => assets/www/index.html
+   
+6. Specify your Drupal site path (with NO trailing slash) in drupalgap.js,
+   for example:
+
+   'site_path':'http://www.drupalgap.org'
+   
+7. Copy the contents of DrupalGap/pages and DrupalGap/scripts to the assets/www
+   folder so these files (and many more) exist:
+   
+   assets/www/dashboard.html
+   assets/www/dashboard.js
+
+8. Run your new Android Application!
 
 ===================================
 

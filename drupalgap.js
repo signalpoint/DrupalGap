@@ -1,6 +1,6 @@
 var drupalgap = {
   'settings':{
-    'site_path':'http://10.0.2.2/mobile.lib.umich.edu', /* e.g. http://www.drupalgap.org */
+    'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'debug':true, /* set to true to see console.log debug information */
   },
@@ -263,7 +263,7 @@ function drupalgap_deviceready() {
 	// Verify site path is set.
 	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
 		navigator.notification.alert(
-		    'You must specify a site path to your Drupal site in the drupalgap.js settings file!',
+		    'You must specify a site path to your Drupal site in the drupalgap.js file!',
 		    function(){},
 		    'Error',
 		    'OK'
@@ -285,8 +285,17 @@ function drupalgap_deviceready() {
 		// Device is online, let's make a call to the System Connect Service Resource.
 		drupalgap.services.system.connect.call({
 			'success':function(result){
-				//$.mobile.changePage('dashboard.html');
-				$.mobile.changePage('node_add.html');
+				$.mobile.changePage('dashboard.html');
+			},
+			'error':function(jqXHR, textStatus, errorThrown) {
+				if (errorThrown == 'Not Found') {
+					navigator.notification.alert(
+					    'Review DrupalGap Troubleshooting Topics!',
+					    function(){},
+					    'Unable to Connect to Drupal',
+					    'OK'
+					);
+				}
 			}
 		});
 	}
