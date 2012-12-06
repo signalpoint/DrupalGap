@@ -25,6 +25,8 @@ var drupalgap = {
 			  // Now assemble the callbacks together.
 			  api_options = drupalgap_chain_callbacks(api_options, options);
 			  
+			  // TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_preprocess
+			  
 			  // Build the Drupal URL path to call.
 			  api_options.url = drupalgap.settings.site_path + drupalgap.settings.base_path + '?q=';
 			  if (api_options.endpoint) {
@@ -252,6 +254,16 @@ var drupalgap = {
 			'options':{
 				'type':'get',
 				'path':'node/%nid.json',
+				'success':function(node){
+					// TODO - this should assemble a node.content
+					// variable with the body and fields. It should also
+					// be a good opportunity for a hook to come in
+					// and modify node.content if they want.
+					node.content = '';
+					if (node.body.length != 0) {
+						node.content = node.body[node.language][0].safe_value;
+					}
+				},
 			},
 			'call':function(options){
 				try {
@@ -424,12 +436,14 @@ function drupalgap_api_default_options() {
 		'dataType':'json',
 		'endpoint':'drupalgap',
 		'success':function(result){
+			// TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_postprocess
 			$.mobile.hidePageLoadingMsg();
 			if (drupalgap.settings.debug) {
 				console.log(JSON.stringify(result));  
 			} 
 		},
 		'error':function(jqXHR, textStatus, errorThrown){
+			// TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_postprocess
 			$.mobile.hidePageLoadingMsg();
 			console.log(JSON.stringify({
 				"jqXHR":jqXHR,

@@ -1,22 +1,47 @@
 $('#drupalgap_node_edit').live('pagebeforeshow',function(){
 	try {
-		if (!drupalgap.node_edit.type) {
-			alert('drupalgap_node_edit - node type not set');
-			return;
-		}
 		if (!drupalgap.node_edit.nid) {
 			// Creating a new node.
+			if (!drupalgap.node_edit.type) {
+				alert('drupalgap_node_edit - node type not set');
+				return;
+			}
 			$('#drupalgap_node_edit h1').html('Create ' + drupalgap.node_edit.type);
 			$('#node_delete').hide();
 		}
 		else {
 			// Editing an existing node.
-			$('#drupalgap_node_edit h1').html('Edit ' + drupalgap.node_edit.type);
 		}
     }
 	catch (error) {
 		if (drupalgap.settings.debug) {
-			console.log("drupalgap_node_edit - " + error);
+			console.log("drupalgap_node_edit - pagebeforeshow - " + error);
+		}
+	}
+});
+
+$('#drupalgap_node_edit').live('pageshow',function(){
+	try {
+		if (!drupalgap.node_edit.nid) {
+			// Creating a new node.
+		}
+		else {
+			// Editing an existing node.
+			drupalgap.services.node.retrieve.call({
+				'nid':drupalgap.node_edit.nid,
+				'success':function(node){
+					$('#drupalgap_node_edit h1').html('Edit ' + node.type);
+					$('#node_title').val(node.title);
+					if (node.body.length != 0) {
+						$('#node_body').val(node.body[node.language][0].value);
+					}
+				},
+			});
+		}
+    }
+	catch (error) {
+		if (drupalgap.settings.debug) {
+			console.log("drupalgap_node_edit - pageshow - " + error);
 		}
 	}
 });
