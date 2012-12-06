@@ -1,6 +1,6 @@
 var drupalgap = {
   'settings':{
-    'site_path':'', /* e.g. http://www.drupalgap.org */
+    'site_path':'http://10.0.2.2/drupalgap', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'language':'und',
     'debug':true, /* set to true to see console.log debug information */
@@ -451,7 +451,7 @@ function drupalgap_api_default_options() {
 				"errorThrown":errorThrown,
 			}));
 			navigator.notification.alert(
-				textStatus + ' (' + errorThrown + ')',
+				textStatus + ' (' + errorThrown + ') [' + jqXHR.responseText + ']',
 				function(){},
 				'DrupalGap API Error',
 				'OK'
