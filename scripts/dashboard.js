@@ -1,4 +1,4 @@
-$('#dashboard').live('pagebeforeshow',function(){
+$('#drupalgap_dashboard').live('pagebeforeshow',function(){
 	try {
 		// Hide both nav bars, then figure out which one to show.
 		$('#navbar_anonymous').hide();
@@ -14,9 +14,27 @@ $('#dashboard').live('pagebeforeshow',function(){
 	}
 	catch (error) {
 		if (drupalgap.settings.debug) {
-			console.log("dashboard - " + error);
+			console.log("drupalgap_dashboard - " + error);
 		}
 	}
+});
+
+$('#drupalgap_dashboard').live('pageshow', function(){
+	drupalgap.views_datasource.call({
+		'path':'drupalgap/views_datasource/drupalgap_content',
+		'success':function(data) {
+			$("#dashboard_content_list").html("");
+			$.each(data.nodes, function(index, object){	
+				$("#dashboard_content_list").append($("<li></li>",{"html":"<a href='#' id='" + object.node.nid + "'>" + object.node.title + "</a>"}));
+			});
+			$("#dashboard_content_list").listview("destroy").listview();
+		},
+	});
+});
+
+$('#dashboard_content_list a').live('click',function(){
+	drupalgap.node.nid = $(this).attr('id');
+	$.mobile.changePage('node.html');
 });
 
 $('#logout').live('click', function(){

@@ -4,6 +4,7 @@ var drupalgap = {
     'base_path':'/',
     'language':'und',
     'debug':true, /* set to true to see console.log debug information */
+    'front':'dashboard.html',
   }, // <!-- settings -->
   'user':{
 	  'uid':0, /* do not change this user id value */
@@ -19,7 +20,7 @@ var drupalgap = {
 			  if (options.async) { api_options.async = options.async; }
 			  if (options.data) { api_options.data = options.data; }
 			  if (options.dataType) { api_options.dataType = options.dataType; }
-			  if (options.endpoint) { api_options.endpoint = options.endpoint; }
+			  if (options.endpoint || options.endpoint == '') { api_options.endpoint = options.endpoint; }
 			  
 			  // Now assemble the callbacks together.
 			  api_options = drupalgap_chain_callbacks(api_options, options);
@@ -39,6 +40,7 @@ var drupalgap = {
 			  
 			  // Asynchronous call.
 			  if (api_options.async) {
+				  $.mobile.loading('show', {theme: "b", text: "Loading"});
 				  $.ajax({
 					  url: api_options.url,
 				      type: api_options.type,
@@ -196,9 +198,6 @@ var drupalgap = {
 			'options':{
 				'type':'get',
 				'path':'user/%uid.json',
-				'success':function(data){
-					
-				},
 			},
 			'call':function(options){
 				try {
@@ -249,6 +248,36 @@ var drupalgap = {
 				}
 			},
 		}, // <!-- create -->
+		'retrieve':{
+			'options':{
+				'type':'get',
+				'path':'node/%nid.json',
+			},
+			'call':function(options){
+				try {
+					if (!options.nid) {
+						navigator.notification.alert(
+							'No node id provided!',
+							function(){},
+							'Node Retrieve Error',
+							'OK'
+						);
+					  return;
+					}
+					api_options = drupalgap_chain_callbacks(drupalgap.services.node.retrieve.options, options);
+					api_options.path = 'node/' + options.nid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Node Retrieve Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- retrieve -->
 	}, // <!-- node -->
 	'drupalgap_content':{
 		'content_types_user_permissions':{
@@ -275,6 +304,39 @@ var drupalgap = {
 		}, // <!-- content_types_user_permissions -->
 	}, // <!-- drupalgap_content -->
   }, // <!-- services -->
+  'views_datasource':{
+	  'options':{ /* these are set by drupalgap_api_default_options() */ },
+	  'call':function(options) {
+		  try {
+			  if (!options.path) {
+				  navigator.notification.alert(
+						'No path provided!',
+						function(){},
+						'DrupalGap Views Datasource Error',
+						'OK'
+					);
+				  return;
+			  }
+			  drupalgap.views_datasource.options = drupalgap_api_default_options();
+			  api_options = drupalgap_chain_callbacks(drupalgap.views_datasource.options, options);
+			  api_options.endpoint = '';
+			  api_options.path = options.path;
+			  drupalgap.api.call(api_options);
+		  }
+		  catch (error) {
+			  navigator.notification.alert(
+					error,
+					function(){},
+					'DrupalGap Views Datasource Error',
+					'OK'
+				);
+		  }
+		  
+	  },
+  }, // <!-- views_datasource -->
+  'node':{
+	  'nid':null,
+  }, // <!-- node -->
   'node_edit':{
 	  'nid':null,
 	  'type':null,
@@ -312,14 +374,13 @@ function drupalgap_deviceready() {
 		    'Offline',
 		    'OK'
 		);
-		$.mobile.changePage('dashboard.html');
+		$.mobile.changePage(drupalgap.settings.front);
 	}
 	else {
 		// Device is online, let's make a call to the System Connect Service Resource.
 		drupalgap.services.system.connect.call({
 			'success':function(result){
-				//$.mobile.changePage('dashboard.html');
-				$.mobile.changePage('node_add.html');
+				$.mobile.changePage(drupalgap.settings.front);
 			},
 			'error':function(jqXHR, textStatus, errorThrown) {
 				if (errorThrown == 'Not Found') {
@@ -363,11 +424,13 @@ function drupalgap_api_default_options() {
 		'dataType':'json',
 		'endpoint':'drupalgap',
 		'success':function(result){
+			$.mobile.hidePageLoadingMsg();
 			if (drupalgap.settings.debug) {
 				console.log(JSON.stringify(result));  
 			} 
 		},
 		'error':function(jqXHR, textStatus, errorThrown){
+			$.mobile.hidePageLoadingMsg();
 			console.log(JSON.stringify({
 				"jqXHR":jqXHR,
 				"textStatus":textStatus,
