@@ -1,7 +1,10 @@
 $('#drupalgap_page_node_add').live('pageshow',function(){
 	try {
-		options = drupalgap.services.drupalgap_content.content_types_user_permissions.call({
+		drupalgap.node_edit = {};
+		alert('node_add call');
+		drupalgap.services.drupalgap_content.content_types_user_permissions.call({
 			'success':function(data){
+				alert('node_add success');
 				$("#node_add_list").html("");
 				$.each(data,function(type,permissions){
 					if (permissions.create) {
@@ -24,6 +27,6 @@ $('#drupalgap_page_node_add').live('pageshow',function(){
  * and send the user to the node_edit.html page.
  */
 $('#node_add_list a').live('click', function(){
-	drupalgap.node_edit.type = $(this).attr('id');
+	drupalgap.node_edit = {'type':$(this).attr('id')};
 	$.mobile.changePage('node_edit.html');
 });

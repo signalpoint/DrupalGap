@@ -20,7 +20,7 @@ $('#drupalgap_dashboard').live('pagebeforeshow',function(){
 });
 
 $('#drupalgap_dashboard').live('pageshow', function(){
-	drupalgap.views_datasource.call({
+	/*drupalgap.views_datasource.call({
 		'path':'drupalgap/views_datasource/drupalgap_content',
 		'success':function(data) {
 			$("#dashboard_content_list").html("");
@@ -29,12 +29,13 @@ $('#drupalgap_dashboard').live('pageshow', function(){
 			});
 			$("#dashboard_content_list").listview("destroy").listview();
 		},
-	});
+	});*/
 });
 
 $('#dashboard_content_list a').live('click',function(){
-	drupalgap.node.nid = $(this).attr('id');
+	drupalgap.node = {'nid':$(this).attr('id')};
 	$.mobile.changePage('node.html');
+	return false;
 });
 
 $('#logout').live('click', function(){

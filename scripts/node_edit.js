@@ -2,6 +2,7 @@ $('#drupalgap_node_edit').live('pagebeforeshow',function(){
 	try {
 		if (!drupalgap.node_edit.nid) {
 			// Creating a new node.
+			//drupalgap.destination = 'node_add.html';
 			if (!drupalgap.node_edit.type) {
 				alert('drupalgap_node_edit - node type not set');
 				return;
@@ -30,6 +31,7 @@ $('#drupalgap_node_edit').live('pageshow',function(){
 			drupalgap.services.node.retrieve.call({
 				'nid':drupalgap.node_edit.nid,
 				'success':function(node){
+					drupalgap.node_edit = node;
 					$('#drupalgap_node_edit h1').html('Edit ' + node.type);
 					$('#node_title').val(node.title);
 					if (node.body.length != 0) {
@@ -54,34 +56,43 @@ $('#node_submit').live('click', function(){
 				'type':drupalgap.node_edit.type,
 				'title':$('#node_title').val(),
 				/*'body':{
-					'und':{
+					drupalgap.settings.language:{
 						'value':$('#node_body').val()
 					}
 				},*/
 			},
 			'success':function(node) {
 				alert('node ' + node.nid + ' created');
+				drupalgap.node_edit = {};
 			},
 		});
 	}
 	else {
 		// Update existing node.
+		
+		drupalgap.node_edit = {};
 	}
 });
 
 $('#node_cancel').live('click', function(){
-	drupalgap.node_edit.type = null;
-	drupalgap.node_edit.nid = null;
-	if (drupalgap.node_edit.destination) {
-	  var destination = drupalgap.node_edit.destination;
-	  drupalgap.node_edit.destination = null;
-	  $.mobile.changePage(destination);
+	destination = 'node_add.html';
+	if (drupalgap.node_edit.nid) {
+		destination = 'node.html';
 	}
-	else {
-		$.mobile.changePage('node_add.html');
-	}
+	//drupalgap.node_edit = {};
+	//$.mobile.changePage(drupalgap.destination);
+	//alert('going to destination: ' + destination);
+	$.mobile.changePage(destination);
+	return false;
 });
 
 $('#node_delete').live('click', function(){
-	alert('delete');
+	if (confirm('Are you sure you want to delete "' + drupalgap.node_edit.title + '"? This cannot be undone.')) {
+		/*drupalgap.services.node.delete.call({
+			'nid':drupalgap.node_edit.nid,
+			'success':function(data){
+				drupalgap.node_edit.node = null;
+			},
+		});*/
+	}
 });

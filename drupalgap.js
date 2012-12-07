@@ -1,11 +1,12 @@
 var drupalgap = {
   'settings':{
-    'site_path':'http://10.0.2.2/drupalgap', /* e.g. http://www.drupalgap.org */
+    'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'language':'und',
     'debug':true, /* set to true to see console.log debug information */
     'front':'dashboard.html',
   }, // <!-- settings -->
+  'destination':'',
   'user':{
 	  'uid':0, /* do not change this user id value */
 	  'name':'Anonymous',
@@ -23,34 +24,35 @@ var drupalgap = {
 			  if (options.endpoint || options.endpoint == '') { api_options.endpoint = options.endpoint; }
 			  
 			  // Now assemble the callbacks together.
-			  api_options = drupalgap_chain_callbacks(api_options, options);
+			  call_options = drupalgap_chain_callbacks(api_options, options);
 			  
 			  // TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_preprocess
 			  
 			  // Build the Drupal URL path to call.
-			  api_options.url = drupalgap.settings.site_path + drupalgap.settings.base_path + '?q=';
-			  if (api_options.endpoint) {
-				  api_options.url += api_options.endpoint + '/';
+			  call_options.url = drupalgap.settings.site_path + drupalgap.settings.base_path + '?q=';
+			  if (call_options.endpoint) {
+				  call_options.url += call_options.endpoint + '/';
 			  }
-			  api_options.url += options.path;
+			  call_options.url += options.path;
 			  
 			  if (drupalgap.settings.debug) {
-				  console.log(JSON.stringify(api_options));
+				  console.log(JSON.stringify(call_options));
 			  }
 			  
 			  // Make the call...
 			  
 			  // Asynchronous call.
-			  if (api_options.async) {
+			  if (call_options.async) {
+				  //alert('call');
 				  $.mobile.loading('show', {theme: "b", text: "Loading"});
 				  $.ajax({
-					  url: api_options.url,
-				      type: api_options.type,
-				      data: api_options.data,
-				      dataType: api_options.dataType,
-				      async: api_options.async,
-				      error: api_options.error,
-				      success: api_options.success,
+					  url: call_options.url,
+				      type: call_options.type,
+				      data: call_options.data,
+				      dataType: call_options.dataType,
+				      async: call_options.async,
+				      error: call_options.error,
+				      success: call_options.success,
 				  });
 			  }
 			  // Synchronous call.
@@ -209,6 +211,7 @@ var drupalgap = {
 						}
 						return false;
 					}
+					drupalgap.services.user.retrieve.options = null;
 					api_options = drupalgap_chain_callbacks(drupalgap.services.user.retrieve.options, options);
 					api_options.path = 'user/' + options.uid + '.json';
 					drupalgap.api.call(api_options);
@@ -255,10 +258,8 @@ var drupalgap = {
 				'type':'get',
 				'path':'node/%nid.json',
 				'success':function(node){
-					// TODO - this should assemble a node.content
-					// variable with the body and fields. It should also
-					// be a good opportunity for a hook to come in
-					// and modify node.content if they want.
+					// TODO - a good opportunity for a hook to come in
+					// and modify node.content if developer wants.
 					node.content = '';
 					if (node.body.length != 0) {
 						node.content = node.body[node.language][0].safe_value;
@@ -296,9 +297,6 @@ var drupalgap = {
 			'options':{
 				'type':'post',
 				'path':'drupalgap_content/content_types_user_permissions.json',
-				'success':function(data){
-					
-				},
 			},
 			'call':function(options){
 				try {
@@ -329,7 +327,7 @@ var drupalgap = {
 					);
 				  return;
 			  }
-			  drupalgap.views_datasource.options = drupalgap_api_default_options();
+			  //drupalgap.views_datasource.options = drupalgap_api_default_options();
 			  api_options = drupalgap_chain_callbacks(drupalgap.views_datasource.options, options);
 			  api_options.endpoint = '';
 			  api_options.path = options.path;
@@ -346,14 +344,8 @@ var drupalgap = {
 		  
 	  },
   }, // <!-- views_datasource -->
-  'node':{
-	  'nid':null,
-  }, // <!-- node -->
-  'node_edit':{
-	  'nid':null,
-	  'type':null,
-	  'destination':null,
-  }, // <!-- node_edit -->
+  'node':{ }, // <!-- node -->
+  'node_edit':{ }, // <!-- node_edit -->
 }; // <!-- drupalgap -->
 
 /**
@@ -450,8 +442,15 @@ function drupalgap_api_default_options() {
 				"textStatus":textStatus,
 				"errorThrown":errorThrown,
 			}));
+			extra_msg = '';
+			if (jqXHR.statusText && jqXHR.statusText != errorThrown) {
+				extra_msg = '[' + jqXHR.statusText + ']';
+			}
+			else if (jqXHR.responseText && jqXHR.responseText != errorThrown) {
+				extra_msg = jqXHR.responseText;
+			}
 			navigator.notification.alert(
-				textStatus + ' (' + errorThrown + ') [' + jqXHR.responseText + ']',
+				textStatus + ' (' + errorThrown + ') ' + extra_msg,
 				function(){},
 				'DrupalGap API Error',
 				'OK'
@@ -463,9 +462,53 @@ function drupalgap_api_default_options() {
 /**
  * Takes option set 2, grabs the success/error callback(s), if any, 
  * and appends them onto option set 1's callback(s), then returns
- * the newly assembled option set 1.
+ * the newly assembled option set 1. We make a copy of option set
+ * 1 since it is passed by reference.
  */
+/*function drupalgap_chain_callbacks(options_set_1, options_set_2) {
+	//options_set_1_copy = jQuery.extend(false, {}, options_set_1);
+	options_set_1_copy = jQuery.extend(true, {}, options_set_1);
+	options_set_1_copy.success = null;
+	options_set_1_copy.error = null;
+	if (options_set_2.success) {
+		if (options_set_1.success) {
+			var success = [];
+			success.push(options_set_1.success);
+			success.push(options_set_2.success);
+			console.log('appending');
+			options_set_1_copy.success = success;
+		}
+		else {
+			console.log('setting');
+			options_set_1_copy.success = options_set_2.success;
+		}
+	}
+	else {
+		console.log('setting');
+		console.log(options_set_1_copy.success);
+	}
+	if (options_set_2.error) {
+		if (options_set_1.error) {
+			var error = [];
+			error.push(options_set_1.error);
+			error.push(options_set_2.error);
+			options_set_1_copy.error = error;
+		}
+		else {
+			options_set_1_copy.error = options_set_2.error;
+		}
+	}
+	if (options_set_1_copy.success.length > 1) {
+		console.log(options_set_1_copy.success);
+	}
+	return options_set_1_copy;
+}
+*/
+
 function drupalgap_chain_callbacks(options_set_1, options_set_2) {
+	if (!options_set_1 && options_set_2) {
+		return jQuery.extend(true, {}, options_set_2);
+	}
 	if (options_set_2.success) {
 		if (options_set_1.success) {
 			if ($.isArray(options_set_1.success)) {
@@ -498,5 +541,10 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 			options_set_1.error = options_set_2.error;
 		}
 	}
-	return options_set_1;
+	if (options_set_1.success.length > 1) {
+		console.log(options_set_1.success);
+	}
+	options_set_2 = null;
+	return jQuery.extend(true, {}, options_set_1);
 }
+
