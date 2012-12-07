@@ -38,6 +38,11 @@ $('#dashboard_content_list a').live('click',function(){
 	return false;
 });
 
+/*$('#my_account').live('click', function(){
+	$.mobile.changePage('user.html', {reloadPage:true});
+	return false;
+});*/
+
 $('#logout').live('click', function(){
 	drupalgap.services.user.logout.call({
 		'success':function(data){

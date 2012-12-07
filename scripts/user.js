@@ -1,6 +1,10 @@
-$('#drupalgap_page_user').live('pageshow',function(){
+//$('#drupalgap_page_user').live('pageshow',function(){
+//die
+$('#drupalgap_page_user').on('pageshow',function(){
 	try {
-		options = drupalgap.services.user.retrieve.call({
+		//console.log(drupalgap.services.user.retrieve.options.success);
+		//alert('pageshow');
+		drupalgap.services.user.retrieve.call({
 			'uid':drupalgap.user.uid,
 			'success':function(data){
 				$('#drupalgap_page_user h1').html(data.name);

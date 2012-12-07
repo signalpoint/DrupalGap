@@ -1,6 +1,6 @@
 var drupalgap = {
   'settings':{
-    'site_path':'', /* e.g. http://www.drupalgap.org */
+    'site_path':'http://10.0.2.2/mobile.lib.umich.edu', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'language':'und',
     'debug':true, /* set to true to see console.log debug information */
@@ -16,7 +16,7 @@ var drupalgap = {
 	  'call':function(options){
 		  try {
 			  // Get the default api options, then adjust to the caller's options if they are present.
-			  api_options = drupalgap_api_default_options();
+			  var api_options = drupalgap_api_default_options();
 			  if (options.type) { api_options.type = options.type; }
 			  if (options.async) { api_options.async = options.async; }
 			  if (options.data) { api_options.data = options.data; }
@@ -24,7 +24,7 @@ var drupalgap = {
 			  if (options.endpoint || options.endpoint == '') { api_options.endpoint = options.endpoint; }
 			  
 			  // Now assemble the callbacks together.
-			  call_options = drupalgap_chain_callbacks(api_options, options);
+			  var call_options = drupalgap_chain_callbacks(api_options, options);
 			  
 			  // TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_preprocess
 			  
@@ -117,7 +117,7 @@ var drupalgap = {
 						}
 						return false;
 					}
-					api_options = drupalgap_chain_callbacks(drupalgap.services.user.login.options, options);
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.user.login.options, options);
 					api_options.data = 'username=' + encodeURIComponent(options.name);
 					api_options.data += '&password=' + encodeURIComponent(options.pass);
 					drupalgap.api.call(api_options);
@@ -183,7 +183,7 @@ var drupalgap = {
 						}
 						return false;
 					}
-					api_options = drupalgap_chain_callbacks(drupalgap.services.user.register.options, options);
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.user.register.options, options);
 					api_options.data = 'name=' + encodeURIComponent(options.name);
 					api_options.data += '&mail=' + encodeURIComponent(options.mail);
 					drupalgap.api.call(api_options);
@@ -211,8 +211,7 @@ var drupalgap = {
 						}
 						return false;
 					}
-					drupalgap.services.user.retrieve.options = null;
-					api_options = drupalgap_chain_callbacks(drupalgap.services.user.retrieve.options, options);
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.user.retrieve.options, options);
 					api_options.path = 'user/' + options.uid + '.json';
 					drupalgap.api.call(api_options);
 				}
@@ -235,7 +234,7 @@ var drupalgap = {
 			},
 			'call':function(options){
 				try {
-					api_options = drupalgap_chain_callbacks(drupalgap.services.node.create.options, options);
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.node.create.options, options);
 					api_options.data = 'node[language]=' + drupalgap.settings.language +
 						'&node[type]=' + encodeURIComponent(options.node.type) +
 						'&node[title]=' + encodeURIComponent(options.node.title);
@@ -277,7 +276,7 @@ var drupalgap = {
 						);
 					  return;
 					}
-					api_options = drupalgap_chain_callbacks(drupalgap.services.node.retrieve.options, options);
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.node.retrieve.options, options);
 					api_options.path = 'node/' + options.nid + '.json';
 					drupalgap.api.call(api_options);
 				}
@@ -328,7 +327,7 @@ var drupalgap = {
 				  return;
 			  }
 			  //drupalgap.views_datasource.options = drupalgap_api_default_options();
-			  api_options = drupalgap_chain_callbacks(drupalgap.views_datasource.options, options);
+			  var api_options = drupalgap_chain_callbacks(drupalgap.views_datasource.options, options);
 			  api_options.endpoint = '';
 			  api_options.path = options.path;
 			  drupalgap.api.call(api_options);
@@ -420,7 +419,8 @@ function drupalgap_check_connection() {
 }
 
 function drupalgap_api_default_options() {
-	return {
+	var default_options = {};
+	default_options = {
 		'url':'',
 		'type':'get',
 		'async':true,
@@ -457,6 +457,7 @@ function drupalgap_api_default_options() {
 			);
 		},
 	};
+	return default_options;
 }
 
 /**
@@ -506,6 +507,70 @@ function drupalgap_api_default_options() {
 */
 
 function drupalgap_chain_callbacks(options_set_1, options_set_2) {
+	
+	var new_options_set = {};
+	$.extend(true, new_options_set, options_set_1);
+	console.log(new_options_set.success);
+	console.log(options_set_2.success);
+	
+	if (options_set_2.success) {
+		if (new_options_set.success) {
+			if (!$.isArray(new_options_set.success)) {	
+				console.log('creating array');
+				var backup = new_options_set.success;
+				new_options_set.success = [];
+				new_options_set.success.push(backup);
+			}
+			console.log('adding to');
+			new_options_set.success.push(options_set_2.success);
+		}
+		else {
+			console.log('overriding');
+			new_options_set.success = options_set_2.success; 
+		}
+	}
+	if (options_set_2.error) {
+		if (new_options_set.error) {
+			if (!$.isArray(new_options_set.error)) {	
+				var backup = new_options_set.error;
+				new_options_set.error = [];
+				new_options_set.error.push(backup);
+			}
+			new_options_set.error.push(options_set_2.error);
+		}
+		else {
+			new_options_set.error = options_set_2.error; 
+		}
+	}
+	console.log(new_options_set.success);
+	return new_options_set;
+	
+	
+	
+	
+	if (new_options_set.success) {
+		if ($.isArray(new_options_set.success)) {
+			
+			new_options_set.success.concat();
+		}
+		else {
+			var success = [];
+			new_options_set.success.concat();
+			success.push(options_set_1.success);
+			success.push(options_set_2.success);
+			new_options_set.success = success;
+		}
+	}
+	else {
+		if (options_set_2.success) {
+			new_options_set.success = options_set_2.success; 
+		}
+	}
+	
+	$.extend(true, new_options_set, options_set_2);
+	console.log(new_options_set.success);
+	return new_options_set;
+	
 	if (!options_set_1 && options_set_2) {
 		return jQuery.extend(true, {}, options_set_2);
 	}
@@ -541,10 +606,9 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 			options_set_1.error = options_set_2.error;
 		}
 	}
-	if (options_set_1.success.length > 1) {
+	/*if (options_set_1.success.length > 1) {
 		console.log(options_set_1.success);
-	}
+	}*/
 	options_set_2 = null;
 	return jQuery.extend(true, {}, options_set_1);
 }
-
