@@ -1,8 +1,8 @@
-$('#drupalgap_node').live('pagebeforeshow', function(){
+$('#drupalgap_node').on('pagebeforeshow', function(){
 	
 });
 
-$('#drupalgap_node').live('pageshow', function(){
+$('#drupalgap_node').on('pageshow', function(){
 	drupalgap.services.node.retrieve.call({
 		'nid':drupalgap.node.nid,
 		'success':function(node){
@@ -19,6 +19,5 @@ $('#drupalgap_node').live('pageshow', function(){
 
 $('#node_edit').live('click', function(){
 	drupalgap.node_edit.nid = drupalgap.node.nid;
-	//drupalgap.destination = 'node.html';
 	$.mobile.changePage('node_edit.html');
 });

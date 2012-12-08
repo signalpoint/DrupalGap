@@ -1,6 +1,6 @@
 var drupalgap = {
   'settings':{
-    'site_path':'http://10.0.2.2/mobile.lib.umich.edu', /* e.g. http://www.drupalgap.org */
+    'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'language':'und',
     'debug':true, /* set to true to see console.log debug information */
@@ -235,11 +235,7 @@ var drupalgap = {
 			'call':function(options){
 				try {
 					var api_options = drupalgap_chain_callbacks(drupalgap.services.node.create.options, options);
-					api_options.data = 'node[language]=' + drupalgap.settings.language +
-						'&node[type]=' + encodeURIComponent(options.node.type) +
-						'&node[title]=' + encodeURIComponent(options.node.title);
-						/*'&node[body][' + drupalgap.settings.language + '][0][value]=' + 
-						encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);*/
+					api_options.data = drupalgap_node_assemble_data(options);
 					drupalgap.api.call(api_options);
 				}
 				catch (error) {
@@ -290,6 +286,49 @@ var drupalgap = {
 				}
 			},
 		}, // <!-- retrieve -->
+		'update':{
+			'options':{
+				'type':'put',
+				'path':'node/%nid.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.node.update.options, options);
+					api_options.data = drupalgap_node_assemble_data(options);
+					api_options.path = 'node/' + options.node.nid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Node Update Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- update -->
+		'del':{
+			'options':{
+				'type':'delete',
+				'path':'node/%nid.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.node.del.options, options);
+					api_options.path = 'node/' + options.nid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Node Delete Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- delete -->
 	}, // <!-- node -->
 	'drupalgap_content':{
 		'content_types_user_permissions':{
@@ -428,14 +467,16 @@ function drupalgap_api_default_options() {
 		'dataType':'json',
 		'endpoint':'drupalgap',
 		'success':function(result){
-			// TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_postprocess
+			// TODO - this is a good spot for a hook
+			// e.g. hook_drupalgap_api_postprocess
 			$.mobile.hidePageLoadingMsg();
 			if (drupalgap.settings.debug) {
 				console.log(JSON.stringify(result));  
 			} 
 		},
 		'error':function(jqXHR, textStatus, errorThrown){
-			// TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_postprocess
+			// TODO - this is a good spot for a hook
+			// e.g. hook_drupalgap_api_postprocess
 			$.mobile.hidePageLoadingMsg();
 			console.log(JSON.stringify({
 				"jqXHR":jqXHR,
@@ -463,69 +504,21 @@ function drupalgap_api_default_options() {
 /**
  * Takes option set 2, grabs the success/error callback(s), if any, 
  * and appends them onto option set 1's callback(s), then returns
- * the newly assembled option set 1. We make a copy of option set
- * 1 since it is passed by reference.
+ * the a newly assembled option set.
  */
-/*function drupalgap_chain_callbacks(options_set_1, options_set_2) {
-	//options_set_1_copy = jQuery.extend(false, {}, options_set_1);
-	options_set_1_copy = jQuery.extend(true, {}, options_set_1);
-	options_set_1_copy.success = null;
-	options_set_1_copy.error = null;
-	if (options_set_2.success) {
-		if (options_set_1.success) {
-			var success = [];
-			success.push(options_set_1.success);
-			success.push(options_set_2.success);
-			console.log('appending');
-			options_set_1_copy.success = success;
-		}
-		else {
-			console.log('setting');
-			options_set_1_copy.success = options_set_2.success;
-		}
-	}
-	else {
-		console.log('setting');
-		console.log(options_set_1_copy.success);
-	}
-	if (options_set_2.error) {
-		if (options_set_1.error) {
-			var error = [];
-			error.push(options_set_1.error);
-			error.push(options_set_2.error);
-			options_set_1_copy.error = error;
-		}
-		else {
-			options_set_1_copy.error = options_set_2.error;
-		}
-	}
-	if (options_set_1_copy.success.length > 1) {
-		console.log(options_set_1_copy.success);
-	}
-	return options_set_1_copy;
-}
-*/
-
 function drupalgap_chain_callbacks(options_set_1, options_set_2) {
-	
 	var new_options_set = {};
 	$.extend(true, new_options_set, options_set_1);
-	console.log(new_options_set.success);
-	console.log(options_set_2.success);
-	
 	if (options_set_2.success) {
 		if (new_options_set.success) {
-			if (!$.isArray(new_options_set.success)) {	
-				console.log('creating array');
+			if (!$.isArray(new_options_set.success)) {
 				var backup = new_options_set.success;
 				new_options_set.success = [];
 				new_options_set.success.push(backup);
 			}
-			console.log('adding to');
 			new_options_set.success.push(options_set_2.success);
 		}
 		else {
-			console.log('overriding');
 			new_options_set.success = options_set_2.success; 
 		}
 	}
@@ -542,73 +535,23 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 			new_options_set.error = options_set_2.error; 
 		}
 	}
-	console.log(new_options_set.success);
 	return new_options_set;
-	
-	
-	
-	
-	if (new_options_set.success) {
-		if ($.isArray(new_options_set.success)) {
-			
-			new_options_set.success.concat();
-		}
-		else {
-			var success = [];
-			new_options_set.success.concat();
-			success.push(options_set_1.success);
-			success.push(options_set_2.success);
-			new_options_set.success = success;
-		}
+}
+
+/**
+ * 
+ */
+function drupalgap_node_assemble_data(options) {
+	data = 'node[language]=' + encodeURIComponent(drupalgap.settings.language);
+	if (options.node.type) {
+		data += '&node[type]=' + encodeURIComponent(options.node.type); 
 	}
-	else {
-		if (options_set_2.success) {
-			new_options_set.success = options_set_2.success; 
-		}
+	if (options.node.title) {
+		data += '&node[title]=' + encodeURIComponent(options.node.title);
 	}
-	
-	$.extend(true, new_options_set, options_set_2);
-	console.log(new_options_set.success);
-	return new_options_set;
-	
-	if (!options_set_1 && options_set_2) {
-		return jQuery.extend(true, {}, options_set_2);
+	if (options.node.body) {
+		data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
+			encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
 	}
-	if (options_set_2.success) {
-		if (options_set_1.success) {
-			if ($.isArray(options_set_1.success)) {
-				$(options_set_1.success).add(options_set_2.success);
-			}
-			else {
-				var success = [];
-				success.push(options_set_1.success);
-				success.push(options_set_2.success);
-				options_set_1.success = success;
-			}
-		}
-		else {
-			options_set_1.success = options_set_2.success;
-		}
-	}
-	if (options_set_2.error) {
-		if (options_set_1.error) {
-			if ($.isArray(options_set_1.error)) {
-				$(options_set_1.error).add(options_set_2.error);
-			}
-			else {
-				var error = [];
-				error.push(options_set_1.error);
-				error.push(options_set_2.error);
-				options_set_1.error = error;
-			}
-		}
-		else {
-			options_set_1.error = options_set_2.error;
-		}
-	}
-	/*if (options_set_1.success.length > 1) {
-		console.log(options_set_1.success);
-	}*/
-	options_set_2 = null;
-	return jQuery.extend(true, {}, options_set_1);
+	return data;
 }

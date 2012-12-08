@@ -1,4 +1,4 @@
-$('#drupalgap_page_user_register').live('pageshow',function(){
+$('#drupalgap_page_user_register').on('pageshow',function(){
   try {
 	    if (drupalgap.user.uid != 0) {
 	    	navigator.notification.alert(
@@ -11,9 +11,7 @@ $('#drupalgap_page_user_register').live('pageshow',function(){
         }
   }
   catch (error) {
-	  if (drupalgap.settings.debug) {
-		  console.log("drupalgap_page_user_register - " + error);
-	  }
+	  alert("drupalgap_page_user_register - " + error);
   }
 });
 
@@ -28,9 +26,7 @@ $('#user_register_submit').live('click',function() {
 	  });
 	}
 	catch (error) {
-		if (drupalgap.settings.debug) {
-			console.log('user_register_submit - ' + error);
-		}
+		alert('user_register_submit - ' + error);
 	}
 	return false;
 });

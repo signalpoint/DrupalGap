@@ -1,4 +1,4 @@
-$('#drupalgap_page_user_login').live('pageshow',function(){
+$('#drupalgap_page_user_login').on('pageshow',function(){
   try {
 	  if (drupalgap.user.uid != 0) {
 		  navigator.notification.alert(
@@ -33,9 +33,7 @@ $('#user_login_submit').live('click',function() {
 	  });
 	}
 	catch (error) {
-		if (drupalgap.settings.debug) {
-			console.log('user_login_submit - ' + error);
-		}
+		alert('user_login_submit - ' + error);
 	}
 	return false;
 });

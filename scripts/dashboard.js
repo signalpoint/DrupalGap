@@ -1,4 +1,4 @@
-$('#drupalgap_dashboard').live('pagebeforeshow',function(){
+$('#drupalgap_dashboard').on('pagebeforeshow',function(){
 	try {
 		// Hide both nav bars, then figure out which one to show.
 		$('#navbar_anonymous').hide();
@@ -13,14 +13,12 @@ $('#drupalgap_dashboard').live('pagebeforeshow',function(){
         }
 	}
 	catch (error) {
-		if (drupalgap.settings.debug) {
-			console.log("drupalgap_dashboard - " + error);
-		}
+		alert("drupalgap_dashboard - " + error);
 	}
 });
 
-$('#drupalgap_dashboard').live('pageshow', function(){
-	/*drupalgap.views_datasource.call({
+$('#drupalgap_dashboard').on('pageshow', function(){
+	drupalgap.views_datasource.call({
 		'path':'drupalgap/views_datasource/drupalgap_content',
 		'success':function(data) {
 			$("#dashboard_content_list").html("");
@@ -29,7 +27,7 @@ $('#drupalgap_dashboard').live('pageshow', function(){
 			});
 			$("#dashboard_content_list").listview("destroy").listview();
 		},
-	});*/
+	});
 });
 
 $('#dashboard_content_list a').live('click',function(){
@@ -37,11 +35,6 @@ $('#dashboard_content_list a').live('click',function(){
 	$.mobile.changePage('node.html');
 	return false;
 });
-
-/*$('#my_account').live('click', function(){
-	$.mobile.changePage('user.html', {reloadPage:true});
-	return false;
-});*/
 
 $('#logout').live('click', function(){
 	drupalgap.services.user.logout.call({

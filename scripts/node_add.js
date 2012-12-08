@@ -1,10 +1,8 @@
-$('#drupalgap_page_node_add').live('pageshow',function(){
+$('#drupalgap_page_node_add').on('pageshow',function(){
 	try {
 		drupalgap.node_edit = {};
-		alert('node_add call');
 		drupalgap.services.drupalgap_content.content_types_user_permissions.call({
 			'success':function(data){
-				alert('node_add success');
 				$("#node_add_list").html("");
 				$.each(data,function(type,permissions){
 					if (permissions.create) {
@@ -16,9 +14,7 @@ $('#drupalgap_page_node_add').live('pageshow',function(){
 		});
     }
 	catch (error) {
-		if (drupalgap.settings.debug) {
-			console.log("drupalgap_page_node_add - " + error);
-		}
+		alert("drupalgap_page_node_add - " + error);
 	}
 });
 
