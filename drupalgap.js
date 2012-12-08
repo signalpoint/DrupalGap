@@ -1,6 +1,6 @@
 var drupalgap = {
   'settings':{
-    'site_path':'', /* e.g. http://www.drupalgap.org */
+    'site_path':'http://10.0.2.2/drupalgap', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'language':'und',
     'debug':true, /* set to true to see console.log debug information */
@@ -310,6 +310,110 @@ var drupalgap = {
 			},
 		}, // <!-- retrieve -->
 	}, // <!-- user -->
+	'comment':{
+		'create':{
+			'options':{
+				'type':'post',
+				'path':'comment.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.create.options, options);
+					api_options.data = drupalgap_comment_assemble_data(options);
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Comment Create Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- create -->
+		'retrieve':{
+			'options':{
+				'type':'get',
+				'path':'comment/%nid.json',
+				'success':function(comment){
+					// TODO - a good opportunity for a hook to come in
+					// and modify comment.content if developer wants.
+					comment.content = '';
+					if (comment.body.length != 0) {
+						comment.content = comment.body[comment.language][0].safe_value;
+					}
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.nid) {
+						navigator.notification.alert(
+							'No comment id provided!',
+							function(){},
+							'Comment Retrieve Error',
+							'OK'
+						);
+					  return;
+					}
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.retrieve.options, options);
+					api_options.path = 'comment/' + options.nid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Comment Retrieve Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- retrieve -->
+		'update':{
+			'options':{
+				'type':'put',
+				'path':'comment/%nid.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.update.options, options);
+					api_options.data = drupalgap_comment_assemble_data(options);
+					api_options.path = 'comment/' + options.comment.nid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Comment Update Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- update -->
+		'del':{
+			'options':{
+				'type':'delete',
+				'path':'comment/%nid.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.del.options, options);
+					api_options.path = 'comment/' + options.nid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'Comment Delete Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- delete -->
+	}, // <!-- comment -->
 	'node':{
 		'create':{
 			'options':{
@@ -468,6 +572,8 @@ var drupalgap = {
   }, // <!-- views_datasource -->
   'node':{ }, // <!-- node -->
   'node_edit':{ }, // <!-- node_edit -->
+  'comment':{ }, // <!-- comment -->
+  'comment_edit':{ }, // <!-- comment_edit -->
 }; // <!-- drupalgap -->
 
 /**
@@ -638,4 +744,32 @@ function drupalgap_node_assemble_data(options) {
 			encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
 	}
 	return data;
+}
+
+/**
+ * 
+ */
+function drupalgap_comment_assemble_data(options) {
+	data = '';
+	if (options.nid) {
+		data += '&nid=' + encodeURIComponent(options.nid);
+	}
+	if (options.subject) {
+		data += '&subject=' + encodeURIComponent(options.subject);
+	}
+	if (options.comment_body) {
+		data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
+			encodeURIComponent(options.comment_body);
+	}
+	return data;
+}
+
+/**
+ *
+ */
+function drupalgap_format_plural(count, singular, plural) {
+	if (count == 1) {
+		return singular;
+	}
+	return plural;
 }

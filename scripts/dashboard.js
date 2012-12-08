@@ -18,13 +18,15 @@ $('#drupalgap_dashboard').on('pagebeforeshow',function(){
 });
 
 $('#drupalgap_dashboard').on('pageshow', function(){
-	// Get the site name, and set the header to it.
-	drupalgap.services.system.get_variable.call({
-		'name':'site_name',
-		'success':function(value){
-			$('#drupalgap_dashboard h1').html(value);
-		}
-	});
+	// Get the site name, and set the header to it for authenticated users.
+	if (drupalgap.user.uid != 0) {
+		drupalgap.services.system.get_variable.call({
+			'name':'site_name',
+			'success':function(value){
+				$('#drupalgap_dashboard h1').html(value);
+			}
+		});
+	}
 	// Grab some recent content and display it.
 	drupalgap.views_datasource.call({
 		'path':'drupalgap/views_datasource/drupalgap_content',
