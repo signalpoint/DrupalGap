@@ -1,6 +1,6 @@
 $('#drupalgap_node').on('pagebeforeshow', function(){
 	$('#node_comments').hide();
-	$('#comment_edit').hide();
+	$('#comment_add').hide();
 });
 
 $('#drupalgap_node').on('pageshow', function(){
@@ -24,7 +24,7 @@ $('#drupalgap_node').on('pageshow', function(){
 					break;
 				case '2':
 					if (node.comment_count > 0) { $('#node_comments').show(); }
-					$('#comment_edit').show();
+					$('#comment_add').show();
 					break;
 			}
 			if ((node.comment == 1 || node.comment == 2) && node.comment_count > 0) {
@@ -35,9 +35,10 @@ $('#drupalgap_node').on('pageshow', function(){
 	});
 });
 
-$('#node_edit').live('click', function(){
+$('#node_edit').on('click', function(){
 	drupalgap.node_edit.nid = drupalgap.node.nid;
 	$.mobile.changePage('node_edit.html');
+	return false;
 });
 
 $('#node_comments').on('click', function(){

@@ -1,6 +1,6 @@
 var drupalgap = {
   'settings':{
-    'site_path':'http://10.0.2.2/drupalgap', /* e.g. http://www.drupalgap.org */
+    'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'language':'und',
     'debug':true, /* set to true to see console.log debug information */
@@ -11,6 +11,7 @@ var drupalgap = {
 	  'uid':0, /* do not change this user id value */
 	  'name':'Anonymous',
   }, // <!-- user -->
+  'account':{},
   'api':{
 	  'options':{ /* these are set by drupalgap_api_default_options() */ },
 	  'call':function(options){
@@ -309,6 +310,28 @@ var drupalgap = {
 				}
 			},
 		}, // <!-- retrieve -->
+		'update':{
+			'options':{
+				'type':'put',
+				'path':'user/%uid.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.user.update.options, options);
+					api_options.data = drupalgap_user_assemble_data(options);
+					api_options.path = 'user/' + options.account.uid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'User Update Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- update -->
 	}, // <!-- user -->
 	'comment':{
 		'create':{
@@ -664,7 +687,7 @@ function drupalgap_api_default_options() {
 				console.log(JSON.stringify(result));  
 			} 
 		},
-		'error':function(jqXHR, textStatus, errorThrown){
+		'error':function(jqXHR, textStatus, errorThrown, url){
 			// TODO - this is a good spot for a hook
 			// e.g. hook_drupalgap_api_postprocess
 			$.mobile.hidePageLoadingMsg();
@@ -760,6 +783,20 @@ function drupalgap_comment_assemble_data(options) {
 	if (options.comment_body) {
 		data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
 			encodeURIComponent(options.comment_body);
+	}
+	return data;
+}
+
+function drupalgap_user_assemble_data (options) {
+	data = '';
+	if (options.account.name) {
+		data += '&name=' + encodeURIComponent(options.account.name);
+	}
+	if (options.account.mail) {
+		data += '&mail=' + encodeURIComponent(options.account.mail);
+	}
+	if (options.account.current_pass) {
+		data += '&current_pass=' + encodeURIComponent(options.account.current_pass);
 	}
 	return data;
 }
