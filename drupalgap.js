@@ -3,6 +3,7 @@ var drupalgap = {
     'site_path':'', /* e.g. http://www.drupalgap.org */
     'base_path':'/',
     'language':'und',
+    'file_public_path':'sites/default/files',
     'debug':true, /* set to true to see console.log debug information */
     'front':'dashboard.html',
   }, // <!-- settings -->
@@ -809,4 +810,32 @@ function drupalgap_format_plural(count, singular, plural) {
 		return singular;
 	}
 	return plural;
+}
+
+/**
+ * 
+ */
+function drupalgap_theme(hook, variables) {
+	html = '';
+	if (hook == 'image') {
+		html = '<img src="' + drupalgap_image_path(variables.path)  + '" />';
+	}
+	return html;
+}
+
+/**
+ * 
+ * @param uri
+ */
+function drupalgap_image_path(uri) {
+	try {
+		src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
+		if (src.indexOf('public://') != -1) {
+			src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+		}
+		return src;
+	}
+	catch (error) {
+		alert('drupalgap_image_path - ' + error);
+	}
 }

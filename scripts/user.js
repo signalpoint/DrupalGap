@@ -1,6 +1,6 @@
 $('#drupalgap_page_user').on('pagebeforeshow',function(){
 	try {
-		//$('#user_node_add').hide();
+		$('#picture').hide();
 		$('#user_edit').hide();
     }
 	catch (error) {
@@ -15,10 +15,13 @@ $('#drupalgap_page_user').on('pageshow',function(){
 		}
 		drupalgap.services.user.retrieve.call({
 			'uid':drupalgap.account.uid,
-			'success':function(data){
-				$('#drupalgap_page_user h2').html(data.name);
-				created = new Date(parseInt(data.created)*1000);
+			'success':function(account){
+				$('#drupalgap_page_user h2').html(account.name);
+				created = new Date(parseInt(account.created)*1000);
 				$('#created').html(created.toDateString());
+				if (account.picture) {
+					$('#picture').html(drupalgap_theme('image', {'path':account.picture.uri})).show();
+				}
 			},
 		});
     }
