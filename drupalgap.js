@@ -186,6 +186,29 @@ var drupalgap = {
 			},
 		}, // <!-- del_variable -->
 	}, // <!-- system -->
+	'file':{
+		'create':{
+			'options':{
+				'type':'post',
+				'path':'file.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.file.create.options, options);
+					api_options.data = options.file;
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'File Create Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- create -->
+	}, // <!-- file -->
 	'user':{
 		'login':{
 			'options':{
@@ -798,6 +821,9 @@ function drupalgap_user_assemble_data (options) {
 	}
 	if (options.account.current_pass) {
 		data += '&current_pass=' + encodeURIComponent(options.account.current_pass);
+	}
+	if (options.account.picture && options.account.picture.fid) {
+		data += '&picture[fid]=' + encodeURIComponent(options.account.picture.fid);
 	}
 	return data;
 }
