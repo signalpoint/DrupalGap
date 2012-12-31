@@ -565,6 +565,148 @@ var drupalgap = {
 			},
 		}, // <!-- delete -->
 	}, // <!-- node -->
+	'taxonomy_term':{
+		'create':{
+			'options':{
+				'type':'post',
+				'path':'taxonomy_term.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_term.create.options, options);
+					api_options.data = drupalgap_taxonomy_term_assemble_data(options);
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'taxonomy_term Create Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- create -->
+		'retrieve':{
+			'options':{
+				'type':'get',
+				'path':'taxonomy_term/%tid.json',
+				'success':function(taxonomy_term){
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.tid) {
+						navigator.notification.alert(
+							'No Term ID provided!',
+							function(){},
+							'taxonomy_term Retrieve Error',
+							'OK'
+						);
+					  return;
+					}
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_term.retrieve.options, options);
+					api_options.path = 'taxonomy_term/' + options.tid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'taxonomy_term Retrieve Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- retrieve -->
+		'update':{
+			'options':{
+				'type':'put',
+				'path':'taxonomy_term/%tid.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_term.update.options, options);
+					api_options.data = drupalgap_taxonomy_term_assemble_data(options);
+					api_options.path = 'taxonomy_term/' + options.taxonomy_term.tid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'taxonomy_term Update Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- update -->
+		'del':{
+			'options':{
+				'type':'delete',
+				'path':'taxonomy_term/%tid.json',
+			},
+			'call':function(options){
+				try {
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_term.del.options, options);
+					api_options.path = 'taxonomy_term/' + options.tid + '.json';
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'taxonomy_term Delete Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- delete -->
+		'selectNodes':{
+			'options':{
+				'type':'post',
+				'path':'taxonomy_term/selectNodes.json',
+				'success':function(tree){
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.tid) {
+						navigator.notification.alert(
+							'No Term ID protided!',
+							function(){},
+							'taxonomy_term selectNodes Error',
+							'OK'
+						);
+					  return;
+					}
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_term.selectNodes.options, options);
+					api_options.data = '';
+					if (options.tid) {
+						api_options.data += '&tid=' + encodeURIComponent(options.tid);
+					}
+					if (options.pager) {
+						api_options.data += '&pager=' + encodeURIComponent(options.pager);
+					}
+					if (options.limit) {
+						api_options.data += '&limit=' + encodeURIComponent(options.limit);
+					}
+					if (options.order) {
+						api_options.data += '&order=' + encodeURIComponent(options.maxdepth);
+					}
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'taxonomy_term selectNodes Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- selectNodes -->
+	}, // <!-- taxonomy_term -->
 	'taxonomy_vocabulary':{
 		'create':{
 			'options':{
@@ -662,6 +804,47 @@ var drupalgap = {
 				}
 			},
 		}, // <!-- delete -->
+		'getTree':{
+			'options':{
+				'type':'post',
+				'path':'taxonomy_vocabulary/getTree.json',
+				'success':function(tree){
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.vid) {
+						navigator.notification.alert(
+							'No Vocabulary ID provided!',
+							function(){},
+							'taxonomy_vocabulary getTree Error',
+							'OK'
+						);
+					  return;
+					}
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_vocabulary.getTree.options, options);
+					api_options.data = '';
+					if (options.vid) {
+						api_options.data += '&vid=' + encodeURIComponent(options.vid);
+					}
+					if (options.parent) {
+						api_options.data += '&parent=' + encodeURIComponent(options.parent);
+					}
+					if (options.maxdepth) {
+						api_options.data += '&maxdepth=' + encodeURIComponent(options.maxdepth);
+					}
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'taxonomy_vocabulary getTree Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- getTree -->
 	}, // <!-- taxonomy_vocabulary -->
 	'drupalgap_content':{
 		'content_types_user_permissions':{
@@ -719,6 +902,8 @@ var drupalgap = {
   'node_edit':{ }, // <!-- node_edit -->
   'comment':{ }, // <!-- comment -->
   'comment_edit':{ }, // <!-- comment_edit -->
+  'taxonomy_term':{ }, // <!-- taxonomy_term ->
+  'taxonomy_term_edit':{ }, // <!-- taxonomy_term_edit ->
   'taxonomy_vocabulary':{ }, // <!-- taxonomy_vocabulary ->
   'taxonomy_vocabulary_edit':{ }, // <!-- taxonomy_vocabulary_edit ->
 }; // <!-- drupalgap -->
@@ -925,6 +1110,16 @@ function drupalgap_user_assemble_data (options) {
 	if (options.account.picture && options.account.picture.fid) {
 		data += '&picture[fid]=' + encodeURIComponent(options.account.picture.fid);
 	}
+	return data;
+}
+
+function drupalgap_taxonomy_term_assemble_data (options) {
+	data = '';
+	return data;
+}
+
+function drupalgap_taxonomy_vocabulary_assemble_data (options) {
+	data = '';
 	return data;
 }
 

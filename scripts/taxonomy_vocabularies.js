@@ -1,6 +1,5 @@
 $('#drupalgap_page_taxonomy_vocabularies').on('pageshow',function(){
 	try {
-		// Grab some recent content and display it.
 		drupalgap.views_datasource.call({
 			'path':'drupalgap/views_datasource/taxonomy_vocabularies',
 			'success':function(data) {
