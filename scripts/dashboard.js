@@ -40,18 +40,18 @@ $('#drupalgap_dashboard').on('pageshow', function(){
 	});
 });
 
-$('#dashboard_content_list a').live('click',function(){
+$('#dashboard_content_list a').on('click',function(){
 	drupalgap.node = {'nid':$(this).attr('id')};
 	$.mobile.changePage('node.html');
 	return false;
 });
 
-$('#my_account').live('click', function(){
+$('#my_account').on('click', function(){
 	drupalgap.account.uid = drupalgap.user.uid;
 	$.mobile.changePage("user.html");
 });
 
-$('#logout').live('click', function(){
+$('#logout').on('click', function(){
 	drupalgap.services.user.logout.call({
 		'success':function(data){
 			$.mobile.changePage("user_login.html");
