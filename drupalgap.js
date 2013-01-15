@@ -6,6 +6,7 @@ var drupalgap = {
     'file_public_path':'sites/default/files',
     'debug':true, /* set to true to see console.log debug information */
     'front':'dashboard.html',
+    'clean_urls':false, /* set to true if you have clean urls enabled on your site */
   }, // <!-- settings -->
   'destination':'',
   'user':{
@@ -31,7 +32,10 @@ var drupalgap = {
 			  // TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_preprocess
 			  
 			  // Build the Drupal URL path to call.
-			  call_options.url = drupalgap.settings.site_path + drupalgap.settings.base_path + '?q=';
+			  call_options.url = drupalgap.settings.site_path + drupalgap.settings.base_path;
+			  if (!drupalgap.settings.clean_urls) {
+				  call_options.url += '?q=';
+			  }
 			  if (call_options.endpoint) {
 				  call_options.url += call_options.endpoint + '/';
 			  }
@@ -867,6 +871,67 @@ var drupalgap = {
 			},
 		}, // <!-- content_types_user_permissions -->
 	}, // <!-- drupalgap_content -->
+	'drupalgap_system':{
+		'connect':{
+			'options':{
+				'type':'post',
+				'path':'drupalgap_system/connect.json',
+				'success':function(data){
+					drupalgap.user = data.system_connect.user;
+					// TODO - make a function to extract additional drupalgap
+					// system connect resource goodies
+				},
+			},
+			'call':function(options){
+				try {
+					drupalgap.api.call(drupalgap_chain_callbacks(drupalgap.services.drupalgap_system.connect.options, options));
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'DrupalGap System Connect Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- connect -->
+	}, // <!-- drupalgap_system -->
+	'drupalgap_user':{
+		'login':{
+			'options':{
+				'type':'post',
+				'path':'drupalgap_user/login.json',
+				'success':function(data){
+					drupalgap.user = data.drupalgap_system_connect.system_connect.user;
+					// TODO - make a function to extract additional drupalgap
+					// user login resource goodies (system connect)
+				},
+			},
+			'call':function(options){
+				try {
+					if (!options.name || !options.pass) {
+						if (drupalgap.settings.debug) {
+							alert('drupalgap.services.drupalgap_user.login.call - missing user name or password');
+						}
+						return false;
+					}
+					var api_options = drupalgap_chain_callbacks(drupalgap.services.drupalgap_user.login.options, options);
+					api_options.data = 'username=' + encodeURIComponent(options.name);
+					api_options.data += '&password=' + encodeURIComponent(options.pass);
+					drupalgap.api.call(api_options);
+				}
+				catch (error) {
+					navigator.notification.alert(
+						error,
+						function(){},
+						'DrupalGap User Login Error',
+						'OK'
+					);
+				}
+			},
+		}, // <!-- login -->
+	}, // <!-- drupalgap_user -->
   }, // <!-- services -->
   'views_datasource':{
 	  'options':{ /* these are set by drupalgap_api_default_options() */ },
@@ -941,8 +1006,9 @@ function drupalgap_deviceready() {
 		$.mobile.changePage(drupalgap.settings.front);
 	}
 	else {
-		// Device is online, let's make a call to the System Connect Service Resource.
-		drupalgap.services.system.connect.call({
+		// Device is online, let's make a call to the
+		// DrupalGap System Connect Service Resource.
+		drupalgap.services.drupalgap_system.connect.call({
 			'success':function(result){
 				$.mobile.changePage(drupalgap.settings.front);
 			},
@@ -1159,4 +1225,24 @@ function drupalgap_image_path(uri) {
 	catch (error) {
 		alert('drupalgap_image_path - ' + error);
 	}
+}
+
+/*
+ * 
+ */
+function drupalgap_user_access(options) {
+	try {
+
+		// Validate the input.
+		if (!options.string) {
+			alert("drupalgap_user_access - string not provided");
+			return false;
+		}
+
+		return true;
+	}
+	catch (error) {
+		alert.log("drupalgap_user_access - " + error);
+	}
+	return false;
 }

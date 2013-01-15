@@ -24,10 +24,10 @@ $('#user_login_submit').live('click',function() {
 	  var pass = $('#pass').val();
 	  if (!name) { alert('Please enter your user name.'); return false; }
 	  if (!pass) { alert('Please enter your password.'); return false; }
-	  drupalgap.services.user.login.call({
+	  drupalgap.services.drupalgap_user.login.call({
 		  'name':name,
 		  'pass':pass,
-		  'success':function(){
+		  'success':function(result){
 			  $.mobile.changePage("dashboard.html");
 		  },
 	  });
