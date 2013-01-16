@@ -17,7 +17,7 @@ $('#drupalgap_page_user_login').on('pageshow',function(){
   }
 });
 
-$('#user_login_submit').live('click',function() {
+$('#user_login_submit').on('click',function() {
 	try {
 	  // Get name and password, validate them.
 	  var name = $('#name').val();

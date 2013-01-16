@@ -737,7 +737,8 @@ var drupalgap = {
 			'options':{
 				'type':'get',
 				'path':'taxonomy_vocabulary/%vid.json',
-				'success':function(taxonomy_vocabulary){
+				'success':function(vocabulary){
+					drupalgap.taxonomy_vocabulary = vocabulary;
 				},
 			},
 			'call':function(options){
@@ -877,9 +878,14 @@ var drupalgap = {
 				'type':'post',
 				'path':'drupalgap_system/connect.json',
 				'success':function(data){
+					// Set the drupalgap.user to the system connect user.
 					drupalgap.user = data.system_connect.user;
-					// TODO - make a function to extract additional drupalgap
-					// system connect resource goodies
+					// Extract drupalgap service resource results.
+					drupalgap_service_resource_extract_results({
+						'service':'drupalgap_system',
+						'resource':'connect',
+						'data':data
+					});
 				},
 			},
 			'call':function(options){
@@ -903,9 +909,14 @@ var drupalgap = {
 				'type':'post',
 				'path':'drupalgap_user/login.json',
 				'success':function(data){
+					// Extract the system connect user and set drupalgap.user with it.
 					drupalgap.user = data.drupalgap_system_connect.system_connect.user;
-					// TODO - make a function to extract additional drupalgap
-					// user login resource goodies (system connect)
+					// Extract drupalgap service resource results.
+					drupalgap_service_resource_extract_results({
+						'service':'drupalgap_user',
+						'resource':'login',
+						'data':data
+					});
 				},
 			},
 			'call':function(options){
@@ -1228,21 +1239,70 @@ function drupalgap_image_path(uri) {
 }
 
 /*
- * 
+ * Given a drupal permission machine name, this function returns true if the
+ * current user has that permission, false otherwise. Here is example input
+ * that checks to see if the current user has the 'access content' permission.
+ * 	Example Usage:
+ * 		user_access = drupalgap_user_access({'permission':'access content'});
+ * 		if (user_access) {
+ * 			alert("You have the 'access content' permission.");
+ * 		}
+ * 		else {
+ * 			alert("You do not have the 'access content' permission.");
+ * 		}
  */
 function drupalgap_user_access(options) {
 	try {
-
-		// Validate the input.
-		if (!options.string) {
-			alert("drupalgap_user_access - string not provided");
+		// Make sure they provided a permission.
+		if (!options.permission) {
+			alert("drupalgap_user_access - permission not provided");
 			return false;
 		}
-
-		return true;
+		// Assume they don't have permission.
+		access = false;
+		// Iterate over drupalgap.user.permissions to see if the current
+		// user has the given permission, then return the result.
+		$.each(drupalgap.user.permissions, function(index, permission){
+			if (options.permission == permission) {
+				access = true;
+				return;
+			}
+		})
+		return access;
 	}
 	catch (error) {
-		alert.log("drupalgap_user_access - " + error);
+		alert("drupalgap_user_access - " + error);
 	}
 	return false;
+}
+
+/**
+ * 
+ */
+function drupalgap_service_resource_extract_results(options) {
+	try {
+		if (options.service == 'drupalgap_system' || options.service == 'drupalgap_user') {
+			if (options.resource == 'connect' || options.resource == 'login') {
+				// Depending on the service resource, extract the permissions
+				// from the options data.
+				permissions = {};
+				if (options.service == 'drupalgap_system' && options.resource == 'connect') {
+					permissions = options.data.user_permissions; 
+				}
+				else if (options.service == 'drupalgap_user' && options.resource == 'login') {
+					permissions = options.data.drupalgap_system_connect.user_permissions; 
+				}
+				// Now iterate over the extracted user_permissions and attach to
+				// the drupalgap.user.permissions variable.
+				drupalgap.user.permissions = [];
+				$.each(permissions, function(index, object){
+					drupalgap.user.permissions.push(object.permission)
+				});
+			}
+		}
+	}
+	catch (error) {
+		alert('drupalgap_service_resource_extract_results - ' + error);
+		return null;
+	}
 }
