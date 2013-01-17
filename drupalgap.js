@@ -1044,7 +1044,9 @@ function drupalgap_deviceready() {
  * @returns
  */
 function drupalgap_check_connection() {
-    var networkState = navigator.connection.type;
+    // TODO - use this line once, cordova 2.3 is released
+    //var networkState = navigator.connection.type;
+    var networkState = navigator.network.connection.type;
 
     var states = {};
     states[Connection.UNKNOWN]  = 'Unknown connection';
