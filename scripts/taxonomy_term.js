@@ -1,6 +1,11 @@
 $('#drupalgap_taxonomy_term').on('pagebeforeshow', function(){
 	try {
-		$('a#taxonomy_vocabulary_name').text(drupalgap.taxonomy_vocabulary.name);
+		// Set the vocabulary name placeholder.
+		$('#taxonomy_vocabulary_name').text(drupalgap.taxonomy_vocabulary.name);
+		// Show term edit button if user has permission.
+		if (drupalgap_user_access({'permission':'administer taxonomy'})) {
+			$('#taxonomy_term_edit').show();
+		}
 	}
 	catch (error) {
 		alert('drupalgap_taxonomy_term - pagebeforeshow - ' + error);
@@ -11,8 +16,7 @@ $('#drupalgap_taxonomy_term').on('pageshow', function(){
 	drupalgap.services.taxonomy_term.retrieve.call({
 		'tid':drupalgap.taxonomy_term.tid,
 		'success':function(term){
-			drupalgap.taxonomy_term = term;
-			$('h2#taxonomy_term_name').html(term.name);
+			$('#taxonomy_term_name').html(term.name);
 			$('#drupalgap_taxonomy_term .content').html(term.description);
 			drupalgap.services.taxonomy_term.selectNodes.call({
 				'tid':term.tid,
@@ -29,8 +33,8 @@ $('#drupalgap_taxonomy_term').on('pageshow', function(){
 });
 
 $('#taxonomy_term_edit').on('click', function(){
-	//drupalgap.taxonomy_term_edit.tid = drupalgap.taxonomy_term.tid;
-	alert('edit');
+	drupalgap.taxonomy_term_edit = drupalgap.taxonomy_term;
+	$.mobile.changePage("taxonomy_term_edit.html");
 	return false;
 });
 

@@ -1,7 +1,6 @@
 $('#drupalgap_taxonomy_term_edit').on('pagebeforeshow',function(){
 	try {
-		console.log(JSON.stringify(drupalgap.taxonomy_vocabulary));
-		if (!drupalgap.taxonomy_term_edit || !drupalgap.taxonomy_term_edit.nid) {
+		if (!drupalgap.taxonomy_term_edit || !drupalgap.taxonomy_term_edit.tid) {
 			// Creating a new term.
 			$('#drupalgap_taxonomy_term_edit h1').html('Create Term');
 			$('#taxonomy_term_weight').val(0);
@@ -9,7 +8,6 @@ $('#drupalgap_taxonomy_term_edit').on('pagebeforeshow',function(){
 		}
 		else {
 			// Editing an existing term.
-			$('#drupalgap_taxonomy_term_edit h1').html('Edit Term');
 		}
     }
 	catch (error) {
@@ -19,6 +17,16 @@ $('#drupalgap_taxonomy_term_edit').on('pagebeforeshow',function(){
 
 $('#drupalgap_taxonomy_term_edit').on('pageshow',function(){
 	try {
+		if (!drupalgap.taxonomy_term_edit || !drupalgap.taxonomy_term_edit.tid) {
+			// Creating a new term.
+		}
+		else {
+			// Editing an existing term, set placeholders.
+			$('#drupalgap_taxonomy_term_edit h1').html('Edit Term');
+			$('#taxonomy_term_name').val(drupalgap.taxonomy_term_edit.name);
+			$('#taxonomy_term_description').val(drupalgap.taxonomy_term_edit.description);
+			$('#taxonomy_term_weight').val(drupalgap.taxonomy_term_edit.weight);
+		}
     }
 	catch (error) {
 		alert("drupalgap_taxonomy_term_edit - pageshow - " + error);
@@ -44,16 +52,12 @@ $('#taxonomy_term_submit').on('click', function(){
 	});
 });
 
-$('#taxonomy_term_cancel').on('click', function(){
-	$.mobile.changePage('taxonomy_vocabulary.html');
-});
-
 $('#taxonomy_term_delete').on('click', function(){
 	if (confirm('Are you sure you want to delete "' + drupalgap.taxonomy_term_edit.name + '"? This cannot be undone.')) {
 		drupalgap.services.taxonomy_term.del.call({
-			'tid':drupalgap.drupalgap.taxonomy_term_edit.tid,
+			'tid':drupalgap.taxonomy_term_edit.tid,
 			'success':function(result){
-				if (result) {
+				if (result[0] == 3) {
 					drupalgap.taxonomy_term = {};
 					drupalgap.taxonomy_term_edit = {};
 					$.mobile.changePage('taxonomy_vocabulary.html');
@@ -61,4 +65,5 @@ $('#taxonomy_term_delete').on('click', function(){
 			},
 		});
 	}
+	return false;
 });

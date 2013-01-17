@@ -597,7 +597,8 @@ var drupalgap = {
 			'options':{
 				'type':'get',
 				'path':'taxonomy_term/%tid.json',
-				'success':function(taxonomy_term){
+				'success':function(term){
+					drupalgap.taxonomy_term = term;
 				},
 			},
 			'call':function(options){
@@ -1044,7 +1045,8 @@ function drupalgap_deviceready() {
  * @returns
  */
 function drupalgap_check_connection() {
-    // TODO - use this line once, cordova 2.3 is released
+    // TODO - Uncomment and use this line once cordova 2.3 is released
+    // instead of the navigator.network.connection.type variable.
     //var networkState = navigator.connection.type;
     var networkState = navigator.network.connection.type;
 
