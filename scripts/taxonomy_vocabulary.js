@@ -46,3 +46,8 @@ $('#taxonomy_vocabulary_tree a').live('click', function(){
 	$.mobile.changePage('taxonomy_term.html');
 	return false;
 });
+
+$('#taxonomy_term_add').on('click', function(){
+	$.mobile.changePage('taxonomy_term_edit.html');
+	return false;
+});

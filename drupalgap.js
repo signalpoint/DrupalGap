@@ -574,6 +574,8 @@ var drupalgap = {
 			'options':{
 				'type':'post',
 				'path':'taxonomy_term.json',
+				'success':function(result){
+				},
 			},
 			'call':function(options){
 				try {
@@ -1192,6 +1194,15 @@ function drupalgap_user_assemble_data (options) {
 
 function drupalgap_taxonomy_term_assemble_data (options) {
 	data = '';
+	try {
+		data += 'vid=' + encodeURIComponent(options.taxonomy_term.vid);
+		data += '&name=' + encodeURIComponent(options.taxonomy_term.name);
+		data += '&description=' + encodeURIComponent(options.taxonomy_term.description);
+		data += '&weight=' + encodeURIComponent(options.taxonomy_term.weight);
+	}
+	catch (error) {
+		alert('drupalgap_taxonomy_term_assemble_data - ' + error);
+	}
 	return data;
 }
 
@@ -1267,7 +1278,7 @@ function drupalgap_user_access(options) {
 				access = true;
 				return;
 			}
-		})
+		});
 		return access;
 	}
 	catch (error) {

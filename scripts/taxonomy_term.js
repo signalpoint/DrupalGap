@@ -1,9 +1,18 @@
+$('#drupalgap_taxonomy_term').on('pagebeforeshow', function(){
+	try {
+		$('a#taxonomy_vocabulary_name').text(drupalgap.taxonomy_vocabulary.name);
+	}
+	catch (error) {
+		alert('drupalgap_taxonomy_term - pagebeforeshow - ' + error);
+	}
+});
+
 $('#drupalgap_taxonomy_term').on('pageshow', function(){
 	drupalgap.services.taxonomy_term.retrieve.call({
 		'tid':drupalgap.taxonomy_term.tid,
 		'success':function(term){
 			drupalgap.taxonomy_term = term;
-			$('#drupalgap_taxonomy_term h2').html(term.name);
+			$('h2#taxonomy_term_name').html(term.name);
 			$('#drupalgap_taxonomy_term .content').html(term.description);
 			drupalgap.services.taxonomy_term.selectNodes.call({
 				'tid':term.tid,
