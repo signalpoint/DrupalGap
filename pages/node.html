@@ -2,11 +2,13 @@
   <script type="text/javascript" charset="utf-8" src="node.js"></script>
     <div data-role="header">
       <a href="dashboard.html" data-icon="home" class="ui-btn-left">Home</a>
-      <h1></h1>
+      <h1 id="node_type"></h1>
       <a href="#" data-icon="gear" class="ui-btn-right" id="node_edit" style='display: none;'>Edit</a>
     </div><!-- /header -->
-    <div class="ui-bar ui-bar-c"><h2></h2></div>
-    <div data-role="content" class="content"></div><!-- /content -->
+    <div data-role="header" data-theme="b">
+      <h1 id="node_title">&nbsp;</h1>
+    </div><!-- /header -->
+    <div data-role="content" id="node_content"></div><!-- /content -->
     <div data-role="content">
     	<a href="#" data-role='button' id='node_comments' data-theme="b"><span>&nbsp;</span></a>
   		<a href="#" data-role='button' id='comment_add'>Add Comment</a>

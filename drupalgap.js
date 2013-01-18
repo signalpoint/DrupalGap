@@ -470,6 +470,10 @@ var drupalgap = {
 			'options':{
 				'type':'post',
 				'path':'node.json',
+				'success':function(node){
+					drupalgap.node_edit = {};
+					drupalgap.node = {'nid':node.nid};
+				},
 			},
 			'call':function(options){
 				try {
@@ -492,6 +496,7 @@ var drupalgap = {
 				'type':'get',
 				'path':'node/%nid.json',
 				'success':function(node){
+					drupalgap.node = node;
 					// TODO - a good opportunity for a hook to come in
 					// and modify node.content if developer wants.
 					node.content = '';
@@ -529,6 +534,10 @@ var drupalgap = {
 			'options':{
 				'type':'put',
 				'path':'node/%nid.json',
+				'success':function(node){
+					drupalgap.node_edit = {};
+					drupalgap.node = {'nid':node.nid};
+				},
 			},
 			'call':function(options){
 				try {
@@ -551,6 +560,15 @@ var drupalgap = {
 			'options':{
 				'type':'delete',
 				'path':'node/%nid.json',
+				'success':function(result){
+					if (result[0]) {
+						drupalgap.node = {};
+						drupalgap.node_edit = {};	
+					}
+					else {
+						alert('node delete - error - ' + JSON.stringify(result));
+					}
+				},
 			},
 			'call':function(options){
 				try {

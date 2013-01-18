@@ -35,17 +35,15 @@ $('#drupalgap_dashboard').on('pageshow', function(){
 		'success':function(data) {
 			$("#dashboard_content_list").html("");
 			$.each(data.nodes, function(index, object){	
-				$("#dashboard_content_list").append($("<li></li>",{"html":"<a href='#' id='" + object.node.nid + "'>" + object.node.title + "</a>"}));
+				$("#dashboard_content_list").append($("<li></li>",{"html":"<a href='node.html' id='" + object.node.nid + "'>" + object.node.title + "</a>"}));
 			});
 			$("#dashboard_content_list").listview("destroy").listview();
 		},
 	});
 });
 
-$('#dashboard_content_list a').on('click',function(){
+$('#dashboard_content_list a').live('click',function(){
 	drupalgap.node = {'nid':$(this).attr('id')};
-	$.mobile.changePage('node.html');
-	return false;
 });
 
 $('#my_account').on('click', function(){

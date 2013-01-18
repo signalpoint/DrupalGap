@@ -16,7 +16,7 @@ $('#drupalgap_page_user').on('pageshow',function(){
 		drupalgap.services.user.retrieve.call({
 			'uid':drupalgap.account.uid,
 			'success':function(account){
-				$('#drupalgap_page_user h2').html(account.name);
+				$('#user_name').html(account.name);
 				created = new Date(parseInt(account.created)*1000);
 				$('#created').html(created.toDateString());
 				if (account.picture) {

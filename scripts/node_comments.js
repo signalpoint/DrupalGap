@@ -8,7 +8,7 @@ $('#drupalgap_node_comments').on('pageshow',function(){
 		drupalgap.services.node.retrieve.call({
 			'nid':drupalgap.node.nid,
 			'success':function(node){
-				$('#drupalgap_node_comments h2').html(node.title);
+				$('#node_title').html(node.title);
 				if (node.comment == 2) { $('#node_comments_add').show(); }
 				drupalgap.views_datasource.call({
 					'path':'drupalgap/views_datasource/drupalgap_comments/' + node.nid,
