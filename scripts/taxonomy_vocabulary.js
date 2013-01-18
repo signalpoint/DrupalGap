@@ -14,10 +14,12 @@ $('#drupalgap_taxonomy_vocabulary').on('pageshow', function(){
 			$('#drupalgap_taxonomy_vocabulary h2').html(vocabulary.name);
 			$('#drupalgap_taxonomy_vocabulary .content').html(vocabulary.description);
 			// Get the vocabulary term tree.
-			drupalgap.services.taxonomy_vocabulary.getTree.call({
+			//drupalgap.services.taxonomy_vocabulary.getTree.call({
+			drupalgap.services.drupalgap_taxonomy.get_terms.call({
 				'vid':vocabulary.vid,
 				'success':function(tree){
 					// Render the tree into a list.
+					// TODO - turn this into a function (drupal equivalent)
 					$("#taxonomy_vocabulary_tree").html("");
 					$.each(tree, function(index, object){
 						var prefix = '';

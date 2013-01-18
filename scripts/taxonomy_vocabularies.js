@@ -1,14 +1,13 @@
 $('#drupalgap_page_taxonomy_vocabularies').on('pageshow',function(){
 	try {
-		drupalgap.views_datasource.call({
-			'path':'drupalgap/views_datasource/taxonomy_vocabularies',
-			'success':function(data) {
+		drupalgap.services.drupalgap_taxonomy.get_vocabularies.call({
+			'success':function(vocabularies){
 				$("#taxonomy_vocabularies_list").html("");
-				$.each(data.vocabularies, function(index, object){	
-					$("#taxonomy_vocabularies_list").append($("<li></li>",{"html":"<a href='taxonomy_vocabulary.html' vid='" + object.vocabulary.vid + "'>" + object.vocabulary.name + "</a>"}));
+				$.each(vocabularies, function(index, vocabulary){	
+					$("#taxonomy_vocabularies_list").append($("<li></li>",{"html":"<a href='taxonomy_vocabulary.html' vid='" + vocabulary.vid + "'>" + vocabulary.name + "</a>"}));
 				});
 				$("#taxonomy_vocabularies_list").listview("destroy").listview();
-			},
+			}
 		});
     }
 	catch (error) {
