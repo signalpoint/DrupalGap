@@ -41,15 +41,26 @@ $('#taxonomy_term_submit').on('click', function(){
 		'description':$('#taxonomy_term_description').val(),
 		'weight':$('#taxonomy_term_weight').val(),
 	};
-	drupalgap.services.taxonomy_term.create.call({
-		'taxonomy_term':taxonomy_term,
-		'success':function(result){
-			if (result[0] == 1) {
-				alert('Term created!');
-			}
-			$.mobile.changePage('taxonomy_vocabulary.html');
-		},
-	});
+	// If this was an existing term, set the term id and update the term,
+	// otherwise create a new term.
+	if (drupalgap.taxonomy_term_edit.tid) {
+		taxonomy_term.tid = drupalgap.taxonomy_term_edit.tid;
+		drupalgap.services.taxonomy_term.update.call({
+			'taxonomy_term':taxonomy_term,
+			'success':function(result){
+				$.mobile.changePage('taxonomy_vocabulary.html');
+			},
+		});
+	}
+	else {
+		drupalgap.services.taxonomy_term.create.call({
+			'taxonomy_term':taxonomy_term,
+			'success':function(result){
+				$.mobile.changePage('taxonomy_vocabulary.html');
+			},
+		});
+	}
+	
 });
 
 $('#taxonomy_term_delete').on('click', function(){
@@ -57,11 +68,7 @@ $('#taxonomy_term_delete').on('click', function(){
 		drupalgap.services.taxonomy_term.del.call({
 			'tid':drupalgap.taxonomy_term_edit.tid,
 			'success':function(result){
-				if (result[0] == 3) {
-					drupalgap.taxonomy_term = {};
-					drupalgap.taxonomy_term_edit = {};
-					$.mobile.changePage('taxonomy_vocabulary.html');
-				}
+				$.mobile.changePage('taxonomy_vocabulary.html');
 			},
 		});
 	}

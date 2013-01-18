@@ -32,14 +32,19 @@ $('#drupalgap_taxonomy_term').on('pageshow', function(){
 	});
 });
 
+// When the edit button is clicked, set the taxonomy_term_edit.
 $('#taxonomy_term_edit').on('click', function(){
 	drupalgap.taxonomy_term_edit = drupalgap.taxonomy_term;
-	$.mobile.changePage("taxonomy_term_edit.html");
-	return false;
 });
 
 $('#taxonomy_term_nodes li a').live('click', function(){
 	drupalgap.node.nid = $(this).attr('nid');
 	$.mobile.changePage('node.html');
 	return false;
+});
+
+// When the back button is clicked, clear the taxonomy_term.
+$('#taxonomy_term_back').on('click', function(){
+	drupalgap.taxonomy_term = {};
+	drupalgap.taxonomy_term_edit = {};
 });
