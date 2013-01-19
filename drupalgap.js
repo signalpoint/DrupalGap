@@ -6,13 +6,16 @@ var drupalgap = {
     'file_public_path':'sites/default/files',
     'debug':true, /* set to true to see console.log debug information */
     'front':'dashboard.html',
+    'offline':'offline.html',
     'clean_urls':false, /* set to true if you have clean urls enabled on your site */
   }, // <!-- settings -->
+  'online':false,
   'destination':'',
   'user':{
 	  'uid':0, /* do not change this user id value */
 	  'name':'Anonymous',
   }, // <!-- user -->
+  // <!-- Core Variables -->
   'account':{ }, // <!-- account -->
   'account_edit':{ }, // <!-- account_edit -->
   'node':{ }, // <!-- node -->
@@ -23,6 +26,7 @@ var drupalgap = {
   'taxonomy_term_edit':{ }, // <!-- taxonomy_term_edit ->
   'taxonomy_vocabulary':{ }, // <!-- taxonomy_vocabulary ->
   'taxonomy_vocabulary_edit':{ }, // <!-- taxonomy_vocabulary_edit ->
+  // <!-- API -->
   'api':{
 	  'options':{ /* these are set by drupalgap_api_default_options() */ },
 	  'call':function(options){
@@ -54,7 +58,20 @@ var drupalgap = {
 				  console.log(JSON.stringify(call_options));
 			  }
 			  
-			  // Make the call...
+			  // Make sure the device is online, if it isn't send the
+			  // user to the offline page.
+			  drupalgap_check_connection();
+			  if (!drupalgap.online) {
+				navigator.notification.alert(
+				    'No network connection!',
+				    function(){ $.mobile.changePage(drupalgap.settings.offline); },
+				    'Offline',
+				    'OK'
+				);
+				return false;
+			  }
+			  
+			// Make the call...
 			  
 			  // Asynchronous call.
 			  if (call_options.async) {
@@ -1130,15 +1147,16 @@ function drupalgap_deviceready() {
 		return false;
 	}
 	// Check device connection.
-	if (drupalgap_check_connection() == 'No network connection') {
+	drupalgap_check_connection();
+	if (!drupalgap.online) {
 		// Device is off-line.
 		navigator.notification.alert(
-		    'Warning, no network connection!',
-		    function(){},
+		    'No connection found!',
+		    function(){ $.mobile.changePage(drupalgap.settings.offline); },
 		    'Offline',
 		    'OK'
 		);
-		$.mobile.changePage(drupalgap.settings.front);
+		return false;
 	}
 	else {
 		// Device is online, let's make a call to the
@@ -1162,8 +1180,9 @@ function drupalgap_deviceready() {
 }
 
 /**
- * Checks the devices connection.
- * @returns
+ * Checks the devices connection and sets drupalgap.online to true if the
+ * device has a connection, false otherwise.
+ * @returns A string indicating the type of connection according to PhoneGap.
  */
 function drupalgap_check_connection() {
     // TODO - Uncomment and use this line once cordova 2.3 is released
@@ -1179,6 +1198,13 @@ function drupalgap_check_connection() {
     states[Connection.CELL_3G]  = 'Cell 3G connection';
     states[Connection.CELL_4G]  = 'Cell 4G connection';
     states[Connection.NONE]     = 'No network connection';
+    
+    if (states[networkState] == 'No network connection') {
+    	drupalgap.online = false;
+    }
+    else {
+    	drupalgap.online = true;
+    }
 
     return states[networkState];
 }
@@ -1408,7 +1434,7 @@ function drupalgap_image_path(uri) {
 function drupalgap_user_access(options) {
 	try {
 		// Make sure they provided a permission.
-		if (!options.permission) {
+		if (options.permission == null) {
 			alert("drupalgap_user_access - permission not provided");
 			return false;
 		}
