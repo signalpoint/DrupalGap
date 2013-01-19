@@ -422,10 +422,6 @@ var drupalgap = {
 					
 					// TODO - a good opportunity for a hook to come in
 					// and modify comment.content if developer wants.
-					
-					// Extract the comment_body and set at a top level in
-					// the comment object for easy access.
-					comment.body = comment.comment_body[comment.language][0].value;
 				},
 			},
 			'call':function(options){
@@ -535,7 +531,7 @@ var drupalgap = {
 					// and modify node.content if developer wants.
 					node.content = '';
 					if (node.body.length != 0) {
-						node.content = node.body[node.language][0].safe_value;
+						node.content = node.body;
 					}
 				},
 			},
@@ -762,9 +758,9 @@ var drupalgap = {
 			},
 			'call':function(options){
 				try {
-					if (!options.tid) {
+					if (!options.tids) {
 						navigator.notification.alert(
-							'No Term ID protided!',
+							'No Term IDs provided!',
 							function(){},
 							'taxonomy_term selectNodes Error',
 							'OK'
@@ -773,8 +769,8 @@ var drupalgap = {
 					}
 					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_term.selectNodes.options, options);
 					api_options.data = '';
-					if (options.tid) {
-						api_options.data += '&tid=' + encodeURIComponent(options.tid);
+					if (options.tids) {
+						api_options.data += '&tids=' + encodeURIComponent(options.tids);
 					}
 					if (options.pager) {
 						api_options.data += '&pager=' + encodeURIComponent(options.pager);
@@ -809,16 +805,6 @@ var drupalgap = {
 					if (!options.taxonomy_vocabulary.name) {
 						alert('taxonomy_vocabulary - create - no name provided');
 						return;
-					}
-					if (!options.taxonomy_vocabulary.machine_name) {
-						if (options.taxonomy_vocabulary.name) {
-							var machine_name = taxonomy_vocabulary.name.toLowerCase().replace(' ', '_');
-							options.taxonomy_vocabulary.machine_name = machine_name;
-						}
-						else {
-							alert('taxonomy_vocabulary - create - no machine_name provided');
-							return;
-						}						
 					}
 					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_vocabulary.create.options, options);
 					api_options.data = drupalgap_taxonomy_vocabulary_assemble_data(options);
@@ -1294,7 +1280,7 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
  * 
  */
 function drupalgap_node_assemble_data(options) {
-	data = 'node[language]=' + encodeURIComponent(drupalgap.settings.language);
+	data = '';
 	if (options.node.type) {
 		data += '&node[type]=' + encodeURIComponent(options.node.type); 
 	}
@@ -1302,8 +1288,8 @@ function drupalgap_node_assemble_data(options) {
 		data += '&node[title]=' + encodeURIComponent(options.node.title);
 	}
 	if (options.node.body) {
-		data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
-			encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
+		data += '&node[body]=' +
+			encodeURIComponent(options.node.body.value);
 	}
 	return data;
 }
@@ -1322,9 +1308,8 @@ function drupalgap_comment_assemble_data(options) {
 	if (options.comment.subject) {
 		data += '&subject=' + encodeURIComponent(options.comment.subject);
 	}
-	if (options.comment.body) {
-		data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
-			encodeURIComponent(options.comment.body);
+	if (options.comment.comment) {
+		data += '&comment=' + encodeURIComponent(options.comment.comment);
 	}
 	return data;
 }
@@ -1367,9 +1352,7 @@ function drupalgap_taxonomy_term_assemble_data (options) {
 function drupalgap_taxonomy_vocabulary_assemble_data (options) {
 	try {
 		data = ''
-		//data += 'vid=' + encodeURIComponent(options.taxonomy_term.vid);
 		data += '&name=' + encodeURIComponent(options.taxonomy_vocabulary.name);
-		data += '&machine_name=' + encodeURIComponent(options.taxonomy_vocabulary.machine_name);
 		data += '&description=' + encodeURIComponent(options.taxonomy_vocabulary.description);
 		data += '&weight=' + encodeURIComponent(options.taxonomy_vocabulary.weight);
 		return data;
@@ -1408,9 +1391,7 @@ function drupalgap_theme(hook, variables) {
 function drupalgap_image_path(uri) {
 	try {
 		src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
-		if (src.indexOf('public://') != -1) {
-			src = src.replace('public://', drupalgap.settings.file_public_path + '/');
-		}
+		console.log(src);
 		return src;
 	}
 	catch (error) {
@@ -1438,10 +1419,14 @@ function drupalgap_user_access(options) {
 			alert("drupalgap_user_access - permission not provided");
 			return false;
 		}
-		// Assume they don't have permission.
+		// User 1 always has permission.
+		if (drupalgap.user.uid == 1) {
+			return true;
+		}
+		// For everyone else, assume they don't have permission. Iterate over
+		// drupalgap.user.permissions to see if the current user has the given
+		// permission, then return the result.
 		access = false;
-		// Iterate over drupalgap.user.permissions to see if the current
-		// user has the given permission, then return the result.
 		$.each(drupalgap.user.permissions, function(index, permission){
 			if (options.permission == permission) {
 				access = true;

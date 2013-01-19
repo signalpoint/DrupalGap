@@ -27,7 +27,6 @@ $('#drupalgap_taxonomy_vocabulary_edit').on('pageshow',function(){
 				'success':function(vocabulary){
 					$('#drupalgap_taxonomy_vocabulary_edit h1').html('Edit Vocabulary');
 					$('#taxonomy_vocabulary_name').val(vocabulary.name);
-					$('#taxonomy_vocabulary_machine_name').val(vocabulary.machine_name);
 					$('#taxonomy_vocabulary_description').val(vocabulary.description);
 					$('#taxonomy_vocabulary_weight').val(vocabulary.weight);
 				},
@@ -44,7 +43,6 @@ $('#taxonomy_vocabulary_submit').on('click', function(){
 	taxonomy_vocabulary = {
 		'vid':drupalgap.taxonomy_vocabulary.vid,
 		'name':$('#taxonomy_vocabulary_name').val(),
-		'machine_name':$('#taxonomy_vocabulary_machine_name').val(),
 		'description':$('#taxonomy_vocabulary_description').val(),
 		'weight':$('#taxonomy_vocabulary_weight').val(),
 	};

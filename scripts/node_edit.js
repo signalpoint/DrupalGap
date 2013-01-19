@@ -3,7 +3,7 @@ $('#drupalgap_node_edit').on('pagebeforeshow',function(){
 		if (!drupalgap.node_edit || !drupalgap.node_edit.nid) {
 			// Creating a new node.
 			if (!drupalgap.node_edit.type) {
-				alert('drupalgap_node_edit - node type not set');
+				alert('drupalgap_node_edit - pagebeforeshow - node type not set');
 				return;
 			}
 			$('#drupalgap_node_edit h1').html('Create ' + drupalgap.node_edit.type);
@@ -28,7 +28,7 @@ $('#drupalgap_node_edit').on('pageshow',function(){
 					$('#drupalgap_node_edit h1').html('Edit ' + node.type);
 					$('#node_title').val(node.title);
 					if (node.body.length != 0) {
-						$('#node_body').val(node.body[node.language][0].value);
+						$('#node_body').val(node.body);
 					}
 				},
 			});
@@ -43,9 +43,7 @@ $('#node_submit').on('click', function(){
 	var node = {
 		"type": drupalgap.node_edit.type,
 		"title": $('#node_title').val(),
-		"body": {
-		  "und": [{"value":$('#node_body').val()}]
-		}
+		"body": {"value":$('#node_body').val()}
 	};
 	if (!drupalgap.node_edit.nid) {
 		// Creating a new node.

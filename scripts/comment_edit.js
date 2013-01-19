@@ -25,7 +25,7 @@ $('#drupalgap_comment_edit').on('pageshow',function(){
 				'success':function(comment){
 					drupalgap.comment_edit = comment;
 					$('#comment_subject').val(comment.subject);
-					$('#comment_body').val(comment.body);
+					$('#comment_body').val(comment.comment);
 				}
 			});
 		}
@@ -48,7 +48,7 @@ $('#comment_submit').on('click',function(){
 	  			'comment':{
 	  				'cid':drupalgap.comment_edit.cid,
 					'subject':subject,
-					'body':body,
+					'comment':body,
 	  			},
 				'success':function(result){
 					$.mobile.changePage('node.html');
@@ -61,7 +61,7 @@ $('#comment_submit').on('click',function(){
 				'comment':{
 					'nid':drupalgap.node.nid,
 					'subject':subject,
-					'body':body,
+					'comment':body,
 				},
 				'success':function(result){
 					$.mobile.changePage('node.html');

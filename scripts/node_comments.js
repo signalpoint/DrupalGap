@@ -18,10 +18,10 @@ $('#drupalgap_node_comments').on('pageshow',function(){
 							if (drupalgap_user_access({'permission':'administer comments'})) {
 								html += '<a href="comment_edit.html" cid="' + object.comment.cid + '" class="node_comment_list_item_edit">EDIT</a>';
 							}
-							html += object.comment.created + "<br />" +
+							html += object.comment.timestamp + "<br />" +
 							'Author: ' + object.comment.name + "<br />"+ 
 							'Subject: ' + object.comment.subject + "<br />" +
-							'Comment:<br />' + object.comment.comment_body + "<hr />"; 
+							'Comment:<br />' + object.comment.comment + "<hr />"; 
 							$("#node_comments_list").append($("<li></li>",{"html":html}));
 						});
 						$("#node_comments_list").listview("destroy").listview();

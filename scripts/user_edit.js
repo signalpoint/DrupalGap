@@ -51,7 +51,7 @@ $('#submit').on('click',function() {
 				'file':{
 					'file':user_picture_image_data,
 					'filename':image_file_name,
-					'filepath':'public://' + image_file_name
+					'filepath':drupalgap.settings.file_public_path + '/pictures/' + image_file_name
 				},
 				'success':function(file){
 					drupalgap_user_edit_update({'file':{'fid':file.fid}});

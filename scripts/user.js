@@ -24,7 +24,7 @@ $('#drupalgap_page_user').on('pageshow',function(){
 				created = new Date(parseInt(account.created)*1000);
 				$('#created').html(created.toDateString());
 				if (account.picture) {
-					$('#picture').html(drupalgap_theme('image', {'path':account.picture.uri})).show();
+					$('#picture').html(drupalgap_theme('image', {'path':account.picture})).show();
 				}
 			},
 		});

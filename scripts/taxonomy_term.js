@@ -19,7 +19,7 @@ $('#drupalgap_taxonomy_term').on('pageshow', function(){
 			$('#taxonomy_term_name').html(term.name);
 			$('#drupalgap_taxonomy_term .content').html(term.description);
 			drupalgap.services.taxonomy_term.selectNodes.call({
-				'tid':term.tid,
+				'tids':term.tid,
 				'success':function(nodes){
 					$("#taxonomy_term_nodes").html("");
 					$.each(nodes, function(index, object){	
