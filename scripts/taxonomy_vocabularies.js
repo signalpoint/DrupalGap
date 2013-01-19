@@ -1,3 +1,15 @@
+$('#drupalgap_page_taxonomy_vocabularies').on('pagebeforeshow',function(){
+	try {
+		// If the user can administer taxonomy, show the vocabulary add button.
+		if (drupalgap_user_access({'permission':'administer taxonomy'})) {
+			$('#taxonomy_vocabulary_add').show();
+		}
+	}
+	catch (error) {
+		alert("drupalgap_page_taxonomy_vocabularies - pagebeforeshow - " + error);
+	}
+});
+
 $('#drupalgap_page_taxonomy_vocabularies').on('pageshow',function(){
 	try {
 		drupalgap.services.drupalgap_taxonomy.get_vocabularies.call({

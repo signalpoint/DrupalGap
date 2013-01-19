@@ -14,12 +14,15 @@ $('#drupalgap_node_comments').on('pageshow',function(){
 					'path':'drupalgap/views_datasource/drupalgap_comments/' + node.nid,
 					'success':function(results){
 						$.each(results.comments, function(index, object){
-							$("#node_comments_list").append($("<li></li>",{"html":
-								object.comment.created + "<br />" +
-								'Author: ' + object.comment.name + "<br />" +
-								'Subject: ' + object.comment.subject + "<br />" +
-								'Comment:<br />' + object.comment.comment_body + "<hr />"
-							}));
+							html = '';
+							if (drupalgap_user_access({'permission':'administer comments'})) {
+								html += '<a href="comment_edit.html" cid="' + object.comment.cid + '" class="node_comment_list_item_edit">EDIT</a>';
+							}
+							html += object.comment.created + "<br />" +
+							'Author: ' + object.comment.name + "<br />"+ 
+							'Subject: ' + object.comment.subject + "<br />" +
+							'Comment:<br />' + object.comment.comment_body + "<hr />"; 
+							$("#node_comments_list").append($("<li></li>",{"html":html}));
 						});
 						$("#node_comments_list").listview("destroy").listview();
 					}
@@ -30,4 +33,9 @@ $('#drupalgap_node_comments').on('pageshow',function(){
 	catch (error) {
 		alert('drupalgap_node_comments - pageshow - ' + error);
 	}
+});
+
+// 
+$('.node_comment_list_item_edit').live('click', function(){
+	drupalgap.comment_edit.cid = $(this).attr('cid');
 });

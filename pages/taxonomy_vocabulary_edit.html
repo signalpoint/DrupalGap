@@ -1,0 +1,30 @@
+<div data-role="page" id="drupalgap_taxonomy_vocabulary_edit">
+  <script type="text/javascript" charset="utf-8" src="taxonomy_vocabulary_edit.js"></script>
+  <div data-role="header">
+    <a href="dashboard.html" data-icon="home" class="ui-btn-left">Home</a>
+    <h1></h1>
+  </div><!-- header -->
+  <div data-role="content">
+    <div>
+      <label for="taxonomy_vocabulary_name">Name *</label>
+      <input type="text" id="taxonomy_vocabulary_name" />
+    </div>
+    <div>
+      <label for="taxonomy_vocabulary_machine_name">Machine Name</label>
+      <input type="text" id="taxonomy_vocabulary_machine_name" />
+    </div>
+    <div>
+      <label for="taxonomy_vocabulary_description">Description</label>
+      <textarea id="taxonomy_vocabulary_description" rows="5"></textarea>
+    </div>
+    <div>
+      <label for="taxonomy_vocabulary_weight">Weight</label>
+      <input type="number" id="taxonomy_vocabulary_weight" />
+    </div>
+    <div data-role="controlgroup">
+      <a href="#" id="taxonomy_vocabulary_submit" data-role="button" data-theme="b" data-icon="plus">Save</a>
+      <a href="taxonomy_vocabularies.html" id="taxonomy_vocabulary_cancel" data-role="button" data-icon="minus">Cancel</a>
+    </div>
+    <a href="#" id="taxonomy_vocabulary_delete" data-role="button" data-icon="delete">Delete</a>
+  </div><!-- content -->
+</div><!-- page -->

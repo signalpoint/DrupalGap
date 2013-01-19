@@ -386,19 +386,21 @@ var drupalgap = {
 		'retrieve':{
 			'options':{
 				'type':'get',
-				'path':'comment/%nid.json',
+				'path':'comment/%cid.json',
 				'success':function(comment){
+					drupalgap.comment = comment;
+					
 					// TODO - a good opportunity for a hook to come in
 					// and modify comment.content if developer wants.
-					comment.content = '';
-					if (comment.body.length != 0) {
-						comment.content = comment.body[comment.language][0].safe_value;
-					}
+					
+					// Extract the comment_body and set at a top level in
+					// the comment object for easy access.
+					comment.body = comment.comment_body[comment.language][0].value;
 				},
 			},
 			'call':function(options){
 				try {
-					if (!options.nid) {
+					if (!options.cid) {
 						navigator.notification.alert(
 							'No comment id provided!',
 							function(){},
@@ -408,7 +410,7 @@ var drupalgap = {
 					  return;
 					}
 					var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.retrieve.options, options);
-					api_options.path = 'comment/' + options.nid + '.json';
+					api_options.path = 'comment/' + options.cid + '.json';
 					drupalgap.api.call(api_options);
 				}
 				catch (error) {
@@ -424,13 +426,15 @@ var drupalgap = {
 		'update':{
 			'options':{
 				'type':'put',
-				'path':'comment/%nid.json',
+				'path':'comment/%cid.json',
+				'success':function(result){
+				},
 			},
 			'call':function(options){
 				try {
 					var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.update.options, options);
 					api_options.data = drupalgap_comment_assemble_data(options);
-					api_options.path = 'comment/' + options.comment.nid + '.json';
+					api_options.path = 'comment/' + options.comment.cid + '.json';
 					drupalgap.api.call(api_options);
 				}
 				catch (error) {
@@ -446,12 +450,12 @@ var drupalgap = {
 		'del':{
 			'options':{
 				'type':'delete',
-				'path':'comment/%nid.json',
+				'path':'comment/%cid.json',
 			},
 			'call':function(options){
 				try {
 					var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.del.options, options);
-					api_options.path = 'comment/' + options.nid + '.json';
+					api_options.path = 'comment/' + options.cid + '.json';
 					drupalgap.api.call(api_options);
 				}
 				catch (error) {
@@ -772,6 +776,20 @@ var drupalgap = {
 			},
 			'call':function(options){
 				try {
+					if (!options.taxonomy_vocabulary.name) {
+						alert('taxonomy_vocabulary - create - no name provided');
+						return;
+					}
+					if (!options.taxonomy_vocabulary.machine_name) {
+						if (options.taxonomy_vocabulary.name) {
+							var machine_name = taxonomy_vocabulary.name.toLowerCase().replace(' ', '_');
+							options.taxonomy_vocabulary.machine_name = machine_name;
+						}
+						else {
+							alert('taxonomy_vocabulary - create - no machine_name provided');
+							return;
+						}						
+					}
 					var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_vocabulary.create.options, options);
 					api_options.data = drupalgap_taxonomy_vocabulary_assemble_data(options);
 					drupalgap.api.call(api_options);
@@ -1264,15 +1282,18 @@ function drupalgap_node_assemble_data(options) {
  */
 function drupalgap_comment_assemble_data(options) {
 	data = '';
-	if (options.nid) {
-		data += '&nid=' + encodeURIComponent(options.nid);
+	if (options.comment.nid) {
+		data += '&nid=' + encodeURIComponent(options.comment.nid);
 	}
-	if (options.subject) {
-		data += '&subject=' + encodeURIComponent(options.subject);
+	if (options.comment.cid) {
+		data += '&cid=' + encodeURIComponent(options.comment.cid);
 	}
-	if (options.comment_body) {
+	if (options.comment.subject) {
+		data += '&subject=' + encodeURIComponent(options.comment.subject);
+	}
+	if (options.comment.body) {
 		data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
-			encodeURIComponent(options.comment_body);
+			encodeURIComponent(options.comment.body);
 	}
 	return data;
 }
@@ -1313,8 +1334,19 @@ function drupalgap_taxonomy_term_assemble_data (options) {
 }
 
 function drupalgap_taxonomy_vocabulary_assemble_data (options) {
-	data = '';
-	return data;
+	try {
+		data = ''
+		//data += 'vid=' + encodeURIComponent(options.taxonomy_term.vid);
+		data += '&name=' + encodeURIComponent(options.taxonomy_vocabulary.name);
+		data += '&machine_name=' + encodeURIComponent(options.taxonomy_vocabulary.machine_name);
+		data += '&description=' + encodeURIComponent(options.taxonomy_vocabulary.description);
+		data += '&weight=' + encodeURIComponent(options.taxonomy_vocabulary.weight);
+		return data;
+	}
+	catch (error) {
+		alert('drupalgap_taxonomy_vocabulary_assemble_data - ' + error);
+	}
+	return '';
 }
 
 /**
