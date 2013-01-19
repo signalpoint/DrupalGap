@@ -16,24 +16,26 @@ $('#drupalgap_taxonomy_vocabulary').on('pageshow', function(){
 			$('#drupalgap_taxonomy_vocabulary h2').html(vocabulary.name);
 			$('#drupalgap_taxonomy_vocabulary .content').html(vocabulary.description);
 			// Get the vocabulary term tree.
-			drupalgap.services.drupalgap_taxonomy.get_terms.call({
-				'vid':vocabulary.vid,
-				'success':function(tree){
-					// Render the tree into a list.
-					// TODO - turn this into a function (drupal equivalent)
-					$("#taxonomy_vocabulary_tree").html("");
-					$.each(tree, function(index, object){
-						var prefix = '';
-						if (object.depth && object.depth != 0) {
-							for (var i = 0; i < object.depth; i++) {
-								prefix += '&nbsp;&nbsp;';
+			if (drupalgap_user_access({'permission':'drupalgap get terms'})) {
+				drupalgap.services.drupalgap_taxonomy.get_terms.call({
+					'vid':vocabulary.vid,
+					'success':function(tree){
+						// Render the tree into a list.
+						// TODO - turn this into a function (drupal equivalent)
+						$("#taxonomy_vocabulary_tree").html("");
+						$.each(tree, function(index, object){
+							var prefix = '';
+							if (object.depth && object.depth != 0) {
+								for (var i = 0; i < object.depth; i++) {
+									prefix += '&nbsp;&nbsp;';
+								}
 							}
-						}
-						$("#taxonomy_vocabulary_tree").append($("<li></li>",{"html":"<a href='taxonomy_term.html' tid='" + object.tid + "'>" + prefix + object.name + "</a>"}));
-					});
-					$("#taxonomy_vocabulary_tree").listview("destroy").listview();
-				}
-			});
+							$("#taxonomy_vocabulary_tree").append($("<li></li>",{"html":"<a href='taxonomy_term.html' tid='" + object.tid + "'>" + prefix + object.name + "</a>"}));
+						});
+						$("#taxonomy_vocabulary_tree").listview("destroy").listview();
+					}
+				});
+			}
 		},
 	});
 });

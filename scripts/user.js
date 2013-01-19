@@ -1,7 +1,14 @@
 $('#drupalgap_page_user').on('pagebeforeshow',function(){
 	try {
 		$('#picture').hide();
-		$('#user_edit').hide();
+		if (drupalgap_user_access({'permission':'administer users'}) || 
+			drupalgap.user.uid == drupalgap.account.uid) {
+			$('#user_edit').show();
+		}
+		if (drupalgap.user.uid == drupalgap.account.uid) {
+			// TODO - only show if user can create at least one content type
+			$('#user_node_add').show();
+		}
     }
 	catch (error) {
 		alert("drupalgap_page_user - pagebeforeshow - " + error);
@@ -10,9 +17,6 @@ $('#drupalgap_page_user').on('pagebeforeshow',function(){
 
 $('#drupalgap_page_user').on('pageshow',function(){
 	try {
-		if (drupalgap.user.uid = drupalgap.account.uid) {
-			$('#user_edit').show();
-		}
 		drupalgap.services.user.retrieve.call({
 			'uid':drupalgap.account.uid,
 			'success':function(account){
@@ -28,4 +32,8 @@ $('#drupalgap_page_user').on('pageshow',function(){
 	catch (error) {
 		alert("drupalgap_page_user - pageshow - " + error);
 	}
+});
+
+$('#user_edit').on('click', function(){
+	drupalgap.account_edit.uid = drupalgap.account.uid;
 });

@@ -11,6 +11,16 @@ $('#drupalgap_dashboard').on('pagebeforeshow',function(){
         	$('#navbar_authenticated').show();
         	$('#user_navbar h2').show().html("Hi, " + drupalgap.user.name);
         }
+		// If the user is allowed to view user profiles, show them the users
+		// button.
+		if (drupalgap_user_access({'permission':'access user profiles'})) {
+			$('#dashboard_users').show();
+		}
+		// If the user is allowed to get vocabularies, show them the
+		// vocabularies button.
+		if (drupalgap_user_access({'permission':'drupalgap get vocabularies'})) {
+			$('#dashboard_vocabularies').show();
+		}
 	}
 	catch (error) {
 		alert("drupalgap_dashboard - " + error);
@@ -48,13 +58,16 @@ $('#dashboard_content_list a').live('click',function(){
 
 $('#my_account').on('click', function(){
 	drupalgap.account.uid = drupalgap.user.uid;
-	$.mobile.changePage("user.html");
 });
 
 $('#logout').on('click', function(){
 	drupalgap.services.user.logout.call({
 		'success':function(data){
-			$.mobile.changePage("user_login.html");
+			drupalgap.services.system.connect.call({
+				'success':function(result){
+					$.mobile.changePage(drupalgap.settings.front, {reloadPage:true});
+				},
+			});
 		}
 	});
 });

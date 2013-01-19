@@ -13,7 +13,16 @@ var drupalgap = {
 	  'uid':0, /* do not change this user id value */
 	  'name':'Anonymous',
   }, // <!-- user -->
-  'account':{},
+  'account':{ }, // <!-- account -->
+  'account_edit':{ }, // <!-- account_edit -->
+  'node':{ }, // <!-- node -->
+  'node_edit':{ }, // <!-- node_edit -->
+  'comment':{ }, // <!-- comment -->
+  'comment_edit':{ }, // <!-- comment_edit -->
+  'taxonomy_term':{ }, // <!-- taxonomy_term ->
+  'taxonomy_term_edit':{ }, // <!-- taxonomy_term_edit ->
+  'taxonomy_vocabulary':{ }, // <!-- taxonomy_vocabulary ->
+  'taxonomy_vocabulary_edit':{ }, // <!-- taxonomy_vocabulary_edit ->
   'api':{
 	  'options':{ /* these are set by drupalgap_api_default_options() */ },
 	  'call':function(options){
@@ -251,6 +260,7 @@ var drupalgap = {
 				'path':'user/logout.json',
 				'success':function(data){
 					drupalgap.user = {'uid':0};
+					// TODO - make a synchronous call to system connect here.
 				},
 			},
 			'call':function(options){
@@ -315,6 +325,9 @@ var drupalgap = {
 			'options':{
 				'type':'get',
 				'path':'user/%uid.json',
+				'success':function(account){
+					drupalgap.account = account;
+				},
 			},
 			'call':function(options){
 				try {
@@ -1093,14 +1106,6 @@ var drupalgap = {
 		  
 	  },
   }, // <!-- views_datasource -->
-  'node':{ }, // <!-- node -->
-  'node_edit':{ }, // <!-- node_edit -->
-  'comment':{ }, // <!-- comment -->
-  'comment_edit':{ }, // <!-- comment_edit -->
-  'taxonomy_term':{ }, // <!-- taxonomy_term ->
-  'taxonomy_term_edit':{ }, // <!-- taxonomy_term_edit ->
-  'taxonomy_vocabulary':{ }, // <!-- taxonomy_vocabulary ->
-  'taxonomy_vocabulary_edit':{ }, // <!-- taxonomy_vocabulary_edit ->
 }; // <!-- drupalgap -->
 
 /**

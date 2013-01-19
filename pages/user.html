@@ -3,15 +3,16 @@
   <div data-role="header">
     <a href="dashboard.html" data-icon="home" class="ui-btn-left">Home</a>
     <h1>User</h1>
-    <a href="user_edit.html" data-icon="gear" class="ui-btn-right" id="user_edit">Edit</a>
+    <a href="user_edit.html" data-icon="gear" class="ui-btn-right" id="user_edit" style="display: none;">Edit</a>
   </div><!-- /header -->
   <div data-role="header" data-theme="b">
-      <h2 id="user_name">&nbsp;</h1>
+  	  <a href="users.html" data-icon="back" class="ui-btn-left">Users</a>
+      <h2 id="user_name">&nbsp;</h2>
+      <a href="node_add.html" data-icon="add" class="ui-btn-right" id="user_node_add" style="display: none;">Content</a>
   </div><!-- /header -->
   <div data-role="content">
       <p id="picture"></p>
       <h3>Member since</h2>
       <p id="created"></p>
-      <a href="node_add.html" data-role="button" id="user_node_add">Create content</a>
   </div><!-- /content -->
 </div><!-- /page -->

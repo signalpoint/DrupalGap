@@ -1,9 +1,13 @@
-var user_picture_source = null;
-var user_picture_destination_type = null;
-var user_picture_image_data = null;
+var user_picture_source;
+var user_picture_destination_type;
+var user_picture_image_data;
 
 $('#drupalgap_page_user_edit').on('pagebeforeshow',function(){
 	try {
+		// Init picture.
+		user_picture_source = null;
+		user_picture_destination_type = null;
+		user_picture_image_data = null;
 		$('#edit_picture').hide();
     }
 	catch (error) {
@@ -15,7 +19,7 @@ $('#drupalgap_page_user_edit').on('pageshow',function(){
 	try {
 		document.addEventListener("deviceready", user_edit_ready, false);
 		drupalgap.services.user.retrieve.call({
-			'uid':drupalgap.account.uid,
+			'uid':drupalgap.account_edit.uid,
 			'success':function(account){
 				$('#name').val(account.name);
 				if (account.mail) {
@@ -38,7 +42,7 @@ $('#drupalgap_page_user_edit').on('pageshow',function(){
 
 $('#submit').on('click',function() {
 	try {
-		if (user_picture_image_data) {
+		if (user_picture_image_data != null) {
 			// Get image and create unique file name with current UTC val.
 			var edit_picture = $('#edit_picture');
 			var d = new Date();
@@ -66,12 +70,12 @@ $('#submit').on('click',function() {
 
 function drupalgap_user_edit_update(options) {
 	var account = {
-		'uid':drupalgap.account.uid,
+		'uid':drupalgap.account_edit.uid,
 		'name':$('#name').val(),
 		'current_pass':$('#current_pass').val(),
 		'mail':$('#mail').val(),
 	};
-	if (options.file && options.file.fid) {
+	if (options != null && options.file && options.file.fid) {
 		account.picture = {'fid':options.file.fid};
 	}
 	drupalgap.services.user.update.call({
