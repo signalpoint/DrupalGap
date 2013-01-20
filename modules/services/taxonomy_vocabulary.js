@@ -152,3 +152,19 @@ drupalgap.services.taxonomy_vocabulary = {
 		},
 	}, // <!-- getTree -->
 };
+
+function drupalgap_taxonomy_vocabulary_assemble_data (options) {
+	try {
+		data = ''
+		//data += 'vid=' + encodeURIComponent(options.taxonomy_term.vid);
+		data += '&name=' + encodeURIComponent(options.taxonomy_vocabulary.name);
+		data += '&machine_name=' + encodeURIComponent(options.taxonomy_vocabulary.machine_name);
+		data += '&description=' + encodeURIComponent(options.taxonomy_vocabulary.description);
+		data += '&weight=' + encodeURIComponent(options.taxonomy_vocabulary.weight);
+		return data;
+	}
+	catch (error) {
+		alert('drupalgap_taxonomy_vocabulary_assemble_data - ' + error);
+	}
+	return '';
+}

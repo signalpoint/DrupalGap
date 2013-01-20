@@ -18,32 +18,12 @@
     		'front':'dashboard.html',
     		'offline':'offline.html',
     		'clean_urls':false, /* set to true if you have clean urls enabled on your site */
+    		'modules_path':'DrupalGap/modules',
   		};
       	
-      	drupalgap.modules = {
-      		'core':[
-				{'name':'api'},
-      			{'name':'services',
-      			 'includes':[
-						{'name':'comment'},
-						{'name':'drupalgap_content'},
-						{'name':'drupalgap_system'},
-						{'name':'drupalgap_taxonomy'},
-						{'name':'drupalgap_user'},
-						{'name':'file'},
-						{'name':'node'},
-						{'name':'services'},
-						{'name':'system'},
-						{'name':'taxonomy_term'},
-						{'name':'taxonomy_vocabulary'},
-      				],
-      			},
-      			{'name':'views_datasource'}
-      		],
-      		'custom':[
-      		     /*{'name':'example'}*/
-      		]
-      	};
+      	drupalgap.modules.custom = [
+      	  /*{'name':'example'},*/
+      	];
       	
   		</script>
   </head>

@@ -175,3 +175,21 @@ drupalgap.services.taxonomy_term = {
 		},
 	}, // <!-- selectNodes -->
 };
+
+function drupalgap_taxonomy_term_assemble_data (options) {
+	// TODO - I'm pretty sure this function's implementation is causing this
+	// console log error to show up when terms are created/updates:
+	// TypeError: Result of expression 'this.element' [undefined] is not an object.
+	// at file:///android_asset/www/jquery.mobile-1.2.0.min.js:2
+	data = '';
+	try {
+		data += 'vid=' + encodeURIComponent(options.taxonomy_term.vid);
+		data += '&name=' + encodeURIComponent(options.taxonomy_term.name);
+		data += '&description=' + encodeURIComponent(options.taxonomy_term.description);
+		data += '&weight=' + encodeURIComponent(options.taxonomy_term.weight);
+	}
+	catch (error) {
+		alert('drupalgap_taxonomy_term_assemble_data - ' + error);
+	}
+	return data;
+}

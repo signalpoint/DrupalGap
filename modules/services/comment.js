@@ -106,3 +106,24 @@ drupalgap.services.comment = {
 		},
 	}, // <!-- delete -->
 };
+
+/**
+ * 
+ */
+function drupalgap_comment_assemble_data(options) {
+	data = '';
+	if (options.comment.nid) {
+		data += '&nid=' + encodeURIComponent(options.comment.nid);
+	}
+	if (options.comment.cid) {
+		data += '&cid=' + encodeURIComponent(options.comment.cid);
+	}
+	if (options.comment.subject) {
+		data += '&subject=' + encodeURIComponent(options.comment.subject);
+	}
+	if (options.comment.body) {
+		data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
+			encodeURIComponent(options.comment.body);
+	}
+	return data;
+}

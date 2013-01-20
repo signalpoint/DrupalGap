@@ -150,3 +150,20 @@ drupalgap.services.user = {
 		},
 	}, // <!-- update -->
 };
+
+function drupalgap_user_assemble_data (options) {
+	data = '';
+	if (options.account.name) {
+		data += '&name=' + encodeURIComponent(options.account.name);
+	}
+	if (options.account.mail) {
+		data += '&mail=' + encodeURIComponent(options.account.mail);
+	}
+	if (options.account.current_pass) {
+		data += '&current_pass=' + encodeURIComponent(options.account.current_pass);
+	}
+	if (options.account.picture && options.account.picture.fid) {
+		data += '&picture[fid]=' + encodeURIComponent(options.account.picture.fid);
+	}
+	return data;
+}

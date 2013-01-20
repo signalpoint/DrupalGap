@@ -120,3 +120,21 @@ drupalgap.services.node = {
 		},
 	}, // <!-- delete -->
 };
+
+/**
+ * 
+ */
+function drupalgap_node_assemble_data(options) {
+	data = 'node[language]=' + encodeURIComponent(drupalgap.settings.language);
+	if (options.node.type) {
+		data += '&node[type]=' + encodeURIComponent(options.node.type); 
+	}
+	if (options.node.title) {
+		data += '&node[title]=' + encodeURIComponent(options.node.title);
+	}
+	if (options.node.body) {
+		data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
+			encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
+	}
+	return data;
+}
