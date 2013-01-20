@@ -7,6 +7,45 @@
       <script src="jquery-1.8.3.min.js"></script>
       <script src="jquery.mobile-1.2.0.min.js"></script>
       <script type="text/javascript" charset="utf-8" src="DrupalGap/drupalgap.js"></script>
+      	<script type="text/javascript" charset="utf-8">
+      	
+      	drupalgap.settings = {
+      		'site_path':'', /* e.g. http://www.drupalgap.org */
+    		'base_path':'/',
+    		'language':'und',
+    		'file_public_path':'sites/default/files',
+    		'debug':true, /* set to true to see console.log debug information */
+    		'front':'dashboard.html',
+    		'offline':'offline.html',
+    		'clean_urls':false, /* set to true if you have clean urls enabled on your site */
+  		};
+      	
+      	drupalgap.modules = {
+      		'core':[
+				{'name':'api'},
+      			{'name':'services',
+      			 'includes':[
+						{'name':'comment'},
+						{'name':'drupalgap_content'},
+						{'name':'drupalgap_system'},
+						{'name':'drupalgap_taxonomy'},
+						{'name':'drupalgap_user'},
+						{'name':'file'},
+						{'name':'node'},
+						{'name':'services'},
+						{'name':'system'},
+						{'name':'taxonomy_term'},
+						{'name':'taxonomy_vocabulary'},
+      				],
+      			},
+      			{'name':'views_datasource'}
+      		],
+      		'custom':[
+      		     /*{'name':'example'}*/
+      		]
+      	};
+      	
+  		</script>
   </head>
   <body onload="drupalgap_onload()"></body>
 </html>
