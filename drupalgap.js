@@ -43,7 +43,30 @@ var drupalgap = {
   'views_datasource':{}, // <!-- views_datasource -->
 }; // <!-- drupalgap -->
 
-
+function drupalgap_add_js() {
+	var data;
+	//var options;
+	if (arguments[0]) { data = arguments[0]; }
+	//if (arguments[1]) { options = arguments[1]; }
+	jQuery.ajax({
+	    async:false,
+	    type:'GET',
+	    url:data,
+	    data:null,
+	    success:function(){
+	    	if (drupalgap.settings.debug) {
+	    		// Print the js path to the console.
+	    		console.log(data.replace(drupalgap.settings.modules_path + '/', ''));
+	    	}
+	    },
+	    dataType:'script',
+	    error: function(xhr, textStatus, errorThrown) {
+	    	console.log('drupalgap_add_js - error');
+	    	console.log(JSON.stringify(xhr));
+	    	alert('drupalgap_add_js - (' + data + ' : ' + textStatus + ') ' + errorThrown);
+	    }
+	});
+}
 
 /**
  * Takes option set 2, grabs the success/error callback(s), if any, 
@@ -99,6 +122,10 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 	// Return the new option set.
 	//console.log(JSON.stringify(new_options_set));
 	return new_options_set;
+}
+
+function drupalgap_changePage(path) {
+	$.mobile.changePage('file:///android_asset/www/' + path);
 }
 
 /**
