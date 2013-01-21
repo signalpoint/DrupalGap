@@ -446,7 +446,6 @@ function drupalgap_user_access(options) {
 }
 
 $('.drupalgap_front').live('click', function(){
-    alert('home');
     drupalgap_changePage(drupalgap.settings.front);
 });
 
