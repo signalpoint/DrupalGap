@@ -9,31 +9,10 @@ $('#drupalgap_page_user_login').on('pageshow',function(){
 		  );
 		  $.mobile.changePage("dashboard.html");
 	  }
+	  drupalgap_form_render('user_login', '#drupalgap_page_user_login .content');
   }
   catch (error) {
-	  if (drupalgap.settings.debug) {
-		  console.log("drupalgap_page_user_login - " + error);
-	  }  
+		alert("drupalgap_page_user_login - " + error);
   }
 });
 
-$('#user_login_submit').on('click',function() {
-	try {
-	  // Get name and password, validate them.
-	  var name = $('#name').val();
-	  var pass = $('#pass').val();
-	  if (!name) { alert('Please enter your user name.'); return false; }
-	  if (!pass) { alert('Please enter your password.'); return false; }
-	  drupalgap.services.drupalgap_user.login.call({
-		  'name':name,
-		  'pass':pass,
-		  'success':function(result){
-			  $.mobile.changePage("dashboard.html");
-		  },
-	  });
-	}
-	catch (error) {
-		alert('user_login_submit - ' + error);
-	}
-	return false;
-});

@@ -18,14 +18,18 @@ function drupalgap_form_render(form_id, css_selector) {
           form_element += '<label for="' + name + '">' + element.title + '</label>';
         }
         switch (element.type) {
-          case "textfield":
-            form_element += '<input type="text" id="' + name + '" value=""/>';
-            break;
+          
           case "email":
             form_element += '<input type="email" id="' + name + '" value=""/>';
             break;
+          case "password":
+            form_element += '<input type="password" id="' + name + '" value=""/>';
+            break;
           case "submit":
             form_element += '<button type="button" data-theme="b" id="' + name + '" class="drupalgap_form_submit">' + element.value + '</button>';
+            break;
+          case "textfield":
+            form_element += '<input type="text" id="' + name + '" value=""/>';
             break;
           default:
             console.log(JSON.stringify(element));

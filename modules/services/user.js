@@ -36,7 +36,7 @@ drupalgap.services.user = {
 			'path':'user/logout.json',
 			'success':function(data){
 				drupalgap.user = {'uid':0};
-				// TODO - make a synchronous call to system connect here.
+				drupalgap.services.drupalgap_system.connect.call({'async':false});
 			},
 		},
 		'call':function(options){

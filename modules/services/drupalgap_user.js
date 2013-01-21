@@ -1,4 +1,4 @@
-drupalgap.services.'drupalgap_user = {
+drupalgap.services.drupalgap_user = {
 	'login':{
 		'options':{
 			'type':'post',

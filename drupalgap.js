@@ -51,7 +51,6 @@ function drupalgap_add_js() {
 	var data;
 	//var options;
 	if (arguments[0]) { data = arguments[0]; }
-	//if (arguments[1]) { options = arguments[1]; }
 	jQuery.ajax({
 	    async:false,
 	    type:'GET',
