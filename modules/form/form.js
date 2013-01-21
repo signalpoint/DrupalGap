@@ -8,6 +8,10 @@ function drupalgap_form_render(form_id, css_selector) {
     // Load the form, render each element, and append form to container
     // identified by the incoming css selector.
     form = drupalgap_get_form(form_id);
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_form_render');
+      console.log(JSON.stringify(form));
+    }
     $.each(form.elements, function(name, element){
         form_element = '<div><div id="drupalgap_form_errors"></div>';
         if (element.type != 'submit') {
@@ -65,12 +69,17 @@ function drupalgap_form_state_values_assemble(form) {
 function drupalgap_get_form(form_id) {
   form = {};
   function_name = form_id + '_form';
-  if (typeof function_name == 'string' && eval('typeof ' + function_name) == 'function') {
+  if (eval('typeof ' + function_name) == 'function') {
 	  if (drupalgap.settings.debug) {
 	    console.log(function_name);
 		}
 		form = eval(function_name + '();');
 	}
+	console.log(JSON.stringify(form));
+	console.log(JSON.stringify(drupalgap.form_state));
+	console.log(form_id);
+	console.log('hook form alter time');
+	drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
 	drupalgap.form = form;
   return form;
 }

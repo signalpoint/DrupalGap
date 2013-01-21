@@ -287,33 +287,56 @@ var drupalgap_module_invoke_continue = null;
  * @param hook
  */
 function drupalgap_module_invoke_all(hook) {
-	drupalgap_module_invoke_continue = true;
-	// Try to fire the hook in every module.
-	$.each(drupalgap.modules, function(bundle, modules){
-		$.each(modules, function(index, module){
-			function_name = module.name + '_' + hook;
-			if (typeof function_name == 'string' &&
-				eval('typeof ' + function_name) == 'function') {
-					if (drupalgap.settings.debug) {
-						console.log('hook(): ' + function_name);
-					}
-					eval(function_name+'();');
-			}
-			// Try to fire the hook in any includes for this module.
-			if (module.includes != null && module.includes.length != 0) {
-				$.each(module.includes, function(include_index, include_object){
-					function_name = include_object.name + '_' + hook;
-					if (typeof function_name == 'string' &&
-							eval('typeof ' + function_name) == 'function') {
-								if (drupalgap.settings.debug) {
-									console.log('hook(): ' + function_name);
-								}
-								eval(function_name+'();');
-						}
-				});
-			}
-		});
-	});
+  try {
+    // Copy the arguments.
+    var module_arguments = Array.prototype.slice.call(arguments);
+    drupalgap_module_invoke_continue = true;
+    // Try to fire the hook in every module.
+    $.each(drupalgap.modules, function(bundle, modules){
+      $.each(modules, function(index, module){
+        function_name = module.name + '_' + hook;
+        if (eval('typeof ' + function_name) == 'function') {
+            if (drupalgap.settings.debug) {
+              console.log('hook(): ' + function_name);
+            }
+            // Get the hook function.
+            var fn = window[function_name];
+            
+            // Remove the hook from the arguments.
+            module_arguments.splice(0,1);
+            if (drupalgap.settings.debug) {
+              console.log(JSON.stringify(module_arguments));
+            }
+            
+            // If there are no arguments, just call the hook directly, otherwise
+            // call the hook and pass along all the arguments.
+            if ($.isEmptyObject(module_arguments) ) { fn(); }
+            else { fn.apply(null, module_arguments); }
+        }
+        // Try to fire the hook in any includes for this module.
+        /*if (module.includes != null && module.includes.length != 0) {
+          $.each(module.includes, function(include_index, include_object){
+            function_name = include_object.name + '_' + hook;
+            if (typeof function_name == 'string' &&
+                eval('typeof ' + function_name) == 'function') {
+                  if (drupalgap.settings.debug) {
+                    console.log('hook(): ' + function_name);
+                  }
+                  //eval(function_name+'();');
+                  var fn = window[function_name];
+                  console.log(JSON.stringify(module_arguments));
+                  delete module_arguments[0];
+                  console.log(JSON.stringify(module_arguments));
+                  fn(module_arguments);
+              }
+          });
+        }*/
+      });
+    });
+  }
+  catch (error) {
+    alert('drupalgap_module_invoke_all - ' + error);
+  }
 }
 
 /**
