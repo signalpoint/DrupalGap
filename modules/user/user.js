@@ -1,3 +1,14 @@
+/**
+ * Implements hook_entity_info().
+ */
+function user_entity_info() {
+  try {
+  }
+  catch (error) {
+    alert('user_entity_info - ' + error);
+  }
+}
+
 function user_login_form() {
   form = {
     'id':'user_login',
@@ -6,7 +17,7 @@ function user_login_form() {
     'elements':{
       'name':{
         'type':'textfield',
-        'title':'Hey Username',
+        'title':'Username',
         'required':true,
       },
       'pass':{

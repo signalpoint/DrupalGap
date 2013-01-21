@@ -2,7 +2,11 @@ var drupalgap = {
   'modules':{
 	  'core':[
 	     {'name':'api'},
+	     {'name':'comment'},
+	     {'name':'entity'},
+	     {'name':'field'},
 	     {'name':'form'},
+	     {'name':'node'},
 	     {'name':'services',
 	       'includes':[
 		       {'name':'comment'},
@@ -19,6 +23,7 @@ var drupalgap = {
 		       {'name':'user'},
 	       ]
 	     },
+	     {'name':'taxonomy'},
 	     {'name':'user'},
 	     {'name':'views_datasource'},
 	   ]
@@ -49,7 +54,6 @@ var drupalgap = {
 
 function drupalgap_add_js() {
 	var data;
-	//var options;
 	if (arguments[0]) { data = arguments[0]; }
 	jQuery.ajax({
 	    async:false,
@@ -167,6 +171,8 @@ function drupalgap_check_connection() {
 function drupalgap_deviceready() {
 	// Load up modules.
 	drupalgap_modules_load();
+	// Initialize entities.
+	drupalgap_entity_get_info();
 	// Verify site path is set.
 	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
 		navigator.notification.alert(
@@ -278,6 +284,29 @@ function drupalgap_image_path(uri) {
 	catch (error) {
 		alert('drupalgap_image_path - ' + error);
 	}
+}
+
+function drupalgap_module_invoke(module, hook) {
+  try {
+    var module_arguments = Array.prototype.slice.call(arguments);
+    if (drupalgap.modules[module]) {
+      function_name = drupalgap.modules[module].name + '_' + hook;
+      if (eval('typeof ' + function_name) == 'function') {
+        // Get the hook function.
+        var fn = window[function_name];
+        // Remove the hook from the arguments.
+        module_arguments.splice(0,1);
+        // If there are no arguments, just call the hook directly, otherwise
+        // call the hook and pass along all the arguments.
+        if ($.isEmptyObject(module_arguments) ) { fn(); }
+        else { fn.apply(null, module_arguments); }
+      }
+    }
+  }
+  catch (error) {
+    alert('drupalgap_module_invoke - ' + error);
+  }
+  
 }
 
 var drupalgap_module_invoke_continue = null;
