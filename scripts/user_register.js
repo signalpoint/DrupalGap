@@ -1,32 +1,20 @@
 $('#drupalgap_page_user_register').on('pageshow',function(){
   try {
-	    if (drupalgap.user.uid != 0) {
-	    	navigator.notification.alert(
-				  'Already logged in!',
-				  function(){},
-				  'Error',
-				  'OK'
-			);
-	    	$.mobile.changePage("dashboard.html");
-        }
+    if (drupalgap.user.uid != 0) {
+      navigator.notification.alert(
+        'Already logged in!',
+        function(){
+          $.mobile.changePage(drupalgap.settings.front);
+        },
+        'Error',
+        'OK'
+      );
+      return false;
+    }
+    drupalgap_form_render('user_register', '#drupalgap_page_user_register .content');
   }
   catch (error) {
-	  alert("drupalgap_page_user_register - " + error);
+    alert("drupalgap_page_user_register - pageshow - " + error);
   }
 });
 
-$('#user_register_submit').live('click',function() {
-	try {
-	  drupalgap.services.user.register.call({
-		  'name':$('#name').val(),
-		  'mail':$('#mail').val(),
-		  'success':function(data){
-			  $.mobile.changePage("dashboard.html");
-		  },
-	  });
-	}
-	catch (error) {
-		alert('user_register_submit - ' + error);
-	}
-	return false;
-});

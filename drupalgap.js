@@ -2,24 +2,25 @@ var drupalgap = {
   'modules':{
 	  'core':[
 	     {'name':'api'},
-	     {
-		   'name':'services',
+	     {'name':'form'},
+	     {'name':'services',
 	       'includes':[
-		     {'name':'comment'},
-		     {'name':'drupalgap_content'},
-		     {'name':'drupalgap_system'},
-		     {'name':'drupalgap_taxonomy'},
-		     {'name':'drupalgap_user'},
-		     {'name':'file'},
-		     {'name':'node'},
-		     {'name':'services'},
-		     {'name':'system'},
-		     {'name':'taxonomy_term'},
-		     {'name':'taxonomy_vocabulary'},
-		     {'name':'user'},
+		       {'name':'comment'},
+		       {'name':'drupalgap_content'},
+		       {'name':'drupalgap_system'},
+		       {'name':'drupalgap_taxonomy'},
+		       {'name':'drupalgap_user'},
+		       {'name':'file'},
+		       {'name':'node'},
+		       {'name':'services'},
+		       {'name':'system'},
+		       {'name':'taxonomy_term'},
+		       {'name':'taxonomy_vocabulary'},
+		       {'name':'user'},
 	       ]
 	     },
-	     {'name':'views_datasource'}
+	     {'name':'user'},
+	     {'name':'views_datasource'},
 	   ]
   },
   'user':{
@@ -30,16 +31,19 @@ var drupalgap = {
   'destination':'',
   'account':{ }, /* <!-- account --> */
   'account_edit':{ }, /* <!-- account_edit --> */
-  'node':{ }, /* <!-- node --> */
-  'node_edit':{ }, /* <!-- node_edit --> */
+  'api':{}, // <!-- api -->
   'comment':{ }, /* <!-- comment --> */
   'comment_edit':{ }, /* <!-- comment_edit --> */
+  'form':{ }, /* <!-- form --> */
+  'form_state':{ }, /* <!-- form_state --> */
+  'form_errors':{ }, /* <!-- form_errors --> */
+  'node':{ }, /* <!-- node --> */
+  'node_edit':{ }, /* <!-- node_edit --> */
+  'services':{}, // <!-- services -->
   'taxonomy_term':{ }, /* <!-- taxonomy_term -> */
   'taxonomy_term_edit':{ }, /* <!-- taxonomy_term_edit -> */
   'taxonomy_vocabulary':{ }, /* <!-- taxonomy_vocabulary -> */
   'taxonomy_vocabulary_edit':{ }, /* <!-- taxonomy_vocabulary_edit -> */
-  'api':{}, // <!-- api -->
-  'services':{}, // <!-- services -->
   'views_datasource':{}, // <!-- views_datasource -->
 }; // <!-- drupalgap -->
 
@@ -417,3 +421,9 @@ function drupalgap_user_access(options) {
 	}
 	return false;
 }
+
+$('.drupalgap_front').live('click', function(){
+    alert('home');
+    drupalgap_changePage(drupalgap.settings.front);
+});
+
