@@ -1,0 +1,35 @@
+This is an example module for DrupalGap. If you want to create your own module
+for DrupalGap, follow these steps.
+
+1. Create new folder, for example:
+
+  app/modules/custom/my_module
+  
+2. Create new javascript file, for example:
+
+  app/modules/custom/my_module/my_module.js
+
+Note, the javascript file name must match that of the folder name.
+
+3. Make DrupalGap aware of your module by adding it to your settings.js file:
+
+// How to add one custom module.
+drupalgap.modules.custom = [
+  {'name':'my_module'},
+];
+
+// How to add multiple custom modules.
+drupalgap.modules.custom = [
+  {'name':'my_module'},
+  {'name':'my_other_module'},
+  {'name':'my_modules_grandma'},
+];
+
+4. Check out example code in modules/example/example.js or refer to the
+   DrupalGap API for more information on building custom modules for mobile
+   applications.
+   
+   http://www.easystreet3.com/drupalgap
+
+5. Compile and run your mobile application.
+

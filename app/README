@@ -1,2 +1,5 @@
-Ignore this directory and anything in it for now... good things coming soon.
+This directory is similar to Drupal's sites/all directory. Place any custom
+modules you create for DrupalGap into the app/modules/custom folder. See the
+modules/example directory in DrupalGap for more information on building custom
+modules for your mobile application.
 

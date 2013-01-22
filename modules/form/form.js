@@ -1,10 +1,16 @@
 function drupalgap_form_get_element_id(name) {
-  if (name == null || name == '') { return ''; }
-  name = 'edit-' + name.toLowerCase().replace('_','-');
-  if (drupalgap.settings.debug) {
-    console.log(name);
+  try {
+    if (name == null || name == '') { return ''; }
+    name = 'edit-' + name.toLowerCase().replace('_','-');
+    if (drupalgap.settings.debug) {
+      console.log(name);
+    }
+    return name;
   }
-  return name
+  catch (error) {
+    alert('drupalgap_form_get_element_id - ' + error);
+  }
+  return null;
 }
 
 /**
@@ -78,9 +84,11 @@ function drupalgap_form_render(form_id, css_selector) {
         form_elements += form_element;
     });
     // Add any form buttons to the form elements html.
-    $.each(form.buttons, function(name, button){
-        form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name) + '">' +  button.title + '</button>';
-    });
+    if (form.buttons && form.buttons.length != 0) {
+      $.each(form.buttons, function(name, button){
+          form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name) + '">' +  button.title + '</button>';
+      });
+    }
     // Append the form to the container.
     form_html = '<div><div id="drupalgap_form_errors"></div>' + form_elements + '</div>';
     $(css_selector).append(form_html).trigger('create');
@@ -96,7 +104,12 @@ function drupalgap_form_render(form_id, css_selector) {
 }
 
 function drupalgap_form_set_error(name, message) {
-  drupalgap.form_errors[name] = message;
+  try {
+    drupalgap.form_errors[name] = message;
+  }
+  catch (error) {
+    alert('drupalgap_form_set_error - ' + error);
+  }
 }
 
 function drupalgap_form_state_values_assemble(form) {
@@ -120,17 +133,23 @@ function drupalgap_form_state_values_assemble(form) {
 }
 
 function drupalgap_get_form(form_id) {
-  form = {};
-  function_name = form_id + '_form';
-  if (eval('typeof ' + function_name) == 'function') {
-	  if (drupalgap.settings.debug) {
-	    console.log(function_name);
-		}
-		form = eval(function_name + '();');
-	}
-	drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
-	drupalgap.form = form;
-  return form;
+  try {
+    form = {};
+    function_name = form_id + '_form';
+    if (eval('typeof ' + function_name) == 'function') {
+      if (drupalgap.settings.debug) {
+        console.log(function_name);
+      }
+      form = eval(function_name + '();');
+    }
+    drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
+    drupalgap.form = form;
+    return form;
+  }
+  catch (error) {
+    alert('drupalgap_get_form - ' + error);
+  }
+  return null;
 }
 
 function _drupalgap_form_submit() {

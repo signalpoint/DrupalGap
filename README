@@ -91,14 +91,14 @@ directory so drupalgap.js is located here:
 
    assets/www/DrupalGap/drupalgap.js
 
-   Download Link: https://github.com/signalpoint/DrupalGap/tags
+   Download Link: https://github.com/signalpoint/DrupalGap
 
-5. Open the default.index.html file that comes with DrupalGap, and save a copy
-   of it so it overwrites the existing index.html file:
+5. Open DrupalGap/app/default.settings.js and save a copy of it as settings.js
+   so the copy of it lives here: 
    
-   assets/www/DrupalGap/default.index.html => assets/www/index.html
+   DrupalGap/app/settings.js
    
-6. Specify your Drupal site path (with NO trailing slash) in index.html,
+6. Specify your Drupal site path (with NO trailing slash) in settings.js,
    for example:
 
    'site_path':'http://www.drupalgap.org'
@@ -106,6 +106,7 @@ directory so drupalgap.js is located here:
 7. Copy the contents of DrupalGap/pages and DrupalGap/scripts to the assets/www
    folder so these files (and many more) exist:
    
+   assets/www/index.html
    assets/www/dashboard.html
    assets/www/dashboard.js
 

@@ -28,6 +28,7 @@ var drupalgap = {
 	     {'name':'views_datasource'},
 	   ]
   },
+  'module_paths':[],
   'user':{
 	  'uid':0, /* do not change this user id value */
 	  'name':'Anonymous',
@@ -58,22 +59,22 @@ function drupalgap_add_js() {
 	var data;
 	if (arguments[0]) { data = arguments[0]; }
 	jQuery.ajax({
-	    async:false,
-	    type:'GET',
-	    url:data,
-	    data:null,
-	    success:function(){
-	    	if (drupalgap.settings.debug) {
-	    		// Print the js path to the console.
-	    		console.log(data.replace(drupalgap.settings.modules_path + '/', ''));
-	    	}
-	    },
-	    dataType:'script',
-	    error: function(xhr, textStatus, errorThrown) {
-	    	console.log('drupalgap_add_js - error');
-	    	console.log(JSON.stringify(xhr));
-	    	alert('drupalgap_add_js - (' + data + ' : ' + textStatus + ') ' + errorThrown);
-	    }
+    async:false,
+    type:'GET',
+    url:data,
+    data:null,
+    success:function(){
+      if (drupalgap.settings.debug) {
+        // Print the js path to the console.
+        console.log(data);
+      }
+    },
+    dataType:'script',
+    error: function(xhr, textStatus, errorThrown) {
+      console.log('drupalgap_add_js - error');
+      console.log(JSON.stringify(xhr));
+      alert('drupalgap_add_js - error - (' + data + ' : ' + textStatus + ') ' + errorThrown);
+    }
 	});
 }
 
@@ -168,9 +169,11 @@ function drupalgap_check_connection() {
 }
 
 /**
- * Cordova is loaded and it is now safe to make calls to Cordova methods.
+ * Cordova is loaded and it is now safe for DrupalGap to start.
  */
 function drupalgap_deviceready() {
+  // Load up settings.
+  drupalgap_settings_load();
 	// Load up modules.
 	drupalgap_modules_load();
 	// Initialize entities.
@@ -178,7 +181,7 @@ function drupalgap_deviceready() {
 	// Verify site path is set.
 	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
 		navigator.notification.alert(
-		    'You must specify a site path to Drupal in the index.html file!',
+		    'No site path to Drupal set in the DrupalGap/app/settings.js file!',
 		    function(){},
 		    'Error',
 		    'OK'
@@ -235,10 +238,16 @@ function drupalgap_deviceready() {
  * @returns
  */
 function drupalgap_format_plural(count, singular, plural) {
-	if (count == 1) {
-		return singular;
+  try {
+    if (count == 1) {
+      return singular;
+    }
+    return plural;
 	}
-	return plural;
+	catch (error) {
+	  alert('drupalgap_format_plural - ' + error);
+	}
+	return null;
 }
 
 /**
@@ -247,27 +256,33 @@ function drupalgap_format_plural(count, singular, plural) {
  * @param name
  */
 function drupalgap_get_path(type, name) {
-	var path = '';
-	var found_it = false;
-	if (type == 'module') {
-		$.each(drupalgap.modules, function(bundle, modules){
-			$.each(modules, function(index, module){
-				if (name == module.name) {
-					path = drupalgap.settings.modules_path + '/';
-					if (bundle != 'core') { path += bundle + '/'; }
-					path += module.name;
-					found_it = true;
-				}
-				if (found_it) {
-					return false;
-				}
-			});
-			if (found_it) {
-				return false;
-			}
-		});
-	}
-	return path;
+  try {
+    var path = '';
+    var found_it = false;
+    if (type == 'module') {
+      $.each(drupalgap.modules, function(bundle, modules){
+        $.each(modules, function(index, module){
+          if (name == module.name) {
+            path = drupalgap_modules_get_bundle_directory(bundle) + '/';
+            if (bundle != 'core') { path += bundle + '/'; }
+            path += module.name;
+            found_it = true;
+          }
+          if (found_it) {
+            return false;
+          }
+        });
+        if (found_it) {
+          return false;
+        }
+      });
+    }
+    return path;
+  }
+  catch (error) {
+    alert('drupalgap_get_path - ' + error);
+  }
+	return null;
 }
 
 /**
@@ -286,6 +301,7 @@ function drupalgap_image_path(uri) {
 	catch (error) {
 		alert('drupalgap_image_path - ' + error);
 	}
+	return null;
 }
 
 function drupalgap_module_invoke(module, hook) {
@@ -308,7 +324,6 @@ function drupalgap_module_invoke(module, hook) {
   catch (error) {
     alert('drupalgap_module_invoke - ' + error);
   }
-  
 }
 
 var drupalgap_module_invoke_continue = null;
@@ -331,33 +346,39 @@ function drupalgap_module_invoke_all(hook) {
             }
             // Get the hook function.
             var fn = window[function_name];
-            
             // Remove the hook from the arguments.
             module_arguments.splice(0,1);
             if (drupalgap.settings.debug) {
               console.log(JSON.stringify(module_arguments));
             }
-            
             // If there are no arguments, just call the hook directly, otherwise
             // call the hook and pass along all the arguments.
             if ($.isEmptyObject(module_arguments) ) { fn(); }
             else { fn.apply(null, module_arguments); }
         }
         // Try to fire the hook in any includes for this module.
+        // TODO - hooks defined in module includes won't work properly until
+        // each module has a unique name, just like in Drupal. E.g. the user.js
+        // module in services collides with the user.js module, therefore both
+        // can't implement hook_form_alter().
         /*if (module.includes != null && module.includes.length != 0) {
           $.each(module.includes, function(include_index, include_object){
             function_name = include_object.name + '_' + hook;
-            if (typeof function_name == 'string' &&
-                eval('typeof ' + function_name) == 'function') {
+            if (eval('typeof ' + function_name) == 'function') {
                   if (drupalgap.settings.debug) {
                     console.log('hook(): ' + function_name);
                   }
-                  //eval(function_name+'();');
+                  // Get the hook function.
                   var fn = window[function_name];
-                  console.log(JSON.stringify(module_arguments));
-                  delete module_arguments[0];
-                  console.log(JSON.stringify(module_arguments));
-                  fn(module_arguments);
+                  // Remove the hook from the arguments.
+                  module_arguments.splice(0,1);
+                  if (drupalgap.settings.debug) {
+                    console.log(JSON.stringify(module_arguments));
+                  }
+                  // If there are no arguments, just call the hook directly, otherwise
+                  // call the hook and pass along all the arguments.
+                  if ($.isEmptyObject(module_arguments) ) { fn(); }
+                  else { fn.apply(null, module_arguments); }
               }
           });
         }*/
@@ -369,6 +390,20 @@ function drupalgap_module_invoke_all(hook) {
   }
 }
 
+function drupalgap_modules_get_bundle_directory(bundle) {
+  try {
+    dir = '';
+    if (bundle == 'core') { dir = 'DrupalGap/modules'; }
+    else if (bundle == 'contrib') { dir = 'DrupalGap/app/modules'; }
+    else if (bundle == 'custom') { dir = 'DrupalGap/app/modules/custom'; }
+    return dir;
+  }
+  catch (error) {
+    alert('drupalgap_modules_get_bundle_directory - ' + error);
+  }
+  return '';
+}
+
 /**
  * 
  */
@@ -377,9 +412,8 @@ function drupalgap_modules_load() {
 		$.each(drupalgap.modules, function(bundle, modules){
 			$.each(modules, function(index, module){
 				// Determine module directory.
-				dir = '';
-				if (bundle != 'core') { dir = bundle + '/'; }
-				module_base_path = drupalgap.settings.modules_path + '/' + dir + module.name;
+				dir = drupalgap_modules_get_bundle_directory(bundle);
+				module_base_path = dir + '/' + module.name;
 				// Add module .js file to array of paths to load.
 				module_path =  module_base_path + '/' + module.name + '.js';
 				modules_paths = [module_path];
@@ -400,7 +434,7 @@ function drupalgap_modules_load() {
 					    success:function(){
 					    	if (drupalgap.settings.debug) {
 					    		// Print the module path to the console.
-					    		console.log(modules_paths_object.replace(drupalgap.settings.modules_path + '/', ''));
+					    		console.log(modules_paths_object.replace('DrupalGap/', ''));
 					    	}
 					    },
 					    dataType:'script',
@@ -412,6 +446,39 @@ function drupalgap_modules_load() {
 			});
 		});
 	}
+}
+
+/**
+ *
+ */
+function drupalgap_settings_load() {
+  try {
+    settings_file_path = 'DrupalGap/app/settings.js';
+    jQuery.ajax({
+      async:false,
+      type:'GET',
+      url:settings_file_path,
+      data:null,
+      success:function(){
+        if (drupalgap.settings.debug) {
+          // Print the js path to the console.
+          console.log(settings_file_path);
+        }
+      },
+      dataType:'script',
+      error: function(xhr, textStatus, errorThrown) {
+        navigator.notification.alert(
+          'Failed to load the settings.js file in the DrupalGap/app folder!',
+          function(){},
+          'Error',
+          'OK'
+        );
+      }
+    });
+  }
+  catch(error) {
+    alert('drupalgap_settings_load - ' + error);
+  }
 }
 
 /**

@@ -1,3 +1,4 @@
 jquery*
 cordova*
-modules/custom/*
+app/modules/*
+app/settings.js
