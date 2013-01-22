@@ -6,6 +6,8 @@ drupalgap.services.drupalgap_user = {
 			'success':function(data){
 				// Extract the system connect user and set drupalgap.user with it.
 				drupalgap.user = data.drupalgap_system_connect.system_connect.user;
+				drupalgap.field_info_instances = data.drupalgap_system_connect.field_info_instances;
+				drupalgap.field_info_fields = data.drupalgap_system_connect.field_info_fields;
 				// Extract drupalgap service resource results.
 				drupalgap_service_resource_extract_results({
 					'service':'drupalgap_user',

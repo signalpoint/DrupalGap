@@ -24,6 +24,5 @@ $('#drupalgap_page_node_add').on('pageshow',function(){
  */
 $('#node_add_list a').live('click', function(){
 	drupalgap.node_edit = {'type':$(this).attr('id')};
-	$.mobile.changePage('node_edit.html');
 });
 

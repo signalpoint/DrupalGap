@@ -4,6 +4,7 @@ drupalgap.services.system = {
 			'type':'post',
 			'path':'system/connect.json',
 			'success':function(data){
+			  // Extract data and set drupalgap variables.
 				drupalgap.user = data.user;
 			},
 		},

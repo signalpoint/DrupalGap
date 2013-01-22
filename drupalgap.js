@@ -39,6 +39,8 @@ var drupalgap = {
   'api':{}, // <!-- api -->
   'comment':{ }, /* <!-- comment --> */
   'comment_edit':{ }, /* <!-- comment_edit --> */
+  'field_info_fields':{ }, /* <!-- field_info_fields --> */
+  'field_info_instances':{ }, /* <!-- field_info_instances --> */
   'form':{ }, /* <!-- form --> */
   'form_state':{ }, /* <!-- form_state --> */
   'form_errors':{ }, /* <!-- form_errors --> */

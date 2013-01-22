@@ -36,16 +36,11 @@ $('#drupalgap_node').on('pageshow', function(){
 
 $('#node_edit').on('click', function(){
 	drupalgap.node_edit.nid = drupalgap.node.nid;
-	$.mobile.changePage('node_edit.html');
-	return false;
+	drupalgap.node_edit.type = drupalgap.node.type;
 });
 
 $('#node_comments').on('click', function(){
-	$.mobile.changePage('node_comments.html');
-	return false;
 });
 
 $('#comment_add').on('click', function(){
-	$.mobile.changePage('comment_edit.html');
-	return false;
 });
