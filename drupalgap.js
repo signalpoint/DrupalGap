@@ -47,6 +47,7 @@ var drupalgap = {
   'form_errors':{ }, /* <!-- form_errors --> */
   'node':{ }, /* <!-- node --> */
   'node_edit':{ }, /* <!-- node_edit --> */
+  'menu_links':{}, /* <!-- menu_links --> */
   'services':{}, // <!-- services -->
   'taxonomy_term':{ }, /* <!-- taxonomy_term -> */
   'taxonomy_term_edit':{ }, /* <!-- taxonomy_term_edit -> */
@@ -177,7 +178,9 @@ function drupalgap_deviceready() {
 	// Load up modules.
 	drupalgap_modules_load();
 	// Initialize entities.
-	drupalgap_entity_get_info();
+	//drupalgap_entity_get_info();
+	// Initialize menu links.
+	drupalgap_menu_links_load();
 	// Verify site path is set.
 	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
 		navigator.notification.alert(
@@ -264,7 +267,6 @@ function drupalgap_get_path(type, name) {
         $.each(modules, function(index, module){
           if (name == module.name) {
             path = drupalgap_modules_get_bundle_directory(bundle) + '/';
-            if (bundle != 'core') { path += bundle + '/'; }
             path += module.name;
             found_it = true;
           }
@@ -285,6 +287,11 @@ function drupalgap_get_path(type, name) {
 	return null;
 }
 
+function drupalgap_goto(path) {
+  console.log('drupalgap_goto');
+  console.log(JSON.stringify(drupalgap.menu_links[path]));
+}
+
 /**
  * 
  * @param uri
@@ -292,9 +299,9 @@ function drupalgap_get_path(type, name) {
  */
 function drupalgap_image_path(uri) {
 	try {
-		src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
+		var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
 		if (src.indexOf('public://') != -1) {
-			src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+			var src = src.replace('public://', drupalgap.settings.file_public_path + '/');
 		}
 		return src;
 	}
@@ -302,6 +309,21 @@ function drupalgap_image_path(uri) {
 		alert('drupalgap_image_path - ' + error);
 	}
 	return null;
+}
+
+function drupalgap_menu_links_load() {
+  drupalgap_module_invoke_all('menu');
+  var menu_links = drupalgap_module_invoke_results;
+  if (menu_links && menu_links.length != 0) {
+    $.each(menu_links, function(index, menu_link){
+        for (var item in menu_link) {
+          drupalgap.menu_links[item] = menu_link[item];
+          break;
+        }
+    })
+  }
+  //drupalgap.menu_links = Array.prototype.slice.call(drupalgap_module_invoke_results);
+  console.log(JSON.stringify(drupalgap.menu_links));
 }
 
 function drupalgap_module_invoke(module, hook) {
@@ -326,6 +348,7 @@ function drupalgap_module_invoke(module, hook) {
   }
 }
 
+var drupalgap_module_invoke_results = null;
 var drupalgap_module_invoke_continue = null;
 /**
  * 
@@ -333,6 +356,8 @@ var drupalgap_module_invoke_continue = null;
  */
 function drupalgap_module_invoke_all(hook) {
   try {
+    // Prepare the invocation results.
+    drupalgap_module_invoke_results = new Array();
     // Copy the arguments.
     var module_arguments = Array.prototype.slice.call(arguments);
     drupalgap_module_invoke_continue = true;
@@ -348,13 +373,14 @@ function drupalgap_module_invoke_all(hook) {
             var fn = window[function_name];
             // Remove the hook from the arguments.
             module_arguments.splice(0,1);
-            if (drupalgap.settings.debug) {
-              console.log(JSON.stringify(module_arguments));
-            }
             // If there are no arguments, just call the hook directly, otherwise
             // call the hook and pass along all the arguments.
-            if ($.isEmptyObject(module_arguments) ) { fn(); }
-            else { fn.apply(null, module_arguments); }
+            if ($.isEmptyObject(module_arguments) ) {
+              drupalgap_module_invoke_results.push(fn());
+            }
+            else {
+              drupalgap_module_invoke_results.push(fn.apply(null, module_arguments));
+            }
         }
         // Try to fire the hook in any includes for this module.
         // TODO - hooks defined in module includes won't work properly until
@@ -417,8 +443,8 @@ function drupalgap_modules_load() {
 				// Add module .js file to array of paths to load.
 				module_path =  module_base_path + '/' + module.name + '.js';
 				modules_paths = [module_path];
-				// If there are any includes with this module, at them
-				// to the list of paths to include.
+				// If there are any includes with this module, add them to the list of
+				// paths to include.
 				if (module.includes != null && module.includes.length != 0) {
 					$.each(module.includes, function(include_index, include_object){
 						modules_paths.push(module_base_path + '/' + include_object.name + '.js');
@@ -528,12 +554,14 @@ function drupalgap_user_access(options) {
 		// drupalgap.user.permissions to see if the current user has the given
 		// permission, then return the result.
 		access = false;
-		$.each(drupalgap.user.permissions, function(index, permission){
-			if (options.permission == permission) {
-				access = true;
-				return;
-			}
-		});
+		if (drupalgap.user.permissions && drupalgap.user.permissions.length != 0) {
+      $.each(drupalgap.user.permissions, function(index, permission){
+        if (options.permission == permission) {
+          access = true;
+          return;
+        }
+      });
+		}
 		return access;
 	}
 	catch (error) {

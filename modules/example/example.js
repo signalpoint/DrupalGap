@@ -7,3 +7,27 @@ function example_form_alter(form, form_state, form_id) {
   }
 }
 
+function custom_stuff_form() {
+  try {
+  }
+  catch (error) {
+    alert('custom_stuff_form - ' + error);
+  }
+}
+
+function custom_stuff_validate(form, form_state) {
+  try {
+  }
+  catch (error) {
+    alert('custom_stuff_validate - ' + error);
+  }
+}
+
+function custom_stuff_submit(form, form_state) {
+  try {
+  }
+  catch (error) {
+    alert('custom_stuff_submit - ' + error);
+  }
+}
+

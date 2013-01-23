@@ -9,6 +9,18 @@ function user_entity_info() {
   }
 }
 
+/**
+ * Implements hook_menu().
+ */
+function user_menu() {
+  var items = {
+    'user/login':{
+      'page callback':'user_login',
+    },
+  };
+  return items;
+}
+
 function user_login_form() {
   form = {
     'id':'user_login',
