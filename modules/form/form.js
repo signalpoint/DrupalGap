@@ -1,16 +1,16 @@
-function drupalgap_form_get_element_id(name) {
+function drupalgap_form_get_element_id(name, form_id) {
   try {
     if (name == null || name == '') { return ''; }
-    name = 'edit-' + name.toLowerCase().replace('_','-');
-    if (drupalgap.settings.debug) {
-      console.log(name);
-    }
+    name =
+      'edit-' +
+      form_id.toLowerCase().replace('_','-') + '-' +
+      name.toLowerCase().replace('_','-');
+    if (drupalgap.settings.debug) { console.log(name); }
     return name;
   }
   catch (error) {
     alert('drupalgap_form_get_element_id - ' + error);
   }
-  return null;
 }
 
 /**
@@ -43,7 +43,7 @@ function drupalgap_form_render(form_id, css_selector) {
           element.default_value = '';
         }
         // Grab the html id attribute for this element name.
-        element_id = drupalgap_form_get_element_id(name);
+        element_id = drupalgap_form_get_element_id(name, form.id);
         // Depending on the element type, render the field.
         switch (element.type) {
           case "email":
@@ -61,6 +61,7 @@ function drupalgap_form_render(form_id, css_selector) {
           case "textfield":
             form_element += '<input type="text" id="' + element_id + '" value="' + element.default_value + '"/>';
             break;
+          case 'text_long':
           case "text_with_summary":
             form_element += '<textarea type="text" id="' + element_id + '">' + element.default_value + '</textarea>';
             break;
@@ -86,7 +87,7 @@ function drupalgap_form_render(form_id, css_selector) {
     // Add any form buttons to the form elements html.
     if (form.buttons && form.buttons.length != 0) {
       $.each(form.buttons, function(name, button){
-          form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name) + '">' +  button.title + '</button>';
+          form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name, form.id) + '">' +  button.title + '</button>';
       });
     }
     // Append the form to the container.
@@ -96,6 +97,8 @@ function drupalgap_form_render(form_id, css_selector) {
     function_name = form_id + '_form_loaded';
     if (eval('typeof ' + function_name) == 'function') {
       form = eval(function_name + '();');
+      //var fn = window[function_name];
+      //fn.apply(null, module_arguments);
     }
   }
   catch (error) {
@@ -117,7 +120,7 @@ function drupalgap_form_state_values_assemble(form) {
     form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
         if (name == 'submit') { return; }
-        form_state.values[name] = $('#' + drupalgap_form_get_element_id(name)).val();
+        form_state.values[name] = $('#' + drupalgap_form_get_element_id(name, form.id)).val();
     });
     drupalgap.form_state = form_state;
     if (drupalgap.settings.debug) {

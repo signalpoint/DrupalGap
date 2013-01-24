@@ -1,6 +1,7 @@
 $('#drupalgap_comment_edit').on('pagebeforeshow',function(){
 	try {
-		if (drupalgap.comment_edit.cid) {
+	  drupalgap_form_render('comment', '#drupalgap_comment_edit .content');
+		/*if (drupalgap.comment_edit.cid) {
 			// Editing existing comment.
 			$('#drupalgap_comment_edit h1').html('Edit Comment');
 		}
@@ -9,7 +10,7 @@ $('#drupalgap_comment_edit').on('pagebeforeshow',function(){
 			$('#drupalgap_comment_edit h1').html('Add Comment');
 			$('#comment_delete').hide();
 		}
-		$('#drupalgap_comment_edit h2').html(drupalgap.node.title);
+		$('#drupalgap_comment_edit h2').html(drupalgap.node.title);*/
 	}
 	catch (error) {
 		alert('comment_edit - pagebeforeshow - ' + error);
@@ -18,7 +19,7 @@ $('#drupalgap_comment_edit').on('pagebeforeshow',function(){
 
 $('#drupalgap_comment_edit').on('pageshow',function(){
 	try {
-		if (drupalgap.comment_edit.cid) {
+		/*if (drupalgap.comment_edit.cid) {
 			// Editing existing comment.
 			drupalgap.services.comment.retrieve.call({
 				'cid':drupalgap.comment_edit.cid,
@@ -31,7 +32,7 @@ $('#drupalgap_comment_edit').on('pageshow',function(){
 		}
 		else {
 			// Adding new comment.
-		}
+		}*/
 	}
 	catch (error) {
 		alert('comment_edit - pageshow - ' + error);
@@ -76,10 +77,11 @@ $('#comment_submit').on('click',function(){
 	return false;
 });
 
-$('#comment_cancel').on('click',function(){
+$('#edit-comment-edit-cancel').on('click',function(){
+    alert('comment cancel');
 });
 
-$('#comment_delete').on('click',function(){
+$('#edit-comment-edit-').on('click',function(){
 	try {
 		if (confirm('Are you sure you want to delete "' + drupalgap.comment_edit.subject + '"? This cannot be undone.')) {
 			drupalgap.services.comment.del.call({

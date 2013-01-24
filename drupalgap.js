@@ -288,8 +288,19 @@ function drupalgap_get_path(type, name) {
 }
 
 function drupalgap_goto(path) {
-  console.log('drupalgap_goto');
-  console.log(JSON.stringify(drupalgap.menu_links[path]));
+  try {
+    if (path && drupalgap.menu_links[path]) {
+      var menu_link = drupalgap.menu_links[path];
+      var page_callback = menu_link['page callback']
+      if (eval('typeof ' + page_callback) == 'function') {
+        var fn = window[page_callback];
+        fn();
+      }
+    }
+  }
+  catch (error) {
+    alert('drupalgap_goto - ' + error);
+  }
 }
 
 /**
@@ -322,8 +333,9 @@ function drupalgap_menu_links_load() {
         }
     })
   }
-  //drupalgap.menu_links = Array.prototype.slice.call(drupalgap_module_invoke_results);
-  console.log(JSON.stringify(drupalgap.menu_links));
+  if (drupalgap.settings.debug) {
+    console.log(JSON.stringify(drupalgap.menu_links));
+  }
 }
 
 function drupalgap_module_invoke(module, hook) {

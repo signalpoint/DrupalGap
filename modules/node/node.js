@@ -39,21 +39,12 @@ function node_edit_form() {
       'default_value':drupalgap.node_edit.type,
     };
     
-    // Get the fields for this content type, iterate over each and add them
-    // to the form's elements.
-    fields = drupalgap_field_info_instances('node', drupalgap.node_edit.type);
-    $.each(fields, function(name, field){
-      field_info = drupalgap_field_info_field(name);
-      // Add the field to the form's elements.
-      form.elements[name] = {
-        'type':field_info.type,
-        'title':field.label,
-        'required':field.required,
-        'default_value':field.default_value,
-        'description':field.description,
-      };
-    });
-    //console.log(JSON.stringify(fields));
+    // Add the fields for this content type to the form.
+    drupalgap_field_info_instances_add_to_form(
+      'node',
+      drupalgap.node_edit.type,
+      form
+    );
     
     // Add submit to form.
     form.elements.submit = {
@@ -81,7 +72,8 @@ function node_edit_form() {
   return null;
 }
 
-function node_edit_form_loaded(form, form_state) {
+// TODO - this should really accept the form, and form_state as args.
+function node_edit_form_loaded() {
   try {
     // Are we editing a node?
     if (drupalgap.node_edit.nid) {
@@ -89,13 +81,15 @@ function node_edit_form_loaded(form, form_state) {
       drupalgap.node_edit = drupalgap.services.node.retrieve.call({
         'nid':drupalgap.node_edit.nid,
         'success':function(node){
-          drupalgap.node_edit = node;
-          $('#' + drupalgap_form_get_element_id('title')).val(node.title);
+          $('#' + drupalgap_form_get_element_id('title', drupalgap.form.id)).val(node.title);
           // Get the fields for this content type, iterate over each and add each
           // of their values to their corresponding form. element
           fields = drupalgap_field_info_instances('node', node.type);
           $.each(fields, function(name, field){
-              $('#' + drupalgap_form_get_element_id(name)).val(node[name][node.language][0].value);
+              if (node[name] && node[name].length > 0) {
+                var css_id = drupalgap_form_get_element_id(name, drupalgap.form.id); 
+                $('#' + css_id).val(node[name][node.language][0].value);
+              }
           });
         },
       });

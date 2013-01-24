@@ -1,25 +1,25 @@
 /**
  * Implements hook_entity_info().
  */
-function user_entity_info() {
+/*function user_entity_info() {
   try {
   }
   catch (error) {
     alert('user_entity_info - ' + error);
   }
-}
+}*/
 
 /**
  * Implements hook_menu().
  */
-function user_menu() {
+/*function user_menu() {
   var items = {
     'user/login':{
       'page callback':'user_login',
     },
   };
   return items;
-}
+}*/
 
 function user_login_form() {
   form = {
