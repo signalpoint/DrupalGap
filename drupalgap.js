@@ -136,7 +136,17 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 }
 
 function drupalgap_changePage(path) {
-	$.mobile.changePage('file:///android_asset/www/' + path);
+  try {
+    if (device.platform != 'Android') {
+      alert('drupalgap_changePage - device platform not supported yet - ' + device.platform);
+    }
+    else {
+      $.mobile.changePage('file:///android_asset/www/' + path);
+    }
+  }
+  catch (error) {
+    alert('drupalgap_changePage - ' + error);
+  }
 }
 
 /**

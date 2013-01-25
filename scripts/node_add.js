@@ -23,6 +23,11 @@ $('#drupalgap_page_node_add').on('pageshow',function(){
  * and send the user to the node_edit.html page.
  */
 $('#node_add_list a').live('click', function(){
-	drupalgap.node_edit = {'type':$(this).attr('id')};
+    // TODO - find the drupal function that initalises an empty node, make the
+    // drupalgap equivalent, and then replace this call with it.
+	drupalgap.node_edit = {
+	  'type':$(this).attr('id'),
+	  'language':drupalgap.settings.language,
+	};
 });
 

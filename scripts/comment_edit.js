@@ -19,20 +19,6 @@ $('#drupalgap_comment_edit').on('pagebeforeshow',function(){
 
 $('#drupalgap_comment_edit').on('pageshow',function(){
 	try {
-		/*if (drupalgap.comment_edit.cid) {
-			// Editing existing comment.
-			drupalgap.services.comment.retrieve.call({
-				'cid':drupalgap.comment_edit.cid,
-				'success':function(comment){
-					drupalgap.comment_edit = comment;
-					$('#comment_subject').val(comment.subject);
-					$('#comment_body').val(comment.body);
-				}
-			});
-		}
-		else {
-			// Adding new comment.
-		}*/
 	}
 	catch (error) {
 		alert('comment_edit - pageshow - ' + error);

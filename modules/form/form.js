@@ -70,7 +70,7 @@ function drupalgap_form_render(form_id, css_selector) {
           case "taxonomy_term_reference":
             break;*/
           default:
-            form_element += '<div><em>Field ' + element.type + ' not supported.</em></div>';
+            form_element += '<div><em>Field ' + element.type + ' not supported, yet.</em></div>';
             console.log(JSON.stringify(element));
             break;
         }
@@ -93,12 +93,13 @@ function drupalgap_form_render(form_id, css_selector) {
     // Append the form to the container.
     form_html = '<div><div id="drupalgap_form_errors"></div>' + form_elements + '</div>';
     $(css_selector).append(form_html).trigger('create');
-    // Call the form loaded function if it exists.
+    // Call the form's loaded unction if it is implemented.
     function_name = form_id + '_form_loaded';
     if (eval('typeof ' + function_name) == 'function') {
       form = eval(function_name + '();');
       //var fn = window[function_name];
-      //fn.apply(null, module_arguments);
+      //fn.apply(null, form, form_state);
+      //fn.apply(null, form);
     }
   }
   catch (error) {
@@ -115,12 +116,17 @@ function drupalgap_form_set_error(name, message) {
   }
 }
 
+/**
+ * Given a form, this function iterates over the form's elements and assembles
+ * each element and value and places them into the form state's values. This
+ * is similar to $form_state['values'] in Drupal.
+ */
 function drupalgap_form_state_values_assemble(form) {
   try {
     form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
-        if (name == 'submit') { return; }
-        form_state.values[name] = $('#' + drupalgap_form_get_element_id(name, form.id)).val();
+      if (name == 'submit') { return; } // Always skip the form 'submit'.
+      form_state.values[name] = $('#' + drupalgap_form_get_element_id(name, form.id)).val();
     });
     drupalgap.form_state = form_state;
     if (drupalgap.settings.debug) {

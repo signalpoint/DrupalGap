@@ -26,6 +26,7 @@ function user_login_form() {
     'id':'user_login',
     'submit':['user_login_form_submit'],
     'validate':['user_login_form_validate'],
+    'entity_type':'user',
     'elements':{
       'name':{
         'type':'textfield',
@@ -75,6 +76,7 @@ function user_register_form() {
     'id':'user_register',
     'submit':['user_register_form_submit'],
     'validate':['user_register_form_validate'],
+    'entity_type':'user',
     'elements':{
       'name':{
         'type':'textfield',

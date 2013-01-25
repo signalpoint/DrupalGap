@@ -21,6 +21,8 @@ function node_edit_form() {
       'validate':['node_edit_form_validate'],
       'elements':{},
       'buttons':{},
+      'entity_type':'node',
+      'action':'node.html',
     };
 		
     // Add the node title field to the form.
@@ -72,7 +74,6 @@ function node_edit_form() {
   return null;
 }
 
-// TODO - this should really accept the form, and form_state as args.
 function node_edit_form_loaded() {
   try {
     // Are we editing a node?
@@ -81,16 +82,15 @@ function node_edit_form_loaded() {
       drupalgap.node_edit = drupalgap.services.node.retrieve.call({
         'nid':drupalgap.node_edit.nid,
         'success':function(node){
+          // Set the drupalgap node edit.
+          drupalgap.node_edit = node;
+          // Place the title in the form.
           $('#' + drupalgap_form_get_element_id('title', drupalgap.form.id)).val(node.title);
-          // Get the fields for this content type, iterate over each and add each
-          // of their values to their corresponding form. element
-          fields = drupalgap_field_info_instances('node', node.type);
-          $.each(fields, function(name, field){
-              if (node[name] && node[name].length > 0) {
-                var css_id = drupalgap_form_get_element_id(name, drupalgap.form.id); 
-                $('#' + css_id).val(node[name][node.language][0].value);
-              }
-          });
+          // Load the entity into the form.
+          console.log(drupalgap.node_edit.type);
+          console.log(JSON.stringify(drupalgap.node_edit));
+          console.log(JSON.stringify(drupalgap.form));
+          drupalgap_entity_load_into_form('node', drupalgap.node_edit.type, drupalgap.node_edit, drupalgap.form);    
         },
       });
     }
@@ -100,50 +100,21 @@ function node_edit_form_loaded() {
   }
 }
 
-function node_edit_form_submit(form, form_state) {
-  try {
-    console.log(JSON.stringify(drupalgap.node_edit));
-    var node = {};
-    $.each(form_state.values, function(name, value){
-        field_info = drupalgap_field_info_field(name);
-        if (field_info) {
-          eval('node.' + name + ' = {};');
-          node[name][drupalgap.node_edit.language] = [{"value":value}];
-        }
-        else {
-          node[name] = value;  
-        }
-    });
-    if (!drupalgap.node_edit.nid) {
-      // Creating a new node.
-      drupalgap.services.node.create.call({
-        'node':node,
-        'success':function(node) {
-          drupalgap_changePage('node.html');
-        },
-      });
-    }
-    else {
-      // Editing an existing node.
-      node.nid = drupalgap.node_edit.nid;
-      drupalgap.services.node.update.call({
-        'node':node,
-        'success':function(node) {
-          drupalgap_changePage('node.html');
-        },
-      });
-    }
-  }
-  catch (error) {
-    alert('node_edit_form_submit - ' + error);
-  }
-}
-
 function node_edit_form_validate(form, form_state) {
   try {
   }
   catch (error) {
     alert('node_edit_form_validate - ' + error);
+  }
+}
+
+function node_edit_form_submit(form, form_state) {
+  try {
+    var node = drupalgap_entity_build_from_form_state();
+    drupalgap_entity_form_submit(node);
+  }
+  catch (error) {
+    alert('node_edit_form_submit - ' + error);
   }
 }
 

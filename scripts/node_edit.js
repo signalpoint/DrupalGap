@@ -27,12 +27,11 @@ $('#drupalgap_node_edit').on('pageshow',function(){
 	}
 });
 
-$('#edit--node-edit-submit').on('click', function(){
+$('#edit-node-edit-submit').on('click', function(){
 	
 });
 
 $('#edit-node-edit-cancel').live('click', function(){
-    alert('node cancel');
 	destination = 'node_add.html';
 	if (drupalgap.node_edit.nid) {
 		destination = 'node.html';
