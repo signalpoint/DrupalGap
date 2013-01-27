@@ -52,3 +52,4 @@ $('#edit-node-edit-delete').live('click', function(){
 		});
 	}
 });
+

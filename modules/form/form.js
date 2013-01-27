@@ -198,6 +198,9 @@ $('.drupalgap_form_submit').live('click', function(){
       var fn = window[validate_function];
       fn.apply(null, Array.prototype.slice.call([drupalgap.form, drupalgap.form_state]));
     }
+    else if (drupalgap.settings.debug) {
+      console.log('Skipping ' + validate_function + ', does not exist.');
+    }
     
     // If there were validation errors, show the form errors and stop the
     // form submission.
@@ -223,6 +226,9 @@ $('.drupalgap_form_submit').live('click', function(){
       }
       var fn = window[submit_function];
       fn.apply(null, Array.prototype.slice.call([drupalgap.form, drupalgap.form_state]));
+    }
+    else if (drupalgap.settings.debug) {
+      console.log('Skipping ' + submit_function + ', does not exist.');
     }
 });
 

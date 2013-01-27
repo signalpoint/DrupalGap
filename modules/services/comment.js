@@ -121,9 +121,9 @@ function drupalgap_comment_assemble_data(options) {
 	if (options.comment.subject) {
 		data += '&subject=' + encodeURIComponent(options.comment.subject);
 	}
-	if (options.comment.body) {
+	if (options.comment.comment_body) {
 		data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
-			encodeURIComponent(options.comment.body);
+			encodeURIComponent(options.comment.comment_body[drupalgap.settings.language][0].value);
 	}
 	return data;
 }

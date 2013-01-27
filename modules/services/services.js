@@ -28,3 +28,4 @@ function drupalgap_service_resource_extract_results(options) {
 		return null;
 	}
 }
+

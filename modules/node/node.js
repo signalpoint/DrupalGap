@@ -87,9 +87,6 @@ function node_edit_form_loaded() {
           // Place the title in the form.
           $('#' + drupalgap_form_get_element_id('title', drupalgap.form.id)).val(node.title);
           // Load the entity into the form.
-          console.log(drupalgap.node_edit.type);
-          console.log(JSON.stringify(drupalgap.node_edit));
-          console.log(JSON.stringify(drupalgap.form));
           drupalgap_entity_load_into_form('node', drupalgap.node_edit.type, drupalgap.node_edit, drupalgap.form);    
         },
       });
