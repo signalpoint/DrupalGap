@@ -61,6 +61,7 @@ function drupalgap_form_render(form_id, css_selector) {
           case "textfield":
             form_element += '<input type="text" id="' + element_id + '" value="' + element.default_value + '"/>';
             break;
+          case 'textarea':
           case 'text_long':
           case "text_with_summary":
             form_element += '<textarea type="text" id="' + element_id + '">' + element.default_value + '</textarea>';
@@ -94,12 +95,15 @@ function drupalgap_form_render(form_id, css_selector) {
     form_html = '<div><div id="drupalgap_form_errors"></div>' + form_elements + '</div>';
     $(css_selector).append(form_html).trigger('create');
     // Call the form's loaded unction if it is implemented.
-    function_name = form_id + '_form_loaded';
+    function_name = form_id + '_loaded';
     if (eval('typeof ' + function_name) == 'function') {
       form = eval(function_name + '();');
       //var fn = window[function_name];
       //fn.apply(null, form, form_state);
       //fn.apply(null, form);
+    }
+    else if (drupalgap.settings.debug) {
+      console.log('Skipping ' + function_name + ', does not exist.');
     }
   }
   catch (error) {
@@ -144,15 +148,15 @@ function drupalgap_form_state_values_assemble(form) {
 function drupalgap_get_form(form_id) {
   try {
     form = {};
-    function_name = form_id + '_form';
-    if (eval('typeof ' + function_name) == 'function') {
-      if (drupalgap.settings.debug) {
-        console.log(function_name);
-      }
-      form = eval(function_name + '();');
+    function_name = form_id;
+    if (drupalgap.settings.debug) {
+      console.log(function_name);
     }
-    drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
-    drupalgap.form = form;
+    if (eval('typeof ' + function_name) == 'function') {
+      form = eval(function_name + '();');
+      drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
+      drupalgap.form = form;
+    }
     return form;
   }
   catch (error) {
@@ -190,7 +194,7 @@ $('.drupalgap_form_submit').live('click', function(){
     _drupalgap_form_validate(drupalgap.form, drupalgap.form_state);
     
     // Call the form's validate function.
-    validate_function = drupalgap.form.id + '_form_validate';
+    validate_function = drupalgap.form.id + '_validate';
     if (eval('typeof ' + validate_function) == 'function') {
       if (drupalgap.settings.debug) {
         console.log(validate_function);
@@ -219,7 +223,7 @@ $('.drupalgap_form_submit').live('click', function(){
     _drupalgap_form_submit();
     
     // Call the form's submit function.
-    submit_function = drupalgap.form.id + '_form_submit';
+    submit_function = drupalgap.form.id + '_submit';
     if (eval('typeof ' + submit_function) == 'function') {
       if (drupalgap.settings.debug) {
         console.log(submit_function);

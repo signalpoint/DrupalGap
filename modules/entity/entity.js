@@ -30,11 +30,17 @@ function drupalgap_entity_form_submit(entity) {
   try {
     var service_resource = null;
     switch (drupalgap.form.entity_type) {
+      case 'comment':
+        service_resource = drupalgap.services.comment;
+        break;
       case 'node':
         service_resource = drupalgap.services.node;
         break;
-      case 'comment':
-        service_resource = drupalgap.services.comment;
+      case 'taxonomy_vocabulary':
+        service_resource = drupalgap.services.taxonomy_vocabulary;
+        break;
+      case 'taxonomy_term':
+        service_resource = drupalgap.services.taxonomy_term;
         break;
       default:
         alert('drupalgap_entity_form_submit - unsported entity type - ' + drupalgap.form.entity_type);
@@ -71,11 +77,17 @@ function drupalgap_entity_get_edit_object(entity_type) {
   try {
     var entity_edit = null;
     switch (entity_type) {
+      case 'comment':
+        entity_edit = drupalgap.comment_edit;
+        break;
       case 'node':
         entity_edit = drupalgap.node_edit;
         break;
-      case 'comment':
-        entity_edit = drupalgap.comment_edit;
+      case 'taxonomy_term':
+        entity_edit = drupalgap.taxonomy_term_edit;
+        break;
+      case 'taxonomy_vocabulary':
+        entity_edit = drupalgap.taxonomy_vocabulary_edit;
         break;
       default:
         alert('drupalgap_entity_get_edit_object - unsported entity type - ' + drupalgap.form.entity_type);
@@ -91,12 +103,19 @@ function drupalgap_entity_get_edit_object(entity_type) {
 
 function drupalgap_entity_get_info(entity_type) {
   try {
-    if (entity_type == null) {
-      drupalgap_module_invoke_all('entity_info');
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_entity_get_info - ' + entity_type);
+      console.log(JSON.stringify(drupalgap.entity_info[entity_type]));
     }
-    else {
-      drupalgap_module_invoke(entity_type, 'entity_info');
+    if (drupalgap.entity_info && drupalgap.entity_info.length > 0) {
+      if (entity_type) {
+        return drupalgap.entity_info[entity_type];
+      }
+      else {
+        return drupalgap.entity_info;
+      }
     }
+    return null;
   }
   catch (error) {
     alert('drupalgap_entity_get_info - ' + error);
@@ -112,6 +131,12 @@ function drupalgap_entity_get_primary_key(entity_type) {
         break;
       case 'node':
         primary_key = 'nid';
+        break;
+      case 'taxonomy_term':
+        primary_key = 'tid';
+        break;
+      case 'taxonomy_vocabulary':
+        primary_key = 'vid';
         break;
       case 'user':
         primary_key = 'uid';

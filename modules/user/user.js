@@ -1,15 +1,4 @@
 /**
- * Implements hook_entity_info().
- */
-/*function user_entity_info() {
-  try {
-  }
-  catch (error) {
-    alert('user_entity_info - ' + error);
-  }
-}*/
-
-/**
  * Implements hook_menu().
  */
 /*function user_menu() {
@@ -21,11 +10,9 @@
   return items;
 }*/
 
-function user_login_form() {
+function user_login() {
   form = {
     'id':'user_login',
-    'submit':['user_login_form_submit'],
-    'validate':['user_login_form_validate'],
     'entity_type':'user',
     'elements':{
       'name':{
@@ -47,15 +34,15 @@ function user_login_form() {
   return form;
 }
 
-function user_login_form_validate(form, form_state) {
+function user_login_validate(form, form_state) {
   try {
   }
   catch (error) {
-    alert('user_login_form_validate - ' + error);
+    alert('user_login_validate - ' + error);
   }
 }
 
-function user_login_form_submit(form, form_state) {
+function user_login_submit(form, form_state) {
   try {
     drupalgap.services.drupalgap_user.login.call({
       'name':drupalgap.form_state.values.name,
@@ -66,16 +53,14 @@ function user_login_form_submit(form, form_state) {
     });
   }
   catch (error) {
-    alert('user_login_form_submit - ' + error);
+    alert('user_login_submit - ' + error);
   }
   
 }
 
-function user_register_form() {
+function user_register() {
   form = {
     'id':'user_register',
-    'submit':['user_register_form_submit'],
-    'validate':['user_register_form_validate'],
     'entity_type':'user',
     'elements':{
       'name':{
@@ -97,15 +82,15 @@ function user_register_form() {
   return form;
 }
 
-function user_register_form_validate(form, form_state) {
+function user_register_validate(form, form_state) {
   try {
   }
   catch (error) {
-    alert('user_register_form_validate - ' + error);
+    alert('user_register_validate - ' + error);
   }
 }
 
-function user_register_form_submit(form, form_state) {
+function user_register_submit(form, form_state) {
   try {
     drupalgap.services.user.register.call({
       'name':drupalgap.form_state.values.name,
@@ -116,7 +101,7 @@ function user_register_form_submit(form, form_state) {
     });
   }
   catch (error) {
-    alert('user_register_form_submit - ' + error);
+    alert('user_register_submit - ' + error);
   }
 }
 

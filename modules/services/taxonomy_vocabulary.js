@@ -160,7 +160,7 @@ function drupalgap_taxonomy_vocabulary_assemble_data (options) {
 		data += '&name=' + encodeURIComponent(options.taxonomy_vocabulary.name);
 		data += '&machine_name=' + encodeURIComponent(options.taxonomy_vocabulary.machine_name);
 		data += '&description=' + encodeURIComponent(options.taxonomy_vocabulary.description);
-		data += '&weight=' + encodeURIComponent(options.taxonomy_vocabulary.weight);
+		//data += '&weight=' + encodeURIComponent(options.taxonomy_vocabulary.weight);
 		return data;
 	}
 	catch (error) {

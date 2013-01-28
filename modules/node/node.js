@@ -1,15 +1,4 @@
-/**
- * Implements hook_entity_info().
- */
-function node_entity_info() {
-  try {
-  }
-  catch (error) {
-    alert('node_entity_info - ' + error);
-  }
-}
-
-function node_edit_form() {
+function node_edit() {
   try {
     // Setup form defaults.
     /* TODO - Always having to declare the default submit and validate
@@ -69,12 +58,12 @@ function node_edit_form() {
     return form;
   }
   catch (error) {
-    alert('node_edit_form - ' + error);
+    alert('node_edit - ' + error);
   }
   return null;
 }
 
-function node_edit_form_loaded() {
+function node_edit_loaded() {
   try {
     // Are we editing a node?
     if (drupalgap.node_edit.nid) {
@@ -93,25 +82,25 @@ function node_edit_form_loaded() {
     }
   }
   catch (error) {
-    alert('node_edit_form_loaded - ' + error);
+    alert('node_edit_loaded - ' + error);
   }
 }
 
-function node_edit_form_validate(form, form_state) {
+function node_edit_validate(form, form_state) {
   try {
   }
   catch (error) {
-    alert('node_edit_form_validate - ' + error);
+    alert('node_edit_validate - ' + error);
   }
 }
 
-function node_edit_form_submit(form, form_state) {
+function node_edit_submit(form, form_state) {
   try {
     var node = drupalgap_entity_build_from_form_state();
     drupalgap_entity_form_submit(node);
   }
   catch (error) {
-    alert('node_edit_form_submit - ' + error);
+    alert('node_edit_submit - ' + error);
   }
 }
 

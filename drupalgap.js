@@ -40,6 +40,7 @@ var drupalgap = {
   'api':{}, // <!-- api -->
   'comment':{ }, /* <!-- comment --> */
   'comment_edit':{ }, /* <!-- comment_edit --> */
+  'entity_info':{ }, /* <!-- entity_info --> */
   'field_info_fields':{ }, /* <!-- field_info_fields --> */
   'field_info_instances':{ }, /* <!-- field_info_instances --> */
   'form':{ }, /* <!-- form --> */
