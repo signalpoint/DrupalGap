@@ -1,3 +1,12 @@
+OUTAGE as of February 7th 2013: DrupalGap's domain registrar decided
+that 'Auto-Renew' does not mean 'Auto-Renew' and has lost our domain
+registrations. We are extremely saddened by this situation and are
+doing our best to resolve it. In the mean time, the mobile
+application demo is not functional, we are very sorry and hope to be
+back up and running soon!
+
+=================================================
+
 DrupalGap is a module, mobile application, and mobile application
 development kit for Drupal websites. This project utilizes Drupal,
 PhoneGap (Cordova), and jQueryMobile.
