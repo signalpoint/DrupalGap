@@ -9,7 +9,7 @@ function drupalgap_service_resource_extract_results(options) {
 				// from the options data.
 				permissions = {};
 				if (options.service == 'drupalgap_system' && options.resource == 'connect') {
-					permissions = options.data.user_permissions; 
+					permissions = options.data.user_roles_and_permissions; 
 				}
 				else if (options.service == 'drupalgap_user' && options.resource == 'login') {
 					permissions = options.data.drupalgap_system_connect.user_permissions; 
