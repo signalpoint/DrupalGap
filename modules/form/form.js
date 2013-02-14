@@ -69,7 +69,7 @@ function drupalgap_form_render(form_id, css_selector) {
           case "taxonomy_term_reference":
             break;*/
           default:
-            form_element += '<div><em>Field ' + element.type + ' not supported.</em></div>';
+            form_element += '<div><em>Field ' + element.type + ' not supported, yet.</em></div>';
             console.log(JSON.stringify(element));
             break;
         }
