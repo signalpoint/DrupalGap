@@ -136,7 +136,7 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 }
 
 function drupalgap_changePage(path) {
-	$.mobile.changePage('file:///android_asset/www/' + path);
+	$.mobile.changePage(window.fsroot + path);
 }
 
 /**
