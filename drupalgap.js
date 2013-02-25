@@ -135,8 +135,38 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 	return new_options_set;
 }
 
+/**
+ * Given a path relative to assets/www, this will change the page to the given
+ * path.
+ */
 function drupalgap_changePage(path) {
-	$.mobile.changePage(window.fsroot + path);
+  try {
+    var destination;
+    switch (device.platform) {
+      case 'Android':
+        destination = 'file:///android_asset/www/' + path;
+        $.mobile.changePage(destination);
+        break;
+      case 'iOS':
+        destination = window.fsroot + path;
+        $.mobile.changePage(destination);
+        break;
+      default:
+        var msg = 'Add your platform to the drupalgap_changePage function!';
+        msg += ' Then please contribute back your code to help other ' + 
+          device.platform + ' users. Go open source!';
+        navigator.notification.alert(
+          msg,
+          function(){ $.mobile.changePage(drupalgap.settings.front); },
+          'Platform Not Supported',
+          'OK'
+        );
+        break;
+    }
+  }
+  catch (error) {
+    alert('drupalgap_changePage - ' + error);
+  }
 }
 
 /**
