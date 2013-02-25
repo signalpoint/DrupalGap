@@ -85,7 +85,7 @@ function drupalgap_api_default_options() {
 		'async':true,
 		'data':'',
 		'dataType':'json',
-		'endpoint':'drupalgap',
+		'endpoint':drupalgap.settings.endpoint || 'drupalgap',
 		'site_path':drupalgap.settings.site_path,
 		'success':function(result){
 			// TODO - this is a good spot for a hook
