@@ -151,6 +151,10 @@ function drupalgap_changePage(path) {
         destination = window.fsroot + path;
         $.mobile.changePage(destination);
         break;
+      case 'Generic':
+        destination = path;
+        $.mobile.changePage(destination);
+        break;
       default:
         var msg = 'Add your platform to the drupalgap_changePage function!';
         msg += ' Then please contribute back your code to help other ' + 
