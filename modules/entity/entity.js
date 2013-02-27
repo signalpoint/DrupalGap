@@ -157,6 +157,7 @@ function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
     switch (entity_type) {
       case 'node':
       case 'comment':
+      case 'taxonomy_vocabulary':
         break;
       default:
         alert('drupalgap_entity_load_into_form - unsupported entity type - ' + entity_type);

@@ -28,16 +28,16 @@ drupalgap.api = {
 		  // user to the offline page.
 		  drupalgap_check_connection();
 		  if (!drupalgap.online) {
-			navigator.notification.alert(
+			  navigator.notification.alert(
 			    'No network connection!',
 			    function(){ $.mobile.changePage(drupalgap.settings.offline); },
 			    'Offline',
 			    'OK'
-			);
-			return false;
+			  );
+			  return false;
 		  }
 		  
-		// Make the call...
+		  // Make the call...
 		  $.mobile.loading('show', {theme: "b", text: "Loading"});
 		  
 		  // Asynchronous call.

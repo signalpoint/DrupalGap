@@ -1,18 +1,6 @@
 $('#drupalgap_node_edit').on('pagebeforeshow',function(){
 	try {
 	  drupalgap_form_render('node_edit', '#drupalgap_node_edit .content');
-		/*if (!drupalgap.node_edit || !drupalgap.node_edit.nid) {
-			// Creating a new node.
-			if (!drupalgap.node_edit.type) {
-				alert('drupalgap_node_edit - node type not set');
-				return;
-			}
-			$('#drupalgap_node_edit h1').html('Create ' + drupalgap.node_edit.type);
-			$('#node_delete').hide();
-		}
-		else {
-			// Editing an existing node.
-		}*/
   }
 	catch (error) {
 		alert("drupalgap_node_edit - pagebeforeshow - " + error);

@@ -39,9 +39,6 @@ function taxonomy_form_vocabulary() {
       },
     };
     
-    //var entity_info = drupalgap_entity_get_info('taxonomy_vocabulary');
-    //console.log(JSON.stringify(entity_info));
-    
     // Add delete button to form if we're editing a vocabulary.
     if (drupalgap.taxonomy_vocabulary_edit.vid) {
       form.buttons['delete'] = {
@@ -58,59 +55,31 @@ function taxonomy_form_vocabulary() {
 
 function taxonomy_form_vocabulary_loaded() {
   try {
-    if (!drupalgap.taxonomy_vocabulary_edit || !drupalgap.taxonomy_vocabulary_edit.vid) {
-      // Creating a new vocabulary.
-    }
-    else {
-      // Editing an existing vocabulary, load it up and set placeholders.
-      /*drupalgap.services.taxonomy_vocabulary.retrieve.call({
-        'vid':drupalgap.taxonomy_vocabulary.vid,
+    // Are we editing a vocabulary?
+    if (drupalgap.taxonomy_vocabulary_edit.vid) {
+      // Retrieve the vocabulary and fill in the form values.
+      drupalgap.services.taxonomy_vocabulary.retrieve.call({
+        'vid':drupalgap.taxonomy_vocabulary_edit.vid,
         'success':function(vocabulary){
-          $('#drupalgap_taxonomy_vocabulary_edit h1').html('Edit Vocabulary');
-          $('#taxonomy_vocabulary_name').val(vocabulary.name);
-          $('#taxonomy_vocabulary_machine_name').val(vocabulary.machine_name);
-          $('#taxonomy_vocabulary_description').val(vocabulary.description);
-          $('#taxonomy_vocabulary_weight').val(vocabulary.weight);
+          // Set the drupalgap taxonomy vocabular edit, and place the vocabulary
+          // properties in the form. We don't need to load entity info into the
+          // form for vocabularies, only for terms.
+          drupalgap.taxonomy_vocabulary_edit = vocabulary;
+          $('#' + drupalgap_form_get_element_id('name', drupalgap.form.id)).val(vocabulary.name);
+          $('#' + drupalgap_form_get_element_id('machine_name', drupalgap.form.id)).val(vocabulary.machine_name);
+          $('#' + drupalgap_form_get_element_id('description', drupalgap.form.id)).val(vocabulary.description);
+          //$('#' + drupalgap_form_get_element_id('weight', drupalgap.form.id)).val(vocabulary.weight);    
         },
-      });*/
+      });
     }
   }
   catch (error) {
     alert('taxonomy_form_vocabulary_loaded - ' + error);
   }
-  
 }
 
 function taxonomy_form_vocabulary_submit(form, form_state) {
   var vocabulary = drupalgap_entity_build_from_form_state();
   drupalgap_entity_form_submit(vocabulary);
-  /*
-  // Grab form input, build json taxonomy_vocabulary and call service resource.
-	taxonomy_vocabulary = {
-		'vid':drupalgap.taxonomy_vocabulary.vid,
-		'name':$('#taxonomy_vocabulary_name').val(),
-		'machine_name':$('#taxonomy_vocabulary_machine_name').val(),
-		'description':$('#taxonomy_vocabulary_description').val(),
-		'weight':$('#taxonomy_vocabulary_weight').val(),
-	};
-	// If this was an existing vocabulary, set the vid and update the vocabulary,
-	// otherwise create a new vocabulary.
-	if (drupalgap.taxonomy_vocabulary_edit.vid) {
-		taxonomy_vocabulary.vid = drupalgap.taxonomy_vocabulary_edit.vid;
-		drupalgap.services.taxonomy_vocabulary.update.call({
-			'taxonomy_vocabulary':taxonomy_vocabulary,
-			'success':function(result){
-				$.mobile.changePage('taxonomy_vocabularies.html');
-			},
-		});
-	}
-	else {
-		drupalgap.services.taxonomy_vocabulary.create.call({
-			'taxonomy_vocabulary':taxonomy_vocabulary,
-			'success':function(result){
-				$.mobile.changePage('taxonomy_vocabularies.html');
-			},
-		});
-	}
-	*/
 }
+
