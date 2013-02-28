@@ -9,11 +9,16 @@ function drupalgap_entity_build_from_form_state() {
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(entity_edit));
     }
+    // Use the default language, unless the entity has one specified.
+    var language = drupalgap.settings.language;
+    if (entity_edit.language) {
+      language = entity_edit.language;
+    }
     $.each(drupalgap.form_state.values, function(name, value){
       field_info = drupalgap_field_info_field(name);
       if (field_info) {
         eval('entity.' + name + ' = {};');
-        entity[name][entity_edit.language] = [{"value":value}];
+        entity[name][language] = [{"value":value}];
       }
       else {
         entity[name] = value;  
@@ -78,6 +83,10 @@ function drupalgap_entity_form_submit(entity) {
   }
 }
 
+/**
+ * Given an entity type (node, comment, etc), this will return the current
+ * entity edit json object inside the drupalgap var. 
+ */
 function drupalgap_entity_get_edit_object(entity_type) {
   try {
     var entity_edit = null;
@@ -96,7 +105,6 @@ function drupalgap_entity_get_edit_object(entity_type) {
         break;
       default:
         alert('drupalgap_entity_get_edit_object - unsported entity type - ' + drupalgap.form.entity_type);
-        return null;
         break;
     }
     return entity_edit;
