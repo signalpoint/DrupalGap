@@ -16,7 +16,7 @@ $('#drupalgap_taxonomy_vocabulary_edit').on('pageshow',function(){
 	}
 });
 
-$('#edit-taxonomy-form_vocabulary-cancel').live('click', function(){
+$('#edit-taxonomy-form-vocabulary-cancel').live('click', function(){
   destination = 'taxonomy_vocabularies.html';
 	if (drupalgap.taxonomy_vocabulary.vid) {
 		destination = 'taxonomy_vocabulary.html';
@@ -24,7 +24,7 @@ $('#edit-taxonomy-form_vocabulary-cancel').live('click', function(){
 	drupalgap_changePage(destination);
 });
 
-$('#taxonomy_vocabulary_delete').on('click', function(){
+$('#edit-taxonomy-form-vocabulary-delete').on('click', function(){
 	if (confirm('Are you sure you want to delete "' + drupalgap.taxonomy_vocabulary.name + '"? This cannot be undone.')) {
 		drupalgap.services.taxonomy_vocabulary.del.call({
 			'vid':drupalgap.taxonomy_vocabulary_edit.vid,
@@ -35,3 +35,4 @@ $('#taxonomy_vocabulary_delete').on('click', function(){
 	}
 	return false;
 });
+

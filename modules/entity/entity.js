@@ -29,18 +29,23 @@ function drupalgap_entity_build_from_form_state() {
 function drupalgap_entity_form_submit(entity) {
   try {
     var service_resource = null;
+    var service_entity = null;
     switch (drupalgap.form.entity_type) {
       case 'comment':
         service_resource = drupalgap.services.comment;
+        //service_entity = drupalgap.comment;
         break;
       case 'node':
         service_resource = drupalgap.services.node;
+        //service_entity = drupalgap.node;
         break;
       case 'taxonomy_vocabulary':
         service_resource = drupalgap.services.taxonomy_vocabulary;
+        //service_entity = drupalgap.taxonomy_vocabulary;
         break;
       case 'taxonomy_term':
         service_resource = drupalgap.services.taxonomy_term;
+        //service_entity = drupalgap.taxonomy_term;
         break;
       default:
         alert('drupalgap_entity_form_submit - unsported entity type - ' + drupalgap.form.entity_type);
@@ -158,6 +163,7 @@ function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
       case 'node':
       case 'comment':
       case 'taxonomy_vocabulary':
+      case 'taxonomy_term':
         break;
       default:
         alert('drupalgap_entity_load_into_form - unsupported entity type - ' + entity_type);

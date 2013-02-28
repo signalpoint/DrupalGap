@@ -3,8 +3,8 @@ function drupalgap_form_get_element_id(name, form_id) {
     if (name == null || name == '') { return ''; }
     name =
       'edit-' +
-      form_id.toLowerCase().replace('_','-') + '-' +
-      name.toLowerCase().replace('_','-');
+      form_id.toLowerCase().replace(/_/g, '-') + '-' +
+      name.toLowerCase().replace(/_/g,'-');
     if (drupalgap.settings.debug) { console.log(name); }
     return name;
   }
