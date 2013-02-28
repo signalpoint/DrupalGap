@@ -2,39 +2,24 @@ var user_picture_source;
 var user_picture_destination_type;
 var user_picture_image_data;
 
-$('#drupalgap_page_user_edit').on('pagebeforeshow',function(){
+$('#drupalgap_user_edit').on('pagebeforeshow',function(){
 	try {
+	  drupalgap_form_render('user_profile_form', '#drupalgap_user_edit .content');
 		// Init picture.
 		user_picture_source = null;
 		user_picture_destination_type = null;
 		user_picture_image_data = null;
 		$('#edit_picture').hide();
-    }
+  }
 	catch (error) {
 		alert("drupalgap_page_user_edit - pagebeforeshow " + error);
 	}
 });
 
-$('#drupalgap_page_user_edit').on('pageshow',function(){
+$('#drupalgap_user_edit').on('pageshow',function(){
 	try {
-		document.addEventListener("deviceready", user_edit_ready, false);
-		drupalgap.services.user.retrieve.call({
-			'uid':drupalgap.account_edit.uid,
-			'success':function(account){
-				$('#name').val(account.name);
-				if (account.mail) {
-					$('#mail').val(account.mail);
-				}
-				else {
-					$('#mail').hide();
-					$('#current_pass').hide();
-				}
-				if (account.picture) {
-					$('#edit_picture').attr('src', drupalgap_image_path(account.picture.uri)).show();
-				}
-			}
-		});
-    }
+		//document.addEventListener("deviceready", user_edit_ready, false);
+  }
 	catch (error) {
 		alert("drupalgap_page_user_edit - pageshow " + error);
 	}

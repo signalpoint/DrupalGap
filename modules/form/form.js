@@ -150,7 +150,7 @@ function drupalgap_get_form(form_id) {
     form = {};
     function_name = form_id;
     if (drupalgap.settings.debug) {
-      console.log(function_name);
+      console.log('Getting form: ' + function_name);
     }
     if (eval('typeof ' + function_name) == 'function') {
       form = eval(function_name + '();');

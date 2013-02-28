@@ -1,33 +1,15 @@
-<div data-role="page" id="drupalgap_page_user_edit">
+<div data-role="page" id="drupalgap_user_edit">
   <script type="text/javascript" charset="utf-8" src="user_edit.js"></script>
   <div data-role="header">
   	<h1>Edit Account</h1>
   </div><!-- /header -->
+  <div data-role="content" class="content"></div><!-- /content -->
   <div data-role="content">
-	  
-	  <h2>Account Information</h2>
-	  
-	  <label for="name">Username *</label>
-	  <input type="text" id="name" />
-	  <p>Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.</p>
-	    
-	  <label for="pass">Current password</label>
-	  <input type="password" id="current_pass" />
-	  <p>Enter your current password to change your <span style="text-decoration: italic;">E-mail address</span>.</p>
-	   
-	  <label for="mail">E-mail address *</label>
-	  <input type="email" id="mail" />
-	  
-	  <h2>Picture</h2>
-	  
+    <h2>Picture</h2>
 	  <div>
       <div id='edit_picture_msg'></div>
       <img id="edit_picture" />
       <a href="#" data-role="button" data-icon="star" id="add_picture">Add Picture</a>
     </div>
-	    
-    <button type="button" data-theme="b" id="submit">Save</button>
-    <a href="user.html" data-role="button" id="cancel">Cancel</a>
-    
   </div><!-- /content -->
 </div><!-- /page -->

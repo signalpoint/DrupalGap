@@ -103,6 +103,9 @@ function drupalgap_entity_get_edit_object(entity_type) {
       case 'taxonomy_vocabulary':
         entity_edit = drupalgap.taxonomy_vocabulary_edit;
         break;
+      case 'user':
+        entity_edit = drupalgap.account_edit;
+        break;
       default:
         alert('drupalgap_entity_get_edit_object - unsported entity type - ' + drupalgap.form.entity_type);
         break;
@@ -172,6 +175,7 @@ function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
       case 'comment':
       case 'taxonomy_vocabulary':
       case 'taxonomy_term':
+      case 'user':
         break;
       default:
         alert('drupalgap_entity_load_into_form - unsupported entity type - ' + entity_type);
@@ -181,17 +185,27 @@ function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
     // Get the fields for this content type, iterate over each and add each
     // of their values to their corresponding form element.
     fields = drupalgap_field_info_instances(entity_type, bundle);
-    console.log(JSON.stringify(fields));
+    if (drupalgap.settings.debug) {
+      console.log('fields');
+      console.log(JSON.stringify(fields));
+    }
+    // Use the default language, unless the entity has one specified.
+    var language = drupalgap.settings.language;
+    if (entity.language) {
+      language = entity.language;
+    }
     $.each(fields, function(name, field){
-        console.log(name);
-        console.log(JSON.stringify(field));
-        console.log(JSON.stringify(entity[name]));
+        if (drupalgap.settings.debug) {
+          console.log(name);
+          console.log(JSON.stringify(field));
+          console.log(JSON.stringify(entity[name]));
+        }
         if (entity[name] &&
-            entity[name][entity.language] &&
-            entity[name][entity.language].length != 0
+            entity[name][language] &&
+            entity[name][language].length != 0
         ) {
           var css_id = drupalgap_form_get_element_id(name, drupalgap.form.id); 
-          $('#' + css_id).val(entity[name][entity.language][0].value);
+          $('#' + css_id).val(entity[name][language][0].value);
         }
     });
   }
