@@ -1,6 +1,10 @@
 $('#drupalgap_node_edit').on('pagebeforeshow',function(){
 	try {
-	  drupalgap_form_render('node_edit', '#drupalgap_node_edit .content');
+	  drupalgap_form_render({
+	      'form_id':'node_edit',
+	      'page_id':$(this).attr('id'),
+	      'container':'.content'
+	  });
   }
 	catch (error) {
 		alert("drupalgap_node_edit - pagebeforeshow - " + error);

@@ -111,6 +111,13 @@ function user_profile_form() {
         'title':'E-mail address',
         'required':true,
       },
+      'picture':{
+        'type':'filefield',
+        'widget_type':'imagefield_widget',
+        'title':'Picture',
+        'required':false,
+        'value':'Add Picture',
+      },
       'submit':{
         'type':'submit',
         'value':'Create new account',

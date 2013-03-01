@@ -14,17 +14,27 @@ function drupalgap_form_get_element_id(name, form_id) {
 }
 
 /**
- * Given a drupalgap form id, and css selector, this loads up the drupalgap form
- * with the given id, assembles it into html5 elements, than appends the
- * elements onto the element identified by the css selector input.
+ * Given a drupalgap form id, a jQM page id, and a child container css selector
+ * for an element inside the jQM page, this loads up the drupalgap form
+ * with the given form id, assembles it into html5 elements, than appends the
+ * elements onto the jQM page inside the container element.
  */
-function drupalgap_form_render(form_id, css_selector) {
+function drupalgap_form_render(options) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_form_render()');
+      console.log(JSON.stringify(options));
+    }
+    if (!options.form_id) { alert('drupalgap_form_render - missing form_id'); }
+    if (!options.page_id) { alert('drupalgap_form_render - missing page_id'); }
+    if (!options.container) { alert('drupalgap_form_render - missing container'); }
+    var form_id = options.form_id;
+    var page_id = options.page_id;
+    var container = options.container;
     // Load the form, render each element, and append form to container
     // identified by the incoming css selector.
     form = drupalgap_get_form(form_id);
     if (drupalgap.settings.debug) {
-      console.log('drupalgap_form_render');
       console.log(JSON.stringify(form));
     }
     form_elements = '';
@@ -49,6 +59,71 @@ function drupalgap_form_render(form_id, css_selector) {
           case "email":
             form_element += '<input type="email" id="' + element_id + '" value="' + element.default_value + '"/>';
             break;
+          case 'filefield':
+            if (element.widget_type == 'imagefield_widget') {
+              // Set the default button text, and if a value was provided,
+              // overwrite the button text.
+              var button_text = 'Add Image';
+              if (element.value) {
+                button_text = element.value;
+              }
+              // Place variables into document for PhoneGap image processing.
+              var element_id_base = element_id.replace(/-/g, '_'); 
+              var image_field_source = element_id_base + '_imagefield_source';
+              var imagefield_destination_type = element_id_base + '_imagefield_destination_type';
+              var imagefield_data = element_id_base + '_imagefield_data';
+              eval('var ' + image_field_source + ' = null;');
+              eval('var ' + imagefield_destination_type + ' = null;');
+              eval('var ' + imagefield_data + ' = null;');
+              // Build an imagefield widget with PhoneGap. Contains a message
+              // div, an image element, and button to add an image.
+              form_element += '<div>' + 
+                '<div id="' + element_id + '-imagefield-msg"></div>' + 
+                '<img id="' + element_id + '-imagefield" />' + 
+                '<a href="#" data-role="button" id="' + element_id + '">' + element.value + '</a>' + 
+              '</div>';
+              // Open extra javascript declaration.
+              form_element += '<script type="text/javascript">';
+              // Add device ready listener for PhoneGap camera.
+              var event_listener = element_id_base +  '_imagefield_ready';
+              form_element += '$("#' + options.page_id + '").on("pageshow",function(){' +
+                'document.addEventListener("deviceready", ' + event_listener + ', false);' +
+              '});' + 
+              'function ' + event_listener +  '() {' +
+                image_field_source + ' = navigator.camera.PictureSourceType;' +
+                imagefield_destination_type + ' = navigator.camera.DestinationType;' +
+              '}';
+              // Define error callback function.
+              var imagefield_error = element_id_base + '_error';
+              form_element += 'function ' + imagefield_error + '(message) {' +
+                'if (message != "Camera cancelled.") {' +
+                  'alert("' + imagefield_error + ' - " + message);' +
+                '}' +
+              '}';
+              // Define success callback function.
+              var imagefield_success = element_id_base + '_success';
+              form_element += 'function ' + imagefield_success + '(message) {' +
+                'alert("success!");' +
+              '}';
+              // Add click handler for photo button.
+              form_element += '$("#' + element_id + '").on("click",function(){' +
+                'var photo_options = {' +
+                  'quality: 50,' +
+                  'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
+                  'correctOrientation: true' +
+                '};' +
+                'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
+              '});';
+              // Close extra javascript declaration.
+              form_element += '</script>';
+              console.log(form_element);
+            }
+            else {
+              // Widget type not supported yet.
+              // filefield_widget
+              form_element += '<div><em>Field ' + element.type + ' (' + element.widget_type + ') not supported, yet.</em></div>';
+            }
+            break;
           case "hidden":
             form_element += '<input type="hidden" id="' + element_id + '" value="' + element.default_value + '"/>';
             break;
@@ -72,7 +147,6 @@ function drupalgap_form_render(form_id, css_selector) {
             break;*/
           default:
             form_element += '<div><em>Field ' + element.type + ' not supported, yet.</em></div>';
-            console.log(JSON.stringify(element));
             break;
         }
         // Added element description.
@@ -93,7 +167,7 @@ function drupalgap_form_render(form_id, css_selector) {
     }
     // Append the form to the container.
     form_html = '<div><div id="drupalgap_form_errors"></div>' + form_elements + '</div>';
-    $(css_selector).append(form_html).trigger('create');
+    $('#' + page_id + ' ' + container).append(form_html).trigger('create');
     // Call the form's loaded unction if it is implemented.
     function_name = form_id + '_loaded';
     if (eval('typeof ' + function_name) == 'function') {

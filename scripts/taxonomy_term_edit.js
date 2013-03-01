@@ -1,6 +1,10 @@
 $('#drupalgap_taxonomy_term_edit').on('pagebeforeshow',function(){
 	try {
-	  drupalgap_form_render('taxonomy_form_term', '#drupalgap_taxonomy_term_edit .content');	
+	  drupalgap_form_render({
+	      'form_id':'taxonomy_form_term',
+	      'page_id':$(this).attr('id'),
+	      'container':'.content'
+	  });
   }
 	catch (error) {
 		alert("drupalgap_taxonomy_term_edit - pagebeforeshow - " + error);

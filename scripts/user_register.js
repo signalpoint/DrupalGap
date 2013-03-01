@@ -11,7 +11,11 @@ $('#drupalgap_page_user_register').on('pageshow',function(){
       );
       return false;
     }
-    drupalgap_form_render('user_register', '#drupalgap_page_user_register .content');
+    drupalgap_form_render({
+	      'form_id':'user_register',
+	      'page_id':$(this).attr('id'),
+	      'container':'.content'
+	  });
   }
   catch (error) {
     alert("drupalgap_page_user_register - pageshow - " + error);

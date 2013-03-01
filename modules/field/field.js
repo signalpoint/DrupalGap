@@ -14,23 +14,30 @@ function drupalgap_field_info_fields() {
   }
 }
 
+/**
+ * Given an entity type and/or a bundle name, this returns the field info
+ * instances for the entity or the bundle.
+ */
 function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
+    var field_info_instances;
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_field_info_instances()');
+      console.log(JSON.stringify(arguments));
+      console.log('drupalgap.field_info_instances[' + entity_type + ']');
+      console.log(JSON.stringify(drupalgap.field_info_instances[entity_type]));
+    }
     if (!bundle_name) {
-      if (drupalgap.settings.debug) {
-        console.log(entity_type);
-        console.log(JSON.stringify(drupalgap.field_info_instances[entity_type]));
-      }
-      return drupalgap.field_info_instances[entity_type];
+      field_info_instances = drupalgap.field_info_instances[entity_type];
     }
     else {
-      if (drupalgap.settings.debug) {
-        console.log(entity_type);
-        console.log(bundle_name);
-        console.log(JSON.stringify(drupalgap.field_info_instances[entity_type][bundle_name]));
-      }
-      return drupalgap.field_info_instances[entity_type][bundle_name];
+      field_info_instances = drupalgap.field_info_instances[entity_type][bundle_name];
     }
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_field_info_instances()');
+      console.log(JSON.stringify(field_info_instances));
+    }
+    return field_info_instances;
   }
   catch(error) {
     alert('drupalgap_field_info_instances - ' + error);

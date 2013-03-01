@@ -170,6 +170,10 @@ function drupalgap_entity_get_primary_key(entity_type) {
 
 function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_entity_load_into_form()');
+      console.log(JSON.stringify(arguments));
+    }
     switch (entity_type) {
       case 'node':
       case 'comment':
@@ -186,7 +190,7 @@ function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
     // of their values to their corresponding form element.
     fields = drupalgap_field_info_instances(entity_type, bundle);
     if (drupalgap.settings.debug) {
-      console.log('fields');
+      console.log('drupalgap_entity_load_into_form - fields');
       console.log(JSON.stringify(fields));
     }
     // Use the default language, unless the entity has one specified.
@@ -195,11 +199,6 @@ function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
       language = entity.language;
     }
     $.each(fields, function(name, field){
-        if (drupalgap.settings.debug) {
-          console.log(name);
-          console.log(JSON.stringify(field));
-          console.log(JSON.stringify(entity[name]));
-        }
         if (entity[name] &&
             entity[name][language] &&
             entity[name][language].length != 0

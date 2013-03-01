@@ -1,6 +1,10 @@
 $('#drupalgap_comment_edit').on('pagebeforeshow',function(){
 	try {
-	  drupalgap_form_render('comment_edit', '#drupalgap_comment_edit .content');
+	  drupalgap_form_render({
+	      'form_id':'comment_edit',
+	      'page_id':$(this).attr('id'),
+	      'container':'.content'
+	  });
 	}
 	catch (error) {
 		alert('comment_edit - pagebeforeshow - ' + error);

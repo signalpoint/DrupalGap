@@ -1,6 +1,10 @@
 $('#drupalgap_taxonomy_vocabulary_edit').on('pagebeforeshow',function(){
 	try {
-	  drupalgap_form_render('taxonomy_form_vocabulary', '#drupalgap_taxonomy_vocabulary_edit .content');
+	  drupalgap_form_render({
+	      'form_id':'taxonomy_form_vocabulary',
+	      'page_id':$(this).attr('id'),
+	      'container':'.content'
+	  });
   }
 	catch (error) {
 		alert("drupalgap_taxonomy_vocabulary_edit - pagebeforeshow - " + error);

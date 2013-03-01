@@ -1,15 +1,19 @@
-var user_picture_source;
+/*var user_picture_source;
 var user_picture_destination_type;
-var user_picture_image_data;
+var user_picture_image_data;*/
 
 $('#drupalgap_user_edit').on('pagebeforeshow',function(){
 	try {
-	  drupalgap_form_render('user_profile_form', '#drupalgap_user_edit .content');
+	  drupalgap_form_render({
+	      'form_id':'user_profile_form',
+	      'page_id':$(this).attr('id'),
+	      'container':'.content'
+	  });
 		// Init picture.
-		user_picture_source = null;
+		/*user_picture_source = null;
 		user_picture_destination_type = null;
 		user_picture_image_data = null;
-		$('#edit_picture').hide();
+		$('#edit_picture').hide();*/
   }
 	catch (error) {
 		alert("drupalgap_page_user_edit - pagebeforeshow " + error);
