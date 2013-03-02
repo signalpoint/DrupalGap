@@ -3,6 +3,7 @@ var drupalgap = {
 	  'core':[
 	     {'name':'api'},
 	     {'name':'comment'},
+	     {'name':'dashboard'},
 	     {'name':'entity'},
 	     {'name':'field'},
 	     {'name':'form'},
@@ -30,6 +31,7 @@ var drupalgap = {
   },
   'module_paths':[],
   'includes':[
+      {'name':'common'},
       {'name':'theme'},
   ],
   'user':{
@@ -53,6 +55,7 @@ var drupalgap = {
   'node_edit':{ }, /* <!-- node_edit --> */
   'menu_links':{}, /* <!-- menu_links --> */
   'page':{'variables':{}}, /* <!-- page --> */
+  'path':'', /* The current menu path. */
   'services':{}, // <!-- services -->
   'taxonomy_term':{ }, /* <!-- taxonomy_term -> */
   'taxonomy_term_edit':{ }, /* <!-- taxonomy_term_edit -> */
@@ -185,9 +188,10 @@ function drupalgap_check_connection() {
 }
 
 /**
- * Cordova is loaded and it is now safe for DrupalGap to start.
+ * Implements PhoneGap's deviceready().
  */
 function drupalgap_deviceready() {
+  // PhoneGap is loaded and it is now safe for DrupalGap to start...
   // Load up settings.
   drupalgap_settings_load();
   // Load up includes.
@@ -236,6 +240,8 @@ function drupalgap_deviceready() {
 					//var promise = $.mobile.loadPage("DrupalGap/themes/easystreet/page.html");
 					//var promise = $.mobile.loadPage("themes/easystreet/page.html"); 
 					//console.log(JSON.stringify(promise));
+					// Set the current menu path to the front page.
+					drupalgap.path = drupalgap.settings.front;
 					// Change the page to the theme's page.html.
 					$.mobile.changePage("DrupalGap/themes/easystreet/page.html");
 					/*$.get('DrupalGap/themes/easystreet/page.html', function(data) {
@@ -314,6 +320,24 @@ function drupalgap_get_path(type, name) {
   }
 	return null;
 }
+
+/**
+ * DrupalGap's version of Drupal's drupal_get_title function.
+ */
+function drupalgap_get_title() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_get_title()');
+      console.log(JSON.stringify(arguments));
+    }
+    // TODO - This should default to the actual Drupal site title.
+    return 'DrupalGap';
+  }
+  catch (error) {
+    alert('drupalgap_get_title - ' + error);
+  }
+}
+
 
 function drupalgap_goto(path) {
   try {
@@ -438,6 +462,9 @@ var drupalgap_module_invoke_continue = null;
  */
 function drupalgap_module_invoke_all(hook) {
   try {
+    // TODO - shouldn't this function ust iterate over each and then call
+    // drupalgap_module_invoke for each?
+    
     // Prepare the invocation results.
     drupalgap_module_invoke_results = new Array();
     // Copy the arguments.
@@ -598,17 +625,6 @@ function drupalgap_settings_load() {
  */
 function drupalgap_onload() {
 	document.addEventListener("deviceready", drupalgap_deviceready, false);
-}
-
-/**
- * 
- */
-function drupalgap_theme(hook, variables) {
-	html = '';
-	if (hook == 'image') {
-		html = '<img src="' + drupalgap_image_path(variables.path)  + '" />';
-	}
-	return html;
 }
 
 /*
