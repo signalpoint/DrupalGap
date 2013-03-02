@@ -19,6 +19,62 @@ function drupalgap_attributes(attributes) {
   }
 }
 
+/**
+ * Given a path, this will change the current page in the app.
+ */
+function drupalgap_goto(path) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_goto()');
+      console.log(JSON.stringify(arguments));
+      console.log('$.mobile.activePage[0].id = ' + $.mobile.activePage[0].id);
+    }
+    // If the path was an empty sting, set it to the front page.
+    if (path == '') {
+      path = drupalgap.settings.front;
+    }
+    var status_code = drupalgap_page_http_status_code(path);
+    switch (status_code) {
+      case 200:
+        // Set the current menu path to the path input.
+        drupalgap.path = path;
+        if (drupalgap.settings.debug) {
+          console.log(JSON.stringify(drupalgap.menu_links[path]));
+        }
+        // Now use jQM to change the page. If this is the first page load,
+        // we need to change the page directly to the theme's page.html,
+        // otherwise all subsequent goto's just need a forced pagebeforeshow
+        // event to be triggered.
+        if ($.mobile.activePage[0].id == '') {
+          // First time.
+          $.mobile.changePage("DrupalGap/themes/easystreet/page.html");
+        }
+        else {
+          // All other times.
+          // Force the pagebeforeshow event.
+          drupalgap_pagebeforeshow();
+        }
+        break;
+      default:
+        alert('drupalgap_goto(' + path + ') => (' + status_code + ')');
+        break;
+    }
+    
+    /*if (path && drupalgap.menu_links[path]) {
+      
+			
+      var menu_link = drupalgap.menu_links[path];
+      var page_callback = menu_link['page callback']
+      if (eval('typeof ' + page_callback) == 'function') {
+        var fn = window[page_callback];
+        fn();
+      }
+    }*/
+  }
+  catch (error) {
+    alert('drupalgap_goto - ' + error);
+  }
+}
 
 /**
  *

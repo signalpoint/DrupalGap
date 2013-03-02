@@ -2,19 +2,49 @@
  * Implements hook_menu().
  */
 function user_menu() {
-  var items = {
-    /*'user/login':{
-      'page callback':'user_login',
-    },*/
-    'users':{
-      'page callback':'user_listing',
-    },
-  };
-  return items;
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_menu()');
+      console.log(JSON.stringify(arguments));
+    }
+    var items = {
+      /*'user/login':{
+        'page callback':'user_login',
+      },*/
+      'users':{
+        'page_callback':'user_listing',
+      },
+    };
+    return items;
+  }
+  catch (error) {
+    alert('user_menu - ' + error);
+  }
 }
 
+/**
+ *
+ */
 function user_listing() {
-  return '<p>howdy dude!</p>';
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_listing()');
+      console.log(JSON.stringify(arguments));
+    }
+    return {
+      'dashboard':{
+        'theme':'link',
+        'path':'dashboard',
+        'text':'Dashboard',
+        'attributes':{
+          'data-role':'button',
+        },
+      }
+    };
+  }
+  catch (error) {
+    alert('user_listing - ' + error);
+  }
 }
 
 function user_login() {

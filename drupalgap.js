@@ -252,16 +252,9 @@ function drupalgap_deviceready() {
 					//var promise = $.mobile.loadPage("DrupalGap/themes/easystreet/page.html");
 					//var promise = $.mobile.loadPage("themes/easystreet/page.html"); 
 					//console.log(JSON.stringify(promise));
-					// Set the current menu path to the front page.
-					drupalgap.path = drupalgap.settings.front;
-					// Change the page to the theme's page.html.
-					$.mobile.changePage("DrupalGap/themes/easystreet/page.html");
-					/*$.get('DrupalGap/themes/easystreet/page.html', function(data) {
-					    console.log(data);
-					    //$('body').html(data);
-          }, 'html');*/
-					// Go to the pront page.
-					//$.mobile.changePage(drupalgap.settings.front);
+					// Change the page to the theme's page.html and load the front page.
+					//$.mobile.changePage("DrupalGap/themes/easystreet/page.html");
+					drupalgap_goto('');
 				},
 				'error':function(jqXHR, textStatus, errorThrown) {
 					if (errorThrown == 'Not Found') {
@@ -347,23 +340,6 @@ function drupalgap_get_title() {
   }
   catch (error) {
     alert('drupalgap_get_title - ' + error);
-  }
-}
-
-
-function drupalgap_goto(path) {
-  try {
-    if (path && drupalgap.menu_links[path]) {
-      var menu_link = drupalgap.menu_links[path];
-      var page_callback = menu_link['page callback']
-      if (eval('typeof ' + page_callback) == 'function') {
-        var fn = window[page_callback];
-        fn();
-      }
-    }
-  }
-  catch (error) {
-    alert('drupalgap_goto - ' + error);
   }
 }
 
@@ -612,12 +588,25 @@ function drupalgap_page_http_status_code(path) {
     // Check to make sure the path is in menu_links, then check for the path's
     // page_callback value, then make sure the page_callback's function exists.
     // This satisfies a 200 response, otherwise we'll throw a 404.
-    if (drupalgap.menu_links[drupalgap.path] && 
-        drupalgap.menu_links[drupalgap.path].page_callback &&
-      eval('typeof ' + drupalgap.menu_links[drupalgap.path].page_callback) == 'function')
-    { status_code = 200; }
-    else { status_code = 404; }
-    if (drupalgap.settings.debug) { console.log('status code: ' + status_code); }
+    if (drupalgap.menu_links[path] && 
+        drupalgap.menu_links[path].page_callback &&
+      eval('typeof ' + drupalgap.menu_links[path].page_callback) == 'function')
+    {
+      status_code = 200;
+    }
+    else {
+      status_code = 404;
+    }
+    if (drupalgap.settings.debug) {
+      if (status_code == 200) {
+        console.log('200 OK');
+      }
+      else {
+        console.log('Status Code: ' + status_code);
+        console.log(JSON.stringify(drupalgap.menu_links));  
+      }
+      
+    }
     return status_code;
   }
   catch (error) {

@@ -68,7 +68,7 @@ function theme_image(variables) {
 function theme_link(variables) {
   try {
     return '<a ' + 
-      'onclick="javascript:drupalgap_changePage(\'' + variables.path + '\');" ' +
+      'onclick="javascript:drupalgap_goto(\'' + variables.path + '\');" ' +
       drupalgap_attributes(variables.attributes) +
     '>' + variables.text + '</a>';
   }

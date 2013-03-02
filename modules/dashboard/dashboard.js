@@ -34,7 +34,7 @@ function dashboard_page() {
     },
     'taxonomy':{
       'theme':'link',
-      'path':'user_listing',
+      'path':'users',
       'text':'Users',
       'attributes':{
         'data-role':'button',
