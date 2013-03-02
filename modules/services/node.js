@@ -122,19 +122,30 @@ drupalgap.services.node = {
 };
 
 /**
- * 
+ * Takes assembled node options and converts them into a 'data' string for
+ * a services call.
  */
 function drupalgap_node_assemble_data(options) {
-	data = 'node[language]=' + encodeURIComponent(drupalgap.settings.language);
-	if (options.node.type) {
-		data += '&node[type]=' + encodeURIComponent(options.node.type); 
-	}
-	if (options.node.title) {
-		data += '&node[title]=' + encodeURIComponent(options.node.title);
-	}
-	if (options.node.body) {
-		data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
-			encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
-	}
-	return data;
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_node_assemble_data()');
+      console.log(JSON.stringify(arguments));
+    }
+    data = 'node[language]=' + encodeURIComponent(drupalgap.settings.language);
+    if (options.node.type) {
+      data += '&node[type]=' + encodeURIComponent(options.node.type); 
+    }
+    if (options.node.title) {
+      data += '&node[title]=' + encodeURIComponent(options.node.title);
+    }
+    if (options.node.body) {
+      data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
+        encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
+    }
+    return data;
+  }
+  catch (error) {
+    alert('drupalgap_node_assemble_data - ' + error);
+  }
 }
+
