@@ -29,9 +29,12 @@ var drupalgap = {
 	   ]
   },
   'module_paths':[],
+  'includes':[
+      {'name':'theme'},
+  ],
   'user':{
 	  'uid':0, /* do not change this user id value */
-	  'name':'Anonymous',
+	  'name':'Anonymous', /* TODO - this value should come from the drupal site */
   },
   'online':false,
   'destination':'',
@@ -49,6 +52,7 @@ var drupalgap = {
   'node':{ }, /* <!-- node --> */
   'node_edit':{ }, /* <!-- node_edit --> */
   'menu_links':{}, /* <!-- menu_links --> */
+  'page':{'variables':{}}, /* <!-- page --> */
   'services':{}, // <!-- services -->
   'taxonomy_term':{ }, /* <!-- taxonomy_term -> */
   'taxonomy_term_edit':{ }, /* <!-- taxonomy_term_edit -> */
@@ -186,6 +190,8 @@ function drupalgap_check_connection() {
 function drupalgap_deviceready() {
   // Load up settings.
   drupalgap_settings_load();
+  // Load up includes.
+  drupalgap_includes_load();
 	// Load up modules.
 	drupalgap_modules_load();
 	// Initialize entities.
@@ -225,8 +231,19 @@ function drupalgap_deviceready() {
 			// DrupalGap System Connect Service Resource.
 			drupalgap.services.drupalgap_system.connect.call({
 				'success':function(result){
+				  // Call all hook_device_connected implementations.
 					drupalgap_module_invoke_all('device_connected');
-					$.mobile.changePage(drupalgap.settings.front);
+					//var promise = $.mobile.loadPage("DrupalGap/themes/easystreet/page.html");
+					//var promise = $.mobile.loadPage("themes/easystreet/page.html"); 
+					//console.log(JSON.stringify(promise));
+					// Change the page to the theme's page.html.
+					$.mobile.changePage("DrupalGap/themes/easystreet/page.html");
+					/*$.get('DrupalGap/themes/easystreet/page.html', function(data) {
+					    console.log(data);
+					    //$('body').html(data);
+          }, 'html');*/
+					// Go to the pront page.
+					//$.mobile.changePage(drupalgap.settings.front);
 				},
 				'error':function(jqXHR, textStatus, errorThrown) {
 					if (errorThrown == 'Not Found') {
@@ -333,6 +350,45 @@ function drupalgap_image_path(uri) {
 	return null;
 }
 
+/**
+ * Loads the js files in DrupalGap/includes specified by drupalgap.includes.
+ */
+function drupalgap_includes_load() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_includes_load()');
+      console.log(JSON.stringify(drupalgap.includes));
+    }
+    if (drupalgap.includes != null && drupalgap.includes.length != 0) {
+      $.each(drupalgap.includes, function(index, include){
+          var include_path =  'DrupalGap/includes/' + include.name + '.inc.js';
+          jQuery.ajax({
+              async:false,
+              type:'GET',
+              url:include_path,
+              data:null,
+              success:function(){
+                if (drupalgap.settings.debug) {
+                  // Print the include path to the console.
+                  console.log(include_path.replace('DrupalGap/', ''));
+                }
+              },
+              dataType:'script',
+              error: function(xhr, textStatus, errorThrown) {
+                  // Look at the `textStatus` and/or `errorThrown` properties.
+              }
+          });
+      });
+    }
+  }
+  catch (error) {
+    alert('drupalgap_includes_load - ' + error);
+  }
+}
+
+/**
+ *
+ */
 function drupalgap_menu_links_load() {
   drupalgap_module_invoke_all('menu');
   var menu_links = drupalgap_module_invoke_results;
@@ -349,6 +405,9 @@ function drupalgap_menu_links_load() {
   }
 }
 
+/**
+ * Given a module name and a hook name, this will invoke that module's hook.
+ */
 function drupalgap_module_invoke(module, hook) {
   try {
     var module_arguments = Array.prototype.slice.call(arguments);
@@ -439,6 +498,9 @@ function drupalgap_module_invoke_all(hook) {
   }
 }
 
+/**
+ *
+ */
 function drupalgap_modules_get_bundle_directory(bundle) {
   try {
     dir = '';
@@ -531,10 +593,10 @@ function drupalgap_settings_load() {
 }
 
 /**
- * 
+ * This is called once the <body> element's onload is fired. We then set the
+ * PhoneGap 'deviceready' event listener to drupalgap_deviceready().
  */
 function drupalgap_onload() {
-	// Add device ready listener.
 	document.addEventListener("deviceready", drupalgap_deviceready, false);
 }
 

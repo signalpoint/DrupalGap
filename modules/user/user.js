@@ -112,7 +112,7 @@ function user_profile_form() {
         'required':true,
       },
       'picture':{
-        'type':'filefield',
+        'type':'image',
         'widget_type':'imagefield_widget',
         'title':'Picture',
         'required':false,

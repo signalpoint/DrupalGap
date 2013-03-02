@@ -1,0 +1,14 @@
+<div data-role="page" id="drupalgap_page">
+  <script>    
+    /**
+     * Implements jQM pagebeforeshow().
+     */
+    $('#drupalgap_page').on('pagebeforeshow',function(){
+        // Pass along to drupalgap.
+        drupalgap_pagebeforeshow();
+    });
+  </script>
+  <div data-role="header"><h1></h1></div><!-- header -->
+  <div data-role="content"></div><!-- content -->
+</div>
+

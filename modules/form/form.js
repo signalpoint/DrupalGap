@@ -59,70 +59,63 @@ function drupalgap_form_render(options) {
           case "email":
             form_element += '<input type="email" id="' + element_id + '" value="' + element.default_value + '"/>';
             break;
-          case 'filefield':
-            if (element.widget_type == 'imagefield_widget') {
-              // Set the default button text, and if a value was provided,
-              // overwrite the button text.
-              var button_text = 'Add Image';
-              if (element.value) {
-                button_text = element.value;
-              }
-              // Place variables into document for PhoneGap image processing.
-              var element_id_base = element_id.replace(/-/g, '_'); 
-              var image_field_source = element_id_base + '_imagefield_source';
-              var imagefield_destination_type = element_id_base + '_imagefield_destination_type';
-              var imagefield_data = element_id_base + '_imagefield_data';
-              eval('var ' + image_field_source + ' = null;');
-              eval('var ' + imagefield_destination_type + ' = null;');
-              eval('var ' + imagefield_data + ' = null;');
-              // Build an imagefield widget with PhoneGap. Contains a message
-              // div, an image element, and button to add an image.
-              form_element += '<div>' + 
-                '<div id="' + element_id + '-imagefield-msg"></div>' + 
-                '<img id="' + element_id + '-imagefield" />' + 
-                '<a href="#" data-role="button" id="' + element_id + '">' + element.value + '</a>' + 
-              '</div>';
-              // Open extra javascript declaration.
-              form_element += '<script type="text/javascript">';
-              // Add device ready listener for PhoneGap camera.
-              var event_listener = element_id_base +  '_imagefield_ready';
-              form_element += '$("#' + options.page_id + '").on("pageshow",function(){' +
-                'document.addEventListener("deviceready", ' + event_listener + ', false);' +
-              '});' + 
-              'function ' + event_listener +  '() {' +
-                image_field_source + ' = navigator.camera.PictureSourceType;' +
-                imagefield_destination_type + ' = navigator.camera.DestinationType;' +
-              '}';
-              // Define error callback function.
-              var imagefield_error = element_id_base + '_error';
-              form_element += 'function ' + imagefield_error + '(message) {' +
-                'if (message != "Camera cancelled.") {' +
-                  'alert("' + imagefield_error + ' - " + message);' +
-                '}' +
-              '}';
-              // Define success callback function.
-              var imagefield_success = element_id_base + '_success';
-              form_element += 'function ' + imagefield_success + '(message) {' +
-                'alert("success!");' +
-              '}';
-              // Add click handler for photo button.
-              form_element += '$("#' + element_id + '").on("click",function(){' +
-                'var photo_options = {' +
-                  'quality: 50,' +
-                  'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
-                  'correctOrientation: true' +
-                '};' +
-                'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
-              '});';
-              // Close extra javascript declaration.
-              form_element += '</script>';
-              console.log(form_element);
+          case 'image':
+            // Set the default button text, and if a value was provided,
+            // overwrite the button text.
+            var button_text = 'Add Image';
+            if (element.value) {
+              button_text = element.value;
             }
-            else {
-              // Widget type not supported yet.
-              // filefield_widget
-              form_element += '<div><em>Field ' + element.type + ' (' + element.widget_type + ') not supported, yet.</em></div>';
-            }
+            // Place variables into document for PhoneGap image processing.
+            var element_id_base = element_id.replace(/-/g, '_'); 
+            var image_field_source = element_id_base + '_imagefield_source';
+            var imagefield_destination_type = element_id_base + '_imagefield_destination_type';
+            var imagefield_data = element_id_base + '_imagefield_data';
+            eval('var ' + image_field_source + ' = null;');
+            eval('var ' + imagefield_destination_type + ' = null;');
+            eval('var ' + imagefield_data + ' = null;');
+            // Build an imagefield widget with PhoneGap. Contains a message
+            // div, an image element, and button to add an image.
+            form_element += '<div>' + 
+              '<div id="' + element_id + '-imagefield-msg"></div>' + 
+              '<img id="' + element_id + '-imagefield" />' + 
+              '<a href="#" data-role="button" id="' + element_id + '">' + element.value + '</a>' + 
+            '</div>';
+            // Open extra javascript declaration.
+            form_element += '<script type="text/javascript">';
+            // Add device ready listener for PhoneGap camera.
+            var event_listener = element_id_base +  '_imagefield_ready';
+            form_element += '$("#' + options.page_id + '").on("pageshow",function(){' +
+              'document.addEventListener("deviceready", ' + event_listener + ', false);' +
+            '});' + 
+            'function ' + event_listener +  '() {' +
+              image_field_source + ' = navigator.camera.PictureSourceType;' +
+              imagefield_destination_type + ' = navigator.camera.DestinationType;' +
+            '}';
+            // Define error callback function.
+            var imagefield_error = element_id_base + '_error';
+            form_element += 'function ' + imagefield_error + '(message) {' +
+              'if (message != "Camera cancelled.") {' +
+                'alert("' + imagefield_error + ' - " + message);' +
+              '}' +
+            '}';
+            // Define success callback function.
+            var imagefield_success = element_id_base + '_success';
+            form_element += 'function ' + imagefield_success + '(message) {' +
+              'alert("success!");' +
+            '}';
+            // Add click handler for photo button.
+            form_element += '$("#' + element_id + '").on("click",function(){' +
+              'var photo_options = {' +
+                'quality: 50,' +
+                'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
+                'correctOrientation: true' +
+              '};' +
+              'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
+            '});';
+            // Close extra javascript declaration.
+            form_element += '</script>';
+            console.log(form_element);
             break;
           case "hidden":
             form_element += '<input type="hidden" id="' + element_id + '" value="' + element.default_value + '"/>';
