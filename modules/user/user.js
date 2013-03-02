@@ -1,14 +1,21 @@
 /**
  * Implements hook_menu().
  */
-/*function user_menu() {
+function user_menu() {
   var items = {
-    'user/login':{
+    /*'user/login':{
       'page callback':'user_login',
+    },*/
+    'users':{
+      'page callback':'user_listing',
     },
   };
   return items;
-}*/
+}
+
+function user_listing() {
+  return '<p>howdy dude!</p>';
+}
 
 function user_login() {
   var form = {

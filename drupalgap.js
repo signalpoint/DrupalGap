@@ -143,8 +143,20 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 	return new_options_set;
 }
 
+/**
+ *
+ */
 function drupalgap_changePage(path) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_changePage()');
+      console.log(JSON.stringify(arguments));
+    }
+  }
+  catch (error) {
+    alert('drupalgap_changePage - ' + error);
+  }
+  /*try {
     if (device.platform != 'Android') {
       alert('drupalgap_changePage - device platform not supported yet - ' + device.platform);
     }
@@ -154,7 +166,7 @@ function drupalgap_changePage(path) {
   }
   catch (error) {
     alert('drupalgap_changePage - ' + error);
-  }
+  }*/
 }
 
 /**
@@ -587,7 +599,35 @@ function drupalgap_modules_load() {
 }
 
 /**
- *
+ * Given a DrupalGap path, this returns the equivalent HTTP status code for the
+ * page in the app. 200, 404, etc.
+ */
+function drupalgap_page_http_status_code(path) {
+  try {
+    var status_code = null;
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_page_http_status_code()');
+      console.log(JSON.stringify(arguments));
+    }
+    // Check to make sure the path is in menu_links, then check for the path's
+    // page_callback value, then make sure the page_callback's function exists.
+    // This satisfies a 200 response, otherwise we'll throw a 404.
+    if (drupalgap.menu_links[drupalgap.path] && 
+        drupalgap.menu_links[drupalgap.path].page_callback &&
+      eval('typeof ' + drupalgap.menu_links[drupalgap.path].page_callback) == 'function')
+    { status_code = 200; }
+    else { status_code = 404; }
+    if (drupalgap.settings.debug) { console.log('status code: ' + status_code); }
+    return status_code;
+  }
+  catch (error) {
+    alert('drupalgap_page_http_status_code - ' + error);
+  }
+}
+
+
+/**
+ * Loads the settings specified in DrupalGap/app/settings.js into the app.
  */
 function drupalgap_settings_load() {
   try {

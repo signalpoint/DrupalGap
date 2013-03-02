@@ -67,9 +67,10 @@ function theme_image(variables) {
  */
 function theme_link(variables) {
   try {
-    return '<a href="' + variables.path + '" ' + drupalgap_attributes(variables.attributes) + '>' +
-      variables.text +
-    '</a>';
+    return '<a ' + 
+      'onclick="javascript:drupalgap_changePage(\'' + variables.path + '\');" ' +
+      drupalgap_attributes(variables.attributes) +
+    '>' + variables.text + '</a>';
   }
   catch (error) {
     alert('theme_link - ' + error);
@@ -121,60 +122,24 @@ function template_process_page(variables) {
       console.log(drupalgap.path);
       console.log(JSON.stringify(drupalgap.menu_links[drupalgap.path]));
     }
-    // Fill in page template variables...
-    
-    // Page title.
-    if (!variables.title) {
-      variables.title = drupalgap_get_title();
-    }
-    $("div[data-role$='header'] h1").html(variables.title);
-    
     // Page content. Route the menu link path to its page callback function
     // to get the content of the current page.
-    
-    var page_404 = false;
-    if (drupalgap.menu_links[drupalgap.path]) {
-      var menu_link = drupalgap.menu_links[drupalgap.path];
-      if (menu_link.page_callback) {
-        var page_callback = menu_link.page_callback;
-        if (eval('typeof ' + page_callback) == 'function') {
-          var fn = window[page_callback];
-          if (drupalgap.settings.debug) { console.log(page_callback + '()'); }
-          // Render the content based on the output type.
-          var content = '';
-          var output = fn();
-          var output_type = $.type(output); 
-          if (output_type === "string") {
-            if (drupalgap.settings.debug) { console.log(output); }
-            // The output came back as a string, we can render it as is.
-            content = output;
-          }
-          else if (output_type === "object") {
-            if (drupalgap.settings.debug) { console.log(JSON.stringify(output)); }
-            // The output came back as on object, render each element in it.
-            $.each(output, function(element, variables){
-                content += theme(variables.theme, variables);
-            });
-          }
-          // Set the page content.
-          $("div[data-role$='content']").html(content).trigger("create");
+    var status_code = drupalgap_page_http_status_code(drupalgap.path);
+    switch (status_code) {
+      case 200:
+        // Fill in page template variables...
+        // Page title.
+        if (!variables.title) {
+          variables.title = drupalgap_get_title();
         }
-        else {
-          page_404 = true;
-        }
-      }
-      else {
-        page_404 = true;
-      }
-      
-      
-    }
-    else {
-      page_404 = true;
-      
-    }
-    if (page_404) {
-      alert('template_process_page - 404, oh no!');
+        $("div[data-role$='header'] h1").html(variables.title);
+        // Set the page content to the output.
+        var content = drupalgap_render_page({'path':drupalgap.path});
+        $("div[data-role$='content']").html(content).trigger("create");
+        break; // 200
+      default:
+        alert('template_process_page - (status code: ' + status_code + ') - oh no!');
+        break;
     }
   }
   catch (error) {

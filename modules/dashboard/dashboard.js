@@ -27,12 +27,19 @@ function dashboard_page() {
     'users':{
       'theme':'link',
       'path':'http://www.drupalgap.org',
+      'text':'www.drupalgap.org',
+      'attributes':{
+        'data-role':'button',
+      },
+    },
+    'taxonomy':{
+      'theme':'link',
+      'path':'user_listing',
       'text':'Users',
       'attributes':{
         'data-role':'button',
       },
     },
   };
-  //return 'hello dashboard page';
 }
 
