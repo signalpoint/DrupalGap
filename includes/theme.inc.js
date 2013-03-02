@@ -51,6 +51,20 @@ function theme(hook, variables) {
 }
 
 /**
+ *
+ */
+function theme_button_link(variables) {
+  try {
+    variables.attributes = {'data-role':'button'};
+    return theme_link(variables);
+  }
+  catch (error) {
+    alert('theme_button_link - ' + error);
+  }
+}
+
+
+/**
  * Implementation of theme_image().
  */
 function theme_image(variables) {

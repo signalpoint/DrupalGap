@@ -101,13 +101,22 @@ function drupalgap_render_page(page) {
       console.log('drupalgap_render_page()');
       console.log(JSON.stringify(arguments));
     }
-    // Extract the menu link path and page callback function.
+    // Extract the menu link path, page callback function and any page arguments,
+    // then call the page callback function with any args and hold on to the
+    // rendered output.
     var menu_link = drupalgap.menu_links[page.path];
     var page_callback = menu_link.page_callback;
     var fn = window[page_callback];
     if (drupalgap.settings.debug) { console.log(page_callback + '()'); }
-    // Retrieve the output.
-    var output = fn();
+    var output = '';
+    if (menu_link.page_arguments) {
+      output = fn.apply(null, Array.prototype.slice.call(menu_link.page_arguments));
+      //output = fn.call(null, menu_link.page_arguments);
+    }
+    else {
+      output = fn();
+    }
+    
     // Render the content based on the output type.
     var content = '';
     // What type of output did we end up with? Plain html or a render object?

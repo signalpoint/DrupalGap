@@ -399,21 +399,33 @@ function drupalgap_includes_load() {
 }
 
 /**
- *
+ * Calls all hook_menu implementations and builds a collection of menu links.
  */
 function drupalgap_menu_links_load() {
-  drupalgap_module_invoke_all('menu');
-  var menu_links = drupalgap_module_invoke_results;
-  if (menu_links && menu_links.length != 0) {
-    $.each(menu_links, function(index, menu_link){
-        for (var item in menu_link) {
-          drupalgap.menu_links[item] = menu_link[item];
-          break;
-        }
-    })
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_menu_links_load()');
+      console.log(JSON.stringify(arguments));
+    }
+    drupalgap_module_invoke_all('menu');
+    var menu_links = drupalgap_module_invoke_results;
+    if (drupalgap.settings.debug) {
+      console.log(JSON.stringify(menu_links));
+    }
+    if (menu_links && menu_links.length != 0) {
+      $.each(menu_links, function(index, menu_link){
+          for (var item in menu_link) {
+            drupalgap.menu_links[item] = menu_link[item];
+            break;
+          }
+      })
+    }
+    if (drupalgap.settings.debug) {
+      console.log(JSON.stringify(drupalgap.menu_links));
+    }
   }
-  if (drupalgap.settings.debug) {
-    console.log(JSON.stringify(drupalgap.menu_links));
+  catch (error) {
+    alert('drupalgap_menu_links_load - ' + error);
   }
 }
 
@@ -445,39 +457,70 @@ function drupalgap_module_invoke(module, hook) {
 var drupalgap_module_invoke_results = null;
 var drupalgap_module_invoke_continue = null;
 /**
- * 
- * @param hook
+ * Given a hook name, this will invoke all modules that implement the hook.
  */
 function drupalgap_module_invoke_all(hook) {
   try {
-    // TODO - shouldn't this function ust iterate over each and then call
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_module_invoke_all(' +  hook + ')');
+      console.log(JSON.stringify(arguments));
+    }
+    // TODO - shouldn't this function just iterate over each and then call
     // drupalgap_module_invoke for each?
     
     // Prepare the invocation results.
     drupalgap_module_invoke_results = new Array();
+    
     // Copy the arguments.
     var module_arguments = Array.prototype.slice.call(arguments);
-    drupalgap_module_invoke_continue = true;
+    if (drupalgap.settings.debug) {
+      console.log(JSON.stringify(module_arguments));
+    }
+    
     // Try to fire the hook in every module.
+    drupalgap_module_invoke_continue = true;
     $.each(drupalgap.modules, function(bundle, modules){
       $.each(modules, function(index, module){
         function_name = module.name + '_' + hook;
         if (eval('typeof ' + function_name) == 'function') {
-            if (drupalgap.settings.debug) {
-              console.log('hook(): ' + function_name);
-            }
-            // Get the hook function.
-            var fn = window[function_name];
-            // Remove the hook from the arguments.
-            module_arguments.splice(0,1);
-            // If there are no arguments, just call the hook directly, otherwise
-            // call the hook and pass along all the arguments.
-            if ($.isEmptyObject(module_arguments) ) {
-              drupalgap_module_invoke_results.push(fn());
+          if (drupalgap.settings.debug) {
+            console.log(function_name + '() => calling hook');
+          }
+          // Get the hook function.
+          var fn = window[function_name];
+          // Remove the hook from the arguments.
+          console.log('splicing');
+          module_arguments.splice(0,1);
+          console.log(JSON.stringify(module_arguments));
+          // If there are no arguments, just call the hook directly, otherwise
+          // call the hook and pass along all the arguments.
+          if ($.isEmptyObject(module_arguments) ) {
+            var invoke_results = fn();
+            console.log(JSON.stringify(invoke_results));
+            if ($.isArray(invoke_results)) {
+              $.each(invoke_results, function(invoke_index, invoke_result){
+                  drupalgap_module_invoke_results.push(invoke_result);
+              });
             }
             else {
-              drupalgap_module_invoke_results.push(fn.apply(null, module_arguments));
+              drupalgap_module_invoke_results.push(invoke_results);
             }
+            /*
+            if (drupalgap.settings.debug) {
+              console.log(JSON.stringify(invoke_results));
+            }
+            $.each(invoke_results, function(index, object){
+                drupalgap_module_invoke_results.push(object);
+            });*/
+            
+            //drupalgap_module_invoke_results.push(fn());
+          }
+          else {
+            drupalgap_module_invoke_results.push(fn.apply(null, module_arguments));
+          }
+          if (drupalgap.settings.debug) {
+            console.log(JSON.stringify(drupalgap_module_invoke_results));
+          }
         }
         // Try to fire the hook in any includes for this module.
         // TODO - hooks defined in module includes won't work properly until
@@ -602,8 +645,17 @@ function drupalgap_page_http_status_code(path) {
         console.log('200 OK');
       }
       else {
-        console.log('Status Code: ' + status_code);
+        console.log('Status Code: ' + status_code + ' (' + path + ')');
         console.log(JSON.stringify(drupalgap.menu_links));  
+        if (!drupalgap.menu_links[path]) {
+          console.log('path (' + path + ') does not exist in menu links');
+        }
+        if (!drupalgap.menu_links[path].page_callback) {
+          console.log('page call back not specified (' + drupalgap.menu_links[path].page_callback + ') does not exist in menu links');
+        }
+        if (!eval('typeof ' + drupalgap.menu_links[path].page_callback) == 'function') {
+          console.log('call back function (' + drupalgap.menu_links[path].page_callback + ') does not exist');
+        }
       }
       
     }

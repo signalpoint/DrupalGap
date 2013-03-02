@@ -19,25 +19,25 @@ function drupalgap_form_get_element_id(name, form_id) {
  * with the given form id, assembles it into html5 elements, than appends the
  * elements onto the jQM page inside the container element.
  */
-function drupalgap_form_render(options) {
+function drupalgap_form_render(form) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_form_render()');
-      console.log(JSON.stringify(options));
-    }
-    if (!options.form_id) { alert('drupalgap_form_render - missing form_id'); }
-    if (!options.page_id) { alert('drupalgap_form_render - missing page_id'); }
-    if (!options.container) { alert('drupalgap_form_render - missing container'); }
-    var form_id = options.form_id;
-    var page_id = options.page_id;
-    var container = options.container;
-    // Load the form, render each element, and append form to container
-    // identified by the incoming css selector.
-    form = drupalgap_get_form(form_id);
-    if (drupalgap.settings.debug) {
       console.log(JSON.stringify(form));
     }
-    form_elements = '';
+    /*if (!options.form_id) { alert('drupalgap_form_render - missing form_id'); }
+    if (!options.page_id) { alert('drupalgap_form_render - missing page_id'); }
+    if (!options.container) { alert('drupalgap_form_render - missing container'); }*/
+    /*var form_id = options.form_id;
+    var page_id = options.page_id;
+    va*/r container = options.container;
+    // Load the form, render each element, and append form to container
+    // identified by the incoming css selector.
+    /*form = drupalgap_get_form(form_id);
+    if (drupalgap.settings.debug) {
+      console.log(JSON.stringify(form));
+    }*/
+    var form_elements = '';
     $.each(form.elements, function(name, element){
         // Open the element.
         form_element = '';
@@ -158,9 +158,11 @@ function drupalgap_form_render(options) {
           form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name, form.id) + '">' +  button.title + '</button>';
       });
     }
-    // Append the form to the container.
-    form_html = '<div><div id="drupalgap_form_errors"></div>' + form_elements + '</div>';
-    $('#' + page_id + ' ' + container).append(form_html).trigger('create');
+    // Return the form html.
+    var form_html = '<div><div id="drupalgap_form_errors"></div>' + form_elements + '</div>';
+    return form_html;
+    
+    //$('#' + page_id + ' ' + container).append(form_html).trigger('create');
     // Call the form's loaded unction if it is implemented.
     function_name = form_id + '_loaded';
     if (eval('typeof ' + function_name) == 'function') {
@@ -212,8 +214,15 @@ function drupalgap_form_state_values_assemble(form) {
   return null;
 }
 
+/**
+ * 
+ */
 function drupalgap_get_form(form_id) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_get_form()');
+      console.log(JSON.stringify(arguments));
+    }
     form = {};
     function_name = form_id;
     if (drupalgap.settings.debug) {
@@ -224,12 +233,12 @@ function drupalgap_get_form(form_id) {
       drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
       drupalgap.form = form;
     }
-    return form;
+    return drupalgap_form_render(form);
+    //return form;
   }
   catch (error) {
     alert('drupalgap_get_form - ' + error);
   }
-  return null;
 }
 
 function _drupalgap_form_submit() {

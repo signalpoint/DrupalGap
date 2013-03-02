@@ -7,11 +7,16 @@ function dashboard_menu() {
       console.log('dashboard_menu()');
       console.log(JSON.stringify(arguments));
     }
-    var items = {
+    /*var items = {
       'dashboard':{
         'page_callback':'dashboard_page',
       },
-    };
+    };*/
+    var items = [{
+      'dashboard':{
+        'page_callback':'dashboard_page',
+      },
+    }];
     return items;
   }
   catch (error) {
@@ -24,21 +29,20 @@ function dashboard_menu() {
  */
 function dashboard_page() {
   return {
-    'users':{
-      'theme':'link',
+    'drupalgap':{
+      'theme':'button_link',
       'path':'http://www.drupalgap.org',
       'text':'www.drupalgap.org',
-      'attributes':{
-        'data-role':'button',
-      },
     },
-    'taxonomy':{
-      'theme':'link',
+    'login':{
+      'theme':'button_link',
+      'path':'user/login',
+      'text':'Login',
+    },
+    'users':{
+      'theme':'button_link',
       'path':'users',
       'text':'Users',
-      'attributes':{
-        'data-role':'button',
-      },
     },
   };
 }
