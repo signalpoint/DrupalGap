@@ -247,13 +247,9 @@ function drupalgap_deviceready() {
 			// DrupalGap System Connect Service Resource.
 			drupalgap.services.drupalgap_system.connect.call({
 				'success':function(result){
-				  // Call all hook_device_connected implementations.
+				  // Call all hook_device_connected implementations then go to
+				  // the front page.
 					drupalgap_module_invoke_all('device_connected');
-					//var promise = $.mobile.loadPage("DrupalGap/themes/easystreet/page.html");
-					//var promise = $.mobile.loadPage("themes/easystreet/page.html"); 
-					//console.log(JSON.stringify(promise));
-					// Change the page to the theme's page.html and load the front page.
-					//$.mobile.changePage("DrupalGap/themes/easystreet/page.html");
 					drupalgap_goto('');
 				},
 				'error':function(jqXHR, textStatus, errorThrown) {

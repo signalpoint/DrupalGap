@@ -42,12 +42,12 @@ function drupalgap_goto(path) {
           console.log(JSON.stringify(drupalgap.menu_links[path]));
         }
         // Now use jQM to change the page. If this is the first page load,
-        // we need to change the page directly to the theme's page.html,
+        // we need to change the page directly to the theme's page.tpl.html,
         // otherwise all subsequent goto's just need a forced pagebeforeshow
         // event to be triggered.
         if ($.mobile.activePage[0].id == '') {
           // First time.
-          $.mobile.changePage("DrupalGap/themes/easystreet/page.html");
+          $.mobile.changePage("DrupalGap/themes/easystreet/page.tpl.html");
         }
         else {
           // All other times.

@@ -1,9 +1,9 @@
 /**
- * This function is called by the current DrupalGap theme's page.html script
+ * This function is called by the current DrupalGap theme's page.tpl.html script
  * jQM pagebeforeshow() implementation. It preprocesses the variables for the
  * page template. (TODO - We weren't able to implement the jQM pagebeforeshow
  * in this file, instead it had to be in the <script></script> tag in the
- * page.html file of the current theme, or else the event would never fire. So
+ * page.tpl.html file of the current theme, or else the event would never fire. So
  * it was decided DrupalGap themes would have to call this function.) 
  */
 function drupalgap_pagebeforeshow() {
