@@ -514,27 +514,18 @@ function drupalgap_modules_load() {
 function drupalgap_settings_load() {
   try {
     settings_file_path = 'DrupalGap/app/settings.js';
-    jQuery.ajax({
-      async:false,
-      type:'GET',
-      url:settings_file_path,
-      data:null,
-      success:function(){
-        if (drupalgap.settings.debug) {
-          // Print the js path to the console.
-          console.log(settings_file_path);
-        }
-      },
-      dataType:'script',
-      error: function(xhr, textStatus, errorThrown) {
-        navigator.notification.alert(
-          'Failed to load the settings.js file in the DrupalGap/app folder!',
-          function(){},
-          'Error',
-          'OK'
-        );
-      }
-    });
+
+    if(drupalgap_file_exists(settings_file_path)){
+      drupalgap_add_js(settings_file_path);      
+    }else{
+      msg = "You have to copy the file DrupalGap/app/default.settings.js to DrupalGap/app/settings.js and adjust it to your needs.";
+      navigator.notification.alert(
+        msg,
+        function(){},
+        'settings.js not available',
+        'OK'
+      );
+    }
   }
   catch(error) {
     alert('drupalgap_settings_load - ' + error);
@@ -603,6 +594,37 @@ function drupalgap_user_access(options) {
 	}
 	return false;
 }
+
+/**
+ * check if a given files exists, returns true or false
+ * @param  {string} file 
+ *   A path to a file
+ * @return {bool}      
+ *   True if file exists, else flase
+ */
+function drupalgap_file_exists(file){
+
+  var file_exists;
+
+  try{
+    jQuery.ajax({
+      async:false,
+      type:'HEAD',
+      url:file,
+      success:function(){
+        file_exists = true;        
+      },
+      error: function(xhr, textStatus, errorThrown) {
+        file_exists = false;
+      }
+    });
+    return(file_exists);
+  }
+  catch (error) {
+    alert('drupalgap_file_exists - ' + error);
+  }
+}
+
 
 $('.drupalgap_front').live('click', function(){
     drupalgap_changePage(drupalgap.settings.front);
