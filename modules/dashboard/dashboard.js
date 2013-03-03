@@ -7,16 +7,11 @@ function dashboard_menu() {
       console.log('dashboard_menu()');
       console.log(JSON.stringify(arguments));
     }
-    /*var items = {
+    var items = {
       'dashboard':{
         'page_callback':'dashboard_page',
       },
-    };*/
-    var items = [{
-      'dashboard':{
-        'page_callback':'dashboard_page',
-      },
-    }];
+    };
     return items;
   }
   catch (error) {
@@ -28,22 +23,31 @@ function dashboard_menu() {
  * Page callback for the dashboard page.
  */
 function dashboard_page() {
-  return {
-    'drupalgap':{
-      'theme':'button_link',
-      'path':'http://www.drupalgap.org',
-      'text':'www.drupalgap.org',
-    },
-    'login':{
-      'theme':'button_link',
-      'path':'user/login',
-      'text':'Login',
-    },
-    'users':{
-      'theme':'button_link',
-      'path':'users',
-      'text':'Users',
-    },
-  };
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('dashboard_page()');
+      console.log(JSON.stringify(arguments));
+    }
+    return {
+      'drupalgap':{
+        'theme':'button_link',
+        'path':'http://www.drupalgap.org',
+        'text':'www.drupalgap.org',
+      },
+      'login':{
+        'theme':'button_link',
+        'path':'user/login',
+        'text':'Login',
+      },
+      'users':{
+        'theme':'button_link',
+        'path':'users',
+        'text':'Users',
+      },
+    };
+  }
+  catch (error) {
+    alert('dashboard_page - ' + error);
+  }
 }
 

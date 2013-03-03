@@ -14,10 +14,7 @@ function drupalgap_form_get_element_id(name, form_id) {
 }
 
 /**
- * Given a drupalgap form id, a jQM page id, and a child container css selector
- * for an element inside the jQM page, this loads up the drupalgap form
- * with the given form id, assembles it into html5 elements, than appends the
- * elements onto the jQM page inside the container element.
+ * Given a drupalgap form, this renders the form.
  */
 function drupalgap_form_render(form) {
   try {
@@ -25,18 +22,7 @@ function drupalgap_form_render(form) {
       console.log('drupalgap_form_render()');
       console.log(JSON.stringify(form));
     }
-    /*if (!options.form_id) { alert('drupalgap_form_render - missing form_id'); }
-    if (!options.page_id) { alert('drupalgap_form_render - missing page_id'); }
-    if (!options.container) { alert('drupalgap_form_render - missing container'); }*/
-    /*var form_id = options.form_id;
-    var page_id = options.page_id;
-    va*/r container = options.container;
-    // Load the form, render each element, and append form to container
-    // identified by the incoming css selector.
-    /*form = drupalgap_get_form(form_id);
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(form));
-    }*/
+    // Render each form element.
     var form_elements = '';
     $.each(form.elements, function(name, element){
         // Open the element.
@@ -158,22 +144,17 @@ function drupalgap_form_render(form) {
           form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name, form.id) + '">' +  button.title + '</button>';
       });
     }
-    // Return the form html.
-    var form_html = '<div><div id="drupalgap_form_errors"></div>' + form_elements + '</div>';
+    // Return the form html and attach javascript to call the form_loaded func.
+    var form_html = '<div><div id="drupalgap_form_errors">doh</div>' +
+      form_elements +
+    '</div>';/* + 
+    '<script type="text/javascript">' + 
+      'var function_name = form + "_loaded";' +
+      'if (eval("typeof " + function_name) == "function") {' +
+        'eval(function_name + "();");' +
+      '}' +
+    '</script>';*/
     return form_html;
-    
-    //$('#' + page_id + ' ' + container).append(form_html).trigger('create');
-    // Call the form's loaded unction if it is implemented.
-    function_name = form_id + '_loaded';
-    if (eval('typeof ' + function_name) == 'function') {
-      form = eval(function_name + '();');
-      //var fn = window[function_name];
-      //fn.apply(null, form, form_state);
-      //fn.apply(null, form);
-    }
-    else if (drupalgap.settings.debug) {
-      console.log('Skipping ' + function_name + ', does not exist.');
-    }
   }
   catch (error) {
     alert('drupalgap_form_render - ' + error);
@@ -234,7 +215,6 @@ function drupalgap_get_form(form_id) {
       drupalgap.form = form;
     }
     return drupalgap_form_render(form);
-    //return form;
   }
   catch (error) {
     alert('drupalgap_get_form - ' + error);
@@ -287,11 +267,21 @@ $('.drupalgap_form_submit').live('click', function(){
     if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
       if (drupalgap.settings.debug) {
         console.log(JSON.stringify(drupalgap.form_errors));
+        console.log($('#drupalgap_form_errors').html());
       }
       $('#drupalgap_form_errors').html('');
+      //var html = '';
       $.each(drupalgap.form_errors, function(name, message){
-          $('#drupalgap_form_errors').append('<li>' + message + '</li>');
+          $('#drupalgap_form_errors').append($('<li>' + message + '</li>'));
+          //html += '<li>' + message + '</li>';
       });
+      //$('#drupalgap_form_errors').html(html);
+      //$('#drupalgap_form_errors').trigger('refresh');
+      //$("div[data-role$='content']").trigger("refresh");
+      console.log($('#drupalgap_form_errors').html());
+      //$("div[data-role$='content']").trigger('refresh');
+      //console.log($('#drupalgap_form_errors').html());
+      //$('#drupalgap_form_errors').trigger('create');
       return false;
     }
     

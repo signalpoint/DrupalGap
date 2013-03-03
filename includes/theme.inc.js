@@ -136,25 +136,15 @@ function template_process_page(variables) {
       console.log(drupalgap.path);
       console.log(JSON.stringify(drupalgap.menu_links[drupalgap.path]));
     }
-    // Page content. Route the menu link path to its page callback function
-    // to get the content of the current page.
-    var status_code = drupalgap_page_http_status_code(drupalgap.path);
-    switch (status_code) {
-      case 200:
-        // Fill in page template variables...
-        // Page title.
-        if (!variables.title) {
-          variables.title = drupalgap_get_title();
-        }
-        $("div[data-role$='header'] h1").html(variables.title);
-        // Set the page content to the output.
-        var content = drupalgap_render_page({'path':drupalgap.path});
-        $("div[data-role$='content']").html(content).trigger("create");
-        break; // 200
-      default:
-        alert('template_process_page - (status code: ' + status_code + ') - oh no!');
-        break;
+    // Fill in page template variables...
+    // Page title.
+    if (!variables.title) {
+      variables.title = drupalgap_get_title();
     }
+    $("div[data-role$='header'] h1").html(variables.title);
+    // Set the page content to the output.
+    var content = drupalgap_render_page({'path':drupalgap.path});
+    $("div[data-role$='content']").html(content).trigger("create");
   }
   catch (error) {
     alert('template_process_page - ' + error);

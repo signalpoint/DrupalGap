@@ -7,7 +7,7 @@ function user_menu() {
       console.log('user_menu()');
       console.log(JSON.stringify(arguments));
     }
-    var items = [{
+    /*var items = [{
       'user/login':{
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_login'],
@@ -15,8 +15,8 @@ function user_menu() {
       'users':{
         'page_callback':'user_listing',
       },
-    }];
-    /*var items = {
+    }];*/
+    var items = {
       'user/login':{
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_login'],
@@ -24,7 +24,7 @@ function user_menu() {
       'users':{
         'page_callback':'user_listing',
       },
-    };*/
+    };
     return items;
   }
   catch (error) {
