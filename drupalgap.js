@@ -519,17 +519,28 @@ function drupalgap_settings_load() {
       drupalgap_add_js(settings_file_path);      
     }else{
       msg = "You have to copy the file DrupalGap/app/default.settings.js to DrupalGap/app/settings.js and adjust it to your needs.";
-      navigator.notification.alert(
-        msg,
-        function(){},
-        'settings.js not available',
-        'OK'
-      );
+      drupalgap_alert(msg);
     }
   }
   catch(error) {
     alert('drupalgap_settings_load - ' + error);
   }
+}
+
+
+
+function drupalgap_alert(msg){
+
+  if (arguments[1]) {alertCallback = arguments[1]} else {alertCallback = function(){}};
+  if (arguments[2]) {title = arguments[2]} else {title = ''};
+  if (arguments[3]) {buttonName = arguments[3]} else {buttonName = ''};
+
+  navigator.notification.alert(
+    msg,
+    alertCallback,
+    title,
+    buttonName);
+
 }
 
 /**
