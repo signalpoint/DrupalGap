@@ -47,7 +47,7 @@ function drupalgap_goto(path) {
         // event to be triggered.
         if ($.mobile.activePage[0].id == '') {
           // First time.
-          $.mobile.changePage("DrupalGap/themes/easystreet/page.tpl.html");
+          $.mobile.changePage("DrupalGap/themes/easystreet3/page.tpl.html");
         }
         else {
           // All other times.
