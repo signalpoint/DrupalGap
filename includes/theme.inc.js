@@ -1,46 +1,21 @@
 /**
  *
  */
-$(document).bind( "pagebeforechange", function( e, data ) {
+$(document).bind("pagebeforechange", function(e, data) {
     try {
       if (drupalgap.settings.debug) {
         console.log('pagebeforechange()');
       }
-      if ( typeof data.toPage === "string" ) {
-        //alert('pagebeforechange: ' + $.mobile.path.parseUrl(data.toPage).hash);
+      if (typeof data.toPage === "string") {
+        // Preprocess the page, then process it.
+        template_preprocess_page(drupalgap.page.variables);
+        template_process_page(drupalgap.page.variables);
       }
-      // Preprocess the page, then process it.
-      /*template_preprocess_page(drupalgap.page.variables);
-      template_process_page(drupalgap.page.variables);
-      e.preventDefault();*/
     }
     catch (error) {
       alert('pagebeforechange - ' + error);
     }
 });
-
-/**
- * This function is called by the jQM pagebeforeshow() implementation inside the
- * page.tpl.html file of the current DrupalGap theme. It preprocesses the variables
- * for the page template. (TODO - We weren't able to implement the jQM pagebeforeshow
- * in this file, instead it had to be in the <script></script> tag in the
- * page.tpl.html file of the current theme, or else the event would never fire. So
- * it was decided DrupalGap themes would have to call this function.) 
- */
-function drupalgap_pagebeforeshow() {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_pagebeforeshow()');
-      console.log(JSON.stringify(arguments));
-    }
-    // Preprocess the page, then process it.
-    template_preprocess_page(drupalgap.page.variables);
-    template_process_page(drupalgap.page.variables);
-  }
-  catch (error) {
-    alert('drupalgap_pagebeforeshow - ' + error);
-  }
-}
 
 /**
  * Implementation of theme().
@@ -165,9 +140,7 @@ function template_process_page(variables) {
     $("div[data-role$='header'] h1").html(variables.title);
     // Set the page content to the output.
     var content = drupalgap_render_page({'path':drupalgap.path});
-    $("div[data-role$='content']").html(content).trigger("create");
-    //$("div[data-role$='content']").html(content);
-    //$("#" + drupalgap_get_page_id(drupalgap.path) + "div[data-role$='content']").html(content).trigger("create");
+    $("#" + drupalgap_get_page_id(drupalgap.path) + " div[data-role$='content']").html(content).trigger("create");
   }
   catch (error) {
     alert('template_process_page - ' + error);

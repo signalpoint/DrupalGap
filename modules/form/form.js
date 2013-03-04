@@ -181,7 +181,6 @@ function drupalgap_form_state_values_assemble(form) {
       console.log('drupalgap_form_state_values_assemble()');
       console.log(JSON.stringify(arguments));
     }
-    alert($.mobile.activePage.attr('id'));
     form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
