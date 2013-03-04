@@ -1,9 +1,9 @@
-<div data-role="page" id="drupalgap_page">
+<div id=":drupalgap_page_id" data-role="page">
   <script>    
     /**
      * Catch jQM's pagebeforeshow event and pass along to DrupalGap.
      */
-    $('#drupalgap_page').on('pagebeforeshow',function(){
+    $("#:drupalgap_page_id").on('pagebeforeshow',function(){
         // Pass along to drupalgap.
         drupalgap_pagebeforeshow();
     });

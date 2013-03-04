@@ -87,7 +87,7 @@ function user_login_submit(form, form_state) {
       'name':drupalgap.form_state.values.name,
       'pass':drupalgap.form_state.values.pass,
       'success':function(result){
-        $.mobile.changePage(drupalgap.settings.front);
+        drupalgap_goto(drupalgap.settings.front);
       },
     });
   }

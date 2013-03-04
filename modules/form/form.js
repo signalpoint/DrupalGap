@@ -145,7 +145,7 @@ function drupalgap_form_render(form) {
       });
     }
     // Return the form html and attach javascript to call the form_loaded func.
-    var form_html = '<div><div id="drupalgap_form_errors">doh</div>' +
+    var form_html = '<div><div id="drupalgap_form_errors"></div>' +
       form_elements +
     '</div>';/* + 
     '<script type="text/javascript">' + 
@@ -177,6 +177,11 @@ function drupalgap_form_set_error(name, message) {
  */
 function drupalgap_form_state_values_assemble(form) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_form_state_values_assemble()');
+      console.log(JSON.stringify(arguments));
+    }
+    alert($.mobile.activePage.attr('id'));
     form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
@@ -224,15 +229,27 @@ function drupalgap_get_form(form_id) {
 function _drupalgap_form_submit() {
 }
 
-function _drupalgap_form_validate(form, form_state) {
-  $.each(form.elements, function(name, element) {
-      if (name == 'submit') { return; }
-      if (element.required) {
-        if (form_state.values[name] == null || form_state.values[name] == '') {
-          drupalgap_form_set_error(name, 'The ' + element.title + ' field is required.');
+/**
+ *
+ */
+function _drupalgap_form_validate(form) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('_drupalgap_form_validate()');
+      console.log(JSON.stringify(arguments));
+    }
+    $.each(form.elements, function(name, element) {
+        if (name == 'submit') { return; }
+        if (element.required) {
+          if (form_state.values[name] == null || form_state.values[name] == '') {
+            drupalgap_form_set_error(name, 'The ' + element.title + ' field is required.');
+          }
         }
-      }
-  });
+    });
+  }
+  catch (error) {
+    alert('_drupalgap_form_validate - ' + error);
+  }
 }
 
 /**
@@ -267,21 +284,17 @@ $('.drupalgap_form_submit').live('click', function(){
     if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
       if (drupalgap.settings.debug) {
         console.log(JSON.stringify(drupalgap.form_errors));
-        console.log($('#drupalgap_form_errors').html());
       }
-      $('#drupalgap_form_errors').html('');
-      //var html = '';
+      var html = '';
       $.each(drupalgap.form_errors, function(name, message){
-          $('#drupalgap_form_errors').append($('<li>' + message + '</li>'));
-          //html += '<li>' + message + '</li>';
+          html += message + '\n\n';
       });
-      //$('#drupalgap_form_errors').html(html);
-      //$('#drupalgap_form_errors').trigger('refresh');
-      //$("div[data-role$='content']").trigger("refresh");
-      console.log($('#drupalgap_form_errors').html());
-      //$("div[data-role$='content']").trigger('refresh');
-      //console.log($('#drupalgap_form_errors').html());
-      //$('#drupalgap_form_errors').trigger('create');
+      navigator.notification.alert(
+        html,
+        function(){},
+        'Warning',
+        'OK'
+      );
       return false;
     }
     

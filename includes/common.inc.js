@@ -20,19 +20,49 @@ function drupalgap_attributes(attributes) {
 }
 
 /**
+ * Given a path, this will return the id for the page's div element.
+ * For example, a string path of 'foo/bar' would result in an id of 'foo_bar'.
+ * <div id="foo_bar"></div>
+ */
+function drupalgap_get_page_id(path) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_get_page_id(' + path + ')');
+      console.log(JSON.stringify(arguments));
+    }
+    var id = path.toLowerCase().replace(/\//g, '_');
+    return id.replace(/-/g, '_');
+  }
+  catch (error) {
+    alert('drupalgap_get_page_id - ' + error);
+  }
+}
+
+
+/**
  * Given a path, this will change the current page in the app.
  */
 function drupalgap_goto(path) {
   try {
     if (drupalgap.settings.debug) {
-      console.log('drupalgap_goto()');
-      console.log(JSON.stringify(arguments));
+      console.log('drupalgap_goto(' + path + ')');
       console.log('$.mobile.activePage[0].id = ' + $.mobile.activePage[0].id);
+      $.each($.mobile.activePage, function(index, object){
+          console.log(index);
+          console.log(object);
+      }); 
     }
     // If the path was an empty sting, set it to the front page.
-    if (path == '') {
-      path = drupalgap.settings.front;
+    if (path == '') { path = drupalgap.settings.front; }
+    
+    // Is this a jQM path?
+    if (path.indexOf('#') == 0) {
+      // We'll just let internal jQM paths go through... for now...?
+      $.mobile.changePage(path, {reloadPage:true});
+      return false;
     }
+    
+    // Determine the http status code and then route the user accordingly.
     var status_code = drupalgap_page_http_status_code(path);
     switch (status_code) {
       case 200:
@@ -41,35 +71,39 @@ function drupalgap_goto(path) {
         if (drupalgap.settings.debug) {
           console.log(JSON.stringify(drupalgap.menu_links[path]));
         }
-        // Now use jQM to change the page. If this is the first page load,
-        // we need to change the page directly to the theme's page.tpl.html,
-        // otherwise all subsequent goto's just need a forced pagebeforeshow
-        // event to be triggered.
-        if ($.mobile.activePage[0].id == '') {
-          // First time.
-          $.mobile.changePage("DrupalGap/themes/easystreet3/page.tpl.html");
-        }
-        else {
-          // All other times.
-          // Force the pagebeforeshow event.
-          drupalgap_pagebeforeshow();
-        }
+        // Generate a JQM page by running it through the theme then attach the
+        // page to the <body> of the document, then change to the page.
+        jQuery.ajax({
+          type:'GET',
+          url:'DrupalGap/themes/easystreet3/page.tpl.html',
+          dataType:'html',
+          data:null,
+          async:false,
+          success:function(html){
+            var page_id = drupalgap_get_page_id(path); 
+            html = html.replace(/:drupalgap_page_id/g, page_id);
+            $('body').append(html);
+            var destination = 'index.html#' + page_id;
+            if (drupalgap.settings.debug) {
+              console.log(destination);
+            }
+            $.mobile.changePage(destination);
+            //var $page = $('#' + page_id),
+          },
+          error: function(xhr, textStatus, errorThrown) {
+            navigator.notification.alert(
+              'Failed to load the page.tpl.html file!',
+              function(){},
+              'Error',
+              'OK'
+            );
+          }
+        });
         break;
       default:
         alert('drupalgap_goto(' + path + ') => (' + status_code + ')');
         break;
     }
-    
-    /*if (path && drupalgap.menu_links[path]) {
-      
-			
-      var menu_link = drupalgap.menu_links[path];
-      var page_callback = menu_link['page callback']
-      if (eval('typeof ' + page_callback) == 'function') {
-        var fn = window[page_callback];
-        fn();
-      }
-    }*/
   }
   catch (error) {
     alert('drupalgap_goto - ' + error);
