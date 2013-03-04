@@ -61,9 +61,14 @@ var drupalgap = {
   'taxonomy_term_edit':{ }, /* <!-- taxonomy_term_edit -> */
   'taxonomy_vocabulary':{ }, /* <!-- taxonomy_vocabulary -> */
   'taxonomy_vocabulary_edit':{ }, /* <!-- taxonomy_vocabulary_edit -> */
+  'themes':[],
   'views_datasource':{}, // <!-- views_datasource -->
 }; // <!-- drupalgap -->
 
+/**
+ * Given a path to a javascript file relative to the app's www directory,
+ * this will load the javascript file so it will be available in scope.
+ */
 function drupalgap_add_js() {
 	var data;
 	if (arguments[0]) { data = arguments[0]; }
@@ -210,6 +215,8 @@ function drupalgap_deviceready() {
   drupalgap_includes_load();
 	// Load up modules.
 	drupalgap_modules_load();
+	// Load up the theme.
+	drupalgap_theme_load();
 	// Initialize entities.
 	//drupalgap_entity_get_info();
 	// Initialize menu links.
@@ -287,6 +294,23 @@ function drupalgap_format_plural(count, singular, plural) {
 	}
 	return null;
 }
+
+/**
+ * Given a JS function, this returns true if the function is available in the
+ * scope, false otherwise.
+ */
+function drupalgap_function_exists(name) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_function_exists(' + name + ')');
+    }
+    return (eval('typeof ' + name) == 'function');
+  }
+  catch (error) {
+    alert('drupalgap_function_exists - ' + error);
+  }
+}
+
 
 /**
  * 
@@ -648,7 +672,7 @@ function drupalgap_modules_get_bundle_directory(bundle) {
 }
 
 /**
- * 
+ * Loads each drupalgap module so they are available in the JS scope.
  */
 function drupalgap_modules_load() {
 	if (drupalgap.modules != null && drupalgap.modules.length != 0) {
@@ -729,7 +753,6 @@ function drupalgap_page_http_status_code(path) {
   }
 }
 
-
 /**
  * Loads the settings specified in DrupalGap/app/settings.js into the app.
  */
@@ -762,6 +785,41 @@ function drupalgap_settings_load() {
     alert('drupalgap_settings_load - ' + error);
   }
 }
+
+/**
+ * Load the theme specified by drupalgap.settings.theme into drupalgap.theme
+ */
+function drupalgap_theme_load() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_theme_load()');
+      console.log(JSON.stringify(arguments));
+    }
+    if (!drupalgap.settings.theme) {
+      alert('drupalgap_theme_load - no theme specified in settings.js');
+    }
+    else {
+      var theme_name = drupalgap.settings.theme;
+      drupalgap_add_js('DrupalGap/themes/' + theme_name + '/' + theme_name + '.js');
+      var template_info_function = theme_name + '_info';
+      if (drupalgap_function_exists(template_info_function)) {
+        var fn = window[template_info_function];
+        drupalgap.theme = fn();
+        if (drupalgap.settings.debug) {
+          console.log('theme loaded: ' + theme_name);
+          console.log(JSON.stringify(drupalgap.theme));
+        }
+      }
+      else {
+        alert('drupalgap_theme_load() - failed - ' + template_info_function + '() does not exist!');
+      }
+    }
+  }
+  catch (error) {
+    alert('drupalgap_theme_load - ' + error);
+  }
+}
+
 
 /**
  * This is called once the <body> element's onload is fired. We then set the

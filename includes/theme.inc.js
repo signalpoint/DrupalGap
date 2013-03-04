@@ -137,7 +137,8 @@ function template_process_page(variables) {
     if (!variables.title) {
       variables.title = drupalgap_get_title();
     }
-    $("div[data-role$='header'] h1").html(variables.title);
+    //$("div[data-role$='header'] h1").html(variables.title);
+    $("#" + drupalgap_get_page_id(drupalgap.path) + " div[data-role$='header']").html(variables.title);
     // Set the page content to the output.
     var content = drupalgap_render_page({'path':drupalgap.path});
     $("#" + drupalgap_get_page_id(drupalgap.path) + " div[data-role$='content']").html(content).trigger("create");

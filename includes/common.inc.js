@@ -1,4 +1,38 @@
 /**
+ * Given a page id, and the theme's page.tpl.html file, this takes the page
+ * template html and adds it to the DOM. It doesn't actually render the page,
+ * that is taken care of by pagebeforechange when it calls the template system.
+ */
+function drupalgap_add_page_to_dom(page_id, html) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_add_page_to_dom()');
+      console.log(JSON.stringify(arguments));
+    }
+    // Set the page id.
+    html = html.replace(/:drupalgap_page_id/g, page_id);
+    // Set the regions.
+    $.each(drupalgap.theme.regions, function(index, region){
+        console.log(JSON.stringify(region));
+        var region_html = '<div ' + drupalgap_attributes(region.attributes)  + '>' +
+          '' + 
+        '</div><!-- ' + region.name + ' -->';
+        eval('html = html.replace(/:' + region.name + '/g, region_html);');
+        //<div data-role="content"></div><!-- content -->
+    });
+    if (drupalgap.settings.debug) {
+      console.log(html);
+    }
+    $('body').append(html);
+    alert('time for bed');
+  }
+  catch (error) {
+    alert('drupalgap_add_page_to_dom - ' + error);
+  }
+}
+
+
+/**
  * Converts a JSON object to an XML/HTML tag attribute string and returns the
  * string.
  */
@@ -80,15 +114,11 @@ function drupalgap_goto(path) {
           data:null,
           async:false,
           success:function(html){
-            var page_id = drupalgap_get_page_id(path); 
-            html = html.replace(/:drupalgap_page_id/g, page_id);
-            $('body').append(html);
-            var destination = 'index.html#' + page_id;
-            if (drupalgap.settings.debug) {
-              console.log(destination);
-            }
-            $.mobile.changePage(destination);
-            //var $page = $('#' + page_id),
+            // Now that we've grabbed the theme's page.tpl.html, let's assemble
+            // the page
+            var page_id = drupalgap_get_page_id(path);
+            drupalgap_add_page_to_dom(page_id, html);
+            $.mobile.changePage('index.html#' + page_id);
           },
           error: function(xhr, textStatus, errorThrown) {
             navigator.notification.alert(

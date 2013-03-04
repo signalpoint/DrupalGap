@@ -28,23 +28,22 @@ function dashboard_page() {
       console.log('dashboard_page()');
       console.log(JSON.stringify(arguments));
     }
-    return {
-      'drupalgap':{
-        'theme':'button_link',
-        'path':'http://www.drupalgap.org',
-        'text':'www.drupalgap.org',
-      },
-      'login':{
+    var content = {};
+    if (drupalgap.user.uid == 0) {
+      content.login = {
         'theme':'button_link',
         'path':'user/login',
         'text':'Login',
-      },
-      'users':{
+      };
+    }
+    else {
+      content.login = {
         'theme':'button_link',
-        'path':'users',
-        'text':'Users',
-      },
-    };
+        'path':'user/logout',
+        'text':'Logout',
+      };
+    }
+    return content;
   }
   catch (error) {
     alert('dashboard_page - ' + error);

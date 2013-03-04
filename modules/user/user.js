@@ -21,6 +21,9 @@ function user_menu() {
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_login'],
       },
+      'user/logout':{
+        'page_callback':'user_logout',
+      },
       'users':{
         'page_callback':'user_listing',
       },
@@ -31,6 +34,31 @@ function user_menu() {
     alert('user_menu - ' + error);
   }
 }
+
+/**
+ * Logs the app user out of the website and app.
+ */
+function user_logout() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_logout()');
+      console.log(JSON.stringify(arguments));
+    }
+    drupalgap.services.user.logout.call({
+      'success':function(data){
+        drupalgap.services.system.connect.call({
+          'success':function(result){
+            drupalgap_goto(drupalgap.settings.front);
+          },
+        });
+      }
+    });
+  }
+  catch (error) {
+    alert('user_logout - ' + error);
+  }
+}
+
 
 /**
  *

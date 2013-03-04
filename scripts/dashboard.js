@@ -61,13 +61,5 @@ $('#my_account').on('click', function(){
 });
 
 $('#logout').on('click', function(){
-	drupalgap.services.user.logout.call({
-		'success':function(data){
-			drupalgap.services.system.connect.call({
-				'success':function(result){
-					$.mobile.changePage(drupalgap.settings.front, {reloadPage:true});
-				},
-			});
-		}
-	});
+	
 });
