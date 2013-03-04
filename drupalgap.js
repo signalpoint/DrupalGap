@@ -7,6 +7,7 @@ var drupalgap = {
 	     {'name':'entity'},
 	     {'name':'field'},
 	     {'name':'form'},
+	     {'name':'menu'},
 	     {'name':'node'},
 	     {'name':'services',
 	       'includes':[
@@ -32,6 +33,7 @@ var drupalgap = {
   'module_paths':[],
   'includes':[
       {'name':'common'},
+      {'name':'menu'},
       {'name':'theme'},
   ],
   'user':{
@@ -53,6 +55,7 @@ var drupalgap = {
   'form_errors':{ }, /* <!-- form_errors --> */
   'node':{ }, /* <!-- node --> */
   'node_edit':{ }, /* <!-- node_edit --> */
+  'menus':[],
   'menu_links':{}, /* <!-- menu_links --> */
   'page':{'variables':{}}, /* <!-- page --> */
   'path':'', /* The current menu path. */
@@ -531,18 +534,13 @@ function drupalgap_module_invoke_all(hook) {
       console.log('drupalgap_module_invoke_all(' +  hook + ')');
       console.log(JSON.stringify(arguments));
     }
-    // TODO - shouldn't this function just iterate over each and then call
-    // drupalgap_module_invoke for each?
-    
     // Prepare the invocation results.
     drupalgap_module_invoke_results = new Array();
-    
     // Copy the arguments.
     var module_arguments = Array.prototype.slice.call(arguments);
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(module_arguments));
     }
-    
     // Try to fire the hook in every module.
     drupalgap_module_invoke_continue = true;
     $.each(drupalgap.modules, function(bundle, modules){
@@ -561,93 +559,6 @@ function drupalgap_module_invoke_all(hook) {
       console.log(JSON.stringify(drupalgap_module_invoke_results));
     }
     return drupalgap_module_invoke_results;
-    
-    // Try to fire the hook in every module.
-    drupalgap_module_invoke_continue = true;
-    $.each(drupalgap.modules, function(bundle, modules){
-      $.each(modules, function(index, module){
-        function_name = module.name + '_' + hook;
-        if (eval('typeof ' + function_name) == 'function') {
-          if (drupalgap.settings.debug) {
-            console.log(function_name + '() => calling hook');
-          }
-          // Get the hook function.
-          var fn = window[function_name];
-          // Remove the hook from the arguments.
-          console.log('splicing');
-          module_arguments.splice(0,1);
-          console.log(JSON.stringify(module_arguments));
-          // If there are no arguments, just call the hook directly, otherwise
-          // call the hook and pass along all the arguments.
-          if ($.isEmptyObject(module_arguments) ) {
-            var invoke_results = fn();
-            console.log(JSON.stringify(invoke_results));
-            if ($.isArray(invoke_results)) {
-              if (invoke_results.length == 1) {
-                $.each(invoke_results[0], function(invoke_index, invoke_result){
-                    console.log(invoke_index);
-                    console.log(JSON.stringify(invoke_result));
-                    //drupalgap_module_invoke_results.push(invoke_result);
-                    //drupalgap_module_invoke_results[invoke_index] = invoke_result;
-                    //eval('drupalgap_module_invoke_results.' + invoke_index + ' = invoke_result;');
-                    //drupalgap_module_invoke_results[invoke_index] = invoke_result;
-                    drupalgap_module_invoke_results.push({invoke_index:invoke_result});
-                    console.log(JSON.stringify(drupalgap_module_invoke_results));
-                    alert('check it'); 
-                });           
-              }
-              else {
-                alert('drupalgap_module_invoke_all(' +  hook + ') - invocation result length: ' + invoke_results.length);
-              }
-            }
-            else {
-              drupalgap_module_invoke_results.push(invoke_results);
-            }
-            /*
-            if (drupalgap.settings.debug) {
-              console.log(JSON.stringify(invoke_results));
-            }
-            $.each(invoke_results, function(index, object){
-                drupalgap_module_invoke_results.push(object);
-            });*/
-            
-            //drupalgap_module_invoke_results.push(fn());
-          }
-          else {
-            drupalgap_module_invoke_results.push(fn.apply(null, module_arguments));
-          }
-          if (drupalgap.settings.debug) {
-            console.log(JSON.stringify(drupalgap_module_invoke_results));
-          }
-        }
-        // Try to fire the hook in any includes for this module.
-        // TODO - hooks defined in module includes won't work properly until
-        // each module has a unique name, just like in Drupal. E.g. the user.js
-        // module in services collides with the user.js module, therefore both
-        // can't implement hook_form_alter().
-        /*if (module.includes != null && module.includes.length != 0) {
-          $.each(module.includes, function(include_index, include_object){
-            function_name = include_object.name + '_' + hook;
-            if (eval('typeof ' + function_name) == 'function') {
-                  if (drupalgap.settings.debug) {
-                    console.log('hook(): ' + function_name);
-                  }
-                  // Get the hook function.
-                  var fn = window[function_name];
-                  // Remove the hook from the arguments.
-                  module_arguments.splice(0,1);
-                  if (drupalgap.settings.debug) {
-                    console.log(JSON.stringify(module_arguments));
-                  }
-                  // If there are no arguments, just call the hook directly, otherwise
-                  // call the hook and pass along all the arguments.
-                  if ($.isEmptyObject(module_arguments) ) { fn(); }
-                  else { fn.apply(null, module_arguments); }
-              }
-          });
-        }*/
-      });
-    });
   }
   catch (error) {
     alert('drupalgap_module_invoke_all - ' + error);
@@ -712,6 +623,8 @@ function drupalgap_modules_load() {
 				});
 			});
 		});
+		// Now invoke hook_install on all modules.
+		drupalgap_module_invoke_all('install');
 	}
 }
 

@@ -24,7 +24,6 @@ function drupalgap_add_page_to_dom(page_id, html) {
       console.log(html);
     }
     $('body').append(html);
-    alert('time for bed');
   }
   catch (error) {
     alert('drupalgap_add_page_to_dom - ' + error);
