@@ -17,6 +17,12 @@ function easystreet3_info() {
           }
         },
         {
+          'name':'navigation',
+          'attributes':{
+            'data-role':'navbar'
+          }
+        },
+        {
           'name':'content',
           'attributes':{
             'data-role':'content'

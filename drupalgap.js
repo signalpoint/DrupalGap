@@ -2,6 +2,7 @@ var drupalgap = {
   'modules':{
 	  'core':[
 	     {'name':'api'},
+	     {'name':'block'},
 	     {'name':'comment'},
 	     {'name':'dashboard'},
 	     {'name':'entity'},
@@ -45,6 +46,7 @@ var drupalgap = {
   'account':{ }, /* <!-- account --> */
   'account_edit':{ }, /* <!-- account_edit --> */
   'api':{}, // <!-- api -->
+  'blocks':[],
   'comment':{ }, /* <!-- comment --> */
   'comment_edit':{ }, /* <!-- comment_edit --> */
   'entity_info':{ }, /* <!-- entity_info --> */

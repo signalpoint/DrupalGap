@@ -8,10 +8,22 @@ function menu_list_system_menus() {
       console.log(JSON.stringify(arguments));
     }
     var system_menus = {
-      'navigation':{'title':'Navigation'},
-      'management':{'title':'Management'},
-      'user-menu':{'title':'User menu'},
-      'main-menu':{'title':'Main menu'},
+      'navigation':{
+        'menu_name':'navigation',
+        'title':'Navigation'
+      },
+      'management':{
+        'menu_name':'management',
+        'title':'Management'
+      },
+      'user_menu':{
+        'menu_name':'user_menu',
+        'title':'User menu'
+      },
+      'main_menu':{
+        'menu_name':'main_menu',
+        'title':'Main menu'
+      },
     };
     return system_menus;
   }

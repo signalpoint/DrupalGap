@@ -1,5 +1,5 @@
 /**
- * Given a page id, and the theme's page.tpl.html file, this takes the page
+ * Given a page id, and the theme's page.tpl.html string, this takes the page
  * template html and adds it to the DOM. It doesn't actually render the page,
  * that is taken care of by pagebeforechange when it calls the template system.
  */
@@ -9,20 +9,8 @@ function drupalgap_add_page_to_dom(page_id, html) {
       console.log('drupalgap_add_page_to_dom()');
       console.log(JSON.stringify(arguments));
     }
-    // Set the page id.
+    // Set the page id and add the page to the dom body.
     html = html.replace(/:drupalgap_page_id/g, page_id);
-    // Set the regions.
-    $.each(drupalgap.theme.regions, function(index, region){
-        console.log(JSON.stringify(region));
-        var region_html = '<div ' + drupalgap_attributes(region.attributes)  + '>' +
-          '' + 
-        '</div><!-- ' + region.name + ' -->';
-        eval('html = html.replace(/:' + region.name + '/g, region_html);');
-        //<div data-role="content"></div><!-- content -->
-    });
-    if (drupalgap.settings.debug) {
-      console.log(html);
-    }
     $('body').append(html);
   }
   catch (error) {
@@ -42,9 +30,11 @@ function drupalgap_attributes(attributes) {
       console.log(JSON.stringify(arguments));
     }
     var attribute_string = '';
-    $.each(attributes, function(name, value){
-        attribute_string += name + '="' + value + '" ';
-    });
+    if (attributes) {
+      $.each(attributes, function(name, value){
+          attribute_string += name + '="' + value + '" ';
+      });
+    }
     return attribute_string;
   }
   catch (error) {
@@ -140,21 +130,6 @@ function drupalgap_goto(path) {
 }
 
 /**
- *
- */
-/*function l() {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('l()');
-      console.log(JSON.stringify(arguments));
-    }
-  }
-  catch (error) {
-    alert('l - ' + error);
-  }
-}*/
-
-/**
  * Given a page assembled by template_process_page(), this renders the html
  * string of the page content and returns the html string.
  */
@@ -174,7 +149,6 @@ function drupalgap_render_page(page) {
     var output = '';
     if (menu_link.page_arguments) {
       output = fn.apply(null, Array.prototype.slice.call(menu_link.page_arguments));
-      //output = fn.call(null, menu_link.page_arguments);
     }
     else {
       output = fn();
@@ -204,4 +178,52 @@ function drupalgap_render_page(page) {
   }
 }
 
+/**
+ * Given a region, this renders it and all the blocks in it. The blocks are
+ * specified in the settings.js file, they are bundled under a region, which in
+ * turn is bundled under a theme name.
+ */
+function drupalgap_render_region(region) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_render_region(' + region.name + ')');
+      console.log(JSON.stringify(arguments));
+    }
+    // If the region has blocks specified in it under the theme in settins.js,
+    // render each block in the region.
+    var region_html = '';
+    if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
+      region_html += '<div ' + drupalgap_attributes(region.attributes)  + '>';
+      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name], function(block_index, block_delta){
+          var block = drupalgap_block_load(block_delta);
+          if (block) {
+            region_html += drupalgap_module_invoke(block.module, 'block_view', block_delta);
+          }
+      });
+      region_html += '</div><!-- ' + region.name + ' -->';
+    }
+    return region_html;
+  }
+  catch (error) {
+    alert('drupalgap_render_region - ' + error);
+  }
+}
+
+/**
+ * Implemtation of l().
+ */
+function l() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('l()');
+      console.log(JSON.stringify(arguments));
+    }
+    var text = arguments[0];
+    var path = arguments[1];
+    return theme('link', {'text':text, 'path':path});
+  }
+  catch (error) {
+    alert('l - ' + error);
+  }
+}
 

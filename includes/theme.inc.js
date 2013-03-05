@@ -73,14 +73,36 @@ function theme_image(variables) {
 }
 
 /**
+ * Implementation of theme_item_list().
+ */
+function theme_item_list(variables) {
+  try {
+    var html = '';
+    if (variables.items) {
+      html += '<ul ' + drupalgap_attributes(variables.attributes) + '>';
+      $.each(variables.items, function(index, item){
+          html += '<li>' + item + '</li>';
+      });
+      html += '</ul>';
+    }
+    return html;
+  }
+  catch (error) {
+    alert('theme_item_list - ' + error);
+  }
+}
+
+
+/**
  * Implementation of theme_link().
  */
 function theme_link(variables) {
   try {
-    return '<a ' + 
+    var html = '<a ' + 
       'onclick="javascript:drupalgap_goto(\'' + variables.path + '\');" ' +
       drupalgap_attributes(variables.attributes) +
     '>' + variables.text + '</a>';
+    return html;
   }
   catch (error) {
     alert('theme_link - ' + error);
@@ -132,16 +154,29 @@ function template_process_page(variables) {
       console.log(drupalgap.path);
       console.log(JSON.stringify(drupalgap.menu_links[drupalgap.path]));
     }
+    
+    // For each region, render it, then replace the placeholder in the page's
+    // html with the rendered region.
+    $.each(drupalgap.theme.regions, function(index, region){
+        var page_html = $("#" + drupalgap_get_page_id(drupalgap.path)).html();
+        console.log(page_html);
+        //alert('rendering region: ' + region.name);
+        eval('page_html = page_html.replace(/:' + region.name + '/g, drupalgap_render_region(region));');
+        console.log(page_html);
+        //alert('done rendering region: ' + region.name);
+        $("#" + drupalgap_get_page_id(drupalgap.path)).html(page_html);
+    });
+    /*
     // Fill in page template variables...
     // Page title.
     if (!variables.title) {
       variables.title = drupalgap_get_title();
     }
-    //$("div[data-role$='header'] h1").html(variables.title);
     $("#" + drupalgap_get_page_id(drupalgap.path) + " div[data-role$='header']").html(variables.title);
     // Set the page content to the output.
     var content = drupalgap_render_page({'path':drupalgap.path});
     $("#" + drupalgap_get_page_id(drupalgap.path) + " div[data-role$='content']").html(content).trigger("create");
+    */
   }
   catch (error) {
     alert('template_process_page - ' + error);
