@@ -159,12 +159,11 @@ function template_process_page(variables) {
     // html with the rendered region.
     $.each(drupalgap.theme.regions, function(index, region){
         var page_html = $("#" + drupalgap_get_page_id(drupalgap.path)).html();
-        console.log(page_html);
-        //alert('rendering region: ' + region.name);
         eval('page_html = page_html.replace(/:' + region.name + '/g, drupalgap_render_region(region));');
-        console.log(page_html);
-        //alert('done rendering region: ' + region.name);
         $("#" + drupalgap_get_page_id(drupalgap.path)).html(page_html);
+        if (drupalgap.settings.debug) {
+          console.log(page_html);
+        }
     });
     /*
     // Fill in page template variables...

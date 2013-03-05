@@ -46,8 +46,6 @@ function menu_install() {
     if (drupalgap.settings.debug) {
       console.log('menu_install() - menus');
       console.log(JSON.stringify(drupalgap.menus));
-      console.log('menu_install() - blocks');
-      console.log(JSON.stringify(drupalgap.blocks));
     }
   }
   catch (error) {
@@ -56,9 +54,8 @@ function menu_install() {
 }
 
 /**
- * Given a menu, this adds it to drupalgap.menus, creates a block for it, and
- * adds the block to drupalgap.blocks. See menu_list_system_menus for examples
- * of a menu JSON object.
+ * Given a menu, this adds it to drupalgap.menus. See menu_list_system_menus
+ * for examples of a menu JSON object.
  */
 function menu_save(menu) {
   try {
@@ -66,12 +63,7 @@ function menu_save(menu) {
       console.log('menu_save()');
       console.log(JSON.stringify(arguments));
     }
-    // Add the menu to drupalgap.menus.
     eval('drupalgap.menus.push({' + menu.menu_name + ':menu});');
-    // Create a block for the menu and add it to drupalgap.blocks.
-    var block_delta = menu.menu_name;
-    eval('var block = {' + block_delta + ':{"delta":"' + block_delta + '","module":"menu"}};');
-    drupalgap.blocks.push(block);
   }
   catch (error) {
     alert('menu_save - ' + error);

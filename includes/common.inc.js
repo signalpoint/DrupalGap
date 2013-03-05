@@ -189,7 +189,7 @@ function drupalgap_render_region(region) {
       console.log('drupalgap_render_region(' + region.name + ')');
       console.log(JSON.stringify(arguments));
     }
-    // If the region has blocks specified in it under the theme in settins.js,
+    // If the region has blocks specified in it under the theme in settings.js,
     // render each block in the region.
     var region_html = '';
     if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {

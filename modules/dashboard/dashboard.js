@@ -28,21 +28,13 @@ function dashboard_page() {
       console.log('dashboard_page()');
       console.log(JSON.stringify(arguments));
     }
-    var content = {};
-    if (drupalgap.user.uid == 0) {
-      content.login = {
+    var content = {
+      'users':{
         'theme':'button_link',
-        'path':'user/login',
-        'text':'Login',
-      };
-    }
-    else {
-      content.login = {
-        'theme':'button_link',
-        'path':'user/logout',
-        'text':'Logout',
-      };
-    }
+        'path':'users',
+        'text':'Users',
+      },
+    };
     return content;
   }
   catch (error) {

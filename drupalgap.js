@@ -26,6 +26,7 @@ var drupalgap = {
 		       {'name':'user'},
 	       ]
 	     },
+	     {'name':'system'},
 	     {'name':'taxonomy'},
 	     {'name':'user'},
 	     {'name':'views_datasource'},
@@ -96,6 +97,27 @@ function drupalgap_add_js() {
     }
 	});
 }
+
+/**
+ * Rounds up all blocks defined by hook_block_info and places them in the
+ * drupalgap.blocks array.
+ */
+function drupalgap_blocks_load() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_blocks_load()');
+      console.log(JSON.stringify(arguments));
+    }
+    drupalgap.blocks = drupalgap_module_invoke_all('block_info');
+    if (drupalgap.settings.debug) {
+      console.log(JSON.stringify(drupalgap.blocks));
+    }
+  }
+  catch (error) {
+    alert('drupalgap_blocks_load - ' + error);
+  }
+}
+
 
 /**
  * Takes option set 2, grabs the success/error callback(s), if any, 
@@ -222,8 +244,8 @@ function drupalgap_deviceready() {
 	drupalgap_modules_load();
 	// Load up the theme.
 	drupalgap_theme_load();
-	// Initialize entities.
-	//drupalgap_entity_get_info();
+	// Load up blocks.
+	drupalgap_blocks_load();
 	// Initialize menu links.
 	drupalgap_menu_links_load();
 	// Verify site path is set.
