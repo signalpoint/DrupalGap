@@ -7,9 +7,14 @@ function system_block_info() {
       console.log('system_block_info()');
       console.log(JSON.stringify(arguments));
     }
+    // System blocks.
     var blocks = {
       'main':{
         'delta':'main',
+        'module':'system',
+      },
+      'header':{
+        'delta':'header',
         'module':'system',
       },
       'powered_by':{
@@ -21,7 +26,7 @@ function system_block_info() {
         'module':'system',
       },
     };
-    // System defined menu blocks.
+    // Make a block for each system menu.
     var system_menus = menu_list_system_menus();
     $.each(system_menus, function(menu_name, menu){
         var block_delta = menu.menu_name;
@@ -50,7 +55,9 @@ function system_block_view(delta) {
     switch (delta) {
       case 'main':
         return drupalgap_render_page({'path':drupalgap.path});
-        //return theme('button_link', {'text':'www.drupalgap.org', 'path':'http://www.drupalgap.org'});
+        break;
+      case 'header':
+        return '<h1>' + l(drupalgap_get_title(), '') + '</h1>';
         break;
       case 'powered_by':
         return '<p>Powered by: ' +  l('DrupalGap','http://www.drupalgap.org') + '</p>';

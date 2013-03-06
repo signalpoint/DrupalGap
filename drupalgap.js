@@ -67,6 +67,7 @@ var drupalgap = {
   'taxonomy_term_edit':{ }, /* <!-- taxonomy_term_edit -> */
   'taxonomy_vocabulary':{ }, /* <!-- taxonomy_vocabulary -> */
   'taxonomy_vocabulary_edit':{ }, /* <!-- taxonomy_vocabulary_edit -> */
+  'title':'',
   'themes':[],
   'views_datasource':{}, // <!-- views_datasource -->
 }; // <!-- drupalgap -->
@@ -374,7 +375,7 @@ function drupalgap_get_path(type, name) {
 }
 
 /**
- * DrupalGap's version of Drupal's drupal_get_title function.
+ * Implementation of drupal_get_title().
  */
 function drupalgap_get_title() {
   try {
@@ -382,8 +383,7 @@ function drupalgap_get_title() {
       console.log('drupalgap_get_title()');
       console.log(JSON.stringify(arguments));
     }
-    // TODO - This should default to the actual Drupal site title.
-    return 'DrupalGap';
+    return drupalgap.title;
   }
   catch (error) {
     alert('drupalgap_get_title - ' + error);
@@ -691,6 +691,21 @@ function drupalgap_page_http_status_code(path) {
 }
 
 /**
+ * Implementation of drupal_set_title().
+ */
+function drupalgap_set_title(title) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_set_title(' + title + ')');
+    }
+    if (title) { drupalgap.title = title; }
+  }
+  catch (error) {
+    alert('drupalgap_set_title - ' + error);
+  }
+}
+
+/**
  * Loads the settings specified in DrupalGap/app/settings.js into the app.
  */
 function drupalgap_settings_load() {
@@ -703,8 +718,8 @@ function drupalgap_settings_load() {
       data:null,
       success:function(){
         if (drupalgap.settings.debug) {
-          // Print the js path to the console.
-          console.log(settings_file_path);
+          // Set the title to the settings title.
+          drupalgap_set_title(drupalgap.settings.title);
         }
       },
       dataType:'script',

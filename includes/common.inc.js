@@ -45,7 +45,6 @@ function drupalgap_attributes(attributes) {
 /**
  * Given a path, this will return the id for the page's div element.
  * For example, a string path of 'foo/bar' would result in an id of 'foo_bar'.
- * <div id="foo_bar"></div>
  */
 function drupalgap_get_page_id(path) {
   try {
@@ -94,6 +93,24 @@ function drupalgap_goto(path) {
         if (drupalgap.settings.debug) {
           console.log(JSON.stringify(drupalgap.menu_links[path]));
         }
+        // Grab the page id.
+        var page_id = drupalgap_get_page_id(path);
+        // Check to see if the page already exists in the DOM.
+        var pages = $("body div[data-role$='page']");
+        var page_in_dom = false;
+        if (pages) {
+          $.each(pages, function(index, page){
+              console.log(index);
+              if (($(page).attr('id')) == page_id) {
+                page_in_dom = true;
+                return false;
+              }
+          });
+        }
+        // If the page is already in the DOM, remove it.
+        if (page_in_dom) {
+          $('#' + page_id).empty().remove();
+        }
         // Generate a JQM page by running it through the theme then attach the
         // page to the <body> of the document, then change to the page.
         jQuery.ajax({
@@ -103,9 +120,6 @@ function drupalgap_goto(path) {
           data:null,
           async:false,
           success:function(html){
-            // Now that we've grabbed the theme's page.tpl.html, let's assemble
-            // the page
-            var page_id = drupalgap_get_page_id(path);
             drupalgap_add_page_to_dom(page_id, html);
             $.mobile.changePage('index.html#' + page_id);
           },

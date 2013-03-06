@@ -11,7 +11,7 @@ function menu_block_view(delta) {
       case 'user_menu':
         var items = [];
         if (drupalgap.user.uid == 0) {
-          items.push(l('Login', 'user/login'));
+          items.push(l('Login', 'user/login'), l('Register', 'user/register'));
         }
         else {
           items.push(l('Logout', 'user/logout'));

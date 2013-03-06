@@ -9,6 +9,7 @@ function dashboard_menu() {
     }
     var items = {
       'dashboard':{
+        'title':'Dashboard',
         'page_callback':'dashboard_page',
       },
     };

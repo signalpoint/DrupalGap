@@ -15,6 +15,10 @@ function user_menu() {
       'user/logout':{
         'page_callback':'user_logout',
       },
+      'user/register':{
+        'page_callback':'drupalgap_get_form',
+        'page_arguments':['user_register'],
+      },
       'users':{
         'page_callback':'user_listing',
       },
@@ -126,12 +130,6 @@ function user_register() {
         'title':'Username',
         'required':true,
         'description':'Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.',
-      },
-      'pass':{
-        'type':'password',
-        'title':'Current password',
-        'required':false,
-        'description':'Enter your current password to change your <span style="text-decoration: italic;">E-mail address</span>.',
       },
       'mail':{
         'type':'email',
