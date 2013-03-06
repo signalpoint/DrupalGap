@@ -8,6 +8,9 @@ function user_menu() {
       console.log(JSON.stringify(arguments));
     }
     var items = {
+      'user':{
+        'page_callback':'user_page',
+      },
       'user/login':{
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_login'],
@@ -19,9 +22,6 @@ function user_menu() {
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_register'],
       },
-      'users':{
-        'page_callback':'user_listing',
-      },
     };
     return items;
   }
@@ -29,6 +29,27 @@ function user_menu() {
     alert('user_menu - ' + error);
   }
 }
+
+/**
+ * Page callback for the user page.
+ */
+function user_page() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_page()');
+    }
+    if (drupalgap.user.uid == 0) {
+      return drupalgap_get_form('user_login');
+    }
+    else {
+      return '';
+    }
+  }
+  catch (error) {
+    alert('user_page - ' + error);
+  }
+}
+
 
 /**
  * Logs the app user out of the website and app.

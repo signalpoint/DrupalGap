@@ -205,14 +205,10 @@ function drupalgap_form_state_values_assemble(form) {
 function drupalgap_get_form(form_id) {
   try {
     if (drupalgap.settings.debug) {
-      console.log('drupalgap_get_form()');
-      console.log(JSON.stringify(arguments));
+      console.log('drupalgap_get_form(' + form_id + ')');
     }
-    form = {};
-    function_name = form_id;
-    if (drupalgap.settings.debug) {
-      console.log('Getting form: ' + function_name);
-    }
+    var form = {};
+    var function_name = form_id;
     if (eval('typeof ' + function_name) == 'function') {
       form = eval(function_name + '();');
       drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);

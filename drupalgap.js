@@ -528,7 +528,6 @@ function drupalgap_module_invoke(module_name, hook) {
         // Get the hook function.
         var fn = window[function_name];
         // Remove the module name and hook from the arguments.
-        //module_arguments.splice(0,1);
         module_arguments.splice(0,2);
         // If there are no arguments, just call the hook directly, otherwise
         // call the hook and pass along all the arguments.
@@ -560,22 +559,38 @@ function drupalgap_module_invoke_all(hook) {
     }
     // Prepare the invocation results.
     drupalgap_module_invoke_results = new Array();
-    // Copy the arguments.
+    // Copy the arguments and remove the hook name from the first index so the
+    // rest can be passed along to the hook.
     var module_arguments = Array.prototype.slice.call(arguments);
+    module_arguments.splice(0,1);
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(module_arguments));
     }
+    // Remove the hook name from the argumets
     // Try to fire the hook in every module.
     drupalgap_module_invoke_continue = true;
     $.each(drupalgap.modules, function(bundle, modules){
         $.each(modules, function(index, module){
-            function_name = module.name + '_' + hook;
+            var function_name = module.name + '_' + hook;
             if (eval('typeof ' + function_name) == 'function') {
-              var invocation_results = drupalgap_module_invoke(module.name, hook, module_arguments);
+              // If there are no arguments, just call the hook directly, otherwise
+              // call the hook and pass along all the arguments.
+              var invocation_results = null;
+              if ($.isEmptyObject(module_arguments) ) {
+                invocation_results = drupalgap_module_invoke(module.name, hook);
+              }
+              else {
+                // Place the module name and hook name on the front of the arguments.
+                module_arguments.unshift(module.name, hook);
+                var fn = window['drupalgap_module_invoke'];
+                invocation_results = fn.apply(null, module_arguments);
+                //drupalgap_module_invoke_results.push(fn.apply(null, module_arguments));
+              }
+              //var invocation_results = drupalgap_module_invoke(module.name, hook, module_arguments);
               if (invocation_results) {
                 drupalgap_module_invoke_results.push(invocation_results);
+                console.log(JSON.stringify(drupalgap_module_invoke_results));
               }
-              console.log(JSON.stringify(drupalgap_module_invoke_results));
             }
         });
     });
