@@ -1,5 +1,6 @@
 /**
- *
+ * Each time we use drupalgap_goto to change a page, this function is called on
+ * the pagebeforehange event. It preproccesses the page, then processes it.
  */
 $(document).bind("pagebeforechange", function(e, data) {
     try {
@@ -7,7 +8,6 @@ $(document).bind("pagebeforechange", function(e, data) {
         console.log('pagebeforechange()');
       }
       if (typeof data.toPage === "string") {
-        // Preprocess the page, then process it.
         template_preprocess_page(drupalgap.page.variables);
         template_process_page(drupalgap.page.variables);
       }
@@ -120,6 +120,8 @@ function template_preprocess_page(variables) {
       console.log(JSON.stringify(variables));
     }
     // Set up default attribute's for the page's div container.
+    // TODO - this probably isn't needed... at least the dashboard id, that for
+    // sure isn't needed.
     variables.attributes = [
       {'date-role':'page'},
       {'id':'drupalgap_dashboard'}

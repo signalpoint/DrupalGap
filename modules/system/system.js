@@ -54,6 +54,10 @@ function system_block_view(delta) {
     }
     switch (delta) {
       case 'main':
+        // This is the main content block, it is required to be in a theme's region
+        // for the content of a page to show up (nodes, users, taxonomy, comments, etc).
+        // Depending on the menu link router, we need to route this through the appropriate
+        // template files and functions. Let's determine where to route this.
         return drupalgap_render_page({'path':drupalgap.path});
         break;
       case 'header':

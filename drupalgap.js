@@ -461,6 +461,29 @@ function drupalgap_menu_links_load() {
     if (menu_links && menu_links.length != 0) {
       $.each(menu_links, function(index, menu_link){
           $.each(menu_link, function(path, menu_item){
+              // Let's figure out where to route this menu item, and attach the
+              // router to the item.
+              var router = null;
+              var args = arg(null, path);
+              if (args) {
+                switch (args[0]) {
+                  case 'user':
+                    // If we are at /user and authenticated, then we'll route to
+                    // the use profile.
+                    if (args.length == 0 && drupalgap.user.uid != 0) {
+                      
+                    }
+                    break; // user
+                  case 'node':
+                    break; // node
+                  default:
+                    console.log('drupalgap_menu_links_load - route unsupported, please fix this code!');
+                    break; // default
+                }
+              }
+              // Attach the router to the menu item.
+              menu_item.router = router;
+              // Attach the menu item to drupalgap.menu_links.
               drupalgap.menu_links[path] = menu_item;
           });
       });

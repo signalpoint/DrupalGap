@@ -14,7 +14,7 @@ function menu_block_view(delta) {
           items.push(l('Login', 'user/login'), l('Register', 'user/register'));
         }
         else {
-          items.push(l('Logout', 'user/logout'));
+          items.push(l('My Account', 'user'), l('Logout', 'user/logout'));
         }
         return theme('item_list', {'items':items, 'attributes':{'data-role':'list-view'}});
         break;

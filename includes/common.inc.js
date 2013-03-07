@@ -1,4 +1,40 @@
 /**
+ * Implementation of arg(index = NULL, path = NULL).
+ */
+function arg() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('arg()');
+      console.log(JSON.stringify(arguments));
+    }
+    var result = null;
+    // If there were zero or one arguments provided.
+    if (arguments.length == 0 || arguments.length == 1) {
+      // Split the path into parts.
+      var args = drupalgap.path.split('/');
+      // If no arguments were provided just return the split array, otherwise
+      // return whichever argument was requested.
+      if (arguments.length == 0) { result = args; }
+      else if (args[arguments[0]]) { result = args[arguments[0]]; }
+    }
+    else {
+      // A path was provided, split it into parts, then return the split array
+      // if they didn't request a specific index, otherwise return the value of
+      // the specific index inside the split array.
+      var path = arguments[1];
+      var args = path.split('/');
+      if (arguments[0] && args[arguments[0]]) { result = args[arguments[0]]; }
+      else { result = args; }
+    }
+    return result;
+  }
+  catch (error) {
+    alert('arg - ' + error);
+  }
+}
+
+
+/**
  * Given a page id, and the theme's page.tpl.html string, this takes the page
  * template html and adds it to the DOM. It doesn't actually render the page,
  * that is taken care of by pagebeforechange when it calls the template system.
@@ -88,11 +124,11 @@ function drupalgap_goto(path) {
     var status_code = drupalgap_page_http_status_code(path);
     switch (status_code) {
       case 200:
-        // Set the current menu path to the path input.
-        drupalgap.path = path;
         if (drupalgap.settings.debug) {
           console.log(JSON.stringify(drupalgap.menu_links[path]));
         }
+        // Set the current menu path to the path input.
+        drupalgap.path = path;
         // Grab the page id.
         var page_id = drupalgap_get_page_id(path);
         // Check to see if the page already exists in the DOM.
@@ -112,7 +148,9 @@ function drupalgap_goto(path) {
           $('#' + page_id).empty().remove();
         }
         // Generate a JQM page by running it through the theme then attach the
-        // page to the <body> of the document, then change to the page.
+        // page to the <body> of the document, then change to the page. Remember,
+        // the rendering of the page does not take place here, that is covered by
+        // the pagebeforechange event which happens after we change the page here.
         jQuery.ajax({
           type:'GET',
           url:'DrupalGap/themes/easystreet3/page.tpl.html',
