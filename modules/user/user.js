@@ -22,6 +22,12 @@ function user_menu() {
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_register'],
       },
+      'user/%':{
+        /*'title':'My account',
+        'title_callback':'user_page_title',*/
+        'page_callback':'user_view_page',
+        'page_arguments':[1],
+      },
     };
     return items;
   }
@@ -38,11 +44,12 @@ function user_page() {
     if (drupalgap.settings.debug) {
       console.log('user_page()');
     }
-    if (drupalgap.user.uid == 0) {
-      return drupalgap_get_form('user_login');
+    if (drupalgap.user.uid != 0) {
+      menu_set_active_item('user/' + drupalgap.user.uid);
+      return menu_execute_active_handler(null, false);
     }
     else {
-      return '';
+      return drupalgap_get_form('user_login');
     }
   }
   catch (error) {
