@@ -211,7 +211,7 @@ function drupalgap_get_form(form_id) {
     var function_name = form_id;
     if (eval('typeof ' + function_name) == 'function') {
       form = eval(function_name + '();');
-      drupalgap_module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
+      module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
       drupalgap.form = form;
     }
     return drupalgap_form_render(form);

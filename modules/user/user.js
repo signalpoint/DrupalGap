@@ -25,7 +25,7 @@ function user_menu() {
       'user/%':{
         /*'title':'My account',
         'title_callback':'user_page_title',*/
-        'page_callback':'user_view_page',
+        'page_callback':'user_view',
         'page_arguments':[1],
       },
     };
@@ -45,8 +45,10 @@ function user_page() {
       console.log('user_page()');
     }
     if (drupalgap.user.uid != 0) {
-      menu_set_active_item('user/' + drupalgap.user.uid);
-      return menu_execute_active_handler(null, false);
+      var path = 'user/' + drupalgap.user.uid;
+      //menu_set_active_item(path);
+      //return menu_execute_active_handler(null, false);
+      return menu_execute_active_handler(path, false);
     }
     else {
       return drupalgap_get_form('user_login');
@@ -257,13 +259,43 @@ function user_profile_form_loaded() {
   }
 }
 
+/**
+ *
+ */
 function user_profile_form_submit(form, form_state) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('user_profile_form_submit()');
+      console.log(JSON.stringify(arguments));
+    }
     var user = drupalgap_entity_build_from_form_state();
     drupalgap_entity_form_submit(user);
   }
   catch (error) {
     alert('user_profile_form_submit - ' + error);
+  }
+}
+
+/**
+ * 
+ */
+function user_view() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_view()');
+      console.log(JSON.stringify(arguments));
+    }
+    var uid = null;
+    if (arguments[0]) { uid = arguments[0]; }
+    if (uid) {
+      return 'howdy user #' + uid;
+    }
+    else {
+      return 'user_view - failed (' + uid + ')';
+    }
+  }
+  catch (error) {
+    alert('user_view - ' + error);
   }
 }
 

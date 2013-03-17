@@ -128,7 +128,7 @@ function template_preprocess_page(variables) {
     ];
     
     // Call all hook_preprocess_page functions.
-    drupalgap_module_invoke_all('preprocess_page');
+    module_invoke_all('preprocess_page');
     
     // Place the variables into drupalgap.page
     drupalgap.page.variables = variables;

@@ -86,10 +86,12 @@ function drupalgap_get_page_id(path) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_get_page_id(' + path + ')');
-      console.log(JSON.stringify(arguments));
     }
-    var id = path.toLowerCase().replace(/\//g, '_');
-    return id.replace(/-/g, '_');
+    var id = path.toLowerCase().replace(/\//g, '_').replace(/-/g, '_');
+    if (drupalgap.settings.debug) {
+      console.log(id);
+    }
+    return id;
   }
   catch (error) {
     alert('drupalgap_get_page_id - ' + error);
@@ -194,7 +196,7 @@ function drupalgap_render_page(page) {
     // Extract the menu link path, page callback function and any page arguments,
     // then call the page callback function with any args and hold on to the
     // rendered output.
-    var menu_link = drupalgap.menu_links[page.path];
+    /*var menu_link = drupalgap.menu_links[page.path];
     var page_callback = menu_link.page_callback;
     var fn = window[page_callback];
     if (drupalgap.settings.debug) { console.log(page_callback + '()'); }
@@ -204,7 +206,8 @@ function drupalgap_render_page(page) {
     }
     else {
       output = fn();
-    }
+    }*/
+    var output = menu_execute_active_handler();
     
     // Render the content based on the output type.
     var content = '';
@@ -249,7 +252,7 @@ function drupalgap_render_region(region) {
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name], function(block_index, block_delta){
           var block = drupalgap_block_load(block_delta);
           if (block) {
-            region_html += drupalgap_module_invoke(block.module, 'block_view', block_delta);
+            region_html += module_invoke(block.module, 'block_view', block_delta);
           }
       });
       region_html += '</div><!-- ' + region.name + ' -->';
