@@ -22,19 +22,19 @@ $(document).bind("pagebeforechange", function(e, data) {
  */
 function theme(hook, variables) {
   try {
-    if (drupalgap.settings.debug) {
+    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
       console.log('theme()');
       console.log(JSON.stringify(arguments));
     }
     var theme_function = 'theme_' + hook;
     if (eval('typeof ' + theme_function) == 'function') {
-      if (drupalgap.settings.debug) {
-        console.log('theme_image()');
+      if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
+        console.log(theme_function + '()');
         console.log(JSON.stringify(variables));
       }
       var fn = window[theme_function];
       var content = fn.call(null, variables);
-      if (drupalgap.settings.debug) { console.log(content); }
+      if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) { console.log(content); }
       return content;
     }
     else {
@@ -108,7 +108,6 @@ function theme_link(variables) {
     alert('theme_link - ' + error);
   }
 }
-
 
 /**
  * Implementation of template_preprocess_page().

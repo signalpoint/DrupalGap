@@ -1,64 +1,23 @@
 /**
- * Implements hook_menu().
+ * Loads a user object.
  */
-function user_menu() {
+function user_load(uid) {
   try {
     if (drupalgap.settings.debug) {
-      console.log('user_menu()');
-      console.log(JSON.stringify(arguments));
+      console.log('user_load(' + uid + ')');
     }
-    var items = {
-      'user':{
-        'page_callback':'user_page',
-      },
-      'user/login':{
-        'page_callback':'drupalgap_get_form',
-        'page_arguments':['user_login'],
-      },
-      'user/logout':{
-        'page_callback':'user_logout',
-      },
-      'user/register':{
-        'page_callback':'drupalgap_get_form',
-        'page_arguments':['user_register'],
-      },
-      'user/%':{
-        /*'title':'My account',
-        'title_callback':'user_page_title',*/
-        'page_callback':'user_view',
-        'page_arguments':[1],
-      },
-    };
-    return items;
+    var user = null;
+    drupalgap.services.user.retrieve.call({
+      'uid':uid,
+      'async':false,
+      'success':function(data){ user = data; },
+    });
+    return user;
   }
   catch (error) {
-    alert('user_menu - ' + error);
+    alert('user_load - ' + error);
   }
 }
-
-/**
- * Page callback for the user page.
- */
-function user_page() {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('user_page()');
-    }
-    if (drupalgap.user.uid != 0) {
-      var path = 'user/' + drupalgap.user.uid;
-      //menu_set_active_item(path);
-      //return menu_execute_active_handler(null, false);
-      return menu_execute_active_handler(path, false);
-    }
-    else {
-      return drupalgap_get_form('user_login');
-    }
-  }
-  catch (error) {
-    alert('user_page - ' + error);
-  }
-}
-
 
 /**
  * Logs the app user out of the website and app.
@@ -83,7 +42,6 @@ function user_logout() {
     alert('user_logout - ' + error);
   }
 }
-
 
 /**
  *
@@ -146,8 +104,68 @@ function user_login_submit(form, form_state) {
   }
   catch (error) {
     alert('user_login_submit - ' + error);
+  } 
+}
+
+/**
+ * Implements hook_menu().
+ */
+function user_menu() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_menu()');
+      console.log(JSON.stringify(arguments));
+    }
+    var items = {
+      'user':{
+        'page_callback':'user_page',
+      },
+      'user/login':{
+        'page_callback':'drupalgap_get_form',
+        'page_arguments':['user_login'],
+      },
+      'user/logout':{
+        'page_callback':'user_logout',
+      },
+      'user/register':{
+        'page_callback':'drupalgap_get_form',
+        'page_arguments':['user_register'],
+      },
+      'user/%':{
+        /*'title':'My account',
+        'title_callback':'user_page_title',*/
+        'page_callback':'user_view',
+        'page_arguments':[1],
+      },
+    };
+    return items;
   }
-  
+  catch (error) {
+    alert('user_menu - ' + error);
+  }
+}
+
+/**
+ * Page callback for the user page.
+ */
+function user_page() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_page()');
+    }
+    if (drupalgap.user.uid != 0) {
+      var path = 'user/' + drupalgap.user.uid;
+      //menu_set_active_item(path);
+      //return menu_execute_active_handler(null, false);
+      return menu_execute_active_handler(path, false);
+    }
+    else {
+      return drupalgap_get_form('user_login');
+    }
+  }
+  catch (error) {
+    alert('user_page - ' + error);
+  }
 }
 
 function user_register() {
@@ -277,7 +295,29 @@ function user_profile_form_submit(form, form_state) {
 }
 
 /**
- * 
+ * Implements hook_theme().
+ */
+function user_theme() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_theme()');
+    }
+    return {
+      'user_picture':{
+        'template':'user-picture',
+      },
+      'user_profile':{
+        'template':'user-profile',
+      },
+    };
+  }
+  catch (error) {
+    alert('user_theme - ' + error);
+  }
+}
+
+/**
+ * Generate an array for rendering the given user.
  */
 function user_view() {
   try {
@@ -285,10 +325,26 @@ function user_view() {
       console.log('user_view()');
       console.log(JSON.stringify(arguments));
     }
+    // Determine the incoming arguments, and set defaults if necessary.
     var uid = null;
+    var view_mode = 'full';
+    var langcode = null;
     if (arguments[0]) { uid = arguments[0]; }
+    if (arguments[1]) { view_mode = arguments[1]; }
+    if (arguments[2]) { langcode = arguments[2]; }
+    if (!langcode) { langcode = drupalgap.settings.language; }
     if (uid) {
-      return 'howdy user #' + uid;
+      // Load the user's account.
+      var account = user_load(uid);
+      if (account) {
+        var build = {
+          'theme':'user_profile',
+          'account':account,
+          'view_mode':view_mode,
+          'language':langcode,
+        };
+        return build;
+      }
     }
     else {
       return 'user_view - failed (' + uid + ')';

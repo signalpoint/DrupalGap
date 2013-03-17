@@ -71,6 +71,7 @@ var drupalgap = {
   'taxonomy_vocabulary_edit':{ }, /* <!-- taxonomy_vocabulary_edit -> */
   'title':'',
   'themes':[],
+  'theme_registry':{},
   'views_datasource':{}, // <!-- views_datasource -->
 }; // <!-- drupalgap -->
 
@@ -187,21 +188,11 @@ function drupalgap_changePage(path) {
       console.log('drupalgap_changePage()');
       console.log(JSON.stringify(arguments));
     }
+    alert('drupalgap_changePage - this function is deprecated!');
   }
   catch (error) {
     alert('drupalgap_changePage - ' + error);
   }
-  /*try {
-    if (device.platform != 'Android') {
-      alert('drupalgap_changePage - device platform not supported yet - ' + device.platform);
-    }
-    else {
-      $.mobile.changePage('file:///android_asset/www/' + path);
-    }
-  }
-  catch (error) {
-    alert('drupalgap_changePage - ' + error);
-  }*/
 }
 
 /**
@@ -252,6 +243,8 @@ function drupalgap_deviceready() {
 	// Initialize menu links.
 	menu_router_build();
 	//drupalgap_menu_links_load();
+	// Initialize the theme registry.
+	drupalgap_theme_registry_build();
 	// Verify site path is set.
 	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
 		navigator.notification.alert(
@@ -666,6 +659,31 @@ function drupalgap_theme_load() {
   }
 }
 
+/**
+ * This calls all implements of hook_theme and builds the DrupalGap theme
+ * registry.
+ */
+function drupalgap_theme_registry_build() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_theme_registry_build()');
+      console.log(JSON.stringify(arguments));
+    }
+    var modules = module_implements('theme');
+    $.each(modules, function(index, module){
+        var function_name = module + '_theme';
+        var fn = window[function_name];
+        var hook_theme = fn();
+        $.each(hook_theme, function(element, variables){
+            variables.path = drupalgap_get_path('module', module);
+            eval('drupalgap.theme_registry.' + element + ' = variables;');
+        });
+    });
+  }
+  catch (error) {
+    alert('drupalgap_theme_registry_build - ' + error);
+  }
+}
 
 /**
  * This is called once the <body> element's onload is fired. We then set the

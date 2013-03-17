@@ -54,7 +54,6 @@ drupalgap.api = {
 		  }
 		  // Synchronous call.
 		  else {
-			// Synchronously.
 		    $.ajax({
 			      url: call_options.url,
 			      type: call_options.type,

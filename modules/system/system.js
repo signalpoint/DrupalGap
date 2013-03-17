@@ -57,14 +57,16 @@ function system_block_view(delta) {
         // This is the main content block, it is required to be in a theme's region
         // for the content of a page to show up (nodes, users, taxonomy, comments, etc).
         // Depending on the menu link router, we need to route this through the appropriate
-        // template files and functions. Let's determine where to route this.
+        // template files and functions.
         return drupalgap_render_page({'path':drupalgap.path});
         break;
       case 'header':
         return '<h1>' + l(drupalgap_get_title(), '') + '</h1>';
         break;
       case 'powered_by':
-        return '<p>Powered by: ' +  l('DrupalGap','http://www.drupalgap.org') + '</p>';
+        return '<p style="text-align: center;">Powered by: ' +
+          l('DrupalGap','http://www.drupalgap.org') +
+        '</p>';
         break;
       case 'help':
         return l('Help','http://www.drupalgap.org/support');

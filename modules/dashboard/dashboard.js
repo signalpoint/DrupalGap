@@ -43,3 +43,21 @@ function dashboard_page() {
   }
 }
 
+/**
+ * Implements hook_theme().
+ */
+function dashboard_theme() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('dashboard_theme()');
+    }
+    return {
+      'dashboard':{
+        'template':'smashboard',
+      },
+    };
+  }
+  catch (error) {
+    alert('dashboard_theme - ' + error);
+  }
+}

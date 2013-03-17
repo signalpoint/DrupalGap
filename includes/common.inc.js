@@ -1,9 +1,9 @@
 /**
- * Implementation of arg(index = NULL, path = NULL).
+ * Implementation of arg(index = null, path = null).
  */
 function arg() {
   try {
-    if (drupalgap.settings.debug) {
+    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
       console.log('arg()');
       console.log(JSON.stringify(arguments));
     }
@@ -61,7 +61,7 @@ function drupalgap_add_page_to_dom(page_id, html) {
  */
 function drupalgap_attributes(attributes) {
   try {
-    if (drupalgap.settings.debug) {
+    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
       console.log('drupalgap_attributes()');
       console.log(JSON.stringify(arguments));
     }
@@ -95,6 +95,48 @@ function drupalgap_get_page_id(path) {
   }
   catch (error) {
     alert('drupalgap_get_page_id - ' + error);
+  }
+}
+
+/**
+ * Returns the path to a system item (module, theme, etc.).
+ */
+function drupalgap_get_path(type, name) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_get_path(' + type + ', ' + name + ')');
+    }
+    var path = null;
+    if (type == 'module') {
+      var found_module = false;
+      $.each(drupalgap.modules, function(bundle, modules){
+          if (found_module) { return false; }
+          else {
+            $.each(modules, function(index, module){
+                if (module.name == name) {
+                  found_module = true;
+                  path = 'DrupalGap';
+                  if (bundle == 'core') { path += '/modules'; }
+                  else if (bundle == 'contrib') { path += '/app/modules'; }
+                  else if (bundle == 'custom') { path += '/app/modules/custom'; }
+                  else {
+                    alert('drupalgap_get_path - unknown module bundle (' + bundle + ')');
+                    return false; 
+                  }
+                  path += '/' + name;
+                  return false;
+                }
+            });
+          }
+      });
+    }
+    else {
+      alert('drupalgap_get_path - unsupported type (' + type + ')');
+    }
+    return path;
+  }
+  catch (error) {
+    alert('drupalgap_get_path - ' + error);
   }
 }
 
@@ -193,22 +235,8 @@ function drupalgap_render_page(page) {
       console.log('drupalgap_render_page()');
       console.log(JSON.stringify(arguments));
     }
-    // Extract the menu link path, page callback function and any page arguments,
-    // then call the page callback function with any args and hold on to the
-    // rendered output.
-    /*var menu_link = drupalgap.menu_links[page.path];
-    var page_callback = menu_link.page_callback;
-    var fn = window[page_callback];
-    if (drupalgap.settings.debug) { console.log(page_callback + '()'); }
-    var output = '';
-    if (menu_link.page_arguments) {
-      output = fn.apply(null, Array.prototype.slice.call(menu_link.page_arguments));
-    }
-    else {
-      output = fn();
-    }*/
+    // Generate the page output.
     var output = menu_execute_active_handler();
-    
     // Render the content based on the output type.
     var content = '';
     // What type of output did we end up with? Plain html or a render object?
@@ -222,8 +250,21 @@ function drupalgap_render_page(page) {
     // the theme system.
     else if (output_type === "object") {
       if (drupalgap.settings.debug) { console.log(JSON.stringify(output)); }
+      // Let's define the names of variables that are reserved for theme
+      // processing.
+      var render_variables = ['theme', 'view_mode', 'language'];
+      
+      // Is there a theme value specified in the output and the registry?
+      if (output.theme && eval('drupalgap.theme_registry.' + output.theme)) {
+        console.log(JSON.stringify(eval('drupalgap.theme_registry.' + output.theme)));
+        alert(output.theme);
+      }
+      
+      // Iterate over any other variables and theme them.
       $.each(output, function(element, variables){
-          content += theme(variables.theme, variables);
+          if ($.inArray(element, render_variables) == -1) {
+            content += theme(variables.theme, variables);  
+          }
       });
     }
     return content;
@@ -269,7 +310,7 @@ function drupalgap_render_region(region) {
  */
 function l() {
   try {
-    if (drupalgap.settings.debug) {
+    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
       console.log('l()');
       console.log(JSON.stringify(arguments));
     }
