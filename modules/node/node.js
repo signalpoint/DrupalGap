@@ -1,10 +1,25 @@
+/**
+ * Page call back for node/add.
+ */
+function node_add_page() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_add_page()');
+    }
+    return "node_add_page()";
+  }
+  catch (error) {
+    alert('node_add_page - ' + error);
+  }
+}
+
 function node_edit() {
   try {
     // Setup form defaults.
     /* TODO - Always having to declare the default submit and validate
                 function names is lame. Set it up to be automatic, then update
                 all existing forms to inherit the automatic goodness. */
-    form = {
+    var form = {
       'id':'node_edit',
       'submit':['node_edit_form_submit'],
       'validate':['node_edit_form_validate'],
@@ -103,4 +118,61 @@ function node_edit_submit(form, form_state) {
     alert('node_edit_submit - ' + error);
   }
 }
+
+/**
+ * Implements hook_menu().
+ */
+function node_menu() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_menu()');
+    }
+    var items = {
+      'node':{
+        'title':'Content',
+        'page_callback':'node_page',
+      },
+      'node/add':{
+        'title':'Add content',
+        'page_callback':'node_add_page',
+        'access_callback':'_node_add_access',
+      }
+    };
+    return items;
+  }
+  catch (error) {
+    alert('node_menu - ' + error);
+  }
+}
+
+/**
+ * Access callback: Checks whether the user has permission to add a node.
+ */
+function _node_add_access() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('_node_add_access()');
+    }
+  }
+  catch (error) {
+    alert('_node_add_access - ' + error);
+  }
+}
+
+/**
+ * Page callback for node.d
+ */
+function node_page() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_page()');
+      console.log(JSON.stringify(arguments));
+    }
+    return "node_page()";
+  }
+  catch (error) {
+    alert('node_page - ' + error);
+  }
+}
+
 

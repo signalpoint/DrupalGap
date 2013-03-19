@@ -4,9 +4,9 @@
 function menu_block_view(delta) {
   try {
     if (drupalgap.settings.debug) {
-      console.log('menu_block_view()');
-      console.log(JSON.stringify(arguments));
+      console.log('menu_block_view(' + delta + ')');
     }
+    var html = '';
     switch (delta) {
       case 'user_menu':
         var items = [];
@@ -16,18 +16,23 @@ function menu_block_view(delta) {
         else {
           items.push(l('My Account', 'user'), l('Logout', 'user/logout'));
         }
-        return theme('item_list', {'items':items, 'attributes':{'data-role':'list-view'}});
+        html = theme('item_list', {'items':items, 'attributes':{'data-role':'list-view'}});
         break;
-      default:
-        return '';
+      case 'main_menu':
+        var items = [];
+        items.push(l('Content', 'node', {'attributes':{'data-icon':'star'}}));
+        html = theme('item_list', {'items':items, 'attributes':{'data-role':'list-view'}});
+        break;
+      case 'navigation':
+        html = 'Navigate this!';
         break;
     }
+    return html;
   }
   catch (error) {
     alert('menu_block_view - ' + error);
   }
 }
-
 
 /**
  * Implements hook_install().

@@ -321,7 +321,13 @@ function l() {
     }
     var text = arguments[0];
     var path = arguments[1];
-    return theme('link', {'text':text, 'path':path});
+    var link = {'text':text, 'path':path};
+    var options = null;
+    if (arguments[2]) {
+      options = arguments[2];
+      if (options.attributes) { link.attributes = options.attributes; }
+    }
+    return theme('link', link);
   }
   catch (error) {
     alert('l - ' + error);

@@ -1,0 +1,1 @@
+Added a new sub_navigation region to the easystreet3 theme, this will hold the main_menu. Adjusted l() to accept attribute options. Replaced duplicate calls to drupalgap_get_page_id in template_process_page with a variable. Started on node and node/add pages. Corrected an accidental global variable when declaring the node edit form.

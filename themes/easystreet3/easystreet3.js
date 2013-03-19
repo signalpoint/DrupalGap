@@ -23,6 +23,12 @@ function easystreet3_info() {
           }
         },
         {
+          'name':'sub_navigation',
+          'attributes':{
+            'data-role':'navbar'
+          }
+        },
+        {
           'name':'content',
           'attributes':{
             'data-role':'content'

@@ -32,7 +32,6 @@ function path_to_theme() {
   }
 }
 
-
 /**
  * Implementation of theme().
  */
@@ -171,28 +170,17 @@ function template_process_page(variables) {
       console.log(drupalgap.path);
       console.log(JSON.stringify(drupalgap.menu_links[drupalgap.path]));
     }
-    
     // For each region, render it, then replace the placeholder in the page's
     // html with the rendered region.
+    var page_id = drupalgap_get_page_id(drupalgap.path);
     $.each(drupalgap.theme.regions, function(index, region){
-        var page_html = $("#" + drupalgap_get_page_id(drupalgap.path)).html();
+        var page_html = $("#" + page_id).html();
         eval('page_html = page_html.replace(/:' + region.name + '/g, drupalgap_render_region(region));');
-        $("#" + drupalgap_get_page_id(drupalgap.path)).html(page_html);
+        $("#" + page_id).html(page_html);
         if (drupalgap.settings.debug) {
-          console.log(page_html);
+          console.log(region.name);
         }
     });
-    /*
-    // Fill in page template variables...
-    // Page title.
-    if (!variables.title) {
-      variables.title = drupalgap_get_title();
-    }
-    $("#" + drupalgap_get_page_id(drupalgap.path) + " div[data-role$='header']").html(variables.title);
-    // Set the page content to the output.
-    var content = drupalgap_render_page({'path':drupalgap.path});
-    $("#" + drupalgap_get_page_id(drupalgap.path) + " div[data-role$='content']").html(content).trigger("create");
-    */
   }
   catch (error) {
     alert('template_process_page - ' + error);

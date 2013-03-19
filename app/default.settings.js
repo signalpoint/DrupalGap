@@ -16,7 +16,8 @@ drupalgap.settings = {
   'blocks':{
     'easystreet3':{
       'header':['header'],
-      'navigation':['main_menu', 'user_menu'],
+      'navigation':['user_menu'],
+      'sub_navigation':['main_menu'],
       'content':['main'],
       'footer':['powered_by'],
     },

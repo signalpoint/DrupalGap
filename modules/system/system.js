@@ -5,7 +5,6 @@ function system_block_info() {
   try {
     if (drupalgap.settings.debug) {
       console.log('system_block_info()');
-      console.log(JSON.stringify(arguments));
     }
     // System blocks.
     var blocks = {
@@ -49,8 +48,7 @@ function system_block_info() {
 function system_block_view(delta) {
   try {
     if (drupalgap.settings.debug) {
-      console.log('system_block_view()');
-      console.log(JSON.stringify(arguments));
+      console.log('system_block_view(' + delta + ')');
     }
     switch (delta) {
       case 'main':
