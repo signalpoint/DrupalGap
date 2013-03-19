@@ -9,6 +9,7 @@ function example_menu() {
     }
     var items = {
       'example':{
+        'title':'Example Page',
         'page_callback':'example_page',
       },
     };

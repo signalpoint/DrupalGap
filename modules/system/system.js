@@ -25,7 +25,7 @@ function system_block_info() {
         'module':'system',
       },
     };
-    // Make a block for each system menu.
+    // Make additional blocks for each system menu.
     var system_menus = menu_list_system_menus();
     $.each(system_menus, function(menu_name, menu){
         var block_delta = menu.menu_name;

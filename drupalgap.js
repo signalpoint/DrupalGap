@@ -59,7 +59,7 @@ var drupalgap = {
   'form_errors':{ }, /* <!-- form_errors --> */
   'node':{ }, /* <!-- node --> */
   'node_edit':{ }, /* <!-- node_edit --> */
-  'menus':[],
+  'menus':{},
   'menu_links':{}, /* <!-- menu_links --> */
   'menu_router':{}, /* <!-- menu_router --> */
   'page':{'variables':{}}, /* <!-- page --> */
@@ -242,7 +242,8 @@ function drupalgap_deviceready() {
 	drupalgap_blocks_load();
 	// Initialize menu links.
 	menu_router_build();
-	//drupalgap_menu_links_load();
+	// Initialize menus.
+	drupalgap_menus_load();
 	// Initialize the theme registry.
 	drupalgap_theme_registry_build();
 	// Verify site path is set.

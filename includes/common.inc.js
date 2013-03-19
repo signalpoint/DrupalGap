@@ -1,40 +1,4 @@
 /**
- * Implementation of arg(index = null, path = null).
- */
-function arg() {
-  try {
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log('arg()');
-      console.log(JSON.stringify(arguments));
-    }
-    var result = null;
-    // If there were zero or one arguments provided.
-    if (arguments.length == 0 || arguments.length == 1) {
-      // Split the path into parts.
-      var args = drupalgap.path.split('/');
-      // If no arguments were provided just return the split array, otherwise
-      // return whichever argument was requested.
-      if (arguments.length == 0) { result = args; }
-      else if (args[arguments[0]]) { result = args[arguments[0]]; }
-    }
-    else {
-      // A path was provided, split it into parts, then return the split array
-      // if they didn't request a specific index, otherwise return the value of
-      // the specific index inside the split array.
-      var path = arguments[1];
-      var args = path.split('/');
-      if (arguments[0] && args[arguments[0]]) { result = args[arguments[0]]; }
-      else { result = args; }
-    }
-    return result;
-  }
-  catch (error) {
-    alert('arg - ' + error);
-  }
-}
-
-
-/**
  * Given a page id, and the theme's page.tpl.html string, this takes the page
  * template html and adds it to the DOM. It doesn't actually render the page,
  * that is taken care of by pagebeforechange when it calls the template system.
@@ -293,12 +257,21 @@ function drupalgap_render_region(region) {
     // If the region has blocks specified in it under the theme in settings.js,
     // render each block in the region.
     var region_html = '';
-    if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
+    if (eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name)) {
       region_html += '<div ' + drupalgap_attributes(region.attributes)  + '>';
-      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name], function(block_index, block_delta){
-          var block = drupalgap_block_load(block_delta);
-          if (block) {
-            region_html += module_invoke(block.module, 'block_view', block_delta);
+      $.each(eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name), function(block_delta, block_settings){
+          // Make sure the block should be visible by checking the user roles.
+          var show_block = true;
+          if (block_settings.roles && block_settings.roles.value && block_settings.roles.value.length != 0) {
+            $.each(block_settings.roles.value, function(role_index, role){
+                
+            });
+          }
+          if (show_block) {
+            var block = drupalgap_block_load(block_delta);
+            if (block) {
+              region_html += module_invoke(block.module, 'block_view', block_delta);
+            }
           }
       });
       region_html += '</div><!-- ' + region.name + ' -->';
@@ -307,6 +280,41 @@ function drupalgap_render_region(region) {
   }
   catch (error) {
     alert('drupalgap_render_region - ' + error);
+  }
+}
+
+/**
+ * Implementation of arg(index = null, path = null).
+ */
+function arg() {
+  try {
+    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
+      console.log('arg()');
+      console.log(JSON.stringify(arguments));
+    }
+    var result = null;
+    // If there were zero or one arguments provided.
+    if (arguments.length == 0 || arguments.length == 1) {
+      // Split the path into parts.
+      var args = drupalgap.path.split('/');
+      // If no arguments were provided just return the split array, otherwise
+      // return whichever argument was requested.
+      if (arguments.length == 0) { result = args; }
+      else if (args[arguments[0]]) { result = args[arguments[0]]; }
+    }
+    else {
+      // A path was provided, split it into parts, then return the split array
+      // if they didn't request a specific index, otherwise return the value of
+      // the specific index inside the split array.
+      var path = arguments[1];
+      var args = path.split('/');
+      if (arguments[0] && args[arguments[0]]) { result = args[arguments[0]]; }
+      else { result = args; }
+    }
+    return result;
+  }
+  catch (error) {
+    alert('arg - ' + error);
   }
 }
 

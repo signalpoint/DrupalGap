@@ -6,26 +6,19 @@ function menu_block_view(delta) {
     if (drupalgap.settings.debug) {
       console.log('menu_block_view(' + delta + ')');
     }
+    // If the block's corresponding menu exists, and it has links, iterate over
+    // each link, add it to an items array, then them an item list.
     var html = '';
-    switch (delta) {
-      case 'user_menu':
-        var items = [];
-        if (drupalgap.user.uid == 0) {
-          items.push(l('Login', 'user/login'), l('Register', 'user/register'));
-        }
-        else {
-          items.push(l('My Account', 'user'), l('Logout', 'user/logout'));
-        }
+    if (eval('drupalgap.menus.' + delta) && eval('drupalgap.menus.' + delta + '.links')) {
+      var items = [];
+      var links = eval('drupalgap.menus.' + delta + '.links');
+      $.each(links, function(index, link){
+          if (!link.options) { link.options = null; }
+          items.push(l(link.title, link.path, link.options));
+      });
+      if (items.length != 0) {
         html = theme('item_list', {'items':items, 'attributes':{'data-role':'list-view'}});
-        break;
-      case 'main_menu':
-        var items = [];
-        items.push(l('Content', 'node', {'attributes':{'data-icon':'star'}}));
-        html = theme('item_list', {'items':items, 'attributes':{'data-role':'list-view'}});
-        break;
-      case 'navigation':
-        html = 'Navigate this!';
-        break;
+      }
     }
     return html;
   }
@@ -68,7 +61,7 @@ function menu_save(menu) {
       console.log('menu_save()');
       console.log(JSON.stringify(arguments));
     }
-    eval('drupalgap.menus.push({' + menu.menu_name + ':menu});');
+    eval('drupalgap.menus.' + menu.menu_name + ' =  menu;');
   }
   catch (error) {
     alert('menu_save - ' + error);

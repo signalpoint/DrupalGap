@@ -99,9 +99,13 @@ function menu_list_system_menus() {
         'menu_name':'management',
         'title':'Management'
       },
-      'user_menu':{
-        'menu_name':'user_menu',
-        'title':'User menu'
+      'user_menu_anonymous':{
+        'menu_name':'user_menu_anonymous',
+        'title':'User menu authenticated'
+      },
+      'user_menu_authenticated':{
+        'menu_name':'user_menu_authenticated',
+        'title':'User menu authenticated'
       },
       'main_menu':{
         'menu_name':'main_menu',
@@ -207,4 +211,69 @@ function drupalgap_get_menu_link_router_path(path) {
   }
 }
 
+
+/**
+ * Loads all of the menus specified in drupalgap.settings.menus into
+ * drupalgap.menus. This is called after menu_router_build(), so any system
+ * defined menus will already be present and should be overwritten with any
+ * customizations present in the settings. It then iterates over the menu links
+ * specified in drupalgap.menu_links and attaches any of them that have a
+ * menu_name to their corresponding menu in drupalgap.menus.
+ */
+function drupalgap_menus_load() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_menus_load()');
+    }
+    if (drupalgap.settings.menus) {
+      console.log(JSON.stringify(drupalgap.menus));
+      console.log(JSON.stringify(drupalgap.settings.menus));
+      // Process each menu defined in the settings.
+      $.each(drupalgap.settings.menus, function(menu_name, menu){
+          // If the menu does not already exist, it is a custom menu, so create
+          // the menu and its corresponding block.
+          if (!eval('drupalgap.menus.' + menu_name)) {
+            // If the custom menu doesn't have its machine name set, set it.
+            if (!menu.menu_name) { menu.menu_name = menu_name; }
+            // Save the custom menu.
+            menu_save(menu);
+          }
+          else {
+            // The menu is a system defined menu, merge it together with any
+            // custom settings.
+            $.extend(true, eval('drupalgap.menus.' + menu_name), menu);
+          }
+      });
+      // Now that we have all of the menus loaded up, and the menu router is built,
+      // let's grab any links from the router that have a menu specified, and add
+      // the link to the router.
+      $.each(drupalgap.menu_links, function(path, menu_link){
+          if (menu_link.menu_name) {
+            if (eval('drupalgap.menus.' + menu_link.menu_name)) {
+              // Create a links array for the menu if one doesn't exist already.
+              if (!eval('drupalgap.menus.' + menu_link.menu_name + '.links')) {
+                eval('drupalgap.menus.' + menu_link.menu_name + '.links = [];');
+              }
+              // Add the path to the menu link inside the menu.
+              menu_link.path = path;
+              // Now push the link onto the menu. We only care about the title,
+              // path and options, as this is just a link. The rest of the
+              // menu link data can be retrieved from drupalgap.menu_links.
+              var link = {};
+              if (menu_link.title) { link.title = menu_link.title; }
+              if (menu_link.path) { link.path = menu_link.path; }
+              if (menu_link.options) { link.options = menu_link.options; }
+              eval('drupalgap.menus.' + menu_link.menu_name + '.links.push(link);');
+            }
+            else {
+              alert('drupalgap_menus_load - menu does not exist (' + menu_link.menu_name + '), cannot attach link to it (' + path + ')');
+            }
+          }
+      });
+    }
+  }
+  catch (error) {
+    alert('drupalgap_menus_load - ' + error);
+  }
+}
 
