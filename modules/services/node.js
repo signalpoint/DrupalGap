@@ -34,7 +34,12 @@ drupalgap.services.node = {
 				// and modify node.content if developer wants.
 				node.content = '';
 				if (node.body.length != 0) {
-					node.content = node.body[node.language][0].safe_value;
+                                        if (node.body[node.language][0].value) {
+                                          node.content = node.body[node.language][0].value;
+                                        }
+                                        else if (node.body[node.language][0].safe_value) {
+					  node.content = node.body[node.language][0].safe_value;
+                                        }
 				}
 			},
 		},
