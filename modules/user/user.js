@@ -358,3 +358,30 @@ function user_view() {
   }
 }
 
+/**
+ * Given a user role (string), this determines if the current user has the role.
+ * Returns true if the user has the role, false otherwise. You may pass in a
+ * user account object to check against a certain account, instead of the current user.
+ */
+function drupalgap_user_has_role(role) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_user_has_role(' + role + ')');
+    }
+    var has_role = false;
+    var account = null;
+    if (arguments[1]) { account = arguments[1]; }
+    else { account = drupalgap.user; }
+    $.each(account.roles, function(rid, value){
+        if (role == value) {
+          has_role = true;
+          return false;
+        }
+    });
+    return has_role;
+  }
+  catch (error) {
+    alert('drupalgap_user_has_role - ' + error);
+  }
+}
+

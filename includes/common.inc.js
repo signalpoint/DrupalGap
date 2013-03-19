@@ -260,11 +260,22 @@ function drupalgap_render_region(region) {
     if (eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name)) {
       region_html += '<div ' + drupalgap_attributes(region.attributes)  + '>';
       $.each(eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name), function(block_delta, block_settings){
-          // Make sure the block should be visible by checking the user roles.
+          // Check the block's visibility rules.
           var show_block = true;
+          // If there are any roles specified in the block settings
           if (block_settings.roles && block_settings.roles.value && block_settings.roles.value.length != 0) {
             $.each(block_settings.roles.value, function(role_index, role){
-                
+                var has_role = false;
+                if (drupalgap_user_has_role(role)) {
+                  // User has role, show/hide the block accordingly.
+                  if (block_settings.roles.mode == 'include') { show_block = true; }
+                  if (block_settings.roles.mode == 'exclude') { show_block = false; }
+                }
+                else {
+                  // User does not have role, show/hide the block accordingly.
+                  if (block_settings.roles.mode == 'include') { show_block = false; }
+                  if (block_settings.roles.mode == 'exclude') { show_block = true; }
+                }
             });
           }
           if (show_block) {

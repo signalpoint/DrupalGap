@@ -2,23 +2,31 @@
  * Specify your DrupalGap's Mobile Application settins here. 
  */
 drupalgap.settings = {
-  /* Site Information */
-  'title':'DrupalGap',
-  'front':'dashboard',
-  'offline':'offline.html',
+  
   /* Paths */
   'site_path':'', /* e.g. http://www.example.com */
   'base_path':'/',
   'clean_urls':false, /* set to true if you have clean urls enabled on your site */
+  
+  /* Site Information */
+  'title':'DrupalGap',
+  'front':'dashboard',
+  'offline':'offline.html',
+  
   /* Language */
   'language':'und',
+  
   /* Files */
+  
   'file_public_path':'sites/default/files',
+  
   /* Debug */
   'debug':true, /* set to true to see console.log debug information */
   'debug_level':0, /* 0 = mild, 1 = medium (), 2 = spicy () */
+  
   /* Theme */
   'theme':'easystreet3',
+  
   /* Blocks */
   'blocks':{
     'easystreet3':{
@@ -29,13 +37,13 @@ drupalgap.settings = {
         'user_menu_anonymous':{
           'roles':{
             'value':['anonymous user'],
-            'include':true,
+            'mode':'include',
           }
         },
         'user_menu_authenticated':{
           'roles':{
             'value':['authenticated user'],
-            'include':true,
+            'mode':'include',
           }
         }
       },
@@ -50,6 +58,7 @@ drupalgap.settings = {
       },
     },
   },
+  
   /* Menus */
   'menus':{
     'main_menu':{
@@ -71,6 +80,8 @@ drupalgap.settings = {
     },
   },
 };
+
+/* Custom Modules */
 drupalgap.modules.custom = [
   /*{'name':'example'},*/
 ];
