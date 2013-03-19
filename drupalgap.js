@@ -300,6 +300,62 @@ function drupalgap_deviceready() {
 }
 
 /**
+ * Checks if a given file exists, returns true or false.
+ * @param  {string} path 
+ *   A path to a file
+ * @return {bool}      
+ *   True if file exists, else flase
+ */
+function drupalgap_file_exists(path) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_file_exists(' + path + ')');
+    }
+    var file_exists = false;
+    jQuery.ajax({
+      async:false,
+      type:'HEAD',
+      url:path,
+      success:function(){ file_exists = true; },
+      error:function(xhr, textStatus, errorThrown) { }
+    });
+    return file_exists;
+  }
+  catch (error) {
+    alert('drupalgap_file_exists - ' + error);
+  }
+}
+
+/**
+ * Reads entire file into a string and returns the string. Returns false if
+ * it fails.
+ */
+function drupalgap_file_get_contents(path) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_file_get_contents(' + path + ')');
+    }
+    var file = false;
+    jQuery.ajax({
+      type:'GET',
+      url:path,
+      dataType:'html',
+      data:null,
+      async:false,
+      success:function(data){ file = data; },
+      error: function(xhr, textStatus, errorThrown) {
+        console.log('drupalgap_file_get_contents - failed to load file (' + path + ')');
+      }
+    });
+    return file;
+  }
+  catch (error) {
+    alert('drupalgap_file_get_contents - ' + error);
+  }
+}
+
+
+/**
  * 
  * @param count
  * @param singular

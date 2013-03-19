@@ -195,25 +195,14 @@ function drupalgap_goto(path) {
         // page to the <body> of the document, then change to the page. Remember,
         // the rendering of the page does not take place here, that is covered by
         // the pagebeforechange event which happens after we change the page here.
-        jQuery.ajax({
-          type:'GET',
-          url:'DrupalGap/themes/easystreet3/page.tpl.html',
-          dataType:'html',
-          data:null,
-          async:false,
-          success:function(html){
-            drupalgap_add_page_to_dom(page_id, html);
-            $.mobile.changePage('index.html#' + page_id);
-          },
-          error: function(xhr, textStatus, errorThrown) {
-            navigator.notification.alert(
-              'Failed to load the page.tpl.html file!',
-              function(){},
-              'Error',
-              'OK'
-            );
-          }
-        });
+        var html = drupalgap_file_get_contents('DrupalGap/themes/easystreet3/page.tpl.html');
+        if (html) {
+          drupalgap_add_page_to_dom(page_id, html);
+          $.mobile.changePage('index.html#' + page_id);
+        }
+        else {
+          alert("drupalgap_goto - failed to load theme's page.tpl.html file");
+        }
         break;
       default:
         alert('drupalgap_goto(' + path + ') => (' + status_code + ')');
@@ -256,8 +245,24 @@ function drupalgap_render_page(page) {
       
       // Is there a theme value specified in the output and the registry?
       if (output.theme && eval('drupalgap.theme_registry.' + output.theme)) {
-        console.log(JSON.stringify(eval('drupalgap.theme_registry.' + output.theme)));
-        alert(output.theme);
+        // Extract the theme object template.
+        var template = eval('drupalgap.theme_registry.' + output.theme + ';');
+        console.log(JSON.stringify(template));
+        // Determine template file name and path.
+        var template_file_name = output.theme.replace(/_/g,'-') + '.tpl.html';
+        var template_file_path = template.path + '/' + template_file_name;
+        if (drupalgap_file_exists(template_file_path)) {
+          var template_file_html = drupalgap_file_get_contents(template_file_path);
+          if (template_file_html) {
+            content += template_file_html;
+          }
+          else {
+            alert('drupalgap_render_page - failed to get file contents (' + template_file_path + ')');
+          }
+        }
+        else {
+          alert('drupalgap_render_page - template file does not exist (' + template_file_path + ')');
+        }
       }
       
       // Iterate over any other variables and theme them.

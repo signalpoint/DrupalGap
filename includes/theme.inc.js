@@ -18,6 +18,22 @@ $(document).bind("pagebeforechange", function(e, data) {
 });
 
 /**
+ * Returns the path to the current DrupalGap theme.
+ */
+function path_to_theme() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('path_to_theme()');
+    }
+    return 'DrupalGap/themes/easystreet3';
+  }
+  catch (error) {
+    alert('path_to_theme - ' + error);
+  }
+}
+
+
+/**
  * Implementation of theme().
  */
 function theme(hook, variables) {

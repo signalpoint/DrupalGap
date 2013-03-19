@@ -345,9 +345,12 @@ function user_view() {
         };
         return build;
       }
+      else {
+        alert('user_view - failed to load user (' + uid + ')');
+      }
     }
     else {
-      return 'user_view - failed (' + uid + ')';
+      return 'user_view - user id not provided';
     }
   }
   catch (error) {
