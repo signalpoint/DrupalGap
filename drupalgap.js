@@ -392,6 +392,27 @@ function drupalgap_function_exists(name) {
   }
 }
 
+/**
+ * Given an html string from a *.tpl.html file, this will extract all of the
+ * placeholders names and return them in an array. Returns false otherwise.
+ */
+function drupalgap_get_placeholders_from_html(html) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_get_placeholders_from_html()');
+      console.log(JSON.stringify(arguments));
+    }
+    var placeholders = false;
+    if (html) {
+      placeholders = html.match(/(?!{:)([\w]+)(?=:})/g);
+    }
+    return placeholders;
+  }
+  catch (error) {
+    alert('drupalgap_get_placeholders_from_html - ' + error);
+  }
+}
+
 
 /**
  * 
@@ -594,44 +615,6 @@ function drupalgap_modules_load() {
 		// Now invoke hook_install on all modules.
 		module_invoke_all('install');
 	}
-}
-
-/**
- * Given a DrupalGap path, this returns the equivalent HTTP status code for the
- * page in the app. 200, 404, etc.
- */
-function drupalgap_page_http_status_code(path) {
-  try {
-    var status_code = null;
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_page_http_status_code()');
-      console.log(JSON.stringify(arguments));
-    }
-    // Check to make sure the path is in menu_links, then check for the path's
-    // page_callback value, then make sure the page_callback's function exists.
-    // This satisfies a 200 response, otherwise we'll throw a 404.
-    if (drupalgap.menu_links[path] && 
-        drupalgap.menu_links[path].page_callback &&
-        eval('typeof ' + drupalgap.menu_links[path].page_callback) == 'function')
-    {
-      status_code = 200;
-    }
-    else {
-      status_code = 404;
-    }
-    if (drupalgap.settings.debug) {
-      if (status_code == 200) {
-        console.log('200 OK');
-      }
-      else {
-        console.log('Status Code: ' + status_code + ' (' + path + ')');
-      }
-    }
-    return status_code;
-  }
-  catch (error) {
-    alert('drupalgap_page_http_status_code - ' + error);
-  }
 }
 
 /**

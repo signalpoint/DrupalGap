@@ -231,7 +231,9 @@ function node_page_view(nid) {
     if (node) {
       var build = {
         'theme':'node',
-        'node':node
+        'node':node,
+        'title':{'markup':node.title},
+        'content':{'markup':node.content},
       };
       return build;
     }

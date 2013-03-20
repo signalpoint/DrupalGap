@@ -127,50 +127,38 @@ function drupalgap_goto(path) {
       return false;
     }
     
-    // Determine the http status code and then route the user accordingly.
-    /*var status_code = drupalgap_page_http_status_code(path);
-    switch (status_code) {
-      case 200:
-        if (drupalgap.settings.debug) {
-          console.log(JSON.stringify(drupalgap.menu_links[path]));
-        }*/
-        // Set the current menu path to the path input.
-        drupalgap.path = path;
-        // Grab the page id.
-        var page_id = drupalgap_get_page_id(path);
-        // Check to see if the page already exists in the DOM.
-        var pages = $("body div[data-role$='page']");
-        var page_in_dom = false;
-        if (pages) {
-          $.each(pages, function(index, page){
-              console.log(index);
-              if (($(page).attr('id')) == page_id) {
-                page_in_dom = true;
-                return false;
-              }
-          });
-        }
-        // If the page is already in the DOM, remove it.
-        if (page_in_dom) {
-          $('#' + page_id).empty().remove();
-        }
-        // Generate a JQM page by running it through the theme then attach the
-        // page to the <body> of the document, then change to the page. Remember,
-        // the rendering of the page does not take place here, that is covered by
-        // the pagebeforechange event which happens after we change the page here.
-        var html = drupalgap_file_get_contents('DrupalGap/themes/easystreet3/page.tpl.html');
-        if (html) {
-          drupalgap_add_page_to_dom(page_id, html);
-          $.mobile.changePage('index.html#' + page_id);
-        }
-        else {
-          alert("drupalgap_goto - failed to load theme's page.tpl.html file");
-        }
-        /*break;
-      default:
-        alert('drupalgap_goto(' + path + ') => (' + status_code + ')');
-        break;
-    }*/
+    // Set the current menu path to the path input.
+    drupalgap.path = path;
+    // Grab the page id.
+    var page_id = drupalgap_get_page_id(path);
+    // Check to see if the page already exists in the DOM.
+    var pages = $("body div[data-role$='page']");
+    var page_in_dom = false;
+    if (pages) {
+      $.each(pages, function(index, page){
+          console.log(index);
+          if (($(page).attr('id')) == page_id) {
+            page_in_dom = true;
+            return false;
+          }
+      });
+    }
+    // If the page is already in the DOM, remove it.
+    if (page_in_dom) {
+      $('#' + page_id).empty().remove();
+    }
+    // Generate a JQM page by running it through the theme then attach the
+    // page to the <body> of the document, then change to the page. Remember,
+    // the rendering of the page does not take place here, that is covered by
+    // the pagebeforechange event which happens after we change the page here.
+    var html = drupalgap_file_get_contents('DrupalGap/themes/easystreet3/page.tpl.html');
+    if (html) {
+      drupalgap_add_page_to_dom(page_id, html);
+      $.mobile.changePage('index.html#' + page_id);
+    }
+    else {
+      alert("drupalgap_goto - failed to load theme's page.tpl.html file");
+    }
   }
   catch (error) {
     alert('drupalgap_goto - ' + error);
@@ -187,37 +175,71 @@ function drupalgap_render_page(page) {
       console.log('drupalgap_render_page()');
       console.log(JSON.stringify(arguments));
     }
-    // Generate the page output.
+    // Generate the page output and render the content based on the output type.
+    // The outpute type will either be an html string or a drupalgap render object.
     var output = menu_execute_active_handler();
-    // Render the content based on the output type.
-    var content = '';
-    // What type of output did we end up with? Plain html or a render object?
     var output_type = $.type(output);
-    // If the output came back as a string, we can render it as is.
+    var content = '';
+    
+    // If the output came back as a string, we can render it as is. If the
+    // output came back as on object, render each element in it through the
+    // theme system.
     if (output_type === "string") {
-      if (drupalgap.settings.debug) { console.log(output); }
+      // The page came back as an html string.
       content = output;
     }
-    // If the output came back as on object, render each element in it through
-    // the theme system.
     else if (output_type === "object") {
-      if (drupalgap.settings.debug) { console.log(JSON.stringify(output)); }
-      // Let's define the names of variables that are reserved for theme
-      // processing.
+      
+      // The page came back as a render object. Let's define the names of
+      // variables that are reserved for theme processing.
       var render_variables = ['theme', 'view_mode', 'language'];
       
       // Is there a theme value specified in the output and the registry?
       if (output.theme && eval('drupalgap.theme_registry.' + output.theme)) {
-        // Extract the theme object template.
+        
+        // Extract the theme object template and determine the template file
+        // name and path.
         var template = eval('drupalgap.theme_registry.' + output.theme + ';');
-        console.log(JSON.stringify(template));
-        // Determine template file name and path.
         var template_file_name = output.theme.replace(/_/g,'-') + '.tpl.html';
         var template_file_path = template.path + '/' + template_file_name;
+        
+        // Make sure the template file exists.
         if (drupalgap_file_exists(template_file_path)) {
+          
+          // Loads the template file's content into a string.
           var template_file_html = drupalgap_file_get_contents(template_file_path);
           if (template_file_html) {
+            
+            // What variable placeholders are present in the template file?
+            var placeholders = drupalgap_get_placeholders_from_html(template_file_html);
+            if (placeholders) {
+              
+              // Replace each placeholder with html.
+              $.each(placeholders, function(index, placeholder){
+                  var html = '';
+                  if (eval('output.' + placeholder)) {
+                    // Grab the element variable from the output.
+                    var element = eval('output.' + placeholder);
+                    // If it is markup, render it as is, if it is themeable,
+                    // then theme it.
+                    if (eval('output.' + placeholder + '.markup')) {
+                      html = eval('output.' + placeholder + '.markup');
+                    }
+                    else if (eval('output.' + placeholder + '.theme')) {
+                      html = theme(eval('output.' + placeholder + '.theme'), element);
+                    }
+                  }
+                  // Now replace the placeholder with the html.
+                  eval('template_file_html = template_file_html.replace(/{:' + placeholder + ':}/g,html);');
+              });
+            }
+            else {
+              alert('drupalgap_render_page - no placeholders found (' + template_file_html + ')');
+            }
+            
+            // Finally add the rendered template file to the content.
             content += template_file_html;
+            
           }
           else {
             alert('drupalgap_render_page - failed to get file contents (' + template_file_path + ')');
@@ -228,13 +250,16 @@ function drupalgap_render_page(page) {
         }
       }
       
-      // Iterate over any other variables and theme them.
+      // Iterate over any remaining variables and theme them.
       $.each(output, function(element, variables){
           if ($.inArray(element, render_variables) == -1) {
             content += theme(variables.theme, variables);  
           }
       });
     }
+    
+    // Now that we are done assembling the content into an html string, we can
+    // return it.
     return content;
   }
   catch (error) {
