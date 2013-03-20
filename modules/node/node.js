@@ -120,6 +120,31 @@ function node_edit_submit(form, form_state) {
 }
 
 /**
+ * Loads a node object and returns it. Returns false if the node load fails.
+ */
+function node_load(nid) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_load()');
+      console.log(JSON.stringify(arguments));
+    }
+    var node = false;
+    drupalgap.services.node.retrieve.call({
+      'nid':nid,
+      'async':false,
+      'success':function(data){
+        node = data;
+      }
+    });
+    return node;
+  }
+  catch (error) {
+    alert(' - ' + error);
+  }
+}
+
+
+/**
  * Implements hook_menu().
  */
 function node_menu() {
@@ -136,7 +161,12 @@ function node_menu() {
         'title':'Add content',
         'page_callback':'node_add_page',
         'access_callback':'_node_add_access',
-      }
+      },
+      'node/%':{
+        'title':'Node',
+        'page_callback':'node_page_view',
+        'page_arguments':[1],
+      },
     };
     return items;
   }
@@ -160,7 +190,7 @@ function _node_add_access() {
 }
 
 /**
- * Page callback for node.d
+ * Page callback for node.
  */
 function node_page() {
   try {
@@ -168,11 +198,68 @@ function node_page() {
       console.log('node_page()');
       console.log(JSON.stringify(arguments));
     }
-    return "node_page()";
+    // Grab some recent content and display it.
+    var html = '';
+    drupalgap.views_datasource.call({
+      'path':'drupalgap/views_datasource/drupalgap_content',
+      'async':false,
+      'success':function(data) {
+        var items = [];
+        $.each(data.nodes, function(index, object){
+            items.push(l(object.node.title, 'node/' + object.node.nid));
+        });
+        html = theme('jqm_item_list', {'items':items});
+      },
+    });
+    return html;
   }
   catch (error) {
     alert('node_page - ' + error);
   }
 }
 
+/**
+ * Page callback for node/%.
+ */
+function node_page_view(nid) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_page_view()');
+      console.log(JSON.stringify(arguments));
+    }
+    var node = node_load(nid);
+    if (node) {
+      var build = {
+        'theme':'node',
+        'node':node
+      };
+      return build;
+    }
+    else {
+      alert('node_page_view - failed to load node (' + nid + ')');
+    }
+  }
+  catch (error) {
+    alert('node_page_view - ' + error);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function node_theme() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_theme()');
+    }
+    return {
+      'node':{
+        'template':'node',
+      },
+    };
+  }
+  catch (error) {
+    alert('node_theme - ' + error);
+  }
+}
 

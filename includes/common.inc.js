@@ -104,7 +104,6 @@ function drupalgap_get_path(type, name) {
   }
 }
 
-
 /**
  * Given a path, this will change the current page in the app.
  */
@@ -129,12 +128,12 @@ function drupalgap_goto(path) {
     }
     
     // Determine the http status code and then route the user accordingly.
-    var status_code = drupalgap_page_http_status_code(path);
+    /*var status_code = drupalgap_page_http_status_code(path);
     switch (status_code) {
       case 200:
         if (drupalgap.settings.debug) {
           console.log(JSON.stringify(drupalgap.menu_links[path]));
-        }
+        }*/
         // Set the current menu path to the path input.
         drupalgap.path = path;
         // Grab the page id.
@@ -167,11 +166,11 @@ function drupalgap_goto(path) {
         else {
           alert("drupalgap_goto - failed to load theme's page.tpl.html file");
         }
-        break;
+        /*break;
       default:
         alert('drupalgap_goto(' + path + ') => (' + status_code + ')');
         break;
-    }
+    }*/
   }
   catch (error) {
     alert('drupalgap_goto - ' + error);

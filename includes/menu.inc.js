@@ -187,6 +187,7 @@ function drupalgap_get_menu_link_router_path(path) {
       var args_size = args.length;
       switch (args[0]) {
         case 'user':
+        case 'node':
           // If there is an integer in the path, replace it with the wildcard
           // defined via hook_menu implementation.
           if (args_size > 1 && is_int(parseInt(args[1]))) {
@@ -194,9 +195,7 @@ function drupalgap_get_menu_link_router_path(path) {
             args[1] = '%';
             router_path = args.join('/');
           }
-          break; // user
-        case 'node':
-          break; // node
+          break;
       }
     }
     // If there isn't a router, we'll just route to the path itself.

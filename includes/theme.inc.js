@@ -125,6 +125,29 @@ function theme_link(variables) {
 }
 
 /**
+ * Identical to theme_item_list, except this turns the list into a jQM listview.
+ */
+function theme_jqm_item_list(variables) {
+  try {
+    if (variables.attributes) {
+      if (variables.attributes.data-role && variables.attributes.data-role != 'listview') {
+      }
+      else {
+        variables.attributes = {'data-role':'listview'}
+      }
+    }
+    else {
+      variables.attributes = {'data-role':'listview'}
+    }
+    return theme_item_list(variables);
+  }
+  catch (error) {
+    alert(' - ' + error);
+  }
+}
+
+
+/**
  * Implementation of template_preprocess_page().
  */
 function template_preprocess_page(variables) {

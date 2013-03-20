@@ -17,7 +17,7 @@ function menu_block_view(delta) {
           items.push(l(link.title, link.path, link.options));
       });
       if (items.length != 0) {
-        html = theme('item_list', {'items':items, 'attributes':{'data-role':'list-view'}});
+        html = theme('item_list', {'items':items});
       }
     }
     return html;
