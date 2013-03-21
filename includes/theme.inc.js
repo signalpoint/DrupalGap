@@ -93,7 +93,7 @@ function theme_image(variables) {
 function theme_item_list(variables) {
   try {
     var html = '';
-    if (variables.items) {
+    if (variables.items && variables.items.length > 0) {
       html += '<ul ' + drupalgap_attributes(variables.attributes) + '>';
       $.each(variables.items, function(index, item){
           html += '<li>' + item + '</li>';

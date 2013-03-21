@@ -7,6 +7,10 @@ function easystreet3_info() {
       console.log('easystreet3_info()');
       console.log(JSON.stringify(arguments));
     }
+    // TODO - This should be converted so the regions can be accessed with
+    // easystreet3.regions.header and the easystreet3.regions.header.name would
+    // be equal to 'header'. The name property should be set by DrupalGap upon
+    // invocation of this hook so implementers don't have to set it.
     return {
       'name':'easystreet3',
       'regions':[

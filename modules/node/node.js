@@ -167,6 +167,18 @@ function node_menu() {
         'page_callback':'node_page_view',
         'page_arguments':[1],
       },
+      'node/%/view':{
+        'title':'View',
+        'type':'MENU_DEFAULT_LOCAL_TASK',
+        'weight':-10,
+      },
+      'node/%/edit':{
+        'title':'Edit',
+        'page_callback':'node_page_edit',
+        'page_arguments':[1],
+        'weight':0,
+        'type':'MENU_LOCAL_TASK',
+      },
     };
     return items;
   }

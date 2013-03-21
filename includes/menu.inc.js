@@ -7,25 +7,32 @@ function menu_execute_active_handler() {
       console.log('menu_execute_active_handler()');
       console.log(JSON.stringify(arguments));
     }
-    // Determine the path and delivery.
+    
+    // Determine the path.
     var path = null;
-    //var deliver = false;
     if (arguments[0]) { path = arguments[0]; }
-    //if (arguments[1] != null) { deliver = arguments[1]; }
     if (!path) { path = drupalgap.path; }
+    
     // Get the router path.
     var routher_path = drupalgap_get_menu_link_router_path(path);
+    
     if (routher_path) {
+      
       // Call the page call back for this router path and send along any arguments.
       var function_name = drupalgap.menu_links[routher_path].page_callback;
       if (drupalgap_function_exists(function_name)) {
+        
+        // Grab the page callback function.
         var fn = window[function_name];
-        if (drupalgap.menu_links[routher_path].page_arguments) {  
-          var page_arguments = [];
-          var args = arg(null, path);
+        
+        // Are there any arguments to send to the page callback?
+        if (drupalgap.menu_links[routher_path].page_arguments) {
+          
           // For each page argument, if the argument is an integer, grab the
           // corresponding arg(#), otherwise just push the arg onto the page
-          // arguments. 
+          // arguments.
+          var page_arguments = [];
+          var args = arg(null, path);
           $.each(drupalgap.menu_links[routher_path].page_arguments, function(index, object){
               if (is_int(object) && args[object]) {
                 page_arguments.push(args[object]);
@@ -34,18 +41,23 @@ function menu_execute_active_handler() {
                 page_arguments.push(object);
               }
           });
+          // Call the page callback function with the page arguments.
           return fn.apply(null, Array.prototype.slice.call(page_arguments));
+          
         }
         else {
+          // There are no arguments, just return the page callback result.
           return fn();
         }
       }
       else {
+        // No page call back specified.
         console.log(JSON.stringify(drupalgap.menu_links[routher_path]));
         alert('menu_execute_active_handler - no page callback (' + routher_path + ')');
       }
     }
     else {
+      // No router path.
       alert('menu_execute_active_handler - no router path (' + path + ')');
     }
   }
@@ -88,30 +100,31 @@ function menu_list_system_menus() {
   try {
     if (drupalgap.settings.debug) {
       console.log('menu_list_system_menus()');
-      console.log(JSON.stringify(arguments));
     }
     var system_menus = {
       'navigation':{
-        'menu_name':'navigation',
         'title':'Navigation'
       },
       'management':{
-        'menu_name':'management',
         'title':'Management'
       },
       'user_menu_anonymous':{
-        'menu_name':'user_menu_anonymous',
         'title':'User menu authenticated'
       },
       'user_menu_authenticated':{
-        'menu_name':'user_menu_authenticated',
         'title':'User menu authenticated'
       },
       'main_menu':{
-        'menu_name':'main_menu',
         'title':'Main menu'
       },
+      'primary_local_tasks':{
+        'title':'Primary Local Tasks'
+      },
     };
+    // Add the menu_name to each menu as a property.
+    $.each(system_menus, function(menu_name, menu){
+        menu.menu_name = menu_name;
+    });
     return system_menus;
   }
   catch (error) {
@@ -129,24 +142,37 @@ function menu_router_build() {
       console.log('menu_router_build()');
       console.log(JSON.stringify(arguments));
     }
-    /*var modules = module_implements('menu');
+    // For each module that implements hook_menu, iterate over each of the
+    // menu links defined by the hook, then add each menu item to
+    // drupalgap.menu_links keyed by the path.
+    var modules = module_implements('menu');
+    var function_name;
+    var fn;
+    var menu_links;
     $.each(modules, function(index, module){
+        // Determine the hook function name, grab the function, and call it
+        // to retrieve the hook's menu links.
+        function_name = module + '_menu';
+        fn = window[function_name];
+        menu_links = fn();
+        // Iterate over each item.
+        $.each(menu_links, function(path, menu_item){
+            // Attach module name to item.
+            menu_item.module = module;
+            // Set a default type for the item if one isn't provided.
+            if (typeof menu_item.type === "undefined") {
+              menu_item.type = 'MENU_NORMAL_ITEM';
+            }
+            // Determine any parent, sibling, and child paths for the item.
+            drupalgap_menu_router_build_menu_item_relationships(path, menu_item);
+            // Attach item to menu links.
+            drupalgap.menu_links[path] = menu_item;
+        });
     });
-    console.log(JSON.stringify(modules));*/
-    var menu_links = module_invoke_all('menu');
-    // Now that we have the items from every hook_menu implementation, we need
-    // to iterate over each implementation, then pull out each menu item and
-    // add it to drupalgap.menu_links.
-    if (menu_links && menu_links.length != 0) {
-      $.each(menu_links, function(index, menu_link){
-          $.each(menu_link, function(path, menu_item){
-              drupalgap.menu_links[path] = menu_item;
-          });
-      });
-    }
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(drupalgap.menu_links));
     }
+    //alert('menu_router_build');
   }
   catch (error) {
     alert('menu_router_build - ' + error);
@@ -275,4 +301,49 @@ function drupalgap_menus_load() {
     alert('drupalgap_menus_load - ' + error);
   }
 }
+
+/**
+ * Given a path, and its corresponding menu item, this will determine any
+ * parent, sibling, and/or child menu item paths and set the references on each
+ * so they are all aware of eachother's paths.
+ */
+function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
+  try {
+    // Split up the path arguments.
+    var args = arg(null, path);
+    // Any parent?
+    if (args.length > 1) {
+      // Set the parent path.
+      var parent = args.splice(0, args.length-1).join('/');
+      menu_item.parent = parent;
+      // Make sure the parent exists.
+      if (drupalgap.menu_links[parent]) {
+        // Now tell the parent about this child. If the parent doesn't yet have
+        // any children, setup the children array on the parent.
+        if (typeof drupalgap.menu_links[parent].children === "undefined") {
+          drupalgap.menu_links[parent].children = [];
+        }
+        drupalgap.menu_links[parent].children.push(path);
+        // Now tell any siblings about this item, and tell this item about any
+        // siblings.
+        if (typeof menu_item.siblings === "undefined") {
+          menu_item.siblings = [];
+        }
+        $.each(drupalgap.menu_links[parent].children, function(index, sibling){
+            if (sibling != path && drupalgap.menu_links[sibling]) {
+              if (typeof drupalgap.menu_links[sibling].siblings === "undefined") {
+                drupalgap.menu_links[sibling].siblings = [];
+              }
+              drupalgap.menu_links[sibling].siblings.push(path);
+              menu_item.siblings.push(sibling);
+            }
+        });
+      }
+    }
+  }
+  catch (error) {
+    alert('drupalgap_menu_router_build_relationships - ' + error);
+  }
+}
+
 

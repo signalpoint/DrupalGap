@@ -43,6 +43,24 @@ function drupalgap_attributes(attributes) {
 }
 
 /**
+ * Returns the current page path as a string.
+ */
+function drupalgap_get_current_path() {
+  try {
+    var path = '';
+    var args = arg();
+    if (args) {
+      path = args.join('/');
+    }
+    return path;
+  }
+  catch (error) {
+    alert(' - ' + error);
+  }
+}
+
+
+/**
  * Given a path, this will return the id for the page's div element.
  * For example, a string path of 'foo/bar' would result in an id of 'foo_bar'.
  */
