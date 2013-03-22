@@ -14,26 +14,27 @@ function menu_execute_active_handler() {
     if (!path) { path = drupalgap.path; }
     
     // Get the router path.
-    var routher_path = drupalgap_get_menu_link_router_path(path);
+    var router_path = drupalgap_get_menu_link_router_path(path);
     
-    if (routher_path) {
+    if (router_path) {
       
       // Call the page call back for this router path and send along any arguments.
-      var function_name = drupalgap.menu_links[routher_path].page_callback;
+      var function_name = drupalgap.menu_links[router_path].page_callback;
       if (drupalgap_function_exists(function_name)) {
         
         // Grab the page callback function.
         var fn = window[function_name];
         
         // Are there any arguments to send to the page callback?
-        if (drupalgap.menu_links[routher_path].page_arguments) {
+        if (drupalgap.menu_links[router_path].page_arguments) {
           
           // For each page argument, if the argument is an integer, grab the
           // corresponding arg(#), otherwise just push the arg onto the page
           // arguments.
           var page_arguments = [];
           var args = arg(null, path);
-          $.each(drupalgap.menu_links[routher_path].page_arguments, function(index, object){
+          
+          $.each(drupalgap.menu_links[router_path].page_arguments, function(index, object){
               if (is_int(object) && args[object]) {
                 page_arguments.push(args[object]);
               }
@@ -52,8 +53,8 @@ function menu_execute_active_handler() {
       }
       else {
         // No page call back specified.
-        console.log(JSON.stringify(drupalgap.menu_links[routher_path]));
-        alert('menu_execute_active_handler - no page callback (' + routher_path + ')');
+        console.log(JSON.stringify(drupalgap.menu_links[router_path]));
+        alert('menu_execute_active_handler - no page callback (' + router_path + ')');
       }
     }
     else {
@@ -163,6 +164,10 @@ function menu_router_build() {
             if (typeof menu_item.type === "undefined") {
               menu_item.type = 'MENU_NORMAL_ITEM';
             }
+            // Set default router path if one wasn't specified.
+            if (typeof menu_item.router_path === "undefined") {
+              menu_item.router_path = drupalgap_get_menu_link_router_path(path);
+            }
             // Determine any parent, sibling, and child paths for the item.
             drupalgap_menu_router_build_menu_item_relationships(path, menu_item);
             // Attach item to menu links.
@@ -200,6 +205,10 @@ function menu_router_build() {
 /**
  * Given a menu link path, this determine and returns the router path as a string.
  */
+// TODO - Since the router path is set by menu_router_build, no one other than
+// menu_router_build should have to call this function. Go around and clean
+// up any calls to this function because the router path will be available in
+// drupalgap.menu_links[path].
 function drupalgap_get_menu_link_router_path(path) {
   try {
     if (drupalgap.settings.debug) {

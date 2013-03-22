@@ -206,10 +206,12 @@ function drupalgap_get_form(form_id) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_get_form(' + form_id + ')');
+      console.log(JSON.stringify(arguments));
     }
     var form = {};
     var function_name = form_id;
     if (eval('typeof ' + function_name) == 'function') {
+      alert('You need to pass along any additional arguments to the form callback!');
       form = eval(function_name + '();');
       module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
       drupalgap.form = form;

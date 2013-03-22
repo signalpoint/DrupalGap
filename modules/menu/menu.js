@@ -11,16 +11,19 @@ function menu_block_view(delta) {
     if (delta == 'primary_local_tasks') {
       // For the current page's router path, grab any local tasks and theme them
       // into the menu. Note, local tasks are located in a menu link item's
-      // children, if there are any.
+      // children, if there are any. Local tasks typically have argument wildcards
+      // in them, so we'll replace their wildcards with the current args.
       var router_path = drupalgap_get_menu_link_router_path(drupalgap_get_current_path());
       if (drupalgap.menu_links[router_path] && drupalgap.menu_links[router_path].children) {
         var items = [];
+        var link_path = '';
         $.each(drupalgap.menu_links[router_path].children, function(index, child){
             if (drupalgap.menu_links[child] &&
               (drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
                drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK')
             ) {
-              items.push(l(drupalgap.menu_links[child].title, child));
+              link_path = drupalgap_place_args_in_path(child);
+              items.push(l(drupalgap.menu_links[child].title, link_path));
             }
         });
         html = theme('item_list', {'items':items});

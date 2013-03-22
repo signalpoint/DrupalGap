@@ -15,6 +15,11 @@ function node_add_page() {
 
 function node_edit() {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('node_edit()');
+      console.log(JSON.stringify(arguments));
+    }
+    alert('node_edit');
     // Setup form defaults.
     /* TODO - Always having to declare the default submit and validate
                 function names is lame. Set it up to be automatic, then update
@@ -174,8 +179,8 @@ function node_menu() {
       },
       'node/%/edit':{
         'title':'Edit',
-        'page_callback':'node_page_edit',
-        'page_arguments':[1],
+        'page_callback':'drupalgap_get_form',
+        'page_arguments':['node_edit', 1],
         'weight':0,
         'type':'MENU_LOCAL_TASK',
       },

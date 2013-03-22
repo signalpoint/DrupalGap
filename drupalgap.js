@@ -465,6 +465,26 @@ function drupalgap_get_title() {
 }
 
 /**
+ * Given a router path, this will return an array containing the indexes of
+ * where the wildcards (%) are present in the router path. Returns false if
+ * there are no wildcards present.
+ */
+function drupalgap_get_wildcards_from_router_path(router_path) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_get_wildcards_from_router_path(' + router_path + ')');
+    }
+    var wildcards = false;
+    
+    return wildcards;
+  }
+  catch (error) {
+    alert('drupalgap_get_wildcards_from_router_path - ' + error);
+  }
+}
+
+
+/**
  * 
  * @param uri
  * @returns
@@ -616,6 +636,54 @@ function drupalgap_modules_load() {
 		module_invoke_all('install');
 	}
 }
+
+/**
+ * Given a router path (and optional path, defaults to current drupalgap.path if
+ * one isn't provided), this takes the path's arguments and replaces any
+ * wildcards (%) in the router path with the corresponding path argument(s). It
+ * then returns the assembled path. Returns false otherwise.
+ */
+function drupalgap_place_args_in_path(input_path) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_place_args_in_path(' + input_path + ')');
+    }
+    var assembled_path = false;
+    if (input_path) {
+      
+      // Determine path to use and break it up into its args.
+      var path = drupalgap.path;
+      if (arguments[1]) { path = arguments[1]; }
+      var path_args = arg(null, path);
+      
+      // Grab wild cards from router path then replace each wild card with
+      // the corresponding path arg.
+      var wildcards;
+      var input_path_args = arg(null, input_path);
+      if (input_path_args && input_path_args.length > 0) {
+        $.each(input_path_args, function(index, arg){
+            if (arg == '%') {
+              if (!wildcards) { wildcards = []; }
+              wildcards.push(index);
+            }
+        });
+        if (wildcards && wildcards.length > 0) {
+          $.each(wildcards, function(index, wildcard){
+              if (path_args[wildcard]) {
+                input_path_args[wildcard] = path_args[wildcard];
+              }
+          });
+          assembled_path = input_path_args.join('/');
+        }
+      }
+    }
+    return assembled_path;
+  }
+  catch (error) {
+    alert('drupalgap_place_args_in_path - ' + error);
+  }
+}
+
 
 /**
  * Implementation of drupal_set_title().
