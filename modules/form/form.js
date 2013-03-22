@@ -200,7 +200,8 @@ function drupalgap_form_state_values_assemble(form) {
 }
 
 /**
- * 
+ * Given a form id, this will load and return the form. Any additional arguments
+ * will be sent along to the form.
  */
 function drupalgap_get_form(form_id) {
   try {
@@ -208,13 +209,42 @@ function drupalgap_get_form(form_id) {
       console.log('drupalgap_get_form(' + form_id + ')');
       console.log(JSON.stringify(arguments));
     }
+    
+    // Let's build the form.
     var form = {};
+    
+    // The form's call back function will be equal to the form id.
     var function_name = form_id;
     if (eval('typeof ' + function_name) == 'function') {
-      alert('You need to pass along any additional arguments to the form callback!');
-      form = eval(function_name + '();');
+      
+      // Grab the function.
+      var fn = window[function_name];
+      
+      // Build the form arguments by iterating over each argument then adding
+      // each to to the form arguments, afterwards remove the argument at index
+      // zero because that is the form id.
+      var form_arguments = [];
+      $.each(arguments, function(index, argument){
+            form_arguments.push(argument);
+      });
+      form_arguments.splice(0,1);
+      
+      // If there were no arguments to pass along, call the function directly to
+      // retrieve the form, otherwise call the function and pass along any
+      // arguments to retrieve the form.
+      if (form_arguments.length == 0) { form = fn(); }
+      else {
+        form = fn.apply(null, Array.prototype.slice.call(form_arguments));
+      }
+      
+      // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
+      
+      // Set drupalgap.form equal to the form.
       drupalgap.form = form;
+    }
+    else {
+      alert('drupalgap_get_form - no callback function (' + function_name + ') available for form');
     }
     return drupalgap_form_render(form);
   }

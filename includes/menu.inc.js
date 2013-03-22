@@ -33,18 +33,13 @@ function menu_execute_active_handler() {
           // arguments.
           var page_arguments = [];
           var args = arg(null, path);
-          
           $.each(drupalgap.menu_links[router_path].page_arguments, function(index, object){
-              if (is_int(object) && args[object]) {
-                page_arguments.push(args[object]);
-              }
-              else {
-                page_arguments.push(object);
-              }
+              if (is_int(object) && args[object]) { page_arguments.push(args[object]); }
+              else { page_arguments.push(object); }
           });
+          
           // Call the page callback function with the page arguments.
           return fn.apply(null, Array.prototype.slice.call(page_arguments));
-          
         }
         else {
           // There are no arguments, just return the page callback result.
