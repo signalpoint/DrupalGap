@@ -13,10 +13,17 @@ function menu_execute_active_handler() {
     if (arguments[0]) { path = arguments[0]; }
     if (!path) { path = drupalgap.path; }
     
+    // TODO - Check to make sure the user has access to this DrupalGap menu path!
+    
     // Get the router path.
     var router_path = drupalgap_get_menu_link_router_path(path);
     
     if (router_path) {
+      /*console.log(path);
+      console.log(router_path);
+      console.log(JSON.stringify(drupalgap.menu_links));
+      console.log(JSON.stringify(drupalgap.menu_links[router_path]));
+      alert('menu_execute_active_handler');*/
       
       // Call the page call back for this router path and send along any arguments.
       var function_name = drupalgap.menu_links[router_path].page_callback;
@@ -30,13 +37,19 @@ function menu_execute_active_handler() {
           
           // For each page argument, if the argument is an integer, grab the
           // corresponding arg(#), otherwise just push the arg onto the page
-          // arguments.
+          // arguments. Then try to prepare any entity that may be present in
+          // the url so the entity is sent via the page arguments to the page
+          // callback, instead of just sending the integer.
           var page_arguments = [];
           var args = arg(null, path);
           $.each(drupalgap.menu_links[router_path].page_arguments, function(index, object){
               if (is_int(object) && args[object]) { page_arguments.push(args[object]); }
               else { page_arguments.push(object); }
           });
+          console.log(JSON.stringify(page_arguments));
+          console.log(JSON.stringify(args));
+          alert('menu_execute_active_handler - built page args');
+          drupalgap_prepare_argument_entities(page_arguments, args);
           
           // Call the page callback function with the page arguments.
           return fn.apply(null, Array.prototype.slice.call(page_arguments));
@@ -163,6 +176,8 @@ function menu_router_build() {
             if (typeof menu_item.router_path === "undefined") {
               menu_item.router_path = drupalgap_get_menu_link_router_path(path);
             }
+            // Make the path available as a property in the menu link.
+            menu_item.path = path;
             // Determine any parent, sibling, and child paths for the item.
             drupalgap_menu_router_build_menu_item_relationships(path, menu_item);
             // Attach item to menu links.

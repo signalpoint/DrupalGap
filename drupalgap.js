@@ -274,9 +274,7 @@ function drupalgap_deviceready() {
 		module_invoke_all('device_offine');
 		navigator.notification.alert(
 		    'No connection found!',
-		    function(){
-		      drupalgap_goto('offline');
-		    },
+		    function(){ drupalgap_goto('offline'); },
 		    'Offline',
 		    'OK'
 		);
@@ -555,6 +553,63 @@ function drupalgap_includes_load() {
 }
 
 /**
+ * Checks to see if the current user has access to the given path. Returns true
+ * if the user has access, false otherwise. You may optionally pass in a user
+ * account object as the second argument to check access on a specific user.
+ */
+function drupalgap_menu_access(path) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_menu_access(' + path + ')');
+    }
+    // User #1 is allowed to do anything, I mean anything.
+    if (drupalgap.user.uid == 1) { return true; }
+    // Everybody else will not have access unless we prove otherwise.
+    var access = false;
+    if (drupalgap.menu_links[path]) {
+      // Check to see if there is an access callback specified with the menu link.
+      if (typeof drupalgap.menu_links[path].access_callback === 'undefined') {
+        // No access call back specified, if there are any access arguments
+        // on the menu link, then it is assumed they are user permission machine
+        // names, so check that user account's role(s) for that permissions to
+        // grant access.
+        if (drupalgap.menu_links[path].access_arguments) {
+          // TODO - implement
+        }
+        else {
+          // There is no access callback and no access arguments specified with
+          // the menu link, so we'll assume everyone has access.
+          access = true;
+        }
+      }
+      else {
+        // There is an access call back specified, call it by passing along any
+        // arguments. Replace any entity argument ids with the entity object.
+        var function_name = drupalgap.menu_links[path].access_callback;
+        if (drupalgap_function_exists(function_name)) {
+          var fn = window[function_name];
+          var access_arguments = drupalgap.menu_links[path].access_arguments;
+          var args = arg();
+          drupalgap_prepare_argument_entities(access_arguments, args);
+          return fn.apply(null, Array.prototype.slice.call(access_arguments));
+          //return fn();
+        }
+        else {
+          alert('drupalgap_menu_access - access call back (' + function_name + ') does not exist');
+        }
+      }
+    }
+    else {
+      alert('drupalgap_menu_access - path (' + path + ') does not exist');
+    }
+    return access;
+  }
+  catch (error) {
+    alert('drupalgap_menu_access - ' + error);
+  }
+}
+
+/**
  * Given a module name, this will return the module inside drupalgap.modules.
  */
 function drupalgap_module_load(module_name) {
@@ -698,7 +753,50 @@ function drupalgap_place_args_in_path(input_path) {
     alert('drupalgap_place_args_in_path - ' + error);
   }
 }
-
+/**
+ *
+ */
+function drupalgap_prepare_argument_entities(page_arguments, args) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_prepare_argument_entities()');
+      console.log(JSON.stringify(arguments));
+    }
+    // If argument zero is an entity type, and argument one is an integer
+    // replace the page call back's integer argument index with the loaded entity.
+    if (args.length > 1 && is_int(parseInt(args[1])) && (
+        args[0] == 'comment' ||
+        args[0] == 'node' ||
+        args[0] == 'taxonomy_term' ||
+        args[0] == 'taxonomy_vocabulary' ||
+        args[0] == 'user'
+    )) {
+      var load_function = args[0] + '_load';
+      if (drupalgap_function_exists(load_function)) {
+        var entity_fn = window[load_function];
+        var entity = entity_fn(parseInt(args[1]));
+        if (!is_int(parseInt(args[page_arguments[0]])) && page_arguments[0] != args[0]) {
+          // We are on a page where the first page argument does not equal the
+          // first argument in args, so let's replace the integer page argument
+          // at its index with the loaded entity.
+          alert('replacing page arg 1 (' + page_arguments[1] + ') with entity');
+          page_arguments[1] = entity;
+        }
+        else {
+          alert('replacing page arg 0 (' + page_arguments[0] + ') with entity');
+          page_arguments[0] = entity;
+        }
+      }
+      else {
+        alert('drupalgap_prepare_argument_entities - load function not implemented! ' + load_function);
+      }
+    }
+    alert('drupalgap_prepare_argument_entities');
+  }
+  catch (error) {
+    alert('drupalgap_prepare_argument_entities - ' + error);
+  }
+}
 
 /**
  * Implementation of drupal_set_title().

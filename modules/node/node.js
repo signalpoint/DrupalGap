@@ -1,4 +1,27 @@
 /**
+ *
+ */
+function node_access(node) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_access()');
+      console.log(JSON.stringify(arguments));
+    }
+    if (node.uid == drupalgap.user.uid) {
+      alert('you are the author!');
+      return true;
+    }
+    else {
+      alert('you are not the author');
+      return false;
+    }
+  }
+  catch (error) {
+    alert('node_access - ' + error);
+  }
+}
+
+/**
  * Page call back for node/add.
  */
 function node_add_page() {
@@ -19,7 +42,6 @@ function node_edit() {
       console.log('node_edit()');
       console.log(JSON.stringify(arguments));
     }
-    alert('node_edit');
     // Setup form defaults.
     /* TODO - Always having to declare the default submit and validate
                 function names is lame. Set it up to be automatic, then update
@@ -183,26 +205,14 @@ function node_menu() {
         'page_arguments':['node_edit', 1],
         'weight':0,
         'type':'MENU_LOCAL_TASK',
+        'access_callback':'node_access',
+        'access_arguments':[1],
       },
     };
     return items;
   }
   catch (error) {
     alert('node_menu - ' + error);
-  }
-}
-
-/**
- * Access callback: Checks whether the user has permission to add a node.
- */
-function _node_add_access() {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('_node_add_access()');
-    }
-  }
-  catch (error) {
-    alert('_node_add_access - ' + error);
   }
 }
 
@@ -238,13 +248,12 @@ function node_page() {
 /**
  * Page callback for node/%.
  */
-function node_page_view(nid) {
+function node_page_view(node) {
   try {
     if (drupalgap.settings.debug) {
       console.log('node_page_view()');
       console.log(JSON.stringify(arguments));
     }
-    var node = node_load(nid);
     if (node) {
       var build = {
         'theme':'node',

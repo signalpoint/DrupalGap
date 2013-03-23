@@ -130,23 +130,6 @@ function theme_item_list(variables) {
   }
 }
 
-
-/**
- * Implementation of theme_link().
- */
-function theme_link(variables) {
-  try {
-    var html = '<a ' + 
-      'onclick="javascript:drupalgap_goto(\'' + variables.path + '\');" ' +
-      drupalgap_attributes(variables.attributes) +
-    '>' + variables.text + '</a>';
-    return html;
-  }
-  catch (error) {
-    alert('theme_link - ' + error);
-  }
-}
-
 /**
  * Identical to theme_item_list, except this turns the list into a jQM listview.
  */
@@ -169,6 +152,21 @@ function theme_jqm_item_list(variables) {
   }
 }
 
+/**
+ * Implementation of theme_link().
+ */
+function theme_link(variables) {
+  try {
+    var html = '<a ' + 
+      'onclick="javascript:drupalgap_goto(\'' + variables.path + '\');" ' +
+      drupalgap_attributes(variables.attributes) +
+    '>' + variables.text + '</a>';
+    return html;
+  }
+  catch (error) {
+    alert('theme_link - ' + error);
+  }
+}
 
 /**
  * Implementation of template_preprocess_page().
