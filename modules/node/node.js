@@ -8,11 +8,9 @@ function node_access(node) {
       console.log(JSON.stringify(arguments));
     }
     if (node.uid == drupalgap.user.uid) {
-      alert('you are the author!');
       return true;
     }
     else {
-      alert('you are not the author');
       return false;
     }
   }
@@ -36,7 +34,10 @@ function node_add_page() {
   }
 }
 
-function node_edit() {
+/**
+ * The node edit form.
+ */
+function node_edit(node) {
   try {
     if (drupalgap.settings.debug) {
       console.log('node_edit()');
@@ -53,31 +54,13 @@ function node_edit() {
       'elements':{},
       'buttons':{},
       'entity_type':'node',
-      'action':'node.html',
-    };
-		
-    // Add the node title field to the form.
-    form.elements.title = {
-      'type':'textfield',
-      'title':'Title',
-      'required':true,
-      'default_value':'',
-      'description':'',
     };
     
-    // Add the node type as a hidden field.
-    form.elements.type = {
-      'type':'hidden',
-      'required':true,
-      'default_value':drupalgap.node_edit.type,
-    };
+    // Add the entity's core fields to the form.
+    drupalgap_entity_add_core_fields_to_form('node', node.type, form, node);
     
     // Add the fields for this content type to the form.
-    drupalgap_field_info_instances_add_to_form(
-      'node',
-      drupalgap.node_edit.type,
-      form
-    );
+    drupalgap_field_info_instances_add_to_form('node', node.type, form, node);
     
     // Add submit to form.
     form.elements.submit = {
@@ -91,7 +74,7 @@ function node_edit() {
     };
     
     // Add delete button to form if we're editing a node.
-    if (drupalgap.node_edit.nid) {
+    if (node.nid) {
       form.buttons['delete'] = {
         'title':'Delete',
       };
@@ -103,29 +86,6 @@ function node_edit() {
     alert('node_edit - ' + error);
   }
   return null;
-}
-
-function node_edit_loaded() {
-  try {
-    // Are we editing a node?
-    if (drupalgap.node_edit.nid) {
-      // Retrieve the node and fill in the form values.
-      drupalgap.node_edit = drupalgap.services.node.retrieve.call({
-        'nid':drupalgap.node_edit.nid,
-        'success':function(node){
-          // Set the drupalgap node edit.
-          drupalgap.node_edit = node;
-          // Place the title in the form.
-          $('#' + drupalgap_form_get_element_id('title', drupalgap.form.id)).val(node.title);
-          // Load the entity into the form.
-          drupalgap_entity_load_into_form('node', drupalgap.node_edit.type, drupalgap.node_edit, drupalgap.form);    
-        },
-      });
-    }
-  }
-  catch (error) {
-    alert('node_edit_loaded - ' + error);
-  }
 }
 
 function node_edit_validate(form, form_state) {

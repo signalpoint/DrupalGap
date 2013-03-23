@@ -58,6 +58,8 @@ var drupalgap = {
   'blocks':[],
   'comment':{ }, /* <!-- comment --> */
   'comment_edit':{ }, /* <!-- comment_edit --> */
+  'entity':{},
+  'entity_edit':{},
   'entity_info':{ }, /* <!-- entity_info --> */
   'field_info_fields':{ }, /* <!-- field_info_fields --> */
   'field_info_instances':{ }, /* <!-- field_info_instances --> */
@@ -775,23 +777,22 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
       if (drupalgap_function_exists(load_function)) {
         var entity_fn = window[load_function];
         var entity = entity_fn(parseInt(args[1]));
-        if (!is_int(parseInt(args[page_arguments[0]])) && page_arguments[0] != args[0]) {
-          // We are on a page where the first page argument does not equal the
-          // first argument in args, so let's replace the integer page argument
-          // at its index with the loaded entity.
-          alert('replacing page arg 1 (' + page_arguments[1] + ') with entity');
-          page_arguments[1] = entity;
-        }
-        else {
-          alert('replacing page arg 0 (' + page_arguments[0] + ') with entity');
-          page_arguments[0] = entity;
-        }
+        // Now that we have the entity loaded, replace the first integer we find
+        // in the page arguments with the loaded entity.
+        $.each(page_arguments, function(index, page_argument){
+            if (is_int(parseInt(page_argument))) {
+              page_arguments[index] = entity;
+              // Attach the entity to drupalgap entity and entity_edit.
+              drupalgap.entity = entity;
+              drupalgap.entity_edit = entity;
+              return false;
+            }
+        });
       }
       else {
         alert('drupalgap_prepare_argument_entities - load function not implemented! ' + load_function);
       }
     }
-    alert('drupalgap_prepare_argument_entities');
   }
   catch (error) {
     alert('drupalgap_prepare_argument_entities - ' + error);

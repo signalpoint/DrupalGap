@@ -16,6 +16,13 @@ function drupalgap_form_get_element_id(name, form_id) {
 /**
  * Given a drupalgap form, this renders the form.
  */
+// TODO - we may possibly colliding html element ids!!! For example, I think the
+// node edit page gets an id of "node_edit" and possibly so does the node
+// edit form, which also may get an id of "node_edit". We may want to prefix
+// both the template page and form ids with prefixes, e.g. drupalgap_page_*
+// and drupalgap_form_*, but adding these prefixes could get annoying for
+// css selectors used in jQuery and CSS. What to do? But does the form even
+// get an element and an id, I don't think so, there is no <form>, right?!
 function drupalgap_form_render(form) {
   try {
     if (drupalgap.settings.debug) {
@@ -71,7 +78,7 @@ function drupalgap_form_render(form) {
             form_element += '<script type="text/javascript">';
             // Add device ready listener for PhoneGap camera.
             var event_listener = element_id_base +  '_imagefield_ready';
-            form_element += '$("#' + options.page_id + '").on("pageshow",function(){' +
+            form_element += '$("#' + drupalgap_get_page_id(drupalgap.path) + '").on("pageshow",function(){' +
               'document.addEventListener("deviceready", ' + event_listener + ', false);' +
             '});' + 
             'function ' + event_listener +  '() {' +
@@ -144,16 +151,12 @@ function drupalgap_form_render(form) {
           form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name, form.id) + '">' +  button.title + '</button>';
       });
     }
-    // Return the form html and attach javascript to call the form_loaded func.
+    // Attach javascript snippet to from to call the form_loaded function. Pass
+    // the drupalgap.entity_edit along to the load function.
     var form_html = '<div><div id="drupalgap_form_errors"></div>' +
       form_elements +
-    '</div>';/* + 
-    '<script type="text/javascript">' + 
-      'var function_name = form + "_loaded";' +
-      'if (eval("typeof " + function_name) == "function") {' +
-        'eval(function_name + "();");' +
-      '}' +
-    '</script>';*/
+    '</div>';
+    // Return the form html.
     return form_html;
   }
   catch (error) {

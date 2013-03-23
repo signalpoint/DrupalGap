@@ -46,9 +46,6 @@ function menu_execute_active_handler() {
               if (is_int(object) && args[object]) { page_arguments.push(args[object]); }
               else { page_arguments.push(object); }
           });
-          console.log(JSON.stringify(page_arguments));
-          console.log(JSON.stringify(args));
-          alert('menu_execute_active_handler - built page args');
           drupalgap_prepare_argument_entities(page_arguments, args);
           
           // Call the page callback function with the page arguments.

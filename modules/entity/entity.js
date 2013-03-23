@@ -1,7 +1,38 @@
+function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form, entity) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_entity_add_core_fields_to_form');
+    }
+    // Grab the core fields for this entity type and bundle.
+    var fields = drupalgap_entity_get_core_fields(entity_type);
+    // Iterate over each core field in the entity and add it to the form. If there is
+    // a value present in the entity, then set the field's form element default
+    // value equal to the core field value.
+    $.each(fields, function(name, field){
+      var default_value = field.default_value;
+      if (entity[name]) {
+        default_value = entity[name];
+      }
+      form.elements[name] = {
+        'type':field.type,
+        'title':field.title,
+        /*'title':field.label,*/
+        'required':field.required,
+        'default_value':default_value,
+        'description':field.description,
+      };
+    });
+  }
+  catch (error) {
+    alert('drupalgap_entity_add_core_fields_to_form - ' + error);
+  }
+}
+
 function drupalgap_entity_build_from_form_state() {
   try {
     var entity = {};
-    var entity_edit = drupalgap_entity_get_edit_object(drupalgap.form.entity_type);
+    //var entity_edit = drupalgap_entity_get_edit_object(drupalgap.form.entity_type);
+    var entity_edit = drupalgap.entity_edit;
     if (!entity_edit) {
       alert('drupalgap_entity_build_from_form_state - failed to get entity_edit - ' + drupalgap.form.entity_type);
       return null;
@@ -58,7 +89,7 @@ function drupalgap_entity_form_submit(entity) {
         break;
     }
     var primary_key = drupalgap_entity_get_primary_key(drupalgap.form.entity_type);
-    var entity_edit = drupalgap_entity_get_edit_object(drupalgap.form.entity_type);
+    var entity_edit = drupalgap.entity_edit;
     var editing = false;
     if (eval('entity_edit.' + primary_key)) {
       editing = true;
@@ -66,7 +97,7 @@ function drupalgap_entity_form_submit(entity) {
     var call_arguments = {};
     call_arguments[drupalgap.form.entity_type] = entity;
     call_arguments.success = function(result) {
-      drupalgap_changePage(drupalgap.form.action);
+      drupalgap_goto(drupalgap.form.entity_type + '/' + eval('entity_edit.' + primary_key));
     };
     if (!editing) {
       // Creating a new entity.   
@@ -84,12 +115,57 @@ function drupalgap_entity_form_submit(entity) {
 }
 
 /**
+ *
+ */
+function drupalgap_entity_get_core_fields(entity_type) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_entity_get_core_fields()');
+      console.log(JSON.stringify(arguments));
+    }
+    var fields = {};
+    switch (entity_type) {
+      case 'node':
+        fields.nid = {
+          'type':'hidden',
+          'required':true,
+          /*'default_value':node.type,*/
+          'default_value':'',
+        };
+        fields.title = {
+          'type':'textfield',
+          'title':'Title',
+          'required':true,
+          'default_value':'',
+          'description':'',
+        };
+        fields.type = {
+          'type':'hidden',
+          'required':true,
+          /*'default_value':node.type,*/
+          'default_value':'',
+        };
+        break;
+      default:
+        alert('drupalgap_entity_get_core_fields - entity type not supported yet (' + entity_type + ')');
+        break;
+    }
+    return fields;
+  }
+  catch (error) {
+    alert('drupalgap_entity_get_core_fields - ' + error);
+  }
+}
+
+/**
  * Given an entity type (node, comment, etc), this will return the current
  * entity edit json object inside the drupalgap var. 
  */
 function drupalgap_entity_get_edit_object(entity_type) {
   try {
-    var entity_edit = null;
+    alert('drupalgap_entity_get_edit_object -  this function is depcreated, it just returns drupalgap.entity_edit');
+    return drupalgap.entity_edit;
+    /*var entity_edit = null;
     switch (entity_type) {
       case 'comment':
         entity_edit = drupalgap.comment_edit;
@@ -110,7 +186,7 @@ function drupalgap_entity_get_edit_object(entity_type) {
         alert('drupalgap_entity_get_edit_object - unsported entity type - ' + drupalgap.form.entity_type);
         break;
     }
-    return entity_edit;
+    return entity_edit;*/
   }
   catch (error) {
     alert('drupalgap_entity_get_edit_object - ' + error);
@@ -168,45 +244,19 @@ function drupalgap_entity_get_primary_key(entity_type) {
   }
 }
 
+// DEPRECATED!
 function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_entity_load_into_form()');
       console.log(JSON.stringify(arguments));
     }
-    switch (entity_type) {
-      case 'node':
-      case 'comment':
-      case 'taxonomy_vocabulary':
-      case 'taxonomy_term':
-      case 'user':
-        break;
-      default:
-        alert('drupalgap_entity_load_into_form - unsupported entity type - ' + entity_type);
-        return;
-        break;
-    }
-    // Get the fields for this content type, iterate over each and add each
-    // of their values to their corresponding form element.
-    fields = drupalgap_field_info_instances(entity_type, bundle);
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_load_into_form - fields');
-      console.log(JSON.stringify(fields));
-    }
-    // Use the default language, unless the entity has one specified.
-    var language = drupalgap.settings.language;
-    if (entity.language) {
-      language = entity.language;
-    }
-    $.each(fields, function(name, field){
-        if (entity[name] &&
-            entity[name][language] &&
-            entity[name][language].length != 0
-        ) {
-          var css_id = drupalgap_form_get_element_id(name, drupalgap.form.id); 
-          $('#' + css_id).val(entity[name][language][0].value);
-        }
-    });
+    
+    // Since entities are now going to be loaded and passed directly to the form,
+    // the form's element values can be filled in before the form is rendered, hooray!
+    alert('drupalgap_entity_load_into_form - this function is deprecated!');
+    return false;
+    
   }
   catch (error) {
     alert('drupalgap_entity_load_into_form - ' + error);
