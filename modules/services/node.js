@@ -4,8 +4,10 @@ drupalgap.services.node = {
 			'type':'post',
 			'path':'node.json',
 			'success':function(node){
-				drupalgap.node_edit = {};
-				drupalgap.node = {'nid':node.nid};
+				//drupalgap.node_edit = {};
+				//drupalgap.node = {'nid':node.nid};
+				drupalgap.entity_edit = {};
+				drupalgap.entity = {'nid':node.nid};
 			},
 		},
 		'call':function(options){
@@ -29,7 +31,8 @@ drupalgap.services.node = {
 			'type':'get',
 			'path':'node/%nid.json',
 			'success':function(node){
-				drupalgap.node = node;
+				//drupalgap.node = node;
+				drupalgap.entity = node;
 				// TODO - a good opportunity for a hook to come in
 				// and modify node.content if developer wants.
 				node.content = '';
@@ -68,8 +71,10 @@ drupalgap.services.node = {
 			'type':'put',
 			'path':'node/%nid.json',
 			'success':function(node){
-				drupalgap.node_edit = {};
-				drupalgap.node = {'nid':node.nid};
+				//drupalgap.node_edit = {};
+				//drupalgap.node = {'nid':node.nid};
+				drupalgap.entity_edit = {};
+				drupalgap.entity = {'nid':node.nid};
 			},
 		},
 		'call':function(options){
@@ -95,8 +100,10 @@ drupalgap.services.node = {
 			'path':'node/%nid.json',
 			'success':function(result){
 				if (result[0]) {
-					drupalgap.node = {};
-					drupalgap.node_edit = {};	
+					//drupalgap.node = {};
+					//drupalgap.node_edit = {};
+					drupalgap.entity = {};
+					drupalgap.entity_edit = {};
 				}
 				else {
 					alert('node delete - error - ' + JSON.stringify(result));
@@ -142,6 +149,7 @@ function drupalgap_node_assemble_data(options) {
     }
     if (drupalgap.settings.debug) {
       console.log(data);
+      alert('drupalgap_node_assemble_data');
     }
     return data;
   }

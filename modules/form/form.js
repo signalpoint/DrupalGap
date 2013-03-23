@@ -272,7 +272,9 @@ function _drupalgap_form_validate(form) {
         if (name == 'submit') { return; }
         if (element.required) {
           if (form_state.values[name] == null || form_state.values[name] == '') {
-            drupalgap_form_set_error(name, 'The ' + element.title + ' field is required.');
+            var field_title = name;
+            if (element.title) { field_title = element.title; }
+            drupalgap_form_set_error(name, 'The ' + field_title + ' field is required.');
           }
         }
     });

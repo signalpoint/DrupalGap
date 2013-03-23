@@ -170,9 +170,12 @@ function menu_router_build() {
               menu_item.type = 'MENU_NORMAL_ITEM';
             }
             // Set default router path if one wasn't specified.
-            if (typeof menu_item.router_path === "undefined") {
+            // TODO - I don't think we want to be setting the router path here,
+            // because the drupalgap_get_menu_link_router_path needs to iterate
+            // over the menu links and this could end in an infinite loop.
+            /*if (typeof menu_item.router_path === "undefined") {
               menu_item.router_path = drupalgap_get_menu_link_router_path(path);
-            }
+            }*/
             // Make the path available as a property in the menu link.
             menu_item.path = path;
             // Determine any parent, sibling, and child paths for the item.
@@ -215,34 +218,82 @@ function menu_router_build() {
 // TODO - Since the router path is set by menu_router_build, no one other than
 // menu_router_build should have to call this function. Go around and clean
 // up any calls to this function because the router path will be available in
-// drupalgap.menu_links[path].
+// drupalgap.menu_links[path]. Actually this might not be true, we need this
+// function to determine router paths for paths like node/123 because those
+// will not be in the drupalgap.menu_links collection. Either way, this function
+// should probably be called minimally.
 function drupalgap_get_menu_link_router_path(path) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_get_menu_link_router_path(' + path + ')');
     }
+    
+    // Is this path defined in drupalgap.menu_links? If it is use it's router
+    // path if it is defined, otherwise just set its router path to its own path.
+    if (drupalgap.menu_links[path]) {
+      if (typeof drupalgap.menu_links[path].router_path === 'undefined') {
+        return path;
+      }
+      else {
+        return drupalgap.menu_links[path].router_path;
+      }
+    }
+    
     // Let's figure out where to route this menu item, and attach the
     // router to the item.
     var router_path = null;
     var args = arg(null, path);
+    
+    // If there is an integer in the path, replace it with the wildcard
+    // defined via hook_menu implementation.
     if (args) {
       var args_size = args.length;
       switch (args[0]) {
         case 'user':
-        case 'node':
-          // If there is an integer in the path, replace it with the wildcard
-          // defined via hook_menu implementation.
+        case 'node':     
           if (args_size > 1 && is_int(parseInt(args[1]))) {
-            // Replace the int with a wildcard for the router path.
             args[1] = '%';
             router_path = args.join('/');
           }
           break;
       }
     }
-    // If there isn't a router, we'll just route to the path itself.
+    
+    // If we haven't found a router path yet, try some other techniques to find
+    // it. If all else fails, just set the router path to the path itself.
+    if (!router_path) {
+      
+      //alert(args);
+      // Are there any paths in drupalgap.menu_links that would be good
+      // candidates as the router for this path? Let's start at the back of the
+      // argument list and start replacing each with a wildcard (%) and then
+      // see if there is a path in drupalgap.menu_links that can handle it?
+      if (args && args.length > 1) {
+        var temp_router_path;
+        for (var i = args.length-1; i != -1; i--) {
+          temp_router_path = ''
+          console.log('i = ' + args[i]);
+          for (var j = 0; j < i; j++) {
+            console.log('j = ' + args[j]);
+            temp_router_path += args[j] + '/';
+          }
+          temp_router_path += '%';
+          if (drupalgap.menu_links[temp_router_path]) {
+            // We found a router path, let's use it.
+            router_path = temp_router_path;
+            break;
+          }
+        }
+      }
+    }
+    
+    // If there isn't a router and we couldn't find one, we'll just route
+    // to the path itself.
     if (!router_path) { router_path = path; }
+    
+    // Finally, return the router path.
     if (drupalgap.settings.debug) {
+      console.log(args);
       console.log('router_path: ' + path + ' => ' + router_path);
     }
     return router_path;

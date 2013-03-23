@@ -97,7 +97,7 @@ function drupalgap_entity_form_submit(entity) {
     var call_arguments = {};
     call_arguments[drupalgap.form.entity_type] = entity;
     call_arguments.success = function(result) {
-      drupalgap_goto(drupalgap.form.entity_type + '/' + eval('entity_edit.' + primary_key));
+      drupalgap_goto(drupalgap.form.entity_type + '/' + eval('drupalgap.entity.' + primary_key));
     };
     if (!editing) {
       // Creating a new entity.   
@@ -128,7 +128,7 @@ function drupalgap_entity_get_core_fields(entity_type) {
       case 'node':
         fields.nid = {
           'type':'hidden',
-          'required':true,
+          'required':false,
           /*'default_value':node.type,*/
           'default_value':'',
         };

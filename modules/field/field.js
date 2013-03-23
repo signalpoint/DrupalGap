@@ -70,7 +70,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
     $.each(fields, function(name, field){
       var field_info = drupalgap_field_info_field(name);
       var default_value = field.default_value;
-      if (entity[name].length != 0 && entity[name][language][0].value) {
+      if (entity[name] && entity[name].length != 0 && entity[name][language][0].value) {
         default_value = entity[name][language][0].value;
       }
       form.elements[name] = {
