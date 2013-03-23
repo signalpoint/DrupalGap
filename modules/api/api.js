@@ -30,7 +30,7 @@ drupalgap.api = {
 		  if (!drupalgap.online) {
 			  navigator.notification.alert(
 			    'No network connection!',
-			    function(){ $.mobile.changePage(drupalgap.settings.offline); },
+			    function(){ drupalgap_goto('offline'); },
 			    'Offline',
 			    'OK'
 			  );

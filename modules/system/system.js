@@ -79,3 +79,86 @@ function system_block_view(delta) {
   }
 }
 
+/**
+ * Implements hook_menu().
+ */
+function system_menu() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('system_menu()');
+    }
+    var items = {
+      'offline':{
+        'title':'Offline',
+        'page_callback':'offline_page',
+      },
+    };
+    return items;
+  }
+  catch (error) {
+    alert('system_menu - ' + error);
+  }
+}
+
+/**
+ * Call back for the offline page.
+ */
+function offline_page() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('offline_page()');
+    }
+    var content = {
+      'message':{
+        'markup':'<h2>No Network Connection</h2>' + 
+          "<p>Oops! We couldn't connect to:</p>" + 
+          '<p>' + drupalgap.settings.site_path + '</p>',
+      },
+      'try_again':{
+        'theme':'button',
+        'text':'Try Again',
+        'attributes':{
+          'onclick':'javascript:offline_try_again();'
+        },
+      },
+      'footer':{
+        'markup':"<p>Check your device's network settings and try again.</p>",
+      },
+    };
+    return content;
+  }
+  catch (error) {
+    alert('offline_page - ' + error);
+  }
+}
+
+/**
+ * When the 'try again' button is clicked, check for a connection and if it has
+ * one make a call to system connect then go to the front page, otherwise just
+ * inform user the device is still offline.
+ */
+function offline_try_again() {
+  try {
+    var connection = drupalgap_check_connection();
+    if (drupalgap.online) {
+      drupalgap.services.drupalgap_system.connect.call({
+        'success':function(){
+          drupalgap_goto('');
+        }
+      });
+    }
+    else {
+      navigator.notification.alert(
+          'Sorry, no connection found! (' + connection + ')',
+          function(){ },
+          'Offline',
+          'OK'
+      );
+      return false;
+    }
+  }
+  catch (error) {
+    alert('offline_try_again - ' + error);
+  }	
+};
+

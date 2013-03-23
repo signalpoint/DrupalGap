@@ -11,6 +11,9 @@ function easystreet3_info() {
     // easystreet3.regions.header and the easystreet3.regions.header.name would
     // be equal to 'header'. The name property should be set by DrupalGap upon
     // invocation of this hook so implementers don't have to set it.
+    // TODO - Regions (other system regions, e.g. 'content') should have
+    // visibility rules similar to the drupalgap.settings.blocks, that way
+    // entire regions can be displayed/hidden based on the current path, neat-o.
     return {
       'name':'easystreet3',
       'regions':[

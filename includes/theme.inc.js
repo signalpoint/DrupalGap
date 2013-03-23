@@ -41,8 +41,17 @@ function theme(hook, variables) {
       console.log('theme()');
       console.log(JSON.stringify(arguments));
     }
+    // If there is HTML markup present, just return it as is. Otherwise, run
+    // the theme hook and send along the variables.
+    if (variables.markup) {
+      return variables.markup;
+    }
     var theme_function = 'theme_' + hook;
     if (eval('typeof ' + theme_function) == 'function') {
+      // If no attributes are coming in, setup an empty JSON object for them.
+      if (typeof variables.attributes === "undefined") {
+        variables.attributes = {};
+      }
       if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
         console.log(theme_function + '()');
         console.log(JSON.stringify(variables));
@@ -64,9 +73,23 @@ function theme(hook, variables) {
 /**
  *
  */
+function theme_button(variables) {
+  try {
+    variables.attributes['data-role'] = 'button';
+    var html = '<a ' + drupalgap_attributes(variables.attributes) + '>' + variables.text + '</a>';
+    return html;
+  }
+  catch (error) {
+    alert('theme_button_link - ' + error);
+  }
+}
+
+/**
+ *
+ */
 function theme_button_link(variables) {
   try {
-    variables.attributes = {'data-role':'button'};
+    variables.attributes['data-role'] = 'button';
     return theme_link(variables);
   }
   catch (error) {
@@ -130,19 +153,19 @@ function theme_link(variables) {
 function theme_jqm_item_list(variables) {
   try {
     if (variables.attributes) {
-      if (variables.attributes.data-role && variables.attributes.data-role != 'listview') {
+      if (variables.attributes['data-role'] && variables.attributes['data-role'] != 'listview') {
       }
       else {
-        variables.attributes = {'data-role':'listview'}
+        variables.attributes['data-role'] = 'listview';
       }
     }
     else {
-      variables.attributes = {'data-role':'listview'}
+      variables.attributes['data-role'] = 'listview';
     }
     return theme_item_list(variables);
   }
   catch (error) {
-    alert(' - ' + error);
+    alert('theme_jqm_item_list - ' + error);
   }
 }
 
@@ -157,12 +180,9 @@ function template_preprocess_page(variables) {
       console.log(JSON.stringify(variables));
     }
     // Set up default attribute's for the page's div container.
-    // TODO - this probably isn't needed... at least the dashboard id, that for
-    // sure isn't needed.
-    variables.attributes = [
-      {'date-role':'page'},
-      {'id':'drupalgap_dashboard'}
-    ];
+    if (typeof variables.attributes === 'undefined') { variables.attributes = {}; }
+    // TODO - is this needed?
+    variables.attributes['date-role'] = 'page';
     
     // Call all hook_preprocess_page functions.
     module_invoke_all('preprocess_page');

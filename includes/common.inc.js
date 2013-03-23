@@ -55,7 +55,7 @@ function drupalgap_get_current_path() {
     return path;
   }
   catch (error) {
-    alert(' - ' + error);
+    alert('drupalgap_get_current_path - ' + error);
   }
 }
 

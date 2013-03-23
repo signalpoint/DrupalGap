@@ -144,7 +144,7 @@ function node_load(nid) {
     return node;
   }
   catch (error) {
-    alert(' - ' + error);
+    alert('node_load - ' + error);
   }
 }
 

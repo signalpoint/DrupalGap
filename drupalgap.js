@@ -39,9 +39,16 @@ var drupalgap = {
       {'name':'module'},
       {'name':'theme'},
   ],
+  /**
+   * User Default Values
+   *   Do not change these values unless you are feeling adventurous.
+   */
   'user':{
-	  'uid':0, /* do not change this user id value */
-	  'name':'Anonymous', /* TODO - this value should come from the drupal site */
+    'uid':0,
+    'name':'Anonymous', /* TODO - this value should come from the drupal site */
+    'roles':{
+      '1':'anonymous user'
+    },
   },
   'online':false,
   'destination':'',
@@ -80,26 +87,30 @@ var drupalgap = {
  * this will load the javascript file so it will be available in scope.
  */
 function drupalgap_add_js() {
-	var data;
-	if (arguments[0]) { data = arguments[0]; }
-	jQuery.ajax({
-    async:false,
-    type:'GET',
-    url:data,
-    data:null,
-    success:function(){
-      if (drupalgap.settings.debug) {
-        // Print the js path to the console.
-        console.log(data);
+  try {
+    var data;
+    if (arguments[0]) { data = arguments[0]; }
+    jQuery.ajax({
+      async:false,
+      type:'GET',
+      url:data,
+      data:null,
+      success:function(){
+        if (drupalgap.settings.debug) {
+          // Print the js path to the console.
+          console.log(data);
+        }
+      },
+      dataType:'script',
+      error: function(xhr, textStatus, errorThrown) {
+        console.log(JSON.stringify(xhr));
+        alert('drupalgap_add_js - error - (' + data + ' : ' + textStatus + ') ' + errorThrown);
       }
-    },
-    dataType:'script',
-    error: function(xhr, textStatus, errorThrown) {
-      console.log('drupalgap_add_js - error');
-      console.log(JSON.stringify(xhr));
-      alert('drupalgap_add_js - error - (' + data + ' : ' + textStatus + ') ' + errorThrown);
-    }
-	});
+    });
+  }
+  catch (error) {
+    alert('drupalgap_add_js - ' + error);
+  }
 }
 
 /**
@@ -256,27 +267,30 @@ function drupalgap_deviceready() {
 		);
 		return false;
 	}
-	// Check device connection.
+	// Check device connection. If the device is offline, warn the user and then
+	// go to the offline page.
 	drupalgap_check_connection();
 	if (!drupalgap.online) {
 		module_invoke_all('device_offine');
-		// Device is off-line.
 		navigator.notification.alert(
 		    'No connection found!',
-		    function(){ $.mobile.changePage(drupalgap.settings.offline); },
+		    function(){
+		      drupalgap_goto('offline');
+		    },
 		    'Offline',
 		    'OK'
 		);
 		return false;
 	}
 	else {
-		// Implementations of hook_device_online().
+	  
+	  // Device is online, let's call implementations of hook_device_online().
 		module_invoke_all('device_online');
-		
+
 		if (module_invoke_continue) {
 			
 			// Device is online, let's make a call to the
-			// DrupalGap System Connect Service Resource.
+			// DrupalGap System Connect Service Resource
 			drupalgap.services.drupalgap_system.connect.call({
 				'success':function(result){
 				  // Call all hook_device_connected implementations then go to
@@ -288,14 +302,15 @@ function drupalgap_deviceready() {
 					if (errorThrown == 'Not Found') {
 						navigator.notification.alert(
 						    'Review DrupalGap Troubleshooting Topics!',
-						    function(){},
+						    function(){
+						      // TODO - Offer some helpful tips if the user gets stuck here!
+						    },
 						    'Unable to Connect to Drupal',
 						    'OK'
 						);
 					}
 				}
 			});
-			
 		}
 	}
 }
@@ -570,7 +585,7 @@ function drupalgap_module_load(module_name) {
     return loaded_module;
   }
   catch (error) {
-    alert(' - ' + error);
+    alert('drupalgap_module_load - ' + error);
   }
 }
 
