@@ -16,45 +16,54 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
       form.elements[name] = {
         'type':field.type,
         'title':field.title,
-        /*'title':field.label,*/
         'required':field.required,
         'default_value':default_value,
         'description':field.description,
       };
     });
+    console.log(JSON.stringify(form));
+    alert('drupalgap_entity_add_core_fields_to_form');
   }
   catch (error) {
     alert('drupalgap_entity_add_core_fields_to_form - ' + error);
   }
 }
 
+/**
+ *
+ */
 function drupalgap_entity_build_from_form_state() {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_entity_build_from_form_state');
+    }
     var entity = {};
     //var entity_edit = drupalgap_entity_get_edit_object(drupalgap.form.entity_type);
-    var entity_edit = drupalgap.entity_edit;
+    /*var entity_edit = drupalgap.entity_edit;
     if (!entity_edit) {
       alert('drupalgap_entity_build_from_form_state - failed to get entity_edit - ' + drupalgap.form.entity_type);
       return null;
     }
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(entity_edit));
-    }
+    }*/
     // Use the default language, unless the entity has one specified.
-    var language = drupalgap.settings.language;
+    /*var language = drupalgap.settings.language;
     if (entity_edit.language) {
       language = entity_edit.language;
-    }
+    }*/
     $.each(drupalgap.form_state.values, function(name, value){
       field_info = drupalgap_field_info_field(name);
       if (field_info) {
         eval('entity.' + name + ' = {};');
-        entity[name][language] = [{"value":value}];
+        entity[name][drupalgap.settings.language] = [{"value":value}];
       }
       else {
         entity[name] = value;  
       }
     });
+    console.log(JSON.stringify(entity));
+    alert('drupalgap_entity_build_from_form_state');
     return entity;
   }
   catch (error) {
@@ -62,8 +71,16 @@ function drupalgap_entity_build_from_form_state() {
   }
 }
 
+/**
+ *
+ */
 function drupalgap_entity_form_submit(entity) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_entity_form_submit');
+      console.log(JSON.stringify(entity));
+    }
+    alert('drupalgap_entity_form_submit');
     var service_resource = null;
     var service_entity = null;
     switch (drupalgap.form.entity_type) {
@@ -89,23 +106,26 @@ function drupalgap_entity_form_submit(entity) {
         break;
     }
     var primary_key = drupalgap_entity_get_primary_key(drupalgap.form.entity_type);
-    var entity_edit = drupalgap.entity_edit;
+    //var entity_edit = drupalgap.entity_edit;
     var editing = false;
-    if (eval('entity_edit.' + primary_key)) {
+    //if (eval('entity_edit.' + primary_key)) {
+    if (entity[primary_key] && entity[primary_key] != '') {
       editing = true;
     }
     var call_arguments = {};
     call_arguments[drupalgap.form.entity_type] = entity;
     call_arguments.success = function(result) {
-      drupalgap_goto(drupalgap.form.entity_type + '/' + eval('drupalgap.entity.' + primary_key));
+      drupalgap_goto(drupalgap.form.entity_type + '/' + eval('result.' + primary_key));
     };
+    console.log(JSON.stringify(call_arguments));
+    alert('drupalgap_entity_form_submit - editing = ' + editing);
     if (!editing) {
       // Creating a new entity.   
       service_resource.create.call(call_arguments);
     }
     else {
       // Update an existing entity.
-      eval('entity.' + primary_key + ' = entity_edit.' + primary_key + ';');
+      //eval('entity.' + primary_key + ' = entity_edit.' + primary_key + ';');
       service_resource.update.call(call_arguments);
     }
   }
@@ -129,7 +149,6 @@ function drupalgap_entity_get_core_fields(entity_type) {
         fields.nid = {
           'type':'hidden',
           'required':false,
-          /*'default_value':node.type,*/
           'default_value':'',
         };
         fields.title = {
@@ -142,7 +161,6 @@ function drupalgap_entity_get_core_fields(entity_type) {
         fields.type = {
           'type':'hidden',
           'required':true,
-          /*'default_value':node.type,*/
           'default_value':'',
         };
         break;
@@ -165,28 +183,6 @@ function drupalgap_entity_get_edit_object(entity_type) {
   try {
     alert('drupalgap_entity_get_edit_object -  this function is depcreated, it just returns drupalgap.entity_edit');
     return drupalgap.entity_edit;
-    /*var entity_edit = null;
-    switch (entity_type) {
-      case 'comment':
-        entity_edit = drupalgap.comment_edit;
-        break;
-      case 'node':
-        entity_edit = drupalgap.node_edit;
-        break;
-      case 'taxonomy_term':
-        entity_edit = drupalgap.taxonomy_term_edit;
-        break;
-      case 'taxonomy_vocabulary':
-        entity_edit = drupalgap.taxonomy_vocabulary_edit;
-        break;
-      case 'user':
-        entity_edit = drupalgap.account_edit;
-        break;
-      default:
-        alert('drupalgap_entity_get_edit_object - unsported entity type - ' + drupalgap.form.entity_type);
-        break;
-    }
-    return entity_edit;*/
   }
   catch (error) {
     alert('drupalgap_entity_get_edit_object - ' + error);

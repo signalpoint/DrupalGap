@@ -11,7 +11,6 @@ drupalgap.settings = {
   /* Site Information */
   'title':'DrupalGap',
   'front':'dashboard',
-  'offline':'offline.html',
   
   /* Language */
   'language':'und',

@@ -52,32 +52,32 @@ var drupalgap = {
   },
   'online':false,
   'destination':'',
-  'account':{ }, /* <!-- account --> */
-  'account_edit':{ }, /* <!-- account_edit --> */
+  /*'account':{ },
+  'account_edit':{ },*/
   'api':{}, // <!-- api -->
   'blocks':[],
-  'comment':{ }, /* <!-- comment --> */
-  'comment_edit':{ }, /* <!-- comment_edit --> */
-  'entity':{},
-  'entity_edit':{},
+  /*'comment':{ },
+  'comment_edit':{ },*/
+  /*'entity':{},
+  'entity_edit':{},*/
   'entity_info':{ }, /* <!-- entity_info --> */
   'field_info_fields':{ }, /* <!-- field_info_fields --> */
   'field_info_instances':{ }, /* <!-- field_info_instances --> */
-  'form':{ }, /* <!-- form --> */
-  'form_state':{ }, /* <!-- form_state --> */
+  /*'form':{ },
+  'form_state':{ },*/
   'form_errors':{ }, /* <!-- form_errors --> */
-  'node':{ }, /* <!-- node --> */
-  'node_edit':{ }, /* <!-- node_edit --> */
+  /*'node':{ },
+  'node_edit':{ },*/
   'menus':{},
   'menu_links':{}, /* <!-- menu_links --> */
   'menu_router':{}, /* <!-- menu_router --> */
   'page':{'variables':{}}, /* <!-- page --> */
   'path':'', /* The current menu path. */
   'services':{}, // <!-- services -->
-  'taxonomy_term':{ }, /* <!-- taxonomy_term -> */
-  'taxonomy_term_edit':{ }, /* <!-- taxonomy_term_edit -> */
-  'taxonomy_vocabulary':{ }, /* <!-- taxonomy_vocabulary -> */
-  'taxonomy_vocabulary_edit':{ }, /* <!-- taxonomy_vocabulary_edit -> */
+  /*'taxonomy_term':{ },
+  'taxonomy_term_edit':{ },
+  'taxonomy_vocabulary':{ },
+  'taxonomy_vocabulary_edit':{ },*/
   'title':'',
   'themes':[],
   'theme_registry':{},
@@ -783,8 +783,11 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
             if (is_int(parseInt(page_argument))) {
               page_arguments[index] = entity;
               // Attach the entity to drupalgap entity and entity_edit.
-              drupalgap.entity = entity;
-              drupalgap.entity_edit = entity;
+              // NO NO NO, this is bad, stop using this idea, you just need to
+              // pass the entiaty around and have caching in place so folks
+              // can load entities with too much worry.
+              //drupalgap.entity = entity;
+              //drupalgap.entity_edit = entity;
               return false;
             }
         });

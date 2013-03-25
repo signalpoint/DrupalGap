@@ -4,10 +4,9 @@ drupalgap.services.node = {
 			'type':'post',
 			'path':'node.json',
 			'success':function(node){
+			  // TODO - good opportunity for a hook here...
 				//drupalgap.node_edit = {};
 				//drupalgap.node = {'nid':node.nid};
-				drupalgap.entity_edit = {};
-				drupalgap.entity = {'nid':node.nid};
 			},
 		},
 		'call':function(options){
@@ -32,7 +31,6 @@ drupalgap.services.node = {
 			'path':'node/%nid.json',
 			'success':function(node){
 				//drupalgap.node = node;
-				drupalgap.entity = node;
 				// TODO - a good opportunity for a hook to come in
 				// and modify node.content if developer wants.
 				node.content = '';
@@ -73,8 +71,6 @@ drupalgap.services.node = {
 			'success':function(node){
 				//drupalgap.node_edit = {};
 				//drupalgap.node = {'nid':node.nid};
-				drupalgap.entity_edit = {};
-				drupalgap.entity = {'nid':node.nid};
 			},
 		},
 		'call':function(options){
@@ -102,8 +98,6 @@ drupalgap.services.node = {
 				if (result[0]) {
 					//drupalgap.node = {};
 					//drupalgap.node_edit = {};
-					drupalgap.entity = {};
-					drupalgap.entity_edit = {};
 				}
 				else {
 					alert('node delete - error - ' + JSON.stringify(result));
