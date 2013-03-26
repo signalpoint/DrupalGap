@@ -11,7 +11,7 @@ var drupalgap = {
 	     {'name':'menu'},
 	     {'name':'node'},
 	     {'name':'services',
-	       'includes':[
+	       /*'includes':[
 		       {'name':'comment'},
 		       {'name':'drupalgap_content'},
 		       {'name':'drupalgap_system'},
@@ -24,7 +24,7 @@ var drupalgap = {
 		       {'name':'taxonomy_term'},
 		       {'name':'taxonomy_vocabulary'},
 		       {'name':'user'},
-	       ]
+	       ]*/
 	     },
 	     {'name':'system'},
 	     {'name':'taxonomy'},
