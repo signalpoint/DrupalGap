@@ -262,7 +262,7 @@ function drupalgap_deviceready() {
 	// Verify site path is set.
 	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
 		navigator.notification.alert(
-		    'No site path to Drupal set in the DrupalGap/app/settings.js file!',
+		    'No site path to Drupal set in the app/settings.js file!',
 		    function(){},
 		    'Error',
 		    'OK'
@@ -519,7 +519,7 @@ function drupalgap_image_path(uri) {
 }
 
 /**
- * Loads the js files in DrupalGap/includes specified by drupalgap.includes.
+ * Loads the js files in includes specified by drupalgap.includes.
  */
 function drupalgap_includes_load() {
   try {
@@ -529,7 +529,7 @@ function drupalgap_includes_load() {
     }
     if (drupalgap.includes != null && drupalgap.includes.length != 0) {
       $.each(drupalgap.includes, function(index, include){
-          var include_path =  'DrupalGap/includes/' + include.name + '.inc.js';
+          var include_path =  'includes/' + include.name + '.inc.js';
           jQuery.ajax({
               async:false,
               type:'GET',
@@ -538,7 +538,7 @@ function drupalgap_includes_load() {
               success:function(){
                 if (drupalgap.settings.debug) {
                   // Print the include path to the console.
-                  console.log(include_path.replace('DrupalGap/', ''));
+                  console.log(include_path);
                 }
               },
               dataType:'script',
@@ -652,9 +652,9 @@ function drupalgap_module_load(module_name) {
 function drupalgap_modules_get_bundle_directory(bundle) {
   try {
     dir = '';
-    if (bundle == 'core') { dir = 'DrupalGap/modules'; }
-    else if (bundle == 'contrib') { dir = 'DrupalGap/app/modules'; }
-    else if (bundle == 'custom') { dir = 'DrupalGap/app/modules/custom'; }
+    if (bundle == 'core') { dir = 'modules'; }
+    else if (bundle == 'contrib') { dir = 'app/modules'; }
+    else if (bundle == 'custom') { dir = 'app/modules/custom'; }
     return dir;
   }
   catch (error) {
@@ -693,7 +693,7 @@ function drupalgap_modules_load() {
 					    success:function(){
 					    	if (drupalgap.settings.debug) {
 					    		// Print the module path to the console.
-					    		console.log(modules_paths_object.replace('DrupalGap/', ''));
+					    		console.log(modules_paths_object);
 					    	}
 					    },
 					    dataType:'script',
@@ -818,11 +818,11 @@ function drupalgap_set_title(title) {
 }
 
 /**
- * Loads the settings specified in DrupalGap/app/settings.js into the app.
+ * Loads the settings specified in app/settings.js into the app.
  */
 function drupalgap_settings_load() {
   try {
-    settings_file_path = 'DrupalGap/app/settings.js';
+    settings_file_path = 'app/settings.js';
     jQuery.ajax({
       async:false,
       type:'GET',
@@ -837,7 +837,7 @@ function drupalgap_settings_load() {
       dataType:'script',
       error: function(xhr, textStatus, errorThrown) {
         navigator.notification.alert(
-          'Failed to load the settings.js file in the DrupalGap/app folder!',
+          'Failed to load the settings.js file in the app folder!',
           function(){},
           'Error',
           'OK'
@@ -864,7 +864,7 @@ function drupalgap_theme_load() {
     }
     else {
       var theme_name = drupalgap.settings.theme;
-      drupalgap_add_js('DrupalGap/themes/' + theme_name + '/' + theme_name + '.js');
+      drupalgap_add_js('themes/' + theme_name + '/' + theme_name + '.js');
       var template_info_function = theme_name + '_info';
       if (drupalgap_function_exists(template_info_function)) {
         var fn = window[template_info_function];

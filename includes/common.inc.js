@@ -97,10 +97,10 @@ function drupalgap_get_path(type, name) {
             $.each(modules, function(index, module){
                 if (module.name == name) {
                   found_module = true;
-                  path = 'DrupalGap';
-                  if (bundle == 'core') { path += '/modules'; }
-                  else if (bundle == 'contrib') { path += '/app/modules'; }
-                  else if (bundle == 'custom') { path += '/app/modules/custom'; }
+                  path = '';
+                  if (bundle == 'core') { path += 'modules'; }
+                  else if (bundle == 'contrib') { path += 'app/modules'; }
+                  else if (bundle == 'custom') { path += 'app/modules/custom'; }
                   else {
                     alert('drupalgap_get_path - unknown module bundle (' + bundle + ')');
                     return false; 
@@ -169,7 +169,7 @@ function drupalgap_goto(path) {
     // page to the <body> of the document, then change to the page. Remember,
     // the rendering of the page does not take place here, that is covered by
     // the pagebeforechange event which happens after we change the page here.
-    var html = drupalgap_file_get_contents('DrupalGap/themes/easystreet3/page.tpl.html');
+    var html = drupalgap_file_get_contents('themes/easystreet3/page.tpl.html');
     if (html) {
       drupalgap_add_page_to_dom(page_id, html);
       $.mobile.changePage('index.html#' + page_id);

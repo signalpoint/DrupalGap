@@ -25,7 +25,7 @@ function path_to_theme() {
     if (drupalgap.settings.debug) {
       console.log('path_to_theme()');
     }
-    return 'DrupalGap/themes/easystreet3';
+    return 'themes/easystreet3';
   }
   catch (error) {
     alert('path_to_theme - ' + error);
