@@ -63,7 +63,7 @@ DrupalGap API
      http://docs.phonegap.com/en/2.3.0/guide_getting-started_index.md.html
 
 2. Download the files needed for the latest version of jQuery & jQueryMobile,
-   and save each file to PhoneGap's assets/www directory:
+   and save each file to PhoneGap's www directory:
 
      http://code.jquery.com/jquery-1.8.3.min.js
      http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js
@@ -73,18 +73,18 @@ DrupalGap API
 
      http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.zip
 
-   Extract the images directory from it into PhoneGap's assets/www directory so
+   Extract the images directory from it into PhoneGap's www directory so
    this directory exists:
    
-     assets/www/images
+     www/images
    
    Note, this is different than the img directory that is created by PhoneGap's
    getting started guide.
 
-4. Download DrupalGap and extract its contents to PhoneGap's assets/www
+4. Download DrupalGap and extract its contents to PhoneGap's www
    directory so drupalgap.js is located here:
 
-       assets/www/DrupalGap/drupalgap.js
+       www/DrupalGap/drupalgap.js
 
      DrupalGap 7 Download
 
@@ -97,19 +97,19 @@ DrupalGap API
 5. Open DrupalGap/app/default.settings.js and save a copy of it as settings.js
    so the copy of it lives here: 
    
-     DrupalGap/app/settings.js
+     www/DrupalGap/app/settings.js
    
 6. Specify your Drupal site path (with NO trailing slash) in settings.js,
    for example:
 
      'site_path':'http://www.drupalgap.org'
    
-7. Copy the contents of DrupalGap/pages and DrupalGap/scripts to the assets/www
+7. Copy the contents of DrupalGap/pages and DrupalGap/scripts to the www
    folder so these files (and many more) exist:
    
-   assets/www/index.html
-   assets/www/dashboard.html
-   assets/www/dashboard.js
+   www/index.html
+   www/dashboard.html
+   www/dashboard.js
 
 8. Run your new mobile application!
 
