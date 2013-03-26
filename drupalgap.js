@@ -148,8 +148,7 @@ function drupalgap_changePage(path) {
         $.mobile.changePage(destination);
         break;
       case 'iOS':
-        destination = window.fsroot + path;
-        $.mobile.changePage(destination);
+        $.mobile.changePage(path);
         break;
       // The 'Generic' platform is for Ripple. http://emulate.phonegap.com/
       case 'Generic':
