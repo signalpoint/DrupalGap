@@ -67,6 +67,8 @@ drupalgap.settings = {
     'main_menu':{
       'links':[
         {'title':'Content','path':'node','options':{'attributes':{'data-icon':'star'}}},
+        {'title':'Taxonomy','path':'taxonomy/vocabularies','options':{'attributes':{'data-icon':'grid'}}},
+        {'title':'Users','path':'user-listing','options':{'attributes':{'data-icon':'info'}}},
       ],
     },
     'user_menu_anonymous':{

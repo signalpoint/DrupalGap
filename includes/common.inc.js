@@ -246,6 +246,8 @@ function drupalgap_render_page(page) {
               if (drupalgap.settings.debug) {
                 console.log(JSON.stringify(placeholders));
               }
+              // TODO - each placeholder should have its own container div and
+              // unique id
               $.each(placeholders, function(index, placeholder){
                   var html = '';
                   if (eval('output.' + placeholder)) {
@@ -289,8 +291,8 @@ function drupalgap_render_page(page) {
       }
       
       // Iterate over any remaining variables and theme them.
-      // TODO - we need to figure out what the 'remaining variables' are, right
-      // now this just tries to print out each one, no bueno.
+      // TODO - each remaining variables should have its own container div and
+      // unique id, similar to the placeholder div containers mentioned above.
       $.each(output, function(element, variables){
           if ($.inArray(element, render_variables) == -1) {
             content += theme(variables.theme, variables);  

@@ -13,13 +13,39 @@ function user_listing() {
         'theme':'jqm_item_list',
         'title':'Users',
         'items':[],
-        'attributes':{'id':'user_listing_list'},
+        'attributes':{'id':'user_listing_items'},
       }
     };
     return content;
   }
   catch (error) {
     alert('user_listing - ' + error);
+  }
+}
+
+/**
+ * The pageshow callback handler for the user listing page.
+ */
+function user_listing_pageshow() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_listing_pageshow()');
+    }
+    // Grab some users and display them.
+		drupalgap.views_datasource.call({
+      'path':'drupalgap/views_datasource/drupalgap_users',
+      'success':function(data) {
+        // Extract the users into items, then drop them in the list.
+        var items = [];
+        $.each(data.users, function(index, object){
+            items.push(l(object.user.name, 'user/' + object.user.uid));
+        });
+        drupalgap_item_list_populate("#user_listing_items", items);
+      },
+    });
+  }
+  catch (error) {
+    alert('user_listing_pageshow - ' + error);
   }
 }
 
@@ -41,56 +67,6 @@ function user_load(uid) {
   }
   catch (error) {
     alert('user_load - ' + error);
-  }
-}
-
-/**
- * Logs the app user out of the website and app.
- */
-function user_logout() {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('user_logout()');
-      console.log(JSON.stringify(arguments));
-    }
-    drupalgap.services.user.logout.call({
-      'success':function(data){
-        drupalgap.services.system.connect.call({
-          'success':function(result){
-            drupalgap_goto(drupalgap.settings.front);
-          },
-        });
-      }
-    });
-  }
-  catch (error) {
-    alert('user_logout - ' + error);
-  }
-}
-
-/**
- * The pageshow callback handler for the user listing page.
- */
-function user_listing_pageshow() {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('user_listing_pageshow()');
-    }
-    // Grab some users and display them.
-		drupalgap.views_datasource.call({
-      'path':'drupalgap/views_datasource/drupalgap_users',
-      'success':function(data) {
-        // Extract the users into items, then drop them in the list.
-        var items = [];
-        $.each(data.users, function(index, object){
-            items.push(l(object.user.name, 'user/' + object.user.uid));
-        });
-        drupalgap_item_list_populate("#user_listing_list", items);
-      },
-    });
-  }
-  catch (error) {
-    alert('user_listing_pageshow - ' + error);
   }
 }
 
@@ -138,6 +114,30 @@ function user_login_submit(form, form_state) {
   catch (error) {
     alert('user_login_submit - ' + error);
   } 
+}
+
+/**
+ * Logs the app user out of the website and app.
+ */
+function user_logout() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_logout()');
+      console.log(JSON.stringify(arguments));
+    }
+    drupalgap.services.user.logout.call({
+      'success':function(data){
+        drupalgap.services.system.connect.call({
+          'success':function(result){
+            drupalgap_goto(drupalgap.settings.front);
+          },
+        });
+      }
+    });
+  }
+  catch (error) {
+    alert('user_logout - ' + error);
+  }
 }
 
 /**

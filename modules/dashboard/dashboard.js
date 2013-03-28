@@ -29,13 +29,16 @@ function dashboard_page() {
       console.log('dashboard_page()');
       console.log(JSON.stringify(arguments));
     }
-    var content = {
+    // TODO - Show site logo and the most recent published node that is promoted
+    // to front page.
+    return '';
+    /*var content = {
       'users':{
         'theme':'button_link',
         'path':'user-listing',
         'text':'View Users',
       },
-    };
+    };*/
     return content;
   }
   catch (error) {
