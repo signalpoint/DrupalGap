@@ -61,6 +61,9 @@ function menu_execute_active_handler() {
         // If there are any jQM event callback functions attached to the menu link
         // for this page, for each event, if the callback function exists, set
         // the event up to be fired with inline JS on the page.
+        // TODO - we should probably pass the same page arguments that are sent
+        // to this path's menu link page_callback function to these jQM page
+        // event callback functions!
         var jqm_page_events = drupalgap_jqm_page_events();
         for (var i = 0; i < jqm_page_events.length; i++) {
           if (drupalgap.menu_links[router_path][jqm_page_events[i]]) {

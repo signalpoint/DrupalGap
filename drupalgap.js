@@ -816,19 +816,38 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
       console.log('drupalgap_prepare_argument_entities()');
       console.log(JSON.stringify(arguments));
     }
-    // If argument zero is an entity type, and argument one is an integer
-    // replace the page call back's integer argument index with the loaded entity.
-    if (args.length > 1 && is_int(parseInt(args[1])) && (
-        args[0] == 'comment' ||
-        args[0] == 'node' ||
-        args[0] == 'taxonomy_term' ||
-        args[0] == 'taxonomy_vocabulary' ||
-        args[0] == 'user'
-    )) {
-      var load_function = args[0] + '_load';
+    // If argument zero is an entity type (or base type, e.g. taxonomy), and we
+    // have at least one integer argument, replace the page call back's integer
+    // argument index with the loaded entity.
+    if (args.length > 1 &&
+          (
+            args[0] == 'comment' ||
+            args[0] == 'node' ||
+            (args[0] == 'taxonomy' && (args[1] == 'vocabulary' || args[1] == 'term')) ||
+            args[0] == 'user'
+          )
+    ) {
+      var found_int_arg = false;
+      var int_arg_index = null;
+      for (var i = 0; i < args.length; i++) {
+        if (is_int(parseInt(args[i]))) {
+          int_arg_index = i; // Save the arg index so we can replace it later.
+          found_int_arg = true;
+          break;
+        }
+      }
+      if (!found_int_arg) { return; }
+      // Determine the naming convention for the entity load function.
+      var load_function_prefix = args[0]; // default
+      if (args[0] == 'taxonomy') {
+        if (args[1] == 'vocabulary' || args[1] == 'term') {
+          load_function_prefix = args[0] + '_' + args[1];
+        }
+      }
+      var load_function = load_function_prefix + '_load'; 
       if (drupalgap_function_exists(load_function)) {
         var entity_fn = window[load_function];
-        var entity = entity_fn(parseInt(args[1]));
+        var entity = entity_fn(parseInt(args[int_arg_index]));
         // Now that we have the entity loaded, replace the first integer we find
         // in the page arguments with the loaded entity.
         $.each(page_arguments, function(index, page_argument){
@@ -837,7 +856,7 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
               // Attach the entity to drupalgap entity and entity_edit.
               // NO NO NO, this is bad, stop using this idea, you just need to
               // pass the entiaty around and have caching in place so folks
-              // can load entities with too much worry.
+              // can load entities with out too much worry.
               //drupalgap.entity = entity;
               //drupalgap.entity_edit = entity;
               return false;

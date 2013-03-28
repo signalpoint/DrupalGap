@@ -12,7 +12,13 @@ function taxonomy_menu() {
         'page_callback':'taxonomy_vocabularies',
         'pageshow':'taxonomy_vocabularies_pageshow',
       },
-      'admin/structure/taxonomy':{
+      'taxonomy/vocabulary/%':{
+        'title':'Vocabulary',
+        'page_callback':'taxonomy_vocabulary',
+        'page_arguments':[2],
+        'pageshow':'taxonomy_vocabulary_pageshow',
+      },
+      /*'admin/structure/taxonomy':{
         'title':'Taxonomy',
         'page_callback':'drupalgap_get_form',
         'page_arguments':['taxonomy_overview_vocabularies'],
@@ -26,7 +32,7 @@ function taxonomy_menu() {
       'admin/structure/taxonomy/add':{
         'title':'Add vocabulary',
         'page_callback':'taxonomy_form_vocabulary',
-      },
+      },*/
     };
     return items;
   }
@@ -253,4 +259,83 @@ function taxonomy_vocabularies_pageshow() {
     alert('taxonomy_vocabularies_pageshow - ' + error);
   }
 }
+
+/**
+ * Page callback for taxonomy/vocabulary/%
+ */
+function taxonomy_vocabulary(vocabulary) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('taxonomy_vocabulary()');
+    }
+    var content = {
+      'name':{
+        'markup':'<h2>' + vocabulary.name + '</h2>',
+      },
+      'description':{
+        'markup':'<p>' + vocabulary.description + '</p>',
+      },
+      'taxonomy_term_listing':{
+        'theme':'jqm_item_list',
+        'title':'Terms',
+        'items':[],
+        'attributes':{'id':'taxonomy_term_listing_items'},
+      }
+    };
+    return content;
+  }
+  catch (error) {
+    alert('taxonomy_vocabulary - ' + error);
+  }
+}
+
+/**
+ * jQM pageshow callback for taxonomy/vocabulary/%
+ */
+function taxonomy_vocabulary_pageshow() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('taxonomy_vocabulary_pageshow()');
+    }
+    drupalgap.services.drupalgap_taxonomy.get_terms.call({
+        'vid':arg(2),
+        'success':function(data){
+          // Extract the terms into items, then drop them in the list.
+          var items = [];
+          $.each(data, function(index, term){
+              items.push(l(term.name, 'taxonomy/term/' + term.tid));
+          });
+          drupalgap_item_list_populate("#taxonomy_term_listing_items", items);
+        }
+    });
+  }
+  catch (error) {
+    alert('taxonomy_vocabulary_pageshow - ' + error);
+  }
+}
+
+/**
+ * Return the vocabulary object matching a vocabulary ID, otherwise it returns
+ * false.
+ */
+function taxonomy_vocabulary_load(vid) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('taxonomy_vocabulary_load(' + vid + ')');
+    }
+    var vocabulary = false;
+    drupalgap.services.taxonomy_vocabulary.retrieve.call({
+      'vid':vid,
+      'async':false,
+      'success':function(data){
+        vocabulary = data;
+      },
+    });
+    return vocabulary;
+  }
+  catch (error) {
+    alert('taxonomy_vocabulary_load - ' + error);
+  }
+}
+
 
