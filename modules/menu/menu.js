@@ -1,6 +1,12 @@
 /**
  * Implements hook_block_view
  */
+// NOTE: When rendering a jQM data-role="navbar" you can't place an
+// empty list (<ul></ul>) in it, this will cause an error:
+// https://github.com/jquery/jquery-mobile/issues/5141
+// So we must check to make sure we have any items before rendering the
+// menu since our theme_item_list implementation returns empty lists
+// for jQM pageshow async list item data retrieval and display.
 function menu_block_view(delta) {
   try {
     if (drupalgap.settings.debug) {
@@ -32,7 +38,7 @@ function menu_block_view(delta) {
         });
         // If there was only one local task menu item, and it is the default
         // local task, don't render the menu, otherwise render the menu as an
-        // item list.
+        // item list as long as there are items to render.
         if (menu_items.length == 1 && menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK') {
           html = '';          
         }
@@ -42,7 +48,9 @@ function menu_block_view(delta) {
               //items.push(l(drupalgap.menu_links[child].title, link_path));
               items.push(l(item.title, drupalgap_place_args_in_path(item.path)));
           });
-          html = theme('item_list', {'items':items});
+          if (items.length > 0) {
+            html = theme('item_list', {'items':items});
+          }
         }
       }
     }
@@ -59,7 +67,7 @@ function menu_block_view(delta) {
             if (!link.options) { link.options = null; }
             items.push(l(link.title, link.path, link.options));
         });
-        if (items.length != 0) {
+        if (items.length > 0) {
           html = theme('item_list', {'items':items});
         }
       }

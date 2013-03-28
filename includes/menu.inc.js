@@ -67,7 +67,7 @@ function menu_execute_active_handler() {
             var jqm_page_event = jqm_page_events[i];
             var jqm_page_event_callback = drupalgap.menu_links[router_path][jqm_page_event];
             if (drupalgap_function_exists(jqm_page_event_callback)) {
-              var script_code = '<script type="text/javascript">$("#' + page_id + '").on("' + jqm_page_event + ' ", ' + jqm_page_event_callback + ');</script>';
+              var script_code = '<script type="text/javascript">$("#' + page_id + '").on("' + jqm_page_event + '", ' + jqm_page_event_callback + ');</script>';
               content[jqm_page_event] = {'markup':script_code};
             }
             else {

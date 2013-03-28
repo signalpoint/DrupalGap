@@ -78,9 +78,9 @@ function node_edit(node) {
       console.log(JSON.stringify(arguments));
     }
     // Setup form defaults.
-    /* TODO - Always having to declare the default submit and validate
-                function names is lame. Set it up to be automatic, then update
-                all existing forms to inherit the automatic goodness. */
+    // TODO - Always having to declare the default submit and validate
+    //          function names is lame. Set it up to be automatic, then update
+    //          all existing forms to inherit the automatic goodness.
     var form = {
       'id':'node_edit',
       'submit':['node_edit_form_submit'],
@@ -185,6 +185,7 @@ function node_menu() {
       'node':{
         'title':'Content',
         'page_callback':'node_page',
+        'pageshow':'node_page_pageshow',
       },
       'node/add':{
         'title':'Add content',
@@ -231,37 +232,51 @@ function node_page() {
       console.log('node_page()');
       console.log(JSON.stringify(arguments));
     }
-    var content = {};
-    
-    content['create_content'] = {
-      'theme':'button_link',
-      'path':'node/add',
-      'text':'Create Content',
-    };
-    
-    // Grab some recent content and display it.
-    drupalgap.views_datasource.call({
-      'path':'drupalgap/views_datasource/drupalgap_content',
-      'async':false,
-      'success':function(data) {
-        var items = [];
-        $.each(data.nodes, function(index, object){
-            items.push(l(object.node.title, 'node/' + object.node.nid));
-        });
-        if (items.length > 0) {
-          content['content_list'] = {'theme':'jqm_item_list','items':items};
-        }
-        else {
-          content['content_list'] = {'markup':'<p>No content found!</p>'};
-        }
+    var content = {
+      'create_content':{
+        'theme':'button_link',
+        'path':'node/add',
+        'text':'Create Content',
       },
-    });
+      'node_listing':{
+        'theme':'jqm_item_list',
+        'title':'Content List',
+        'items':[],
+        'attributes':{'id':'node_listing_list'},
+      }
+    };
     
     // Return the content.
     return content;
   }
   catch (error) {
     alert('node_page - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function node_page_pageshow() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_page_pageshow()');
+    }
+    // Grab some recent content and display it.
+    drupalgap.views_datasource.call({
+      'path':'drupalgap/views_datasource/drupalgap_content',
+      'success':function(data) {
+        // Extract the users into items, then drop them in the list.
+        var items = [];
+        $.each(data.nodes, function(index, object){
+            items.push(l(object.node.title, 'node/' + object.node.nid));
+        });
+        drupalgap_item_list_populate("#node_listing_list", items);
+      },
+    });
+  }
+  catch (error) {
+    alert('node_page_pageshow - ' + error);
   }
 }
 

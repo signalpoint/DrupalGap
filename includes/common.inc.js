@@ -154,7 +154,7 @@ function drupalgap_goto(path) {
     // Check to see if the page already exists in the DOM.
     var pages = $("body div[data-role$='page']");
     var page_in_dom = false;
-    if (pages) {
+    if (pages && pages.length > 0) {
       $.each(pages, function(index, page){
           console.log(index);
           if (($(page).attr('id')) == page_id) {
@@ -177,6 +177,11 @@ function drupalgap_goto(path) {
     var html = drupalgap_file_get_contents('themes/easystreet3/page.tpl.html');
     if (html) {
       drupalgap_add_page_to_dom(page_id, html);
+      // NOTE: This call appears to be synchronous, so we could do stuff after
+      // this here... hook anyone?
+      if (drupalgap.settings.debug) {
+        console.log('drupalgap_goto - changePage => ' + page_id);
+      }
       $.mobile.changePage('index.html#' + page_id);
     }
     else {

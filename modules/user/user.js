@@ -1,4 +1,29 @@
 /**
+ *
+ */
+function user_listing() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('user_listing()');
+      console.log(JSON.stringify(arguments));
+    }
+    // Place an empty item list that will hold a list of users.
+    var content = {
+      'user_listing':{
+        'theme':'jqm_item_list',
+        'title':'Users',
+        'items':[],
+        'attributes':{'id':'user_listing_list'},
+      }
+    };
+    return content;
+  }
+  catch (error) {
+    alert('user_listing - ' + error);
+  }
+}
+
+/**
  * Loads a user object.
  */
 function user_load(uid) {
@@ -40,31 +65,6 @@ function user_logout() {
   }
   catch (error) {
     alert('user_logout - ' + error);
-  }
-}
-
-/**
- *
- */
-function user_listing() {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('user_listing()');
-      console.log(JSON.stringify(arguments));
-    }
-    // Place an empty item list that will hold a list of users.
-    var content = {
-      'user_listing':{
-        'theme':'jqm_item_list',
-        'title':'Users',
-        'items':[],
-        'attributes':{'id':'user_listing_list'},
-      }
-    };
-    return content;
-  }
-  catch (error) {
-    alert('user_listing - ' + error);
   }
 }
 
@@ -120,9 +120,16 @@ function user_login() {
 
 function user_login_submit(form, form_state) {
   try {
+    // WARNING: only print this out for debugging, you don't want your password
+    // floating around in a JS console!
+    /*if (drupalgap.settings.debug) {
+      console.log('user_login_submit()');
+      console.log(JSON.stringify(arguments));
+    }*/
+    //alert('user_login_submit');
     drupalgap.services.drupalgap_user.login.call({
-      'name':drupalgap.form_state.values.name,
-      'pass':drupalgap.form_state.values.pass,
+      'name':form_state.values.name,
+      'pass':form_state.values.pass,
       'success':function(result){
         drupalgap_goto(drupalgap.settings.front);
       },

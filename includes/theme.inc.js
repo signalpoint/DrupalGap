@@ -11,6 +11,11 @@ $(document).bind("pagebeforechange", function(e, data) {
         template_preprocess_page(drupalgap.page.variables);
         template_process_page(drupalgap.page.variables);
       }
+      if (drupalgap.settings.debug) {
+        // TODO - Is this log message getting hit twice on one page change?
+        // If so, that's no bueno!
+        console.log('pagebeforechange() - processed page');
+      }
     }
     catch (error) {
       alert('pagebeforechange - ' + error);
@@ -185,7 +190,7 @@ function template_preprocess_page(variables) {
     // Set up default attribute's for the page's div container.
     if (typeof variables.attributes === 'undefined') { variables.attributes = {}; }
     // TODO - is this needed?
-    variables.attributes['date-role'] = 'page';
+    variables.attributes['data-role'] = 'page';
     
     // Call all hook_preprocess_page functions.
     module_invoke_all('preprocess_page');
@@ -220,11 +225,14 @@ function template_process_page(variables) {
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap.path);
     $.each(drupalgap.theme.regions, function(index, region){
+        if (drupalgap.settings.debug) {
+          console.log('template_process_page - rendering region (' + region.name + ') for page id (' + page_id + ')');
+        }
         var page_html = $("#" + page_id).html();
         eval('page_html = page_html.replace(/:' + region.name + '/g, drupalgap_render_region(region));');
         $("#" + page_id).html(page_html);
         if (drupalgap.settings.debug) {
-          console.log(region.name);
+          console.log('template_process_page - rendered region (' + region.name + ') for page id (' + page_id + ')');
         }
     });
   }

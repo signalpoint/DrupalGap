@@ -202,7 +202,7 @@ function drupalgap_form_state_values_assemble(form) {
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(form_state));
     }
-    alert('drupalgap_form_state_values_assemble');
+    //alert('drupalgap_form_state_values_assemble');
     return form_state;
   }
   catch (error) {
@@ -246,7 +246,7 @@ function drupalgap_form_load(form_id) {
       console.log(JSON.stringify(arguments));
     }
     
-    alert('drupalgap_form_load');
+    //alert('drupalgap_form_load');
     
     var form = false;
     
@@ -344,7 +344,7 @@ $('.drupalgap_form_submit').live('click', function(){
     _drupalgap_form_validate(form, form_state);
     
     // Call the form's validate function.
-    validate_function = form.id + '_validate';
+    var validate_function = form.id + '_validate';
     if (eval('typeof ' + validate_function) == 'function') {
       if (drupalgap.settings.debug) {
         console.log(validate_function);
@@ -379,7 +379,7 @@ $('.drupalgap_form_submit').live('click', function(){
     _drupalgap_form_submit();
     
     // Call the form's submit function.
-    submit_function = drupalgap.form.id + '_submit';
+    var submit_function = form.id + '_submit';
     if (eval('typeof ' + submit_function) == 'function') {
       if (drupalgap.settings.debug) {
         console.log(submit_function);
