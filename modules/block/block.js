@@ -31,13 +31,11 @@ function drupalgap_block_load(delta) {
           }
       });
     }
-    if (drupalgap.settings.debug) {
-      if (block) {
-        console.log(JSON.stringify(block));
-      }
-      else {
-        console.log('ERROR: block load failed: ' + delta);
-      }
+    if (block == null) {
+      alert('drupalgap_block_load - block load failed: ' + delta);
+    }
+    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
+      console.log(JSON.stringify(block));
     }
     return block;
   }

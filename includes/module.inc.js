@@ -58,6 +58,7 @@ function module_invoke(module_name, hook) {
       }
     }
     if (drupalgap.settings.debug) {
+      console.log('module_invoke(' + module_name + ', ' + hook + ') - results');
       console.log(JSON.stringify(module_invocation_results));
     }
     return module_invocation_results;

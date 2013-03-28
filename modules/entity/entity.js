@@ -143,6 +143,9 @@ function drupalgap_entity_get_core_fields(entity_type) {
       console.log('drupalgap_entity_get_core_fields()');
       console.log(JSON.stringify(arguments));
     }
+    // TODO - was this function what we were tyring to accomplish with the early
+    // entity_info hook imitations?
+    // TODO - And why is this function not populated dynamically via Drupal? WTF?!
     var fields = {};
     switch (entity_type) {
       case 'node':
@@ -168,6 +171,20 @@ function drupalgap_entity_get_core_fields(entity_type) {
           'required':true,
           'default_value':'und', // TODO - not sure about this, need to learn
         };                       // more about international sites.
+        break;
+      case 'user':
+        fields.uid = {
+          'type':'hidden',
+          'required':false,
+          'default_value':'',
+        };
+        fields.name = {
+          'type':'textfield',
+          'title':'Username',
+          'required':true,
+          'default_value':'',
+          'description':'',
+        };
         break;
       default:
         alert('drupalgap_entity_get_core_fields - entity type not supported yet (' + entity_type + ')');

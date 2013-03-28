@@ -584,9 +584,6 @@ function drupalgap_item_list_populate(list_css_selector, items) {
  */
 function drupalgap_jqm_page_events() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_jqm_page_events()');
-    }
     return [
       'pagebeforechange',
       'pagebeforecreate',

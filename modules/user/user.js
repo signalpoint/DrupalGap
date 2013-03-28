@@ -357,38 +357,38 @@ function user_theme() {
 /**
  * Generate an array for rendering the given user.
  */
-function user_view() {
+function user_view(account) {
   try {
     if (drupalgap.settings.debug) {
       console.log('user_view()');
       console.log(JSON.stringify(arguments));
     }
     // Determine the incoming arguments, and set defaults if necessary.
-    var uid = null;
     var view_mode = 'full';
     var langcode = null;
-    if (arguments[0]) { uid = arguments[0]; }
     if (arguments[1]) { view_mode = arguments[1]; }
     if (arguments[2]) { langcode = arguments[2]; }
     if (!langcode) { langcode = drupalgap.settings.language; }
-    if (uid) {
-      // Load the user's account.
-      var account = user_load(uid);
-      if (account) {
-        var build = {
-          'theme':'user_profile',
-          'account':account,
-          'view_mode':view_mode,
-          'language':langcode,
+    if (account) {
+      var build = {
+        'theme':'user_profile',
+        'account':account,
+        'view_mode':view_mode,
+        'language':langcode,
+        'name':{'markup':account.name},
+        'created':{'markup':(new Date(parseInt(account.created)*1000)).toDateString()},
+      };
+      // Any picture?
+      if (account.picture && account.picture.fid) {
+        build.picture = {
+          'theme':'image',
+          'path':account.picture.uri,
         };
-        return build;
       }
-      else {
-        alert('user_view - failed to load user (' + uid + ')');
-      }
+      return build;
     }
     else {
-      return 'user_view - user id not provided';
+      alert('user_view - account was empty!');
     }
   }
   catch (error) {

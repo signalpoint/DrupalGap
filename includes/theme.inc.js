@@ -67,7 +67,7 @@ function theme(hook, variables) {
       return content;
     }
     else {
-      return '<div>' + theme_function + '() does not exist</div>';
+      console.log('WARNING: ' + theme_function + '() does not exist');
     }
   }
   catch (error) {

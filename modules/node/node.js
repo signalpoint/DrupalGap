@@ -292,8 +292,8 @@ function node_page_view(node) {
     if (node) {
       var build = {
         'theme':'node',
-        'node':node,
-        'title':{'markup':node.title},
+        'node':node, // TODO - is this line of code doing anything?
+        'title':{'markup':node.title}, // TODO - this is a core field and should probably by fetched from entity.js
         'content':{'markup':node.content},
       };
       return build;

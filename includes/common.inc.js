@@ -243,6 +243,9 @@ function drupalgap_render_page(page) {
             if (placeholders) {
               
               // Replace each placeholder with html.
+              if (drupalgap.settings.debug) {
+                console.log(JSON.stringify(placeholders));
+              }
               $.each(placeholders, function(index, placeholder){
                   var html = '';
                   if (eval('output.' + placeholder)) {
@@ -256,18 +259,25 @@ function drupalgap_render_page(page) {
                     else if (eval('output.' + placeholder + '.theme')) {
                       html = theme(eval('output.' + placeholder + '.theme'), element);
                     }
+                    // Now remove the variable from the output.
+                    delete output[placeholder];
                   }
-                  // Now replace the placeholder with the html.
+                  // Now replace the placeholder with the html, even if it was empty.
                   eval('template_file_html = template_file_html.replace(/{:' + placeholder + ':}/g,html);');
               });
             }
             else {
-              alert('drupalgap_render_page - no placeholders found (' + template_file_html + ')');
+              // There were no place holders found, do nothing, ok.
+              if (drupalgap.settings.debug) {
+                console.log('drupalgap_render_page - no placeholders found (' + template_file_html + ')');
+              }
             }
             
             // Finally add the rendered template file to the content.
             content += template_file_html;
-            
+            if (drupalgap.settings.debug) {
+              console.log(content);
+            }
           }
           else {
             alert('drupalgap_render_page - failed to get file contents (' + template_file_path + ')');
@@ -279,6 +289,8 @@ function drupalgap_render_page(page) {
       }
       
       // Iterate over any remaining variables and theme them.
+      // TODO - we need to figure out what the 'remaining variables' are, right
+      // now this just tries to print out each one, no bueno.
       $.each(output, function(element, variables){
           if ($.inArray(element, render_variables) == -1) {
             content += theme(variables.theme, variables);  
