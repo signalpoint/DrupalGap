@@ -11,7 +11,7 @@ var drupalgap = {
 	     {'name':'menu'},
 	     {'name':'node'},
 	     {'name':'services',
-	       /*'includes':[
+	       'includes':[
 		       {'name':'comment'},
 		       {'name':'drupalgap_content'},
 		       {'name':'drupalgap_system'},
@@ -24,7 +24,7 @@ var drupalgap = {
 		       {'name':'taxonomy_term'},
 		       {'name':'taxonomy_vocabulary'},
 		       {'name':'user'},
-	       ]*/
+	       ]
 	     },
 	     {'name':'system'},
 	     {'name':'taxonomy'},
@@ -65,7 +65,8 @@ var drupalgap = {
   'field_info_instances':{ }, /* <!-- field_info_instances --> */
   /*'form':{ },
   'form_state':{ },*/
-  'form_errors':{ }, /* <!-- form_errors --> */
+  'form_errors':{ },
+  'form_states':[],
   /*'node':{ },
   'node_edit':{ },*/
   'menus':{},
@@ -551,6 +552,60 @@ function drupalgap_includes_load() {
   }
   catch (error) {
     alert('drupalgap_includes_load - ' + error);
+  }
+}
+
+/**
+ * Given an html list element id and an array of items, this will populate
+ * the clear the list, populate it with the items, destroy the list and then
+ * refresh the list with the new items.
+ */
+function drupalgap_item_list_populate(list_css_selector, items) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('()');
+      console.log(JSON.stringify(arguments));
+    }
+    // TODO - this could use some validation and alerts for improper input.
+    $(list_css_selector).html("");
+    for (var i = 0; i < items.length; i ++) {
+      $(list_css_selector).append($("<li></li>",{"html":items[i]}));
+    }
+    $(list_css_selector).listview("destroy").listview();
+  }
+  catch (error) {
+    alert('drupalgap_item_list_populate - ' + error);
+  }
+}
+
+/**
+ * Returns array of jQM Page event names.
+ *   http://api.jquerymobile.com/category/events/
+ */
+function drupalgap_jqm_page_events() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_jqm_page_events()');
+    }
+    return [
+      'pagebeforechange',
+      'pagebeforecreate',
+      'pagebeforehide',
+      'pagebeforeload',
+      'pagebeforeshow',
+      'pagechange',
+      'pagechangefailed',
+      'pagecreate',
+      'pagehide',
+      'pageinit',
+      'pageload',
+      'pageloadfailed',
+      'pageremove',
+      'pageshow'
+    ];
+  }
+  catch (error) {
+    alert('drupalgap_jqm_page_events - ' + error);
   }
 }
 

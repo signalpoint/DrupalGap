@@ -32,8 +32,8 @@ function dashboard_page() {
     var content = {
       'users':{
         'theme':'button_link',
-        'path':'user',
-        'text':'User',
+        'path':'user-listing',
+        'text':'View Users',
       },
     };
     return content;

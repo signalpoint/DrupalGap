@@ -126,8 +126,6 @@ function drupalgap_form_render(form) {
             };
             //form_element += '<button type="button" data-theme="b" id="' + element_id + '" class="drupalgap_form_submit" form_id="' + form.id + '">' + element.value + '</button>';
             form_element += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
-            console.log(form_element);
-            alert('how does the submit button look?');
             break;
           case "textfield":
             form_element += '<input type="text" id="' + element_id + '" value="' + element.default_value + '"/>';
@@ -199,10 +197,12 @@ function drupalgap_form_state_values_assemble(form) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
       form_state.values[name] = $('#' + drupalgap_form_get_element_id(name, form.id)).val();
     });
-    //drupalgap.form_state = form_state;
+    // Attach the form state to drupalgap.form_states keyed by the form id.
+    drupalgap.form_states[form.id] = form_state;
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(form_state));
     }
+    alert('drupalgap_form_state_values_assemble');
     return form_state;
   }
   catch (error) {
@@ -223,7 +223,7 @@ function drupalgap_get_form(form_id) {
     var html = '';
     var form = drupalgap_form_load.apply(null, Array.prototype.slice.call(arguments));
     if (form) {
-      html = drupalgap_form_render(form)
+      html = drupalgap_form_render(form);
     }
     else {
       alert('drupalgap_get_form - failed to get form (' + form_id + ')');
@@ -325,18 +325,19 @@ function _drupalgap_form_validate(form, form_state) {
  * Handles a drupalgap form's submit button click.
  */
 $('.drupalgap_form_submit').live('click', function(){
-    
-    // START HERE - I THINK THE FORM STATE NEEDS TO GO ALONG HERE!!!!
+
+    // Load the form by grabbing the form id from the submit button's attribute.
+    // TODO - we should probably be wrapping a form in a form element you
+    // dumb dumb.
     var form = drupalgap_form_load($(this).attr('form_id'));
-    
     if (!form) {
-      alert('.drupalgap_form_submit - click ' + $(this).attr('form_id'));
+      alert('.drupalgap_form_submit - click - failed to load form: ' + $(this).attr('form_id'));
     }
     
     // Assemble the form state values.
     var form_state = drupalgap_form_state_values_assemble(form);
     
-    // Clear our previuos form errors.
+    // Clear our previous form errors.
     drupalgap.form_errors = {};
     
     // Call drupalgap form's api validate.

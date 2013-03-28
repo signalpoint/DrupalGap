@@ -140,15 +140,17 @@ function drupalgap_goto(path) {
     
     // Is this a jQM path?
     if (path.indexOf('#') == 0) {
-      // We'll just let internal jQM paths go through... for now...?
+      // TODO - We'll just let internal jQM paths go through... for now...?
       $.mobile.changePage(path, {reloadPage:true});
       return false;
     }
     
     // Set the current menu path to the path input.
     drupalgap.path = path;
+
     // Grab the page id.
     var page_id = drupalgap_get_page_id(path);
+
     // Check to see if the page already exists in the DOM.
     var pages = $("body div[data-role$='page']");
     var page_in_dom = false;
@@ -161,14 +163,17 @@ function drupalgap_goto(path) {
           }
       });
     }
+
     // If the page is already in the DOM, remove it.
     if (page_in_dom) {
       $('#' + page_id).empty().remove();
     }
+    
     // Generate a JQM page by running it through the theme then attach the
     // page to the <body> of the document, then change to the page. Remember,
     // the rendering of the page does not take place here, that is covered by
-    // the pagebeforechange event which happens after we change the page here.
+    // the pagebeforechange event in theme.inc.js which happens after we change
+    // the page here.
     var html = drupalgap_file_get_contents('themes/easystreet3/page.tpl.html');
     if (html) {
       drupalgap_add_page_to_dom(page_id, html);
@@ -194,7 +199,7 @@ function drupalgap_render_page(page) {
       console.log(JSON.stringify(arguments));
     }
     // Generate the page output and render the content based on the output type.
-    // The outpute type will either be an html string or a drupalgap render object.
+    // The output type will either be an html string or a drupalgap render object.
     var output = menu_execute_active_handler();
     var output_type = $.type(output);
     var content = '';

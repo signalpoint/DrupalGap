@@ -111,7 +111,7 @@ function drupalgap_api_default_options() {
 				extra_msg = jqXHR.responseText;
 			}
 			navigator.notification.alert(
-				textStatus + ' (' + errorThrown + ') ' + extra_msg,
+				textStatus + ' (' + errorThrown + ') ' + extra_msg + '[' + url + ']',
 				function(){},
 				'DrupalGap API Error',
 				'OK'

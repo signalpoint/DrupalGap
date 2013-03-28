@@ -1,5 +1,5 @@
 /**
- * Specify your DrupalGap's Mobile Application settins here. 
+ * Specify your DrupalGap's Mobile Application settings here. 
  */
 drupalgap.settings = {
   

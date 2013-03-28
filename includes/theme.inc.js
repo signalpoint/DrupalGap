@@ -113,16 +113,21 @@ function theme_image(variables) {
 /**
  * Implementation of theme_item_list().
  */
+
 function theme_item_list(variables) {
   try {
-    var html = '';
+    // We'll theme an empty list unordered list by default, if there is a type
+    // of list specified we'll use that, and if there are some items we'll
+    // theme them too.
+    var type = 'ul';
+    if (variables.type) { type = variables.type; }
+    var html = '<' + type + ' ' + drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
-      html += '<ul ' + drupalgap_attributes(variables.attributes) + '>';
       $.each(variables.items, function(index, item){
           html += '<li>' + item + '</li>';
       });
-      html += '</ul>';
     }
+    html += '</' + type + '>';
     return html;
   }
   catch (error) {

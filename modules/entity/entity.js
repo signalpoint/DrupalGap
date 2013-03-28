@@ -163,6 +163,11 @@ function drupalgap_entity_get_core_fields(entity_type) {
           'required':true,
           'default_value':'',
         };
+        fields.language = {
+          'type':'hidden',
+          'required':true,
+          'default_value':'und', // TODO - not sure about this, need to learn
+        };                       // more about international sites.
         break;
       default:
         alert('drupalgap_entity_get_core_fields - entity type not supported yet (' + entity_type + ')');
@@ -216,6 +221,9 @@ function drupalgap_entity_get_primary_key(entity_type) {
     switch (entity_type) {
       case 'comment':
         primary_key = 'cid';
+        break;
+      case 'file':
+        primary_key = 'fid';
         break;
       case 'node':
         primary_key = 'nid';
