@@ -329,6 +329,11 @@ $('.drupalgap_form_submit').live('click', function(){
     // Load the form by grabbing the form id from the submit button's attribute.
     // TODO - we should probably be wrapping a form in a form element you
     // dumb dumb.
+    // TODO - doing a form load here without passing along the arguments that
+    // were sent to the form originally results in some strange behavior. One
+    // for example is, we lose the form.action value because when the form
+    // is fetched again here there is entity so the action when editing an entity
+    // never gets set properly.
     var form = drupalgap_form_load($(this).attr('form_id'));
     if (!form) {
       alert('.drupalgap_form_submit - click - failed to load form: ' + $(this).attr('form_id'));

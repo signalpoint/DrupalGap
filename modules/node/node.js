@@ -108,7 +108,7 @@ function node_edit(node) {
     };
     
     // Add delete button to form if we're editing a node.
-    if (node.nid) {
+    if (node && node.nid) {
       form.buttons['delete'] = {
         'title':'Delete',
       };

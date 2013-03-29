@@ -12,7 +12,6 @@ function module_implements(hook) {
     //var reset = false;
     //if (arguments[1] != false) { sort = arguments[1]; }
     //if (arguments[2] != false) { reset = arguments[2]; }
-    console.log(JSON.stringify(drupalgap.modules));
     if (hook) {
       $.each(drupalgap.modules, function(bundle, modules){
           $.each(modules, function(index, module){
@@ -106,9 +105,7 @@ function module_invoke_all(hook) {
                 module_arguments.unshift(module.name, hook);
                 var fn = window['module_invoke'];
                 invocation_results = fn.apply(null, module_arguments);
-                //module_invoke_results.push(fn.apply(null, module_arguments));
               }
-              //var invocation_results = module_invoke(module.name, hook, module_arguments);
               if (invocation_results) {
                 module_invoke_results.push(invocation_results);
                 console.log(JSON.stringify(module_invoke_results));
@@ -125,3 +122,4 @@ function module_invoke_all(hook) {
     alert('module_invoke_all - ' + error);
   }
 }
+

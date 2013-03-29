@@ -328,7 +328,7 @@ function drupalgap_render_region(region) {
       $.each(eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name), function(block_delta, block_settings){
           // Check the block's visibility rules.
           var show_block = true;
-          // If there are any roles specified in the block settings
+          // If there are any roles specified in the block settings.
           if (block_settings.roles && block_settings.roles.value && block_settings.roles.value.length != 0) {
             $.each(block_settings.roles.value, function(role_index, role){
                 var has_role = false;

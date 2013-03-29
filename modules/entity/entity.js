@@ -117,14 +117,12 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       drupalgap_goto(destination);
     };
     
-    console.log(JSON.stringify(call_arguments));
-    alert('drupalgap_entity_form_submit - editing = ' + editing);
+    // Depending on if we are creating a new entity, or editing an existing one,
+    // call the appropriate service resource.
     if (!editing) {
-      // Creating a new entity.   
       service_resource.create.call(call_arguments);
     }
     else {
-      // Update an existing entity.
       service_resource.update.call(call_arguments);
     }
   }
@@ -183,6 +181,32 @@ function drupalgap_entity_get_core_fields(entity_type) {
           'required':true,
           'default_value':'',
           'description':'',
+        };
+        break;
+      case 'taxonomy_term':
+        fields = {
+          'vid':{
+            'type':'hidden',
+            'required':true,
+            'default_value':'',
+          },
+          'tid':{
+            'type':'hidden',
+            'required':false,
+            'default_value':'',
+          },
+          'name':{
+            'type':'textfield',
+            'title':'Name',
+            'required':true,
+            'default_value':'',
+          },
+          'description':{
+            'type':'textarea',
+            'title':'Description',
+            'required':false,
+            'default_value':'',
+          }
         };
         break;
       case 'taxonomy_vocabulary':
