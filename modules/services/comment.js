@@ -111,7 +111,7 @@ drupalgap.services.comment = {
  * 
  */
 function drupalgap_comment_assemble_data(options) {
-	data = '';
+	var data = '';
 	if (options.comment.nid) {
 		data += '&nid=' + encodeURIComponent(options.comment.nid);
 	}

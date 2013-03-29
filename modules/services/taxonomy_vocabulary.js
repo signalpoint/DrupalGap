@@ -155,7 +155,7 @@ drupalgap.services.taxonomy_vocabulary = {
 
 function drupalgap_taxonomy_vocabulary_assemble_data (options) {
 	try {
-		data = ''
+		var data = ''
 		//data += 'vid=' + encodeURIComponent(options.taxonomy_term.vid);
 		data += '&name=' + encodeURIComponent(options.taxonomy_vocabulary.name);
 		data += '&machine_name=' + encodeURIComponent(options.taxonomy_vocabulary.machine_name);

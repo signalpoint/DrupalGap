@@ -10,7 +10,7 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
     // value equal to the core field value.
     $.each(fields, function(name, field){
       var default_value = field.default_value;
-      if (entity[name]) {
+      if (entity && entity[name]) {
         default_value = entity[name];
       }
       form.elements[name] = {
@@ -21,8 +21,6 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
         'description':field.description,
       };
     });
-    console.log(JSON.stringify(form));
-    alert('drupalgap_entity_add_core_fields_to_form');
   }
   catch (error) {
     alert('drupalgap_entity_add_core_fields_to_form - ' + error);
@@ -32,27 +30,18 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
 /**
  *
  */
-function drupalgap_entity_build_from_form_state() {
+function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_entity_build_from_form_state');
     }
     var entity = {};
-    //var entity_edit = drupalgap_entity_get_edit_object(drupalgap.form.entity_type);
-    /*var entity_edit = drupalgap.entity_edit;
-    if (!entity_edit) {
-      alert('drupalgap_entity_build_from_form_state - failed to get entity_edit - ' + drupalgap.form.entity_type);
-      return null;
-    }
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(entity_edit));
-    }*/
     // Use the default language, unless the entity has one specified.
     /*var language = drupalgap.settings.language;
     if (entity_edit.language) {
       language = entity_edit.language;
     }*/
-    $.each(drupalgap.form_state.values, function(name, value){
+    $.each(form_state.values, function(name, value){
       field_info = drupalgap_field_info_field(name);
       if (field_info) {
         eval('entity.' + name + ' = {};');
@@ -62,8 +51,6 @@ function drupalgap_entity_build_from_form_state() {
         entity[name] = value;  
       }
     });
-    console.log(JSON.stringify(entity));
-    alert('drupalgap_entity_build_from_form_state');
     return entity;
   }
   catch (error) {
@@ -74,49 +61,62 @@ function drupalgap_entity_build_from_form_state() {
 /**
  *
  */
-function drupalgap_entity_form_submit(entity) {
+function drupalgap_entity_form_submit(form, form_state, entity) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_entity_form_submit');
-      console.log(JSON.stringify(entity));
+      console.log(JSON.stringify(arguments));
     }
-    alert('drupalgap_entity_form_submit');
     var service_resource = null;
-    var service_entity = null;
-    switch (drupalgap.form.entity_type) {
+    switch (form.entity_type) {
       case 'comment':
         service_resource = drupalgap.services.comment;
-        //service_entity = drupalgap.comment;
         break;
       case 'node':
         service_resource = drupalgap.services.node;
-        //service_entity = drupalgap.node;
         break;
       case 'taxonomy_vocabulary':
         service_resource = drupalgap.services.taxonomy_vocabulary;
-        //service_entity = drupalgap.taxonomy_vocabulary;
         break;
       case 'taxonomy_term':
         service_resource = drupalgap.services.taxonomy_term;
-        //service_entity = drupalgap.taxonomy_term;
         break;
       default:
-        alert('drupalgap_entity_form_submit - unsported entity type - ' + drupalgap.form.entity_type);
+        alert('drupalgap_entity_form_submit - unsupported entity type - ' + form.entity_type);
         return null;
         break;
     }
-    var primary_key = drupalgap_entity_get_primary_key(drupalgap.form.entity_type);
-    //var entity_edit = drupalgap.entity_edit;
+    
+    // Grab the primary key name for this entity type.
+    var primary_key = drupalgap_entity_get_primary_key(form.entity_type);
+    
+    // Determine if we are editing an entity or creating a new one.
     var editing = false;
-    //if (eval('entity_edit.' + primary_key)) {
     if (entity[primary_key] && entity[primary_key] != '') {
       editing = true;
     }
+    
+    // Let's set up the api call arguments.
     var call_arguments = {};
-    call_arguments[drupalgap.form.entity_type] = entity;
+    
+    // Attach the entity to the call arguments, keyed by its type
+    call_arguments[form.entity_type] = entity;
+    
+    // Setup the success call back to go back to the entity page view.
     call_arguments.success = function(result) {
-      drupalgap_goto(drupalgap.form.entity_type + '/' + eval('result.' + primary_key));
+      
+      // By default we'll try to redirect to [entity-type]/[entity-id]. Note,
+      // this doesn't work for taxonomy_vocabulary and taxonomy_term since
+      // they have paths of taxonomy/vocabulary and taxonomy/term. So once
+      // all of the entity forms have an action, we can get rid of this default
+      // setting and just use the action.
+      var destination = form.entity_type + '/' + eval('result.' + primary_key);
+      if (form.action) {
+        destination = form.action;
+      }
+      drupalgap_goto(destination);
     };
+    
     console.log(JSON.stringify(call_arguments));
     alert('drupalgap_entity_form_submit - editing = ' + editing);
     if (!editing) {
@@ -125,7 +125,6 @@ function drupalgap_entity_form_submit(entity) {
     }
     else {
       // Update an existing entity.
-      //eval('entity.' + primary_key + ' = entity_edit.' + primary_key + ';');
       service_resource.update.call(call_arguments);
     }
   }
@@ -184,6 +183,33 @@ function drupalgap_entity_get_core_fields(entity_type) {
           'required':true,
           'default_value':'',
           'description':'',
+        };
+        break;
+      case 'taxonomy_vocabulary':
+        fields = {
+          'vid':{
+            'type':'hidden',
+            'required':false,
+            'default_value':'',
+          },
+          'name':{
+            'type':'textfield',
+            'title':'Name',
+            'required':true,
+            'default_value':'',
+          },
+          'machine_name':{
+            'type':'textfield',
+            'title':'Machine Name',
+            'required':true,
+            'default_value':'',
+          },
+          'description':{
+            'type':'textarea',
+            'title':'Description',
+            'required':false,
+            'default_value':'',
+          }
         };
         break;
       default:

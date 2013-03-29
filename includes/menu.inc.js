@@ -288,6 +288,17 @@ function drupalgap_get_menu_link_router_path(path) {
             router_path = args.join('/');
           }
           break;
+        case 'taxonomy':
+          if (args_size > 2 && (args[1] == 'vocabulary' || args[1] == 'term') &&
+              is_int(parseInt(args[2]))
+          ) {
+            args[2] = '%';
+            router_path = args.join('/');
+          }
+          break;
+        default:
+          console.log('drupalgap_get_menu_link_router_path - default case, round one (' + path + ')');
+          break;
       }
     }
     
@@ -304,7 +315,6 @@ function drupalgap_get_menu_link_router_path(path) {
         var temp_router_path;
         for (var i = args.length-1; i != -1; i--) {
           temp_router_path = ''
-          console.log('i = ' + args[i]);
           for (var j = 0; j < i; j++) {
             console.log('j = ' + args[j]);
             temp_router_path += args[j] + '/';

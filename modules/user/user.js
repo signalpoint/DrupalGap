@@ -324,8 +324,8 @@ function user_profile_form_submit(form, form_state) {
       console.log('user_profile_form_submit()');
       console.log(JSON.stringify(arguments));
     }
-    var user = drupalgap_entity_build_from_form_state();
-    drupalgap_entity_form_submit(user);
+    var user = drupalgap_entity_build_from_form_state(form, form_state);
+    drupalgap_entity_form_submit(form, form_state, user);
   }
   catch (error) {
     alert('user_profile_form_submit - ' + error);

@@ -103,8 +103,8 @@ function comment_edit_validate(form, form_state) {
 
 function comment_edit_submit(form, form_state) {
   try {
-    var comment = drupalgap_entity_build_from_form_state();
-    drupalgap_entity_form_submit(comment);
+    var comment = drupalgap_entity_build_from_form_state(form, form_state);
+    drupalgap_entity_form_submit(form, form_state, comment);
   }
   catch (error) {
     alert('comment_edit_submit - ' + error);

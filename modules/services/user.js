@@ -152,7 +152,7 @@ drupalgap.services.user = {
 };
 
 function drupalgap_user_assemble_data (options) {
-	data = '';
+	var data = '';
 	if (options.account.name) {
 		data += '&name=' + encodeURIComponent(options.account.name);
 	}

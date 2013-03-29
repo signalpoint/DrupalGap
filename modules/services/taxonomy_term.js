@@ -185,7 +185,7 @@ function drupalgap_taxonomy_term_assemble_data (options) {
 	// console log error to show up when terms are created/updates:
 	// TypeError: Result of expression 'this.element' [undefined] is not an object.
 	// at file:///android_asset/www/jquery.mobile-1.2.0.min.js:2
-	data = '';
+	var data = '';
 	try {
 		data += 'vid=' + encodeURIComponent(options.taxonomy_term.vid);
 		data += '&name=' + encodeURIComponent(options.taxonomy_term.name);

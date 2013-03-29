@@ -140,8 +140,8 @@ function node_edit_submit(form, form_state) {
       console.log('node_edit_submit()');
       console.log(JSON.stringify(arguments));
     }
-    var node = drupalgap_entity_build_from_form_state();
-    drupalgap_entity_form_submit(node);
+    var node = drupalgap_entity_build_from_form_state(form, form_state);
+    drupalgap_entity_form_submit(form, form_state, node);
   }
   catch (error) {
     alert('node_edit_submit - ' + error);

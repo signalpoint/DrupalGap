@@ -18,6 +18,19 @@ function taxonomy_menu() {
         'page_arguments':[2],
         'pageshow':'taxonomy_vocabulary_pageshow',
       },
+      'taxonomy/vocabulary/%/view':{
+        'title':'View',
+        'type':'MENU_DEFAULT_LOCAL_TASK',
+        'weight':-10,
+      },
+      'taxonomy/vocabulary/%/edit':{
+        'title':'Edit',
+        'page_callback':'drupalgap_get_form',
+        'page_arguments':['taxonomy_form_vocabulary', 2],
+        'weight':0,
+        'type':'MENU_LOCAL_TASK',
+        'access_arguments':['administer taxonomy'],
+      },
       'taxonomy/term/%':{
         'title':'Taxonomy term',
         'page_callback':'taxonomy_term_page',
@@ -47,50 +60,52 @@ function taxonomy_menu() {
   }
 }
 
-
-function taxonomy_form_vocabulary() {
+/**
+ *
+ */
+function taxonomy_form_vocabulary(vocabulary) {
   try {
+    if (drupalgap.settings.debug) {
+      console.log('taxonomy_form_vocabulary');
+      console.log(JSON.stringify(vocabulary));
+    }
+    
+    // Setup form defaults.
+    // TODO - Always having to declare the default submit and validate
+    //          function names is lame. Set it up to be automatic, then update
+    //          all existing forms to inherit the automatic goodness.
     var form = {
       'id':'taxonomy_form_vocabulary',
+      'submit':['taxonomy_form_vocabulary_submit'],
+      'validate':['taxonomy_form_vocabulary_validate'],
+      'elements':{},
+      'buttons':{},
       'entity_type':'taxonomy_vocabulary',
-      'action':'taxonomy_vocabularies.html',
-      'elements':{
-        'vid':{
-          'type':'hidden',
-          'required':false,
-          'default_value':'',
-        },
-        'name':{
-          'type':'textfield',
-          'title':'Name',
-          'required':true,
-        },
-        'machine_name':{
-          'type':'textfield',
-          'title':'Machine Name',
-          'required':true,
-          'default_value':'',
-        },
-        'description':{
-          'type':'textarea',
-          'title':'Description',
-          'required':false,
-          'default_value':'',
-        },
-        'submit':{
-          'type':'submit',
-          'value':'Save',
-        },
-      },
-      'buttons':{
-        'cancel':{
-          'title':'Cancel',
-        },
-      },
+      'action':'taxonomy/vocabularies',
     };
     
-    // Add delete button to form if we're editing a vocabulary.
-    if (drupalgap.taxonomy_vocabulary_edit.vid) {
+    // Add the entity's core fields to the form.
+    drupalgap_entity_add_core_fields_to_form('taxonomy_vocabulary', null, form, vocabulary);
+    
+    // Add submit to form.
+    form.elements.submit = {
+      'type':'submit',
+      'value':'Save',
+    };
+    
+    // Add cancel button to form.
+    form.buttons['cancel'] = {
+      'title':'Cancel',
+    };
+    
+    // If we're editing a vocabulary set the form action to the vocabulary page
+    // view and add a delete button to form if we're editing a node.
+    // TODO - delete buttons should be automated for all entity types based
+    // on user's permission.
+    if (vocabulary && vocabulary.vid) {
+      // TODO - this action isn't being retained upon entity form submission
+      // drupalgap_goto...
+      form.action = 'taxonomy/vocabulary/' + vocabulary.vid;
       form.buttons['delete'] = {
         'title':'Delete',
       };
@@ -129,8 +144,17 @@ function taxonomy_form_vocabulary_loaded() {
 }
 
 function taxonomy_form_vocabulary_submit(form, form_state) {
-  var vocabulary = drupalgap_entity_build_from_form_state();
-  drupalgap_entity_form_submit(vocabulary);
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('taxonomy_form_vocabulary_submit()');
+      console.log(JSON.stringify(arguments));
+    }
+    var vocabulary = drupalgap_entity_build_from_form_state(form, form_state);
+    drupalgap_entity_form_submit(form, form_state, vocabulary);
+  }
+  catch (error) {
+    alert('taxonomy_form_vocabulary_submit - ' + error);
+  }
 }
 
 function taxonomy_form_term() {
@@ -138,7 +162,7 @@ function taxonomy_form_term() {
     var form = {
       'id':'taxonomy_form_term',
       'entity_type':'taxonomy_term',
-      'action':'taxonomy_vocabulary.html',
+      /*'action':'taxonomy_vocabulary.html',*/
       'elements':{
         'vid':{
           'type':'hidden',
@@ -214,8 +238,8 @@ function taxonomy_form_term_loaded() {
 }
 
 function taxonomy_form_term_submit(form, form_state) {
-  var term = drupalgap_entity_build_from_form_state();
-  drupalgap_entity_form_submit(term);
+  var term = drupalgap_entity_build_from_form_state(form, form_state);
+  drupalgap_entity_form_submit(form, form_state, term);
 }
 
 /**
