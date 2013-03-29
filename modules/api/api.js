@@ -110,13 +110,18 @@ function drupalgap_api_default_options() {
 			else if (jqXHR.responseText && jqXHR.responseText != errorThrown) {
 				extra_msg = jqXHR.responseText;
 			}
-			navigator.notification.alert(
-				textStatus + ' (' + errorThrown + ') ' + extra_msg + '[' + url + ']',
-				function(){},
-				'DrupalGap API Error',
-				'OK'
-			);
+			if (this.error_alert) {
+        navigator.notification.alert(
+          textStatus + ' (' + errorThrown + ') ' + extra_msg + '[' + url + ']',
+          function(){},
+          'DrupalGap API Call Error',
+          'OK'
+        );
+			}
 		},
+		'error_alert':true, /* an option to supress the defaul error call back's
+		                       alert dialog window, use: options.error_alert = false;
+		                       use  with caution */
 	};
 	return default_options;
 }

@@ -563,7 +563,7 @@ function drupalgap_includes_load() {
 function drupalgap_item_list_populate(list_css_selector, items) {
   try {
     if (drupalgap.settings.debug) {
-      console.log('()');
+      console.log('drupalgap_item_list_populate()');
       console.log(JSON.stringify(arguments));
     }
     // TODO - this could use some validation and alerts for improper input.

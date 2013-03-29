@@ -162,6 +162,10 @@ drupalgap.services.taxonomy_term = {
 				if (options.order) {
 					api_options.data += '&order=' + encodeURIComponent(options.maxdepth);
 				}
+				// The Services module throws a 404 if no nodes are found which the
+				// DrupalGap API interprets by throwing an alert, let's supress that.
+				//api_options.error_alert = false;
+				// Make the call.
 				drupalgap.api.call(api_options);
 			}
 			catch (error) {
