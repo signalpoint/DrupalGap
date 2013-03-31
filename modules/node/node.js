@@ -199,6 +199,7 @@ function node_menu() {
         'title':'Node',
         'page_callback':'node_page_view',
         'page_arguments':[1],
+        'pageshow':'node_page_view_pageshow',
       },
       'node/%/view':{
         'title':'View',
@@ -241,7 +242,7 @@ function node_page() {
         'theme':'jqm_item_list',
         'title':'Content List',
         'items':[],
-        'attributes':{'id':'node_listing_list'},
+        'attributes':{'id':'node_listing_items'},
       }
     };
     
@@ -270,7 +271,7 @@ function node_page_pageshow() {
         $.each(data.nodes, function(index, object){
             items.push(l(object.node.title, 'node/' + object.node.nid));
         });
-        drupalgap_item_list_populate("#node_listing_list", items);
+        drupalgap_item_list_populate("#node_listing_items", items);
       },
     });
   }
@@ -295,6 +296,29 @@ function node_page_view(node) {
         'title':{'markup':node.title}, // TODO - this is a core field and should probably by fetched from entity.js
         'content':{'markup':node.content},
       };
+      // If the comments are hidden, do nothing.
+      if (node.comment == 0) { }
+      // If the comments are closed or open, show the comments.
+      else if (node.comment == 1 || node.comment == 2) {
+        
+        // Build an empty list for the comments
+        build.comments = {
+          'theme':'jqm_item_list',
+          'title':'Comments',
+          'items':[],
+          'attributes':{'id':'comment_listing_items'},
+        };
+        
+        // If the comments are open, show the comment form.
+        if (node.comment == 2) {
+          build.comments_form = {
+            'markup':
+              '<h2>Add comment</h2>' +
+                drupalgap_get_form('comment_edit', {'nid':node.nid})
+          };
+        }
+      }
+      
       return build;
     }
     else {
@@ -303,6 +327,42 @@ function node_page_view(node) {
   }
   catch (error) {
     alert('node_page_view - ' + error);
+  }
+}
+
+/**
+ * jQM pageshow handler for node/% pages.
+ */
+function node_page_view_pageshow() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_page_view_pageshow()');
+    }
+    // Grab some recent comments and display it.
+    if ($('#comment_listing_items')) {
+      drupalgap.views_datasource.call({
+        'path':'drupalgap/views_datasource/drupalgap_comments/' + arg(1),
+        'success':function(data) {
+          // Extract the comments into items, then drop them in the list.
+          var items = [];
+          $.each(data.comments, function(index, object){
+              var html = '';
+              if (drupalgap_user_access({'permission':'administer comments'})) {
+                html += l('Edit', 'comment/' + object.comment.cid + '/edit');
+              }
+              html += object.comment.created + "<br />" +
+                'Author: ' + object.comment.name + "<br />"+ 
+                'Subject: ' + object.comment.subject + "<br />" +
+                'Comment:<br />' + object.comment.comment_body + "<hr />"; 
+              items.push(html);
+          });
+          drupalgap_item_list_populate("#comment_listing_items", items);
+        },
+      });
+    }
+  }
+  catch (error) {
+    alert('node_page_view_pageshow - ' + error);
   }
 }
 

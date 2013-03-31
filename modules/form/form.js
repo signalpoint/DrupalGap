@@ -133,6 +133,7 @@ function drupalgap_form_render(form) {
           case 'textarea':
           case 'text_long':
           case "text_with_summary":
+          case 'text_textarea':
             form_element += '<textarea type="text" id="' + element_id + '">' + element.default_value + '</textarea>';
             break;
           /*case "image":

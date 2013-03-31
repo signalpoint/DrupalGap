@@ -67,7 +67,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
     // Iterate over each field in the entity and add it to the form. If there is
     // a value present in the entity, then set the field's form element default
     // value equal to the field value.
-    if (fields && fields.length > 0) {
+    if (fields) {
       $.each(fields, function(name, field){
         var field_info = drupalgap_field_info_field(name);
         var default_value = field.default_value;

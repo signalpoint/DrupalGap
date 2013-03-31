@@ -135,9 +135,7 @@ function drupalgap_goto(path) {
           console.log(object);
       }); 
     }
-    
-    // Special Cases:
-    
+
     // If the path was an empty sting, set it to the front page.
     if (path == '') { path = drupalgap.settings.front; }
     // If the path is to 'user', and the user is logged in, let's set the path
@@ -164,7 +162,6 @@ function drupalgap_goto(path) {
     var page_in_dom = false;
     if (pages && pages.length > 0) {
       $.each(pages, function(index, page){
-          console.log(index);
           if (($(page).attr('id')) == page_id) {
             page_in_dom = true;
             return false;
@@ -174,9 +171,15 @@ function drupalgap_goto(path) {
 
     // If the page is already in the DOM, remove it.
     if (page_in_dom) {
+      // TODO - this is causing problems when you try to goto the same page
+      // you are already on. E.g. node/%, then posting a comment, brings you
+      // back to node/%, but since we remove the page from the dom here, then
+      // try to add it again below, a jQM trigger event fails.
       $('#' + page_id).empty().remove();
+      // This doesn't work.
+      //$.mobile.changePage('index.html#' + page_id, {reloadPage:true});
     }
-    
+
     // Generate a JQM page by running it through the theme then attach the
     // page to the <body> of the document, then change to the page. Remember,
     // the rendering of the page does not take place here, that is covered by

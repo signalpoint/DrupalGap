@@ -154,6 +154,26 @@ function drupalgap_entity_get_core_fields(entity_type) {
     // TODO - And why is this function not populated dynamically via Drupal? WTF?!
     var fields = {};
     switch (entity_type) {
+      case 'comment':
+        fields = {
+          'cid':{
+            'type':'hidden',
+            'required':false,
+            'default_value':'',
+          },
+          'nid':{
+            'type':'hidden',
+            'required':true,
+            'default_value':'',
+          },
+          'subject':{
+            'type':'textfield',
+            'title':'Subject',
+            'required':false,
+            'default_value':'',
+          },
+        };
+        break;
       case 'node':
         fields.nid = {
           'type':'hidden',
