@@ -165,10 +165,22 @@ function user_menu() {
         'page_arguments':['user_register'],
       },
       'user/%':{
-        /*'title':'My account',
-        'title_callback':'user_page_title',*/
+        'title':'My account',
         'page_callback':'user_view',
         'page_arguments':[1],
+      },
+      'user/%/view':{
+        'title':'View',
+        'type':'MENU_DEFAULT_LOCAL_TASK',
+        'weight':-10,
+      },
+      'user/%/edit':{
+        'title':'Edit',
+        'page_callback':'drupalgap_get_form',
+        'page_arguments':['user_profile_form', 1],
+        'access_arguments':[''],
+        'weight':0,
+        'type':'MENU_LOCAL_TASK',
       },
       'user-listing':{
         'page_callback':'user_listing',
@@ -194,6 +206,7 @@ function user_page() {
     if (drupalgap.user.uid != 0) {
       var path = 'user/' + drupalgap.user.uid;
       //menu_set_active_item(path);
+      //drupalgap.path = path;
       //return menu_execute_active_handler(null, false);
       return menu_execute_active_handler(path, false);
     }
@@ -246,72 +259,49 @@ function user_register_submit(form, form_state) {
   }
 }
 
-function user_profile_form() {
-  var form = {
-    'id':'user_profile_form',
-    'entity_type':'user',
-    'elements':{
-      'name':{
-        'type':'textfield',
-        'title':'Username',
-        'required':true,
-      },
-      'mail':{
-        'type':'email',
-        'title':'E-mail address',
-        'required':true,
-      },
-      'picture':{
-        'type':'image',
-        'widget_type':'imagefield_widget',
-        'title':'Picture',
-        'required':false,
-        'value':'Add Picture',
-      },
-      'submit':{
-        'type':'submit',
-        'value':'Create new account',
-      },
-    },
-    'buttons':{
-      'cancel':{
-        'title':'Cancel',
-      },
-    },
-  };
-  return form;
-}
-
-function user_profile_form_loaded() {
+/**
+ *
+ */
+function user_profile_form(account) {
   try {
-    // Are we editing a user?
-    if (drupalgap.account_edit.uid) {
-      // Retrieve the user and fill in the form values.
-      drupalgap.services.user.retrieve.call({
-        'uid':drupalgap.account_edit.uid,
-        'success':function(account){
-          // Set the drupalgap account edit.
-          drupalgap.account_edit = account;
-          // Load the entity into the form.
-          drupalgap_entity_load_into_form('user', null, drupalgap.account_edit, drupalgap.form);
-          /*$('#name').val(account.name);
-          if (account.mail) {
-            $('#mail').val(account.mail);
-          }
-          else {
-            $('#mail').hide();
-            $('#current_pass').hide();
-          }
-          */
-          /*if (account.picture) {
-            $('#edit_picture').attr('src', drupalgap_image_path(account.picture.uri)).show();
-          }*/
-        }
-      });
+    if (drupalgap.settings.debug) {
+      console.log('user_profile_form()');
+      console.log(JSON.stringify(arguments));
     }
+    // Setup form defaults.
+    // TODO - Always having to declare the default submit and validate
+    //          function names is lame. Set it up to be automatic, then update
+    //          all existing forms to inherit the automatic goodness.
+    var form = {
+      'id':'user_profile_form',
+      'submit':['user_profile_form_submit'],
+      'validate':['user_profile_form_validate'],
+      'elements':{},
+      'buttons':{},
+      'entity_type':'user',
+    };
+    
+    // Add the entity's core fields to the form.
+    drupalgap_entity_add_core_fields_to_form('user', null, form, account);
+    
+    // Add the fields for accounts to the form.
+    drupalgap_field_info_instances_add_to_form('user', null, form, account);
+    
+    // Add submit to form.
+    form.elements.submit = {
+      'type':'submit',
+      'value':'Save',
+    };
+    
+    // Add cancel button to form.
+    form.buttons['cancel'] = {
+      'title':'Cancel',
+    };
+    
+    return form;
   }
   catch (error) {
-    alert('node_edit_loaded - ' + error);
+    alert('user_profile_form - ' + error);
   }
 }
 
@@ -324,8 +314,8 @@ function user_profile_form_submit(form, form_state) {
       console.log('user_profile_form_submit()');
       console.log(JSON.stringify(arguments));
     }
-    var user = drupalgap_entity_build_from_form_state(form, form_state);
-    drupalgap_entity_form_submit(form, form_state, user);
+    var account = drupalgap_entity_build_from_form_state(form, form_state);
+    drupalgap_entity_form_submit(form, form_state, account);
   }
   catch (error) {
     alert('user_profile_form_submit - ' + error);

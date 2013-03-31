@@ -75,11 +75,14 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       case 'node':
         service_resource = drupalgap.services.node;
         break;
+      case 'taxonomy_term':
+        service_resource = drupalgap.services.taxonomy_term;
+        break;
       case 'taxonomy_vocabulary':
         service_resource = drupalgap.services.taxonomy_vocabulary;
         break;
-      case 'taxonomy_term':
-        service_resource = drupalgap.services.taxonomy_term;
+      case 'user':
+        service_resource = drupalgap.services.user;
         break;
       default:
         alert('drupalgap_entity_form_submit - unsupported entity type - ' + form.entity_type);
@@ -99,8 +102,14 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
     // Let's set up the api call arguments.
     var call_arguments = {};
     
-    // Attach the entity to the call arguments, keyed by its type
-    call_arguments[form.entity_type] = entity;
+    // Attach the entity to the call arguments, keyed by its type. There is a
+    // special case for the user entity type, we want to call it 'account' so
+    // CRUD understands it.
+    var entity_type = form.entity_type;
+    if (entity_type == 'user') {
+      entity_type = 'account'; 
+    }
+    call_arguments[entity_type] = entity;
     
     // Setup the success call back to go back to the entity page view.
     call_arguments.success = function(result) {
@@ -181,6 +190,20 @@ function drupalgap_entity_get_core_fields(entity_type) {
           'required':true,
           'default_value':'',
           'description':'',
+        };
+        fields.mail = {
+          'type':'email',
+          'title':'E-mail address',
+          'required':true,
+          'default_value':'',
+          'description':'',
+        };
+        fields.picture = {
+          'type':'image',
+          'widget_type':'imagefield_widget',
+          'title':'Picture',
+          'required':false,
+          'value':'Add Picture',
         };
         break;
       case 'taxonomy_term':

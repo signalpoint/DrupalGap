@@ -61,26 +61,28 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
     var fields = drupalgap_field_info_instances(entity_type, bundle_name);
     // Use the default language, unless the entity has one specified.
     var language = drupalgap.settings.language;
-    if (entity.language) {
+    if (entity && entity.language) {
       language = entity.language;
     }
     // Iterate over each field in the entity and add it to the form. If there is
     // a value present in the entity, then set the field's form element default
     // value equal to the field value.
-    $.each(fields, function(name, field){
-      var field_info = drupalgap_field_info_field(name);
-      var default_value = field.default_value;
-      if (entity[name] && entity[name].length != 0 && entity[name][language][0].value) {
-        default_value = entity[name][language][0].value;
-      }
-      form.elements[name] = {
-        'type':field_info.type,
-        'title':field.label,
-        'required':field.required,
-        'default_value':default_value,
-        'description':field.description,
-      };
-    });
+    if (fields && fields.length > 0) {
+      $.each(fields, function(name, field){
+        var field_info = drupalgap_field_info_field(name);
+        var default_value = field.default_value;
+        if (entity[name] && entity[name].length != 0 && entity[name][language][0].value) {
+          default_value = entity[name][language][0].value;
+        }
+        form.elements[name] = {
+          'type':field_info.type,
+          'title':field.label,
+          'required':field.required,
+          'default_value':default_value,
+          'description':field.description,
+        };
+      });
+    }
   }
   catch (error) {
     alert('drupalgap_field_info_instances_add_to_form - ' + error);

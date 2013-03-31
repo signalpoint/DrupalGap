@@ -119,7 +119,6 @@ function node_edit(node) {
   catch (error) {
     alert('node_edit - ' + error);
   }
-  return null;
 }
 
 function node_edit_validate(form, form_state) {

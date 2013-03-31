@@ -45,7 +45,6 @@ function menu_block_view(delta) {
         else {
           var items = [];
           $.each(menu_items, function(index, item){
-              //items.push(l(drupalgap.menu_links[child].title, link_path));
               items.push(l(item.title, drupalgap_place_args_in_path(item.path)));
           });
           if (items.length > 0) {

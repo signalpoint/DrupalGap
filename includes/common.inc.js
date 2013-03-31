@@ -135,8 +135,16 @@ function drupalgap_goto(path) {
           console.log(object);
       }); 
     }
+    
+    // Special Cases:
+    
     // If the path was an empty sting, set it to the front page.
     if (path == '') { path = drupalgap.settings.front; }
+    // If the path is to 'user', and the user is logged in, let's set the path
+    // to 'user/[uid]' so the router path can be determined properly.
+    else if (path == 'user' && drupalgap.user.uid != 0) {
+      path = 'user/' + drupalgap.user.uid;
+    }
     
     // Is this a jQM path?
     if (path.indexOf('#') == 0) {

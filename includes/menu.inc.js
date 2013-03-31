@@ -117,7 +117,6 @@ function menu_get_item() {
     var router_item = null;
     if (arguments[0]) { path = arguments[0]; }
     if (arguments[1]) { router_item = arguments[1]; }
-    console.log(JSON.stringify(drupalgap.menu_links));
     if (path && drupalgap.menu_links[path]) {
       return eval('drupalgap.menu_links.' + path + ';');
     }
@@ -201,13 +200,6 @@ function menu_router_build() {
             if (typeof menu_item.type === "undefined") {
               menu_item.type = 'MENU_NORMAL_ITEM';
             }
-            // Set default router path if one wasn't specified.
-            // TODO - I don't think we want to be setting the router path here,
-            // because the drupalgap_get_menu_link_router_path needs to iterate
-            // over the menu links and this could end in an infinite loop.
-            /*if (typeof menu_item.router_path === "undefined") {
-              menu_item.router_path = drupalgap_get_menu_link_router_path(path);
-            }*/
             // Make the path available as a property in the menu link.
             menu_item.path = path;
             // Determine any parent, sibling, and child paths for the item.
