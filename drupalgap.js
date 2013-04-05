@@ -923,6 +923,7 @@ function drupalgap_settings_load() {
 
 /**
  * Load the theme specified by drupalgap.settings.theme into drupalgap.theme
+ * Returns true on success, false if it fails.
  */
 function drupalgap_theme_load() {
   try {
@@ -934,8 +935,21 @@ function drupalgap_theme_load() {
       alert('drupalgap_theme_load - no theme specified in settings.js');
     }
     else {
+      // Pull the theme name from the settings.js file.
       var theme_name = drupalgap.settings.theme;
-      drupalgap_add_js('themes/' + theme_name + '/' + theme_name + '.js');
+      // Let's try to load to theme's js file first by looking in the core
+      // themes directory, then in the app/themes directory.
+      var theme_path = 'themes/' + theme_name + '/' + theme_name + '.js';
+      if (!drupalgap_file_exists(theme_path)) {
+        theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
+        if (!drupalgap_file_exists(theme_path)) {
+          alert("drupalgap_theme_load - Failed to load theme! The theme's JS file does not exist: " + theme_path + ')');
+          return false;
+        }
+      }
+      // We found the theme's js file, add it to the page.
+      drupalgap_add_js(theme_path);
+      // Call the theme's template_info implementation.
       var template_info_function = theme_name + '_info';
       if (drupalgap_function_exists(template_info_function)) {
         var fn = window[template_info_function];
@@ -944,11 +958,14 @@ function drupalgap_theme_load() {
           console.log('theme loaded: ' + theme_name);
           console.log(JSON.stringify(drupalgap.theme));
         }
+        // Theme loaded successfully!
+        return true;
       }
       else {
         alert('drupalgap_theme_load() - failed - ' + template_info_function + '() does not exist!');
       }
     }
+    return false;
   }
   catch (error) {
     alert('drupalgap_theme_load - ' + error);

@@ -8,7 +8,7 @@ drupalgap.settings = {
   'base_path':'/',
   'clean_urls':false, /* set to true if you have clean urls enabled on your site */
   
-  /* Site Information */
+  /* App Information */
   'title':'DrupalGap',
   'front':'dashboard',
   

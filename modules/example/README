@@ -9,7 +9,7 @@ for DrupalGap, follow these steps.
 
   app/modules/custom/my_module/my_module.js
 
-Note, the javascript file name must match that of the folder name.
+Note, the javascript file name must match the folder name.
 
 3. Make DrupalGap aware of your module by adding it to your settings.js file:
 

@@ -1,1 +1,22 @@
+This is an example theme for DrupalGap. If you want to create your own theme
+for DrupalGap, follow these steps.
+
+1. Create new folder, for example:
+
+  app/themes/my_theme
+  
+2. Create new javascript file, for example:
+
+  app/themes/my_theme/my_theme.js
+
+Note, the javascript file name must match the folder name.
+
+3. Make DrupalGap aware of your theme by setting it in your settings.js file:
+
+  /* Theme */
+  'theme':'my_theme',
+
+4. Check out example code in themes/example/example.js
+
+5. Compile and run your mobile application.
 
