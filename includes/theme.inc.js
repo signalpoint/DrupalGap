@@ -23,14 +23,20 @@ $(document).bind("pagebeforechange", function(e, data) {
 });
 
 /**
- * Returns the path to the current DrupalGap theme.
+ * Returns the path to the current DrupalGap theme, false otherwise.
  */
 function path_to_theme() {
   try {
     if (drupalgap.settings.debug) {
       console.log('path_to_theme()');
     }
-    return 'themes/easystreet3';
+    if (drupalgap.theme_path) {
+      return drupalgap.theme_path;
+    }
+    else {
+      alert('path_to_theme - drupalgap.theme_path is not set!');
+      return false;
+    }
   }
   catch (error) {
     alert('path_to_theme - ' + error);
@@ -108,7 +114,8 @@ function theme_button_link(variables) {
  */
 function theme_image(variables) {
   try {
-    return '<img src="' + drupalgap_image_path(variables.path)  + '" />';
+    //return '<img src="' + drupalgap_image_path(variables.path)  + '" />';
+    return '<img src="' + variables.path  + '" />';
   }
   catch (error) {
     alert('theme_image - ' + error);
@@ -229,7 +236,7 @@ function template_process_page(variables) {
           console.log('template_process_page - rendering region (' + region.name + ') for page id (' + page_id + ')');
         }
         var page_html = $("#" + page_id).html();
-        eval('page_html = page_html.replace(/:' + region.name + '/g, drupalgap_render_region(region));');
+        eval('page_html = page_html.replace(/{:' + region.name + ':}/g, drupalgap_render_region(region));');
         $("#" + page_id).html(page_html);
         if (drupalgap.settings.debug) {
           console.log('template_process_page - rendered region (' + region.name + ') for page id (' + page_id + ')');

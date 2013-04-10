@@ -12,6 +12,10 @@ function system_block_info() {
         'delta':'main',
         'module':'system',
       },
+      'logo':{
+        'delta':'logo',
+        'module':'system',
+      },
       'header':{
         'delta':'header',
         'module':'system',
@@ -57,6 +61,13 @@ function system_block_view(delta) {
         // Depending on the menu link router, we need to route this through the appropriate
         // template files and functions.
         return drupalgap_render_page({'path':drupalgap.path});
+        break;
+      case 'logo':
+        if (drupalgap.settings.logo) {
+          return '<div>' + l(theme('image', {'path':drupalgap.settings.logo}), '') + '</div>';
+          //return '<div><img src="' + drupalgap.settings.logo + '" /></div>';
+        }
+        return '';
         break;
       case 'header':
         return '<h1>' + l(drupalgap_get_title(), '') + '</h1>';

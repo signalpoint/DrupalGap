@@ -10,7 +10,7 @@ function drupalgap_add_page_to_dom(page_id, html) {
       console.log(JSON.stringify(arguments));
     }
     // Set the page id and add the page to the dom body.
-    html = html.replace(/:drupalgap_page_id/g, page_id);
+    html = html.replace(/{:drupalgap_page_id:}/g, page_id);
     $('body').append(html);
   }
   catch (error) {
@@ -185,18 +185,24 @@ function drupalgap_goto(path) {
     // the rendering of the page does not take place here, that is covered by
     // the pagebeforechange event in theme.inc.js which happens after we change
     // the page here.
-    var html = drupalgap_file_get_contents('themes/easystreet3/page.tpl.html');
-    if (html) {
-      drupalgap_add_page_to_dom(page_id, html);
-      // NOTE: This call appears to be synchronous, so we could do stuff after
-      // this here... hook anyone?
-      if (drupalgap.settings.debug) {
-        console.log('drupalgap_goto - changePage => ' + page_id);
-      }
-      $.mobile.changePage('index.html#' + page_id);
+    var page_template_path = path_to_theme() + '/page.tpl.html';
+    if (!drupalgap_file_exists(page_template_path)) {
+      alert('drupalgap_goto - page template does not exist! (' + page_template_path + ')');
     }
     else {
-      alert("drupalgap_goto - failed to load theme's page.tpl.html file");
+      var html = drupalgap_file_get_contents(page_template_path);
+      if (html) {
+        drupalgap_add_page_to_dom(page_id, html);
+        // NOTE: This call appears to be synchronous, so we could do stuff after
+        // this here... hook anyone?
+        if (drupalgap.settings.debug) {
+          console.log('drupalgap_goto - changePage => ' + page_id);
+        }
+        $.mobile.changePage('index.html#' + page_id);
+      }
+      else {
+        alert("drupalgap_goto - failed to load theme's page.tpl.html file");
+      }
     }
   }
   catch (error) {
@@ -323,13 +329,18 @@ function drupalgap_render_page(page) {
 /**
  * Given a region, this renders it and all the blocks in it. The blocks are
  * specified in the settings.js file, they are bundled under a region, which in
- * turn is bundled under a theme name.
+ * turn is bundled under a theme name. Returns an empty string if it fails.
  */
 function drupalgap_render_region(region) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_render_region(' + region.name + ')');
       console.log(JSON.stringify(arguments));
+    }
+    // Make sure there are blocks specified for this theme in settings.js.
+    if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
+      alert('drupalgap_render_region - region (' + region.name + ') not defined in settings.js blocks!');
+      return '';
     }
     // If the region has blocks specified in it under the theme in settings.js,
     // render each block in the region.

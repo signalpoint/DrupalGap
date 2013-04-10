@@ -25,6 +25,9 @@ drupalgap.settings = {
   /* Theme */
   'theme':'easystreet3',
   
+  /* Logo */
+  'logo':'',
+  
   /* Blocks */
   'blocks':{
     'easystreet3':{

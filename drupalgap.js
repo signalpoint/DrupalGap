@@ -80,6 +80,7 @@ var drupalgap = {
   'taxonomy_vocabulary':{ },
   'taxonomy_vocabulary_edit':{ },*/
   'title':'',
+  'theme_path':'',
   'themes':[],
   'theme_registry':{},
   'views_datasource':{}, // <!-- views_datasource -->
@@ -958,7 +959,9 @@ function drupalgap_theme_load() {
           console.log('theme loaded: ' + theme_name);
           console.log(JSON.stringify(drupalgap.theme));
         }
-        // Theme loaded successfully!
+        // Theme loaded successfully! Set the drupalgap.theme_path and return
+        // true.
+        drupalgap.theme_path = theme_path.replace('/' + theme_name + '.js', '');
         return true;
       }
       else {

@@ -100,7 +100,7 @@ function menu_execute_active_handler() {
     }
   }
   catch (error) {
-    alert('menu_execute_active_handler - ' + error);
+    alert('menu_execute_active_handler(' + path + ') - ' + error);
   }
 }
 
