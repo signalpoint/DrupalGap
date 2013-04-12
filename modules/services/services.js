@@ -102,3 +102,66 @@ function drupalgap_service_resource_extract_results(options) {
 	}
 }
 
+/**
+ * RSS Services
+ */
+drupalgap.services.rss = {
+	'retrieve':{
+		'options':{
+			'type':'get',
+			'dataType':'xml',
+		},
+		'call':function(options){
+			try {
+				if (!options.url) {
+					alert('drupalgap.services.rss.retrieve.call - missing url');
+					return false;
+				}
+				var api_options = drupalgap_chain_callbacks(drupalgap.services.rss.retrieve.options, options);
+				drupalgap.api.call(api_options);
+			}
+			catch (error) {
+				navigator.notification.alert(
+					error,
+					function(){},
+					'RSS Retrieve Error',
+					'OK'
+				);
+			}
+		},
+	}, // <!-- get_variable -->
+};
+
+/**
+ * Given the result of a drupalgap.services.rss.retrieve.call, this will iterate
+ * over the RSS items and assemble them into a nice array of JSON objects and
+ * return them. Returns null if it fails.
+ */
+function drupalgap_services_rss_extract_items(data) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('drupalgap_services_rss_extract_items()');
+    }
+    var items = null;
+    var $xml = $(data);
+    if ($xml) {
+      // Extract the feeds items, then drop them in the list.
+      var items = [];
+      $xml.find("item").each(function() {
+          var $this = $(this), item = {
+            title: $this.find("title").text(),
+            link: $this.find("link").text(),
+            description: $this.find("description").text(),
+            pubDate: $this.find("pubDate").text(),
+            author: $this.find("author").text()
+          }
+          items.push(item);
+      });
+    }
+    return items;
+  }
+  catch (error) {
+    alert('drupalgap_services_rss_extract_items - ' + error);
+  }
+}
+
