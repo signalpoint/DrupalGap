@@ -1,6 +1,7 @@
 jquery*
 cordova*
 app/modules/*
+app/themes/*
 app/settings.js
 res
 images

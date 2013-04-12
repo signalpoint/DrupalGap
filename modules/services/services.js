@@ -14,10 +14,10 @@
       var entity_type = entity_types[i];
       eval('drupalgap.services.' + entity_type + ' = {};');
       for (var j = 0; j < crud.length; j++) {
-        
+
         // Grab the crud action.
         var action = crud[j];
-        
+
         // What HTTP type are we going to use?
         var type = '';
         switch (action) {
@@ -27,7 +27,7 @@
           case 'del': type = 'DELETE'; break;
           default: break;
         }
-        
+
         // What is our path going to be? If it is a retrieve we'll go to
         // [entity-type].json, otherwise we'll go to
         // [entity-type]/[entity-id].json.
@@ -36,7 +36,7 @@
           path = entity_type + '/%' +
             drupalgap_entity_get_primary_key(entity_type) + '.json';
         }
-        
+
         // Build the resource.
         var resource = {
           'options':{
@@ -57,7 +57,7 @@
             }
           },
         };
-        
+
         // Attach the resource to drupalgap.services.
         console.log(JSON.stringify(resource.options));
         eval('drupalgap.services.' + entity_type + '.' + action + ' = resource;');
@@ -72,64 +72,64 @@
 }*/
 
 /**
- * 
+ *
  */
 function drupalgap_service_resource_extract_results(options) {
-	try {
-		if (options.service == 'drupalgap_system' || options.service == 'drupalgap_user') {
-			if (options.resource == 'connect' || options.resource == 'login') {
-				// Depending on the service resource, extract the permissions
-				// from the options data.
-				permissions = {};
-				if (options.service == 'drupalgap_system' && options.resource == 'connect') {
-					permissions = options.data.user_permissions; 
-				}
-				else if (options.service == 'drupalgap_user' && options.resource == 'login') {
-					permissions = options.data.drupalgap_system_connect.user_permissions; 
-				}
-				// Now iterate over the extracted user_permissions and attach to
-				// the drupalgap.user.permissions variable.
-				drupalgap.user.permissions = [];
-				$.each(permissions, function(index, object){
-					drupalgap.user.permissions.push(object.permission)
-				});
-			}
-		}
-	}
-	catch (error) {
-		alert('drupalgap_service_resource_extract_results - ' + error);
-		return null;
-	}
+  try {
+    if (options.service == 'drupalgap_system' || options.service == 'drupalgap_user') {
+      if (options.resource == 'connect' || options.resource == 'login') {
+        // Depending on the service resource, extract the permissions
+        // from the options data.
+        permissions = {};
+        if (options.service == 'drupalgap_system' && options.resource == 'connect') {
+          permissions = options.data.user_permissions;
+        }
+        else if (options.service == 'drupalgap_user' && options.resource == 'login') {
+          permissions = options.data.drupalgap_system_connect.user_permissions;
+        }
+        // Now iterate over the extracted user_permissions and attach to
+        // the drupalgap.user.permissions variable.
+        drupalgap.user.permissions = [];
+        $.each(permissions, function(index, object){
+          drupalgap.user.permissions.push(object.permission)
+        });
+      }
+    }
+  }
+  catch (error) {
+    alert('drupalgap_service_resource_extract_results - ' + error);
+    return null;
+  }
 }
 
 /**
  * RSS Services
  */
 drupalgap.services.rss = {
-	'retrieve':{
-		'options':{
-			'type':'get',
-			'dataType':'xml',
-		},
-		'call':function(options){
-			try {
-				if (!options.url) {
-					alert('drupalgap.services.rss.retrieve.call - missing url');
-					return false;
-				}
-				var api_options = drupalgap_chain_callbacks(drupalgap.services.rss.retrieve.options, options);
-				drupalgap.api.call(api_options);
-			}
-			catch (error) {
-				navigator.notification.alert(
-					error,
-					function(){},
-					'RSS Retrieve Error',
-					'OK'
-				);
-			}
-		},
-	}, // <!-- get_variable -->
+  'retrieve':{
+    'options':{
+      'type':'get',
+      'dataType':'xml',
+    },
+    'call':function(options){
+      try {
+        if (!options.url) {
+          alert('drupalgap.services.rss.retrieve.call - missing url');
+          return false;
+        }
+        var api_options = drupalgap_chain_callbacks(drupalgap.services.rss.retrieve.options, options);
+        drupalgap.api.call(api_options);
+      }
+      catch (error) {
+        navigator.notification.alert(
+          error,
+          function(){},
+          'RSS Retrieve Error',
+          'OK'
+        );
+      }
+    },
+  }, // <!-- get_variable -->
 };
 
 /**
