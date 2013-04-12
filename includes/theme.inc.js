@@ -114,8 +114,16 @@ function theme_button_link(variables) {
  */
 function theme_image(variables) {
   try {
+    // Turn the path, alt and title into attributes if they are present.
+    if (variables.path) { variables.attributes.src = variables.path; }
+    if (variables.alt) { variables.attributes.alt = variables.alt; }
+    if (variables.title) { variables.attributes.title = variables.title; }
+    // Make sure the image width doesn't exceed the device's width.
+    if (!variables.attributes.style) { variables.attributes.style = ''; }
+    variables.attributes.style += ' max-width: ' + $(document).width() + 'px; ';
+    // Render the image.
+    return '<img ' + drupalgap_attributes(variables.attributes) + ' />';
     //return '<img src="' + drupalgap_image_path(variables.path)  + '" />';
-    return '<img src="' + variables.path  + '" />';
   }
   catch (error) {
     alert('theme_image - ' + error);
