@@ -10,16 +10,20 @@ drupalgap.api = {
 		  
 		  // TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_preprocess
 		  
-		  // Build the Drupal URL path to call.
-		  call_options.url = call_options.site_path + drupalgap.settings.base_path;
-		  if (!drupalgap.settings.clean_urls) {
-			  call_options.url += '?q=';
+		  // Build the Drupal URL path to call if one hasn't been assembled already
+		  // by the caller.
+		  if (!call_options.url || call_options.url == '') { 
+        call_options.url = call_options.site_path + drupalgap.settings.base_path;
+        if (!drupalgap.settings.clean_urls) {
+          call_options.url += '?q=';
+        }
+        if (call_options.endpoint) {
+          call_options.url += call_options.endpoint + '/';
+        }
+        call_options.url += options.path;
 		  }
-		  if (call_options.endpoint) {
-			  call_options.url += call_options.endpoint + '/';
-		  }
-		  call_options.url += options.path;
 		  
+		  // Print out the call options if debugging is turned on.
 		  if (drupalgap.settings.debug) {
 			  console.log(JSON.stringify(call_options));
 		  }
@@ -89,10 +93,25 @@ function drupalgap_api_default_options() {
 		'success':function(result){
 			// TODO - this is a good spot for a hook
 			// e.g. hook_drupalgap_api_postprocess
+			// Hide the loading message.
 			$.mobile.hidePageLoadingMsg();
+			// If debugging is turned on, print the result to the console.
 			if (drupalgap.settings.debug) {
-				console.log(JSON.stringify(result));  
-			} 
+			  // Note: http://stackoverflow.com/a/11616993/763010
+				var cache = [];
+        console.log(JSON.stringify(result, function(key, value) {
+            if (typeof value === 'object' && value !== null) {
+              if (cache.indexOf(value) !== -1) {
+                // Circular reference found, discard key
+                return;
+              }
+              // Store value in our collection
+              cache.push(value);
+            }
+            return value;
+        }));
+        cache = null; // Enable garbage collection
+			}
 		},
 		'error':function(jqXHR, textStatus, errorThrown, url){
 			// TODO - this is a good spot for a hook
