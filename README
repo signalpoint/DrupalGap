@@ -14,6 +14,8 @@ iOS (iPhone, iPad, etc)
 
   https://itunes.apple.com/us/app/drupalgap/id509874423?mt=8
 
+Please rate the DrupalGap application to help improve it!
+
 |=========================================================|
 | Drupal Module (http://www.drupal.org/project/drupalgap) |
 |=========================================================|
@@ -39,15 +41,13 @@ applications that communicate with their Drupal websites.
 
 7.x-1.x
 
-  https://github.com/signalpoint/DrupalGap/tree/7.x-1.x)
+  https://github.com/signalpoint/DrupalGap/tree/7.x-1.x
 
-6.x-1.x
+|===============|
+| DrupalGap API |
+|===============|
 
-  https://github.com/signalpoint/DrupalGap/tree/6.x-1.x)
-
-DrupalGap API
-
-  http://www.easystreet3.com/drupalgap)
+  http://api.drupalgap.org
 
 |=============================================================|
 | Installation: DrupalGap + PhoneGap + jQueryMobile = Android |
