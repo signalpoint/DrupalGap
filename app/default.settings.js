@@ -6,6 +6,7 @@ drupalgap.settings = {
   /* Paths */
   'site_path':'', /* e.g. http://www.example.com */
   'base_path':'/',
+  'default_services_endpoint':'drupalgap',
   'clean_urls':false, /* set to true if you have clean urls enabled on your site */
   
   /* App Information */
