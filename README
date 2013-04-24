@@ -2,6 +2,8 @@ DrupalGap is a module, mobile application, and mobile application
 development kit for Drupal websites. This project utilizes Drupal,
 PhoneGap (Cordova), and jQueryMobile.
 
+  http://www.drupalgap.org
+
 |================================================|
 | Try a Demo of the DrupalGap Mobile Application |
 |================================================|
@@ -39,9 +41,15 @@ websites running the DrupalGap module.
 Developers can easily create custom multi-platform mobile
 applications that communicate with their Drupal websites.
 
-7.x-1.x
+  Stable Release
+  --------------
 
-  https://github.com/signalpoint/DrupalGap/tree/7.x-1.x
+    https://github.com/signalpoint/DrupalGap/tags
+
+  Development Snapshot
+  --------------------
+
+    https://github.com/signalpoint/DrupalGap
 
 |===============|
 | DrupalGap API |
@@ -74,12 +82,18 @@ applications that communicate with their Drupal websites.
    This is different than the img directory that is created by PhoneGap's
    getting started guide.
 
-4. Download DrupalGap and extract its contents into PhoneGap's www
-directory so drupalgap.js is located here:
+4. Download the latest release of DrupalGap (or clone the development snapshot)
+   and extract its contents into PhoneGap's www directory so drupalgap.js is
+   located here:
 
    www/drupalgap.js
 
-   Download Link: https://github.com/signalpoint/DrupalGap
+   Download Links:
+     https://github.com/signalpoint/DrupalGap/tags
+     https://github.com/signalpoint/DrupalGap
+
+   Note, the drupalgap index.html will overwrite the index.html provided
+   by PhoneGap.
 
 5. Open www/app/default.settings.js and save a copy of it as settings.js
    so the copy of it lives here: 
@@ -89,7 +103,7 @@ directory so drupalgap.js is located here:
 6. Specify your Drupal site path (with NO trailing slash) in settings.js,
    for example:
 
-   'site_path':'http://www.drupalgap.org'
+   'site_path':'http://www.drupalgap.org',
 
 7. Run your new Android Application!
 
