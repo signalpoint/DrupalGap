@@ -3,5 +3,6 @@ cordova*
 app/modules/*
 app/themes/*
 app/settings.js
+app/.gitignore
 res
 images
