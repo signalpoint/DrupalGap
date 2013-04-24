@@ -214,22 +214,6 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
 }
 
 /**
- *
- */
-function drupalgap_changePage(path) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_changePage()');
-      console.log(JSON.stringify(arguments));
-    }
-    alert('drupalgap_changePage - this function is deprecated!');
-  }
-  catch (error) {
-    alert('drupalgap_changePage - ' + error);
-  }
-}
-
-/**
  * Checks the devices connection and sets drupalgap.online to true if the
  * device has a connection, false otherwise.
  * @returns A string indicating the type of connection according to PhoneGap.
