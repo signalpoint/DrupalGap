@@ -1,6 +1,7 @@
 /**
  * Determines which modules are implementing a hook. Returns an array with the
- * names of the modules which are implementing this hook.
+ * names of the modules which are implementing this hook. If no modules
+ * implement the hook, it returns false.
  */
 function module_implements(hook) {
   try {
@@ -21,6 +22,9 @@ function module_implements(hook) {
               }
           });
       });
+    }
+    if (modules_that_implement.length == 0) {
+      return false;
     }
     return modules_that_implement;
   }
@@ -106,9 +110,8 @@ function module_invoke_all(hook) {
                 var fn = window['module_invoke'];
                 invocation_results = fn.apply(null, module_arguments);
               }
-              if (invocation_results) {
+              if (typeof invocation_results !== 'undefined') {
                 module_invoke_results.push(invocation_results);
-                console.log(JSON.stringify(module_invoke_results));
               }
             }
         });
