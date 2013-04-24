@@ -88,7 +88,7 @@ function drupalgap_api_default_options() {
     'async':true,
     'data':'',
     'dataType':'json',
-    'endpoint':'drupalgap',
+    'endpoint':drupalgap.settings.default_services_endpoint,
     'site_path':drupalgap.settings.site_path,
     'success':function(result){
       // TODO - this is a good spot for a hook
@@ -140,7 +140,7 @@ function drupalgap_api_default_options() {
     },
     'error_alert':true, /* an option to supress the defaul error call back's
                            alert dialog window, use: options.error_alert = false;
-                           use  with caution */
+                           use with caution */
   };
   return default_options;
 }
