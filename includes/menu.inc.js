@@ -289,7 +289,9 @@ function drupalgap_get_menu_link_router_path(path) {
           }
           break;
         default:
-          console.log('drupalgap_get_menu_link_router_path - default case, round one (' + path + ')');
+          if (drupalgap.settings.debug) {
+            console.log('drupalgap_get_menu_link_router_path - default case, will try round two (' + path + ')');
+          }
           break;
       }
     }
@@ -308,7 +310,6 @@ function drupalgap_get_menu_link_router_path(path) {
         for (var i = args.length-1; i != -1; i--) {
           temp_router_path = ''
           for (var j = 0; j < i; j++) {
-            console.log('j = ' + args[j]);
             temp_router_path += args[j] + '/';
           }
           temp_router_path += '%';
@@ -352,8 +353,6 @@ function drupalgap_menus_load() {
       console.log('drupalgap_menus_load()');
     }
     if (drupalgap.settings.menus) {
-      console.log(JSON.stringify(drupalgap.menus));
-      console.log(JSON.stringify(drupalgap.settings.menus));
       // Process each menu defined in the settings.
       $.each(drupalgap.settings.menus, function(menu_name, menu){
           // If the menu does not already exist, it is a custom menu, so create
