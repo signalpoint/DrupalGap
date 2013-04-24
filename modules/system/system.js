@@ -33,7 +33,7 @@ function system_block_info() {
     var system_menus = menu_list_system_menus();
     $.each(system_menus, function(menu_name, menu){
         var block_delta = menu.menu_name;
-        eval('blocks.' + block_delta + ' = {"delta":"' + block_delta + '","module":"menu"};');
+        eval('blocks.' + block_delta + ' = {"name":"' + block_delta + '","delta":"' + block_delta + '","module":"menu"};');
     });
     if (drupalgap.settings.debug) {
       console.log('system_block_info() - blocks');
