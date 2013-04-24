@@ -1,3 +1,7 @@
+/**
+ * Given a form element name and the form_id, this generates an html id
+ * attribute value to be used in the DOM.
+ */
 function drupalgap_form_get_element_id(name, form_id) {
   try {
     if (name == null || name == '') { return ''; }
@@ -173,6 +177,10 @@ function drupalgap_form_render(form) {
   }
 }
 
+/**
+ * Given a form element name and an error message, this attaches the error
+ * message to the drupalgap.form_errors array, keyed by the form element name.
+ */
 function drupalgap_form_set_error(name, message) {
   try {
     drupalgap.form_errors[name] = message;
@@ -203,7 +211,6 @@ function drupalgap_form_state_values_assemble(form) {
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(form_state));
     }
-    //alert('drupalgap_form_state_values_assemble');
     return form_state;
   }
   catch (error) {
@@ -298,7 +305,8 @@ function _drupalgap_form_submit() {
 }
 
 /**
- *
+ * An internal function used by the DrupalGap forms api to validate all the
+ * elements on a form when. 
  */
 function _drupalgap_form_validate(form, form_state) {
   try {

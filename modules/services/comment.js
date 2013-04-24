@@ -108,7 +108,7 @@ drupalgap.services.comment = {
 };
 
 /**
- *
+ * Assembles the data uri component for comment entity service resource calls.
  */
 function drupalgap_comment_assemble_data(options) {
   var data = '';

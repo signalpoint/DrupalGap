@@ -180,6 +180,10 @@ drupalgap.services.taxonomy_term = {
   }, // <!-- selectNodes -->
 };
 
+/**
+ * Assembles the data uri component for taxonomy term entity service resource
+ * calls.
+ */
 function drupalgap_taxonomy_term_assemble_data (options) {
   // TODO - I'm pretty sure this function's implementation is causing this
   // console log error to show up when terms are created/updates:

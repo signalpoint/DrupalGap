@@ -82,7 +82,7 @@ function theme(hook, variables) {
 }
 
 /**
- *
+ * Themes a button.
  */
 function theme_button(variables) {
   try {
@@ -96,7 +96,7 @@ function theme_button(variables) {
 }
 
 /**
- *
+ * Themes a button link.
  */
 function theme_button_link(variables) {
   try {
@@ -255,21 +255,4 @@ function template_process_page(variables) {
     alert('template_process_page - ' + error);
   }
 }
-
-
-/**
- * Implementation of template_preprocess().
- */
-/*function template_preprocess() {
-  
-}*/
-
-/**
- * TODO - undecided if this is needed because the contents of index.html
-  (which is the equivalent of html.tpl.php in Drupal) doesn't need that
-  level of flexibility at this time. Perhaps in the future though?
- */ 
-/*function template_preprocess_html() {
-  // 
-}*/
 

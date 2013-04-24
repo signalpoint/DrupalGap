@@ -1,5 +1,5 @@
 /**
- *
+ * The comment edit form.
  */
 function comment_edit(comment) {
   try {
@@ -69,7 +69,7 @@ function comment_edit(comment) {
 }
 
 /**
- *
+ * The comment edit validation function.
  */
 function comment_edit_validate(form, form_state) {
   try {
@@ -83,7 +83,7 @@ function comment_edit_validate(form, form_state) {
 }
 
 /**
- *
+ * The comment edit submit function.
  */
 function comment_edit_submit(form, form_state) {
   try {

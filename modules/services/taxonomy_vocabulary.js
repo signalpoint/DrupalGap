@@ -153,6 +153,10 @@ drupalgap.services.taxonomy_vocabulary = {
   }, // <!-- getTree -->
 };
 
+/**
+ * Assembles the data uri component for taxonomy vocabulary entity service
+ * resource calls.
+ */
 function drupalgap_taxonomy_vocabulary_assemble_data (options) {
   try {
     var data = ''

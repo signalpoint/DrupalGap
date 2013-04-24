@@ -392,11 +392,8 @@ function drupalgap_file_get_contents(path) {
 
 
 /**
- * 
- * @param count
- * @param singular
- * @param plural
- * @returns
+ * See drupal_format_plural() for more information.
+ * http://api.drupal.org/api/drupal/includes%21common.inc/function/format_plural/7
  */
 function drupalgap_format_plural(count, singular, plural) {
   try {
@@ -520,9 +517,8 @@ function drupalgap_get_wildcards_from_router_path(router_path) {
 
 
 /**
- * 
- * @param uri
- * @returns
+ * Given a drupal image file uri, this will return the path to the image on the
+ * Drupal site.
  */
 function drupalgap_image_path(uri) {
 	try {
@@ -718,7 +714,8 @@ function drupalgap_module_load(module_name) {
 }
 
 /**
- *
+ * Given a module bundle type, this will return the path to that module bundle's
+ * directory.
  */
 function drupalgap_modules_get_bundle_directory(bundle) {
   try {
@@ -827,7 +824,8 @@ function drupalgap_place_args_in_path(input_path) {
   }
 }
 /**
- *
+ * Converts a hook_menu items page_arguments path like node/123 so arg zero
+ * would be 'node' and arg 1 would be the loaded entity node.
  */
 function drupalgap_prepare_argument_entities(page_arguments, args) {
   try {

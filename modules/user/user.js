@@ -1,5 +1,5 @@
 /**
- *
+ * A page call back function to display a simple list of drupal users.
  */
 function user_listing() {
   try {
@@ -70,6 +70,9 @@ function user_load(uid) {
   }
 }
 
+/**
+ * The user login form.
+ */
 function user_login() {
   var form = {
     'id':'user_login',
@@ -94,6 +97,9 @@ function user_login() {
   return form;
 }
 
+/**
+ * The user login form submit handler.
+ */
 function user_login_submit(form, form_state) {
   try {
     // WARNING: only print this out for debugging, you don't want your password
@@ -219,6 +225,9 @@ function user_page() {
   }
 }
 
+/**
+ * The user registration form.
+ */
 function user_register() {
   var form = {
     'id':'user_register',
@@ -244,6 +253,9 @@ function user_register() {
   return form;
 }
 
+/**
+ * The user registration form submit handler.
+ */
 function user_register_submit(form, form_state) {
   try {
     drupalgap.services.user.register.call({
@@ -260,7 +272,7 @@ function user_register_submit(form, form_state) {
 }
 
 /**
- *
+ * The user profile form.
  */
 function user_profile_form(account) {
   try {
@@ -306,7 +318,7 @@ function user_profile_form(account) {
 }
 
 /**
- *
+ * The user profile form submit handler.
  */
 function user_profile_form_submit(form, form_state) {
   try {

@@ -1,5 +1,7 @@
 /**
- *
+ * Given a node, this determines if the current user has access to it. Returns
+ * true if so, false otherwise. This function implementation is incomplete, use
+ * with caution.
  */
 function node_access(node) {
   try {
@@ -54,7 +56,7 @@ function node_add_page() {
 }
 
 /**
- *
+ * Page call back function for node/add/[type].
  */
 function node_add_page_by_type(type) {
   try {
@@ -121,6 +123,9 @@ function node_edit(node) {
   }
 }
 
+/**
+ * The node edit form's validation function.
+ */
 function node_edit_validate(form, form_state) {
   try {
     if (drupalgap.settings.debug) {
@@ -133,6 +138,9 @@ function node_edit_validate(form, form_state) {
   }
 }
 
+/**
+ * The node edit form's submit function.
+ */
 function node_edit_submit(form, form_state) {
   try {
     if (drupalgap.settings.debug) {
@@ -255,7 +263,7 @@ function node_page() {
 }
 
 /**
- *
+ * The jQM pageshow callback for the node listing page.
  */
 function node_page_pageshow() {
   try {

@@ -74,7 +74,7 @@ function taxonomy_menu() {
 }
 
 /**
- *
+ * The taxonomy vocabulary form.
  */
 function taxonomy_form_vocabulary(vocabulary) {
   try {
@@ -129,7 +129,7 @@ function taxonomy_form_vocabulary(vocabulary) {
 }
 
 /**
- *
+ * The taxonomy vocabulary form submit handler.
  */
 function taxonomy_form_vocabulary_submit(form, form_state) {
   try {
@@ -146,7 +146,7 @@ function taxonomy_form_vocabulary_submit(form, form_state) {
 }
 
 /**
- *
+ * The taxonomy term form.
  */
 function taxonomy_form_term(term) {
   try {
@@ -196,7 +196,7 @@ function taxonomy_form_term(term) {
 }
 
 /**
- *
+ * The taxonomy term form submit handler.
  */
 function taxonomy_form_term_submit(form, form_state) {
   try {
@@ -415,5 +415,4 @@ function taxonomy_vocabulary_load(vid) {
     alert('taxonomy_vocabulary_load - ' + error);
   }
 }
-
 

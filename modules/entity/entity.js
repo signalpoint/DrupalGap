@@ -1,3 +1,7 @@
+/**
+ * Given an entity type, bundle name, form and entity, this will add the entity's
+ * core fields to the form via the DrupalGap forms api.
+ */
 function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form, entity) {
   try {
     if (drupalgap.settings.debug) {
@@ -28,7 +32,8 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
 }
 
 /**
- *
+ * Given a form and form_state, this will assemble the entity based on the
+ * form_state values and return the entity as a json object.
  */
 function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
@@ -59,7 +64,8 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
 }
 
 /**
- *
+ * Given a form, form_state and entity, this will call the appropriate service
+ * resource c.r.u.d. operation.
  */
 function drupalgap_entity_form_submit(form, form_state, entity) {
   try {
@@ -141,7 +147,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
 }
 
 /**
- *
+ * Given an entity type, this returns its core fields as forms api elements.
  */
 function drupalgap_entity_get_core_fields(entity_type) {
   try {
@@ -304,6 +310,10 @@ function drupalgap_entity_get_edit_object(entity_type) {
   }
 }
 
+/**
+ * Given an entity_type, this returns the entity information. See also 
+ * http://api.drupal.org/api/drupal/includes%21common.inc/function/entity_get_info/7
+ */
 function drupalgap_entity_get_info(entity_type) {
   try {
     if (drupalgap.settings.debug) {
@@ -325,6 +335,9 @@ function drupalgap_entity_get_info(entity_type) {
   }
 }
 
+/**
+ * Given an entity type, this returns the primary key identifier for it.
+ */
 function drupalgap_entity_get_primary_key(entity_type) {
   try {
     var primary_key = null;
@@ -355,25 +368,6 @@ function drupalgap_entity_get_primary_key(entity_type) {
   }
   catch (error) {
     alert('drupalgap_entity_get_primary_key - ' + error);
-  }
-}
-
-// DEPRECATED!
-function drupalgap_entity_load_into_form(entity_type, bundle, entity, form) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_load_into_form()');
-      console.log(JSON.stringify(arguments));
-    }
-    
-    // Since entities are now going to be loaded and passed directly to the form,
-    // the form's element values can be filled in before the form is rendered, hooray!
-    alert('drupalgap_entity_load_into_form - this function is deprecated!');
-    return false;
-    
-  }
-  catch (error) {
-    alert('drupalgap_entity_load_into_form - ' + error);
   }
 }
 

@@ -151,6 +151,9 @@ drupalgap.services.user = {
   }, // <!-- update -->
 };
 
+/**
+ * Assembles the data uri component for user entity service resource calls.
+ */
 function drupalgap_user_assemble_data (options) {
   var data = '';
   if (options.account.name) {

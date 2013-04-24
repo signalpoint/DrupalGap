@@ -123,7 +123,7 @@ drupalgap.services.node = {
 };
 
 /**
- *
+ * Assembles the data uri component for node entity service resource calls.
  */
 function drupalgap_node_assemble_data(options) {
   try {
