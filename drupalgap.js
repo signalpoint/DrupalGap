@@ -127,6 +127,25 @@ function drupalgap_blocks_load() {
       console.log('drupalgap_blocks_load()');
       console.log(JSON.stringify(arguments));
     }
+    /*drupalgap.blocks[0] = {};
+    var modules = module_implements('block_info');
+    if (modules) {
+      $.each(modules, function(index, module){
+          var blocks = module_invoke(module, 'block_info');
+          if (blocks) {
+            $.each(blocks, function(delta, block){
+              // Assign the delta as the name of the block, set the delta of the
+              // block as well, and set the module name on the block for reference.
+              block.name = delta;
+              block.delta = delta;
+              block.module = module;  
+              // Add the block to drupalgap.blocks.
+              eval("drupalgap.blocks[0]." + delta + " = block;");
+              //drupalgap.blocks[delta] = block;
+            });
+          }
+      });
+    }*/
     drupalgap.blocks = module_invoke_all('block_info');
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(drupalgap.blocks));
@@ -286,11 +305,26 @@ function drupalgap_deviceready() {
 	}
 	else {
 	  
-	  // Device is online, let's call implementations of hook_device_online().
-		module_invoke_all('device_online');
-
-		if (module_invoke_continue) {
-			
+	  // Device is online, let's call any implementations of hook_device_online().
+	  // If any implementation returns false, that means they don't want DrupalGap
+	  // to continue with the System Connect call, so we'll skip that and go
+	  // straight to the App's front page.
+	  var proceed = true;
+		var invocation_results = module_invoke_all('device_online');
+		if (invocation_results && invocation_results.length > 0) {
+		  $.each(invocation_results, function(index, object){
+		      if (object === false) {
+		        proceed = false;
+		        return false;
+		      }
+		  });
+		}
+		if (!proceed) {
+		  drupalgap_goto('');
+		  // TODO - if module's are going to skip the System Connect call, then we
+		  // need to make sure drupalgap.user is set up with appropriate defaults.
+		}
+		else {
 			// Device is online, let's make a call to the
 			// DrupalGap System Connect Service Resource
 			drupalgap.services.drupalgap_system.connect.call({
@@ -1060,5 +1094,17 @@ $('.drupalgap_front').live('click', function(){
 // http://stackoverflow.com/a/3886106/763010
 function is_int(n) {
    return typeof n === 'number' && n % 1 == 0;
+}
+
+function ucfirst (str) {
+  // http://kevin.vanzonneveld.net
+  // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+  // +   bugfixed by: Onno Marsman
+  // +   improved by: Brett Zamir (http://brett-zamir.me)
+  // *     example 1: ucfirst('kevin van zonneveld');
+  // *     returns 1: 'Kevin van zonneveld'
+  str += '';
+  var f = str.charAt(0).toUpperCase();
+  return f + str.substr(1);
 }
 
