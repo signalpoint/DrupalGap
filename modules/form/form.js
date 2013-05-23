@@ -125,8 +125,7 @@ function drupalgap_form_render(form) {
               'type':'button',
               'data-theme':'b',
               'id':element_id,
-              'class':'drupalgap_form_submit',
-              'form_id':form.id,
+              'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
             };
             //form_element += '<button type="button" data-theme="b" id="' + element_id + '" class="drupalgap_form_submit" form_id="' + form.id + '">' + element.value + '</button>';
             form_element += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
@@ -301,40 +300,11 @@ function drupalgap_form_load(form_id) {
   }
 }
 
-function _drupalgap_form_submit() {
-}
-
-/**
- * An internal function used by the DrupalGap forms api to validate all the
- * elements on a form when. 
- */
-function _drupalgap_form_validate(form, form_state) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('_drupalgap_form_validate()');
-      console.log(JSON.stringify(arguments));
-    }
-    $.each(form.elements, function(name, element) {
-        if (name == 'submit') { return; }
-        if (element.required) {
-          if (form_state.values[name] == null || form_state.values[name] == '') {
-            var field_title = name;
-            if (element.title) { field_title = element.title; }
-            drupalgap_form_set_error(name, 'The ' + field_title + ' field is required.');
-          }
-        }
-    });
-  }
-  catch (error) {
-    alert('_drupalgap_form_validate - ' + error);
-  }
-}
-
 /**
  * Handles a drupalgap form's submit button click.
  */
-$('.drupalgap_form_submit').live('click', function(){
-
+function _drupalgap_form_submit(form_id) {
+  try {
     // Load the form by grabbing the form id from the submit button's attribute.
     // TODO - we should probably be wrapping a form in a form element you
     // dumb dumb.
@@ -343,9 +313,9 @@ $('.drupalgap_form_submit').live('click', function(){
     // for example is, we lose the form.action value because when the form
     // is fetched again here there is entity so the action when editing an entity
     // never gets set properly.
-    var form = drupalgap_form_load($(this).attr('form_id'));
+    var form = drupalgap_form_load(form_id);
     if (!form) {
-      alert('.drupalgap_form_submit - click - failed to load form: ' + $(this).attr('form_id'));
+      alert('_drupalgap_form_submit - click - failed to load form: ' + form_id);
     }
     
     // Assemble the form state values.
@@ -389,9 +359,6 @@ $('.drupalgap_form_submit').live('click', function(){
       return false;
     }
     
-    // Call drupalgap form's api submit.
-    _drupalgap_form_submit();
-    
     // Call the form's submit function.
     var submit_function = form.id + '_submit';
     if (eval('typeof ' + submit_function) == 'function') {
@@ -404,5 +371,35 @@ $('.drupalgap_form_submit').live('click', function(){
     else if (drupalgap.settings.debug) {
       console.log('Skipping ' + submit_function + ', does not exist.');
     }
-});
+  }
+  catch (error) {
+    alert('_drupalgap_form_submit - ' + error);
+  }
+}
+
+/**
+ * An internal function used by the DrupalGap forms api to validate all the
+ * elements on a form when. 
+ */
+function _drupalgap_form_validate(form, form_state) {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('_drupalgap_form_validate()');
+      console.log(JSON.stringify(arguments));
+    }
+    $.each(form.elements, function(name, element) {
+        if (name == 'submit') { return; }
+        if (element.required) {
+          if (form_state.values[name] == null || form_state.values[name] == '') {
+            var field_title = name;
+            if (element.title) { field_title = element.title; }
+            drupalgap_form_set_error(name, 'The ' + field_title + ' field is required.');
+          }
+        }
+    });
+  }
+  catch (error) {
+    alert('_drupalgap_form_validate - ' + error);
+  }
+}
 
