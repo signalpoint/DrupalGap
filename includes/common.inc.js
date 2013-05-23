@@ -32,6 +32,10 @@ function drupalgap_attributes(attributes) {
     var attribute_string = '';
     if (attributes) {
       $.each(attributes, function(name, value){
+          // TODO - if someone passes in a value with double quotes, this will
+          // break. e.g. 'onclick':'_drupalgap_form_submit("' + form.id + "');'
+          // will break, but 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
+          // will work.
           attribute_string += name + '="' + value + '" ';
       });
     }
