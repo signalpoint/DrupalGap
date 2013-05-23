@@ -1069,7 +1069,7 @@ function drupalgap_user_access(options) {
 	return false;
 }
 
-$('.drupalgap_front').live('click', function(){
+$('.drupalgap_front').on('click', function(){
     drupalgap_changePage(drupalgap.settings.front);
 });
 
