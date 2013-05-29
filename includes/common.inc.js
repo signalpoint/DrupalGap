@@ -202,7 +202,7 @@ function drupalgap_goto(path) {
         if (drupalgap.settings.debug) {
           console.log('drupalgap_goto - changePage => ' + page_id);
         }
-        $.mobile.changePage('index.html#' + page_id);
+        $.mobile.changePage('#' + page_id);
       }
       else {
         alert("drupalgap_goto - failed to load theme's page.tpl.html file");

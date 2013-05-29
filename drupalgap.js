@@ -219,28 +219,22 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
  * @returns A string indicating the type of connection according to PhoneGap.
  */
 function drupalgap_check_connection() {
-    // TODO - Uncomment and use this line once cordova 2.3 is released
-    // instead of the navigator.network.connection.type variable.
-    //var networkState = navigator.connection.type;
-    var networkState = navigator.network.connection.type;
-
-    var states = {};
-    states[Connection.UNKNOWN]  = 'Unknown connection';
-    states[Connection.ETHERNET] = 'Ethernet connection';
-    states[Connection.WIFI]     = 'WiFi connection';
-    states[Connection.CELL_2G]  = 'Cell 2G connection';
-    states[Connection.CELL_3G]  = 'Cell 3G connection';
-    states[Connection.CELL_4G]  = 'Cell 4G connection';
-    states[Connection.NONE]     = 'No network connection';
-    
-    if (states[networkState] == 'No network connection') {
-    	drupalgap.online = false;
-    }
-    else {
-    	drupalgap.online = true;
-    }
-
-    return states[networkState];
+  var networkState = navigator.connection.type;
+  var states = {};
+  states[Connection.UNKNOWN]  = 'Unknown connection';
+  states[Connection.ETHERNET] = 'Ethernet connection';
+  states[Connection.WIFI]     = 'WiFi connection';
+  states[Connection.CELL_2G]  = 'Cell 2G connection';
+  states[Connection.CELL_3G]  = 'Cell 3G connection';
+  states[Connection.CELL_4G]  = 'Cell 4G connection';
+  states[Connection.NONE]     = 'No network connection';
+  if (states[networkState] == 'No network connection') {
+    drupalgap.online = false;
+  }
+  else {
+    drupalgap.online = true;
+  }
+  return states[networkState];
 }
 
 /**
