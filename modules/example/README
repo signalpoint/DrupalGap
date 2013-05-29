@@ -4,6 +4,9 @@ for DrupalGap, follow these steps.
 1. Create new folder, for example:
 
   app/modules/custom/my_module
+
+  Note, for now your module must go inside the 'custom' directory like
+  the example above.
   
 2. Create new javascript file, for example:
 
