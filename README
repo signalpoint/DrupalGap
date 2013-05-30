@@ -33,16 +33,6 @@ websites running the DrupalGap module.
 Developers can create custom multi-platform mobile applications that communicate
 with their Drupal websites.
 
-  Stable Releases
-  ---------------
-
-    https://github.com/signalpoint/DrupalGap/tags
-
-  Development Snapshot
-  --------------------
-
-    https://github.com/signalpoint/DrupalGap
-
 |===============|
 | DrupalGap API |
 |===============|
