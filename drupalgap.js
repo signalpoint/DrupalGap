@@ -1,36 +1,36 @@
 var drupalgap = {
   'modules':{
-	  'core':[
-	     {'name':'api'},
-	     {'name':'block'},
-	     {'name':'comment'},
-	     {'name':'dashboard'},
-	     {'name':'entity'},
-	     {'name':'field'},
-	     {'name':'form'},
-	     {'name':'menu'},
-	     {'name':'node'},
-	     {'name':'services',
-	       'includes':[
-		       {'name':'comment'},
-		       {'name':'drupalgap_content'},
-		       {'name':'drupalgap_system'},
-		       {'name':'drupalgap_taxonomy'},
-		       {'name':'drupalgap_user'},
-		       {'name':'file'},
-		       {'name':'node'},
-		       {'name':'services'},
-		       {'name':'system'},
-		       {'name':'taxonomy_term'},
-		       {'name':'taxonomy_vocabulary'},
-		       {'name':'user'},
-	       ]
-	     },
-	     {'name':'system'},
-	     {'name':'taxonomy'},
-	     {'name':'user'},
-	     {'name':'views_datasource'},
-	   ]
+    'core':[
+       {'name':'api'},
+       {'name':'block'},
+       {'name':'comment'},
+       {'name':'dashboard'},
+       {'name':'entity'},
+       {'name':'field'},
+       {'name':'form'},
+       {'name':'menu'},
+       {'name':'node'},
+       {'name':'services',
+         'includes':[
+           {'name':'comment'},
+           {'name':'drupalgap_content'},
+           {'name':'drupalgap_system'},
+           {'name':'drupalgap_taxonomy'},
+           {'name':'drupalgap_user'},
+           {'name':'file'},
+           {'name':'node'},
+           {'name':'services'},
+           {'name':'system'},
+           {'name':'taxonomy_term'},
+           {'name':'taxonomy_vocabulary'},
+           {'name':'user'},
+         ]
+       },
+       {'name':'system'},
+       {'name':'taxonomy'},
+       {'name':'user'},
+       {'name':'views_datasource'},
+     ]
   },
   'module_paths':[],
   'includes':[
@@ -52,17 +52,17 @@ var drupalgap = {
   },
   'online':false,
   'destination':'',
-  'api':{}, // <!-- api -->
+  'api':{},
   'blocks':[],
-  'entity_info':{ }, /* <!-- entity_info --> */
-  'field_info_fields':{ }, /* <!-- field_info_fields --> */
-  'field_info_instances':{ }, /* <!-- field_info_instances --> */
-  'form_errors':{ },
+  'entity_info':{},
+  'field_info_fields':{},
+  'field_info_instances':{},
+  'form_errors':{},
   'form_states':[],
   'menus':{},
-  'menu_links':{}, /* <!-- menu_links --> */
-  'menu_router':{}, /* <!-- menu_router --> */
-  'page':{'variables':{}}, /* <!-- page --> */
+  'menu_links':{},
+  'menu_router':{},
+  'page':{'variables':{}},
   'path':'', /* The current menu path. */
   'services':{},
   'title':'',
@@ -124,7 +124,7 @@ function drupalgap_blocks_load() {
               // block as well, and set the module name on the block for reference.
               block.name = delta;
               block.delta = delta;
-              block.module = module;  
+              block.module = module;
               // Add the block to drupalgap.blocks.
               eval("drupalgap.blocks[0]." + delta + " = block;");
               //drupalgap.blocks[delta] = block;
@@ -144,59 +144,59 @@ function drupalgap_blocks_load() {
 
 
 /**
- * Takes option set 2, grabs the success/error callback(s), if any, 
+ * Takes option set 2, grabs the success/error callback(s), if any,
  * and appends them onto option set 1's callback(s), then returns
  * the newly assembled option set.
  */
 function drupalgap_chain_callbacks(options_set_1, options_set_2) {
-	
-	//console.log(JSON.stringify(options_set_1));
-	//console.log(JSON.stringify(options_set_2));
-	
-	// Setup the new options.
-	var new_options_set = {};
-	$.extend(true, new_options_set, options_set_1);
-	
-	// Chain the success callbacks.
-	if (options_set_2.success) {
-		if (new_options_set.success) {
-			if (!$.isArray(new_options_set.success)) {
-				var backup = new_options_set.success;
-				new_options_set.success = [];
-				new_options_set.success.push(backup);
-			}
-			new_options_set.success.push(options_set_2.success);
-		}
-		else {
-			new_options_set.success = options_set_2.success; 
-		}
-	}
-	
-	// Chain the error callbacks.
-	if (options_set_2.error) {
-		if (new_options_set.error) {
-			if (!$.isArray(new_options_set.error)) {	
-				var backup = new_options_set.error;
-				new_options_set.error = [];
-				new_options_set.error.push(backup);
-			}
-			new_options_set.error.push(options_set_2.error);
-		}
-		else {
-			new_options_set.error = options_set_2.error; 
-		}
-	}
-	
-	// For all other variables in option set 2, add them to the new option set.
-	$.each(options_set_2, function(index, object){
-		if (index != 'success' && index != 'error') {
-			new_options_set[index] = object;
-		}
-	});
-	
-	// Return the new option set.
-	//console.log(JSON.stringify(new_options_set));
-	return new_options_set;
+
+  //console.log(JSON.stringify(options_set_1));
+  //console.log(JSON.stringify(options_set_2));
+
+  // Setup the new options.
+  var new_options_set = {};
+  $.extend(true, new_options_set, options_set_1);
+
+  // Chain the success callbacks.
+  if (options_set_2.success) {
+    if (new_options_set.success) {
+      if (!$.isArray(new_options_set.success)) {
+        var backup = new_options_set.success;
+        new_options_set.success = [];
+        new_options_set.success.push(backup);
+      }
+      new_options_set.success.push(options_set_2.success);
+    }
+    else {
+      new_options_set.success = options_set_2.success;
+    }
+  }
+
+  // Chain the error callbacks.
+  if (options_set_2.error) {
+    if (new_options_set.error) {
+      if (!$.isArray(new_options_set.error)) {
+        var backup = new_options_set.error;
+        new_options_set.error = [];
+        new_options_set.error.push(backup);
+      }
+      new_options_set.error.push(options_set_2.error);
+    }
+    else {
+      new_options_set.error = options_set_2.error;
+    }
+  }
+
+  // For all other variables in option set 2, add them to the new option set.
+  $.each(options_set_2, function(index, object){
+    if (index != 'success' && index != 'error') {
+      new_options_set[index] = object;
+    }
+  });
+
+  // Return the new option set.
+  //console.log(JSON.stringify(new_options_set));
+  return new_options_set;
 }
 
 /**
@@ -232,95 +232,95 @@ function drupalgap_deviceready() {
   drupalgap_settings_load();
   // Load up includes.
   drupalgap_includes_load();
-	// Load up modules.
-	drupalgap_modules_load();
-	// Load up the theme.
-	drupalgap_theme_load();
-	// Load up blocks.
-	drupalgap_blocks_load();
-	// Initialize menu links.
-	menu_router_build();
-	// Initialize menus.
-	drupalgap_menus_load();
-	// Initialize the theme registry.
-	drupalgap_theme_registry_build();
-	// Verify site path is set.
-	if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
-		navigator.notification.alert(
-		    'No site path to Drupal set in the app/settings.js file!',
-		    function(){},
-		    'Error',
-		    'OK'
-		);
-		return false;
-	}
-	// Check device connection. If the device is offline, warn the user and then
-	// go to the offline page.
-	drupalgap_check_connection();
-	if (!drupalgap.online) {
-		module_invoke_all('device_offine');
-		navigator.notification.alert(
-		    'No connection found!',
-		    function(){ drupalgap_goto('offline'); },
-		    'Offline',
-		    'OK'
-		);
-		return false;
-	}
-	else {
-	  
-	  // Device is online, let's call any implementations of hook_device_online().
-	  // If any implementation returns false, that means they don't want DrupalGap
-	  // to continue with the System Connect call, so we'll skip that and go
-	  // straight to the App's front page.
-	  var proceed = true;
-		var invocation_results = module_invoke_all('device_online');
-		if (invocation_results && invocation_results.length > 0) {
-		  $.each(invocation_results, function(index, object){
-		      if (object === false) {
-		        proceed = false;
-		        return false;
-		      }
-		  });
-		}
-		if (!proceed) {
-		  drupalgap_goto('');
-		  // TODO - if module's are going to skip the System Connect call, then we
-		  // need to make sure drupalgap.user is set up with appropriate defaults.
-		}
-		else {
-			// Device is online, let's make a call to the
-			// DrupalGap System Connect Service Resource
-			drupalgap.services.drupalgap_system.connect.call({
-				'success':function(result){
-				  // Call all hook_device_connected implementations then go to
-				  // the front page.
-					module_invoke_all('device_connected');
-					drupalgap_goto('');
-				},
-				'error':function(jqXHR, textStatus, errorThrown) {
-				  // Build an informative error message and display it.
-				  var msg = 'drupalgap_deviceready() - failed connection to ' +
-				    drupalgap.settings.site_path;;
-				  if (errorThrown != '') { msg += ' - ' + errorThrown; }
-				  msg += ' - Go to www.drupalgap.org for troubleshooting info.';
+  // Load up modules.
+  drupalgap_modules_load();
+  // Load up the theme.
+  drupalgap_theme_load();
+  // Load up blocks.
+  drupalgap_blocks_load();
+  // Initialize menu links.
+  menu_router_build();
+  // Initialize menus.
+  drupalgap_menus_load();
+  // Initialize the theme registry.
+  drupalgap_theme_registry_build();
+  // Verify site path is set.
+  if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
+    navigator.notification.alert(
+        'No site path to Drupal set in the app/settings.js file!',
+        function(){},
+        'Error',
+        'OK'
+    );
+    return false;
+  }
+  // Check device connection. If the device is offline, warn the user and then
+  // go to the offline page.
+  drupalgap_check_connection();
+  if (!drupalgap.online) {
+    module_invoke_all('device_offine');
+    navigator.notification.alert(
+        'No connection found!',
+        function(){ drupalgap_goto('offline'); },
+        'Offline',
+        'OK'
+    );
+    return false;
+  }
+  else {
+
+    // Device is online, let's call any implementations of hook_device_online().
+    // If any implementation returns false, that means they don't want DrupalGap
+    // to continue with the System Connect call, so we'll skip that and go
+    // straight to the App's front page.
+    var proceed = true;
+    var invocation_results = module_invoke_all('device_online');
+    if (invocation_results && invocation_results.length > 0) {
+      $.each(invocation_results, function(index, object){
+          if (object === false) {
+            proceed = false;
+            return false;
+          }
+      });
+    }
+    if (!proceed) {
+      drupalgap_goto('');
+      // TODO - if module's are going to skip the System Connect call, then we
+      // need to make sure drupalgap.user is set up with appropriate defaults.
+    }
+    else {
+      // Device is online, let's make a call to the
+      // DrupalGap System Connect Service Resource
+      drupalgap.services.drupalgap_system.connect.call({
+        'success':function(result){
+          // Call all hook_device_connected implementations then go to
+          // the front page.
+          module_invoke_all('device_connected');
+          drupalgap_goto('');
+        },
+        'error':function(jqXHR, textStatus, errorThrown) {
+          // Build an informative error message and display it.
+          var msg = 'drupalgap_deviceready() - failed connection to ' +
+            drupalgap.settings.site_path;;
+          if (errorThrown != '') { msg += ' - ' + errorThrown; }
+          msg += ' - Go to www.drupalgap.org for troubleshooting info.';
           navigator.notification.alert(
               msg,
               function(){ drupalgap_goto('offline'); },
               'Unable to Connect to Drupal',
               'OK'
           );
-				}
-			});
-		}
-	}
+        }
+      });
+    }
+  }
 }
 
 /**
  * Checks if a given file exists, returns true or false.
- * @param  {string} path 
+ * @param  {string} path
  *   A path to a file
- * @return {bool}      
+ * @return {bool}
  *   True if file exists, else flase
  */
 function drupalgap_file_exists(path) {
@@ -382,11 +382,11 @@ function drupalgap_format_plural(count, singular, plural) {
       return singular;
     }
     return plural;
-	}
-	catch (error) {
-	  alert('drupalgap_format_plural - ' + error);
-	}
-	return null;
+  }
+  catch (error) {
+    alert('drupalgap_format_plural - ' + error);
+  }
+  return null;
 }
 
 /**
@@ -428,7 +428,7 @@ function drupalgap_get_placeholders_from_html(html) {
 
 
 /**
- * 
+ *
  * @param type
  * @param name
  */
@@ -458,7 +458,7 @@ function drupalgap_get_path(type, name) {
   catch (error) {
     alert('drupalgap_get_path - ' + error);
   }
-	return null;
+  return null;
 }
 
 /**
@@ -488,7 +488,7 @@ function drupalgap_get_wildcards_from_router_path(router_path) {
       console.log('drupalgap_get_wildcards_from_router_path(' + router_path + ')');
     }
     var wildcards = false;
-    
+
     return wildcards;
   }
   catch (error) {
@@ -502,17 +502,17 @@ function drupalgap_get_wildcards_from_router_path(router_path) {
  * Drupal site.
  */
 function drupalgap_image_path(uri) {
-	try {
-		var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
-		if (src.indexOf('public://') != -1) {
-			var src = src.replace('public://', drupalgap.settings.file_public_path + '/');
-		}
-		return src;
-	}
-	catch (error) {
-		alert('drupalgap_image_path - ' + error);
-	}
-	return null;
+  try {
+    var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
+    if (src.indexOf('public://') != -1) {
+      var src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+    }
+    return src;
+  }
+  catch (error) {
+    alert('drupalgap_image_path - ' + error);
+  }
+  return null;
 }
 
 /**
@@ -716,46 +716,46 @@ function drupalgap_modules_get_bundle_directory(bundle) {
  * Loads each drupalgap module so they are available in the JS scope.
  */
 function drupalgap_modules_load() {
-	if (drupalgap.modules != null && drupalgap.modules.length != 0) {
-		$.each(drupalgap.modules, function(bundle, modules){
-			$.each(modules, function(index, module){
-				// Determine module directory.
-				dir = drupalgap_modules_get_bundle_directory(bundle);
-				module_base_path = dir + '/' + module.name;
-				// Add module .js file to array of paths to load.
-				module_path =  module_base_path + '/' + module.name + '.js';
-				modules_paths = [module_path];
-				// If there are any includes with this module, add them to the list of
-				// paths to include.
-				if (module.includes != null && module.includes.length != 0) {
-					$.each(module.includes, function(include_index, include_object){
-						modules_paths.push(module_base_path + '/' + include_object.name + '.js');
-					});
-				}
-				// Now load all the paths for this module.
-				$.each(modules_paths, function(modules_paths_index, modules_paths_object){
-					jQuery.ajax({
-					    async:false,
-					    type:'GET',
-					    url:modules_paths_object,
-					    data:null,
-					    success:function(){
-					    	if (drupalgap.settings.debug) {
-					    		// Print the module path to the console.
-					    		console.log(modules_paths_object);
-					    	}
-					    },
-					    dataType:'script',
-					    error: function(xhr, textStatus, errorThrown) {
-					        // Look at the `textStatus` and/or `errorThrown` properties.
-					    }
-					});
-				});
-			});
-		});
-		// Now invoke hook_install on all modules.
-		module_invoke_all('install');
-	}
+  if (drupalgap.modules != null && drupalgap.modules.length != 0) {
+    $.each(drupalgap.modules, function(bundle, modules){
+      $.each(modules, function(index, module){
+        // Determine module directory.
+        dir = drupalgap_modules_get_bundle_directory(bundle);
+        module_base_path = dir + '/' + module.name;
+        // Add module .js file to array of paths to load.
+        module_path =  module_base_path + '/' + module.name + '.js';
+        modules_paths = [module_path];
+        // If there are any includes with this module, add them to the list of
+        // paths to include.
+        if (module.includes != null && module.includes.length != 0) {
+          $.each(module.includes, function(include_index, include_object){
+            modules_paths.push(module_base_path + '/' + include_object.name + '.js');
+          });
+        }
+        // Now load all the paths for this module.
+        $.each(modules_paths, function(modules_paths_index, modules_paths_object){
+          jQuery.ajax({
+              async:false,
+              type:'GET',
+              url:modules_paths_object,
+              data:null,
+              success:function(){
+                if (drupalgap.settings.debug) {
+                  // Print the module path to the console.
+                  console.log(modules_paths_object);
+                }
+              },
+              dataType:'script',
+              error: function(xhr, textStatus, errorThrown) {
+                  // Look at the `textStatus` and/or `errorThrown` properties.
+              }
+          });
+        });
+      });
+    });
+    // Now invoke hook_install on all modules.
+    module_invoke_all('install');
+  }
 }
 
 /**
@@ -771,12 +771,12 @@ function drupalgap_place_args_in_path(input_path) {
     }
     var assembled_path = false;
     if (input_path) {
-      
+
       // Determine path to use and break it up into its args.
       var path = drupalgap.path;
       if (arguments[1]) { path = arguments[1]; }
       var path_args = arg(null, path);
-      
+
       // Grab wild cards from router path then replace each wild card with
       // the corresponding path arg.
       var wildcards;
@@ -842,7 +842,7 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
           load_function_prefix = args[0] + '_' + args[1];
         }
       }
-      var load_function = load_function_prefix + '_load'; 
+      var load_function = load_function_prefix + '_load';
       if (drupalgap_function_exists(load_function)) {
         var entity_fn = window[load_function];
         var entity = entity_fn(parseInt(args[int_arg_index]));
@@ -1003,51 +1003,51 @@ function drupalgap_theme_registry_build() {
  * PhoneGap 'deviceready' event listener to drupalgap_deviceready().
  */
 function drupalgap_onload() {
-	document.addEventListener("deviceready", drupalgap_deviceready, false);
+  document.addEventListener("deviceready", drupalgap_deviceready, false);
 }
 
 /*
  * Given a drupal permission machine name, this function returns true if the
  * current user has that permission, false otherwise. Here is example input
  * that checks to see if the current user has the 'access content' permission.
- * 	Example Usage:
- * 		user_access = drupalgap_user_access({'permission':'access content'});
- * 		if (user_access) {
- * 			alert("You have the 'access content' permission.");
- * 		}
- * 		else {
- * 			alert("You do not have the 'access content' permission.");
- * 		}
+ *  Example Usage:
+ *    user_access = drupalgap_user_access({'permission':'access content'});
+ *    if (user_access) {
+ *      alert("You have the 'access content' permission.");
+ *    }
+ *    else {
+ *      alert("You do not have the 'access content' permission.");
+ *    }
  */
 function drupalgap_user_access(options) {
-	try {
-		// Make sure they provided a permission.
-		if (options.permission == null) {
-			alert("drupalgap_user_access - permission not provided");
-			return false;
-		}
-		// User 1 always has permission.
-		if (drupalgap.user.uid == 1) {
-			return true;
-		}
-		// For everyone else, assume they don't have permission. Iterate over
-		// drupalgap.user.permissions to see if the current user has the given
-		// permission, then return the result.
-		access = false;
-		if (drupalgap.user.permissions && drupalgap.user.permissions.length != 0) {
+  try {
+    // Make sure they provided a permission.
+    if (options.permission == null) {
+      alert("drupalgap_user_access - permission not provided");
+      return false;
+    }
+    // User 1 always has permission.
+    if (drupalgap.user.uid == 1) {
+      return true;
+    }
+    // For everyone else, assume they don't have permission. Iterate over
+    // drupalgap.user.permissions to see if the current user has the given
+    // permission, then return the result.
+    access = false;
+    if (drupalgap.user.permissions && drupalgap.user.permissions.length != 0) {
       $.each(drupalgap.user.permissions, function(index, permission){
         if (options.permission == permission) {
           access = true;
           return;
         }
       });
-		}
-		return access;
-	}
-	catch (error) {
-		alert("drupalgap_user_access - " + error);
-	}
-	return false;
+    }
+    return access;
+  }
+  catch (error) {
+    alert("drupalgap_user_access - " + error);
+  }
+  return false;
 }
 
 $('.drupalgap_front').on('click', function(){
