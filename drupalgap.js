@@ -52,38 +52,24 @@ var drupalgap = {
   },
   'online':false,
   'destination':'',
-  /*'account':{ },
-  'account_edit':{ },*/
   'api':{}, // <!-- api -->
   'blocks':[],
-  /*'comment':{ },
-  'comment_edit':{ },*/
-  /*'entity':{},
-  'entity_edit':{},*/
   'entity_info':{ }, /* <!-- entity_info --> */
   'field_info_fields':{ }, /* <!-- field_info_fields --> */
   'field_info_instances':{ }, /* <!-- field_info_instances --> */
-  /*'form':{ },
-  'form_state':{ },*/
   'form_errors':{ },
   'form_states':[],
-  /*'node':{ },
-  'node_edit':{ },*/
   'menus':{},
   'menu_links':{}, /* <!-- menu_links --> */
   'menu_router':{}, /* <!-- menu_router --> */
   'page':{'variables':{}}, /* <!-- page --> */
   'path':'', /* The current menu path. */
-  'services':{}, // <!-- services -->
-  /*'taxonomy_term':{ },
-  'taxonomy_term_edit':{ },
-  'taxonomy_vocabulary':{ },
-  'taxonomy_vocabulary_edit':{ },*/
+  'services':{},
   'title':'',
   'theme_path':'',
   'themes':[],
   'theme_registry':{},
-  'views_datasource':{}, // <!-- views_datasource -->
+  'views_datasource':{},
 }; // <!-- drupalgap -->
 
 /**
@@ -313,16 +299,17 @@ function drupalgap_deviceready() {
 					drupalgap_goto('');
 				},
 				'error':function(jqXHR, textStatus, errorThrown) {
-					if (errorThrown == 'Not Found') {
-						navigator.notification.alert(
-						    'Review DrupalGap Troubleshooting Topics!',
-						    function(){
-						      // TODO - Offer some helpful tips if the user gets stuck here!
-						    },
-						    'Unable to Connect to Drupal',
-						    'OK'
-						);
-					}
+				  // Build an informative error message and display it.
+				  var msg = 'drupalgap_deviceready() - failed connection to ' +
+				    drupalgap.settings.site_path;;
+				  if (errorThrown != '') { msg += ' - ' + errorThrown; }
+				  msg += ' - Go to www.drupalgap.org for troubleshooting info.';
+          navigator.notification.alert(
+              msg,
+              function(){ drupalgap_goto('offline'); },
+              'Unable to Connect to Drupal',
+              'OK'
+          );
 				}
 			});
 		}
