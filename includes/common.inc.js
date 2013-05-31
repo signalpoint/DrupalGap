@@ -197,12 +197,15 @@ function drupalgap_goto(path) {
       var html = drupalgap_file_get_contents(page_template_path);
       if (html) {
         drupalgap_add_page_to_dom(page_id, html);
-        // NOTE: This call appears to be synchronous, so we could do stuff after
-        // this here... hook anyone?
-        if (drupalgap.settings.debug) {
-          console.log('drupalgap_goto - changePage => ' + page_id);
+        // Depending on the device platform, change the page accordingly. Note,
+        // Android seems to want the 'index.html' prefix, while others (e.g.
+        // Ripple do not want it).
+        if (device.platform == 'Android') {
+          $.mobile.changePage('index.html#' + page_id);
         }
-        $.mobile.changePage('#' + page_id);
+        else {
+          $.mobile.changePage('#' + page_id);
+        }
       }
       else {
         alert("drupalgap_goto - failed to load theme's page.tpl.html file");

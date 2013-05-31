@@ -121,7 +121,7 @@ function offline_page() {
     }
     var content = {
       'message':{
-        'markup':'<h2>No Network Connection</h2>' + 
+        'markup':'<h2>Failed Connection</h2>' + 
           "<p>Oops! We couldn't connect to:</p>" + 
           '<p>' + drupalgap.settings.site_path + '</p>',
       },
