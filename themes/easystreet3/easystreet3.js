@@ -33,6 +33,11 @@ function easystreet3_info() {
           "attributes":{
             "data-role":"content"
           }
+        },
+        "footer":{
+          "attributes":{
+            "data-role":"footer"
+          }
         }
       }
     };
