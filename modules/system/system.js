@@ -173,3 +173,23 @@ function offline_try_again() {
   }	
 };
 
+/**
+ * Returns an array of region names defined by the system that themes must use.
+ * We do this so Core and Contrib Modules can use these regions for UI needs.
+ */
+function system_regions_list() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('system_regions_list()');
+      console.log(JSON.stringify(arguments));
+    }
+    var regions = ['header', 'content', 'footer'];
+    return regions;
+  }
+  catch (error) {
+    alert('system_regions_list - ' + error);
+  }
+}
+
+// REGION SET BUTTON
+

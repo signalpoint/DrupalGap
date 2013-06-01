@@ -30,7 +30,9 @@ function dashboard_page() {
       console.log(JSON.stringify(arguments));
     }
     // TODO - Show site logo and the most recent published node that is promoted
-    // to front page.
+    // to front page. Actually it would be neat if the Dashboard links could be
+    // controlled through the Drupal UI. Or some type of settings.js stuff so
+    // users can have their own custom dashboard.
     return '';
     /*var content = {
       'users':{

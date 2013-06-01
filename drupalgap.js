@@ -956,6 +956,20 @@ function drupalgap_theme_load() {
           console.log('theme loaded: ' + theme_name);
           console.log(JSON.stringify(drupalgap.theme));
         }
+        // For each region in the name, set the 'name' value on the region JSON.
+        $.each(drupalgap.theme.regions, function(name, region){
+            drupalgap.theme.regions[name].name = name;
+        });
+        // Make sure the theme implements the required regions.
+        var regions = system_regions_list();
+        for (var i = 0; i < regions.length; i++) {
+          var region = regions[i];
+          if (typeof drupalgap.theme.regions[region] === 'undefined') {
+            console.log('WARNING: drupalgap_theme_load() - The "' +
+                        theme_name + '" theme does not have the "' + region +
+                        '" region specified in "' + theme_name + '_info()."');
+          }
+        }
         // Theme loaded successfully! Set the drupalgap.theme_path and return
         // true.
         drupalgap.theme_path = theme_path.replace('/' + theme_name + '.js', '');

@@ -1,0 +1,13 @@
+This document describes how to update your mobile application from one minor
+version of DrupalGap to another. For example, 7.x-1.2-alpha to 7.x-1.3-alpha
+
+7.x-1.2-alpha => 7.x-1.3-alpha
+
+  Any themes created prior to 7.x-1.2-alpha need to have their template_info()
+  hook updated to match the new region naming convention. The regions are now
+  keyed by name and will have their 'name' property automatically set. We made
+  this change so regions could easily be accessed
+  (e.g. drupalgap.theme.regions.header) instead of having to iterate over all
+  regions looking for a specific name. See themes/easystreet3/easystreet3.js
+  for example code.
+  
