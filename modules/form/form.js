@@ -43,7 +43,9 @@ function drupalgap_form_render(form) {
         }
         // Add a label to all fields, except submit.
         if (element.type != 'submit' && element.type != 'hidden') {
-          form_element += '<label for="' + name + '"><strong>' + element.title + '</strong></label>';
+          form_element += '<label for="' + name + '"><strong>' + element.title + '</strong>';
+          if (element.required) { form_element += '*'; }
+          form_element += '</label>';
         }
         // If there wasn't a default value provided, set one.
         if (!element.default_value) {
