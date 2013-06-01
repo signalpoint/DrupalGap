@@ -33,10 +33,6 @@ drupalgap.settings = {
   'blocks':{
     'easystreet3':{
       'header':{
-        /* Instead of just a header block, we may want 3 separate blocks, that
-           way we can have a title, and a menu button on the left and right (and
-           potentially drop down menus if we continue to utilize the menu/block
-           goodness) */
         'header':{}
       },
       'navigation':{
