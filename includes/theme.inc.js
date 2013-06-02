@@ -59,9 +59,15 @@ function theme(hook, variables) {
     }
     var theme_function = 'theme_' + hook;
     if (eval('typeof ' + theme_function) == 'function') {
-      // If no attributes are coming in, setup an empty JSON object for them.
+      // If no attributes are coming in, look to variables.options.attributes
+      // as a secondary option, otherwise setup an empty JSON object for them.
       if (typeof variables.attributes === "undefined") {
-        variables.attributes = {};
+        if (variables.options && variables.options.attributes) {
+          variables.attributes = variables.options.attributes;
+        }
+        else {
+          variables.attributes = {};
+        }
       }
       if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
         console.log(theme_function + '()');
