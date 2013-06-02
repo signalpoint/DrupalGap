@@ -46,6 +46,57 @@ function drupalgap_attributes(attributes) {
 }
 
 /**
+ * Used by drupalgap_render_region to check the visibility settings on region
+ * links and blocks. Just like Drupal Blocks, this function checks the visibility
+ * rules specified by role or pages specified in data. Returns true by default,
+ * otherwise it will return true or false depending on the first visibility
+ * setting present in data.
+ */
+function drupalgap_check_visibility(type, data) {
+  try {
+    var visible = true;
+    // Roles.
+    if (data.roles && data.roles.value && data.roles.value.length != 0) {
+      $.each(data.roles.value, function(role_index, role){
+          var has_role = false;
+          if (drupalgap_user_has_role(role)) {
+            // User has role, show/hide the block accordingly.
+            if (data.roles.mode == 'include') { visible = true; }
+            if (data.roles.mode == 'exclude') { visible = false; }
+          }
+          else {
+            // User does not have role, show/hide the block accordingly.
+            if (data.roles.mode == 'include') { visible = false; }
+            if (data.roles.mode == 'exclude') { visible = true; }
+          }
+          // Break out of the loop.
+          return false;
+      });
+    }
+    // Pages.
+    else if (data.pages && data.pages.value && data.pages.value.length != 0) {
+      $.each(data.pages.value, function(page_index, path){
+          if (path == drupalgap.path) {
+            if (data.pages.mode == 'include') { visible = true; }
+            else if (data.pages.mode == 'exclude') { visible = false; }
+          }
+          else {
+            if (data.pages.mode == 'include') { visible = false; }
+            else if (data.pages.mode == 'exclude') { visible = true; }
+          }
+          // Break out of the loop.
+          return false;
+      });
+    }
+    return visible;
+  }
+  catch (error) {
+    alert('drupalgap_check_visibility - ' + error);
+  }
+}
+
+
+/**
  * Returns the current page path as a string.
  */
 function drupalgap_get_current_path() {
@@ -358,30 +409,16 @@ function drupalgap_render_region(region) {
       // If there are any links attached to this region, render them first.
       if (region.links && region.links.length > 0) {
         for (var i = 0; i < region.links.length; i++) {
-          region_html += theme('link', region.links[i]); 
+          // Check link's region visiblity settings.
+          if (drupalgap_check_visibility('region', region.links[i].region)) {
+            region_html += l(region.links[i].title, region.links[i].path, region.links[i].region.options);
+          }
         }
       }
       // Render each block in the region.
       $.each(eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name), function(block_delta, block_settings){
-          // Check the block's visibility rules.
-          var show_block = true;
-          // If there are any roles specified in the block settings.
-          if (block_settings.roles && block_settings.roles.value && block_settings.roles.value.length != 0) {
-            $.each(block_settings.roles.value, function(role_index, role){
-                var has_role = false;
-                if (drupalgap_user_has_role(role)) {
-                  // User has role, show/hide the block accordingly.
-                  if (block_settings.roles.mode == 'include') { show_block = true; }
-                  if (block_settings.roles.mode == 'exclude') { show_block = false; }
-                }
-                else {
-                  // User does not have role, show/hide the block accordingly.
-                  if (block_settings.roles.mode == 'include') { show_block = false; }
-                  if (block_settings.roles.mode == 'exclude') { show_block = true; }
-                }
-            });
-          }
-          if (show_block) {
+          // Check the block's visibility settings.
+          if (drupalgap_check_visibility('block', block_settings)) {
             var block = drupalgap_block_load(block_delta);
             if (block) {
               region_html += module_invoke(block.module, 'block_view', block_delta);

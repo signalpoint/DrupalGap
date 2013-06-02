@@ -402,9 +402,7 @@ function drupalgap_menus_load() {
             if (!drupalgap.theme.regions[menu_link.region.name].links) {
               drupalgap.theme.regions[menu_link.region.name].links = [];
             }
-            drupalgap.theme.regions[menu_link.region.name].links.push(
-              drupalgap_menus_load_convert_menu_link_to_link_json(menu_link)
-            );
+            drupalgap.theme.regions[menu_link.region.name].links.push(menu_link);
           }
       });
     }
@@ -426,6 +424,9 @@ function drupalgap_menus_load_convert_menu_link_to_link_json(menu_link) {
       // TODO - this is strange, we have to fill the 'text' value so theme_link
       // will play nice. These two properties, and their usage, need a thorough
       // review, only one should probably be used.
+      // UPDATE - the link.text property is probably no longer used, it should
+      // be safe to get rid of. In fact, this whole function is dumb and should
+      // go away.
       link.title = menu_link.title;
       link.text = menu_link.title;
     }
