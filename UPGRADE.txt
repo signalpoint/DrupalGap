@@ -11,3 +11,4 @@ version of DrupalGap to another. For example, 7.x-1.2-alpha to 7.x-1.3-alpha
   regions looking for a specific name. See themes/easystreet3/easystreet3.js
   for example code.
   
+  hook_device_online() has been renamed to hook_deviceready()

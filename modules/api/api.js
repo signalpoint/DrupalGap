@@ -151,8 +151,9 @@ function drupalgap_api_default_options() {
  * hook need to return true if they'd like DrupalGap to continue, or return
  * false if you'd like DrupalGap to NOT continue. If DrupalGap continues, it
  * will perform a System Connect resource call then go to the App's front page.
+ * This is called during DrupalGap's "deviceready" implementation for PhoneGap.
  */
-function hook_device_online() {
+function hook_deviceready() {
   
 }
 

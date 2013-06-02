@@ -269,12 +269,12 @@ function drupalgap_deviceready() {
   }
   else {
 
-    // Device is online, let's call any implementations of hook_device_online().
+    // Device is online, let's call any implementations of hook_deviceready().
     // If any implementation returns false, that means they don't want DrupalGap
     // to continue with the System Connect call, so we'll skip that and go
     // straight to the App's front page.
     var proceed = true;
-    var invocation_results = module_invoke_all('device_online');
+    var invocation_results = module_invoke_all('deviceready');
     if (invocation_results && invocation_results.length > 0) {
       $.each(invocation_results, function(index, object){
           if (object === false) {
