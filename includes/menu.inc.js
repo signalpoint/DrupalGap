@@ -345,7 +345,9 @@ function drupalgap_get_menu_link_router_path(path) {
  * defined menus will already be present and should be overwritten with any
  * customizations present in the settings. It then iterates over the menu links
  * specified in drupalgap.menu_links and attaches any of them that have a
- * menu_name to their corresponding menu in drupalgap.menus.
+ * menu_name to their corresponding menu in drupalgap.menus. Any menu link items
+ * that have a 'region' property specified will be added to
+ * drupalgap.theme.regions[region].
  */
 function drupalgap_menus_load() {
   try {
@@ -369,10 +371,12 @@ function drupalgap_menus_load() {
             $.extend(true, eval('drupalgap.menus.' + menu_name), menu);
           }
       });
-      // Now that we have all of the menus loaded up, and the menu router is built,
-      // let's grab any links from the router that have a menu specified, and add
-      // the link to the router.
+      // Now that we have all of the menus loaded up, and the menu router is
+      // built, let's iterate over all the menu links and perform various
+      // operations on them.
       $.each(drupalgap.menu_links, function(path, menu_link){
+          // Let's grab any links from the router that have a menu specified,
+          // and add the link to the router.
           if (menu_link.menu_name) {
             if (eval('drupalgap.menus.' + menu_link.menu_name)) {
               // Create a links array for the menu if one doesn't exist already.
@@ -384,15 +388,23 @@ function drupalgap_menus_load() {
               // Now push the link onto the menu. We only care about the title,
               // path and options, as this is just a link. The rest of the
               // menu link data can be retrieved from drupalgap.menu_links.
-              var link = {};
-              if (menu_link.title) { link.title = menu_link.title; }
-              if (menu_link.path) { link.path = menu_link.path; }
-              if (menu_link.options) { link.options = menu_link.options; }
+              var link = drupalgap_menus_load_convert_menu_link_to_link_json(menu_link);
               eval('drupalgap.menus.' + menu_link.menu_name + '.links.push(link);');
             }
             else {
               alert('drupalgap_menus_load - menu does not exist (' + menu_link.menu_name + '), cannot attach link to it (' + path + ')');
             }
+          }
+          // If the menu link is set to a specific region, create a links array
+          // for the region if one doesn't exist already, then add the menu item
+          // to the links array as a link.
+          if (menu_link.region) {
+            if (!drupalgap.theme.regions[menu_link.region].links) {
+              drupalgap.theme.regions[menu_link.region].links = [];
+            }
+            drupalgap.theme.regions[menu_link.region].links.push(
+              drupalgap_menus_load_convert_menu_link_to_link_json(menu_link)
+            );
           }
       });
     }
@@ -401,6 +413,31 @@ function drupalgap_menus_load() {
     alert('drupalgap_menus_load - ' + error);
   }
 }
+
+/**
+ * Given a menu link item from drupalgap_menus_load(), this will return a JSON
+ * object representing a link object compatable with theme_link(). It contains
+ * the link title, path and options.
+ */
+function drupalgap_menus_load_convert_menu_link_to_link_json(menu_link) {
+  try {
+    var link = {};
+    if (menu_link.title) {
+      // TODO - this is strange, we have to fill the 'text' value so theme_link
+      // will play nice. These two properties, and their usage, need a thorough
+      // review, only one should probably be used.
+      link.title = menu_link.title;
+      link.text = menu_link.title;
+    }
+    if (menu_link.path) { link.path = menu_link.path; }
+    if (menu_link.options) { link.options = menu_link.options; }
+    return link;
+  }
+  catch (error) {
+    alert('drupalgap_menus_load_convert_menu_link_to_link_json - ' + error);
+  }
+}
+
 
 /**
  * Given a path, and its corresponding menu item, this will determine any
