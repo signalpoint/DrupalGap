@@ -18,7 +18,6 @@ function drupalgap_add_page_to_dom(page_id, html) {
   }
 }
 
-
 /**
  * Converts a JSON object to an XML/HTML tag attribute string and returns the
  * string.
@@ -349,11 +348,20 @@ function drupalgap_render_region(region) {
       alert('drupalgap_render_region - region (' + region.name + ') not defined in settings.js blocks!');
       return '';
     }
-    // If the region has blocks specified in it under the theme in settings.js,
-    // render each block in the region.
+    // Let's render the region...
     var region_html = '';
+    
+    // If the region has blocks specified in it under the theme in settings.js...
     if (eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name)) {
+      // Open the region container.
       region_html += '<div ' + drupalgap_attributes(region.attributes)  + '>';
+      // If there are any links attached to this region, render them first.
+      if (region.links && region.links.length > 0) {
+        for (var i = 0; i < region.links.length; i++) {
+          region_html += theme('link', region.links[i]); 
+        }
+      }
+      // Render each block in the region.
       $.each(eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name), function(block_delta, block_settings){
           // Check the block's visibility rules.
           var show_block = true;
@@ -380,6 +388,7 @@ function drupalgap_render_region(region) {
             }
           }
       });
+      // Close the region container.
       region_html += '</div><!-- ' + region.name + ' -->';
     }
     return region_html;
