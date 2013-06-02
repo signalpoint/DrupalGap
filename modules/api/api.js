@@ -145,3 +145,16 @@ function drupalgap_api_default_options() {
   return default_options;
 }
 
+/**
+ * When the app is first loading up, DrupalGap checks to see if the device has
+ * a connection, if it does then this hook is called. Implementations of this
+ * hook need to return true if they'd like DrupalGap to continue, or return
+ * false if you'd like DrupalGap to NOT continue. If DrupalGap continues, it
+ * will perform a System Connect resource call then go to the App's front page.
+ */
+function hook_device_online() {
+  
+}
+
+// TODO - list all other core hooks here.
+
