@@ -399,10 +399,10 @@ function drupalgap_menus_load() {
           // for the region if one doesn't exist already, then add the menu item
           // to the links array as a link.
           if (menu_link.region) {
-            if (!drupalgap.theme.regions[menu_link.region].links) {
-              drupalgap.theme.regions[menu_link.region].links = [];
+            if (!drupalgap.theme.regions[menu_link.region.name].links) {
+              drupalgap.theme.regions[menu_link.region.name].links = [];
             }
-            drupalgap.theme.regions[menu_link.region].links.push(
+            drupalgap.theme.regions[menu_link.region.name].links.push(
               drupalgap_menus_load_convert_menu_link_to_link_json(menu_link)
             );
           }
@@ -431,6 +431,11 @@ function drupalgap_menus_load_convert_menu_link_to_link_json(menu_link) {
     }
     if (menu_link.path) { link.path = menu_link.path; }
     if (menu_link.options) { link.options = menu_link.options; }
+    // If it is a menu link on a region, and it has options, set the link options
+    // to the ones provided in the menu link region settings.
+    if (menu_link.region && menu_link.region.options) {
+      link.options = menu_link.options = menu_link.region.options;
+    }
     return link;
   }
   catch (error) {
