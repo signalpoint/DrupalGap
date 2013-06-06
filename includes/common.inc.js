@@ -183,29 +183,31 @@ function drupalgap_goto(path) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_goto(' + path + ')');
-      console.log('$.mobile.activePage[0].id = ' + $.mobile.activePage[0].id);
-      $.each($.mobile.activePage, function(index, object){
-          console.log(index);
-          console.log(object);
-      }); 
     }
     
-    // If the path was an empty sting, set it to the front page.
-    if (path == '') { path = drupalgap.settings.front; }  
-    // If the path is to 'user', and the user is logged in, let's set the path
-    // to 'user/[uid]' so the router path can be determined properly.
-    else if (path == 'user' && drupalgap.user.uid != 0) {
-      path = 'user/' + drupalgap.user.uid;
+    // Extract any incoming options, and set any defaults that weren't provided.
+    var options = false;
+    if (arguments[1]) {
+      options = arguments[1];
+      if (!options.form_submission) {
+        options.form_submission = true;
+      }
     }
     
-    // Return if we are trying to go to the path we are already on.
-    if (drupalgap.path == path) {
+    // Prepare the path.
+    path = drupalgap_goto_prepare_path(path);
+    
+    // Return if we are trying to go to the path we are already on, unless this
+    // was a form submission, then we'll let the page rebuild itself
+    if (drupalgap.path == path && !options.form_submission) {
       return false;
     }
     
     // Is this a jQM path?
     if (path.indexOf('#') == 0) {
       // TODO - We'll just let internal jQM paths go through... for now...?
+                // UPDATE - do we even deal with jQM paths anymore? Or I we only
+                // using DrupalGap paths. Weight the pros and cons.
       $.mobile.changePage(path, {reloadPage:true});
       return false;
     }
@@ -216,7 +218,90 @@ function drupalgap_goto(path) {
     // Grab the page id.
     var page_id = drupalgap_get_page_id(path);
 
-    // Check to see if the page already exists in the DOM.
+    // If the page is already in the DOM, remove it.
+    if (drupalgap_page_in_dom(page_id) && !options.form_submission) {
+      $('#' + page_id).empty().remove();
+    }
+
+    // Generate the page.
+    drupalgap_goto_generate_page_and_go(path, page_id, options);
+    
+  }
+  catch (error) {
+    alert('drupalgap_goto - ' + error);
+  }
+}
+
+/**
+ * Generate a JQM page by running it through the theme then attach the
+ * page to the <body> of the document, then change to the page. Remember,
+ * the rendering of the page does not take place here, that is covered by
+ * the pagebeforechange event in theme.inc.js which happens after we change
+ * the page here.
+ */
+function drupalgap_goto_generate_page_and_go(path, page_id, options) {
+  try {
+    var page_template_path = path_to_theme() + '/page.tpl.html';
+    if (!drupalgap_file_exists(page_template_path)) {
+      alert('drupalgap_goto_generate_page_and_go - page template does not exist! (' + page_template_path + ')');
+    }
+    else {
+      var html = drupalgap_file_get_contents(page_template_path);
+      if (html) {
+        // Add page to DOM.
+        drupalgap_add_page_to_dom(page_id, html);
+        // Depending on the device platform, change the page accordingly. Note,
+        // Android seems to want the 'index.html' prefix, while others (e.g.
+        // Ripple do not want it). Setup change page options if necessary.
+        var changePageOptions = {};
+        if (drupalgap.path == path && options.form_submission) {
+          changePageOptions.allowSamePageTransition = true;
+        }
+        if (device.platform == 'Android') {
+          $.mobile.changePage('index.html#' + page_id, changePageOptions);
+        }
+        else {
+          $.mobile.changePage('#' + page_id, changePageOptions);
+        }
+      }
+      else {
+        alert("drupalgap_goto_generate_page_and_go - failed to load theme's page.tpl.html file");
+      }
+    }
+  }
+  catch (error) {
+    alert('drupalgap_goto_generate_page_and_go - ' + error);
+  }
+}
+
+/**
+ * Given a path, this function will do any necessary conversions to the path so
+ * it is better understood by the menu system. For example, a path of "" in
+ * Drupal is used to represent the front page, so this function would turn the
+ * "" value into the App's actual front page (drupalgap.settings.front) path
+ * value so the menu system routes it correctly.
+ */
+function drupalgap_goto_prepare_path(path) {
+  try {
+    // If the path was an empty sting, set it to the front page.
+    if (path == '') { path = drupalgap.settings.front; }  
+    // If the path is to 'user', and the user is logged in, let's set the path
+    // to 'user/[uid]' so the router path can be determined properly.
+    else if (path == 'user' && drupalgap.user.uid != 0) {
+      path = 'user/' + drupalgap.user.uid;
+    }
+    return path;
+  }
+  catch(error) {
+    alert('drupalgap_goto_prepare_path - ' + error);
+  }
+}
+
+/**
+ * Returns true if the given page id's page div already exists in the DOM.
+ */
+function drupalgap_page_in_dom(page_id) {
+  try {
     var pages = $("body div[data-role$='page']");
     var page_in_dom = false;
     if (pages && pages.length > 0) {
@@ -227,43 +312,12 @@ function drupalgap_goto(path) {
           }
       });
     }
-
-    // If the page is already in the DOM, remove it.
-    if (page_in_dom) {
-      $('#' + page_id).empty().remove();
-    }
-
-    // Generate a JQM page by running it through the theme then attach the
-    // page to the <body> of the document, then change to the page. Remember,
-    // the rendering of the page does not take place here, that is covered by
-    // the pagebeforechange event in theme.inc.js which happens after we change
-    // the page here.
-    var page_template_path = path_to_theme() + '/page.tpl.html';
-    if (!drupalgap_file_exists(page_template_path)) {
-      alert('drupalgap_goto - page template does not exist! (' + page_template_path + ')');
-    }
-    else {
-      var html = drupalgap_file_get_contents(page_template_path);
-      if (html) {
-        drupalgap_add_page_to_dom(page_id, html);
-        // Depending on the device platform, change the page accordingly. Note,
-        // Android seems to want the 'index.html' prefix, while others (e.g.
-        // Ripple do not want it).
-        if (device.platform == 'Android') {
-          $.mobile.changePage('index.html#' + page_id);
-        }
-        else {
-          $.mobile.changePage('#' + page_id);
-        }
-      }
-      else {
-        alert("drupalgap_goto - failed to load theme's page.tpl.html file");
-      }
-    }
+    return page_in_dom;
   }
   catch (error) {
-    alert('drupalgap_goto - ' + error);
+    alert('drupalgap_page_in_dom - ' + error);
   }
+  
 }
 
 /**
