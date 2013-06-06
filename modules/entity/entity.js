@@ -129,7 +129,12 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       if (form.action) {
         destination = form.action;
       }
-      drupalgap_goto(destination);
+      // TODO - this drupalgap_goto probably shouldn't be here... the drupalgap
+      // form submission handler should be the one who handles the call to
+      // drupalgap_goto. We're going to need to make a separate call back
+      // function in form.js to handle these entity async callbacks (and
+      // every other developer).
+      drupalgap_goto(destination, {'form_submission':true});
     };
     
     // Depending on if we are creating a new entity, or editing an existing one,
