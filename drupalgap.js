@@ -65,6 +65,7 @@ var drupalgap = {
   'page':{'variables':{}},
   'path':'', /* The current menu path. */
   'services':{},
+  'sessid':null,
   'title':'',
   'theme_path':'',
   'themes':[],
@@ -301,7 +302,7 @@ function drupalgap_deviceready() {
         'error':function(jqXHR, textStatus, errorThrown) {
           // Build an informative error message and display it.
           var msg = 'drupalgap_deviceready() - failed connection to ' +
-            drupalgap.settings.site_path;;
+            drupalgap.settings.site_path;
           if (errorThrown != '') { msg += ' - ' + errorThrown; }
           msg += ' - Go to www.drupalgap.org for troubleshooting info.';
           navigator.notification.alert(

@@ -23,11 +23,6 @@ drupalgap.api = {
         call_options.url += options.path;
       }
 
-      // Print out the call options if debugging is turned on.
-      if (drupalgap.settings.debug) {
-        console.log(JSON.stringify(call_options));
-      }
-
       // Make sure the device is online, if it isn't send the
       // user to the offline page.
       drupalgap_check_connection();
@@ -40,45 +35,114 @@ drupalgap.api = {
         );
         return false;
       }
-
-      // Make the call...
-      $.mobile.loading('show', {theme: "b", text: "Loading"});
-
-      // Asynchronous call.
-      if (call_options.async) {
-        $.ajax({
-          url: call_options.url,
-            type: call_options.type,
-            data: call_options.data,
-            dataType: call_options.dataType,
-            async: true,
-            error: call_options.error,
-            success: call_options.success,
-        });
+      
+      if (drupalgap.settings.debug) {
+        console.log('' + call_options.url);
       }
-      // Synchronous call.
-      else {
-        $.ajax({
-            url: call_options.url,
-            type: call_options.type,
-            data: call_options.data,
-            dataType: call_options.dataType,
-            async: false,
-            error: call_options.error,
-            success: call_options.success,
-        });
-      }
+      
+      // Get CSRF token.
+      _drupalgap_api_get_csrf_token(call_options, {
+          success:function() {
+            
+            // Show the loading icon.
+            $.mobile.loading('show', {theme: "b", text: "Loading"});
+            
+            // Build api call object options.
+            var api_object = {
+              url: call_options.url,
+              type: call_options.type,
+              data: call_options.data,
+              dataType: call_options.dataType,
+              async: true,
+              error: call_options.error,
+              success: call_options.success
+            }
+            
+            // Synchronous call?
+            if (!call_options.async) {
+              api_object.async = false;
+            }
+            
+            // If there are any beforeSend declarations, attach them to the api
+            // call object.
+            console.log(JSON.stringify(call_options));
+            //alert('checking before send');
+            if (call_options.beforeSend) {
+              api_object.beforeSend = call_options.beforeSend;
+            }
+            
+            // Make the call.
+            if (drupalgap.settings.debug) {
+              console.log(JSON.stringify(api_object));
+            }
+            $.ajax(api_object);      
+          }
+      });
     }
     catch (error) {
-    navigator.notification.alert(
-      error,
-      function(){},
-      'DrupalGap API Error',
-      'OK'
-    );
+      navigator.notification.alert(
+        error,
+        function(){},
+        'DrupalGap API Error',
+        'OK'
+      );
     }
   }
 };
+
+/**
+ * Given the API's call options and a JSON object containing a success and error
+ * callback, this will append a CSRF token to the API call's request header, if
+ * necessary.
+ */
+function _drupalgap_api_get_csrf_token(call_options, options) {
+  try {
+    // Add CSRF Validation Token to the request header, if necessary.
+    var types = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
+    if ($.inArray(call_options.type.toUpperCase(), types) == -1) {
+      var token = drupalgap.sessid; 
+      if (!token) {
+        var token_url = drupalgap.settings.site_path +
+                        drupalgap.settings.base_path +
+                        '?q=services/session/token'; 
+        $.ajax({
+            url:token_url,
+            type:'get',
+            dataType:'text',
+            success:function(data){
+              token = data;
+              drupalgap.sessid = token;
+              call_options.token = token;
+              call_options.beforeSend = function (request) {
+                request.setRequestHeader("X-CSRF-Token", call_options.token);
+              };
+              options.success.call();
+            },
+            error:function (jqXHR, textStatus, errorThrown) {
+              alert('_drupalgap_api_get_csrf_token - Failed to retrieve token! (' + errorThrown +
+                    ') You must upgrade your Drupal Services module to version 3.4 (or above)! ' +
+                    'Also check your device for a connection!');
+            }
+        });
+      }
+      else {
+        // Already had token, use it.
+        call_options.token = token;
+        call_options.beforeSend = function (request) {
+          request.setRequestHeader("X-CSRF-Token", call_options.token);
+        };
+        options.success.call();
+      }
+    }
+    else {
+      // The call doesn't need a token, so we're good to go.
+      options.success.call();
+    }
+  }
+  catch (error) {
+    alert('_drupalgap_api_get_csrf_token - ' + error);
+  }
+}
 
 function drupalgap_api_default_options() {
   var default_options = {};
@@ -129,16 +193,16 @@ function drupalgap_api_default_options() {
       else if (jqXHR.responseText && jqXHR.responseText != errorThrown) {
         extra_msg = jqXHR.responseText;
       }
-      if (this.error_alert) {
+      //if (this.error_alert) {
         navigator.notification.alert(
           textStatus + ' (' + errorThrown + ') ' + extra_msg + '[' + url + ']',
           function(){},
           'DrupalGap API Call Error',
           'OK'
         );
-      }
+      //}
     },
-    'error_alert':true, /* an option to supress the defaul error call back's
+    'error_alert':true, /* an option to supress the default error call back's
                            alert dialog window, use: options.error_alert = false;
                            use with caution */
   };
