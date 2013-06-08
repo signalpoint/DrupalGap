@@ -65,8 +65,6 @@ drupalgap.api = {
             
             // If there are any beforeSend declarations, attach them to the api
             // call object.
-            console.log(JSON.stringify(call_options));
-            //alert('checking before send');
             if (call_options.beforeSend) {
               api_object.beforeSend = call_options.beforeSend;
             }
@@ -97,11 +95,15 @@ drupalgap.api = {
  */
 function _drupalgap_api_get_csrf_token(call_options, options) {
   try {
-    // Add CSRF Validation Token to the request header, if necessary.
+    // Add CSRF Validation Token to the request header, if necessary. Certain
+    // HTTP methods do not need the token.
     var types = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
     if ($.inArray(call_options.type.toUpperCase(), types) == -1) {
-      var token = drupalgap.sessid; 
-      if (!token) {
+      //var token = drupalgap.sessid; 
+      //if (!token) {
+      // TODO - why do we need a fresh token every time? We tried saving it and
+      // re-using it, but that doesn't work when going from anonymous to
+      // authenticated, that breaks the CSRF validation.
         var token_url = drupalgap.settings.site_path +
                         drupalgap.settings.base_path +
                         '?q=services/session/token'; 
@@ -109,8 +111,8 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
             url:token_url,
             type:'get',
             dataType:'text',
-            success:function(data){
-              token = data;
+            success:function(token){
+              //token = data;
               drupalgap.sessid = token;
               call_options.token = token;
               call_options.beforeSend = function (request) {
@@ -119,20 +121,20 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
               options.success.call();
             },
             error:function (jqXHR, textStatus, errorThrown) {
-              alert('_drupalgap_api_get_csrf_token - Failed to retrieve token! (' + errorThrown +
+              alert('Failed to retrieve CSRF token! (' + errorThrown +
                     ') You must upgrade your Drupal Services module to version 3.4 (or above)! ' +
-                    'Also check your device for a connection!');
+                    'Also check your device for a connection, and try logging out and then back in!');
             }
         });
-      }
-      else {
+      //}
+      /*else {
         // Already had token, use it.
         call_options.token = token;
         call_options.beforeSend = function (request) {
           request.setRequestHeader("X-CSRF-Token", call_options.token);
         };
         options.success.call();
-      }
+      }*/
     }
     else {
       // The call doesn't need a token, so we're good to go.
