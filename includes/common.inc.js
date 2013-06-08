@@ -250,18 +250,17 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
       if (html) {
         // Add page to DOM.
         drupalgap_add_page_to_dom(page_id, html);
-        // Depending on the device platform, change the page accordingly. Note,
-        // Android seems to want the 'index.html' prefix, while others (e.g.
-        // Ripple do not want it). Setup change page options if necessary.
+        // Setup change page options if necessary.
         var changePageOptions = {};
         if (drupalgap.path == path && options.form_submission) {
           changePageOptions.allowSamePageTransition = true;
         }
-        if (device.platform == 'Android') {
-          $.mobile.changePage('index.html#' + page_id, changePageOptions);
+        // The Ripple emulator seems to not like the 'index.html' prefix
+        if (typeof parent.window.ripple === 'function') {
+          $.mobile.changePage('#' + page_id, changePageOptions);
         }
         else {
-          $.mobile.changePage('#' + page_id, changePageOptions);
+          $.mobile.changePage('index.html#' + page_id, changePageOptions);
         }
       }
       else {
