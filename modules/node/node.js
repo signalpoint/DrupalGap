@@ -29,29 +29,44 @@ function node_add_page() {
     if (drupalgap.settings.debug) {
       console.log('node_add_page()');
     }
-    var content = {};
-    content['header'] = {'markup':'<h2>Create Content</h2>'};
-    drupalgap.services.drupalgap_content.content_types_user_permissions.call({
-        'async':false,
-        'success':function(data){
-          var items = [];
-          $.each(data,function(type,permissions){
-            if (permissions.create) {
-              items.push(l(type, 'node/add/' + type));
-            }
-          });
-          if (items.length > 0) {
-            content['content_type_list'] = {'theme':'jqm_item_list', 'items':items};
-          }
-          else {
-            content['content_type_list'] = '<p>Sorry, you do not have permission to add content!</p>';
-          }
-        },
-		});
-		return content;
+    var content = {
+      "header":{'markup':'<h2>Create Content</h2>'},
+      'node_type_listing':{
+        'theme':'jqm_item_list',
+        'title':'Content Types',
+        'items':[],
+        'attributes':{'id':'node_type_listing_items'},
+      }
+    };
+    return content;
   }
   catch (error) {
     alert('node_add_page - ' + error);
+  }
+}
+
+/**
+ * The jQM pageshow callback for the node add page.
+ */
+function node_add_page_pageshow() {
+  try {
+    if (drupalgap.settings.debug) {
+      console.log('node_add_page_pageshow()');
+    }
+    drupalgap.services.drupalgap_content.content_types_user_permissions.call({
+      'success':function(data) {
+        var items = [];
+        $.each(data,function(type,permissions){
+            if (permissions.create) {
+              items.push(l(type, 'node/add/' + type));
+            }
+        });
+        drupalgap_item_list_populate("#node_type_listing_items", items);
+      },
+    });
+  }
+  catch (error) {
+    alert('node_add_page_pageshow - ' + error);
   }
 }
 
@@ -197,6 +212,7 @@ function node_menu() {
       'node/add':{
         'title':'Add content',
         'page_callback':'node_add_page',
+        'pageshow':'node_add_page_pageshow',
       },
       'node/add/%':{
         'title':'Add content',
@@ -253,7 +269,6 @@ function node_page() {
         'attributes':{'id':'node_listing_items'},
       }
     };
-    
     // Return the content.
     return content;
   }
