@@ -165,12 +165,12 @@ function drupalgap_form_render(form) {
           form_elements += '<button type="button" id="' + drupalgap_form_get_element_id(name, form.id) + '">' +  button.title + '</button>';
       });
     }
-    // Attach javascript snippet to from to call the form_loaded function. Pass
-    // the drupalgap.entity_edit along to the load function.
+    // Return the form html.
+    // TODO - we should probably be wrapping a form in a form element you
+    // dumb dumb.
     var form_html = '<div><div id="drupalgap_form_errors"></div>' +
       form_elements +
     '</div>';
-    // Return the form html.
     return form_html;
   }
   catch (error) {
@@ -220,8 +220,8 @@ function drupalgap_form_state_values_assemble(form) {
 }
 
 /**
- * Given a form id, this will render the form. Any additional arguments
- * will be sent along to the form.
+ * Given a form id, this will render the form and return the html for the form.
+ * Any additional arguments will be sent along to the form.
  */
 function drupalgap_get_form(form_id) {
   try {
@@ -245,8 +245,8 @@ function drupalgap_get_form(form_id) {
 }
 
 /**
- * Given a form id, this will return the form object assembled by the form's
- * call back function. If the form fails to load, this returns false.
+ * Given a form id, this will return the form JSON object assembled by the
+ * form's call back function. If the form fails to load, this returns false.
  */
 function drupalgap_form_load(form_id) {
   try {
@@ -265,7 +265,7 @@ function drupalgap_form_load(form_id) {
       
       form = {};
       
-      // Grab the function.
+      // Grab the form's function.
       var fn = window[function_name];
       
       // Build the form arguments by iterating over each argument then adding
@@ -277,6 +277,9 @@ function drupalgap_form_load(form_id) {
       });
       form_arguments.splice(0,1);
       
+      // Attach the form arguments to the form object.
+      form.arguments = form_arguments;
+      
       // If there were no arguments to pass along, call the function directly to
       // retrieve the form, otherwise call the function and pass along any
       // arguments to retrieve the form.
@@ -286,11 +289,14 @@ function drupalgap_form_load(form_id) {
       }
       
       // Give modules an opportunity to alter the form.
-      //module_invoke_all('form_alter', form, drupalgap.form_state, form_id);
       module_invoke_all('form_alter', form, null, form_id);
       
-      // Set drupalgap.form equal to the form.
-      //drupalgap.form = form;
+      // Place the assembled form into local storage so _drupalgap_form_submit
+      // will have access to the assembled form.
+      window.localStorage.setItem(
+        drupalgap_form_id_local_storage_key(form_id),
+        JSON.stringify(form)
+      );
     }
     else {
       alert('drupalgap_form_load - no callback function (' + function_name + ') available for form');
@@ -303,21 +309,38 @@ function drupalgap_form_load(form_id) {
 }
 
 /**
+ * Given a form id, this will return the local storage key used by DrupalGap
+ * to save the assembled form to the device's local storage.
+ */
+function drupalgap_form_id_local_storage_key(form_id) {
+  try {
+    return 'drupalgap_form_' + form_id;
+  }
+  catch (error) {
+    alert('drupalgap_form_id_local_storage_key - ' + error);
+  }
+}
+
+/**
  * Handles a drupalgap form's submit button click.
  */
 function _drupalgap_form_submit(form_id) {
   try {
-    // Load the form by grabbing the form id from the submit button's attribute.
-    // TODO - we should probably be wrapping a form in a form element you
-    // dumb dumb.
-    // TODO - doing a form load here without passing along the arguments that
-    // were sent to the form originally results in some strange behavior. One
-    // for example is, we lose the form.action value because when the form
-    // is fetched again here there is entity so the action when editing an entity
-    // never gets set properly.
-    var form = drupalgap_form_load(form_id);
-    if (!form) {
-      alert('_drupalgap_form_submit - click - failed to load form: ' + form_id);
+    if (drupalgap.settings.debug) {
+      console.log('_drupalgap_form_submit(' + form_id + ')');
+      console.log(JSON.stringify(arguments));
+    }
+    // Load the form from local storage.
+    var local_storage_form = window.localStorage.getItem(drupalgap_form_id_local_storage_key(form_id));
+    var form = false;
+    if (local_storage_form) {
+      form = JSON.parse(local_storage_form);
+      if (!form) {
+        alert('_drupalgap_form_submit - failed to load form: ' + form_id);
+      }
+    }
+    else {
+      alert('_drupalgap_form_submit - failed to load form from local storage: ' + form_id);
     }
     
     // Assemble the form state values.
@@ -369,6 +392,7 @@ function _drupalgap_form_submit(form_id) {
       }
       var fn = window[submit_function];
       fn.apply(null, Array.prototype.slice.call([form, form_state]));
+      // TODO - remove the form from local storage? probably.
     }
     else if (drupalgap.settings.debug) {
       console.log('Skipping ' + submit_function + ', does not exist.');
@@ -381,7 +405,7 @@ function _drupalgap_form_submit(form_id) {
 
 /**
  * An internal function used by the DrupalGap forms api to validate all the
- * elements on a form when. 
+ * elements on a form. 
  */
 function _drupalgap_form_validate(form, form_state) {
   try {
