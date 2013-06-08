@@ -206,22 +206,34 @@ function drupalgap_chain_callbacks(options_set_1, options_set_2) {
  * @returns A string indicating the type of connection according to PhoneGap.
  */
 function drupalgap_check_connection() {
-  var networkState = navigator.connection.type;
-  var states = {};
-  states[Connection.UNKNOWN]  = 'Unknown connection';
-  states[Connection.ETHERNET] = 'Ethernet connection';
-  states[Connection.WIFI]     = 'WiFi connection';
-  states[Connection.CELL_2G]  = 'Cell 2G connection';
-  states[Connection.CELL_3G]  = 'Cell 3G connection';
-  states[Connection.CELL_4G]  = 'Cell 4G connection';
-  states[Connection.NONE]     = 'No network connection';
-  if (states[networkState] == 'No network connection') {
-    drupalgap.online = false;
+  try {
+    // We'll assume that Ripple emulation always has a connection, for now.
+    // http://stackoverflow.com/q/15950382/763010
+    if (typeof parent.window.ripple === 'function') {
+      drupalgap.online = true;
+      return 'Ethernet connection';
+    }
+    
+    var networkState = navigator.connection.type;
+    var states = {};
+    states[Connection.UNKNOWN]  = 'Unknown connection';
+    states[Connection.ETHERNET] = 'Ethernet connection';
+    states[Connection.WIFI]     = 'WiFi connection';
+    states[Connection.CELL_2G]  = 'Cell 2G connection';
+    states[Connection.CELL_3G]  = 'Cell 3G connection';
+    states[Connection.CELL_4G]  = 'Cell 4G connection';
+    states[Connection.NONE]     = 'No network connection';
+    if (states[networkState] == 'No network connection') {
+      drupalgap.online = false;
+    }
+    else {
+      drupalgap.online = true;
+    }
+    return states[networkState];
   }
-  else {
-    drupalgap.online = true;
+  catch (error) {
+    alert('drupalgap_check_connection - ' + error);
   }
-  return states[networkState];
 }
 
 /**
@@ -259,7 +271,7 @@ function drupalgap_deviceready() {
   // go to the offline page.
   drupalgap_check_connection();
   if (!drupalgap.online) {
-    module_invoke_all('device_offine');
+    module_invoke_all('device_offline');
     navigator.notification.alert(
         'No connection found!',
         function(){ drupalgap_goto('offline'); },
