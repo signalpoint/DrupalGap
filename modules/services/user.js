@@ -35,6 +35,7 @@ drupalgap.services.user = {
       'type':'post',
       'path':'user/logout.json',
       'success':function(data){
+        //drupalgap.sessid = null;
         drupalgap.user = {'uid':0};
         drupalgap.services.drupalgap_system.connect.call({'async':false});
       },

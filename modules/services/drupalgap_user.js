@@ -4,6 +4,8 @@ drupalgap.services.drupalgap_user = {
       'type':'post',
       'path':'drupalgap_user/login.json',
       'success':function(data){
+        // Set the session id.
+        //drupalgap.sessid = data.drupalgap_system_connect.system_connect.sessid;
         // Extract the system connect user and set drupalgap.user with it.
         drupalgap.user = data.drupalgap_system_connect.system_connect.user;
         drupalgap.field_info_instances = data.drupalgap_system_connect.field_info_instances;

@@ -143,7 +143,6 @@ function drupalgap_node_assemble_data(options) {
     }
     if (drupalgap.settings.debug) {
       console.log(data);
-      alert('drupalgap_node_assemble_data');
     }
     return data;
   }
