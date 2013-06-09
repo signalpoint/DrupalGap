@@ -37,6 +37,7 @@ var drupalgap = {
       {'name':'common'},
       {'name':'menu'},
       {'name':'module'},
+      {'name':'mvc'},
       {'name':'theme'},
   ],
   /**
@@ -62,6 +63,11 @@ var drupalgap = {
   'menus':{},
   'menu_links':{},
   'menu_router':{},
+  'mvc':{
+    'models':{},
+    'views':{},
+    'controllers':{}
+  },
   'page':{'variables':{}},
   'path':'', /* The current menu path. */
   'services':{},
@@ -140,6 +146,35 @@ function drupalgap_blocks_load() {
   }
   catch (error) {
     alert('drupalgap_blocks_load - ' + error);
+  }
+}
+
+/**
+ * Loads up all necessary assets to make DrupalGap ready.
+ */
+function drupalgap_bootstrap() {
+  try {
+    // Load up settings.
+    drupalgap_settings_load();
+    // Load up includes.
+    drupalgap_includes_load();
+    // Load up modules.
+    drupalgap_modules_load();
+    // Load up MVCs.
+    drupalgap_mvc_init();
+    // Load up the theme.
+    drupalgap_theme_load();
+    // Load up blocks.
+    drupalgap_blocks_load();
+    // Initialize menu links.
+    menu_router_build();
+    // Initialize menus.
+    drupalgap_menus_load();
+    // Initialize the theme registry.
+    drupalgap_theme_registry_build();
+  }
+  catch (error) {
+    alert('drupalgap_bootstrap - ' + error);
   }
 }
 
@@ -241,22 +276,8 @@ function drupalgap_check_connection() {
  */
 function drupalgap_deviceready() {
   // PhoneGap is loaded and it is now safe for DrupalGap to start...
-  // Load up settings.
-  drupalgap_settings_load();
-  // Load up includes.
-  drupalgap_includes_load();
-  // Load up modules.
-  drupalgap_modules_load();
-  // Load up the theme.
-  drupalgap_theme_load();
-  // Load up blocks.
-  drupalgap_blocks_load();
-  // Initialize menu links.
-  menu_router_build();
-  // Initialize menus.
-  drupalgap_menus_load();
-  // Initialize the theme registry.
-  drupalgap_theme_registry_build();
+  drupalgap_bootstrap();
+  
   // Verify site path is set.
   if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
     navigator.notification.alert(
