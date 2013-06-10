@@ -1,5 +1,5 @@
-This directory is similar to Drupal's sites/all directory. Place any custom
-modules you create for DrupalGap into the app/modules/custom folder. See the
-modules/example directory in DrupalGap for more information on building custom
-modules for your mobile application.
+This directory is similar to the sites/all directory in Drupal. Place any custom
+DrupalGap modules or themes for your app in this directory. For more information,
+please visit the Getting Started Guide:
 
+  http://www.drupalgap.org/get-started
