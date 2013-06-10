@@ -237,20 +237,26 @@ function menu_router_build() {
 }*/
 
 /**
- * Given a menu link path, this determine and returns the router path as a string.
+ * Given a menu link path, this determines and returns the router path as a
+ * string.
  */
-// TODO - Since the router path is set by menu_router_build, no one other than
-// menu_router_build should have to call this function. Go around and clean
-// up any calls to this function because the router path will be available in
-// drupalgap.menu_links[path]. Actually this might not be true, we need this
-// function to determine router paths for paths like node/123 because those
-// will not be in the drupalgap.menu_links collection. Either way, this function
-// should probably be called minimally.
 function drupalgap_get_menu_link_router_path(path) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_get_menu_link_router_path(' + path + ')');
     }
+    
+    // TODO - Since the router path is set by menu_router_build, no one other than
+    // menu_router_build should have to call this function. Go around and clean
+    // up any calls to this function because the router path will be available in
+    // drupalgap.menu_links[path]. Actually this might not be true, we need this
+    // function to determine router paths for paths like node/123 because those
+    // will not be in the drupalgap.menu_links collection. Either way, this function
+    // should probably be called minimally.
+    
+    // TODO - Why is this function called twice sometimes? E.G. via an MVC item
+    // view item/local_users/user/0, this function gets called twice in one page
+    // load, that can't be good.
     
     // Is this path defined in drupalgap.menu_links? If it is use it's router
     // path if it is defined, otherwise just set its router path to its own path.
@@ -299,22 +305,27 @@ function drupalgap_get_menu_link_router_path(path) {
     // If we haven't found a router path yet, try some other techniques to find
     // it. If all else fails, just set the router path to the path itself.
     if (!router_path) {
-      
-      //alert(args);
       // Are there any paths in drupalgap.menu_links that would be good
       // candidates as the router for this path? Let's start at the back of the
       // argument list and start replacing each with a wildcard (%) and then
-      // see if there is a path in drupalgap.menu_links that can handle it?
+      // see if there is a path in drupalgap.menu_links that can handle it.
       if (args && args.length > 1) {
         var temp_router_path;
         for (var i = args.length-1; i != -1; i--) {
-          temp_router_path = ''
-          for (var j = 0; j < i; j++) {
-            temp_router_path += args[j] + '/';
+          temp_router_path = '';
+          for (var j = 0; j < args.length; j++) {
+            if (j < i) {
+              temp_router_path += args[j];
+            }
+            else {
+              temp_router_path += '%';
+            }
+            if (j != args.length-1) {
+              temp_router_path += '/';
+            }
           }
-          temp_router_path += '%';
+          // If we found a router path, let's use it.
           if (drupalgap.menu_links[temp_router_path]) {
-            // We found a router path, let's use it.
             router_path = temp_router_path;
             break;
           }
