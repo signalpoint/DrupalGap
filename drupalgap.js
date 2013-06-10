@@ -9,6 +9,7 @@ var drupalgap = {
        {'name':'field'},
        {'name':'form'},
        {'name':'menu'},
+       {'name':'mvc'},
        {'name':'node'},
        {'name':'services',
          'includes':[
@@ -37,7 +38,6 @@ var drupalgap = {
       {'name':'common'},
       {'name':'menu'},
       {'name':'module'},
-      {'name':'mvc'},
       {'name':'theme'},
   ],
   /**
@@ -160,8 +160,6 @@ function drupalgap_bootstrap() {
     drupalgap_includes_load();
     // Load up modules.
     drupalgap_modules_load();
-    // Load up MVCs.
-    drupalgap_mvc_init();
     // Load up the theme.
     drupalgap_theme_load();
     // Load up blocks.
@@ -844,7 +842,8 @@ function drupalgap_place_args_in_path(input_path) {
 }
 /**
  * Converts a hook_menu items page_arguments path like node/123 so arg zero
- * would be 'node' and arg 1 would be the loaded entity node.
+ * would be 'node' and arg 1 would be the loaded entity node. Also works for MVC
+ * page paths, converts the integer into an MVC item.
  */
 function drupalgap_prepare_argument_entities(page_arguments, args) {
   try {
@@ -860,7 +859,8 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
             args[0] == 'comment' ||
             args[0] == 'node' ||
             (args[0] == 'taxonomy' && (args[1] == 'vocabulary' || args[1] == 'term')) ||
-            args[0] == 'user'
+            args[0] == 'user' ||
+            args[0] == 'item'
           )
     ) {
       var found_int_arg = false;
@@ -881,9 +881,19 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
         }
       }
       var load_function = load_function_prefix + '_load';
+      // If the load function exists, load the entity.
       if (drupalgap_function_exists(load_function)) {
         var entity_fn = window[load_function];
-        var entity = entity_fn(parseInt(args[int_arg_index]));
+        var entity = null;
+        // Load the entity. MVC items need to pass along the module name and
+        // model type to its load function. All other entity load functions just
+        // need the entity id.
+        if (args[0] == 'item') {
+          entity = entity_fn(args[1], args[2], parseInt(args[int_arg_index]));
+        }
+        else {
+          entity = entity_fn(parseInt(args[int_arg_index]));
+        }
         // Now that we have the entity loaded, replace the first integer we find
         // in the page arguments with the loaded entity.
         $.each(page_arguments, function(index, page_argument){

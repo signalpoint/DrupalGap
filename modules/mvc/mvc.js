@@ -1,4 +1,31 @@
 /**
+ *
+ */
+function collection_list_page(module, type) {
+  try {
+    var content = {
+      'collection_list':{
+        'theme':'jqm_item_list',
+        'title':'Collection'
+      }
+    };
+    var items = [];
+    var collection = collection_load(module, type);
+    if (collection) {
+      $.each(collection, function(id, item){
+          var path = 'item/' + module + '/' + type + '/' + id;
+          items.push(l(item.name, path));
+      });
+      content.collection_list.items = items;  
+    }
+    return content;
+  }
+  catch (error) {
+    alert('collection_list_page - ' + error);
+  }
+}
+
+/**
  * Given a module name and model type, this will return the collection JSON object.
  */
 function collection_load(module, type) {
@@ -36,12 +63,34 @@ function drupalgap_mvc_get_collection_key(bucket, module, model_type) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function mvc_menu() {
+  try {
+    var items = {
+      'collection/%/%/list':{
+        'page_callback':"collection_list_page",
+        "page_arguments":[1, 2]
+      },
+      'item/%/%/%':{
+        'page_callback':"item_view_page",
+        "page_arguments":[1, 2, 3]
+      }
+    };
+    return items;
+  }
+  catch (error) {
+    alert('mvc_menu - ' + error);
+  }
+}
+
+/**
  *
  */
-function drupalgap_mvc_init() {
+function mvc_install() {
   try {
     if (drupalgap.settings.debug) {
-      console.log('drupalgap_mvc_init()');
+      console.log('mvc_install()');
     }
     // Load models...
     // For each module that implements hook_mvc_model(), iterate over each model
@@ -104,7 +153,7 @@ function drupalgap_mvc_init() {
     //var controllers = module_invoke_all('mvc_controller');
   }
   catch (error) {
-    alert('drupalgap_mvc_init - ' + error);
+    alert('mvc_install - ' + error);
   }
 }
 
@@ -137,16 +186,16 @@ function drupalgap_mvc_model_load(module, name) {
 }
 
 /**
- * Given a module name, and model name, this generates and returns the form JSON
+ * Given a module type, and model type, this generates and returns the form JSON
  * object to create a model item.
  */
-function drupalgap_mvc_model_create_form(module, name) {
+function drupalgap_mvc_model_create_form(module, type) {
    try {
     if (drupalgap.settings.debug) {
-      console.log('drupalgap_mvc_model_create_form(' + module + ', ' + name + ')');
+      console.log('drupalgap_mvc_model_create_form(' + module + ', ' + type + ')');
     }
     var form = false;
-    var model = drupalgap_mvc_model_load(module, name);
+    var model = drupalgap_mvc_model_load(module, type);
     if (model) {
       form = {
         id:"drupalgap_mvc_model_create_form",
@@ -179,10 +228,41 @@ function drupalgap_mvc_model_create_form(module, name) {
  */
 function drupalgap_mvc_model_create_form_submit(form, form_state) {
   try {
-    item_save(form_state.values);
+    // Save the item and then view it.
+    if (item_save(form_state.values)) {
+      /*var path = 'item/' +
+                 form_state.values.module + '/' +
+                 form_state.values.type + '/' +
+                 form_state.values.id;*/
+      var path = 'collection/' +
+                 form_state.values.module + '/' +
+                 form_state.values.type + '/list';
+      alert(path);
+      drupalgap_goto(path);
+    }
+    else {
+      alert('drupalgap_mvc_model_create_form_submit - failed to save item!');
+    }
   }
   catch (error) {
     alert('drupalgap_mvc_model_create_form_submit - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function item_load(module, type, id) {
+  try {
+    var item = false;
+    var collection = collection_load(module, type);
+    if (collection && typeof collection[id] !== 'undefined') {
+      item = collection[id];
+    }
+    return item; 
+  }
+  catch (error) {
+    alert('item_load - ' + error);
   }
 }
 
@@ -214,10 +294,28 @@ function item_save(item) {
     settings.auto_increment = item.id + 1;
     window.localStorage.setItem(settings_key, JSON.stringify(settings));
     
-    return true;  
+    if (drupalgap.settings.debug) {
+      console.log('item_save - saved item!');
+      console.log(JSON.stringify(item));
+    }
+    
+    return true;
   }
   catch (error) {
     alert('item_save - ' + error);
   }
 }
 
+/**
+ *
+ */
+function item_view_page(module, type, item) {
+  try {
+    console.log(JSON.stringify(arguments));
+    alert('item_view_page');
+    return 'funk that page!';
+  }
+  catch (error) {
+    alert('item_view_page - ' + error);
+  }
+}
