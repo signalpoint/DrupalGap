@@ -392,6 +392,11 @@ function _drupalgap_form_submit(form_id) {
       }
       var fn = window[submit_function];
       fn.apply(null, Array.prototype.slice.call([form, form_state]));
+      // TODO - the call to the form's submit function should be async and we
+      // should have a success callback here that checks the form.action and
+      // then does a drupalgap_goto there once the form is submitted. Right now,
+      // for example, drupalgap_entity_form_submit() takes care of the
+      // drupalgap_goto call, should that be handled here?
       // TODO - remove the form from local storage? probably.
     }
     else if (drupalgap.settings.debug) {
