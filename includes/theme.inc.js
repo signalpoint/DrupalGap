@@ -137,9 +137,26 @@ function theme_image(variables) {
 }
 
 /**
+ * Theme's an item from an MVC collection.
+ */
+function theme_item(variables) {
+  try {
+    var html = '';
+    //var mvc_model_system_fields
+    $.each(variables.item, function(field, value){
+        html += '<h2>' + variables.model.fields[field].title + '</h2><p>' + value + '</p>';
+    });
+    return html;
+  }
+  catch (error) {
+    alert('theme_item - ' + error);
+  }
+  
+}
+
+/**
  * Implementation of theme_item_list().
  */
-
 function theme_item_list(variables) {
   try {
     // We'll theme an empty list unordered list by default, if there is a type
