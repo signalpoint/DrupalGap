@@ -321,9 +321,8 @@ function drupalgap_deviceready() {
       // need to make sure drupalgap.user is set up with appropriate defaults.
     }
     else {
-      // Device is online, let's make a call to the
-      // DrupalGap System Connect Service Resource
-      drupalgap.services.drupalgap_system.connect.call({
+      // Device is online, let's build the default system connect options.
+      var options = {
         'success':function(result){
           // Call all hook_device_connected implementations then go to
           // the front page.
@@ -343,7 +342,22 @@ function drupalgap_deviceready() {
               'OK'
           );
         }
-      });
+      };
+      
+      // If we have a session id in local storage, then we'll use it as the
+      // CSRF token when making the initial call to system connect. This will
+      // determine if the user is still authenticated with Drupal or not.
+      var token = window.localStorage.getItem('sessid');
+      if (token) {
+        drupalgap.sessid = token;
+        options.token = token;
+        options.beforeSend = function (request) {
+          request.setRequestHeader("X-CSRF-Token", options.token);
+        };
+      }
+      
+      // DrupalGap System Connect Service Resource
+      drupalgap.services.drupalgap_system.connect.call(options);
     }
   }
 }

@@ -44,6 +44,8 @@ drupalgap.api = {
       _drupalgap_api_get_csrf_token(call_options, {
           success:function() {
             
+            //alert(call_options.url);
+            
             // Show the loading icon.
             $.mobile.loading('show', {theme: "b", text: "Loading"});
             
@@ -95,24 +97,35 @@ drupalgap.api = {
  */
 function _drupalgap_api_get_csrf_token(call_options, options) {
   try {
-    // Add CSRF Validation Token to the request header, if necessary. Certain
-    // HTTP methods do not need the token.
+    // Anonymous users don't need the CSRF token.
+    if (drupalgap.user.uid == 0) {
+      options.success.call();
+      return;
+    }
+    // We have an authenicated user, do we need a token for this call?
     var types = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
     if ($.inArray(call_options.type.toUpperCase(), types) == -1) {
-      //var token = drupalgap.sessid; 
-      //if (!token) {
-      // TODO - why do we need a fresh token every time? We tried saving it and
-      // re-using it, but that doesn't work when going from anonymous to
-      // authenticated, that breaks the CSRF validation.
+      // We need a token, is there one in drupalgap.sessid?
+      var token = drupalgap.sessid; 
+      if (!token) {
+        // There wasn't one available in drupalgap.sessid, is there one in
+        // local storage?
+        token = window.localStorage.getItem('sessid');
+      }
+      if (!token) {
+        // We don't have a previous token to use, let's grab one from Drupal.
         var token_url = drupalgap.settings.site_path +
                         drupalgap.settings.base_path +
-                        '?q=services/session/token'; 
+                        '?q=services/session/token';
         $.ajax({
             url:token_url,
             type:'get',
             dataType:'text',
             success:function(token){
-              //token = data;
+              // Save the token to local storage as sessid, set drupalgap.sessid
+              // with the token, attach the token and the request header to the
+              // call options, then return via the success function.
+              window.localStorage.setItem('sessid', token);
               drupalgap.sessid = token;
               call_options.token = token;
               call_options.beforeSend = function (request) {
@@ -126,18 +139,20 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
                     'Also check your device for a connection, and try logging out and then back in!');
             }
         });
-      //}
-      /*else {
-        // Already had token, use it.
+      }
+      else {
+        // We had a previous token available, let's use it by attaching it
+        // to the call options and the CSRF header.
         call_options.token = token;
         call_options.beforeSend = function (request) {
           request.setRequestHeader("X-CSRF-Token", call_options.token);
         };
         options.success.call();
-      }*/
+      }
     }
     else {
-      // The call doesn't need a token, so we're good to go.
+      // This call's HTTP method doesn't need a token, so we return via the
+      // success function.
       options.success.call();
     }
   }
@@ -224,4 +239,15 @@ function hook_deviceready() {
 }
 
 // TODO - list all other core hooks here.
+
+function hook_mvc_model() {
+  var models = {};
+  return models;
+}
+
+function hook_mvc_view() {
+}
+
+function hook_mvc_controller() {
+}
 
