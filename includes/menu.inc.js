@@ -26,6 +26,15 @@ function menu_execute_active_handler() {
       console.log(JSON.stringify(drupalgap.menu_links[router_path]));
       alert('menu_execute_active_handler');*/
       
+      // Make sure we have a menu link item that can handle this router path,
+      // otherwise we'll call it a 404.
+      if (!drupalgap.menu_links[router_path]) {
+        return '<h2>404 - Not Found</h2>' +
+               '<h3>Path</h3>' + path +
+               '<h3>Router Path</h3>' +
+               router_path;
+      }
+
       // Call the page call back for this router path and send along any arguments.
       var function_name = drupalgap.menu_links[router_path].page_callback;
       if (drupalgap_function_exists(function_name)) {
@@ -70,7 +79,11 @@ function menu_execute_active_handler() {
             var jqm_page_event = jqm_page_events[i];
             var jqm_page_event_callback = drupalgap.menu_links[router_path][jqm_page_event];
             if (drupalgap_function_exists(jqm_page_event_callback)) {
+              // TODO - why are these jQM page events being called more than once?
               var script_code = '<script type="text/javascript">$("#' + page_id + '").on("' + jqm_page_event + '", ' + jqm_page_event_callback + ');</script>';
+              //var script_code = '<script type="text/javascript">$(document).ready(function(){$("#' + page_id + '").on("' + jqm_page_event + '", ' + jqm_page_event_callback + ');});</script>';
+              //var script_code = '<script type="text/javascript">$(document).on("' + jqm_page_event + '", "#' + page_id + '", ' + jqm_page_event_callback  + ');</script>';
+              //alert('adding jqm_page_event: ' + jqm_page_event);
               content[jqm_page_event] = {'markup':script_code};
             }
             else {
@@ -258,7 +271,12 @@ function drupalgap_get_menu_link_router_path(path) {
     // view item/local_users/user/0, this function gets called twice in one page
     // load, that can't be good.
     
-    // Is this path defined in drupalgap.menu_links? If it is use it's router
+    // TODO - this function has a limitation in the types of menu paths it can
+    // handle, for example a menu path of 'collection/%/%/list' with a path of
+    // 'collection/local_users/user/list' can't find eachother. So we had to
+    // change the mvc_menu() item path to be collection/list/%/%.
+    
+    // Is this path defined in drupalgap.menu_links? If it is, use it's router
     // path if it is defined, otherwise just set its router path to its own path.
     if (drupalgap.menu_links[path]) {
       if (typeof drupalgap.menu_links[path].router_path === 'undefined') {
