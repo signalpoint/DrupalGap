@@ -5,6 +5,11 @@ drupalgap.services.user = {
       'path':'user/login.json',
       'success':function(data){
         drupalgap.user = data.user;
+        // WARNING - we don't automatically make a call to acquire the CSRF
+        // token here. The DrupalGap User Login resource automatically gets the
+        // token, but since this is the default implementation of the Services
+        // User Login resource, we won't auto get the CSRF token and set
+        // drupalgap.sessid with it.
       },
     },
     'call':function(options){
@@ -35,13 +40,22 @@ drupalgap.services.user = {
       'type':'post',
       'path':'user/logout.json',
       'success':function(data){
-        //drupalgap.sessid = null;
-        drupalgap.user = {'uid':0};
+        // the drupalgap user and call drupalgap system connect.
         drupalgap.services.drupalgap_system.connect.call({'async':false});
       },
     },
     'call':function(options){
       try {
+        if (drupalgap.sessid) {
+          options.token = drupalgap.sessid;
+          options.beforeSend = function (request) {
+            request.setRequestHeader("X-CSRF-Token", options.token);
+          };
+        }
+        // Clear the session id then remove it from local storage, then logout
+        drupalgap.sessid = null;
+        window.localStorage.removeItem('sessid');
+        drupalgap.user = {'uid':0};
         drupalgap.api.call(drupalgap_chain_callbacks(drupalgap.services.user.logout.options, options));
       }
       catch (error) {
@@ -171,4 +185,3 @@ function drupalgap_user_assemble_data (options) {
   }
   return data;
 }
-
