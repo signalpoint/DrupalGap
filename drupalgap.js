@@ -1149,10 +1149,6 @@ function drupalgap_user_access(options) {
   return false;
 }
 
-$('.drupalgap_front').on('click', function(){
-    drupalgap_changePage(drupalgap.settings.front);
-});
-
 // http://stackoverflow.com/a/3886106/763010
 function is_int(n) {
    return typeof n === 'number' && n % 1 == 0;
