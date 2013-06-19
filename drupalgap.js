@@ -68,7 +68,10 @@ var drupalgap = {
     'views':{},
     'controllers':{}
   },
-  'page':{'variables':{}},
+  'page':{
+    'jqm_events':[],
+    'variables':{}
+  },
   'path':'', /* The current menu path. */
   'services':{},
   'sessid':null,
@@ -621,6 +624,26 @@ function drupalgap_item_list_populate(list_css_selector, items) {
   }
   catch (error) {
     alert('drupalgap_item_list_populate - ' + error);
+  }
+}
+
+/**
+ * Given a jQM page event, and the corresponding callback function name that
+ * handles the event, this function will call the callback function, if it has
+ * not already been called on the current page. This really is only used by
+ * menu_execute_active_handler() to prevent jQM from firing inline page event
+ * handlers more than once.
+ */
+function drupalgap_jqm_page_event_fire(event, callback) {
+  try {
+    if ($.inArray(event, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
+      drupalgap.page.jqm_events.push(event);
+      var fn = window[callback];
+      fn();
+    }
+  }
+  catch (error) {
+    alert('drupalgap_jqm_page_event_fire - ' + error);
   }
 }
 
