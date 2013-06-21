@@ -55,8 +55,11 @@ function drupalgap_attributes(attributes) {
 function drupalgap_check_visibility(type, data) {
   try {
     var visible = true;
+    if (typeof data === 'undefined') {
+      console.log('drupalgap_check_visibility - WARNING - no data provided for type (' + type + ')');
+    }
     // Roles.
-    if (data.roles && data.roles.value && data.roles.value.length != 0) {
+    else if (typeof data.roles !== 'undefined' && data.roles && data.roles.value && data.roles.value.length != 0) {
       $.each(data.roles.value, function(role_index, role){
           var has_role = false;
           if (drupalgap_user_has_role(role)) {
@@ -74,8 +77,11 @@ function drupalgap_check_visibility(type, data) {
       });
     }
     // Pages.
-    else if (data.pages && data.pages.value && data.pages.value.length != 0) {
+    else if (typeof data.pages !== 'undefined' && data.pages && data.pages.value && data.pages.value.length != 0) {
       $.each(data.pages.value, function(page_index, path){
+          if (path == '') {
+            path = drupalgap.settings.front;
+          }
           if (path == drupalgap.path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
@@ -462,9 +468,22 @@ function drupalgap_render_region(region) {
       // If there are any links attached to this region, render them first.
       if (region.links && region.links.length > 0) {
         for (var i = 0; i < region.links.length; i++) {
+          // Extract the data associated with this link. If it has a 'region'
+          // property then it is coming from a hook_menu, if it doesn't then it
+          // is coming from settings.js.
+          var data = null;
+          if (typeof region.links[i].region === 'undefined') {
+            data = region.links[i]; // link defined in settings.js
+            // TODO - we need to warn people that they can't make a custom menu
+            // with a machine name of 'regions' now that this machine name is a
+            // "system" name for rendering links in regions.
+          }
+          else {
+            data = region.links[i].region; // link defined via hook_menu()
+          }
           // Check link's region visiblity settings.
-          if (drupalgap_check_visibility('region', region.links[i].region)) {
-            region_html += l(region.links[i].title, region.links[i].path, region.links[i].region.options);
+          if (drupalgap_check_visibility('region', data)) {
+            region_html += l(region.links[i].title, region.links[i].path, data.options);
           }
         }
       }

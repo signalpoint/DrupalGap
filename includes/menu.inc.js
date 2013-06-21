@@ -395,8 +395,13 @@ function drupalgap_menus_load() {
           if (!eval('drupalgap.menus.' + menu_name)) {
             // If the custom menu doesn't have its machine name set, set it.
             if (!menu.menu_name) { menu.menu_name = menu_name; }
-            // Save the custom menu.
-            menu_save(menu);
+            // Save the custom menu, as long is its name isn't 'regions', because
+            // that is a special "system" menu that allows menu links to be
+            // placed directly in regions via settings.js. Keep in mind the
+            // 'regions' menu is in fact NOT a system menu.
+            if (menu_name != 'regions') {
+              menu_save(menu);
+            }
           }
           else {
             // The menu is a system defined menu, merge it together with any
@@ -438,7 +443,24 @@ function drupalgap_menus_load() {
             drupalgap.theme.regions[menu_link.region.name].links.push(menu_link);
           }
       });
+      // If there are any region menu links defined in settings.js, create a
+      // links array for the region if one doesn't exist already, then add the
+      // menu item to the links array as a link.
+      if (typeof drupalgap.settings.menus.regions !== 'undefined') {
+        $.each(drupalgap.settings.menus.regions, function(region, menu){
+            if (typeof menu.links !== 'undefined' && $.isArray(menu.links) && menu.links.length > 0) {
+              if (!drupalgap.theme.regions[region].links) {
+                drupalgap.theme.regions[region].links = [];
+              }
+              $.each(menu.links, function(index, link){
+                  drupalgap.theme.regions[region].links.push(link);
+              });
+            }
+        });
+      }
     }
+    //console.log(JSON.stringify(drupalgap.menus));
+    //alert('drupalgap_menus_load');
   }
   catch (error) {
     alert('drupalgap_menus_load - ' + error);

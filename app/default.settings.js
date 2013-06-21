@@ -83,6 +83,22 @@ drupalgap.settings = {
         {'title':'Logout','path':'user/logout'},
       ],
     },
+    /* Region menu links. */
+    'regions':{
+      'header':{
+        'links':[
+          {
+            'title':'Home',
+            'path':'',
+            "options":{"attributes":{"data-icon":"home", "class":"ui-btn-left"}},
+            "pages":{
+              "value":[''],
+              "mode":"exclude",
+            }
+          }
+        ],
+      },
+    }
   },
 };
 
