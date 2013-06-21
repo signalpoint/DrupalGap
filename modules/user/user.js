@@ -160,13 +160,16 @@ function user_menu() {
         'page_callback':'user_page',
       },
       'user/login':{
+        'title':'Login',
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_login'],
       },
       'user/logout':{
+        'title':'Logout',
         'page_callback':'user_logout',
       },
       'user/register':{
+        'title':'Register',
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_register'],
       },
@@ -189,6 +192,7 @@ function user_menu() {
         'type':'MENU_LOCAL_TASK',
       },
       'user-listing':{
+        'title':'Users',
         'page_callback':'user_listing',
         'access_arguments':['access user profiles'],
         'pageshow':'user_listing_pageshow',
