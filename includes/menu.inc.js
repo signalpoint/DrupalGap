@@ -1,5 +1,6 @@
 /**
- * Execute the page callback associated with the current path.
+ * Execute the page callback associated with the current path and return its
+ * content.
  */
 function menu_execute_active_handler() {
   try {
@@ -16,8 +17,9 @@ function menu_execute_active_handler() {
     
     // TODO - Check to make sure the user has access to this DrupalGap menu path!
     
-    // Get the router path.
+    // Get the router path and set drupalgap.router_path.
     var router_path = drupalgap_get_menu_link_router_path(path);
+    drupalgap.router_path = router_path; 
     
     if (router_path) {
       /*console.log(path);
@@ -90,6 +92,11 @@ function menu_execute_active_handler() {
               );
             }
           }
+        }
+        
+        // Set the page title.
+        if (typeof drupalgap.menu_links[router_path].title !== 'undefined') {
+          drupalgap_set_title(drupalgap.menu_links[router_path].title);
         }
 
         // And finally return the content.    

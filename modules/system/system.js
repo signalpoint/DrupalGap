@@ -60,7 +60,7 @@ function system_block_view(delta) {
         // for the content of a page to show up (nodes, users, taxonomy, comments, etc).
         // Depending on the menu link router, we need to route this through the appropriate
         // template files and functions.
-        return drupalgap_render_page({'path':drupalgap.path});
+        return drupalgap_render_page();
         break;
       case 'logo':
         if (drupalgap.settings.logo) {
@@ -70,7 +70,7 @@ function system_block_view(delta) {
         return '';
         break;
       case 'header':
-        return '<h1>' + l(drupalgap_get_title(), '') + '</h1>';
+        return '<h1>' + drupalgap_get_title() + '</h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">Powered by: ' +

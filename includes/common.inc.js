@@ -320,18 +320,19 @@ function drupalgap_page_in_dom(page_id) {
 }
 
 /**
- * Given a page assembled by template_process_page(), this renders the html
- * string of the page content and returns the html string.
+ * Renders the html string of the page content that is stored in
+ * drupalgap.output.
  */
-function drupalgap_render_page(page) {
+function drupalgap_render_page() {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_render_page()');
       console.log(JSON.stringify(arguments));
     }
-    // Generate the page output and render the content based on the output type.
-    // The output type will either be an html string or a drupalgap render object.
-    var output = menu_execute_active_handler();
+    // Since the page output has already been assembled, render the content
+    // based on the output type. The output type will either be an html string
+    // or a drupalgap render object.
+    var output = drupalgap.output;
     var output_type = $.type(output);
     var content = '';
     

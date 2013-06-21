@@ -246,10 +246,7 @@ function template_preprocess_page(variables) {
 }
 
 /**
- * Implementation of template_process_page(). The current page will have its
- * placeholders filled with the incoming variables. Default variables:
- *
- *   title - the current page title
+ * Implementation of template_process_page().
  */
 function template_process_page(variables) {
   try {
@@ -259,6 +256,9 @@ function template_process_page(variables) {
       console.log(drupalgap.path);
       console.log(JSON.stringify(drupalgap.menu_links[drupalgap.path]));
     }
+    // Execute the active menu handler to assemble the page output. We need to
+    // do this before we render the regions below.
+    drupalgap.output = menu_execute_active_handler();
     // For each region, render it, then replace the placeholder in the page's
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap.path);
