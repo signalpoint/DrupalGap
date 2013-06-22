@@ -187,7 +187,6 @@ function user_menu() {
         'title':'Edit',
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_profile_form', 1],
-        'access_arguments':[''],
         'weight':0,
         'type':'MENU_LOCAL_TASK',
       },

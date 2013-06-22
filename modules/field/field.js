@@ -1,3 +1,6 @@
+/**
+ * Given a field name, this will return its field info.
+ */
 function drupalgap_field_info_field(field_name) {
   try {
     return drupalgap.field_info_fields[field_name];
@@ -7,6 +10,9 @@ function drupalgap_field_info_field(field_name) {
   }
 }
 
+/**
+ * Returns info on all fields.
+ */
 function drupalgap_field_info_fields() {
   try {
     if (drupalgap.settings.debug) {
@@ -52,6 +58,10 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
   }
 }
 
+/**
+ * Given an entity type, bundle name, form and entity, this will add the
+ * entity's fields to the given form.
+ */
 function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, form, entity) {
   try {
     if (drupalgap.settings.debug) {
@@ -70,17 +80,19 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
     if (fields) {
       $.each(fields, function(name, field){
         var field_info = drupalgap_field_info_field(name);
-        var default_value = field.default_value;
-        if (entity[name] && entity[name].length != 0 && entity[name][language][0].value) {
-          default_value = entity[name][language][0].value;
+        if (field_info) {
+          var default_value = field.default_value;
+          if (entity[name] && entity[name].length != 0 && entity[name][language][0].value) {
+            default_value = entity[name][language][0].value;
+          }
+          form.elements[name] = {
+            'type':field_info.type,
+            'title':field.label,
+            'required':field.required,
+            'default_value':default_value,
+            'description':field.description,
+          };
         }
-        form.elements[name] = {
-          'type':field_info.type,
-          'title':field.label,
-          'required':field.required,
-          'default_value':default_value,
-          'description':field.description,
-        };
       });
     }
   }
