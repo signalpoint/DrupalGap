@@ -302,6 +302,26 @@ function user_profile_form(account) {
     // Add the fields for accounts to the form.
     drupalgap_field_info_instances_add_to_form('user', null, form, account);
     
+    // Add password fields to the form. We show the current password field only
+    // if the user is editing their account. We show the password and confirm
+    // password field no matter what.
+    if (drupalgap.user.uid == account.uid) {
+      form.elements.current_pass = {
+        'title':'Current password',
+        'type':'password',
+        'description':'Enter your current password to change the E-mail address or Password.'
+      };
+    }
+    form.elements.pass_pass1 = {
+      'title':'Password',
+      'type':'password'
+    };
+    form.elements.pass_pass2 = {
+      'title':'Confirm password',
+      'type':'password',
+      'description':'To change the current user password, enter the new password in both fields.'
+    };
+    
     // Add submit to form.
     form.elements.submit = {
       'type':'submit',
