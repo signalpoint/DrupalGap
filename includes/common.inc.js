@@ -205,7 +205,7 @@ function drupalgap_goto(path) {
     
     // Return if we are trying to go to the path we are already on, unless this
     // was a form submission, then we'll let the page rebuild itself
-    if (drupalgap.path == path && !options.form_submission) {
+    if ($.mobile.activePage.data('url') == path && !options.form_submission) {
       return false;
     }
     
