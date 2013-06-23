@@ -696,7 +696,7 @@ function drupalgap_menu_access(path) {
       if (typeof drupalgap.menu_links[path].access_callback === 'undefined') {
         // No access call back specified, if there are any access arguments
         // on the menu link, then it is assumed they are user permission machine
-        // names, so check that user account's role(s) for that permissions to
+        // names, so check that user account's role(s) for that permission to
         // grant access.
         if (drupalgap.menu_links[path].access_arguments) {
           // TODO - implement
@@ -709,15 +709,17 @@ function drupalgap_menu_access(path) {
       }
       else {
         // There is an access call back specified, call it by passing along any
-        // arguments. Replace any entity argument ids with the entity object.
+        // arguments. Replace any entity argument ids with the entity object, if
+        // it hasn't been already.
         var function_name = drupalgap.menu_links[path].access_callback;
         if (drupalgap_function_exists(function_name)) {
+          // Grab the access callback function and make a copy of the path's
+          // access arguments.
           var fn = window[function_name];
-          var access_arguments = drupalgap.menu_links[path].access_arguments;
+          var access_arguments = drupalgap.menu_links[path].access_arguments.slice(0);
           var args = arg();
           drupalgap_prepare_argument_entities(access_arguments, args);
           return fn.apply(null, Array.prototype.slice.call(access_arguments));
-          //return fn();
         }
         else {
           alert('drupalgap_menu_access - access call back (' + function_name + ') does not exist');
@@ -938,12 +940,6 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
         $.each(page_arguments, function(index, page_argument){
             if (is_int(parseInt(page_argument))) {
               page_arguments[index] = entity;
-              // Attach the entity to drupalgap entity and entity_edit.
-              // NO NO NO, this is bad, stop using this idea, you just need to
-              // pass the entiaty around and have caching in place so folks
-              // can load entities with out too much worry.
-              //drupalgap.entity = entity;
-              //drupalgap.entity_edit = entity;
               return false;
             }
         });

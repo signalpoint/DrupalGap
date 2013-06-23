@@ -1,4 +1,21 @@
 /**
+ * The access callback for the user/%/edit page.
+ */
+function user_edit_access(account) {
+  try {
+    // If the current user is looking at their own account, or if they have the
+    // 'administer users' permission, then they are allowed to edit the account.
+    if (drupalgap.user.uid == account.uid || drupalgap_user_access({'permission':'administer users'})) {
+      return true;
+    }
+    return false;
+  }
+  catch (error) {
+    alert('user_edit_access - ' + error);
+  }
+}
+
+/**
  * A page call back function to display a simple list of drupal users.
  */
 function user_listing() {
@@ -187,6 +204,8 @@ function user_menu() {
         'title':'Edit',
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_profile_form', 1],
+        'access_callback':'user_edit_access',
+        'access_arguments':[1],
         'weight':0,
         'type':'MENU_LOCAL_TASK',
       },
