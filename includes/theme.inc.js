@@ -214,13 +214,12 @@ function theme_jqm_item_list(variables) {
  */
 function theme_link(variables) {
   try {
-    var path = '';
+    var path;
     var text = '';
-    if (variables.path) { path = variables.path; }
     if (variables.text) { text = variables.text; }
-    if (path != '') {
+    if (typeof variables.path !== 'undefined') {
       return '<a ' + 
-        'onclick="javascript:drupalgap_goto(\'' + path + '\');" ' +
+        'onclick="javascript:drupalgap_goto(\'' + variables.path + '\');" ' +
         drupalgap_attributes(variables.attributes) +
       '>' + text + '</a>';
     }
