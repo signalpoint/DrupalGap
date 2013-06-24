@@ -374,6 +374,13 @@ function drupalgap_deviceready() {
 }
 
 /**
+ * Returns true if given value is empty. A generic way to test for emptiness.
+ */
+function drupalgap_empty(value) {
+  return (typeof value === "undefined" || value === null || value == '');
+}
+
+/**
  * Checks if a given file exists, returns true or false.
  * @param  {string} path
  *   A path to a file
@@ -842,7 +849,7 @@ function drupalgap_modules_load() {
 }
 
 /**
- * Given a router path (and optional path, defaults to current drupalgap.path if
+ * Given a router path (and optional path, defaults to current drupalgap path if
  * one isn't provided), this takes the path's arguments and replaces any
  * wildcards (%) in the router path with the corresponding path argument(s). It
  * then returns the assembled path. Returns false otherwise.
@@ -856,7 +863,7 @@ function drupalgap_place_args_in_path(input_path) {
     if (input_path) {
 
       // Determine path to use and break it up into its args.
-      var path = drupalgap.path;
+      var path = drupalgap_get_path();
       if (arguments[1]) { path = arguments[1]; }
       var path_args = arg(null, path);
 
@@ -1170,7 +1177,3 @@ function ucfirst (str) {
   return f + str.substr(1);
 }
 
-// generic way to test for empty
-function drupalgap_empty(value) {
-  return (typeof value === "undefined" || value === null || value == '');
-}

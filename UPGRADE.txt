@@ -22,6 +22,9 @@ version of DrupalGap to another.
   The drupalgap.title variable has been deprecated. It has been replaced by
   drupalgap.page.title and should instead be set and retrieve by
   drupalgap_set_title() and drupalgap_get_title().
+  
+  The drupalgap.path variable should now be accessed and set with the following
+  two functions: drupalgap_path_get() and drupalgap_path_set('foo')
 
 7.x-1.2-alpha => 7.x-1.3-alpha
 

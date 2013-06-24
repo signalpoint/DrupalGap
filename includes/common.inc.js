@@ -82,7 +82,7 @@ function drupalgap_check_visibility(type, data) {
           if (path == '') {
             path = drupalgap.settings.front;
           }
-          if (path == drupalgap.path) {
+          if (path == drupalgap_path_get()) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
           }
@@ -220,15 +220,16 @@ function drupalgap_goto(path) {
     
     // Return if we are trying to go to the path we are already on, unless this
     // was a form submission, then we'll let the page rebuild itself
-    if ($.mobile.activePage.data('url') == path && !options.form_submission) {
+    //if (drupalgap_path_get() == path && !options.form_submission) {
+    if (drupalgap_jqm_active_page_url() == path && !options.form_submission) {
       return false;
     }
     
     // Is this a jQM path?
     if (path.indexOf('#') == 0) {
       // TODO - We'll just let internal jQM paths go through... for now...?
-                // UPDATE - do we even deal with jQM paths anymore? Or I we only
-                // using DrupalGap paths. Weight the pros and cons.
+                // UPDATE - do we even deal with jQM paths anymore? Or are we only
+                // using DrupalGap paths. Weigh the pros and cons.
       $.mobile.changePage(path, {reloadPage:true});
       return false;
     }
@@ -237,7 +238,7 @@ function drupalgap_goto(path) {
     drupalgap.back_path = drupalgap.path;
     
     // Set the current menu path to the path input.
-    drupalgap.path = path;
+    drupalgap_path_set(path);
 
     // Grab the page id.
     var page_id = drupalgap_get_page_id(path);
@@ -253,6 +254,47 @@ function drupalgap_goto(path) {
   }
   catch (error) {
     alert('drupalgap_goto - ' + error);
+  }
+}
+
+/**
+ * Returns the URL of the active jQuery Mobile page.
+ */
+function drupalgap_jqm_active_page_url() {
+  try {
+    // WARNING: when the app first loads, this value may be much different than
+    // you expect. It certainly is not the front page path, because on Android
+    // for example it returns '/android_asset/www/index.html'.
+    return $.mobile.activePage.data('url');
+  }
+  catch (error) {
+    alert('drupalgap_jqm_active_page_url - ' + error);
+  }
+}
+
+/**
+ * Get the current DrupalGap path.
+ */
+function drupalgap_path_get() {
+  try {
+    var path = drupalgap.path;
+    
+    return path;
+  }
+  catch (error) {
+    alert('drupalgap_path_get - ' + error);
+  }
+}
+
+/**
+ * Set the current DrupalGap path.
+ */
+function drupalgap_path_set(path) {
+  try {
+    drupalgap.path = path;
+  }
+  catch (error) {
+    alert('drupalgap_path_set - ' + error);
   }
 }
 
@@ -276,7 +318,7 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
         drupalgap_add_page_to_dom(page_id, html);
         // Setup change page options if necessary.
         var changePageOptions = {};
-        if (drupalgap.path == path && options.form_submission) {
+        if (drupalgap_path_get() == path && options.form_submission) {
           changePageOptions.allowSamePageTransition = true;
         }
         // The Ripple emulator seems to not like the 'index.html' prefix
@@ -538,7 +580,8 @@ function arg() {
     // If there were zero or one arguments provided.
     if (arguments.length == 0 || arguments.length == 1) {
       // Split the path into parts.
-      var args = drupalgap.path.split('/');
+      var drupalgap_path = drupalgap_path_get();
+      var args = drupalgap_path.split('/');
       // If no arguments were provided just return the split array, otherwise
       // return whichever argument was requested.
       if (arguments.length == 0) { result = args; }

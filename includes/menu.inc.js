@@ -12,7 +12,7 @@ function menu_execute_active_handler() {
     // Determine the path and then grab the page id.
     var path = null;
     if (arguments[0]) { path = arguments[0]; }
-    if (!path) { path = drupalgap.path; }
+    if (!path) { path = drupalgap_path_get(); }
     var page_id = drupalgap_get_page_id(path);
     
     // TODO - Check to make sure the user has access to this DrupalGap menu path!
@@ -246,7 +246,7 @@ function menu_router_build() {
     if (drupalgap.settings.debug) {
       console.log('menu_set_active_item(' + path + ')');
     }
-    drupalgap.path = path;
+    drupalgap_path_set(path);
   }
   catch (error) {
     alert('menu_set_active_item - ' + error);

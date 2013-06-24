@@ -267,18 +267,19 @@ function template_preprocess_page(variables) {
  */
 function template_process_page(variables) {
   try {
+    var drupalgap_path = drupalgap_path_get();
     if (drupalgap.settings.debug) {
       console.log('template_process_page()');
       console.log(JSON.stringify(arguments));
-      console.log(drupalgap.path);
-      console.log(JSON.stringify(drupalgap.menu_links[drupalgap.path]));
+      console.log(drupalgap_path);
+      console.log(JSON.stringify(drupalgap.menu_links[drupalgap_path]));
     }
     // Execute the active menu handler to assemble the page output. We need to
     // do this before we render the regions below.
     drupalgap.output = menu_execute_active_handler();
     // For each region, render it, then replace the placeholder in the page's
     // html with the rendered region.
-    var page_id = drupalgap_get_page_id(drupalgap.path);
+    var page_id = drupalgap_get_page_id(drupalgap_path);
     $.each(drupalgap.theme.regions, function(index, region){
         if (drupalgap.settings.debug) {
           console.log('template_process_page - rendering region (' + region.name + ') for page id (' + page_id + ')');

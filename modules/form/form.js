@@ -84,7 +84,7 @@ function drupalgap_form_render(form) {
             form_element += '<script type="text/javascript">';
             // Add device ready listener for PhoneGap camera.
             var event_listener = element_id_base +  '_imagefield_ready';
-            form_element += '$("#' + drupalgap_get_page_id(drupalgap.path) + '").on("pageshow",function(){' +
+            form_element += '$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").on("pageshow",function(){' +
               'document.addEventListener("deviceready", ' + event_listener + ', false);' +
             '});' + 
             'function ' + event_listener +  '() {' +
