@@ -234,7 +234,7 @@ function user_page() {
     if (drupalgap.user.uid != 0) {
       var path = 'user/' + drupalgap.user.uid;
       //menu_set_active_item(path);
-      //drupalgap.path = path;
+      //drupalgap_path_set(path);
       //return menu_execute_active_handler(null, false);
       return menu_execute_active_handler(path, false);
     }
@@ -251,28 +251,33 @@ function user_page() {
  * The user registration form.
  */
 function user_register() {
-  var form = {
-    'id':'user_register',
-    'entity_type':'user',
-    'elements':{
-      'name':{
-        'type':'textfield',
-        'title':'Username',
-        'required':true,
-        'description':'Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.',
+  try {
+    var form = {
+      'id':'user_register',
+      'entity_type':'user',
+      'elements':{
+        'name':{
+          'type':'textfield',
+          'title':'Username',
+          'required':true,
+          'description':'Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.',
+        },
+        'mail':{
+          'type':'email',
+          'title':'E-mail address',
+          'required':true,
+        },
+        'submit':{
+          'type':'submit',
+          'value':'Create new account',
+        },
       },
-      'mail':{
-        'type':'email',
-        'title':'E-mail address',
-        'required':true,
-      },
-      'submit':{
-        'type':'submit',
-        'value':'Create new account',
-      },
-    },
-  };
-  return form;
+    };
+    return form;
+  }
+  catch (error) {
+    alert('user_register - ' + error);
+  }
 }
 
 /**
