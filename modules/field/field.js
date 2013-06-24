@@ -45,7 +45,9 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
       field_info_instances = drupalgap.field_info_instances[entity_type];
     }
     else {
-      field_info_instances = drupalgap.field_info_instances[entity_type][bundle_name];
+      if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
+        field_info_instances = drupalgap.field_info_instances[entity_type][bundle_name];  
+      }
     }
     if (drupalgap.settings.debug) {
       console.log('drupalgap_field_info_instances()');
