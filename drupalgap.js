@@ -54,6 +54,8 @@ var drupalgap = {
   'online':false,
   'destination':'',
   'api':{},
+  'back':false, /* moving backwards or not */
+  'back_path':'', /* the path to move back to */
   'blocks':[],
   'entity_info':{},
   'field_info_fields':{},
@@ -175,6 +177,8 @@ function drupalgap_bootstrap() {
     drupalgap_menus_load();
     // Initialize the theme registry.
     drupalgap_theme_registry_build();
+    // Attach device back button handler (Android).
+    document.addEventListener("backbutton", drupalgap_back, false); 
   }
   catch (error) {
     alert('drupalgap_bootstrap - ' + error);
@@ -339,7 +343,9 @@ function drupalgap_deviceready() {
           var msg = 'drupalgap_deviceready() - failed connection to ' +
             drupalgap.settings.site_path;
           if (errorThrown != '') { msg += ' - ' + errorThrown; }
-          msg += ' - Go to www.drupalgap.org for troubleshooting info.';
+          msg += ' - Check your device\'s connection and check that ' + drupalgap.settings.site_path +
+                 ' is online. If you continue to have problems visit ' + 
+                 'www.drupalgap.org for troubleshooting info.';
           navigator.notification.alert(
               msg,
               function(){ drupalgap_goto('offline'); },
