@@ -218,19 +218,13 @@ function drupalgap_goto(path) {
     // Prepare the path.
     path = drupalgap_goto_prepare_path(path);
     
-    // Return if we are trying to go to the path we are already on, unless this
-    // was a form submission, then we'll let the page rebuild itself
-    //if (drupalgap_path_get() == path && !options.form_submission) {
-    if (drupalgap_jqm_active_page_url() == path && !options.form_submission) {
-      return false;
-    }
+    // Grab the page id.
+    var page_id = drupalgap_get_page_id(path);
     
-    // Is this a jQM path?
-    if (path.indexOf('#') == 0) {
-      // TODO - We'll just let internal jQM paths go through... for now...?
-                // UPDATE - do we even deal with jQM paths anymore? Or are we only
-                // using DrupalGap paths. Weigh the pros and cons.
-      $.mobile.changePage(path, {reloadPage:true});
+    // Return if we are trying to go to the path we are already on, unless this
+    // was a form submission, then we'll let the page rebuild itself. For
+    // accurracy we compare the jQM active page url with the destination page id.
+    if (drupalgap_jqm_active_page_url() == page_id && !options.form_submission) {
       return false;
     }
     
@@ -239,9 +233,6 @@ function drupalgap_goto(path) {
     
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
-
-    // Grab the page id.
-    var page_id = drupalgap_get_page_id(path);
 
     // If the page is already in the DOM, remove it.
     if (drupalgap_page_in_dom(page_id) && !options.form_submission) {
@@ -515,7 +506,8 @@ function drupalgap_render_region(region) {
     }
     // Make sure there are blocks specified for this theme in settings.js.
     if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
-      alert('drupalgap_render_region - region (' + region.name + ') not defined in settings.js blocks!');
+      alert('drupalgap_render_region - there are no blocks for the "' +
+            drupalgap.settings.theme + ' " theme in the settings.js file!');
       return '';
     }
     // Let's render the region...
