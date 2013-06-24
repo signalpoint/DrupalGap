@@ -1164,3 +1164,7 @@ function ucfirst (str) {
   return f + str.substr(1);
 }
 
+// generic way to test for empty
+function drupalgap_empty(value) {
+  return (typeof value === "undefined" || value === null || value == '');
+}
