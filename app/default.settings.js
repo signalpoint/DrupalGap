@@ -87,10 +87,26 @@ drupalgap.settings = {
     'regions':{
       'header':{
         'links':[
+          /* Home Button */
           {
             'title':'Home',
             'path':'',
             "options":{"attributes":{"data-icon":"home", "class":"ui-btn-left"}},
+            "pages":{
+              "value":[''],
+              "mode":"exclude",
+            }
+          },
+          /* Back Button */
+          {
+            'title':'Back',
+            "options":{
+              "attributes":{
+                "data-icon":"back",
+                "class":"ui-btn-right",
+                "onclick":"javascript:drupalgap_back();"
+              }
+            },
             "pages":{
               "value":[''],
               "mode":"exclude",

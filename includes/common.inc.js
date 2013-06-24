@@ -183,6 +183,21 @@ function drupalgap_get_path(type, name) {
 }
 
 /**
+ * Change the page to the previous page.
+ */
+function drupalgap_back() {
+  try {
+    drupalgap.back = true;
+    history.back();
+    drupalgap.path = drupalgap.back_path;
+    return false;
+  }
+  catch (error) {
+    alert('drupalgap_back' + error);
+  }
+}
+
+/**
  * Given a path, this will change the current page in the app.
  */
 function drupalgap_goto(path) {
@@ -217,6 +232,9 @@ function drupalgap_goto(path) {
       $.mobile.changePage(path, {reloadPage:true});
       return false;
     }
+    
+    // Save the back path.
+    drupalgap.back_path = drupalgap.path;
     
     // Set the current menu path to the path input.
     drupalgap.path = path;

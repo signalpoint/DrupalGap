@@ -7,6 +7,11 @@ $(document).bind("pagebeforechange", function(e, data) {
       if (drupalgap.settings.debug) {
         console.log('pagebeforechange()');
       }
+      // If we're moving backwards, reset drupalgap.back and return.
+      if (drupalgap.back) {
+        drupalgap.back = false;
+        return;
+      }
       if (typeof data.toPage === "string") {
         template_preprocess_page(drupalgap.page.variables);
         template_process_page(drupalgap.page.variables);
@@ -21,6 +26,10 @@ $(document).bind("pagebeforechange", function(e, data) {
       alert('pagebeforechange - ' + error);
     }
 });
+
+/*$(document).bind('pagebeforeshow', function(event, date){
+    alert('previous page: ' + date.prevPage.attr('id'));
+});*/
 
 /**
  * Returns the path to the current DrupalGap theme, false otherwise.
@@ -205,11 +214,19 @@ function theme_jqm_item_list(variables) {
  */
 function theme_link(variables) {
   try {
-    var html = '<a ' + 
-      'onclick="javascript:drupalgap_goto(\'' + variables.path + '\');" ' +
-      drupalgap_attributes(variables.attributes) +
-    '>' + variables.text + '</a>';
-    return html;
+    var path = '';
+    var text = '';
+    if (variables.path) { path = variables.path; }
+    if (variables.text) { text = variables.text; }
+    if (path != '') {
+      return '<a ' + 
+        'onclick="javascript:drupalgap_goto(\'' + path + '\');" ' +
+        drupalgap_attributes(variables.attributes) +
+      '>' + text + '</a>';
+    }
+    else {
+      return '<a ' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
+    }
   }
   catch (error) {
     alert('theme_link - ' + error);
