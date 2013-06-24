@@ -189,7 +189,7 @@ function drupalgap_back() {
   try {
     drupalgap.back = true;
     history.back();
-    drupalgap.path = drupalgap.back_path;
+    drupalgap_path_set(drupalgap.back_path);
     return false;
   }
   catch (error) {
@@ -235,7 +235,7 @@ function drupalgap_goto(path) {
     }
     
     // Save the back path.
-    drupalgap.back_path = drupalgap.path;
+    drupalgap.back_path = drupalgap_path_get();
     
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
