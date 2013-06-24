@@ -34,7 +34,7 @@ drupalgap.services.node = {
         // TODO - a good opportunity for a hook to come in
         // and modify node.content if developer wants.
         node.content = '';
-        if (node.body.length != 0) {
+        if (!drupalgap_empty(node.body)) {
           node.content = node.body[node.language][0].safe_value;
         }
       },
