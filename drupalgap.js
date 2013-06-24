@@ -863,7 +863,7 @@ function drupalgap_place_args_in_path(input_path) {
     if (input_path) {
 
       // Determine path to use and break it up into its args.
-      var path = drupalgap_get_path();
+      var path = drupalgap_path_get();
       if (arguments[1]) { path = arguments[1]; }
       var path_args = arg(null, path);
 
