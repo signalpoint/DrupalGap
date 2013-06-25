@@ -11,7 +11,9 @@ drupalgap.api = {
       // TODO - this is a good spot for a hook, e.g. hook_drupalgap_api_preprocess
 
       // Build the Drupal URL path to call if one hasn't been assembled already
-      // by the caller.
+      // by the caller. Save a copy of the service resource url for
+      // hook_services_success() before it gets modified below.
+      call_options.service_resource = '' + options.path;
       if (!call_options.url || call_options.url == '') {
         call_options.url = call_options.site_path + drupalgap.settings.base_path;
         if (!drupalgap.settings.clean_urls) {
@@ -57,7 +59,8 @@ drupalgap.api = {
               dataType: call_options.dataType,
               async: true,
               error: call_options.error,
-              success: call_options.success
+              success: call_options.success,
+              service_resource:call_options.service_resource
             }
             
             // Synchronous call?
@@ -172,10 +175,10 @@ function drupalgap_api_default_options() {
     'endpoint':drupalgap.settings.default_services_endpoint,
     'site_path':drupalgap.settings.site_path,
     'success':function(result){
-      // TODO - this is a good spot for a hook
-      // e.g. hook_drupalgap_api_postprocess
       // Hide the loading message.
       $.mobile.hidePageLoadingMsg();
+      // Invoke hook_services_success().
+      module_invoke_all('services_success', this.service_resource, result);
       // If debugging is turned on, print the result to the console.
       if (drupalgap.settings.debug) {
         // Note: http://stackoverflow.com/a/11616993/763010
@@ -222,6 +225,9 @@ function drupalgap_api_default_options() {
     'error_alert':true, /* an option to supress the default error call back's
                            alert dialog window, use: options.error_alert = false;
                            use with caution */
+    'service_resource':null, /* holds a copy of the service resource being
+                                called e.g. user/login.json,
+                                system/connect.json */
   };
   return default_options;
 }
@@ -251,3 +257,10 @@ function hook_mvc_view() {
 function hook_mvc_controller() {
 }
 
+/**
+ * Called after a successful services API call to a Drupal site. Do not call
+ * any services from within your implementation, you may run into an infinite
+ * loop in your code. See http://drupalgap.org/project/force_authentication for
+ * example usage.
+ */
+function hook_services_success(url, data) { }
