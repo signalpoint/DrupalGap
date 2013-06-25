@@ -411,13 +411,13 @@ function drupalgap_file_exists(path) {
  * Reads entire file into a string and returns the string. Returns false if
  * it fails.
  */
-function drupalgap_file_get_contents(path) {
+function drupalgap_file_get_contents(path, options) {
   try {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_file_get_contents(' + path + ')');
     }
     var file = false;
-    jQuery.ajax({
+    var default_options = {
       type:'GET',
       url:path,
       dataType:'html',
@@ -427,7 +427,9 @@ function drupalgap_file_get_contents(path) {
       error: function(xhr, textStatus, errorThrown) {
         console.log('drupalgap_file_get_contents - failed to load file (' + path + ')');
       }
-    });
+    };
+    $.extend(default_options, options);
+    jQuery.ajax(default_options);
     return file;
   }
   catch (error) {
