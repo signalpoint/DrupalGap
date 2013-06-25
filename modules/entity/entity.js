@@ -166,24 +166,22 @@ function drupalgap_entity_get_core_fields(entity_type) {
     var fields = {};
     switch (entity_type) {
       case 'comment':
-        fields = {
-          'cid':{
-            'type':'hidden',
-            'required':false,
-            'default_value':'',
-          },
-          'nid':{
-            'type':'hidden',
-            'required':true,
-            'default_value':'',
-          },
-          'subject':{
-            'type':'textfield',
-            'title':'Subject',
-            'required':false,
-            'default_value':'',
-          },
-        };
+        // Add each schema field to the fields collection.
+        $.each(drupalgap.entity_info[entity_type].schema_fields_sql['base table'], function(index, name){
+            var field = {
+              "type":"hidden",
+              "required":false,
+              "default_value":"",
+              "title":ucfirst(name)
+            };
+            eval('fields.' + name + ' = field;');
+        });
+        // Make modifications to comment fields.
+        fields['nid'].required = true;
+        fields['subject'].type = 'textfield';
+        fields['name'].type = 'textfield';
+        fields['mail'].type = 'textfield';
+        fields['homepage'].type = 'textfield';
         break;
       case 'node':
         fields.nid = {
