@@ -631,10 +631,6 @@ function drupalgap_item_list_populate(list_css_selector, items) {
     for (var i = 0; i < items.length; i ++) {
       $(list_css_selector).append($("<li></li>",{"html":items[i]}));
     }
-    // TODO - cannot call methods on listview prior to initilalization;
-    // attempted to call method 'destroy' - we get this bug when drupalgap_goto()
-    // reloads the same page after a form submission, and that page has an
-    // item list that is populated.
     $(list_css_selector).listview("destroy").listview();
   }
   catch (error) {

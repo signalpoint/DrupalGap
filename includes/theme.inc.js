@@ -12,6 +12,9 @@ $(document).bind("pagebeforechange", function(e, data) {
         drupalgap.back = false;
         return;
       }
+      if (drupalgap_jqm_active_page_url() == drupalgap_get_page_id(drupalgap_path_get())) {
+        return;
+      }
       if (typeof data.toPage === "string") {
         template_preprocess_page(drupalgap.page.variables);
         template_process_page(drupalgap.page.variables);
@@ -19,6 +22,8 @@ $(document).bind("pagebeforechange", function(e, data) {
       if (drupalgap.settings.debug) {
         // TODO - Is this log message getting hit twice on one page change?
         // If so, that's no bueno!
+        // UPDATE is it because there are typically two pages in the DOM?!?!
+        // Possibly, since it appears we bound the event to the document.
         console.log('pagebeforechange() - processed page');
       }
     }

@@ -234,7 +234,8 @@ function drupalgap_goto(path) {
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
 
-    // If the page is already in the DOM, remove it.
+    // If the page is already in the DOM, remove it, unless this is a form
+    // submission.
     if (drupalgap_page_in_dom(page_id) && !options.form_submission) {
       $('#' + page_id).empty().remove();
     }
@@ -305,18 +306,24 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
     else {
       var html = drupalgap_file_get_contents(page_template_path);
       if (html) {
+        
         // Add page to DOM.
         drupalgap_add_page_to_dom(page_id, html);
+        
         // Setup change page options if necessary.
         var changePageOptions = {};
         if (drupalgap_path_get() == path && options.form_submission) {
           changePageOptions.allowSamePageTransition = true;
         }
-        // The Ripple emulator seems to not like the 'index.html' prefix
+        
+        // Let's change to the page.
         if (typeof parent.window.ripple === 'function') {
+          // The Ripple emulator seems to not like the 'index.html' prefix,
+          // so we'll remove that.
           $.mobile.changePage('#' + page_id, changePageOptions);
         }
         else {
+          // Default change page.
           $.mobile.changePage('index.html#' + page_id, changePageOptions);
         }
       }

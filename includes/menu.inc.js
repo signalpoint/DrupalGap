@@ -69,30 +69,33 @@ function menu_execute_active_handler() {
           content = fn();
         }
         
-        // Clear out any previous jQM page events, then if there are any jQM
+        // If we're not navigating to the exact same page, clear out any
+        // previous jQM page events, then if there are any jQM
         // event callback functions attached to the menu link for this page, set
         // each event up to be fired with inline JS on the page.
-        drupalgap.page.jqm_events = [];
-        var jqm_page_events = drupalgap_jqm_page_events();
-        for (var i = 0; i < jqm_page_events.length; i++) {
-          if (drupalgap.menu_links[router_path][jqm_page_events[i]]) {
-            var jqm_page_event = jqm_page_events[i];
-            var jqm_page_event_callback = drupalgap.menu_links[router_path][jqm_page_event];
-            if (drupalgap_function_exists(jqm_page_event_callback)) {
-              // TODO - we should probably pass the same page arguments that are sent
-              // to this path's menu link page_callback function to these jQM page
-              // event callback functions!
-              var script_code = '<script type="text/javascript">$("#' + page_id + '").on("' +jqm_page_event + '", drupalgap_jqm_page_event_fire("' + jqm_page_event + '", "' + jqm_page_event_callback + '"));</script>';
-              content[jqm_page_event] = {'markup':script_code};
-            }
-            else {
-              alert('menu_execute_active_handler (' + path + ') - the jQM ' +
-                jqm_page_event + ' call back function ' + jqm_page_event_callback +
-                ' does not exist!'
-              );
+        //if (drupalgap_jqm_active_page_url() != page_id) {
+          drupalgap.page.jqm_events = [];
+          var jqm_page_events = drupalgap_jqm_page_events();
+          for (var i = 0; i < jqm_page_events.length; i++) {
+            if (drupalgap.menu_links[router_path][jqm_page_events[i]]) {
+              var jqm_page_event = jqm_page_events[i];
+              var jqm_page_event_callback = drupalgap.menu_links[router_path][jqm_page_event];
+              if (drupalgap_function_exists(jqm_page_event_callback)) {
+                // TODO - we should probably pass the same page arguments that are sent
+                // to this path's menu link page_callback function to these jQM page
+                // event callback functions!
+                var script_code = '<script type="text/javascript">$("#' + page_id + '").on("' +jqm_page_event + '", drupalgap_jqm_page_event_fire("' + jqm_page_event + '", "' + jqm_page_event_callback + '"));</script>';
+                content[jqm_page_event] = {'markup':script_code};
+              }
+              else {
+                alert('menu_execute_active_handler (' + path + ') - the jQM ' +
+                  jqm_page_event + ' call back function ' + jqm_page_event_callback +
+                  ' does not exist!'
+                );
+              }
             }
           }
-        }
+        //}
         
         // Set the page title.
         if (typeof drupalgap.menu_links[router_path].title !== 'undefined') {
