@@ -121,6 +121,15 @@ function drupalgap_comment_assemble_data(options) {
   if (options.comment.subject) {
     data += '&subject=' + encodeURIComponent(options.comment.subject);
   }
+  if (options.comment.name) {
+    data += '&name=' + encodeURIComponent(options.comment.name);
+  }
+  if (options.comment.mail) {
+    data += '&mail=' + encodeURIComponent(options.comment.mail);
+  }
+  if (options.comment.homepage) {
+    data += '&homepage=' + encodeURIComponent(options.comment.homepage);
+  }
   if (options.comment.comment_body) {
     data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
       encodeURIComponent(options.comment.comment_body[drupalgap.settings.language][0].value);
