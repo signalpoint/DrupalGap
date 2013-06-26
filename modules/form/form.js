@@ -18,7 +18,7 @@ function drupalgap_form_get_element_id(name, form_id) {
 }
 
 /**
- * Given a drupalgap form, this renders the form.
+ * Given a drupalgap form, this renders the form html and returns it.
  */
 // TODO - we may possibly colliding html element ids!!! For example, I think the
 // node edit page gets an id of "node_edit" and possibly so does the node
@@ -33,6 +33,12 @@ function drupalgap_form_render(form) {
       console.log('drupalgap_form_render()');
       console.log(JSON.stringify(form));
     }
+    // If no form id is provided, warn the user.
+    if (!form.id) {
+      return '<p>drupalgap_form_render() - missing form id!</p>' + JSON.stringify(form);
+    }
+    // If the form already exists in the DOM, remove it.
+    if ($('form#' + form.id).length) { $('form#' + form.id).remove(); }
     // Render each form element.
     var form_elements = '';
     $.each(form.elements, function(name, element){
@@ -166,11 +172,9 @@ function drupalgap_form_render(form) {
       });
     }
     // Return the form html.
-    // TODO - we should probably be wrapping a form in a form element you
-    // dumb dumb.
-    var form_html = '<div><div id="drupalgap_form_errors"></div>' +
+    var form_html = '<form id="' + form.id + '"><div><div id="drupalgap_form_errors"></div>' +
       form_elements +
-    '</div>';
+    '</div></form>';
     return form_html;
   }
   catch (error) {
