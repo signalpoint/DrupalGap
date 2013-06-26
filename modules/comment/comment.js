@@ -69,20 +69,6 @@ function comment_edit(comment) {
 }
 
 /**
- * The comment edit validation function.
- */
-function comment_edit_validate(form, form_state) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('comment_edit_validate');
-    }
-  }
-  catch (error) {
-    alert('comment_edit_validate - ' + error);
-  }
-}
-
-/**
  * The comment edit submit function.
  */
 function comment_edit_submit(form, form_state) {
