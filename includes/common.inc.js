@@ -326,7 +326,12 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
       alert('drupalgap_goto_generate_page_and_go - page template does not exist! (' + page_template_path + ')');
     }
     else {
-      var html = drupalgap_file_get_contents(page_template_path);
+      
+      // Load the page template html file.
+      var options = {};
+      if (!drupalgap.settings.cache.theme_registry) { options.cache = false; }
+      var html = drupalgap_file_get_contents(page_template_path, options);
+      
       if (html) {
         
         // Add page to DOM.
