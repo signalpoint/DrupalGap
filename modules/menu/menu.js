@@ -22,7 +22,8 @@ function menu_block_view(delta) {
       // them into the menu. Note, local tasks are located in a menu link item's
       // children, if there are any. Local tasks typically have argument wildcards
       // in them, so we'll replace their wildcards with the current args.
-      var router_path = drupalgap_get_menu_link_router_path(drupalgap_get_current_path());
+      //var router_path = drupalgap_get_menu_link_router_path(drupalgap_get_current_path());
+      var router_path = drupalgap_router_path_get();
       if (drupalgap.menu_links[router_path] && drupalgap.menu_links[router_path].children) {
         var menu_items = [];
         var link_path = '';

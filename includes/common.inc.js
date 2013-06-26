@@ -101,25 +101,6 @@ function drupalgap_check_visibility(type, data) {
   }
 }
 
-
-/**
- * Returns the current page path as a string.
- */
-function drupalgap_get_current_path() {
-  try {
-    var path = '';
-    var args = arg();
-    if (args) {
-      path = args.join('/');
-    }
-    return path;
-  }
-  catch (error) {
-    alert('drupalgap_get_current_path - ' + error);
-  }
-}
-
-
 /**
  * Given a path, this will return the id for the page's div element.
  * For example, a string path of 'foo/bar' would result in an id of 'foo_bar'.
@@ -218,6 +199,18 @@ function drupalgap_goto(path) {
     // Prepare the path.
     path = drupalgap_goto_prepare_path(path);
     
+    // Determine the router path.
+    var router_path = drupalgap_get_menu_link_router_path(path);
+    
+    // If the new router path is the same as the current router path and the new
+    // path is the same as the current path, don't go anywhere, unless it is a
+    // form submission, then continue.
+    if (router_path == drupalgap_router_path_get() &&
+        drupalgap_path_get() == path && 
+        !options.form_submission) {
+      return false;
+    }
+    
     // Grab the page id.
     var page_id = drupalgap_get_page_id(path);
     
@@ -233,6 +226,9 @@ function drupalgap_goto(path) {
     
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
+    
+    // Set the drupalgap router path.
+    drupalgap_router_path_set(router_path);
 
     // If the page is already in the DOM, remove it, unless this is a form
     // submission.
@@ -287,6 +283,32 @@ function drupalgap_path_set(path) {
   }
   catch (error) {
     alert('drupalgap_path_set - ' + error);
+  }
+}
+
+/**
+ * Get the current DrupalGap router_path.
+ */
+function drupalgap_router_path_get() {
+  try {
+    var router_path = drupalgap.router_path;
+    
+    return router_path;
+  }
+  catch (error) {
+    alert('drupalgap_router_path_get - ' + error);
+  }
+}
+
+/**
+ * Set the current DrupalGap router_path.
+ */
+function drupalgap_router_path_set(router_path) {
+  try {
+    drupalgap.router_path = router_path;
+  }
+  catch (error) {
+    alert('drupalgap_router_path_set - ' + error);
   }
 }
 
@@ -346,12 +368,17 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
  */
 function drupalgap_goto_prepare_path(path) {
   try {
-    // If the path was an empty sting, set it to the front page.
-    if (path == '') { path = drupalgap.settings.front; }  
-    // If the path is to 'user', and the user is logged in, let's set the path
-    // to 'user/[uid]' so the router path can be determined properly.
-    else if (path == 'user' && drupalgap.user.uid != 0) {
-      path = 'user/' + drupalgap.user.uid;
+    // If the path is an empty string, change it to the front page path.
+    if (path == '') { path = drupalgap.settings.front; }
+    // Change 'user' to 'user/login' for anonymous users, or change it to
+    // e.g. 'user/123/view' for authenticated users.
+    else if (path == 'user') {
+      if (drupalgap.user.uid != 0) {
+        path = 'user/' + drupalgap.user.uid + '/view';
+      }
+      else {
+        path = 'user/login';
+      }
     }
     return path;
   }

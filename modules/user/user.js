@@ -231,16 +231,9 @@ function user_page() {
     if (drupalgap.settings.debug) {
       console.log('user_page()');
     }
-    if (drupalgap.user.uid != 0) {
-      var path = 'user/' + drupalgap.user.uid;
-      //menu_set_active_item(path);
-      //drupalgap_path_set(path);
-      //return menu_execute_active_handler(null, false);
-      return menu_execute_active_handler(path, false);
-    }
-    else {
-      return drupalgap_get_form('user_login');
-    }
+    // NOTE, this page call back isn't actually used, because the 'user' path
+    // in DrupalGap is redirected to either 'user/login' or e.g. 'user/123/view'.
+    return 'user_page()';
   }
   catch (error) {
     alert('user_page - ' + error);
