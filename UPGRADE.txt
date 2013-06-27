@@ -32,6 +32,10 @@ version of DrupalGap to another.
   The drupalgap.settings.cache variable has been introduced, be sure to add it
   to your settings.js file (you'll find its default values in
   default.settings.js).
+  
+  The drupalgap_user_access() function has been renamed to user_access() and it
+  now just takes in a string with a permission name, it no longer takes in a
+  JSON object with a permission property/value.
 
 7.x-1.2-alpha => 7.x-1.3-alpha
 

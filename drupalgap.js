@@ -1119,19 +1119,19 @@ function drupalgap_onload() {
  * current user has that permission, false otherwise. Here is example input
  * that checks to see if the current user has the 'access content' permission.
  *  Example Usage:
- *    user_access = drupalgap_user_access({'permission':'access content'});
- *    if (user_access) {
+ *    var has_access = user_access('access content');
+ *    if (has_access) {
  *      alert("You have the 'access content' permission.");
  *    }
  *    else {
  *      alert("You do not have the 'access content' permission.");
  *    }
  */
-function drupalgap_user_access(options) {
+function user_access(permission) {
   try {
     // Make sure they provided a permission.
-    if (options.permission == null) {
-      alert("drupalgap_user_access - permission not provided");
+    if (permission == null) {
+      alert("user_access - permission not provided");
       return false;
     }
     // User 1 always has permission.
@@ -1141,10 +1141,10 @@ function drupalgap_user_access(options) {
     // For everyone else, assume they don't have permission. Iterate over
     // drupalgap.user.permissions to see if the current user has the given
     // permission, then return the result.
-    access = false;
+    var access = false;
     if (drupalgap.user.permissions && drupalgap.user.permissions.length != 0) {
-      $.each(drupalgap.user.permissions, function(index, permission){
-        if (options.permission == permission) {
+      $.each(drupalgap.user.permissions, function(index, user_permission){
+        if (permission == user_permission) {
           access = true;
           return;
         }
@@ -1153,7 +1153,7 @@ function drupalgap_user_access(options) {
     return access;
   }
   catch (error) {
-    alert("drupalgap_user_access - " + error);
+    alert("user_access - " + error);
   }
   return false;
 }

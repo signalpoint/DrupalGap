@@ -5,7 +5,7 @@ function user_edit_access(account) {
   try {
     // If the current user is looking at their own account, or if they have the
     // 'administer users' permission, then they are allowed to edit the account.
-    if (drupalgap.user.uid == account.uid || drupalgap_user_access({'permission':'administer users'})) {
+    if (drupalgap.user.uid == account.uid || user_access('administer users')) {
       return true;
     }
     return false;

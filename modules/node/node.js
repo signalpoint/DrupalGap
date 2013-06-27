@@ -370,7 +370,7 @@ function node_page_view_pageshow() {
           var items = [];
           $.each(data.comments, function(index, object){
               var html = '';
-              if (drupalgap_user_access({'permission':'administer comments'})) {
+              if (user_access('administer comments')) {
                 html += l('Edit', 'comment/' + object.comment.cid + '/edit');
               }
               html += object.comment.created + "<br />" +
