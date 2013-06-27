@@ -2,7 +2,7 @@
  * Each time we use drupalgap_goto to change a page, this function is called on
  * the pagebeforehange event. It preproccesses the page, then processes it.
  */
-$(document).bind("pagebeforechange", function(e, data) {
+$(document).on("pagebeforechange", function(e, data) {
     try {
       if (drupalgap.settings.debug) {
         console.log('pagebeforechange()');
@@ -223,10 +223,13 @@ function theme_link(variables) {
     var text = '';
     if (variables.text) { text = variables.text; }
     if (typeof variables.path !== 'undefined') {
-      return '<a ' + 
-        'onclick="javascript:drupalgap_goto(\'' + variables.path + '\');" ' +
-        drupalgap_attributes(variables.attributes) +
-      '>' + text + '</a>';
+      // By default our onclick will use a drupalgap_goto, unless there is an
+      // http:// or https:// in the link, then we'll use PhoneGap's InAppBrowser
+      var onclick = 'drupalgap_goto(\'' + variables.path + '\');';
+      if (variables.path.indexOf('http://') != -1 || variables.path.indexOf('https://') != -1) {
+        onclick = "window.open('" + variables.path + "', '_blank', 'location=yes');";
+      }
+      return '<a onclick="javascript:' + onclick + '"' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
     }
     else {
       return '<a ' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
