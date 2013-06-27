@@ -4,3 +4,8 @@ app/themes/*
 app/settings.js
 app/.gitignore
 res
+
+# Ignore jQM Theme Roller Files
+themes/images
+themes/*.css
+

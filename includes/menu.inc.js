@@ -17,9 +17,8 @@ function menu_execute_active_handler() {
     
     // TODO - Check to make sure the user has access to this DrupalGap menu path!
     
-    // Get the router path and set drupalgap.router_path.
-    var router_path = drupalgap_get_menu_link_router_path(path);
-    drupalgap.router_path = router_path; 
+    // Get the router path.
+    var router_path = drupalgap_router_path_get();
     
     if (router_path) {
       /*console.log(path);
@@ -263,14 +262,6 @@ function drupalgap_get_menu_link_router_path(path) {
       console.log('drupalgap_get_menu_link_router_path(' + path + ')');
     }
     
-    // TODO - Since the router path is set by menu_router_build, no one other than
-    // menu_router_build should have to call this function. Go around and clean
-    // up any calls to this function because the router path will be available in
-    // drupalgap.menu_links[path]. Actually this might not be true, we need this
-    // function to determine router paths for paths like node/123 because those
-    // will not be in the drupalgap.menu_links collection. Either way, this function
-    // should probably be called minimally.
-    
     // TODO - Why is this function called twice sometimes? E.G. via an MVC item
     // view item/local_users/user/0, this function gets called twice in one page
     // load, that can't be good.
@@ -353,6 +344,14 @@ function drupalgap_get_menu_link_router_path(path) {
           }
         }
       }
+    }
+    
+    // If the router path is a default menu local task, inherit its parent
+    // router path.
+    if (drupalgap.menu_links[router_path] && 
+        drupalgap.menu_links[router_path].type == 'MENU_DEFAULT_LOCAL_TASK' &&
+        drupalgap.menu_links[router_path].parent) {
+      router_path = drupalgap.menu_links[router_path].parent;
     }
     
     // If there isn't a router and we couldn't find one, we'll just route

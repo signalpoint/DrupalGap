@@ -29,6 +29,11 @@ drupalgap.settings = {
   /* Logo */
   'logo':'',
   
+  /* Cache - Set to true when publishing app!*/
+  'cache':{
+    'theme_registry':false,
+  },
+  
   /* Blocks */
   'blocks':{
     'easystreet3':{
