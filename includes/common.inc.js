@@ -607,10 +607,6 @@ function drupalgap_render_region(region) {
  */
 function arg() {
   try {
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log('arg()');
-      console.log(JSON.stringify(arguments));
-    }
     var result = null;
     // If there were zero or one arguments provided.
     if (arguments.length == 0 || arguments.length == 1) {
@@ -643,10 +639,6 @@ function arg() {
  */
 function l() {
   try {
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log('l()');
-      console.log(JSON.stringify(arguments));
-    }
     var text = arguments[0];
     var path = arguments[1];
     var link = {'text':text, 'path':path};
@@ -654,6 +646,7 @@ function l() {
     if (arguments[2]) {
       options = arguments[2];
       if (options.attributes) { link.attributes = options.attributes; }
+      link.options = options;
     }
     return theme('link', link);
   }

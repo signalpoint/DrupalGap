@@ -223,10 +223,10 @@ function theme_link(variables) {
     var text = '';
     if (variables.text) { text = variables.text; }
     if (typeof variables.path !== 'undefined') {
-      // By default our onclick will use a drupalgap_goto, unless there is an
-      // http:// or https:// in the link, then we'll use PhoneGap's InAppBrowser
+      // By default our onclick will use a drupalgap_goto, unless the user
+      // specified the InAppBrowser option.
       var onclick = 'drupalgap_goto(\'' + variables.path + '\');';
-      if (variables.path.indexOf('http://') != -1 || variables.path.indexOf('https://') != -1) {
+      if (variables.options && variables.options.InAppBrowser) {
         onclick = "window.open('" + variables.path + "', '_blank', 'location=yes');";
       }
       return '<a onclick="javascript:' + onclick + '"' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';

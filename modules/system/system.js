@@ -74,7 +74,7 @@ function system_block_view(delta) {
         break;
       case 'powered_by':
         return '<p style="text-align: center;">Powered by: ' +
-          l('DrupalGap','http://www.drupalgap.org') +
+          l('DrupalGap','http://www.drupalgap.org', {InAppBrowser:true}) +
         '</p>';
         break;
       case 'help':
