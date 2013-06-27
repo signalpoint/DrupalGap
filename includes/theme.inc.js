@@ -1,30 +1,26 @@
 /**
  * Each time we use drupalgap_goto to change a page, this function is called on
- * the pagebeforehange event. It preproccesses the page, then processes it.
+ * the pagebeforehange event. If we're not moving backwards, or navigating to
+ * the same page, this will preproccesses the page, then processes it.
  */
 $(document).on("pagebeforechange", function(e, data) {
     try {
-      if (drupalgap.settings.debug) {
-        console.log('pagebeforechange()');
-      }
       // If we're moving backwards, reset drupalgap.back and return.
       if (drupalgap.back) {
         drupalgap.back = false;
         return;
       }
+      // If the jqm active page url is the same as the page id of the current
+      // path, return.
       if (drupalgap_jqm_active_page_url() == drupalgap_get_page_id(drupalgap_path_get())) {
         return;
       }
+      // We only want to process the page we are going to, not the page we are
+      // coming from. When data.toPage is a string that is our destination page.
       if (typeof data.toPage === "string") {
         template_preprocess_page(drupalgap.page.variables);
         template_process_page(drupalgap.page.variables);
-      }
-      if (drupalgap.settings.debug) {
-        // TODO - Is this log message getting hit twice on one page change?
-        // If so, that's no bueno!
-        // UPDATE is it because there are typically two pages in the DOM?!?!
-        // Possibly, since it appears we bound the event to the document.
-        console.log('pagebeforechange() - processed page');
+        if (drupalgap.settings.debug) { console.log('pagebeforechange() - processed page'); }
       }
     }
     catch (error) {
