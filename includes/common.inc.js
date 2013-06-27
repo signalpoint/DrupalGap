@@ -246,73 +246,6 @@ function drupalgap_goto(path) {
 }
 
 /**
- * Returns the URL of the active jQuery Mobile page.
- */
-function drupalgap_jqm_active_page_url() {
-  try {
-    // WARNING: when the app first loads, this value may be much different than
-    // you expect. It certainly is not the front page path, because on Android
-    // for example it returns '/android_asset/www/index.html'.
-    return $.mobile.activePage.data('url');
-  }
-  catch (error) {
-    alert('drupalgap_jqm_active_page_url - ' + error);
-  }
-}
-
-/**
- * Get the current DrupalGap path.
- */
-function drupalgap_path_get() {
-  try {
-    var path = drupalgap.path;
-    
-    return path;
-  }
-  catch (error) {
-    alert('drupalgap_path_get - ' + error);
-  }
-}
-
-/**
- * Set the current DrupalGap path.
- */
-function drupalgap_path_set(path) {
-  try {
-    drupalgap.path = path;
-  }
-  catch (error) {
-    alert('drupalgap_path_set - ' + error);
-  }
-}
-
-/**
- * Get the current DrupalGap router_path.
- */
-function drupalgap_router_path_get() {
-  try {
-    var router_path = drupalgap.router_path;
-    
-    return router_path;
-  }
-  catch (error) {
-    alert('drupalgap_router_path_get - ' + error);
-  }
-}
-
-/**
- * Set the current DrupalGap router_path.
- */
-function drupalgap_router_path_set(router_path) {
-  try {
-    drupalgap.router_path = router_path;
-  }
-  catch (error) {
-    alert('drupalgap_router_path_set - ' + error);
-  }
-}
-
-/**
  * Generate a JQM page by running it through the theme then attach the
  * page to the <body> of the document, then change to the page. Remember,
  * the rendering of the page does not take place here, that is covered by
@@ -416,7 +349,73 @@ function drupalgap_page_in_dom(page_id) {
   catch (error) {
     alert('drupalgap_page_in_dom - ' + error);
   }
-  
+}
+
+/**
+ * Returns the URL of the active jQuery Mobile page.
+ */
+function drupalgap_jqm_active_page_url() {
+  try {
+    // WARNING: when the app first loads, this value may be much different than
+    // you expect. It certainly is not the front page path, because on Android
+    // for example it returns '/android_asset/www/index.html'.
+    return $.mobile.activePage.data('url');
+  }
+  catch (error) {
+    alert('drupalgap_jqm_active_page_url - ' + error);
+  }
+}
+
+/**
+ * Get the current DrupalGap path.
+ */
+function drupalgap_path_get() {
+  try {
+    var path = drupalgap.path;
+    
+    return path;
+  }
+  catch (error) {
+    alert('drupalgap_path_get - ' + error);
+  }
+}
+
+/**
+ * Set the current DrupalGap path.
+ */
+function drupalgap_path_set(path) {
+  try {
+    drupalgap.path = path;
+  }
+  catch (error) {
+    alert('drupalgap_path_set - ' + error);
+  }
+}
+
+/**
+ * Get the current DrupalGap router_path.
+ */
+function drupalgap_router_path_get() {
+  try {
+    var router_path = drupalgap.router_path;
+    
+    return router_path;
+  }
+  catch (error) {
+    alert('drupalgap_router_path_get - ' + error);
+  }
+}
+
+/**
+ * Set the current DrupalGap router_path.
+ */
+function drupalgap_router_path_set(router_path) {
+  try {
+    drupalgap.router_path = router_path;
+  }
+  catch (error) {
+    alert('drupalgap_router_path_set - ' + error);
+  }
 }
 
 /**
