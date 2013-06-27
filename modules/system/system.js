@@ -95,14 +95,16 @@ function system_block_view(delta) {
  */
 function system_menu() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('system_menu()');
-    }
+    if (drupalgap.settings.debug) { console.log('system_menu()'); }
     var items = {
+      'dashboard':{
+        'title':'Dashboard',
+        'page_callback':'system_dashboard_page',
+      },
       'offline':{
         'title':'Offline',
-        'page_callback':'offline_page',
-      },
+        'page_callback':'system_offline_page',
+      }
     };
     return items;
   }
@@ -112,13 +114,42 @@ function system_menu() {
 }
 
 /**
+ * Page callback for the dashboard page.
+ */
+function system_dashboard_page() {
+  try {
+    if (drupalgap.settings.debug) { console.log('system_dashboard_page()'); }
+    var content = {};
+    content.welcome = {
+      markup:'<h2>Welcome to DrupalGap</h2><p>The open source ' +
+             'mobile application development kit for Drupal!</p>'
+    };
+    if (drupalgap.settings.logo) {
+      content.logo = {
+        markup:'<center>' +
+                 theme('image', {path:drupalgap.settings.logo}) +
+               '</center>'
+      };
+    }
+    content.get_started = {
+      theme:'button_link',
+      text:'Getting Started Guide',
+      path:'http://www.drupalgap.org/get-started',
+      options:{InAppBrowser:true}
+    };
+    return content;
+  }
+  catch (error) {
+    alert('system_dashboard_page - ' + error);
+  }
+}
+
+/**
  * Call back for the offline page.
  */
-function offline_page() {
+function system_offline_page() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('offline_page()');
-    }
+    if (drupalgap.settings.debug) { console.log('system_offline_page()'); }
     var content = {
       'message':{
         'markup':'<h2>Failed Connection</h2>' + 
@@ -138,9 +169,7 @@ function offline_page() {
     };
     return content;
   }
-  catch (error) {
-    alert('offline_page - ' + error);
-  }
+  catch (error) { alert('system_offline_page - ' + error); }
 }
 
 /**

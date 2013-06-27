@@ -4,7 +4,6 @@ var drupalgap = {
        {'name':'api'},
        {'name':'block'},
        {'name':'comment'},
-       {'name':'dashboard'},
        {'name':'entity'},
        {'name':'field'},
        {'name':'form'},

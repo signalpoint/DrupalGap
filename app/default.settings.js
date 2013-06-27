@@ -27,7 +27,7 @@ drupalgap.settings = {
   'theme':'easystreet3',
   
   /* Logo */
-  'logo':'',
+  'logo':'themes/easystreet3/images/drupalgap.jpg',
   
   /* Cache - Set to true when publishing app!*/
   'cache':{
