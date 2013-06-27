@@ -230,10 +230,12 @@ function drupalgap_goto(path) {
     // Set the drupalgap router path.
     drupalgap_router_path_set(router_path);
 
-    // If the page is already in the DOM, remove it, unless this is a form
-    // submission.
+    // If the page is already in the DOM, prevent the page from processing then
+    // change to it.
     if (drupalgap_page_in_dom(page_id) && !options.form_submission) {
-      $('#' + page_id).empty().remove();
+      drupalgap.page.process = false;
+      $.mobile.changePage('#' + page_id);
+      return;
     }
 
     // Generate the page.

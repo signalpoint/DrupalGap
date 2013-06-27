@@ -18,9 +18,20 @@ $(document).on("pagebeforechange", function(e, data) {
       // We only want to process the page we are going to, not the page we are
       // coming from. When data.toPage is a string that is our destination page.
       if (typeof data.toPage === "string") {
-        template_preprocess_page(drupalgap.page.variables);
-        template_process_page(drupalgap.page.variables);
-        if (drupalgap.settings.debug) { console.log('pagebeforechange() - processed page'); }
+        
+        // If drupalgap_goto() determined that it is necessary to prevent the
+        // default page from reloading, then we'll skip the page
+        // processing and reset the prevention boolean.
+        if (!drupalgap.page.process) {
+          drupalgap.page.process = true;
+        }
+        else {
+          alert('processing page');
+          // Pre process, then process the page.
+          template_preprocess_page(drupalgap.page.variables);
+          template_process_page(drupalgap.page.variables);
+          if (drupalgap.settings.debug) { console.log('pagebeforechange() - processed'); }
+        }
       }
     }
     catch (error) {

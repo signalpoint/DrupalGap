@@ -73,7 +73,8 @@ var drupalgap = {
   'page':{
     'jqm_events':[],
     'title':'',
-    'variables':{}
+    'variables':{},
+    'process':true
   },
   'path':'', /* The current menu path. */
   'router_path':'', /* The current menu router path. */
