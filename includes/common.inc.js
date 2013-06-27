@@ -329,7 +329,11 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
       
       // Load the page template html file.
       var options = {};
-      if (!drupalgap.settings.cache.theme_registry) { options.cache = false; }
+      if (drupalgap.settings.cache &&
+          drupalgap.settings.cache.theme_registry &&
+          !drupalgap.settings.cache.theme_registry) {
+          options.cache = false;
+       }
       var html = drupalgap_file_get_contents(page_template_path, options);
       
       if (html) {
