@@ -835,6 +835,7 @@ function drupalgap_modules_load() {
               },
               dataType:'script',
               error: function(xhr, textStatus, errorThrown) {
+                alert('Failed to load module! (' + module.name + ')');
                   // Look at the `textStatus` and/or `errorThrown` properties.
               }
           });
