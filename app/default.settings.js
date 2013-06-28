@@ -20,7 +20,8 @@ drupalgap.settings = {
   'file_public_path':'sites/default/files',
   
   /* Debug */
-  'debug':true, /* set to true to see console.log debug information */
+  'debug':true, /* Set to true to see console.log debug information. Set to
+                   false when publishing app! */
   'debug_level':0, /* 0 = mild, 1 = medium (), 2 = spicy () */
   
   /* Theme */
@@ -125,6 +126,11 @@ drupalgap.settings = {
 
 /* Custom Modules */
 drupalgap.modules.custom = [
+  /*{'name':'example'},*/
+];
+
+/* Contrib Modules */
+drupalgap.modules.contrib = [
   /*{'name':'example'},*/
 ];
 
