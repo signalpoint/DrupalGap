@@ -20,7 +20,7 @@ drupalgap.settings = {
   'file_public_path':'sites/default/files',
   
   /* Debug */
-  'debug':true, /* Set to true to see console.log debug information. Set to
+  'debug':false, /* Set to true to see console.log debug information. Set to
                    false when publishing app! */
   'debug_level':0, /* 0 = mild, 1 = medium (), 2 = spicy () */
   
