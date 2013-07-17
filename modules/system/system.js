@@ -101,6 +101,10 @@ function system_menu() {
         'title':'Dashboard',
         'page_callback':'system_dashboard_page',
       },
+      'error':{
+        'title':'Error',
+        'page_callback':'system_error_page',
+      },
       'offline':{
         'title':'Offline',
         'page_callback':'system_offline_page',
@@ -150,6 +154,24 @@ function system_dashboard_page() {
   }
   catch (error) {
     alert('system_dashboard_page - ' + error);
+  }
+}
+
+/**
+ * The page callback for the error page.
+ */
+function system_error_page() {
+  try {
+    var content = {
+      info:{
+        markup:"<p>An unexpected error has occurred! Review console.log() " + 
+               "messages for more information!</p>"
+      }
+    };
+    return content;
+  }
+  catch (error) {
+    alert('system_error_page - ' + error);
   }
 }
 

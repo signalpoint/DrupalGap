@@ -179,6 +179,25 @@ function drupalgap_back() {
 }
 
 /**
+ * Given an error message, this will log the message to the console and goto
+ * the error page, if it isn't there already. If drupalgap.settings.debug is set
+ * to true, this function will also alert the error.
+ */
+function drupalgap_error(message) {
+  try {
+    var error_message = 'drupalgap_error() - ' +
+                        arguments.callee.caller.name + ' - ' +
+                        message; 
+    console.log(error_message);
+    if (drupalgap.settings.debug) { alert(error_message); }
+    if (drupalgap_path_get() != 'error') { drupalgap_goto('error'); }
+  }
+  catch (error) {
+    alert('drupalgap_error - ' + error);
+  }
+}
+
+/**
  * Given a path, this will change the current page in the app.
  */
 function drupalgap_goto(path) {
@@ -554,9 +573,10 @@ function drupalgap_render_region(region) {
             drupalgap.settings.theme + ' " theme in the settings.js file!');
       return '';
     }
+    // Grab the current path.
+    var current_path = drupalgap_path_get();
     // Let's render the region...
     var region_html = '';
-    
     // If the region has blocks specified in it under the theme in settings.js...
     if (eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name)) {
       // Open the region container.
@@ -577,16 +597,32 @@ function drupalgap_render_region(region) {
           else {
             data = region.links[i].region; // link defined via hook_menu()
           }
-          // Check link's region visiblity settings.
+          // Check link's region visiblity settings. Links will not be rendered
+          // on the system 'offline' or 'error' pages.
+          var render_link = false;
           if (drupalgap_check_visibility('region', data)) {
-            region_html += l(region.links[i].title, region.links[i].path, data.options);
+            render_link = true;
+            if (current_path == 'offline' || current_path == 'error') {
+              render_link = false;
+            }
+            if (render_link) {
+              region_html += l(region.links[i].title, region.links[i].path, data.options);
+            }
           }
         }
       }
       // Render each block in the region.
       $.each(eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name), function(block_delta, block_settings){
           // Check the block's visibility settings.
+          var render_block = false;
           if (drupalgap_check_visibility('block', block_settings)) {
+            render_block = true;
+            // The 'offline' and 'error' pages only have the 'main' system block visible.
+            if (block_delta != 'main' && (current_path == 'offline' || current_path == 'error')) {
+              render_block = false;
+            }
+          }
+          if (render_block) {
             var block = drupalgap_block_load(block_delta);
             if (block) {
               region_html += module_invoke(block.module, 'block_view', block_delta);
