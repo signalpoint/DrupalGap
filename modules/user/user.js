@@ -70,21 +70,8 @@ function user_listing_pageshow() {
  * Loads a user object.
  */
 function user_load(uid) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('user_load(' + uid + ')');
-    }
-    var user = null;
-    drupalgap.services.user.retrieve.call({
-      'uid':uid,
-      'async':false,
-      'success':function(data){ user = data; },
-    });
-    return user;
-  }
-  catch (error) {
-    alert('user_load - ' + error);
-  }
+  try { return entity_load('user', uid); }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

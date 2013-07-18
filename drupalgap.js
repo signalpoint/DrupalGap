@@ -35,6 +35,7 @@ var drupalgap = {
   'module_paths':[],
   'includes':[
       {'name':'common'},
+      {'name':'file'},
       {'name':'menu'},
       {'name':'module'},
       {'name':'theme'},
@@ -184,7 +185,6 @@ function drupalgap_bootstrap() {
     alert('drupalgap_bootstrap - ' + error);
   }
 }
-
 
 /**
  * Takes option set 2, grabs the success/error callback(s), if any,
@@ -1161,7 +1161,10 @@ function user_access(permission) {
 
 // http://stackoverflow.com/a/3886106/763010
 function is_int(n) {
-   return typeof n === 'number' && n % 1 == 0;
+  if (typeof n === 'string') {
+    n = parseInt(n);
+  }
+  return typeof n === 'number' && n % 1 == 0;
 }
 
 function ucfirst (str) {

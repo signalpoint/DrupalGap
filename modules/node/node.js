@@ -174,26 +174,9 @@ function node_edit_submit(form, form_state) {
  * Loads a node object and returns it. Returns false if the node load fails.
  */
 function node_load(nid) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('node_load()');
-      console.log(JSON.stringify(arguments));
-    }
-    var node = false;
-    drupalgap.services.node.retrieve.call({
-      'nid':nid,
-      'async':false,
-      'success':function(data){
-        node = data;
-      }
-    });
-    return node;
-  }
-  catch (error) {
-    alert('node_load - ' + error);
-  }
+  try { return entity_load('node', nid); }
+  catch (error) { drupalgap_error(error); }
 }
-
 
 /**
  * Implements hook_menu().
@@ -345,7 +328,7 @@ function node_page_view(node) {
       return build;
     }
     else {
-      alert('node_page_view - failed to load node (' + nid + ')');
+      alert('node_page_view - failed to load node (' + node.nid + ')');
     }
   }
   catch (error) {
