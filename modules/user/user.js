@@ -106,13 +106,6 @@ function user_login() {
  */
 function user_login_submit(form, form_state) {
   try {
-    // WARNING: only print this out for debugging, you don't want your password
-    // floating around in a JS console!
-    /*if (drupalgap.settings.debug) {
-      console.log('user_login_submit()');
-      console.log(JSON.stringify(arguments));
-    }*/
-    //alert('user_login_submit');
     drupalgap.services.drupalgap_user.login.call({
       'name':form_state.values.name,
       'pass':form_state.values.pass,
@@ -121,33 +114,36 @@ function user_login_submit(form, form_state) {
       },
     });
   }
-  catch (error) {
-    alert('user_login_submit - ' + error);
-  } 
+  catch (error) { drupalgap_error(error); } 
 }
 
 /**
- * Logs the app user out of the website and app.
+ * The user logout page callback.
  */
 function user_logout() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('user_logout()');
-      console.log(JSON.stringify(arguments));
-    }
+    return {
+      info:{
+        markup:'<p>Logging out...</p>'
+      }
+    };
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * The user logout pageshow callback. This actually handles the call to the
+ * user logout service resource.
+ */
+function user_logout_pagechange() {
+  try {
     drupalgap.services.user.logout.call({
       'success':function(data){
-        drupalgap.services.system.connect.call({
-          'success':function(result){
-            drupalgap_goto(drupalgap.settings.front);
-          },
-        });
+        drupalgap_goto(drupalgap.settings.front);
       }
     });
   }
-  catch (error) {
-    alert('user_logout - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -171,6 +167,7 @@ function user_menu() {
       'user/logout':{
         'title':'Logout',
         'page_callback':'user_logout',
+        'pagechange':'user_logout_pagechange'
       },
       'user/register':{
         'title':'Register',

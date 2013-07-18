@@ -1,5 +1,5 @@
 /**
- *
+ * The page callback for collection/list/%/%.
  */
 function collection_list_page(module, type) {
   try {
@@ -38,7 +38,8 @@ function collection_load(module, type) {
 }
 
 /**
- * Given a module name and model type, this will return the collection JSON object.
+ * Given a module name, model type and item collection, this will save the
+ * collection JSON object to local storage.
  */
 function collection_save(module, type, collection) {
   try {
@@ -63,7 +64,7 @@ function mvc_get_collection_key(bucket, module, model_type) {
 }
 
 /**
- *
+ * Implements hook_install().
  */
 function mvc_install() {
   try {
@@ -221,14 +222,7 @@ function drupalgap_mvc_model_create_form(module, type) {
 }
 
 /**
- *
- */
-/*function drupalgap_mvc_model_create_form_validate(form, form_state) {
-  
-}*/
-
-/**
- *
+ * Handles the submission of an mvc model item creation form.
  */
 function drupalgap_mvc_model_create_form_submit(form, form_state) {
   try {
@@ -253,7 +247,8 @@ function drupalgap_mvc_model_create_form_submit(form, form_state) {
 }
 
 /**
- *
+ * Given a module name, mvc model type, and item id, this will return the item,
+ * or false if the item fails to load.
  */
 function item_load(module, type, id) {
   try {
@@ -270,7 +265,7 @@ function item_load(module, type, id) {
 }
 
 /**
- *
+ * Given an mvc item, this saves it to local storage.
  */
 function item_save(item) {
   try {
@@ -310,7 +305,7 @@ function item_save(item) {
 }
 
 /**
- *
+ * The page callback for item/%/%/%.
  */
 function item_view_page(module, type, item) {
   try {
@@ -326,3 +321,4 @@ function item_view_page(module, type, item) {
     alert('item_view_page - ' + error);
   }
 }
+
