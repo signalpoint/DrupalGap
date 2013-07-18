@@ -717,12 +717,23 @@ function entity_load(entity_type, ids) {
   catch (error) { drupalgap_error(error); }
 }
 
+/**
+ * Given an entity type and the entity id, this will return the local storage
+ * key to be used when saving/loading the entity from local storage.
+ */
 function entity_local_storage_key(entity_type, id) {
   try {
     return entity_type + '_' + id;
   }
   catch (error) { drupalgap_error(error); }
 }
+
+/*function entity_save(entity_type, entity) {
+  try {
+    
+  }
+  catch (error) { drupalgap_error(error); }
+}*/
 
 /**
  * Implemtation of l().
