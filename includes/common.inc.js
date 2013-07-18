@@ -12,10 +12,29 @@ function drupalgap_add_page_to_dom(page_id, html) {
     // Set the page id and add the page to the dom body.
     html = html.replace(/{:drupalgap_page_id:}/g, page_id);
     $('body').append(html);
+    // Add the page id to drupalgap.pages.
+    drupalgap.pages.push(page_id);
   }
   catch (error) {
     alert('drupalgap_add_page_to_dom - ' + error);
   }
+}
+
+/**
+ * Removes all pages from the DOM except the current one.
+ */
+function drupalgap_remove_pages_from_dom() {
+  try {
+    var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
+    $.each(drupalgap.pages, function(index, page_id){
+        if (current_page_id != page_id) {
+          $('#' + page_id).empty().remove();
+        }
+    });
+    // Reset drupalgap.pages to only contain the current page id.
+    drupalgap.pages = [current_page_id];
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -249,12 +268,20 @@ function drupalgap_goto(path) {
     // Set the drupalgap router path.
     drupalgap_router_path_set(router_path);
 
-    // If the page is already in the DOM, prevent the page from processing then
-    // change to it.
-    if (drupalgap_page_in_dom(page_id) && !options.form_submission) {
-      drupalgap.page.process = false;
-      $.mobile.changePage('#' + page_id);
-      return;
+    // If the page is already in the DOM and we're not doing a form submission,
+    // prevent the page from processing then change to it, unless we were
+    // specifically told to reload the page, at which time we'll just remove it
+    // from the dom then let it rebuild naturally.
+    if (drupalgap_page_in_dom(page_id)) {
+      if (!options.form_submission) {
+        drupalgap.page.process = false;
+        $.mobile.changePage('#' + page_id, options);
+        return;
+      }
+      else if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
+        $('#' + page_id).empty().remove();
+        delete options.reloadPage;
+      }
     }
 
     // Generate the page.
@@ -281,14 +308,19 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
     }
     else {
       
+      // If options wasn't set, set it as an empty JSON object.
+      if (!options) {
+        options = {};
+      }
+      
       // Load the page template html file.
-      var options = {};
+      var file_options = {};
       if (drupalgap.settings.cache &&
           drupalgap.settings.cache.theme_registry &&
           !drupalgap.settings.cache.theme_registry) {
-          options.cache = false;
+          file_options.cache = false;
        }
-      var html = drupalgap_file_get_contents(page_template_path, options);
+      var html = drupalgap_file_get_contents(page_template_path, file_options);
       
       if (html) {
         
@@ -296,20 +328,19 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
         drupalgap_add_page_to_dom(page_id, html);
         
         // Setup change page options if necessary.
-        var changePageOptions = {};
         if (drupalgap_path_get() == path && options.form_submission) {
-          changePageOptions.allowSamePageTransition = true;
+          options.allowSamePageTransition = true;
         }
         
         // Let's change to the page.
         if (typeof parent.window.ripple === 'function') {
           // The Ripple emulator seems to not like the 'index.html' prefix,
           // so we'll remove that.
-          $.mobile.changePage('#' + page_id, changePageOptions);
+          $.mobile.changePage('#' + page_id, options);
         }
         else {
           // Default change page.
-          $.mobile.changePage('index.html#' + page_id, changePageOptions);
+          $.mobile.changePage('index.html#' + page_id, options);
         }
       }
       else {

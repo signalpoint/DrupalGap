@@ -33,12 +33,16 @@ drupalgap.services.drupalgap_user = {
         drupalgap.user = data.drupalgap_system_connect.system_connect.user;
         drupalgap.field_info_instances = data.drupalgap_system_connect.field_info_instances;
         drupalgap.field_info_fields = data.drupalgap_system_connect.field_info_fields;
+        
         // Extract drupalgap service resource results.
         drupalgap_service_resource_extract_results({
           'service':'drupalgap_user',
           'resource':'login',
           'data':data
         });
+        
+        // Remove all pages from the DOM.
+        drupalgap_remove_pages_from_dom();
       },
     },
     'call':function(options){

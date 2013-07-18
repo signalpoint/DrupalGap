@@ -77,6 +77,7 @@ var drupalgap = {
     'variables':{},
     'process':true
   },
+  'pages':[], /* Collection of page ids that are loaded into the DOM. */
   'path':'', /* The current menu path. */
   'router_path':'', /* The current menu router path. */
   'services':{},

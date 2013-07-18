@@ -10,6 +10,8 @@ drupalgap.services.user = {
         // token, but since this is the default implementation of the Services
         // User Login resource, we won't auto get the CSRF token and set
         // drupalgap.sessid with it.
+        // Remove all pages from the DOM.
+        drupalgap_remove_pages_from_dom();
       },
     },
     'call':function(options){
@@ -46,6 +48,8 @@ drupalgap.services.user = {
         window.localStorage.removeItem('sessid');
         drupalgap.user = {'uid':0};
         drupalgap.services.drupalgap_system.connect.call({'async':false});
+        // Remove all pages from the DOM.
+        drupalgap_remove_pages_from_dom();
       },
     },
     'call':function(options){
