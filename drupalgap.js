@@ -618,9 +618,9 @@ function drupalgap_includes_load() {
 }
 
 /**
- * Given an html list element id and an array of items, this will populate
- * the clear the list, populate it with the items, destroy the list and then
- * refresh the list with the new items.
+ * Given an html list element id and an array of items, this will clear the
+ * list, populate it with the items, destroy the list and then refresh the list
+ * with the new items.
  */
 function drupalgap_item_list_populate(list_css_selector, items) {
   try {
@@ -835,6 +835,7 @@ function drupalgap_modules_load() {
               },
               dataType:'script',
               error: function(xhr, textStatus, errorThrown) {
+                alert('Failed to load module! (' + module.name + ')');
                   // Look at the `textStatus` and/or `errorThrown` properties.
               }
           });

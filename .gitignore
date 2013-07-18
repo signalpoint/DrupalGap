@@ -3,6 +3,7 @@ app/modules/*
 app/themes/*
 app/settings.js
 app/.gitignore
+app/README.*
 res
 
 # Ignore jQM Theme Roller Files

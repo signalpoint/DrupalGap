@@ -101,6 +101,10 @@ function system_menu() {
         'title':'Dashboard',
         'page_callback':'system_dashboard_page',
       },
+      'error':{
+        'title':'Error',
+        'page_callback':'system_error_page',
+      },
       'offline':{
         'title':'Offline',
         'page_callback':'system_offline_page',
@@ -121,8 +125,8 @@ function system_dashboard_page() {
     if (drupalgap.settings.debug) { console.log('system_dashboard_page()'); }
     var content = {};
     content.welcome = {
-      markup:'<h2>Welcome to DrupalGap</h2><p>The open source ' +
-             'mobile application development kit for Drupal!</p>'
+      markup:'<h2 style="text-align: center;">Welcome to DrupalGap</h2>' + 
+             '<p>The open source mobile application development kit for Drupal!</p>'
     };
     if (drupalgap.settings.logo) {
       content.logo = {
@@ -131,16 +135,43 @@ function system_dashboard_page() {
                '</center>'
       };
     }
+    content.site_info = {
+      markup:'<h3 style="text-align: center;">' + drupalgap.settings.site_path + '</h3>'
+    };
     content.get_started = {
       theme:'button_link',
       text:'Getting Started Guide',
       path:'http://www.drupalgap.org/get-started',
       options:{InAppBrowser:true}
     };
+    content.support = {
+      theme:'button_link',
+      text:'Support',
+      path:'http://www.drupalgap.org/support',
+      options:{InAppBrowser:true}
+    };
     return content;
   }
   catch (error) {
     alert('system_dashboard_page - ' + error);
+  }
+}
+
+/**
+ * The page callback for the error page.
+ */
+function system_error_page() {
+  try {
+    var content = {
+      info:{
+        markup:"<p>An unexpected error has occurred! Review console.log() " + 
+               "messages for more information!</p>"
+      }
+    };
+    return content;
+  }
+  catch (error) {
+    alert('system_error_page - ' + error);
   }
 }
 

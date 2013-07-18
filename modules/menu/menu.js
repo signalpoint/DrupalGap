@@ -60,10 +60,9 @@ function menu_block_view(delta) {
       
       // If the block's corresponding menu exists, and it has links, iterate over
       // each link, add it to an items array, then theme an item list.
-      if (eval('drupalgap.menus.' + delta) && eval('drupalgap.menus.' + delta + '.links')) {
+      if (drupalgap.menus[delta] && drupalgap.menus[delta].links) {
         var items = [];
-        var links = eval('drupalgap.menus.' + delta + '.links');
-        $.each(links, function(index, link){
+        $.each(drupalgap.menus[delta].links, function(index, link){
             if (!link.options) { link.options = null; }
             items.push(l(link.title, link.path, link.options));
         });
