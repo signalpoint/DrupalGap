@@ -672,6 +672,59 @@ function arg() {
 }
 
 /**
+ * Given an entity type and an entity id, this will load and return the entity
+ * JSON, false otherwise. It will first try to load the entity from local
+ * storage, if it can't it will retrieve the entity from the server then save
+ * it to local storage.
+ */
+function entity_load(entity_type, ids) {
+  try {
+    if (!is_int(ids)) {
+      alert('entity_load(' + entity_type + ') - only single ids supported at this time!');
+      return false;
+    }
+    var entity_id = ids;
+    var local_storage_key = entity_local_storage_key(entity_type, entity_id);
+    var entity = window.localStorage.getItem(local_storage_key);
+    if (entity) { return JSON.parse(entity); }
+    else {
+      var entity_types = [
+        'comment',
+        'file',
+        'node',
+        'taxonomy_term',
+        'taxonomy_vocabulary',
+        'user'
+      ];
+      if ($.inArray(entity_type, entity_types) && drupalgap.services[entity_type]) {
+        var primary_key = drupalgap_entity_get_primary_key(entity_type);
+        var options = {
+          'async':false,
+          'success':function(data){ entity = data; }
+        };
+        options[primary_key] = entity_id;
+        drupalgap.services[entity_type].retrieve.call(options);
+        window.localStorage.setItem(local_storage_key, JSON.stringify(entity));
+      
+      }
+      else {
+        entity = false;
+        drupalgap_error('Failed to load entity! (' + entity_type + ', ' + entity_id + ')');
+      }
+      return entity;
+    }
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+function entity_local_storage_key(entity_type, id) {
+  try {
+    return entity_type + '_' + id;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implemtation of l().
  */
 function l() {

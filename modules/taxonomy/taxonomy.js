@@ -217,23 +217,8 @@ function taxonomy_form_term_submit(form, form_state) {
  * false.
  */
 function taxonomy_term_load(tid) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('taxonomy_term_load(' + tid + ')');
-    }
-    var term = false;
-    drupalgap.services.taxonomy_term.retrieve.call({
-      'tid':tid,
-      'async':false,
-      'success':function(data){
-        term = data;
-      },
-    });
-    return term;
-  }
-  catch (error) {
-    alert('taxonomy_term_load - ' + error);
-  }
+  try { return entity_load('taxonomy_term', tid); }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -397,22 +382,7 @@ function taxonomy_vocabulary_pageshow() {
  * false.
  */
 function taxonomy_vocabulary_load(vid) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('taxonomy_vocabulary_load(' + vid + ')');
-    }
-    var vocabulary = false;
-    drupalgap.services.taxonomy_vocabulary.retrieve.call({
-      'vid':vid,
-      'async':false,
-      'success':function(data){
-        vocabulary = data;
-      },
-    });
-    return vocabulary;
-  }
-  catch (error) {
-    alert('taxonomy_vocabulary_load - ' + error);
-  }
+  try { return entity_load('taxonomy_vocabulary', vid); }
+  catch (error) { drupalgap_error(error); }
 }
 
