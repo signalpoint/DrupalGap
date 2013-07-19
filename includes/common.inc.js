@@ -714,8 +714,19 @@ function entity_load(entity_type, ids) {
       alert('entity_load(' + entity_type + ') - only single ids supported at this time!');
       return false;
     }
+    // Grab the entity id.
     var entity_id = ids;
+    // Grab any options.
+    var options = null;
+    if (arguments[2]) { options = arguments[2]; }
+    // Get the local storage key. 
     var local_storage_key = entity_local_storage_key(entity_type, entity_id);
+    // Process options if necessary.
+    if (options) {
+      // If we are resetting, clearAre we resetting?
+      if (options.reset) { window.localStorage.removeItem(local_storage_key); }
+    }
+    // Attempt to load the entity from local storage.
     var entity = window.localStorage.getItem(local_storage_key);
     if (entity) { return JSON.parse(entity); }
     else {
@@ -729,14 +740,13 @@ function entity_load(entity_type, ids) {
       ];
       if ($.inArray(entity_type, entity_types) && drupalgap.services[entity_type]) {
         var primary_key = drupalgap_entity_get_primary_key(entity_type);
-        var options = {
+        var call_options = {
           'async':false,
           'success':function(data){ entity = data; }
         };
-        options[primary_key] = entity_id;
-        drupalgap.services[entity_type].retrieve.call(options);
+        call_options[primary_key] = entity_id;
+        drupalgap.services[entity_type].retrieve.call(call_options);
         window.localStorage.setItem(local_storage_key, JSON.stringify(entity));
-      
       }
       else {
         entity = false;
@@ -748,6 +758,10 @@ function entity_load(entity_type, ids) {
   catch (error) { drupalgap_error(error); }
 }
 
+/**
+ * Given an entity type and its id, this will return the local storage key to be
+ * used when saving and loading the entity from local storage.
+ */
 function entity_local_storage_key(entity_type, id) {
   try {
     return entity_type + '_' + id;

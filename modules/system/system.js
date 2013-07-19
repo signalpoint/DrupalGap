@@ -124,6 +124,9 @@ function system_dashboard_page() {
   try {
     if (drupalgap.settings.debug) { console.log('system_dashboard_page()'); }
     var content = {};
+    content.site_info = {
+      markup:'<h4 style="text-align: center;">' + drupalgap.settings.site_path + '</h4>'
+    };
     content.welcome = {
       markup:'<h2 style="text-align: center;">Welcome to DrupalGap</h2>' + 
              '<p>The open source mobile application development kit for Drupal!</p>'
@@ -135,9 +138,6 @@ function system_dashboard_page() {
                '</center>'
       };
     }
-    content.site_info = {
-      markup:'<h3 style="text-align: center;">' + drupalgap.settings.site_path + '</h3>'
-    };
     content.get_started = {
       theme:'button_link',
       text:'Getting Started Guide',

@@ -946,7 +946,14 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
           entity = entity_fn(args[1], args[2], parseInt(args[int_arg_index]));
         }
         else {
-          entity = entity_fn(parseInt(args[int_arg_index]));
+          // Force a reload (reset) when we load the entity if we are editing
+          // the entity.
+          if (arg(2) == 'edit') {
+            entity = entity_fn(parseInt(args[int_arg_index]), {reset:true});
+          }
+          else {
+             entity = entity_fn(parseInt(args[int_arg_index]));
+          }
         }
         // Now that we have the entity loaded, replace the first integer we find
         // in the page arguments with the loaded entity.

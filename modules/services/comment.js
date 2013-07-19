@@ -93,6 +93,7 @@ drupalgap.services.comment = {
       try {
         var api_options = drupalgap_chain_callbacks(drupalgap.services.comment.del.options, options);
         api_options.path = 'comment/' + options.cid + '.json';
+        window.localStorage.removeItem(entity_local_storage_key('comment', options.cid));
         drupalgap.api.call(api_options);
       }
       catch (error) {

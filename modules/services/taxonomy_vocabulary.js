@@ -98,6 +98,7 @@ drupalgap.services.taxonomy_vocabulary = {
       try {
         var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_vocabulary.del.options, options);
         api_options.path = 'taxonomy_vocabulary/' + options.vid + '.json';
+        window.localStorage.removeItem(entity_local_storage_key('taxonomy_vocabulary', options.vid));
         drupalgap.api.call(api_options);
       }
       catch (error) {

@@ -217,7 +217,11 @@ function taxonomy_form_term_submit(form, form_state) {
  * false.
  */
 function taxonomy_term_load(tid) {
-  try { return entity_load('taxonomy_term', tid); }
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    return entity_load('taxonomy_term', tid, options);
+  }
   catch (error) { drupalgap_error(error); }
 }
 
@@ -382,7 +386,11 @@ function taxonomy_vocabulary_pageshow() {
  * false.
  */
 function taxonomy_vocabulary_load(vid) {
-  try { return entity_load('taxonomy_vocabulary', vid); }
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    return entity_load('taxonomy_vocabulary', vid, options);
+  }
   catch (error) { drupalgap_error(error); }
 }
 

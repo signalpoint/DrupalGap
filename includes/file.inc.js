@@ -3,7 +3,9 @@
  */
 function file_load(fid) {
   try {
-    return entity_load('file', fid);
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    return entity_load('file', fid, options);
   }
   catch (error) { drupalgap_error(error); }
 }

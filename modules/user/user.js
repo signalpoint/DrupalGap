@@ -70,7 +70,11 @@ function user_listing_pageshow() {
  * Loads a user object.
  */
 function user_load(uid) {
-  try { return entity_load('user', uid); }
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    return entity_load('user', uid, options);
+  }
   catch (error) { drupalgap_error(error); }
 }
 

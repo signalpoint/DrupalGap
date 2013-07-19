@@ -143,6 +143,8 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       service_resource.create.call(call_arguments);
     }
     else {
+      // Remove the entity from local storage, then call the update resource.
+      window.localStorage.removeItem(entity_local_storage_key(form.entity_type, entity[primary_key]));
       service_resource.update.call(call_arguments);
     }
   }

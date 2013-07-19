@@ -88,6 +88,7 @@ drupalgap.services.node = {
       'path':'node/%nid.json',
       'success':function(result){
         if (result[0]) {
+          
         }
         else {
           alert('node delete - error - ' + JSON.stringify(result));
@@ -98,6 +99,7 @@ drupalgap.services.node = {
       try {
         var api_options = drupalgap_chain_callbacks(drupalgap.services.node.del.options, options);
         api_options.path = 'node/' + options.nid + '.json';
+        window.localStorage.removeItem(entity_local_storage_key('node', options.nid));
         drupalgap.api.call(api_options);
       }
       catch (error) {

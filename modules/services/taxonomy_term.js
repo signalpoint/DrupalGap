@@ -118,6 +118,7 @@ drupalgap.services.taxonomy_term = {
       try {
         var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_term.del.options, options);
         api_options.path = 'taxonomy_term/' + options.tid + '.json';
+        window.localStorage.removeItem(entity_local_storage_key('taxonomy_term', options.tid));
         drupalgap.api.call(api_options);
       }
       catch (error) {
