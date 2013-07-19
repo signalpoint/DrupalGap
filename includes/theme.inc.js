@@ -77,6 +77,7 @@ function theme(hook, variables) {
     if (variables.markup) {
       return variables.markup;
     }
+    var content = '';
     var theme_function = 'theme_' + hook;
     if (eval('typeof ' + theme_function) == 'function') {
       // If no attributes are coming in, look to variables.options.attributes
@@ -94,13 +95,13 @@ function theme(hook, variables) {
         console.log(JSON.stringify(variables));
       }
       var fn = window[theme_function];
-      var content = fn.call(null, variables);
+      content = fn.call(null, variables);
       if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) { console.log(content); }
-      return content;
     }
     else {
       console.log('WARNING: ' + theme_function + '() does not exist');
     }
+    return content;
   }
   catch (error) {
     alert('theme - ' + error);
