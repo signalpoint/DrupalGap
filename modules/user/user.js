@@ -125,13 +125,7 @@ function user_login_submit(form, form_state) {
  * The user logout page callback.
  */
 function user_logout() {
-  try {
-    return {
-      info:{
-        markup:'<p>Logging out...</p>'
-      }
-    };
-  }
+  try { return '<p>Logging out...</p>'; }
   catch (error) { drupalgap_error(error); }
 }
 

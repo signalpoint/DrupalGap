@@ -68,6 +68,16 @@ function menu_execute_active_handler() {
           content = fn();
         }
         
+        // If the content came back as a string, convert it to a render object
+        // so any jQM page events can be attached to the content if necessary.
+        if (typeof content === 'string') {
+          content = {
+            content:{
+              markup:content
+            }
+          };
+        }
+        
         // Clear out any previous jQM page events, then if there are any jQM
         // event callback functions attached to the menu link for this page, set
         // each event up to be fired with inline JS on the page.
