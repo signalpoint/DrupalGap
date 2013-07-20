@@ -27,10 +27,7 @@ drupalgap.services.node = {
       'type':'get',
       'path':'node/%nid.json',
       'success':function(node){
-        node.content = '';
-        if (!drupalgap_empty(node.body)) {
-          node.content = node.body[node.language][0].safe_value;
-        }
+        drupalgap_entity_render_content('node', node);
       },
     },
     'call':function(options){

@@ -32,6 +32,66 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
 }
 
 /**
+ * Given an entity, this will render the content of the entity and place it in
+ * the entity JSON object as the 'content' property.
+ */
+function drupalgap_entity_render_content(entity_type, entity) {
+  try {
+    entity.content = '';
+    switch (entity_type) {
+      case 'node':
+        // Render each field on the entity, using the default display.
+        var field_info = drupalgap_field_info_instances(entity_type, entity.type);
+        console.log(JSON.stringify(entity));
+        console.log(JSON.stringify(field_info));
+        $.each(field_info, function(field_name, field){
+            // Render the field label, if necessary.
+            var label = '';
+            if (field['display']['default']['label'] != 'hidden') {
+              label = '<h3>' + field.label + '</h3>';
+            }
+            // Determine the field module and hook_field_formatter_view function
+            // name. Then render the field content.
+            var module = field['display']['default']['module'];
+            var function_name = module + '_field_formatter_view';
+            var content = '';
+            if (drupalgap_function_exists(function_name)) {
+              // Grab the field formatter function, then call it and append its
+              // result to the entity's content. 
+              var fn = window[function_name]; 
+              content += fn(entity_type, entity, field, null, 'und', null, field['display']['default']);
+            }
+            else {
+              console.log('WARNING: drupalgap_entity_render_content - ' + function_name + '() does not exist!');
+            }
+            // Place the label above or below the field content.
+            if (label != '') {
+              switch (field['display']['default']['label']) {
+                case 'below':
+                  content += label;
+                  break;
+                case 'above':
+                default:
+                  content = label + content;
+                  break;
+              }
+            }
+            entity.content += content;
+        });
+        //entity.content = 'Flux capacitor!';
+        //var entity_info = drupalgap_entity_get_info(entity_type);
+        //console.log(JSON.stringify(entity_info));
+        /*entity.content = '';
+        if (!drupalgap_empty(entity.body)) {
+          entity.content = entity.body[entity.language][0].safe_value;
+        }*/   
+        break;
+    }
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Given a form and form_state, this will assemble the entity based on the
  * form_state values and return the entity as a json object.
  */
@@ -321,23 +381,12 @@ function drupalgap_entity_get_edit_object(entity_type) {
  */
 function drupalgap_entity_get_info(entity_type) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_get_info - ' + entity_type);
-      console.log(JSON.stringify(drupalgap.entity_info[entity_type]));
+    if (entity_type && drupalgap.entity_info[entity_type]) {
+      return drupalgap.entity_info[entity_type];
     }
-    if (drupalgap.entity_info && drupalgap.entity_info.length > 0) {
-      if (entity_type) {
-        return drupalgap.entity_info[entity_type];
-      }
-      else {
-        return drupalgap.entity_info;
-      }
-    }
-    return null;
+    return drupalgap.entity_info;
   }
-  catch (error) {
-    alert('drupalgap_entity_get_info - ' + error);
-  }
+  catch (error) { drupalgap_error('drupalgap_entity_get_info - ' + error); }
 }
 
 /**
