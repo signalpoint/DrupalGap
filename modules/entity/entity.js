@@ -38,14 +38,17 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
 function drupalgap_entity_render_content(entity_type, entity) {
   try {
     entity.content = '';
-    // Render each field on the entity, using the default display.
+    // Render each field on the entity, using the default display. The fields
+    // need to be appended accorind to their weight, so we'll keep track of
+    // the weights and rendered field content as we iterate through the fields,
+    // then at the end will append them in order onto the entity's content.
     var field_info = drupalgap_field_info_instances(entity_type, entity.type);
+    var field_content = {};
+    var field_weights = {};
     $.each(field_info, function(field_name, field){
-        // Render the field label, if necessary.
-        var label = '';
-        if (field['display']['default']['label'] != 'hidden') {
-          label = '<h3>' + field.label + '</h3>';
-        }
+        if (!field.display || !field.display['default']) { return; }
+        // Save the field name and weight.
+        field_weights[field_name] = field.display['default'].weight;
         // Determine module that implements the hook_field_formatter_view,
         // then determine the hook's function name, then render the field content.
         var module = field['display']['default']['module'];
@@ -75,8 +78,10 @@ function drupalgap_entity_render_content(entity_type, entity) {
         else {
           console.log('WARNING: drupalgap_entity_render_content - ' + function_name + '() does not exist!');
         }
-        // Place the label above or below the field content.
-        if (label != '') {
+        // Render the field label, if necessary.
+        if (content != '' && field['display']['default']['label'] != 'hidden') {
+          var label = '<h3>' + field.label + '</h3>';
+          // Place the label above or below the field content.
           label = '<div>' + label + '</div>';
           switch (field['display']['default']['label']) {
             case 'below':
@@ -88,8 +93,29 @@ function drupalgap_entity_render_content(entity_type, entity) {
               break;
           }
         }
-        // Append the field content to the entity's content.
-        entity.content += content;
+        // Save the field content.
+        field_content[field_name] = content;
+    });
+    // Extract the field weights and sort them.
+    var extracted_weights = [];
+    $.each(field_weights, function(field_name, weight){
+        extracted_weights.push(weight);
+    });
+    extracted_weights.sort(function(a, b) { return a-b; });
+    // For each sorted weight, locate the field with the corresponding weight,
+    // then add that field's content to the entity, if it hasn't already been
+    // added.
+    var completed_fields = [];
+    $.each(extracted_weights, function(weight_index, target_weight){
+        $.each(field_weights, function(field_name, weight){
+            if (target_weight == weight) {
+              if (completed_fields.indexOf(field_name) == -1) {
+                completed_fields.push(field_name);
+                entity.content += field_content[field_name];
+                return false;
+              }
+            }
+        });
     });
   }
   catch (error) { drupalgap_error(error); }

@@ -127,7 +127,7 @@ drupalgap.services.taxonomy_term = {
       try {
         if (!options.tid) {
           navigator.notification.alert(
-            'No Term ID protided!',
+            'No Term ID provided!',
             function(){},
             'taxonomy_term selectNodes Error',
             'OK'
