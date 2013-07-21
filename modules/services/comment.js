@@ -25,8 +25,7 @@ drupalgap.services.comment = {
       'type':'get',
       'path':'comment/%cid.json',
       'success':function(comment){
-        drupalgap.comment = comment;
-
+        drupalgap_entity_render_content('comment', comment);
         // TODO - a good opportunity for a hook to come in
         // and modify comment.content if developer wants.
 

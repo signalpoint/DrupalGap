@@ -4,14 +4,9 @@ drupalgap.services.taxonomy_term = {
       'type':'post',
       'path':'taxonomy_term.json',
       'success':function(result){
-        // If the term was successfully created, clear out
-        // taxonomy_term and taxonomy_term_edit, otherwise notify
-        // the user of the problem.
-        if (result[0] == 1) {
-          drupalgap.taxonomy_term = {};
-          drupalgap.taxonomy_term_edit = {};
-        }
-        else {
+        // If the term was not successfully created, notify the user of the
+        // problem.
+        if (result[0] != 1) {
           alert('taxonomy_term - create failed - ' + JSON.stringify(result));
         }
       },
@@ -36,9 +31,8 @@ drupalgap.services.taxonomy_term = {
     'options':{
       'type':'get',
       'path':'taxonomy_term/%tid.json',
-      'success':function(term){
-        // Set the taxonomy_term with the term that was returned.
-        drupalgap.taxonomy_term = term;
+      'success':function(taxonomy_term){
+        drupalgap_entity_render_content('taxonomy_term', taxonomy_term);
       },
     },
     'call':function(options){
@@ -71,12 +65,8 @@ drupalgap.services.taxonomy_term = {
       'type':'put',
       'path':'taxonomy_term/%tid.json',
       'success':function(result){
-        // If the update was successful, clear taxonomy_term_edit,
-        // otherwise notify the user.
-        if (result[0] == 2) {
-          drupalgap.taxonomy_term_edit = {};
-        }
-        else {
+        // If the update was not successful, notify the user.
+        if (result[0] != 2) {
           alert('taxonomy_term - update failed - ' + JSON.stringify(result));
         }
       }
@@ -103,13 +93,8 @@ drupalgap.services.taxonomy_term = {
       'type':'delete',
       'path':'taxonomy_term/%tid.json',
       'success':function(result) {
-        // If the delete was successful, clear taxonomy_term
-        // and taxonomy_term_edit, otherwise notify the user.
-        if (result[0] == 3) {
-          drupalgap.taxonomy_term = {};
-          drupalgap.taxonomy_term_edit = {};
-        }
-        else {
+        // If the delete was not successful, notify the user.
+        if (result[0] != 3) {
           alert('taxonomy_term - delete failed - ' + JSON.stringify(result));
         }
       },

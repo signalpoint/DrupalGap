@@ -38,8 +38,8 @@ drupalgap.services.taxonomy_vocabulary = {
     'options':{
       'type':'get',
       'path':'taxonomy_vocabulary/%vid.json',
-      'success':function(vocabulary){
-        drupalgap.taxonomy_vocabulary = vocabulary;
+      'success':function(taxonomy_vocabulary){
+        drupalgap_entity_render_content('taxonomy_vocabulary', taxonomy_vocabulary);
       },
     },
     'call':function(options){

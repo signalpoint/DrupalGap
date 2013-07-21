@@ -1,4 +1,24 @@
 /**
+ * Implements hook_field_formatter_view().
+ */
+function taxonomy_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
+  try {
+    var element = {};
+    if (!drupalgap_empty(items)) {
+      $.each(items, function(delta, item){
+          element[delta] = {
+            theme:'link',
+            text:item.tid,
+            path:'taxonomy/term/' + item.tid
+          };
+      });
+    }
+    return element;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implements hook_menu().
  */
 function taxonomy_menu() {

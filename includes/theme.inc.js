@@ -150,7 +150,6 @@ function theme_image(variables) {
     variables.attributes.style += ' max-width: ' + $(document).width() + 'px; ';
     // Render the image.
     return '<img ' + drupalgap_attributes(variables.attributes) + ' />';
-    //return '<img src="' + drupalgap_image_path(variables.path)  + '" />';
   }
   catch (error) {
     alert('theme_image - ' + error);

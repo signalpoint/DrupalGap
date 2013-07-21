@@ -1,4 +1,3 @@
-window.localStorage.clear();
 var drupalgap = {
   'modules':{
     'core':[
@@ -11,6 +10,7 @@ var drupalgap = {
            {'name':'text'},
          ]
        },
+       {'name':'image'},
        {'name':'menu'},
        {'name':'mvc'},
        {'name':'node'},

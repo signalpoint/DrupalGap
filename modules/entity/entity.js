@@ -42,30 +42,44 @@ function drupalgap_entity_render_content(entity_type, entity) {
       case 'node':
         // Render each field on the entity, using the default display.
         var field_info = drupalgap_field_info_instances(entity_type, entity.type);
-        console.log(JSON.stringify(entity));
-        console.log(JSON.stringify(field_info));
         $.each(field_info, function(field_name, field){
             // Render the field label, if necessary.
             var label = '';
             if (field['display']['default']['label'] != 'hidden') {
               label = '<h3>' + field.label + '</h3>';
             }
-            // Determine the field module and hook_field_formatter_view function
-            // name. Then render the field content.
+            // Determine module that implements the hook_field_formatter_view,
+            // then determine the hook's function name, then render the field content.
             var module = field['display']['default']['module'];
             var function_name = module + '_field_formatter_view';
             var content = '';
             if (drupalgap_function_exists(function_name)) {
-              // Grab the field formatter function, then call it and append its
-              // result to the entity's content. 
-              var fn = window[function_name]; 
-              content += fn(entity_type, entity, field, null, 'und', null, field['display']['default']);
+              // Grab the field formatter function, then grab the field items
+              // from the entity, then call the formatter function it and append
+              // its result to the entity's content. 
+              var fn = window[function_name];
+              var items = null;
+              if (entity[field_name] && entity[field_name][entity.language]) {
+                items = entity[field_name][entity.language];
+              }
+              var elements = fn(entity_type, entity, field, null, 'und', items, field['display']['default']);
+              $.each(elements, function(delta, element){
+                  // If the element has markup, render it as is, if it is
+                  // themeable, then theme it.
+                  var element_content = '';
+                  if (element.markup) { element_content = element.markup; }
+                  else if (element.theme) {
+                    element_content = theme(element.theme, element);
+                  }
+                  content += '<div>' + element_content + '</div>';
+              });
             }
             else {
               console.log('WARNING: drupalgap_entity_render_content - ' + function_name + '() does not exist!');
             }
             // Place the label above or below the field content.
             if (label != '') {
+              label = '<div>' + label + '</div>';
               switch (field['display']['default']['label']) {
                 case 'below':
                   content += label;
@@ -76,15 +90,9 @@ function drupalgap_entity_render_content(entity_type, entity) {
                   break;
               }
             }
+            // Append the field content to the entity's content.
             entity.content += content;
-        });
-        //entity.content = 'Flux capacitor!';
-        //var entity_info = drupalgap_entity_get_info(entity_type);
-        //console.log(JSON.stringify(entity_info));
-        /*entity.content = '';
-        if (!drupalgap_empty(entity.body)) {
-          entity.content = entity.body[entity.language][0].safe_value;
-        }*/   
+        }); 
         break;
     }
   }
