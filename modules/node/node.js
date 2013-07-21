@@ -211,6 +211,8 @@ function node_menu() {
         'page_callback':'node_page_view',
         'page_arguments':[1],
         'pageshow':'node_page_view_pageshow',
+        'title_callback':'node_page_title',
+        'title_arguments':[1],
       },
       'node/%/view':{
         'title':'View',
@@ -374,6 +376,18 @@ function node_page_view_pageshow() {
   catch (error) {
     alert('node_page_view_pageshow - ' + error);
   }
+}
+
+/**
+ * The title call back function for the node view page.
+ */
+function node_page_title (node) {
+  try {
+    var title = '';
+    if (node && node.title) { title = node.title; }
+    return title;
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

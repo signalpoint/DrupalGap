@@ -38,6 +38,7 @@ function menu_execute_active_handler() {
 
       // Call the page call back for this router path and send along any arguments.
       var function_name = drupalgap.menu_links[router_path].page_callback;
+      var page_arguments = [];
       if (drupalgap_function_exists(function_name)) {
         
         // Grab the page callback function and get ready to build the html.
@@ -46,13 +47,11 @@ function menu_execute_active_handler() {
         
         // Are there any arguments to send to the page callback?
         if (drupalgap.menu_links[router_path].page_arguments) {
-          
           // For each page argument, if the argument is an integer, grab the
           // corresponding arg(#), otherwise just push the arg onto the page
           // arguments. Then try to prepare any entity that may be present in
           // the url so the entity is sent via the page arguments to the page
           // callback, instead of just sending the integer.
-          var page_arguments = [];
           var args = arg(null, path);
           $.each(drupalgap.menu_links[router_path].page_arguments, function(index, object){
               if (is_int(object) && args[object]) { page_arguments.push(args[object]); }
@@ -103,9 +102,46 @@ function menu_execute_active_handler() {
           }
         }
         
-        // Set the page title.
+        // Set the page title. First we'll see if the hook_menu() item has a
+        // title variable set, then check for a title_callback function.
+        var title_arguments = [];
         if (typeof drupalgap.menu_links[router_path].title !== 'undefined') {
           drupalgap_set_title(drupalgap.menu_links[router_path].title);
+        }
+        if (drupalgap.menu_links[router_path].title_callback !== 'undefined') {
+          var function_name = drupalgap.menu_links[router_path].title_callback;
+          if (drupalgap_function_exists(function_name)) {
+            // Grab the page callback function and get ready to build the html.
+            var fn = window[function_name];
+            
+            // Are there any arguments to send to the title callback?
+            if (drupalgap.menu_links[router_path].title_arguments) {
+              // Can we reuse the page arguments?
+              if (drupalgap.menu_links[router_path].page_arguments &&
+                drupalgap.menu_links[router_path].page_arguments.toString() == 
+                drupalgap.menu_links[router_path].title_arguments.toString()) {
+                title_arguments = page_arguments;
+              }
+              else {
+                // For each title argument, if the argument is an integer, grab the
+                // corresponding arg(#), otherwise just push the arg onto the title
+                // arguments. Then try to prepare any entity that may be present in
+                // the url so the entity is sent via the title arguments to the title
+                // callback, instead of just sending the integer.
+                $.each(drupalgap.menu_links[router_path].title_arguments, function(index, object){
+                    if (is_int(object) && args[object]) { title_arguments.push(args[object]); }
+                    else { title_arguments.push(object); }
+                });
+                drupalgap_prepare_argument_entities(title_arguments, args);
+              }
+              // Call the title callback function with the title arguments.
+              drupalgap_set_title(fn.apply(null, Array.prototype.slice.call(title_arguments)));
+            }
+            else {
+              // There are no arguments, just return the title callback result.
+              drupalgap_set_title(fn());
+            }
+          }
         }
 
         // And finally return the content.    
