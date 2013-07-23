@@ -237,8 +237,12 @@ function theme_link(variables) {
           onclick = "window.open('" + variables.path + "', '_blank', 'location=yes');";  
         }
         // Reload the page?
-        else if (typeof variables.options.reloadPage !== 'undefined' && variables.options.reloadPage) {
-          onclick = 'drupalgap_goto(\'' + variables.path + '\', {reloadPage:true});';
+        else if (typeof variables.options.reloadPage !== 'undefined') {
+          var reloadPage = 'false';
+          if (variables.options.reloadPage) {
+            reloadPage = 'true';
+          }
+          onclick = 'drupalgap_goto(\'' + variables.path + '\', {reloadPage:' + reloadPage + '});';
         }
       }
       return '<a onclick="javascript:' + onclick + '"' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';

@@ -270,10 +270,26 @@ function drupalgap_goto(path) {
 
     // If the page is already in the DOM and we're asked to reload it, then
     // remove the page and let it rebuild itself. If we're not reloading the
-    // page and we're not in the middle of a form submission,prevent the page
+    // page and we're not in the middle of a form submission, prevent the page
     // from processing then change to it.
     if (drupalgap_page_in_dom(page_id)) {
+      var reloadPage = false;
+      // Were we sent the reloadPage option?
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
+        reloadPage = true;
+      }
+      // Does the hook_menu() item for this path specify reloadPage?
+      else if (drupalgap.menu_links[router_path].reloadPage !== 'undefined' &&
+               drupalgap.menu_links[router_path].reloadPage) {
+        reloadPage = true;
+        // If the reloadPage option is set to false, let it override the
+        // hook_menu() item reloadPage option, if necessary.
+        if (typeof options.reloadPage !== 'undefined' && !options.reloadPage) {
+          reloadPage = false;  
+        }
+      }
+      // Reload the page?
+      if (reloadPage) {
         $('#' + page_id).empty().remove();
         delete options.reloadPage;
       }

@@ -161,6 +161,7 @@ function user_menu() {
         'title':'Login',
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_login'],
+        reloadPage:true
       },
       'user/logout':{
         'title':'Logout',
@@ -171,6 +172,7 @@ function user_menu() {
         'title':'Register',
         'page_callback':'drupalgap_get_form',
         'page_arguments':['user_register'],
+        reloadPage:true
       },
       'user/%':{
         'title':'My account',
