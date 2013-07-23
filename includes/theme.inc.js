@@ -225,19 +225,26 @@ function theme_jqm_item_list(variables) {
  */
 function theme_link(variables) {
   try {
-    var path;
     var text = '';
     if (variables.text) { text = variables.text; }
     if (typeof variables.path !== 'undefined') {
-      // By default our onclick will use a drupalgap_goto, unless the user
-      // specified the InAppBrowser option.
+      // By default our onclick will use a drupalgap_goto(). If we have any
+      // incoming options, then the link will be modified accordingly.
       var onclick = 'drupalgap_goto(\'' + variables.path + '\');';
-      if (variables.options && variables.options.InAppBrowser) {
-        onclick = "window.open('" + variables.path + "', '_blank', 'location=yes');";
+      if (variables.options) {
+        // Use an InAppBrowser?
+        if (variables.options.InAppBrowser) {
+          onclick = "window.open('" + variables.path + "', '_blank', 'location=yes');";  
+        }
+        // Reload the page?
+        else if (typeof variables.options.reloadPage !== 'undefined' && variables.options.reloadPage) {
+          onclick = 'drupalgap_goto(\'' + variables.path + '\', {reloadPage:true});';
+        }
       }
       return '<a onclick="javascript:' + onclick + '"' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
     }
     else {
+      // The link has no path, so just render the text and attributes.
       return '<a ' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
     }
   }

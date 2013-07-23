@@ -229,8 +229,8 @@ function drupalgap_goto(path) {
     var options = false;
     if (arguments[1]) {
       options = arguments[1];
-      if (!options.form_submission) {
-        options.form_submission = true;
+      if (typeof options.form_submission === 'undefined') {
+        options.form_submission = false;
       }
     }
     
@@ -255,7 +255,7 @@ function drupalgap_goto(path) {
     // Return if we are trying to go to the path we are already on, unless this
     // was a form submission, then we'll let the page rebuild itself. For
     // accurracy we compare the jQM active page url with the destination page id.
-    if (drupalgap_jqm_active_page_url() == page_id && !options.form_submission) {
+    if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
       return false;
     }
     
@@ -268,20 +268,25 @@ function drupalgap_goto(path) {
     // Set the drupalgap router path.
     drupalgap_router_path_set(router_path);
 
-    // If the page is already in the DOM and we're not doing a form submission,
-    // prevent the page from processing then change to it, unless we were
-    // specifically told to reload the page, at which time we'll just remove it
-    // from the dom then let it rebuild naturally.
+    // If the page is already in the DOM and we're asked to reload it, then
+    // remove the page and let it rebuild itself. If we're not reloading the
+    // page and we're not in the middle of a form submission,prevent the page
+    // from processing then change to it.
     if (drupalgap_page_in_dom(page_id)) {
-      if (!options.form_submission) {
+      if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
+        $('#' + page_id).empty().remove();
+        delete options.reloadPage;
+      }
+      else if (!options.form_submission) {
         drupalgap.page.process = false;
         $.mobile.changePage('#' + page_id, options);
         return;
       }
-      else if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        $('#' + page_id).empty().remove();
-        delete options.reloadPage;
-      }
+    }
+    else if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
+      // The page is not in the DOM, and we're being asked to reload it, this
+      // can't happen, so we'll just delete the reloadPage option.
+      delete options.reloadPage;
     }
 
     // Generate the page.
@@ -309,7 +314,7 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
     else {
       
       // If options wasn't set, set it as an empty JSON object.
-      if (!options) {
+      if (typeof options === 'undefined') {
         options = {};
       }
       
@@ -781,9 +786,14 @@ function entity_local_storage_key(entity_type, id) {
  */
 function l() {
   try {
+    // Grab the text and the path from the arguments and then build a simple
+    // link object.
     var text = arguments[0];
     var path = arguments[1];
     var link = {'text':text, 'path':path};
+    // Determine if there are any incoming link options, if there are, attach
+    // them to the link object. If there are any attributes, extract them from
+    // the options and attach them directly to the link object.
     var options = null;
     if (arguments[2]) {
       options = arguments[2];
