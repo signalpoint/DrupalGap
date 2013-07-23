@@ -226,7 +226,7 @@ function drupalgap_goto(path) {
     }
     
     // Extract any incoming options, and set any defaults that weren't provided.
-    var options = false;
+    var options = {};
     if (arguments[1]) {
       options = arguments[1];
       if (typeof options.form_submission === 'undefined') {
@@ -279,8 +279,8 @@ function drupalgap_goto(path) {
         reloadPage = true;
       }
       // Does the hook_menu() item for this path specify reloadPage?
-      else if (drupalgap.menu_links[router_path].reloadPage !== 'undefined' &&
-               drupalgap.menu_links[router_path].reloadPage) {
+      else if (drupalgap.menu_links[router_path].options &&
+               drupalgap.menu_links[router_path].options.reloadPage) {
         reloadPage = true;
         // If the reloadPage option is set to false, let it override the
         // hook_menu() item reloadPage option, if necessary.
