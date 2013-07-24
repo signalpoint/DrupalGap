@@ -273,23 +273,13 @@ function drupalgap_goto(path) {
     // page and we're not in the middle of a form submission, prevent the page
     // from processing then change to it.
     if (drupalgap_page_in_dom(page_id)) {
-      var reloadPage = false;
-      // Were we sent the reloadPage option?
-      if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        reloadPage = true;
-      }
-      // Does the hook_menu() item for this path specify reloadPage?
-      else if (drupalgap.menu_links[router_path].options &&
-               drupalgap.menu_links[router_path].options.reloadPage) {
-        reloadPage = true;
-        // If the reloadPage option is set to false, let it override the
-        // hook_menu() item reloadPage option, if necessary.
-        if (typeof options.reloadPage !== 'undefined' && !options.reloadPage) {
-          reloadPage = false;  
-        }
+      // If there are any hook_menu() item options for this router path, bring
+      // them into the current options without overwriting any existing values.
+      if (drupalgap.menu_links[router_path].options) {
+        options = $.extend({}, drupalgap.menu_links[router_path].options, options);
       }
       // Reload the page?
-      if (reloadPage) {
+      if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
         $('#' + page_id).empty().remove();
         delete options.reloadPage;
       }

@@ -229,20 +229,29 @@ function theme_link(variables) {
     if (variables.text) { text = variables.text; }
     if (typeof variables.path !== 'undefined') {
       // By default our onclick will use a drupalgap_goto(). If we have any
-      // incoming options, then the link will be modified accordingly.
+      // incoming link options, then modify the link accordingly.
       var onclick = 'drupalgap_goto(\'' + variables.path + '\');';
       if (variables.options) {
         // Use an InAppBrowser?
         if (variables.options.InAppBrowser) {
           onclick = "window.open('" + variables.path + "', '_blank', 'location=yes');";  
         }
-        // Reload the page?
-        else if (typeof variables.options.reloadPage !== 'undefined') {
-          var reloadPage = 'false';
-          if (variables.options.reloadPage) {
-            reloadPage = 'true';
+        else {
+          // All other options need to be extracted into a JSON string for the
+          // onclick handler.
+          var goto_options = '';
+          // Any transition?
+          var transition = null;
+          if (variables.options.transition) {
+            goto_options += "transition:'" + variables.options.transition + "',";
           }
-          onclick = 'drupalgap_goto(\'' + variables.path + '\', {reloadPage:' + reloadPage + '});';
+          // Reloading the page?
+          if (typeof variables.options.reloadPage !== 'undefined') {
+            var reloadPage = 'false';
+            if (variables.options.reloadPage) { reloadPage = 'true'; }
+            goto_options += 'reloadPage:' + reloadPage + ',';
+          }
+          onclick = 'drupalgap_goto(\'' + variables.path + '\', {' + goto_options + '});';
         }
       }
       return '<a onclick="javascript:' + onclick + '"' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
