@@ -21,9 +21,9 @@ For complete details, please visit the DrupalGap Hello World documentation.
 
      https://www.github.com/signalpoint/DrupalGap/tags
 
-2. Extract the downloaded DrupalGap archive into the PhoneGap www
-   directory. When you are done, the drupalgap.js file will be
-   located here:
+2. Extract the downloaded DrupalGap archive into the www directory
+   located within your PhoneGap project workspace. When you are done,
+   the drupalgap.js file will be located here:
 
      www/drupalgap.js
 
