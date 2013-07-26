@@ -43,21 +43,17 @@ with their Drupal websites.
 | Installation |
 |==============|
 
-For more complete details, please visit http://www.drupalgap.org/hello-world
+For complete details, please visit the DrupalGap Hello World documentation.
+
+    http://www.drupalgap.org/hello-world
 
 ====
 
-0. Enable the DrupalGap Module on your Drupal Site
+1. Download the latest stable release of DrupalGap:
 
-1. Complete the PhoneGap 2.9.0 Platform Guide for your device
+     https://www.github.com/signalpoint/DrupalGap/tags
 
-     http://docs.phonegap.com/en/2.9.0/guide_getting-started_index.md.html#Platform%20Guides
-
-2. Download the latest stable release of DrupalGap:
-
-     https://github.com/signalpoint/DrupalGap/tags
-
-3. Extract the downloaded DrupalGap archive into PhoneGap's www
+2. Extract the downloaded DrupalGap archive into the PhoneGap www
    directory. When you are done, the drupalgap.js file will be
    located here:
 
@@ -66,17 +62,17 @@ For more complete details, please visit http://www.drupalgap.org/hello-world
    Note, the DrupalGap index.html will overwrite the index.html provided
    by PhoneGap.
 
-4. Open www/app/default.settings.js and save a copy of it as settings.js
+3. Open www/app/default.settings.js and save a copy of it as settings.js
    so the copy of it lives here: 
    
      www/app/settings.js
    
-5. Specify your Drupal site path (with NO trailing slash) in settings.js,
+4. Specify your Drupal site path (with NO trailing slash) in settings.js,
    for example:
 
      'site_path':'http://www.drupalgap.org',
 
-6. Run your new Mobile Application!
+5. Run your new Mobile Application!
 
 ===================================
 
