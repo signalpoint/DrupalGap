@@ -4,40 +4,8 @@ and jQueryMobile.
 
   http://www.drupalgap.org
 
-|================================================|
-| Try a Demo of the DrupalGap Mobile Application |
-|================================================|
-
-Android
-
-  https://play.google.com/store/apps/details?id=com.drupalgap&hl=en
-
-iOS (iPhone, iPad, etc)
-
-  https://itunes.apple.com/us/app/drupalgap/id509874423?mt=8
-
-Please rate the DrupalGap application to help improve it!
-
-|========================================|
-| Mobile Application for Android and iOS |
-|========================================|
-
-The DrupalGap mobile application can be installed on an Android or
-iOS mobile device. Once installed, the device can connect to Drupal
-websites running the DrupalGap module.
-
-|====================================|
-| Mobile Application Development Kit |
-|====================================|
-
-Developers can create custom multi-platform mobile applications that communicate
-with their Drupal websites.
-
-|===============|
-| DrupalGap API |
-|===============|
-
-  http://api.drupalgap.org
+With DrupalGap developers can create custom multi-platform mobile
+applications that communicate with their Drupal websites.
 
 |==============|
 | Installation |
@@ -77,7 +45,8 @@ For complete details, please visit the DrupalGap Hello World documentation.
 ===================================
 
 From here you'll have a great start to building a mobile application that
-integrates with your Drupal website.
+integrates with your Drupal website. Check out topics in the Getting
+Started Guide to continue.
 
 |=======================|
 | Getting Started Guide |
@@ -90,4 +59,4 @@ http://www.drupalgap.org/get-started
 |==================|
 
 http://www.drupalgap.org
-http://www.drupal.org/project/drupalgap
+http://api.drupalgap.org
