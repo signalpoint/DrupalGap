@@ -43,11 +43,15 @@ with their Drupal websites.
 | Installation |
 |==============|
 
+For more complete details, please visit http://www.drupalgap.org/hello-world
+
+====
+
 0. Enable the DrupalGap Module on your Drupal Site
 
-1. Complete the PhoneGap Getting Started Guide for your Platform
+1. Complete the PhoneGap 2.9.0 Platform Guide for your device
 
-     docs.phonegap.com/en/edge/guide_platforms_index.md.html
+     http://docs.phonegap.com/en/2.9.0/guide_getting-started_index.md.html#Platform%20Guides
 
 2. Download the latest stable release of DrupalGap:
 
