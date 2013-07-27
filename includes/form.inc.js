@@ -62,7 +62,12 @@ function drupalgap_form_render(form) {
         // Depending on the element type, render the field.
         switch (element.type) {
           case "email":
-            form_element += '<input type="email" id="' + element_id + '" value="' + element.default_value + '"/>';
+            form_element += theme('email', {
+              attributes:{
+                id:element_id,
+                value:element.default_value
+              }
+            });
             break;
           case 'image':
             // Set the default button text, and if a value was provided,
@@ -120,13 +125,26 @@ function drupalgap_form_render(form) {
             '});';
             // Close extra javascript declaration.
             form_element += '</script>';
-            console.log(form_element);
             break;
           case "hidden":
-            form_element += '<input type="hidden" id="' + element_id + '" value="' + element.default_value + '"/>';
+            form_element += theme('hidden', {
+              attributes:{
+                id:element_id,
+                value:element.default_value
+              }
+            });
             break;
           case "password":
-            form_element += '<input type="password" id="' + element_id + '" value="' + element.default_value + '"/>';
+            form_element += theme('password', {
+              attributes:{
+                id:element_id,
+                value:element.default_value
+              }
+            });
+            break;
+          case "select":
+            /*form_element += theme('select', {
+            });*/
             break;
           case "submit":
             var submit_attributes = {
@@ -140,17 +158,25 @@ function drupalgap_form_render(form) {
             break;
           case "text":
           case "textfield":
-            form_element += '<input type="text" id="' + element_id + '" value="' + element.default_value + '"/>';
+            form_element += theme('textfield', {
+              attributes:{
+                id:element_id,
+                value:element.default_value
+              }
+            });
             break;
           case 'textarea':
           case 'text_long':
           case "text_with_summary":
           case 'text_textarea':
-            form_element += '<textarea type="text" id="' + element_id + '">' + element.default_value + '</textarea>';
+            form_element += theme('textarea', {
+              attributes:{
+                id:element_id
+              },
+              value:element.default_value
+            });
             break;
-          /*case "image":
-            break;
-          case "taxonomy_term_reference":
+          /*case "taxonomy_term_reference":
             break;*/
           default:
             var msg = 'Field ' + element.type + ' not supported, yet.';
@@ -439,5 +465,66 @@ function _drupalgap_form_validate(form, form_state) {
   catch (error) {
     alert('_drupalgap_form_validate - ' + error);
   }
+}
+
+/**
+ * Themes a email input.
+ */
+function theme_email(variables) {
+  try {
+    variables.attributes.type = 'email';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Themes a hidden input.
+ */
+function theme_hidden(variables) {
+  try {
+    variables.attributes.type = 'hidden';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Themes a password input.
+ */
+function theme_password(variables) {
+  try {
+    variables.attributes.type = 'password';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Themes a text input.
+ */
+function theme_textfield(variables) {
+  try {
+    variables.attributes.type = 'text';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Themes a textarea input.
+ */
+function theme_textarea(variables) {
+  try {
+    var output = '<div><textarea ' + drupalgap_attributes(variables.attributes) + '>' +
+                   variables.value +
+                 '</textarea></div>';
+    return output;
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
