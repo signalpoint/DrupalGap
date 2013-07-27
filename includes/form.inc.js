@@ -138,6 +138,7 @@ function drupalgap_form_render(form) {
             //form_element += '<button type="button" data-theme="b" id="' + element_id + '" class="drupalgap_form_submit" form_id="' + form.id + '">' + element.value + '</button>';
             form_element += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
             break;
+          case "text":
           case "textfield":
             form_element += '<input type="text" id="' + element_id + '" value="' + element.default_value + '"/>';
             break;
@@ -152,7 +153,9 @@ function drupalgap_form_render(form) {
           case "taxonomy_term_reference":
             break;*/
           default:
-            form_element += '<div><em>Field ' + element.type + ' not supported, yet.</em></div>';
+            var msg = 'Field ' + element.type + ' not supported, yet.';
+            form_element += '<div><em>' + msg + '</em></div>';
+            console.log('WARNING: ' + msg);
             break;
         }
         // Added element description.
