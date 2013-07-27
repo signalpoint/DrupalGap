@@ -770,6 +770,25 @@ function entity_load(entity_type, ids) {
 }
 
 /**
+ *
+ */
+/*function element_set_attributes(element, map) {
+  try {
+    $.each(map, function(property, attribute){
+        // If the key is numeric, the attribute name needs to be taken over.
+        if (is_int(property)) {
+          property = attribute;
+        }
+        // Do not overwrite already existing attributes.
+        if (element[property] && element.attributes[attribute]) {
+          element.attributes[attribute] = element[property];
+        }
+    });
+  }
+  catch (error) { drupalgap_error(error); }
+}*/
+ 
+/**
  * Given an entity type and the entity id, this will return the local storage
  * key to be used when saving/loading the entity from local storage.
  */
