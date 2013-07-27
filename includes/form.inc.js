@@ -143,8 +143,18 @@ function drupalgap_form_render(form) {
             });
             break;
           case "select":
-            /*form_element += theme('select', {
-            });*/
+            var select = {
+              options:element.options,
+              value:element.default_value,
+              attributes:{
+                id:element_id
+              }
+            };
+            if (element.required) {
+              select.options[-1] = 'Select';
+              select.value = -1;
+            }
+            form_element += theme('select', select);
             break;
           case "submit":
             var submit_attributes = {
@@ -153,7 +163,6 @@ function drupalgap_form_render(form) {
               'id':element_id,
               'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
             };
-            //form_element += '<button type="button" data-theme="b" id="' + element_id + '" class="drupalgap_form_submit" form_id="' + form.id + '">' + element.value + '</button>';
             form_element += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
             break;
           case "text":
@@ -454,7 +463,22 @@ function _drupalgap_form_validate(form, form_state) {
     $.each(form.elements, function(name, element) {
         if (name == 'submit') { return; }
         if (element.required) {
-          if (form_state.values[name] == null || form_state.values[name] == '') {
+          var valid = true;
+          // Check for null value.
+          if (form_state.values[name] == null) {
+            valid = false;
+          }
+          // Check for empty string value.
+          else if (form_state.values[name] == '') {
+            valid = false;
+          }
+          // Check for a -1 value on a select list. 
+          else if (element.type == 'select' && form_state.values[name] == -1) {
+            // TODO - this approach to select list validation will not allow
+            // a developer to have a select list option with a -1 value.
+            valid = false;
+          }
+          if (!valid) {
             var field_title = name;
             if (element.title) { field_title = element.title; }
             drupalgap_form_set_error(name, 'The ' + field_title + ' field is required.');
@@ -499,6 +523,28 @@ function theme_password(variables) {
     variables.attributes.type = 'password';
     var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
     return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Themes a select list input.
+ */
+function theme_select(variables) {
+  try {
+    var options = '';
+    if (variables.options) {
+      $.each(variables.options, function(value, label){
+          var selected = '';
+          if (variables.value && variables.value == value) {
+            selected = ' selected ';
+          }
+          options += '<option value="' + value + '" ' + selected + '>' + label + '</option>'
+      });
+    }
+    return '<select ' + drupalgap_attributes(variables.attributes) + '>' +
+      options +
+    '</select>';
   }
   catch (error) { drupalgap_error(error); }
 }
