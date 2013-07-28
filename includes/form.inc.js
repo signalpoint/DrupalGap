@@ -25,8 +25,7 @@ function drupalgap_form_get_element_id(name, form_id) {
 // edit form, which also may get an id of "node_edit". We may want to prefix
 // both the template page and form ids with prefixes, e.g. drupalgap_page_*
 // and drupalgap_form_*, but adding these prefixes could get annoying for
-// css selectors used in jQuery and CSS. What to do? But does the form even
-// get an element and an id, I don't think so, there is no <form>, right?!
+// css selectors used in jQuery and CSS. What to do?
 function drupalgap_form_render(form) {
   try {
     if (drupalgap.settings.debug) {
@@ -42,25 +41,27 @@ function drupalgap_form_render(form) {
     // Render each form element.
     var form_elements = '';
     $.each(form.elements, function(name, element){
+        var form_element = '';
         // Open the element.
-        form_element = '';
-        if (element.type != 'hidden') {
-          form_element += '<div>';
-        }
-        // Add a label to all fields, except submit.
+        if (element.type != 'hidden') { form_element += '<div>'; }
+        // Add a label to all fields, except submit and hidden fields.
         if (element.type != 'submit' && element.type != 'hidden') {
-          form_element += '<label for="' + name + '"><strong>' + element.title + '</strong>';
-          if (element.required) { form_element += '*'; }
-          form_element += '</label>';
+          form_element = theme('form_element_label', {'element':element});
         }
         // If there wasn't a default value provided, set one.
-        if (!element.default_value) {
-          element.default_value = '';
-        }
+        if (!element.default_value) { element.default_value = ''; }
         // Grab the html id attribute for this element name.
         element_id = drupalgap_form_get_element_id(name, form.id);
         // Depending on the element type, render the field.
         switch (element.type) {
+          case "checkbox":
+            form_element += theme('checkbox', {
+              attributes:{
+                id:element_id,
+                value:element.default_value
+              }
+            });
+            break;
           case "email":
             form_element += theme('email', {
               attributes:{
@@ -517,6 +518,22 @@ function _drupalgap_form_validate(form, form_state) {
 }
 
 /**
+ * Themes a checkbox input.
+ */
+function theme_checkbox(variables) {
+  try {
+    variables.attributes.type = 'checkbox';
+    // Check the box?
+    if (variables.checked) {
+      variables.attributes.checked = 'checked';
+    }
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Themes a email input.
  */
 function theme_email(variables) {
@@ -524,6 +541,21 @@ function theme_email(variables) {
     variables.attributes.type = 'email';
     var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
     return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Themes a form element label.
+ */
+function theme_form_element_label(variables) {
+  try {
+    console.log(JSON.stringify(variables));
+    var element = variables.element;
+    var html = '<label for="' + element.name + '"><strong>' + element.title + '</strong>';
+    if (element.required) { html += '*'; }
+    html += '</label>';
+    return html;
   }
   catch (error) { drupalgap_error(error); }
 }
