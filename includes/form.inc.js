@@ -142,6 +142,16 @@ function drupalgap_form_render(form) {
               }
             });
             break;
+          case "radios":
+            var radios = {
+              options:element.options,
+              value:element.default_value,
+              attributes:{
+                id:element_id
+              }
+            };
+            form_element += theme('radios', radios);
+            break;
           case "select":
             var select = {
               options:element.options,
@@ -247,7 +257,14 @@ function drupalgap_form_state_values_assemble(form) {
     var form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
-      form_state.values[name] = $('#' + drupalgap_form_get_element_id(name, form.id)).val();
+      var selector = '';
+      if (element.type == 'radios') {
+        selector = 'input:radio[name="' + drupalgap_form_get_element_id(name, form.id) + '"]:checked';
+      }
+      else {
+        selector = '#' + drupalgap_form_get_element_id(name, form.id);
+      }
+      form_state.values[name] = $(selector).val();
     });
     // Attach the form state to drupalgap.form_states keyed by the form id.
     drupalgap.form_states[form.id] = form_state;
@@ -274,6 +291,9 @@ function drupalgap_get_form(form_id) {
     var html = '';
     var form = drupalgap_form_load.apply(null, Array.prototype.slice.call(arguments));
     if (form) {
+      if (!form.id) {
+        form.id = form_id;
+      }
       html = drupalgap_form_render(form);
     }
     else {
@@ -328,6 +348,11 @@ function drupalgap_form_load(form_id) {
       if (form_arguments.length == 0) { form = fn(); }
       else {
         form = fn.apply(null, Array.prototype.slice.call(form_arguments));
+      }
+      
+      // If a form id wasn't provided, set it now.
+      if (!form.id) {
+        form.id = form_id;
       }
       
       // Give modules an opportunity to alter the form.
@@ -523,6 +548,44 @@ function theme_password(variables) {
     variables.attributes.type = 'password';
     var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
     return output;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Themes radio buttons.
+ */
+function theme_radios(variables) {
+  try {
+    var radios = '';
+    if (variables.options) {
+      variables.attributes.type = 'radio';
+      // Determine an id prefix to use.
+      var id = 'radio';
+      if (variables.attributes.id) {
+        id = variables.attributes.id;
+        delete variables.attributes.id;  
+      }
+      // Set the radio name equal to the id if one doesn't exist.
+      if (!variables.attributes.name) {
+        variables.attributes.name = id;
+      }
+      // Init a delta value so each radio button can have a unique id.
+      var delta = 0;
+      $.each(variables.options, function(value, label){
+          var checked = '';
+          if (variables.value && variables.value == value) {
+            checked = ' checked="checked" ';
+          }
+          var input_id = id + '_' + delta.toString();
+          var input_label = '<label for="' + input_id + '">' + label + '</label>'
+          radios += '<input id="' + input_id + '" value="' + value + '" ' +
+                                 drupalgap_attributes(variables.attributes) +
+                                 checked + ' />' + input_label;
+          delta++;
+      });
+    }
+    return radios;
   }
   catch (error) { drupalgap_error(error); }
 }
