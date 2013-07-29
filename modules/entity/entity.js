@@ -63,7 +63,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
           if (entity[field_name] && entity[field_name][entity.language]) {
             items = entity[field_name][entity.language];
           }
-          var elements = fn(entity_type, entity, field, null, 'und', items, field['display']['default']);
+          var elements = fn(entity_type, entity, field, null, entity.language, items, field['display']['default']);
           $.each(elements, function(delta, element){
               // If the element has markup, render it as is, if it is
               // themeable, then theme it.
@@ -296,8 +296,8 @@ function drupalgap_entity_get_core_fields(entity_type) {
         fields.language = {
           'type':'hidden',
           'required':true,
-          'default_value':'und', // TODO - not sure about this, need to learn
-        };                       // more about international sites.
+          'default_value':drupalgap.settings.language,
+        };
         break;
       case 'user':
         fields.uid = {
