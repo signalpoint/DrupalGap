@@ -41,7 +41,8 @@ function drupalgap_form_render(form) {
     // Render the form's input elements.
     var form_elements = _drupalgap_form_render_elements(form);
     // Return the form html.
-    var form_html = '<form id="' + form.id + '"><div><div id="drupalgap_form_errors"></div>' +
+    var form_html =
+    '<form id="' + form.id + '"><div><div id="drupalgap_form_errors"></div>' +
       form_elements +
     '</div></form>';
     return form_html;
@@ -215,179 +216,11 @@ function drupalgap_form_id_local_storage_key(form_id) {
 function _drupalgap_form_render_elements(form) {
   try {
     var content = '';
+    // For each form element, if the element objects name property isn't set,
+    // set it, then render the element.
     $.each(form.elements, function(name, element){
-        var html = '';
-        // Open the element.
-        if (element.type != 'hidden') { html += '<div>'; }
-        // Add a label to all fields, except submit and hidden fields.
-        if (element.type != 'submit' && element.type != 'hidden') {
-          html += theme('form_element_label', {'element':element});
-        }
-        // If there wasn't a default value provided, set one.
-        if (!element.default_value) { element.default_value = ''; }
-        // Grab the html id attribute for this element name.
-        element_id = drupalgap_form_get_element_id(name, form.id);
-        // Depending on the element type, render the field.
-        switch (element.type) {
-          case "checkbox":
-            html += theme('checkbox', {
-              attributes:{
-                id:element_id,
-                value:element.default_value
-              }
-            });
-            break;
-          case "email":
-            html += theme('email', {
-              attributes:{
-                id:element_id,
-                value:element.default_value
-              }
-            });
-            break;
-          case 'image':
-            // Set the default button text, and if a value was provided,
-            // overwrite the button text.
-            var button_text = 'Add Image';
-            if (element.value) {
-              button_text = element.value;
-            }
-            // Place variables into document for PhoneGap image processing.
-            var element_id_base = element_id.replace(/-/g, '_'); 
-            var image_field_source = element_id_base + '_imagefield_source';
-            var imagefield_destination_type = element_id_base + '_imagefield_destination_type';
-            var imagefield_data = element_id_base + '_imagefield_data';
-            eval('var ' + image_field_source + ' = null;');
-            eval('var ' + imagefield_destination_type + ' = null;');
-            eval('var ' + imagefield_data + ' = null;');
-            // Build an imagefield widget with PhoneGap. Contains a message
-            // div, an image element, and button to add an image.
-            html += '<div>' + 
-              '<div id="' + element_id + '-imagefield-msg"></div>' + 
-              '<img id="' + element_id + '-imagefield" />' + 
-              '<a href="#" data-role="button" id="' + element_id + '">' + element.value + '</a>' + 
-            '</div>';
-            // Open extra javascript declaration.
-            html += '<script type="text/javascript">';
-            // Add device ready listener for PhoneGap camera.
-            var event_listener = element_id_base +  '_imagefield_ready';
-            html += '$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").on("pageshow",function(){' +
-              'document.addEventListener("deviceready", ' + event_listener + ', false);' +
-            '});' + 
-            'function ' + event_listener +  '() {' +
-              image_field_source + ' = navigator.camera.PictureSourceType;' +
-              imagefield_destination_type + ' = navigator.camera.DestinationType;' +
-            '}';
-            // Define error callback function.
-            var imagefield_error = element_id_base + '_error';
-            html += 'function ' + imagefield_error + '(message) {' +
-              'if (message != "Camera cancelled.") {' +
-                'alert("' + imagefield_error + ' - " + message);' +
-              '}' +
-            '}';
-            // Define success callback function.
-            var imagefield_success = element_id_base + '_success';
-            html += 'function ' + imagefield_success + '(message) {' +
-              'alert("success!");' +
-            '}';
-            // Add click handler for photo button.
-            html += '$("#' + element_id + '").on("click",function(){' +
-              'var photo_options = {' +
-                'quality: 50,' +
-                'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
-                'correctOrientation: true' +
-              '};' +
-              'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
-            '});';
-            // Close extra javascript declaration.
-            html += '</script>';
-            break;
-          case "hidden":
-            html += theme('hidden', {
-              attributes:{
-                id:element_id,
-                value:element.default_value
-              }
-            });
-            break;
-          case "password":
-            html += theme('password', {
-              attributes:{
-                id:element_id,
-                value:element.default_value
-              }
-            });
-            break;
-          case "radios":
-            var radios = {
-              options:element.options,
-              value:element.default_value,
-              attributes:{
-                id:element_id
-              }
-            };
-            html += theme('radios', radios);
-            break;
-          case "select":
-            var select = {
-              options:element.options,
-              value:element.default_value,
-              attributes:{
-                id:element_id
-              }
-            };
-            if (element.required) {
-              select.options[-1] = 'Select';
-              select.value = -1;
-            }
-            html += theme('select', select);
-            break;
-          case "submit":
-            var submit_attributes = {
-              'type':'button',
-              'data-theme':'b',
-              'id':element_id,
-              'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
-            };
-            html += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
-            break;
-          case "text":
-          case "textfield":
-            html += theme('textfield', {
-              attributes:{
-                id:element_id,
-                value:element.default_value
-              }
-            });
-            break;
-          case 'textarea':
-          case 'text_long':
-          case "text_with_summary":
-          case 'text_textarea':
-            html += theme('textarea', {
-              attributes:{
-                id:element_id
-              },
-              value:element.default_value
-            });
-            break;
-          /*case "taxonomy_term_reference":
-            break;*/
-          default:
-            var msg = 'Field ' + element.type + ' not supported, yet.';
-            html += '<div><em>' + msg + '</em></div>';
-            console.log('WARNING: ' + msg);
-            break;
-        }
-        // Added element description.
-        if (element.description && element.type != 'hidden') {
-          html += '<div>' + element.description + '</div>';
-        }
-        // Close element and add to form elements.
-        if (element.type != 'hidden') {
-          html += '</div><div>&nbsp;</div>';
-        }
-        content += html;
+        if (!element.name) { element.name = name; }
+        content += _drupalgap_form_render_element(form, element);
     });
     // Add any form buttons to the form elements html.
     if (form.buttons && form.buttons.length != 0) {
@@ -403,9 +236,182 @@ function _drupalgap_form_render_elements(form) {
 /**
  * Renders an input element for a form.
  */
-function _drupalgap_form_render_element() {
+function _drupalgap_form_render_element(form, element) {
   try {
-    
+    var html = '';
+    console.log(JSON.stringify(element));
+    var name = element.name;
+    // Open the element.
+    if (element.type != 'hidden') { html += '<div>'; }
+    // Add a label to all fields, except submit and hidden fields.
+    if (element.type != 'submit' && element.type != 'hidden') {
+      html += theme('form_element_label', {'element':element});
+    }
+    // If there wasn't a default value provided, set one.
+    if (!element.default_value) { element.default_value = ''; }
+    // Grab the html id attribute for this element name.
+    var element_id = drupalgap_form_get_element_id(name, form.id);
+    // Depending on the element type, render the field.
+    switch (element.type) {
+      case "checkbox":
+        html += theme('checkbox', {
+          attributes:{
+            id:element_id,
+            value:element.default_value
+          }
+        });
+        break;
+      case "email":
+        html += theme('email', {
+          attributes:{
+            id:element_id,
+            value:element.default_value
+          }
+        });
+        break;
+      case 'image':
+        // Set the default button text, and if a value was provided,
+        // overwrite the button text.
+        var button_text = 'Add Image';
+        if (element.value) {
+          button_text = element.value;
+        }
+        // Place variables into document for PhoneGap image processing.
+        var element_id_base = element_id.replace(/-/g, '_'); 
+        var image_field_source = element_id_base + '_imagefield_source';
+        var imagefield_destination_type = element_id_base + '_imagefield_destination_type';
+        var imagefield_data = element_id_base + '_imagefield_data';
+        eval('var ' + image_field_source + ' = null;');
+        eval('var ' + imagefield_destination_type + ' = null;');
+        eval('var ' + imagefield_data + ' = null;');
+        // Build an imagefield widget with PhoneGap. Contains a message
+        // div, an image element, and button to add an image.
+        html += '<div>' + 
+          '<div id="' + element_id + '-imagefield-msg"></div>' + 
+          '<img id="' + element_id + '-imagefield" />' + 
+          '<a href="#" data-role="button" id="' + element_id + '">' + element.value + '</a>' + 
+        '</div>';
+        // Open extra javascript declaration.
+        html += '<script type="text/javascript">';
+        // Add device ready listener for PhoneGap camera.
+        var event_listener = element_id_base +  '_imagefield_ready';
+        html += '$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").on("pageshow",function(){' +
+          'document.addEventListener("deviceready", ' + event_listener + ', false);' +
+        '});' + 
+        'function ' + event_listener +  '() {' +
+          image_field_source + ' = navigator.camera.PictureSourceType;' +
+          imagefield_destination_type + ' = navigator.camera.DestinationType;' +
+        '}';
+        // Define error callback function.
+        var imagefield_error = element_id_base + '_error';
+        html += 'function ' + imagefield_error + '(message) {' +
+          'if (message != "Camera cancelled.") {' +
+            'alert("' + imagefield_error + ' - " + message);' +
+          '}' +
+        '}';
+        // Define success callback function.
+        var imagefield_success = element_id_base + '_success';
+        html += 'function ' + imagefield_success + '(message) {' +
+          'alert("success!");' +
+        '}';
+        // Add click handler for photo button.
+        html += '$("#' + element_id + '").on("click",function(){' +
+          'var photo_options = {' +
+            'quality: 50,' +
+            'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
+            'correctOrientation: true' +
+          '};' +
+          'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
+        '});';
+        // Close extra javascript declaration.
+        html += '</script>';
+        break;
+      case "hidden":
+        html += theme('hidden', {
+          attributes:{
+            id:element_id,
+            value:element.default_value
+          }
+        });
+        break;
+      case "password":
+        html += theme('password', {
+          attributes:{
+            id:element_id,
+            value:element.default_value
+          }
+        });
+        break;
+      case "radios":
+        var radios = {
+          options:element.options,
+          value:element.default_value,
+          attributes:{
+            id:element_id
+          }
+        };
+        html += theme('radios', radios);
+        break;
+      case "select":
+        var select = {
+          options:element.options,
+          value:element.default_value,
+          attributes:{
+            id:element_id
+          }
+        };
+        if (element.required) {
+          select.options[-1] = 'Select';
+          select.value = -1;
+        }
+        html += theme('select', select);
+        break;
+      case "submit":
+        var submit_attributes = {
+          'type':'button',
+          'data-theme':'b',
+          'id':element_id,
+          'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
+        };
+        html += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
+        break;
+      case "text":
+      case "textfield":
+        html += theme('textfield', {
+          attributes:{
+            id:element_id,
+            value:element.default_value
+          }
+        });
+        break;
+      case 'textarea':
+      case 'text_long':
+      case "text_with_summary":
+      case 'text_textarea':
+        html += theme('textarea', {
+          attributes:{
+            id:element_id
+          },
+          value:element.default_value
+        });
+        break;
+      /*case "taxonomy_term_reference":
+        break;*/
+      default:
+        var msg = 'Field ' + element.type + ' not supported, yet.';
+        html += '<div><em>' + msg + '</em></div>';
+        console.log('WARNING: ' + msg);
+        break;
+    }
+    // Added element description.
+    if (element.description && element.type != 'hidden') {
+      html += '<div>' + element.description + '</div>';
+    }
+    // Close element and add to form elements.
+    if (element.type != 'hidden') {
+      html += '</div><div>&nbsp;</div>';
+    }
+    return html;
   }
   catch (error) { drupalgap_error(error); }
 }
