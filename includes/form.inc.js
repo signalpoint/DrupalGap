@@ -239,36 +239,66 @@ function _drupalgap_form_render_elements(form) {
 function _drupalgap_form_render_element(form, element) {
   try {
     var html = '';
-    console.log(JSON.stringify(element));
+    
+    // Extract the element name.
     var name = element.name;
+    
     // Open the element.
     if (element.type != 'hidden') { html += '<div>'; }
+    
     // Add a label to all fields, except submit and hidden fields.
     if (element.type != 'submit' && element.type != 'hidden') {
       html += theme('form_element_label', {'element':element});
     }
+    
     // If there wasn't a default value provided, set one.
     if (!element.default_value) { element.default_value = ''; }
+    
     // Grab the html id attribute for this element name.
     var element_id = drupalgap_form_get_element_id(name, form.id);
-    // Depending on the element type, render the field.
+    
+    // Generate default variables to send to theme().
+    var variables = {
+      attributes:{
+        id:element_id,
+        value:element.default_value
+      }
+    };
+    
+    // Depending on the element type, if necessary, adjust the variables and/or
+    // theme function to be used, then render the element by calling its theme
+    // function.
+    var theme_function = element.type;
+    
+    // The following element types apply cleanly to their corresponding theme
+    // functions:
+    //   checkbox
+    //   email
+    //   hidden
+    //   password
+    //   radios
+    //   select
+    //   textfield
+    //   textarea                                          
+    // The following element types need their theme function adjusted:
+    //   textarea
+    //   text_long
+    //   text_with_summary
+    //   text_textarea
+    // The following element types need their variables adjusted:
+    //   radios
+    //   select
+    //   textarea
+    //   text_long
+    //   text_with_summary
+    //   text_textarea
+    // The following element types are not yet supported:
+    //   taxonomy_term_reference
+    // The following fields are outliers and need to be converted to use a theme
+    // function.
+    //   image
+    //   submit
     switch (element.type) {
-      case "checkbox":
-        html += theme('checkbox', {
-          attributes:{
-            id:element_id,
-            value:element.default_value
-          }
-        });
-        break;
-      case "email":
-        html += theme('email', {
-          attributes:{
-            id:element_id,
-            value:element.default_value
-          }
-        });
-        break;
       case 'image':
         // Set the default button text, and if a value was provided,
         // overwrite the button text.
@@ -326,45 +356,22 @@ function _drupalgap_form_render_element(form, element) {
         // Close extra javascript declaration.
         html += '</script>';
         break;
-      case "hidden":
-        html += theme('hidden', {
-          attributes:{
-            id:element_id,
-            value:element.default_value
-          }
-        });
-        break;
-      case "password":
-        html += theme('password', {
-          attributes:{
-            id:element_id,
-            value:element.default_value
-          }
-        });
-        break;
       case "radios":
-        var radios = {
-          options:element.options,
-          value:element.default_value,
-          attributes:{
-            id:element_id
-          }
-        };
-        html += theme('radios', radios);
+        // Add options and value to variables and remove the value attribute.
+        variables.options = element.options;
+        variables.value = element.default_value;
+        delete variables.attributes.value;
         break;
       case "select":
-        var select = {
-          options:element.options,
-          value:element.default_value,
-          attributes:{
-            id:element_id
-          }
-        };
+        // Add options and value to variables and remove the value attribute.
+        variables.options = element.options;
+        variables.value = element.default_value;
+        delete variables.attributes.value;
+        // Required?
         if (element.required) {
-          select.options[-1] = 'Select';
-          select.value = -1;
+          variables.options[-1] = 'Select';
+          variables.value = -1;
         }
-        html += theme('select', select);
         break;
       case "submit":
         var submit_attributes = {
@@ -376,41 +383,43 @@ function _drupalgap_form_render_element(form, element) {
         html += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
         break;
       case "text":
-      case "textfield":
-        html += theme('textfield', {
-          attributes:{
-            id:element_id,
-            value:element.default_value
-          }
-        });
+        theme_function = 'textfield';
         break;
       case 'textarea':
       case 'text_long':
       case "text_with_summary":
       case 'text_textarea':
-        html += theme('textarea', {
-          attributes:{
-            id:element_id
-          },
-          value:element.default_value
-        });
-        break;
-      /*case "taxonomy_term_reference":
-        break;*/
-      default:
-        var msg = 'Field ' + element.type + ' not supported, yet.';
-        html += '<div><em>' + msg + '</em></div>';
-        console.log('WARNING: ' + msg);
+        theme_function = 'textarea';
+        // Add value to variables and remove the value attribute.
+        variables.value = element.default_value;
+        delete variables.attributes.value;
         break;
     }
+    
+    // If the element isn't an outlier, run it through the theme system.
+    if (element.type != 'submit' && element.type != 'image') {
+      // Theme the element.
+      if (drupalgap_function_exists('theme_' + theme_function)) {
+        html += theme(theme_function, variables);
+      }
+      else {
+        var msg = 'Field ' + element.type + ' not supported, yet.';
+        html += '<div><em>' + msg + '</em></div>';
+        console.log('WARNING: _drupalgap_form_render_element() - ' + msg);
+      }
+    }
+    
     // Added element description.
     if (element.description && element.type != 'hidden') {
       html += '<div>' + element.description + '</div>';
     }
+    
     // Close element and add to form elements.
     if (element.type != 'hidden') {
       html += '</div><div>&nbsp;</div>';
     }
+    
+    // Return the element html.
     return html;
   }
   catch (error) { drupalgap_error(error); }
