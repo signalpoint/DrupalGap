@@ -125,6 +125,21 @@ function drupalgap_add_js() {
 }
 
 /**
+ * Given a path to a css file relative to the app's www directory, this will
+ * attempt to load the css file so it will be available in scope.
+ */
+function drupalgap_add_css() {
+  try {
+    var data;
+    if (arguments[0]) { data = arguments[0]; }
+    $('<link/>', {rel: 'stylesheet', href: data}).appendTo('head');
+  }
+  catch (error) {
+    alert('drupalgap_add_css - ' + error);
+  }
+}
+
+/**
  * Rounds up all blocks defined by hook_block_info and places them in the
  * drupalgap.blocks array.
  */
