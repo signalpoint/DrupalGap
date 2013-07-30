@@ -9,8 +9,10 @@ drupalgap.settings = {
   'default_services_endpoint':'drupalgap',
   'clean_urls':false, /* set to true if you have clean urls enabled on your site */
   
-  /* App Information */
+  /* App Title */
   'title':'DrupalGap',
+  
+  /* App Front Page */
   'front':'dashboard',
   
   /* Language */
@@ -56,7 +58,12 @@ drupalgap.settings = {
         }
       },
       'sub_navigation':{
-        'main_menu':{},
+        'main_menu':{
+          'roles':{
+            'value':['administrator'],
+            'mode':'include',
+          }
+        },
         'primary_local_tasks':{},
       },
       'content':{
@@ -70,9 +77,13 @@ drupalgap.settings = {
   
   /* Menus */
   'menus':{
-    /*'main_menu':{
-      'links':[],
-    },*/
+    'main_menu':{
+      'links':[
+        {'title':'Content','path':'node','options':{'attributes':{'data-icon':'star'}}},
+        {'title':'Taxonomy','path':'taxonomy/vocabularies','options':{'attributes':{'data-icon':'grid'}}},
+        {'title':'Users','path':'user-listing','options':{'attributes':{'data-icon':'info'}}},
+      ],
+    },
     'user_menu_anonymous':{
       'links':[
         {'title':'Login','path':'user/login'},
