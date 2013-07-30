@@ -243,6 +243,14 @@ function _drupalgap_form_render_element(form, element) {
     // Extract the element name.
     var name = element.name;
     
+    // Grab the html id attribute for this element name, then save the id on the
+    // element.
+    var element_id = drupalgap_form_get_element_id(name, form.id);
+    element.id = element_id;
+    
+    // If there wasn't a default value provided, set one.
+    if (!element.default_value) { element.default_value = ''; }
+    
     // Open the element.
     if (element.type != 'hidden') { html += '<div>'; }
     
@@ -250,12 +258,6 @@ function _drupalgap_form_render_element(form, element) {
     if (element.type != 'submit' && element.type != 'hidden') {
       html += theme('form_element_label', {'element':element});
     }
-    
-    // If there wasn't a default value provided, set one.
-    if (!element.default_value) { element.default_value = ''; }
-    
-    // Grab the html id attribute for this element name.
-    var element_id = drupalgap_form_get_element_id(name, form.id);
     
     // Generate default variables to send to theme().
     var variables = {
@@ -586,9 +588,13 @@ function theme_email(variables) {
  */
 function theme_form_element_label(variables) {
   try {
-    //console.log(JSON.stringify(variables));
     var element = variables.element;
-    var html = '<label for="' + element.name + '"><strong>' + element.title + '</strong>';
+    // By default, use the element id as the label for, unless the element is
+    // a radio, then use the name.
+    var label_for = element.id;
+    if (element.type == 'radios') { label_for = element.name; }
+    // Render the label.
+    var html = '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
     if (element.required) { html += '*'; }
     html += '</label>';
     return html;
