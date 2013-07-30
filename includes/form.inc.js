@@ -274,7 +274,6 @@ function _drupalgap_form_render_element(form, element) {
     
     // The following element types apply cleanly to their corresponding theme
     // functions:
-    //   checkbox
     //   email
     //   hidden
     //   password
@@ -288,6 +287,7 @@ function _drupalgap_form_render_element(form, element) {
     //   text_with_summary
     //   text_textarea
     // The following element types need their variables adjusted:
+    //   checkbox
     //   radios
     //   select
     //   textarea
@@ -301,6 +301,12 @@ function _drupalgap_form_render_element(form, element) {
     //   image
     //   submit
     switch (element.type) {
+      case 'checkbox':
+        // If the checkbox has a default value of 1, check the box.
+        if (element.default_value == 1) {
+          variables.checked = true;
+        }
+        break;
       case 'image':
         // Set the default button text, and if a value was provided,
         // overwrite the button text.
@@ -591,7 +597,11 @@ function theme_form_element_label(variables) {
     var element = variables.element;
     // By default, use the element id as the label for, unless the element is
     // a radio, then use the name.
-    var label_for = element.id;
+    var label_for = '';
+    if (element.id) { label_for = element.id; }
+    else if (element.attributes && element.attributes.for) {
+      label_for = element.attributes.for;
+    }
     if (element.type == 'radios') { label_for = element.name; }
     // Render the label.
     var html = '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
