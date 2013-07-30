@@ -627,6 +627,7 @@ function drupalgap_includes_load() {
               },
               dataType:'script',
               error: function(xhr, textStatus, errorThrown) {
+                console.log(errorThrown);
                   // Look at the `textStatus` and/or `errorThrown` properties.
               }
           });
