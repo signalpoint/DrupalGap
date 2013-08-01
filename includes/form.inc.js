@@ -599,8 +599,8 @@ function theme_form_element_label(variables) {
     // a radio, then use the name.
     var label_for = '';
     if (element.id) { label_for = element.id; }
-    else if (element.attributes && element.attributes.for) {
-      label_for = element.attributes.for;
+    else if (element.attributes && element.attributes['for']) {
+      label_for = element.attributes['for'];
     }
     if (element.type == 'radios') { label_for = element.name; }
     // Render the label.
