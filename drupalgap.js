@@ -5,11 +5,7 @@ var drupalgap = {
        {'name':'block'},
        {'name':'comment'},
        {'name':'entity'},
-       {'name':'field',
-         'includes':[
-           {'name':'text'},
-         ]
-       },
+       {'name':'field'},
        {'name':'image'},
        {'name':'menu'},
        {'name':'mvc'},
