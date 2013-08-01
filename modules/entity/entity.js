@@ -60,8 +60,13 @@ function drupalgap_entity_render_content(entity_type, entity) {
           // its result to the entity's content. 
           var fn = window[function_name];
           var items = null;
-          if (entity[field_name] && entity[field_name][entity.language]) {
-            items = entity[field_name][entity.language];
+          if (entity[field_name]) {
+            if (entity[field_name][entity.language]) {
+              items = entity[field_name][entity.language];
+            }
+            else {
+              items = entity[field_name];
+            }
           }
           var elements = fn(entity_type, entity, field, null, entity.language, items, field['display']['default']);
           $.each(elements, function(delta, element){
@@ -392,27 +397,21 @@ function drupalgap_entity_get_core_fields(entity_type) {
 }
 
 /**
- * Given an entity type (node, comment, etc), this will return the current
- * entity edit json object inside the drupalgap var. 
- */
-function drupalgap_entity_get_edit_object(entity_type) {
-  try {
-    alert('drupalgap_entity_get_edit_object -  this function is depcreated, it just returns drupalgap.entity_edit');
-    return drupalgap.entity_edit;
-  }
-  catch (error) {
-    alert('drupalgap_entity_get_edit_object - ' + error);
-  }
-}
-
-/**
- * Given an entity_type, this returns the entity information. See also 
+ * Given an entity_type, this returns the entity JSON info, if it exists, false
+ * otherwise. You may optionally call this function with no arguments to
+ * retrieve the JSON info for all entity types. See also 
  * http://api.drupal.org/api/drupal/includes%21common.inc/function/entity_get_info/7
  */
-function drupalgap_entity_get_info(entity_type) {
+function drupalgap_entity_get_info() {
   try {
-    if (entity_type && drupalgap.entity_info[entity_type]) {
-      return drupalgap.entity_info[entity_type];
+    if (arguments[0]) {
+      var entity_type = arguments[0];
+      if (entity_type && drupalgap.entity_info[entity_type]) {
+        return drupalgap.entity_info[entity_type];
+      }
+      else {
+        return false;
+      }
     }
     return drupalgap.entity_info;
   }
