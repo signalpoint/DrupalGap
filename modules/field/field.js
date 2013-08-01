@@ -103,3 +103,25 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
   }
 }
 
+/**
+ * Implements hook_field_formatter_view().
+ */
+function number_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
+  try {
+    var element = {};
+    // If items is a string, convert it into a single item JSON object.
+    if (typeof items === 'string') {
+      items = {0:{value:items}}
+    }
+    if (!drupalgap_empty(items)) {
+      $.each(items, function(delta, item){
+          element[delta] = {
+            markup:item.value
+          };
+      });
+    }
+    return element;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
