@@ -734,7 +734,7 @@ function entity_load(entity_type, ids) {
     var local_storage_key = entity_local_storage_key(entity_type, entity_id);
     // Process options if necessary.
     if (options) {
-      // If we are resetting, clearAre we resetting?
+      // If we are resetting, remove the item from localStorage.
       if (options.reset) { window.localStorage.removeItem(local_storage_key); }
     }
     // Attempt to load the entity from local storage.
