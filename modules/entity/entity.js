@@ -49,57 +49,8 @@ function drupalgap_entity_render_content(entity_type, entity) {
         if (!field.display || !field.display['default']) { return; }
         // Save the field name and weight.
         field_weights[field_name] = field.display['default'].weight;
-        // Determine module that implements the hook_field_formatter_view,
-        // then determine the hook's function name, then render the field content.
-        var module = field['display']['default']['module'];
-        var function_name = module + '_field_formatter_view';
-        var content = '';
-        if (drupalgap_function_exists(function_name)) {
-          // Grab the field formatter function, then grab the field items
-          // from the entity, then call the formatter function it and append
-          // its result to the entity's content. 
-          var fn = window[function_name];
-          var items = null;
-          if (entity[field_name]) {
-            if (entity[field_name][entity.language]) {
-              items = entity[field_name][entity.language];
-            }
-            else {
-              items = entity[field_name];
-            }
-          }
-          var elements = fn(entity_type, entity, field, null, entity.language, items, field['display']['default']);
-          $.each(elements, function(delta, element){
-              // If the element has markup, render it as is, if it is
-              // themeable, then theme it.
-              var element_content = '';
-              if (element.markup) { element_content = element.markup; }
-              else if (element.theme) {
-                element_content = theme(element.theme, element);
-              }
-              content += '<div>' + element_content + '</div>';
-          });
-        }
-        else {
-          console.log('WARNING: drupalgap_entity_render_content - ' + function_name + '() does not exist!');
-        }
-        // Render the field label, if necessary.
-        if (content != '' && field['display']['default']['label'] != 'hidden') {
-          var label = '<h3>' + field.label + '</h3>';
-          // Place the label above or below the field content.
-          label = '<div>' + label + '</div>';
-          switch (field['display']['default']['label']) {
-            case 'below':
-              content += label;
-              break;
-            case 'above':
-            default:
-              content = label + content;
-              break;
-          }
-        }
         // Save the field content.
-        field_content[field_name] = content;
+        field_content[field_name] = drupalgap_entity_render_field(entity_type, entity, field_name, field);
     });
     // Extract the field weights and sort them.
     var extracted_weights = [];
@@ -122,6 +73,65 @@ function drupalgap_entity_render_content(entity_type, entity) {
             }
         });
     });
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ *
+ */
+function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
+  try {
+    var content = '';
+    // Determine module that implements the hook_field_formatter_view,
+    // then determine the hook's function name, then render the field content.
+    var module = field['display']['default']['module'];
+    var function_name = module + '_field_formatter_view';
+    if (drupalgap_function_exists(function_name)) {
+      // Grab the field formatter function, then grab the field items
+      // from the entity, then call the formatter function it and append
+      // its result to the entity's content. 
+      var fn = window[function_name];
+      var items = null;
+      if (entity[field_name]) {
+        if (entity[field_name][entity.language]) {
+          items = entity[field_name][entity.language];
+        }
+        else {
+          items = entity[field_name];
+        }
+      }
+      var elements = fn(entity_type, entity, field, null, entity.language, items, field['display']['default']);
+      $.each(elements, function(delta, element){
+          // If the element has markup, render it as is, if it is
+          // themeable, then theme it.
+          var element_content = '';
+          if (element.markup) { element_content = element.markup; }
+          else if (element.theme) {
+            element_content = theme(element.theme, element);
+          }
+          content += '<div>' + element_content + '</div>';
+      });
+    }
+    else {
+      console.log('WARNING: drupalgap_entity_render_field - ' + function_name + '() does not exist!');
+    }
+    // Render the field label, if necessary.
+    if (content != '' && field['display']['default']['label'] != 'hidden') {
+      var label = '<h3>' + field.label + '</h3>';
+      // Place the label above or below the field content.
+      label = '<div>' + label + '</div>';
+      switch (field['display']['default']['label']) {
+        case 'below':
+          content += label;
+          break;
+        case 'above':
+        default:
+          content = label + content;
+          break;
+      }
+    }
+    return content;
   }
   catch (error) { drupalgap_error(error); }
 }
