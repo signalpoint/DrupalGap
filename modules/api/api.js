@@ -46,7 +46,7 @@ drupalgap.api = {
       _drupalgap_api_get_csrf_token(call_options, {
           success:function() {
             
-            //alert(call_options.url);
+            alert(call_options.url);
             
             // Show the loading icon.
             $.mobile.loading('show', {theme: "b", text: "Loading"});
@@ -100,31 +100,42 @@ drupalgap.api = {
  */
 function _drupalgap_api_get_csrf_token(call_options, options) {
   try {
-    // Anonymous users don't need the CSRF token.
-    if (drupalgap.user.uid == 0) {
-      options.success.call();
-      return;
-    }
-    // We have an authenicated user, do we need a token for this call?
+    var token = false;
+    // Do we potentially need a token for this call? We most likely need one if
+    // the call option's type is not one of these types.
     var types = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
     if ($.inArray(call_options.type.toUpperCase(), types) == -1) {
-      // We need a token, is there one in drupalgap.sessid?
-      var token = drupalgap.sessid; 
-      if (!token) {
-        // There wasn't one available in drupalgap.sessid, is there one in
-        // local storage?
-        token = window.localStorage.getItem('sessid');
+      // Anonymous users don't need the CSRF token, unless we're calling system
+      // connect, then we need to pass along the token if we have one.
+      if (drupalgap.user.uid == 0 &&
+          call_options.service_resource != 'drupalgap_system/connect.json' &&
+          call_options.service_resource != 'system/connect.json') {
+        alert('anonymous user, no need for token!');
+        options.success.call();
+        return;
+      }
+      // Is there a token available in local storage?
+      token = window.localStorage.getItem('sessid');
+      if (token) {
+        alert('found token in local storage');
+      }
+      // If we don't already have a token, is there one in drupalgap.sessid?
+      if (!token && drupalgap.sessid) {
+        token = drupalgap.sessid;
+        alert('token available in drupalgap.sessid!');
       }
       if (!token) {
         // We don't have a previous token to use, let's grab one from Drupal.
         var token_url = drupalgap.settings.site_path +
                         drupalgap.settings.base_path +
                         '?q=services/session/token';
+        alert('fetch token: ' + token_url);
         $.ajax({
             url:token_url,
             type:'get',
             dataType:'text',
             success:function(token){
+              alert('got token! ' + token);
               // Save the token to local storage as sessid, set drupalgap.sessid
               // with the token, attach the token and the request header to the
               // call options, then return via the success function.
@@ -138,7 +149,7 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
             },
             error:function (jqXHR, textStatus, errorThrown) {
               alert('Failed to retrieve CSRF token! (' + errorThrown +
-                    ') You must upgrade your Drupal Services module to version 3.4 (or above)! ' +
+                    ') You must upgrade your Drupal Services module to version 3.5 (or above)! ' +
                     'Also check your device for a connection, and try logging out and then back in!');
             }
         });
