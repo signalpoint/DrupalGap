@@ -411,9 +411,14 @@ function _drupalgap_form_render_element(form, element) {
         html += theme(theme_function, variables);
       }
       else {
-        var msg = 'Field ' + element.type + ' not supported, yet.';
-        html += '<div><em>' + msg + '</em></div>';
-        console.log('WARNING: _drupalgap_form_render_element() - ' + msg);
+        if (element.markup || element.markup == '') {
+          html += element.markup; 
+        }
+        else {
+          var msg = 'Field ' + element.type + ' not supported, yet.';
+          html += '<div><em>' + msg + '</em></div>';
+          console.log('WARNING: _drupalgap_form_render_element() - ' + msg);
+        }
       }
     }
     
