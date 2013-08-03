@@ -278,7 +278,7 @@ function node_page_pageshow() {
     drupalgap.views_datasource.call({
       'path':'drupalgap/views_datasource/drupalgap_content',
       'success':function(data) {
-        // Extract the users into items, then drop them in the list.
+        // Extract the nodes into items, then drop them in the list.
         var items = [];
         $.each(data.nodes, function(index, object){
             items.push(l(object.node.title, 'node/' + object.node.nid));
