@@ -1184,6 +1184,21 @@ function user_access(permission) {
   return false;
 }
 
+/**
+ * Returns the current time as a string with the format: "yyyy-mm-dd hh:mm:ss".
+ * http://tylerfrankenstein.com/code/javascript-date-time-yyyy-mm-dd-hh-mm-ss
+ */
+function js_yyyy_mm_dd_hh_mm_ss () {
+  now = new Date();
+  year = "" + now.getFullYear();
+  month = "" + (now.getMonth() + 1); if (month.length == 1) { month = "0" + month; }
+  day = "" + now.getDate(); if (day.length == 1) { day = "0" + day; }
+  hour = "" + now.getHours(); if (hour.length == 1) { hour = "0" + hour; }
+  minute = "" + now.getMinutes(); if (minute.length == 1) { minute = "0" + minute; }
+  second = "" + now.getSeconds(); if (second.length == 1) { second = "0" + second; }
+  return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+}
+
 // http://stackoverflow.com/a/3886106/763010
 function is_int(n) {
   if (typeof n === 'string') {
