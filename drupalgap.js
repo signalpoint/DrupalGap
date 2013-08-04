@@ -1185,6 +1185,20 @@ function user_access(permission) {
 }
 
 /**
+ * Given an JSON object, this will output it to the console.
+ */
+function dpm(data) {
+  try {
+    if (data) {
+      console.log(JSON.stringify(data));
+    }
+  }
+  catch (error) {
+    alert('dpm - ' + error);
+  }
+}
+
+/**
  * Returns the current time as a string with the format: "yyyy-mm-dd hh:mm:ss".
  * http://tylerfrankenstein.com/code/javascript-date-time-yyyy-mm-dd-hh-mm-ss
  */
