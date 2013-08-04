@@ -251,5 +251,29 @@ function system_regions_list() {
   }
 }
 
-// REGION SET BUTTON
+/**
+ * Add default buttons to a form and set its prefix.
+ */
+function system_settings_form(form, form_state) {
+  try {
+    if (form.elements && !form.elements.submit) {
+      form.elements.submit = {
+        type:'submit',
+        value:'Save configuration'
+      };
+    }
+    form.submit.push('system_settings_form_submit');
+    return form;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Execute the system_settings_form.
+ */
+function system_settings_form_submit(form, form_state) {
+  try {
+  }
+  catch (error) { drupalgap_error(error); }
+}
 
