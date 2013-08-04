@@ -446,6 +446,13 @@ function drupalgap_menus_load() {
             // 'regions' menu is in fact NOT a system menu.
             if (menu_name != 'regions') {
               menu_save(menu);
+              // Make a block for this custom menu.
+              var block_delta = menu.menu_name;
+              drupalgap.blocks[0][block_delta] = {
+                name:block_delta,
+                delta:block_delta,
+                module:'menu'
+              };
             }
           }
           else {
