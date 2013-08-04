@@ -177,8 +177,30 @@ function drupalgap_form_load(form_id) {
         form.id = form_id;
       }
       
+      // If the form's validation and submission handler arrays are not set yet,
+      // create an empty array for them.
+      if (!form.validate) {
+        form.validate = [];
+      }
+      if (!form.submit) {
+        form.submit = [];
+      }
+      
+      // Add the default call back functions to their respective array, if they
+      // exist.
+      var validate_function_name = form.id + '_validate';
+      if (drupalgap_function_exists(validate_function_name)) {
+        form.validate.push(validate_function_name);
+      }
+      var submit_function_name = form.id + '_submit';
+      if (drupalgap_function_exists(submit_function_name)) {
+        form.submit.push(submit_function_name);
+      }
+      
       // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, null, form_id);
+      
+      dpm(form);
       
       // Place the assembled form into local storage so _drupalgap_form_submit
       // will have access to the assembled form.
