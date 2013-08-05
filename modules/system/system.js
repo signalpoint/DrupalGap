@@ -273,6 +273,12 @@ function system_settings_form(form, form_state) {
  */
 function system_settings_form_submit(form, form_state) {
   try {
+    if (form_state.values) {
+      $.each(form_state.values, function(variable, value){
+          variable_set(variable, value);
+      });
+    }
+    alert('The configuration options have been saved.');
   }
   catch (error) { drupalgap_error(error); }
 }
