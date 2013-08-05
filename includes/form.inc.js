@@ -104,14 +104,21 @@ function drupalgap_form_state_values_assemble(form) {
     var form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
+      // Determine the css selector for the form element.
       var selector = '';
       if (element.type == 'radios') {
         selector = 'input:radio[name="' + drupalgap_form_get_element_id(name, form.id) + '"]:checked';
       }
-      else {
-        selector = '#' + drupalgap_form_get_element_id(name, form.id);
+      else { selector = '#' + drupalgap_form_get_element_id(name, form.id); }
+      // Determine the value of the form element.
+      var value = null;
+      if (element.type == 'checkbox') {
+        if ($(selector).is(':checked')) { value = 1; }
+        else { value = 0; }
       }
-      form_state.values[name] = $(selector).val();
+      if (value == null) { value = $(selector).val(); }
+      // Set the form state value.
+      form_state.values[name] = value;
     });
     // Attach the form state to drupalgap.form_states keyed by the form id.
     drupalgap.form_states[form.id] = form_state;
@@ -159,8 +166,6 @@ function drupalgap_form_load(form_id) {
       console.log('drupalgap_form_load(' + form_id + ')');
       console.log(JSON.stringify(arguments));
     }
-    
-    //alert('drupalgap_form_load');
     
     var form = drupalgap_form_defaults(form_id);
     
