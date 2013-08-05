@@ -3,9 +3,10 @@
  */
 function drupalgap_form_defaults(form_id) {
   var form = {};
-  // Set the form id and elements.
+  // Set the form id, elements and buttons.
   form.id = form_id;
   form.elements = {};
+  form.buttons = {};
   // Create empty arrays for the form's validation and submission handlers, then
   // add the default call back functions to their respective array, if they
   // exist.
