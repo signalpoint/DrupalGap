@@ -194,7 +194,16 @@ function drupalgap_form_load(form_id) {
       // arguments to retrieve the form.
       if (form_arguments.length == 0) { form = fn(form, null); }
       else {
-        form = fn.apply(null, form, null, Array.prototype.slice.call(form_arguments));
+        // We must consolidate the form, form_state and arguments into one array
+        // and then pass it along to the form builder.
+        var consolidated_arguments = [];
+        var form_state = null;
+        consolidated_arguments.push(form);
+        consolidated_arguments.push(form_state);
+        $.each(form_arguments, function(index, argument){
+          consolidated_arguments.push(argument);    
+        });
+        form = fn.apply(null, Array.prototype.slice.call(consolidated_arguments));
       }
       
       // Give modules an opportunity to alter the form.
