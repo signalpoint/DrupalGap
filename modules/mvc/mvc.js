@@ -199,16 +199,13 @@ function drupalgap_mvc_model_create_form(module, type) {
     if (drupalgap.settings.debug) {
       console.log('drupalgap_mvc_model_create_form(' + module + ', ' + type + ')');
     }
-    var form = false;
+    var form = drupalgap_form_defaults('drupalgap_mvc_model_create_form');
     var model = model_load(module, type);
     if (model) {
-      form = {
-        id:"drupalgap_mvc_model_create_form",
-        elements:model.fields
-      };
-      form.buttons = {
-        cancel:{"title":"Cancel"}
-      };
+      // TODO - this could be dangerous just overriding the elements variable, we
+      // should iterate over the model fields and add them one by one instead.
+      form.elements = model.fields;
+      form.buttons.cancel = {"title":"Cancel"};
       form.elements.submit = {
         type:"submit",
         value:"Create"
