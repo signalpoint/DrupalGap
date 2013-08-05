@@ -1,4 +1,29 @@
 /**
+ * Given a form id, this will assemble and return the default form JSON object.
+ */
+function drupalgap_form_defaults(form_id) {
+  var form = {};
+  // Set the form id and elements.
+  form.id = form_id;
+  form.elements = {};
+  // Create empty arrays for the form's validation and submission handlers, then
+  // add the default call back functions to their respective array, if they
+  // exist.
+  form.validate = [];
+  form.submit = [];
+  var validate_function_name = form.id + '_validate';
+  if (drupalgap_function_exists(validate_function_name)) {
+    form.validate.push(validate_function_name);
+  }
+  var submit_function_name = form.id + '_submit';
+  if (drupalgap_function_exists(submit_function_name)) {
+    form.submit.push(submit_function_name);
+  }
+  // Finally, return the form.
+  return form;
+}
+
+/**
  * Given a form element name and the form_id, this generates an html id
  * attribute value to be used in the DOM.
  */
@@ -113,14 +138,10 @@ function drupalgap_get_form(form_id) {
     var html = '';
     var form = drupalgap_form_load.apply(null, Array.prototype.slice.call(arguments));
     if (form) {
-      if (!form.id) {
-        form.id = form_id;
-      }
+      // Render the form.
       html = drupalgap_form_render(form);
     }
-    else {
-      alert('drupalgap_get_form - failed to get form (' + form_id + ')');
-    }
+    else { alert('drupalgap_get_form - failed to get form (' + form_id + ')'); }
     return html;
   }
   catch (error) {
@@ -141,13 +162,11 @@ function drupalgap_form_load(form_id) {
     
     //alert('drupalgap_form_load');
     
-    var form = false;
+    var form = drupalgap_form_defaults(form_id);
     
     // The form's call back function will be equal to the form id.
     var function_name = form_id;
     if (eval('typeof ' + function_name) == 'function') {
-      
-      form = {};
       
       // Grab the form's function.
       var fn = window[function_name];
@@ -167,40 +186,13 @@ function drupalgap_form_load(form_id) {
       // If there were no arguments to pass along, call the function directly to
       // retrieve the form, otherwise call the function and pass along any
       // arguments to retrieve the form.
-      if (form_arguments.length == 0) { form = fn(); }
+      if (form_arguments.length == 0) { form = fn(form, null); }
       else {
-        form = fn.apply(null, Array.prototype.slice.call(form_arguments));
-      }
-      
-      // If a form id wasn't provided, set it now.
-      if (!form.id) {
-        form.id = form_id;
-      }
-      
-      // If the form's validation and submission handler arrays are not set yet,
-      // create an empty array for them.
-      if (!form.validate) {
-        form.validate = [];
-      }
-      if (!form.submit) {
-        form.submit = [];
-      }
-      
-      // Add the default call back functions to their respective array, if they
-      // exist.
-      var validate_function_name = form.id + '_validate';
-      if (drupalgap_function_exists(validate_function_name)) {
-        form.validate.push(validate_function_name);
-      }
-      var submit_function_name = form.id + '_submit';
-      if (drupalgap_function_exists(submit_function_name)) {
-        form.submit.push(submit_function_name);
+        form = fn.apply(null, form, null, Array.prototype.slice.call(form_arguments));
       }
       
       // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, null, form_id);
-      
-      dpm(form);
       
       // Place the assembled form into local storage so _drupalgap_form_submit
       // will have access to the assembled form.
@@ -210,7 +202,9 @@ function drupalgap_form_load(form_id) {
       );
     }
     else {
-      alert('drupalgap_form_load - no callback function (' + function_name + ') available for form');
+      var error_msg = 'drupalgap_form_load - no callback function (' +
+                       function_name + ') available for form (' + form_id + ')'; 
+      alert(error_msg);
     }
     return form;
   }
@@ -318,6 +312,7 @@ function _drupalgap_form_render_element(form, element) {
     //   text_textarea
     // The following element types are not yet supported:
     //   taxonomy_term_reference
+    //   ...
     // The following fields are outliers and need to be converted to use a theme
     // function.
     //   image
@@ -325,9 +320,7 @@ function _drupalgap_form_render_element(form, element) {
     switch (element.type) {
       case 'checkbox':
         // If the checkbox has a default value of 1, check the box.
-        if (element.default_value == 1) {
-          variables.checked = true;
-        }
+        if (element.default_value == 1) { variables.checked = true; }
         break;
       case 'image':
         // Set the default button text, and if a value was provided,
@@ -491,18 +484,12 @@ function _drupalgap_form_submit(form_id) {
     // Call drupalgap form's api validate.
     _drupalgap_form_validate(form, form_state);
     
-    // Call the form's validate function.
-    var validate_function = form.id + '_validate';
-    if (eval('typeof ' + validate_function) == 'function') {
-      if (drupalgap.settings.debug) {
-        console.log(validate_function);
-      }
-      var fn = window[validate_function];
-      fn.apply(null, Array.prototype.slice.call([form, form_state]));
-    }
-    else if (drupalgap.settings.debug) {
-      console.log('Skipping ' + validate_function + ', does not exist.');
-    }
+    // Call the form's validate function(s), if any.
+    $.each(form.validate, function(index, function_name){
+        if (drupalgap.settings.debug) { console.log(function_name + '()'); }
+        var fn = window[function_name];
+        fn.apply(null, Array.prototype.slice.call([form, form_state]));  
+    });
     
     // If there were validation errors, show the form errors and stop the
     // form submission.
@@ -523,24 +510,19 @@ function _drupalgap_form_submit(form_id) {
       return false;
     }
     
-    // Call the form's submit function.
-    var submit_function = form.id + '_submit';
-    if (eval('typeof ' + submit_function) == 'function') {
-      if (drupalgap.settings.debug) {
-        console.log(submit_function);
-      }
-      var fn = window[submit_function];
-      fn.apply(null, Array.prototype.slice.call([form, form_state]));
-      // TODO - the call to the form's submit function should be async and we
-      // should have a success callback here that checks the form.action and
-      // then does a drupalgap_goto there once the form is submitted. Right now,
-      // for example, drupalgap_entity_form_submit() takes care of the
-      // drupalgap_goto call, should that be handled here?
-      // TODO - remove the form from local storage? probably.
-    }
-    else if (drupalgap.settings.debug) {
-      console.log('Skipping ' + submit_function + ', does not exist.');
-    }
+    // Call the form's submit function(s), if any.
+    $.each(form.submit, function(index, function_name){
+        if (drupalgap.settings.debug) { console.log(function_name + '()'); }
+        var fn = window[function_name];
+        fn.apply(null, Array.prototype.slice.call([form, form_state]));
+    });
+      
+    // TODO - the call to the form's submit function should be async and we
+    // should have a success callback here that checks the form.action and
+    // then does a drupalgap_goto there once the form is submitted. Right now,
+    // for example, drupalgap_entity_form_submit() takes care of the
+    // drupalgap_goto call, should that be handled here?
+    // TODO - remove the form from local storage? probably.
   }
   catch (error) {
     alert('_drupalgap_form_submit - ' + error);

@@ -46,8 +46,6 @@ drupalgap.api = {
       _drupalgap_api_get_csrf_token(call_options, {
           success:function() {
             
-            alert(call_options.url);
-            
             // Show the loading icon.
             $.mobile.loading('show', {theme: "b", text: "Loading"});
             
@@ -110,32 +108,25 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
       if (drupalgap.user.uid == 0 &&
           call_options.service_resource != 'drupalgap_system/connect.json' &&
           call_options.service_resource != 'system/connect.json') {
-        alert('anonymous user, no need for token!');
         options.success.call();
         return;
       }
       // Is there a token available in local storage?
       token = window.localStorage.getItem('sessid');
-      if (token) {
-        alert('found token in local storage');
-      }
       // If we don't already have a token, is there one in drupalgap.sessid?
       if (!token && drupalgap.sessid) {
         token = drupalgap.sessid;
-        alert('token available in drupalgap.sessid!');
       }
       if (!token) {
         // We don't have a previous token to use, let's grab one from Drupal.
         var token_url = drupalgap.settings.site_path +
                         drupalgap.settings.base_path +
                         '?q=services/session/token';
-        alert('fetch token: ' + token_url);
         $.ajax({
             url:token_url,
             type:'get',
             dataType:'text',
             success:function(token){
-              alert('got token! ' + token);
               // Save the token to local storage as sessid, set drupalgap.sessid
               // with the token, attach the token and the request header to the
               // call options, then return via the success function.

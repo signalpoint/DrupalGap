@@ -1189,6 +1189,7 @@ function user_access(permission) {
  */
 function dpm(data) {
   try {
+    console.log(arguments.callee.caller.name);
     if (data) {
       console.log(JSON.stringify(data));
     }
