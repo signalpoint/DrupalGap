@@ -1185,6 +1185,36 @@ function user_access(permission) {
 }
 
 /**
+ * Given a variable name and value, this will save the value to local storage,
+ * keyed by its name.
+ */
+function variable_set(name, value) {
+  try {
+    if (!value) { value = ' '; } // store null values as a single space*
+    else if (is_int(value)) { value = value.toString(); }
+    else if (typeof value === 'object') { value = JSON.stringify(value); }
+    return window.localStorage.setItem(name, value);
+    // * phonegap won't set us store an empty string in local storage
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given a variable name and a default value, this will first attempt to load
+ * the variable from local storage, if it can't then the default value will be
+ * returned.
+ */
+function variable_get(name, default_value) {
+  try {
+    var value = window.localStorage.getItem(name);
+    if (!value) { value = default_value; }
+    if (value == ' ') { value = ''; } // convert single spaces to empty strings
+    return value;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Given an JSON object, this will output it to the console.
  */
 function dpm(data) {
