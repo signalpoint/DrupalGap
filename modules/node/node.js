@@ -88,24 +88,14 @@ function node_add_page_by_type(type) {
 /**
  * The node edit form.
  */
-function node_edit(node) {
+function node_edit(form, form_state, node) {
   try {
     if (drupalgap.settings.debug) {
       console.log('node_edit()');
       console.log(JSON.stringify(arguments));
     }
     // Setup form defaults.
-    // TODO - Always having to declare the default submit and validate
-    //          function names is lame. Set it up to be automatic, then update
-    //          all existing forms to inherit the automatic goodness.
-    var form = {
-      'id':'node_edit',
-      'submit':['node_edit_form_submit'],
-      'validate':['node_edit_form_validate'],
-      'elements':{},
-      'buttons':{},
-      'entity_type':'node',
-    };
+    form.entity_type = 'node';
     
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form('node', node.type, form, node);
@@ -381,7 +371,7 @@ function node_page_view_pageshow() {
 /**
  * The title call back function for the node view page.
  */
-function node_page_title (node) {
+function node_page_title(node) {
   try {
     var title = '';
     if (node && node.title) { title = node.title; }

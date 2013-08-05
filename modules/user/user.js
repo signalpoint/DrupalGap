@@ -81,26 +81,21 @@ function user_load(uid) {
 /**
  * The user login form.
  */
-function user_login() {
-  var form = {
-    'id':'user_login',
-    'entity_type':'user',
-    'elements':{
-      'name':{
-        'type':'textfield',
-        'title':'Username',
-        'required':true,
-      },
-      'pass':{
-        'type':'password',
-        'title':'Password',
-        'required':true,
-      },
-      'submit':{
-        'type':'submit',
-        'value':'Login',
-      },
-    },
+function user_login(form, form_state) {
+  form.entity_type = 'user';
+  form.elements.name = {
+    'type':'textfield',
+    'title':'Username',
+    'required':true,
+  };
+  form.elements.pass = {
+    'type':'password',
+    'title':'Password',
+    'required':true,
+  };
+  form.elements.submit = {
+    'type':'submit',
+    'value':'Login',
   };
   return form;
 }
@@ -228,28 +223,23 @@ function user_page() {
 /**
  * The user registration form.
  */
-function user_register() {
+function user_register(form, form_state) {
   try {
-    var form = {
-      'id':'user_register',
-      'entity_type':'user',
-      'elements':{
-        'name':{
-          'type':'textfield',
-          'title':'Username',
-          'required':true,
-          'description':'Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.',
-        },
-        'mail':{
-          'type':'email',
-          'title':'E-mail address',
-          'required':true,
-        },
-        'submit':{
-          'type':'submit',
-          'value':'Create new account',
-        },
-      },
+    form.entity_type = 'user';
+    form.elements.name = {
+      'type':'textfield',
+      'title':'Username',
+      'required':true,
+      'description':'Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.',
+    };
+    form.elements.mail = {
+      'type':'email',
+      'title':'E-mail address',
+      'required':true,
+    };
+    form.elements.submit = {
+      'type':'submit',
+      'value':'Create new account',
     };
     return form;
   }
@@ -279,24 +269,14 @@ function user_register_submit(form, form_state) {
 /**
  * The user profile form.
  */
-function user_profile_form(account) {
+function user_profile_form(form, form_state, account) {
   try {
     if (drupalgap.settings.debug) {
       console.log('user_profile_form()');
       console.log(JSON.stringify(arguments));
     }
     // Setup form defaults.
-    // TODO - Always having to declare the default submit and validate
-    //          function names is lame. Set it up to be automatic, then update
-    //          all existing forms to inherit the automatic goodness.
-    var form = {
-      'id':'user_profile_form',
-      'submit':['user_profile_form_submit'],
-      'validate':['user_profile_form_validate'],
-      'elements':{},
-      'buttons':{},
-      'entity_type':'user',
-    };
+    form.entity_type = 'user';
     
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form('user', null, form, account);

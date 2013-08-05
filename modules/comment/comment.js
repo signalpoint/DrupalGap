@@ -1,7 +1,7 @@
 /**
  * The comment edit form.
  */
-function comment_edit(comment) {
+function comment_edit(form, form_state, comment) {
   try {
     if (drupalgap.settings.debug) {
       console.log('comment_edit');
@@ -11,24 +11,15 @@ function comment_edit(comment) {
     // id. Note, once the form.js submit handler is aware of its own entity and
     // can pass it along to this function (and others) when loading a form during
     // the submission process, this little chunk of code will no longer by needed.
-    if (!comment) {
-      comment = {'nid':arg(1)};
-    }
+    if (!comment) { comment = {'nid':arg(1)}; }
     
     // Load up the node specified in the comment.
     var node = node_load(comment.nid);
     
     if (node) {
       // Setup form defaults.
-      var form = {
-        'id':'comment_edit',
-        'submit':['comment_edit_form_submit'],
-        'validate':['comment_edit_form_validate'],
-        'elements':{},
-        'buttons':{},
-        'entity_type':'comment',
-        'action':'node/' + node.nid,
-      };
+      form.entity_type = 'comment';
+      form.action = 'node/' + node.nid;
       
       // Determine the comment bundle from the node type.
       var bundle = 'comment_node_' + node.type;

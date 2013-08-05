@@ -100,7 +100,7 @@ function taxonomy_menu() {
 /**
  * The taxonomy vocabulary form.
  */
-function taxonomy_form_vocabulary(vocabulary) {
+function taxonomy_form_vocabulary(form, form_state, vocabulary) {
   try {
     if (drupalgap.settings.debug) {
       console.log('taxonomy_form_vocabulary');
@@ -108,15 +108,8 @@ function taxonomy_form_vocabulary(vocabulary) {
     }
     
     // Setup form defaults.
-    var form = {
-      'id':'taxonomy_form_vocabulary',
-      'submit':['taxonomy_form_vocabulary_submit'],
-      'validate':['taxonomy_form_vocabulary_validate'],
-      'elements':{},
-      'buttons':{},
-      'entity_type':'taxonomy_vocabulary',
-      'action':'taxonomy/vocabularies',
-    };
+    form.entity_type = 'taxonomy_vocabulary';
+    form.action = 'taxonomy/vocabularies';
     
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form('taxonomy_vocabulary', null, form, vocabulary);
@@ -172,22 +165,15 @@ function taxonomy_form_vocabulary_submit(form, form_state) {
 /**
  * The taxonomy term form.
  */
-function taxonomy_form_term(term) {
+function taxonomy_form_term(form, form_state, term) {
   try {
     if (drupalgap.settings.debug) {
       console.log('taxonomy_form_term()');
       console.log(JSON.stringify(arguments));
     }
     // Setup form defaults.
-    var form = {
-      'id':'taxonomy_form_term',
-      'submit':['taxonomy_form_term_submit'],
-      'validate':['taxonomy_form_term_validate'],
-      'elements':{},
-      'buttons':{},
-      'entity_type':'taxonomy_term',
-      'action':'taxonomy/vocabularies',
-    };
+    form.entity_type = 'taxonomy_term';
+    form.action = 'taxonomy/vocabularies';
     
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form('taxonomy_term', null, form, term);
