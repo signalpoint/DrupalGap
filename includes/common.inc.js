@@ -330,10 +330,11 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
         options = {};
       }
       
-      // Load the page template html file.
+      // Load the page template html file. Determine if we are going to cache
+      // the template file or not.
       var file_options = {};
       if (drupalgap.settings.cache &&
-          drupalgap.settings.cache.theme_registry &&
+          drupalgap.settings.cache.theme_registry !== 'undefined' &&
           !drupalgap.settings.cache.theme_registry) {
           file_options.cache = false;
        }
