@@ -80,7 +80,6 @@ function drupalgap_check_visibility(type, data) {
     // Roles.
     else if (typeof data.roles !== 'undefined' && data.roles && data.roles.value && data.roles.value.length != 0) {
       $.each(data.roles.value, function(role_index, role){
-          var has_role = false;
           if (drupalgap_user_has_role(role)) {
             // User has role, show/hide the block accordingly.
             if (data.roles.mode == 'include') { visible = true; }
@@ -91,8 +90,8 @@ function drupalgap_check_visibility(type, data) {
             if (data.roles.mode == 'include') { visible = false; }
             if (data.roles.mode == 'exclude') { visible = true; }
           }
-          // Break out of the loop.
-          return false;
+          // Break out of the loop if already determined to be visible.
+          if (visible) { return false; }
       });
     }
     // Pages.
@@ -109,8 +108,8 @@ function drupalgap_check_visibility(type, data) {
             if (data.pages.mode == 'include') { visible = false; }
             else if (data.pages.mode == 'exclude') { visible = true; }
           }
-          // Break out of the loop.
-          return false;
+          // Break out of the loop if already determined to be visible.
+          if (visible) { return false; }
       });
     }
     return visible;
