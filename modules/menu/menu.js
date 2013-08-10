@@ -13,6 +13,10 @@ function menu_block_view(delta) {
       console.log('menu_block_view(' + delta + ')');
     }
     var html = '';
+    
+    // Grab the current path so we can watch out for any menu links that match it.
+    var path = drupalgap_path_get();
+    
     // Are we about to view a normal menu, or the local task menu?
     if (delta == 'primary_local_tasks') {
       
@@ -62,8 +66,16 @@ function menu_block_view(delta) {
       // each link, add it to an items array, then theme an item list.
       if (drupalgap.menus[delta] && drupalgap.menus[delta].links) {
         var items = [];
-        $.each(drupalgap.menus[delta].links, function(index, link){
-            if (!link.options) { link.options = null; }
+        $.each(drupalgap.menus[delta].links, function(index, menu_link){
+            // Make a deep copy of the menu link so we don't modify it.
+            var link = jQuery.extend(true, {}, menu_link);
+            // If there are no link options, set up defaults.
+            if (!link.options) { link.options = {attributes:{}}; }
+            // If the link points to the current path, set it as active.
+            if (link.path == path) {
+              if (!link.options.attributes['class']) { link.options.attributes['class'] = ''; }
+              link.options.attributes['class'] += ' ui-btn-active ui-state-persist ';
+            }
             items.push(l(link.title, link.path, link.options));
         });
         if (items.length > 0) {
