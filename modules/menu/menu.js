@@ -71,6 +71,7 @@ function menu_block_view(delta) {
             var link = jQuery.extend(true, {}, menu_link);
             // If there are no link options, set up defaults.
             if (!link.options) { link.options = {attributes:{}}; }
+            else if (!link.options.attributes) { link.options.attributes = {}; }
             // If the link points to the current path, set it as active.
             if (link.path == path) {
               if (!link.options.attributes['class']) { link.options.attributes['class'] = ''; }
