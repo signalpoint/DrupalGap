@@ -627,6 +627,10 @@ function drupalgap_render_region(region) {
     var region_html = '';
     // If the region has blocks specified in it under the theme in settings.js...
     if (eval('drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name)) {
+      // If a class attribute hasn't yet been provided, set a default, then
+      // append a system class name for the region onto its attributes array.
+      if (!region.attributes['class']) { region.attributes['class'] = ''; }
+      region.attributes['class'] += ' region_' + region.name + ' ';
       // Open the region container.
       region_html += '<div ' + drupalgap_attributes(region.attributes)  + '>';
       // If there are any links attached to this region, render them first.
