@@ -242,22 +242,7 @@ function drupalgap_api_default_options() {
  * will perform a System Connect resource call then go to the App's front page.
  * This is called during DrupalGap's "deviceready" implementation for PhoneGap.
  */
-function hook_deviceready() {
-  
-}
-
-// TODO - list all other core hooks here.
-
-function hook_mvc_model() {
-  var models = {};
-  return models;
-}
-
-function hook_mvc_view() {
-}
-
-function hook_mvc_controller() {
-}
+function hook_deviceready() {}
 
 /**
  * Called after a successful services API call to a Drupal site. Do not call
@@ -266,3 +251,18 @@ function hook_mvc_controller() {
  * example usage.
  */
 function hook_services_success(url, data) { }
+
+function hook_block_info() {}
+function hook_block_view() {}
+function hook_install() {}
+function hook_menu() {}
+
+function hook_mvc_model() {
+  var models = {};
+  return models;
+}
+function hook_mvc_view() {}
+function hook_mvc_controller() {}
+
+// TODO - list all other core hooks here.
+
