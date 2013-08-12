@@ -240,17 +240,11 @@ function theme_link(variables) {
           // All other options need to be extracted into a JSON string for the
           // onclick handler.
           var goto_options = '';
-          // Any transition?
-          var transition = null;
-          if (variables.options.transition) {
-            goto_options += "transition:'" + variables.options.transition + "',";
-          }
-          // Reloading the page?
-          if (typeof variables.options.reloadPage !== 'undefined') {
-            var reloadPage = 'false';
-            if (variables.options.reloadPage) { reloadPage = 'true'; }
-            goto_options += 'reloadPage:' + reloadPage + ',';
-          }
+          $.each(variables.options, function(option, value){
+              if (option == 'attributes') { return; }
+              if (typeof value === 'string') { value = "'" + value + "'"; }
+              goto_options += option + ":" + value + ",";
+          });
           onclick = 'drupalgap_goto(\'' + variables.path + '\', {' + goto_options + '});';
         }
       }
