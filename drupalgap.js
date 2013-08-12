@@ -1252,6 +1252,14 @@ function is_int(n) {
   return typeof n === 'number' && n % 1 == 0;
 }
 
+/**
+ * Javascript equivalent of php's time() function.
+ */
+function time() {
+  var d = new Date();
+  return Math.floor(d/1000);
+}
+
 function ucfirst (str) {
   // http://kevin.vanzonneveld.net
   // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
