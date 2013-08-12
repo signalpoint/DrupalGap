@@ -32,9 +32,20 @@ drupalgap.settings = {
   /* Logo */
   'logo':'themes/easystreet3/images/drupalgap.jpg',
   
-  /* Cache - Set to true when publishing app!*/
+  /* Cache Performance Settings */
   'cache':{
-    'theme_registry':false,
+    
+    /* Set to true to load the page.tpl.html contents from cache */
+    theme_registry:true,
+    
+    /* Allow entities retrieved from the Drupal server to be cached on the
+       device using local storage.  */
+    entity:{
+      enabled:true, /* Set to true to enable entity local storage caching. */
+      expiration:3600 /* Number of seconds before cached copy of entity expires. 
+                       Set to 0 to cache forever, set to 60 for one minute, etc.  */
+    },
+
   },
   
   /* Blocks */

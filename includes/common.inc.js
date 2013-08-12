@@ -325,9 +325,7 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
     else {
       
       // If options wasn't set, set it as an empty JSON object.
-      if (typeof options === 'undefined') {
-        options = {};
-      }
+      if (typeof options === 'undefined') { options = {}; }
       
       // Load the page template html file. Determine if we are going to cache
       // the template file or not.
@@ -749,32 +747,60 @@ function entity_load(entity_type, ids) {
     }
     // Attempt to load the entity from local storage.
     var entity = window.localStorage.getItem(local_storage_key);
-    if (entity) { return JSON.parse(entity); }
-    else {
-      var entity_types = [
-        'comment',
-        'file',
-        'node',
-        'taxonomy_term',
-        'taxonomy_vocabulary',
-        'user'
-      ];
-      if ($.inArray(entity_type, entity_types) && drupalgap.services[entity_type]) {
-        var primary_key = drupalgap_entity_get_primary_key(entity_type);
-        var call_options = {
-          'async':false,
-          'success':function(data){ entity = data; }
-        };
-        call_options[primary_key] = entity_id;
-        drupalgap.services[entity_type].retrieve.call(call_options);
-        window.localStorage.setItem(local_storage_key, JSON.stringify(entity));
+    if (entity) {
+      var entity = JSON.parse(entity); 
+      // We successfully loaded the entity from local storage. If it expired
+      // remove it from local storage then continue onward with the entity
+      // retrieval from Drupal. Otherwise return the local storage entity copy.
+      if (entity.drupalgap_expiration !== 'undefined' &&
+          entity.drupalgap_expiration != 0 &&
+          time() > entity.drupalgap_expiration) {
+        console.log('cached entity expired!');
+        window.localStorage.removeItem(local_storage_key);
+        entity = false;
       }
       else {
-        entity = false;
-        drupalgap_error('Failed to load entity! (' + entity_type + ', ' + entity_id + ')');
+        console.log('cached entity still valid');
+        return entity;
       }
-      return entity;
     }
+    // We didn't load the entity from local storage. Let's grab it from the
+    // Drupal server instead.
+    var entity_types = [
+      'comment',
+      'file',
+      'node',
+      'taxonomy_term',
+      'taxonomy_vocabulary',
+      'user'
+    ];
+    if ($.inArray(entity_type, entity_types) && drupalgap.services[entity_type]) {
+      var primary_key = drupalgap_entity_get_primary_key(entity_type);
+      var call_options = {
+        'async':false,
+        'success':function(data){
+          // Set the entity equal to the returned data.
+          entity = data;
+          // If entity caching is enabled, set the expiration time as a
+          // property on the entity that can be used later.
+          if (drupalgap.settings.cache.entity &&
+              drupalgap.settings.cache.entity.enabled &&
+              drupalgap.settings.cache.entity.expiration !== 'undefined') {
+            var expiration = time() + drupalgap.settings.cache.entity.expiration;
+            entity.drupalgap_expiration = expiration;
+          }
+        }
+      };
+      call_options[primary_key] = entity_id;
+      console.log('retrieving entity from server');
+      drupalgap.services[entity_type].retrieve.call(call_options);
+      window.localStorage.setItem(local_storage_key, JSON.stringify(entity));
+    }
+    else {
+      entity = false;
+      drupalgap_error('Failed to load entity! (' + entity_type + ', ' + entity_id + ')');
+    }
+    return entity;
   }
   catch (error) { drupalgap_error(error); }
 }
