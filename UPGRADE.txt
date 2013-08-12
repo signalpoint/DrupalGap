@@ -9,6 +9,15 @@ version of DrupalGap to another.
   then replace it with the default.settings.js file. Then you must re-add any
   modifications you made to your settings.js file (i.e. site_path, etc).
 
+|===========================|
+| Clear Local Storage Cache |
+|===========================|
+
+  It is important to clear your device (or browser) local storage cache. On a
+  device this can typically be accomplished by uninstalling the App completely,
+  then re-installing it. If you're using Ripple in Chrome, then clear the
+  Chrome web browser cache.
+
 |=====================================|
 | Version Change Notes for Developers |
 |=====================================|
