@@ -72,10 +72,9 @@ drupalgap.api = {
               api_object.beforeSend = call_options.beforeSend;
             }
             
+            if (drupalgap.settings.debug) { dpm(api_object); }
+            
             // Make the call.
-            if (drupalgap.settings.debug) {
-              console.log(JSON.stringify(api_object));
-            }
             $.ajax(api_object);      
           }
       });

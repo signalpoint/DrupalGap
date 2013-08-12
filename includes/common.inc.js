@@ -230,7 +230,8 @@ function drupalgap_goto(path) {
       console.log('drupalgap_goto(' + path + ')');
     }
     
-    // Extract any incoming options, and set any defaults that weren't provided.
+    // Extract any incoming options, set any defaults that weren't provided,
+    // then populate the global page options variable.
     var options = {};
     if (arguments[1]) {
       options = arguments[1];
@@ -238,6 +239,7 @@ function drupalgap_goto(path) {
         options.form_submission = false;
       }
     }
+    drupalgap.page.options = options;
     
     // Prepare the path.
     path = drupalgap_goto_prepare_path(path);
@@ -283,10 +285,14 @@ function drupalgap_goto(path) {
       if (drupalgap.menu_links[router_path].options) {
         options = $.extend({}, drupalgap.menu_links[router_path].options, options);
       }
-      // Reload the page?
+      // Reload the page? If so, remove the page from the DOM, delete the
+      // reloadPage option, then set the reloadingPage option to true so others
+      // down the line will know the page is reloading. We can't pass along the
+      // actual reloadPage option since it may collide with jQM later on.
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
         $('#' + page_id).empty().remove();
         delete options.reloadPage;
+        options.reloadingPage = true;
       }
       else if (!options.form_submission) {
         drupalgap.page.process = false;
@@ -733,37 +739,18 @@ function entity_load(entity_type, ids) {
       alert('entity_load(' + entity_type + ') - only single ids supported at this time!');
       return false;
     }
+    var entity = false;
     // Grab the entity id.
     var entity_id = ids;
     // Grab any options.
     var options = null;
     if (arguments[2]) { options = arguments[2]; }
-    // Get the local storage key. 
-    var local_storage_key = entity_local_storage_key(entity_type, entity_id);
-    // Process options if necessary.
-    if (options) {
-      // If we are resetting, remove the item from localStorage.
-      if (options.reset) { window.localStorage.removeItem(local_storage_key); }
+    // If entity caching is enabled, try to load the entity from local storage.
+    if (drupalgap.settings.cache.entity && drupalgap.settings.cache.entity.enabled) {
+      entity = _entity_load_from_local_storage(entity_type, entity_id, options);
+      if (entity) { return entity; }
     }
-    // Attempt to load the entity from local storage.
-    var entity = window.localStorage.getItem(local_storage_key);
-    if (entity) {
-      var entity = JSON.parse(entity); 
-      // We successfully loaded the entity from local storage. If it expired
-      // remove it from local storage then continue onward with the entity
-      // retrieval from Drupal. Otherwise return the local storage entity copy.
-      if (entity.drupalgap_expiration !== 'undefined' &&
-          entity.drupalgap_expiration != 0 &&
-          time() > entity.drupalgap_expiration) {
-        console.log('cached entity expired!');
-        window.localStorage.removeItem(local_storage_key);
-        entity = false;
-      }
-      else {
-        console.log('cached entity still valid');
-        return entity;
-      }
-    }
+    
     // We didn't load the entity from local storage. Let's grab it from the
     // Drupal server instead.
     var entity_types = [
@@ -781,24 +768,81 @@ function entity_load(entity_type, ids) {
         'success':function(data){
           // Set the entity equal to the returned data.
           entity = data;
-          // If entity caching is enabled, set the expiration time as a
-          // property on the entity that can be used later.
-          if (drupalgap.settings.cache.entity &&
-              drupalgap.settings.cache.entity.enabled &&
-              drupalgap.settings.cache.entity.expiration !== 'undefined') {
-            var expiration = time() + drupalgap.settings.cache.entity.expiration;
-            entity.drupalgap_expiration = expiration;
+          // Is entity caching enabled? 
+          if (drupalgap.settings.cache.entity && drupalgap.settings.cache.entity.enabled) {
+            // Set the expiration time as a property on the entity that can be
+            // used later.
+            if (drupalgap.settings.cache.entity.expiration !== 'undefined') {
+              var expiration = time() + drupalgap.settings.cache.entity.expiration;
+              if (drupalgap.settings.cache.entity.expiration == 0) { expiration = 0; }
+              entity.drupalgap_expiration = expiration;
+            }
+            // Save the entity to local storage.
+            window.localStorage.setItem(
+              entity_local_storage_key(entity_type, entity_id),
+              JSON.stringify(entity)
+            );
           }
         }
       };
       call_options[primary_key] = entity_id;
-      console.log('retrieving entity from server');
       drupalgap.services[entity_type].retrieve.call(call_options);
-      window.localStorage.setItem(local_storage_key, JSON.stringify(entity));
     }
     else {
       entity = false;
       drupalgap_error('Failed to load entity! (' + entity_type + ', ' + entity_id + ')');
+    }
+    return entity;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * An internal function used by entity_load() to attempt loading an entity
+ * form local storage.
+ */
+function _entity_load_from_local_storage(entity_type, entity_id, options) {
+  try {
+    var entity = false;
+    // Get the local storage key. 
+    var local_storage_key = entity_local_storage_key(entity_type, entity_id);
+    // Process options if necessary.
+    if (options) {
+      // If we are resetting, remove the item from localStorage.
+      if (options.reset) { window.localStorage.removeItem(local_storage_key); }
+    }
+    // Attempt to load the entity from local storage.
+    entity = window.localStorage.getItem(local_storage_key);
+    if (entity) {
+      entity = JSON.parse(entity); 
+      // We successfully loaded the entity from local storage. If it expired
+      // remove it from local storage then continue onward with the entity
+      // retrieval from Drupal. Otherwise return the local storage entity copy.
+      if (typeof entity.drupalgap_expiration !== 'undefined' &&
+          entity.drupalgap_expiration != 0 &&
+          time() > entity.drupalgap_expiration) {
+        window.localStorage.removeItem(local_storage_key);
+        entity = false;
+      }
+      else {
+        // The entity has not yet expired. If the current page options
+        // indicate reloadingPage is true (and the reset option wasn't set to
+        // false) then we'll grab a fresh copy of the entity from Drupal.
+        // If the page is reloading and the developer didn't call for a reset,
+        // then just return the cached copy.
+        if (drupalgap.page.options && drupalgap.page.options.reloadingPage) {
+          // Reloading page... cached entity is still valid.
+          if (typeof drupalgap.page.options.reset !== 'undefined' && drupalgap.page.options.reset == false) {
+            // We were told to not reset it, so we'll use the cached copy.
+            return entity;
+          }
+          else {
+            // Remove the entity from local storage and reset it.
+            window.localStorage.removeItem(local_storage_key);
+            entity = false;
+          }
+        }
+      }
     }
     return entity;
   }

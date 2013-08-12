@@ -33,7 +33,7 @@ drupalgap.settings = {
   'logo':'themes/easystreet3/images/drupalgap.jpg',
   
   /* Cache Performance Settings */
-  'cache':{
+  cache:{
     
     /* Set to true to load the page.tpl.html contents from cache */
     theme_registry:true,

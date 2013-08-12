@@ -76,7 +76,8 @@ var drupalgap = {
     'jqm_events':[],
     'title':'',
     'variables':{},
-    'process':true
+    'process':true,
+    options:{}, /* holds onto the current page's options, e.g. reloadPage, etc. */
   },
   'pages':[], /* Collection of page ids that are loaded into the DOM. */
   'path':'', /* The current menu path. */
