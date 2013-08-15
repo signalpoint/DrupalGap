@@ -73,6 +73,8 @@ function drupalgap_entity_render_content(entity_type, entity) {
             }
         });
     });
+    // Give modules a chance to alter the content.
+    module_invoke_all('entity_post_render_content', entity);
   }
   catch (error) { drupalgap_error(error); }
 }

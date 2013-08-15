@@ -254,6 +254,13 @@ function hook_services_success(url, data) { }
 
 function hook_block_info() {}
 function hook_block_view() {}
+
+/**
+ * Called after drupalgap_entity_render_content() assembles the entity.content
+ * string. Use this to make modifications to the HTML output of the entity's
+ * content before it is displayed.
+ */
+function hook_entity_post_render_content(entity) {}
 function hook_install() {}
 function hook_menu() {}
 
