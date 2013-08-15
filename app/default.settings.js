@@ -39,6 +39,13 @@ drupalgap.settings.logo = 'themes/easystreet3/images/drupalgap.jpg';
 // Language
 drupalgap.settings.language = 'und';
 
+// Loading Animation - http://view.jquerymobile.com/1.3.2/dist/demos/widgets/loader/
+drupalgap.settings.loading = {
+  text: 'Loading...',
+  textVisible: true,
+  theme:'a'
+};
+
 /*****************************************|
  * Modules - http://drupalgap.org/node/74 |
  *****************************************/

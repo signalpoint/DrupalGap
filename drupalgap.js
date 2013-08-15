@@ -63,6 +63,7 @@ var drupalgap = {
   'field_info_instances':{},
   'form_errors':{},
   'form_states':[],
+  loading:false, /* indicates if the loading message is shown or not */
   'menus':{},
   'menu_links':{},
   'menu_router':{},
@@ -705,6 +706,40 @@ function drupalgap_jqm_page_events() {
   catch (error) {
     alert('drupalgap_jqm_page_events - ' + error);
   }
+}
+
+/**
+ * Show the jQueryMobile loading message.
+ */
+function drupalgap_loading_message_show() {
+  try {
+    // Backwards compatability for versions prior to 7.x-1.6-alpha
+    if (drupalgap.loading === 'undefined') { drupalgap.loading = false; }
+    // Return if the loading message is already shown.
+    if (drupalgap.loading) { return; }
+    // Set default options. Override the options if any were set or sent in.
+    var options = {
+      text: 'Loading...',
+      textVisible: true
+    };
+    if (drupalgap.settings.loading) { options = drupalgap.settings.loading; }
+    if (arguments[0]) { options = arguments[0]; }
+    // Show the loading message.
+    $.mobile.loading("show", options);
+    drupalgap.loading = true;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Hide the jQueryMobile loading message.
+ */
+function drupalgap_loading_message_hide() {
+  try {
+    $.mobile.hidePageLoadingMsg();
+    drupalgap.loading = false;
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

@@ -46,8 +46,7 @@ drupalgap.api = {
       _drupalgap_api_get_csrf_token(call_options, {
           success:function() {
             
-            // Show the loading icon.
-            $.mobile.loading('show', {theme: "b", text: "Loading"});
+            drupalgap_loading_message_show();
             
             // Build api call object options.
             var api_object = {
@@ -121,11 +120,13 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
         var token_url = drupalgap.settings.site_path +
                         drupalgap.settings.base_path +
                         '?q=services/session/token';
+        drupalgap_loading_message_show();
         $.ajax({
             url:token_url,
             type:'get',
             dataType:'text',
             success:function(token){
+              drupalgap_loading_message_hide();
               // Save the token to local storage as sessid, set drupalgap.sessid
               // with the token, attach the token and the request header to the
               // call options, then return via the success function.
@@ -138,6 +139,7 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
               options.success.call();
             },
             error:function (jqXHR, textStatus, errorThrown) {
+              drupalgap_loading_message_hide();
               alert('Failed to retrieve CSRF token! (' + errorThrown +
                     ') You must upgrade your Drupal Services module to version 3.5 (or above)! ' +
                     'Also check your device for a connection, and try logging out and then back in!');
@@ -176,8 +178,7 @@ function drupalgap_api_default_options() {
     'endpoint':drupalgap.settings.default_services_endpoint,
     'site_path':drupalgap.settings.site_path,
     'success':function(result){
-      // Hide the loading message.
-      $.mobile.hidePageLoadingMsg();
+      drupalgap_loading_message_hide();
       // Invoke hook_services_success().
       module_invoke_all('services_success', this.service_resource, result);
       // If debugging is turned on, print the result to the console.
@@ -201,7 +202,7 @@ function drupalgap_api_default_options() {
     'error':function(jqXHR, textStatus, errorThrown, url){
       // TODO - this is a good spot for a hook
       // e.g. hook_drupalgap_api_postprocess
-      $.mobile.hidePageLoadingMsg();
+      drupalgap_loading_message_hide();
       console.log(JSON.stringify({
         "jqXHR":jqXHR,
         "textStatus":textStatus,
