@@ -592,6 +592,9 @@ function drupalgap_image_path(uri) {
     if (src.indexOf('public://') != -1) {
       var src = src.replace('public://', drupalgap.settings.file_public_path + '/');
     }
+    else if (uri.indexOf('s3://') != -1) {
+      var src = uri.replace('s3://', drupalgap.settings.s3_public_path + '/');
+    }
     return src;
   }
   catch (error) {
