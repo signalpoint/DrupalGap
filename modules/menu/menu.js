@@ -80,7 +80,12 @@ function menu_block_view(delta) {
             items.push(l(link.title, link.path, link.options));
         });
         if (items.length > 0) {
-          html = theme('item_list', {'items':items});
+          // Pass along any menu attributes.
+          var attributes = null;
+          if (drupalgap.menus[delta].options && drupalgap.menus[delta].options.attributes) {
+            attributes = drupalgap.menus[delta].options.attributes;
+          }
+          html = theme('item_list', {'items':items, 'attributes':attributes});
         }
       }
     }
