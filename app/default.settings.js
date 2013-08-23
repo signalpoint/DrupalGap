@@ -60,47 +60,6 @@ drupalgap.modules.custom = [
   /*{name:'example'},*/
 ];
 
-/****************************************|
- * Blocks - http://drupalgap.org/node/83 |
- ****************************************/
-drupalgap.settings.blocks = {};
-
-// Easy Street 3 Theme Blocks
-drupalgap.settings.blocks.easystreet3 = {
-  header:{
-    header:{}
-  },
-  navigation:{
-    user_menu_anonymous:{
-      roles:{
-        value:['anonymous user'],
-        mode:'include',
-      }
-    },
-    user_menu_authenticated:{
-      roles:{
-        value:['authenticated user'],
-        mode:'include',
-      }
-    }
-  },
-  sub_navigation:{
-    main_menu:{
-      roles:{
-        value:['administrator'],
-        mode:'include',
-      }
-    },
-    primary_local_tasks:{},
-  },
-  content:{
-    main:{}
-  },
-  footer:{
-    powered_by:{}
-  }
-};
-
 /***************************************|
  * Menus - http://drupalgap.org/node/85 |
  ***************************************/
@@ -153,6 +112,47 @@ drupalgap.settings.menus['main_menu'] = {
       }
     }
   ]
+};
+
+/****************************************|
+ * Blocks - http://drupalgap.org/node/83 |
+ ****************************************/
+drupalgap.settings.blocks = {};
+
+// Easy Street 3 Theme Blocks
+drupalgap.settings.blocks.easystreet3 = {
+  header:{
+    header:{}
+  },
+  navigation:{
+    user_menu_anonymous:{
+      roles:{
+        value:['anonymous user'],
+        mode:'include',
+      }
+    },
+    user_menu_authenticated:{
+      roles:{
+        value:['authenticated user'],
+        mode:'include',
+      }
+    }
+  },
+  sub_navigation:{
+    main_menu:{
+      roles:{
+        value:['administrator'],
+        mode:'include',
+      }
+    },
+    primary_local_tasks:{},
+  },
+  content:{
+    main:{}
+  },
+  footer:{
+    powered_by:{}
+  }
 };
 
 /****************************************************|
