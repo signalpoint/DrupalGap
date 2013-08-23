@@ -130,6 +130,20 @@ function drupalgap_node_assemble_data(options) {
       data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
         encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
     }
+    
+    var node_fields_list = drupalgap_field_info_instances('node', options.node.type);
+    var node_fields = Object.keys(node_fields_list);
+    console.log(node_fields);
+    $(node_fields).each(function(index,field_name){      	
+    	if(field_name in options.node){
+    		var field_data = eval("options.node."+field_name+"['"+drupalgap.settings.language+"'][0].value");
+    		if(field_data){   		
+	    		data += '&node['+field_name+'][' + drupalgap.settings.language + '][0][value]=' +
+	            encodeURIComponent(field_data);
+    		}
+    	}
+    	
+    });
     if (drupalgap.settings.debug) {
       console.log(data);
     }
