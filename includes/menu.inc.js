@@ -57,7 +57,7 @@ function menu_execute_active_handler() {
               if (is_int(object) && args[object]) { page_arguments.push(args[object]); }
               else { page_arguments.push(object); }
           });
-          drupalgap_prepare_argument_entities(page_arguments, args);
+          //drupalgap_prepare_argument_entities(page_arguments, args);
           
           // Call the page callback function with the page arguments.
           content = fn.apply(null, Array.prototype.slice.call(page_arguments));
@@ -79,18 +79,22 @@ function menu_execute_active_handler() {
         
         // Clear out any previous jQM page events, then if there are any jQM
         // event callback functions attached to the menu link for this page, set
-        // each event up to be fired with inline JS on the page.
+        // each event up to be fired with inline JS on the page. We pass along
+        // any page arguments to the jQM event handler function.
         drupalgap.page.jqm_events = [];
         var jqm_page_events = drupalgap_jqm_page_events();
+        var jqm_page_event_args = null;
+        if (page_arguments.length > 0) {
+          jqm_page_event_args = JSON.stringify(page_arguments); 
+        }
         for (var i = 0; i < jqm_page_events.length; i++) {
           if (drupalgap.menu_links[router_path][jqm_page_events[i]]) {
             var jqm_page_event = jqm_page_events[i];
             var jqm_page_event_callback = drupalgap.menu_links[router_path][jqm_page_event];
             if (drupalgap_function_exists(jqm_page_event_callback)) {
-              // TODO - we should probably pass the same page arguments that are sent
-              // to this path's menu link page_callback function to these jQM page
-              // event callback functions!
-              var script_code = '<script type="text/javascript">$("#' + page_id + '").on("' +jqm_page_event + '", drupalgap_jqm_page_event_fire("' + jqm_page_event + '", "' + jqm_page_event_callback + '"));</script>';
+              var script_code = '<script type="text/javascript">' +
+                '$("#' + page_id + '").on("' +jqm_page_event + '", drupalgap_jqm_page_event_fire("' + jqm_page_event + '", "' + jqm_page_event_callback + '", ' + jqm_page_event_args + '));' +
+              '</script>';
               content[jqm_page_event] = {'markup':script_code};
             }
             else {

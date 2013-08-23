@@ -670,12 +670,15 @@ function drupalgap_item_list_populate(list_css_selector, items) {
  * menu_execute_active_handler() to prevent jQM from firing inline page event
  * handlers more than once.
  */
-function drupalgap_jqm_page_event_fire(event, callback) {
+function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
   try {
     if ($.inArray(event, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
       drupalgap.page.jqm_events.push(event);
       var fn = window[callback];
-      fn();
+      if (page_arguments) {
+        fn.apply(null, Array.prototype.slice.call(page_arguments));
+      }
+      else { fn(); }
     }
   }
   catch (error) {
