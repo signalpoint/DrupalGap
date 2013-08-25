@@ -243,6 +243,7 @@ function drupalgap_goto(path) {
     
     // Prepare the path.
     path = drupalgap_goto_prepare_path(path);
+    if (!path) { return false; }
     
     // Determine the router path.
     var router_path = drupalgap_get_menu_link_router_path(path);
@@ -384,7 +385,15 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
 function drupalgap_goto_prepare_path(path) {
   try {
     // If the path is an empty string, change it to the front page path.
-    if (path == '') { path = drupalgap.settings.front; }
+    if (path == '') {
+      if (!drupalgap.settings.front) {
+        alert("drupalgap_goto_prepare_path - no 'front' page specified in settings.js!");
+        return false;
+      }
+      else {
+        path = drupalgap.settings.front;
+      }
+    }
     // Change 'user' to 'user/login' for anonymous users, or change it to
     // e.g. 'user/123/view' for authenticated users.
     else if (path == 'user') {
