@@ -126,20 +126,23 @@ function drupalgap_node_assemble_data(options) {
     if (options.node.title) {
       data += '&node[title]=' + encodeURIComponent(options.node.title);
     }
-    if (options.node.body) {
-      data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
-        encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
-    }
     
     var node_fields_list = drupalgap_field_info_instances('node', options.node.type);
     var node_fields = Object.keys(node_fields_list);
-   // console.log(node_fields);
+    //console.log(node_fields);
     $(node_fields).each(function(index,field_name){      	
     	if(field_name in options.node){
     		var field_data = eval("options.node."+field_name+"['"+drupalgap.settings.language+"'][0].value");
-    		if(field_data){   		
-	    		data += '&node['+field_name+'][' + drupalgap.settings.language + '][0][value]=' +
-	            encodeURIComponent(field_data);
+    		if(field_data){
+    			var field_widget_type = eval("node_fields_list."+field_name+".widget.type");   			
+    			if(field_widget_type == 'options_select'){
+    				//Options select does not work with [und][0][value] but works with [und][value]
+    				data += '&node['+field_name+'][' + drupalgap.settings.language + '][value]=' +
+    	            encodeURIComponent(field_data);
+    			}else{
+    				data += '&node['+field_name+'][' + drupalgap.settings.language + '][0][value]=' +
+    	            encodeURIComponent(field_data);
+    			}    				    	
     		}
     	}
     	
