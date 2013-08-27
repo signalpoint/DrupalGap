@@ -206,6 +206,19 @@ function drupalgap_form_load(form_id) {
         form = fn.apply(null, Array.prototype.slice.call(consolidated_arguments));
       }
       
+      // Set empty options and attributes properties on each form element if the
+      // element does not yet have any. This allows others to more easily modify
+      // options and attributes on an element without having to worry about
+      // testing for nulls and creating empty properties first.
+      $.each(form.elements, function(name, element){
+          if (!element.options) {
+            form.elements[name].options = {attributes:{}};
+          }
+          else if (!element.options.attributes) {
+            form.elements[name].options.attributes = {};
+          }
+      });
+      
       // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, null, form_id);
       
@@ -298,6 +311,9 @@ function _drupalgap_form_render_element(form, element) {
       }
     };
     
+    // Merge element attributes into the variables object.
+    variables.attributes = $.extend({}, variables.attributes, element.options.attributes);
+    
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
@@ -357,7 +373,7 @@ function _drupalgap_form_render_element(form, element) {
         html += '<div>' + 
           '<div id="' + element_id + '-imagefield-msg"></div>' + 
           '<img id="' + element_id + '-imagefield" />' + 
-          '<a href="#" data-role="button" id="' + element_id + '">' + element.value + '</a>' + 
+          '<a href="#" data-role="button" id="' + element_id + '">' + button_text + '</a>' + 
         '</div>';
         // Open extra javascript declaration.
         html += '<script type="text/javascript">';
