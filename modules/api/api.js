@@ -38,9 +38,7 @@ drupalgap.api = {
         return false;
       }
       
-      if (drupalgap.settings.debug) {
-        console.log('' + call_options.url);
-      }
+      if (drupalgap.settings.debug) { dpm(call_options.url); }
       
       // Get CSRF token.
       _drupalgap_api_get_csrf_token(call_options, {
@@ -254,6 +252,11 @@ function hook_services_success(url, data) { }
 
 function hook_block_info() {}
 function hook_block_view() {}
+
+/**
+ *
+ */
+function hook_404(router_path) {}
 
 /**
  * Called after drupalgap_entity_render_content() assembles the entity.content
