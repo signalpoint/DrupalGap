@@ -737,15 +737,16 @@ function arg() {
 }
 
 /**
- * Given an entity type and an entity id, this will load and return the entity
- * JSON, false otherwise. It will first try to load the entity from local
- * storage, if it can't it will retrieve the entity from the server then save
- * it to local storage.
+ * Given an entity type and an entity id, this will load the entity JSON object
+ * then send it to the success callback provided in the options. It will first
+ * try to load the entity from local storage, if it can't it will retrieve the
+ * entity from the Drupal server then save it to local storage. Local storage
+ * load and save attempts will be ignored if entity caching is disabled.
  */
 function entity_load(entity_type, ids) {
   try {
     if (!is_int(ids)) {
-      alert('entity_load(' + entity_type + ') - only single ids supported at this time!');
+      alert('entity_load(' + entity_type + ') - only single ids supported at this time, sorry!');
       return false;
     }
     var entity = false;
@@ -754,10 +755,21 @@ function entity_load(entity_type, ids) {
     // Grab any options.
     var options = null;
     if (arguments[2]) { options = arguments[2]; }
+    // Confirm caller attached a success callback function.
+    if (!options || typeof options.success !== 'function') {
+      var dev_msg = 'No success callback function was provided to ' + entity_type + '_load(' + entity_id + ') by caller!';
+      var user_msg = 'Sorry, there was a problem loading ' + entity_type + ' #' + entity_id + '!';
+      drupalgap_error(dev_msg, user_msg);
+      return;
+    }
     // If entity caching is enabled, try to load the entity from local storage.
+    // If a copy is available in local storage, send it to the success callback.
     if (drupalgap.settings.cache.entity && drupalgap.settings.cache.entity.enabled) {
       entity = _entity_load_from_local_storage(entity_type, entity_id, options);
-      if (entity) { return entity; }
+      if (entity) {
+        options.success(entity);
+        return;
+      }
     }
     
     // We didn't load the entity from local storage. Let's grab it from the
@@ -773,8 +785,8 @@ function entity_load(entity_type, ids) {
     if ($.inArray(entity_type, entity_types) && drupalgap.services[entity_type]) {
       var primary_key = drupalgap_entity_get_primary_key(entity_type);
       var call_options = {
-        'async':false,
-        'success':function(data){
+        /*'async':false,*/
+        success:function(data){
           // Set the entity equal to the returned data.
           entity = data;
           // Is entity caching enabled? 
@@ -792,23 +804,23 @@ function entity_load(entity_type, ids) {
               JSON.stringify(entity)
             );
           }
+          // Send the entity back to the caller's success callback function.
+          options.success(entity);
         }
       };
       call_options[primary_key] = entity_id;
       drupalgap.services[entity_type].retrieve.call(call_options);
     }
     else {
-      entity = false;
       drupalgap_error('Failed to load entity! (' + entity_type + ', ' + entity_id + ')');
     }
-    return entity;
   }
   catch (error) { drupalgap_error(error); }
 }
 
 /**
  * An internal function used by entity_load() to attempt loading an entity
- * form local storage.
+ * from local storage.
  */
 function _entity_load_from_local_storage(entity_type, entity_id, options) {
   try {
