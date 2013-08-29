@@ -196,6 +196,13 @@ drupalgap.settings.menus.regions['header'] = {
   ]
 };
 
+/*********|
+ * Camera |
+ **********/
+drupalgap.settings.camera = {
+  quality:50
+};
+
 /**************|
  * Development |
  **************/
