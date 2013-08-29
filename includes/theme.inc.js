@@ -147,8 +147,7 @@ function theme_image(variables) {
     if (variables.title) { variables.attributes.title = variables.title; }
     // Make sure the image width doesn't exceed the device's width.
     if (!variables.attributes.style) { variables.attributes.style = ''; }
-    var max_width = $(document).width() - parseInt($('.ui-content').css('padding'))*2;
-    variables.attributes.style += ' max-width: ' + max_width  + 'px; ';
+    variables.attributes.style += ' max-width: ' + drupalgap_max_width()  + 'px; ';
     // Render the image.
     return '<img ' + drupalgap_attributes(variables.attributes) + ' />';
   }

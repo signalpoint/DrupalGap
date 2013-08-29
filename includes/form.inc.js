@@ -370,10 +370,11 @@ function _drupalgap_form_render_element(form, element) {
         eval('var ' + imagefield_data + ' = null;');
         // Build an imagefield widget with PhoneGap. Contains a message
         // div, an image element, and button to add an image.
+        //'<a href="#" data-role="button" id="' + element_id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
         html += '<div>' + 
           '<div id="' + element_id + '-imagefield-msg"></div>' + 
-          '<img id="' + element_id + '-imagefield" />' + 
-          '<a href="#" data-role="button" id="' + element_id + '">' + button_text + '</a>' + 
+          '<img id="' + element_id + '-imagefield" style="display: none;" />' + 
+          '<a href="#" data-role="button" id="' + element_id + '">' + button_text + '</a>' +
         '</div>';
         // Open extra javascript declaration.
         html += '<script type="text/javascript">';
@@ -395,13 +396,18 @@ function _drupalgap_form_render_element(form, element) {
         '}';
         // Define success callback function.
         var imagefield_success = element_id_base + '_success';
-        html += 'function ' + imagefield_success + '(message) {' +
-          'alert("success!");' +
+        html += 'function ' + imagefield_success + '(imageData) {' +
+          '_image_phonegap_camera_getPicture_success({field_name:"' + element.name + '", image:imageData, id:"' + element_id + '"})' +
         '}';
+        // Determine image quality.
+        var quality = 50;
+        if (drupalgap.settings.camera.quality) {
+          quality = drupalgap.settings.camera.quality;
+        }
         // Add click handler for photo button.
         html += '$("#' + element_id + '").on("click",function(){' +
           'var photo_options = {' +
-            'quality: 50,' +
+            'quality: ' + quality + ',' +
             'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
             'correctOrientation: true' +
           '};' +
