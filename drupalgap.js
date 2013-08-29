@@ -745,6 +745,18 @@ function drupalgap_loading_message_hide() {
 }
 
 /**
+ * Returns the suggested max width for elements within the content area.
+ */
+function drupalgap_max_width() {
+  try {
+    var padding = parseInt($('.ui-content').css('padding'));
+    if (isNaN(padding)) { padding = 16; } // use a 16px default if needed
+    return $(document).width() - padding*2;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Checks to see if the current user has access to the given path. Returns true
  * if the user has access, false otherwise. You may optionally pass in a user
  * account object as the second argument to check access on a specific user.
@@ -1257,10 +1269,9 @@ function variable_get(name, default_value) {
  */
 function dpm(data) {
   try {
-    console.log(arguments.callee.caller.name);
-    if (data) {
-      console.log(JSON.stringify(data));
-    }
+    var name = arguments.callee.caller.name;
+    if (name && name != '') { console.log(); }
+    if (data) { console.log(JSON.stringify(data)); }
   }
   catch (error) {
     alert('dpm - ' + error);
