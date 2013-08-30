@@ -134,7 +134,8 @@ function drupalgap_node_assemble_data(options) {
         if (key) {
           // Skip fields without values.
           //if (typeof options.node[field_name][lng][0].value === 'undefined') { return; }
-          if (typeof options.node[field_name][lng][0][key] === 'undefined') { return; }
+          if (typeof options.node[field_name][lng][0][key] === undefined 
+        		  || !(options.node[field_name][lng][0][key])) { return; }
           // Encode the value.
           var value = encodeURIComponent(options.node[field_name][lng][0][key]);
           // Add the key and value to the data string. Note, select does not work
@@ -148,7 +149,6 @@ function drupalgap_node_assemble_data(options) {
           data += value;
         }
     });
-    
     // Return the data string.
     return data;
   }
