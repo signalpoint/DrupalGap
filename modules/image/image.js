@@ -131,17 +131,14 @@ function _image_field_form_submit(form, form_state) {
         "filename":image_file_name,
         "filepath":'public://' + image_file_name
       }};
-      // Build the options for the file create resource.
-      var options = {
+      // Call the file create resource.
+      drupalgap.services.file.create.call({
         'file':file,
         async:false,
         success:function(result){
-          alert('Created file: ' + result.fid);
-          form_state.values[name][0] = {fid:result.fid}
+          form_state.values[name] = result.fid;
         }
-      };
-      // Call the file create resource.
-      drupalgap.services.file.create.call(options);
+      });
   });
 }
 

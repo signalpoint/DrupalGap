@@ -116,10 +116,10 @@ drupalgap.services.node = {
  */
 function drupalgap_node_assemble_data(options) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(options));
-    }
-    var data = 'node[language]=' + encodeURIComponent(drupalgap.settings.language);
+    
+    // Determine language code and start building data string.
+    var lng = drupalgap.settings.language;
+    var data = 'node[language]=' + encodeURIComponent(lng);
     if (options.node.type) {
       data += '&node[type]=' + encodeURIComponent(options.node.type);
     }
@@ -127,33 +127,31 @@ function drupalgap_node_assemble_data(options) {
       data += '&node[title]=' + encodeURIComponent(options.node.title);
     }
     
-    var node_fields_list = drupalgap_field_info_instances('node', options.node.type);
-    var node_fields = Object.keys(node_fields_list);
-    //console.log(node_fields);
-    $(node_fields).each(function(index,field_name){      	
-    	if(field_name in options.node){
-    		var field_data = eval("options.node."+field_name+"['"+drupalgap.settings.language+"'][0].value");
-    		if(field_data){
-    			var field_widget_type = eval("node_fields_list."+field_name+".widget.type");   			
-    			if(field_widget_type == 'options_select'){
-    				//Options select does not work with [und][0][value] but works with [und][value]
-    				data += '&node['+field_name+'][' + drupalgap.settings.language + '][value]=' +
-    	            encodeURIComponent(field_data);
-    			}else{
-    				data += '&node['+field_name+'][' + drupalgap.settings.language + '][0][value]=' +
-    	            encodeURIComponent(field_data);
-    			}    				    	
-    		}
-    	}
-    	
+    // Iterate over the fields on this node and add them to the data string.
+    var fields = drupalgap_field_info_instances('node', options.node.type);
+    $.each(fields, function(field_name, field){
+        var key = drupalgap_field_key(field_name);
+        if (key) {
+          // Skip fields without values.
+          //if (typeof options.node[field_name][lng][0].value === 'undefined') { return; }
+          if (typeof options.node[field_name][lng][0][key] === 'undefined') { return; }
+          // Encode the value.
+          var value = encodeURIComponent(options.node[field_name][lng][0][key]);
+          // Add the key and value to the data string. Note, select does not work
+          // with [und][0][value] but works with [und][value]
+          if (field.widget.type == 'options_select') {
+            data += '&node[' + field_name + '][' + lng + '][' + key + ']=';
+          }
+          else {
+            data += '&node[' + field_name + '][' + lng + '][0][' + key + ']=';
+          }
+          data += value;
+        }
     });
-    if (drupalgap.settings.debug) {
-      console.log(data);
-    }
+    
+    // Return the data string.
     return data;
   }
-  catch (error) {
-    alert('drupalgap_node_assemble_data - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
