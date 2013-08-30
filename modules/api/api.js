@@ -261,6 +261,13 @@ function hook_block_view() {}
  * content before it is displayed.
  */
 function hook_entity_post_render_content(entity) {}
+
+/**
+ * Called after drupalgap_image_path() assembles the image path. Use this hook
+ * to make modifications to the image path.
+ */
+function hook_image_path_alter(src) { }
+
 function hook_install() {}
 function hook_menu() {}
 
