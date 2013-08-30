@@ -314,6 +314,16 @@ function _drupalgap_form_render_element(form, element) {
     // Merge element attributes into the variables object.
     variables.attributes = $.extend({}, variables.attributes, element.options.attributes);
     
+    // If this element is a field, grab the info instance and info field for the
+    // field, then attach them both to the variables object so all theme
+    // functions will have access to that data.
+    var field_info_field = drupalgap_field_info_field(name);
+    if (field_info_field) {
+      var field_info_instance = drupalgap_field_info_instance(form.entity_type, name, form.elements.type.default_value);
+      variables.field_info_field = field_info_field;
+      variables.field_info_instance = field_info_instance;
+    }
+    
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
@@ -456,6 +466,9 @@ function _drupalgap_form_render_element(form, element) {
         break;
     }
     
+    // Give modules a chance to alter the variables.
+    //module_invoke_all('form_element_alter', form, element, variables);
+    
     // If the element isn't an outlier, run it through the theme system.
     if (element.type != 'submit' && element.type != 'image') {
       // Theme the element.
@@ -467,7 +480,7 @@ function _drupalgap_form_render_element(form, element) {
           html += element.markup; 
         }
         else {
-          var msg = 'Field ' + element.type + ' not supported, yet.';
+          var msg = 'Field ' + element.type + ' not supported.';
           html += '<div><em>' + msg + '</em></div>';
           console.log('WARNING: _drupalgap_form_render_element() - ' + msg);
         }

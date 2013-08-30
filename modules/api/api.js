@@ -260,7 +260,13 @@ function hook_block_view() {}
  * string. Use this to make modifications to the HTML output of the entity's
  * content before it is displayed.
  */
-function hook_entity_post_render_content(entity) {}
+function hook_entity_post_render_content(entity) { }
+
+/**
+ * Called after a form element is assembled. Use it to alter a form element.
+ */
+//function hook_form_element_alter(form, element, variables) { }
+
 function hook_install() {}
 function hook_menu() {}
 
