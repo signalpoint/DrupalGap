@@ -109,6 +109,7 @@ function module_invoke_all(hook) {
                 module_arguments.unshift(module.name, hook);
                 var fn = window['module_invoke'];
                 invocation_results = fn.apply(null, module_arguments);
+                module_arguments.splice(0,2);
               }
               if (typeof invocation_results !== 'undefined') {
                 module_invoke_results.push(invocation_results);
