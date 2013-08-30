@@ -264,7 +264,8 @@ function hook_entity_post_render_content(entity) {}
 
 /**
  * Called after drupalgap_image_path() assembles the image path. Use this hook
- * to make modifications to the image path.
+ * to make modifications to the image path. Return the modified path, or false
+ * to allow the default path to be generated.
  */
 function hook_image_path_alter(src) { }
 
