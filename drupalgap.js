@@ -588,18 +588,31 @@ function drupalgap_get_wildcards_from_router_path(router_path) {
  */
 function drupalgap_image_path(uri) {
   try {
-    var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
-    if (src.indexOf('public://') != -1) {
-      src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+    var altered = false;
+    // If any modules want to alter the path, let them do it.
+    var modules = module_implements('image_path_alter');
+    if (modules) {
+      $.each(modules, function(index, module){
+          var result = module_invoke(module, 'image_path_alter', uri);
+          if (result) {
+            altered = true;
+            uri = result;
+            return false;
+          }
+      });
     }
-    else if (src.indexOf('s3://') != -1) {
-      src = uri.replace('s3://', drupalgap.settings.s3_public_path + '/');
+    if (!altered) {
+      // No one modified the image path, we'll use the default approach to
+      // generating the image src path.
+      var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
+      if (src.indexOf('public://') != -1) {
+        src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+      }
+      return src;
     }
-    return src;
+    else { return uri; }
   }
-  catch (error) {
-    alert('drupalgap_image_path - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -743,6 +756,18 @@ function drupalgap_loading_message_hide() {
   try {
     $.mobile.hidePageLoadingMsg();
     drupalgap.loading = false;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Returns the suggested max width for elements within the content area.
+ */
+function drupalgap_max_width() {
+  try {
+    var padding = parseInt($('.ui-content').css('padding'));
+    if (isNaN(padding)) { padding = 16; } // use a 16px default if needed
+    return $(document).width() - padding*2;
   }
   catch (error) { drupalgap_error(error); }
 }
@@ -1260,10 +1285,9 @@ function variable_get(name, default_value) {
  */
 function dpm(data) {
   try {
-    console.log(arguments.callee.caller.name);
-    if (data) {
-      console.log(JSON.stringify(data));
-    }
+    var name = arguments.callee.caller.name;
+    if (name && name != '') { console.log(); }
+    if (data) { console.log(JSON.stringify(data)); }
   }
   catch (error) {
     alert('dpm - ' + error);

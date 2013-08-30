@@ -218,16 +218,7 @@ function menu_get_item() {
  */
 function menu_list_system_menus() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('menu_list_system_menus()');
-    }
     var system_menus = {
-      'navigation':{
-        'title':'Navigation'
-      },
-      'management':{
-        'title':'Management'
-      },
       'user_menu_anonymous':{
         'title':'User menu authenticated'
       },
@@ -247,9 +238,7 @@ function menu_list_system_menus() {
     });
     return system_menus;
   }
-  catch (error) {
-    alert('menu_list_system_menus - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

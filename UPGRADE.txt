@@ -24,6 +24,15 @@ version of DrupalGap to another.
 
 7.x-1.5-alpha => 7.x-1.6-alpha
 
+  The 'navigation' and 'management' system menus have been deprecated. If you
+  were using these menus at all in settings.js, the menus will still work as is,
+  they will now just be considered a 'custom' menu instead. If you were using
+  either of these menus programmatically, just create an empty custom menu
+  in settings.js using the 'navigation' or 'management' machine name, and that
+  will bring these menus back for you.
+
+  ---
+
   Loading entities from the server has changed from synchronous to asynchronous.
   This means that any time you load an entity, it will be loaded asynchronously
   and you must provide a success callback to retrieve and use the entity. For
@@ -31,7 +40,7 @@ version of DrupalGap to another.
   
     var node = node_load(123);
   
-  Now that it is an asynchronous call, code like this would instead be used to
+  Now that it is an asynchronous call, code like this would be used instead to
   retrieve a node:
   
     node_load(123, {

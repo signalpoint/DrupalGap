@@ -206,6 +206,19 @@ function drupalgap_form_load(form_id) {
         form = fn.apply(null, Array.prototype.slice.call(consolidated_arguments));
       }
       
+      // Set empty options and attributes properties on each form element if the
+      // element does not yet have any. This allows others to more easily modify
+      // options and attributes on an element without having to worry about
+      // testing for nulls and creating empty properties first.
+      $.each(form.elements, function(name, element){
+          if (!element.options) {
+            form.elements[name].options = {attributes:{}};
+          }
+          else if (!element.options.attributes) {
+            form.elements[name].options.attributes = {};
+          }
+      });
+      
       // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, null, form_id);
       
@@ -298,6 +311,9 @@ function _drupalgap_form_render_element(form, element) {
       }
     };
     
+    // Merge element attributes into the variables object.
+    variables.attributes = $.extend({}, variables.attributes, element.options.attributes);
+    
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
@@ -354,10 +370,11 @@ function _drupalgap_form_render_element(form, element) {
         eval('var ' + imagefield_data + ' = null;');
         // Build an imagefield widget with PhoneGap. Contains a message
         // div, an image element, and button to add an image.
+        //'<a href="#" data-role="button" id="' + element_id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
         html += '<div>' + 
           '<div id="' + element_id + '-imagefield-msg"></div>' + 
-          '<img id="' + element_id + '-imagefield" />' + 
-          '<a href="#" data-role="button" id="' + element_id + '">' + element.value + '</a>' + 
+          '<img id="' + element_id + '-imagefield" style="display: none;" />' + 
+          '<a href="#" data-role="button" id="' + element_id + '">' + button_text + '</a>' +
         '</div>';
         // Open extra javascript declaration.
         html += '<script type="text/javascript">';
@@ -379,13 +396,18 @@ function _drupalgap_form_render_element(form, element) {
         '}';
         // Define success callback function.
         var imagefield_success = element_id_base + '_success';
-        html += 'function ' + imagefield_success + '(message) {' +
-          'alert("success!");' +
+        html += 'function ' + imagefield_success + '(imageData) {' +
+          '_image_phonegap_camera_getPicture_success({field_name:"' + element.name + '", image:imageData, id:"' + element_id + '"})' +
         '}';
+        // Determine image quality.
+        var quality = 50;
+        if (drupalgap.settings.camera.quality) {
+          quality = drupalgap.settings.camera.quality;
+        }
         // Add click handler for photo button.
         html += '$("#' + element_id + '").on("click",function(){' +
           'var photo_options = {' +
-            'quality: 50,' +
+            'quality: ' + quality + ',' +
             'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
             'correctOrientation: true' +
           '};' +
