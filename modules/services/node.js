@@ -134,8 +134,8 @@ function drupalgap_node_assemble_data(options) {
         if (key) {
           // Skip fields without values.
           if (typeof options.node[field_name][lng][0][key] === 'undefined' ||
-              !options.node[field_name][lng][0][key] &&
-              options.node[field_name][lng][0][key] != '') { return; }
+              !options.node[field_name][lng][0][key] ||
+              options.node[field_name][lng][0][key] == '') { return; }
           // Encode the value.
           var value = encodeURIComponent(options.node[field_name][lng][0][key]);
           // Add the key and value to the data string. Note, select does not work
