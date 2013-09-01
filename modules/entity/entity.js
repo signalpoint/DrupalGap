@@ -467,3 +467,43 @@ function drupalgap_entity_get_primary_key(entity_type) {
   }
 }
 
+/**
+ * Given an entity type and an entity id, this will return a render object for
+ * the entity's page view container.
+ */
+function _drupalgap_entity_page_view_container(entity_type, entity_id) {
+  try {
+    var id = _drupalgap_entity_page_view_container_id(entity_type, entity_id);
+    return {
+      markup:'<div id="' + id + '"></div>'
+    }
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given an entity type and id, this will return the unique id to be used for
+ * the entity's page container.
+ */
+function _drupalgap_entity_page_view_container_id(entity_type, entity_id) {
+  try {
+    return entity_type + '_' + entity_id + '_container';
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given an entity type, id and page build, this will render the page build and
+ * inject it into the container on the page.
+ */
+function _drupalgap_entity_page_view_container_inject(entity_type, entity_id, build) {
+  try {
+    // Get the container id, set the drupalgap.output to the page build, then
+    // inject the rendered page into the container.
+    var id = _drupalgap_entity_page_view_container_id(entity_type, entity_id);
+    drupalgap.output = build;
+    $('#' + id).html(drupalgap_render_page());
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
