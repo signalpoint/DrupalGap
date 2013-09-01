@@ -109,10 +109,15 @@ function menu_execute_active_handler() {
             var jqm_page_event = jqm_page_events[i];
             var jqm_page_event_callback = drupalgap.menu_links[router_path][jqm_page_event];
             if (drupalgap_function_exists(jqm_page_event_callback)) {
-              var script_code = '<script type="text/javascript">' +
-                '$("#' + page_id + '").on("' +jqm_page_event + '", drupalgap_jqm_page_event_fire("' + jqm_page_event + '", "' + jqm_page_event_callback + '", ' + jqm_page_event_args + '));' +
-              '</script>';
-              content[jqm_page_event] = {'markup':script_code};
+              var options = {
+                'page_id':page_id,
+                'jqm_page_event':jqm_page_event,
+                'jqm_page_event_callback':jqm_page_event_callback,
+                'jqm_page_event_args':jqm_page_event_args
+              };
+              content[jqm_page_event] = {
+                markup:drupalgap_jqm_page_event_script_code(options)
+              };
             }
             else {
               alert('menu_execute_active_handler (' + path + ') - the jQM ' +
@@ -123,52 +128,19 @@ function menu_execute_active_handler() {
           }
         }
         
-        // Set the page title. First we'll see if the hook_menu() item has a
-        // title variable set, then check for a title_callback function.
-        var title_arguments = [];
-        if (typeof drupalgap.menu_links[router_path].title !== 'undefined') {
-          drupalgap_set_title(drupalgap.menu_links[router_path].title);
-        }
-        if (drupalgap.menu_links[router_path].title_callback !== 'undefined') {
-          var function_name = drupalgap.menu_links[router_path].title_callback;
-          if (drupalgap_function_exists(function_name)) {
-            // Grab the page callback function and get ready to build the html.
-            var fn = window[function_name];
-            
-            // Are there any arguments to send to the title callback?
-            if (drupalgap.menu_links[router_path].title_arguments) {
-              // Can we reuse the page arguments?
-              if (drupalgap.menu_links[router_path].page_arguments &&
-                drupalgap.menu_links[router_path].page_arguments.toString() == 
-                drupalgap.menu_links[router_path].title_arguments.toString()) {
-                title_arguments = page_arguments;
-              }
-              else {
-                // For each title argument, if the argument is an integer, grab the
-                // corresponding arg(#), otherwise just push the arg onto the title
-                // arguments. Then try to prepare any entity that may be present in
-                // the url so the entity is sent via the title arguments to the title
-                // callback, instead of just sending the integer.
-                $.each(drupalgap.menu_links[router_path].title_arguments, function(index, object){
-                    if (is_int(object) && args[object]) { title_arguments.push(args[object]); }
-                    else { title_arguments.push(object); }
-                });
-                drupalgap_prepare_argument_entities(title_arguments, args);
-              }
-              // Call the title callback function with the title arguments.
-              drupalgap_set_title(fn.apply(null, Array.prototype.slice.call(title_arguments)));
-            }
-            else {
-              // There are no arguments, just return the title callback result.
-              drupalgap_set_title(fn());
-            }
-          }
-        }
+        // Add a pageshow handler for the page title.
+        var options = {
+          'page_id':page_id,
+          'jqm_page_event':'pageshow',
+          'jqm_page_event_callback':'_drupalgap_page_title_pageshow',
+          'jqm_page_event_args':jqm_page_event_args
+        };
+        content['drupalgap_page_title_pageshow'] =  {
+          markup:drupalgap_jqm_page_event_script_code(options)
+        };
 
         // And finally return the content.    
-        if (drupalgap.settings.debug) {
-          console.log(JSON.stringify(content));
-        }
+        if (drupalgap.settings.debug) { dpm(content); }
         return content;
       }
       else {
