@@ -389,7 +389,7 @@ function user_view(account) {
       if (account.picture && account.picture.fid) {
         build.picture = {
           'theme':'image',
-          'path':account.picture.uri,
+          'path':account.picture.url,
         };
       }
       return build;
