@@ -753,7 +753,7 @@ function _drupalgap_page_title_pageshow(page_arguments) {
  */
 function _drupalgap_page_title_pageshow_success(title) {
   try {
-    $('h1#drupalgap_title').html(title);
+    $('h1#drupalgap_page_title').html(title);
   }
   catch (error) { drupalgap_error(error); }
 }
