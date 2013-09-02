@@ -154,14 +154,15 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
       language = entity_edit.language;
     }*/
     $.each(form_state.values, function(name, value){
-      field_info = drupalgap_field_info_field(name);
-      if (field_info) {
-        eval('entity.' + name + ' = {};');
-        entity[name][drupalgap.settings.language] = [{"value":value}];
-      }
-      else {
-        entity[name] = value;  
-      }
+        var key = drupalgap_field_key(name);
+        if (key) {
+          // Attach the key and value to the entity.
+          eval('entity.' + name + ' = {};');
+          eval('entity[name][drupalgap.settings.language] = [{"' + key + '":value}];');
+        }
+        else {
+          entity[name] = value;  
+        }
     });
     return entity;
   }

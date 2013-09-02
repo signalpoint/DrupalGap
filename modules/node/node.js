@@ -373,11 +373,16 @@ function node_page_view_pageshow(nid) {
 /**
  * The title call back function for the node view page.
  */
-function node_page_title(node) {
+function node_page_title(callback, nid) {
   try {
+    // Try to load the node title, then send it back to the given callback.
     var title = '';
-    if (node && node.title) { title = node.title; }
-    return title;
+    var node = node_load(nid, {
+        success:function(node){
+          if (node && node.title) { title = node.title; }
+          callback.call(null, title);
+        }
+    });
   }
   catch (error) { drupalgap_error(error); }
 }

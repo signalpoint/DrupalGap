@@ -16,8 +16,8 @@ function system_block_info() {
         'delta':'logo',
         'module':'system',
       },
-      'header':{
-        'delta':'header',
+      'title':{
+        'delta':'title',
         'module':'system',
       },
       'powered_by':{
@@ -69,8 +69,8 @@ function system_block_view(delta) {
         }
         return '';
         break;
-      case 'header':
-        return '<h1>' + drupalgap_get_title() + '</h1>';
+      case 'title':
+        return '<h1 id="drupalgap_page_title"></h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">Powered by: ' +

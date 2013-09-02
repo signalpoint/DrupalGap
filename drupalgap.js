@@ -588,19 +588,31 @@ function drupalgap_get_wildcards_from_router_path(router_path) {
  */
 function drupalgap_image_path(uri) {
   try {
-    var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
-    if (src.indexOf('public://') != -1) {
-      var src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+    var altered = false;
+    // If any modules want to alter the path, let them do it.
+    var modules = module_implements('image_path_alter');
+    if (modules) {
+      $.each(modules, function(index, module){
+          var result = module_invoke(module, 'image_path_alter', uri);
+          if (result) {
+            altered = true;
+            uri = result;
+            return false;
+          }
+      });
     }
-    else if (uri.indexOf('s3://') != -1) {
-      var src = uri.replace('s3://', drupalgap.settings.s3_public_path + '/');
+    if (!altered) {
+      // No one modified the image path, we'll use the default approach to
+      // generating the image src path.
+      var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
+      if (src.indexOf('public://') != -1) {
+        src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+      }
+      return src;
     }
-    return src;
+    else { return uri; }
   }
-  catch (error) {
-    alert('drupalgap_image_path - ' + error);
-  }
-  return null;
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -672,8 +684,11 @@ function drupalgap_item_list_populate(list_css_selector, items) {
  */
 function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
   try {
-    if ($.inArray(event, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
-      drupalgap.page.jqm_events.push(event);
+    // Concatenate the event name and the callback name together into a unique
+    // key so multiple callbacks can handle the same event.
+    var key = event + '-' + callback;
+    if ($.inArray(key, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
+      drupalgap.page.jqm_events.push(key);
       var fn = window[callback];
       if (page_arguments) {
         fn.apply(null, Array.prototype.slice.call(page_arguments));
@@ -715,6 +730,25 @@ function drupalgap_jqm_page_events() {
 }
 
 /**
+ * Given a JSON object with a page id, a jQM page event name, a callback
+ * function to handle the jQM page event and any page arguments, this function
+ * will return the inline JS code needed to handle the event.
+ */
+function drupalgap_jqm_page_event_script_code(options) {
+  try {
+    var script_code = '<script type="text/javascript">' +
+      '$("#' + options.page_id + '").on("' + options.jqm_page_event + '", drupalgap_jqm_page_event_fire("' +
+        options.jqm_page_event + '", "' +
+        options.jqm_page_event_callback + '", ' +
+        options.jqm_page_event_args +
+      '));' +
+    '</script>';
+    return script_code;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Show the jQueryMobile loading message.
  */
 function drupalgap_loading_message_show() {
@@ -744,6 +778,18 @@ function drupalgap_loading_message_hide() {
   try {
     $.mobile.hidePageLoadingMsg();
     drupalgap.loading = false;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Returns the suggested max width for elements within the content area.
+ */
+function drupalgap_max_width() {
+  try {
+    var padding = parseInt($('.ui-content').css('padding'));
+    if (isNaN(padding)) { padding = 16; } // use a 16px default if needed
+    return $(document).width() - padding*2;
   }
   catch (error) { drupalgap_error(error); }
 }
@@ -1261,10 +1307,9 @@ function variable_get(name, default_value) {
  */
 function dpm(data) {
   try {
-    console.log(arguments.callee.caller.name);
-    if (data) {
-      console.log(JSON.stringify(data));
-    }
+    var name = arguments.callee.caller.name;
+    if (name && name != '') { console.log(); }
+    if (data) { console.log(JSON.stringify(data)); }
   }
   catch (error) {
     alert('dpm - ' + error);

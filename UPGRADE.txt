@@ -24,14 +24,30 @@ version of DrupalGap to another.
 
 7.x-1.5-alpha => 7.x-1.6-alpha
 
+  The 'header' system block has been renamed to 'title'. In your settings.js
+  file, you'll need to update your "Blocks" settings to use the 'title' block
+  instead of the 'header' block. FYI, this block is used to display the page
+  title.
+  
+  ---
+
+  The 'navigation' and 'management' system menus have been deprecated. If you
+  were using these menus at all in settings.js, the menus will still work as is,
+  they will now just be considered a 'custom' menu instead. If you were using
+  either of these menus programmatically, just create an empty custom menu
+  in settings.js using the 'navigation' or 'management' machine name, and that
+  will bring these menus back for you.
+
+  ---
+
   Loading entities from the server has changed from synchronous to asynchronous.
   This means that any time you load an entity, it will be loaded asynchronously
-  and you must provide a success callback to retrieve and use the entity. For
+  and you must provide a success callback to use the retrieved entity. For
   example, before you could simply use:
   
     var node = node_load(123);
   
-  Now that it is an asynchronous call, code like this would instead be used to
+  Now that it is an asynchronous call, code like this would be used instead to
   retrieve a node:
   
     node_load(123, {
@@ -46,6 +62,38 @@ version of DrupalGap to another.
   above.
   
   ---
+  
+  Now that entities are loaded asynchronously, the page title_callback system
+  needed to be changed to asynchronous as well. For example, before we could
+  create a title_callback for a custom page like this:
+  
+    function my_module_menu() {
+      var items = {
+        my_page:{
+          title:'My Page',
+          page_callback:'my_page_callback',
+          title_callback:'my_page_title_callback',
+          title_arguments:['Good Monkey']
+        }
+      };
+      return items;
+    }
+    
+    function my_page_title_callback(my_arg) {
+      return my_arg.replace('Good', 'Bad');
+    }
+  
+  Now the title_callback for the above example would be implemented like this:
+    
+    function my_page_title_callback(callback, my_arg) {
+      callback.call(null, my_arg.replace('Good', 'Bad'));
+    }
+  
+  As you can see, title_callback implementations now take a 'callback' argument
+  that needs to be called with your custom title so the page title will be
+  properly set.
+  
+  ---
 
   See https://github.com/signalpoint/DrupalGap/issues/119 for information about
   adjusting any custom forms you may have previously created in a module. Now,
@@ -53,6 +101,8 @@ version of DrupalGap to another.
   form generation functions should now MODIFY the form object and return it. No
   longer do you CREATE the form and return it. Read the Forms documentation for
   more details on creating forms. http://drupalgap.org/node/76
+  
+  ---
   
   The structure of the default.settings.js file has changed from being one giant
   JSON object to a much more manageable set of lines of code. It is recommended

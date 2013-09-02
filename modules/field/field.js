@@ -104,6 +104,26 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
 }
 
 /**
+ * Given a field name, this will return the key that should be used when
+ * settings its value on an entity. If the field name is not a field, it returns
+ * false.
+ */
+function drupalgap_field_key(field_name) {
+  // Determine the key to use for the value. By default, most fields
+  // use 'value' as the key.
+  var key = false;
+  var field_info = drupalgap_field_info_field(field_name);
+  if (field_info) {
+    key = 'value';
+    // Images use fid as the key.
+    if (field_info.module == 'image' && field_info.type == 'image') {
+      key = 'fid';
+    }
+  }
+  return key;
+}
+
+/**
  * Implements hook_field_formatter_view().
  */
 function number_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {

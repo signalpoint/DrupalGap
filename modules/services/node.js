@@ -116,27 +116,43 @@ drupalgap.services.node = {
  */
 function drupalgap_node_assemble_data(options) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(options));
-    }
-    var data = 'node[language]=' + encodeURIComponent(drupalgap.settings.language);
+    
+    // Determine language code and start building data string.
+    var lng = drupalgap.settings.language;
+    var data = 'node[language]=' + encodeURIComponent(lng);
     if (options.node.type) {
       data += '&node[type]=' + encodeURIComponent(options.node.type);
     }
     if (options.node.title) {
       data += '&node[title]=' + encodeURIComponent(options.node.title);
     }
-    if (options.node.body) {
-      data += '&node[body][' + drupalgap.settings.language + '][0][value]=' +
-        encodeURIComponent(options.node.body[drupalgap.settings.language][0].value);
-    }
-    if (drupalgap.settings.debug) {
-      console.log(data);
-    }
+    
+    // Iterate over the fields on this node and add them to the data string.
+    var fields = drupalgap_field_info_instances('node', options.node.type);
+    $.each(fields, function(field_name, field){
+        var key = drupalgap_field_key(field_name);
+        if (key) {
+          // Skip fields without values.
+          if (typeof options.node[field_name][lng][0][key] === 'undefined' ||
+              !options.node[field_name][lng][0][key] ||
+              options.node[field_name][lng][0][key] == '') { return; }
+          // Encode the value.
+          var value = encodeURIComponent(options.node[field_name][lng][0][key]);
+          // Add the key and value to the data string. Note, select does not work
+          // with [und][0][value] but works with [und][value]
+          if (field.widget.type == 'options_select') {
+            data += '&node[' + field_name + '][' + lng + '][' + key + ']=';
+          }
+          else {
+            data += '&node[' + field_name + '][' + lng + '][0][' + key + ']=';
+          }
+          data += value;
+        }
+    });
+    
+    // Return the data string.
     return data;
   }
-  catch (error) {
-    alert('drupalgap_node_assemble_data - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
