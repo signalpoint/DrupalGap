@@ -588,18 +588,31 @@ function drupalgap_get_wildcards_from_router_path(router_path) {
  */
 function drupalgap_image_path(uri) {
   try {
-    var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
-    if (src.indexOf('public://') != -1) {
-      src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+    var altered = false;
+    // If any modules want to alter the path, let them do it.
+    var modules = module_implements('image_path_alter');
+    if (modules) {
+      $.each(modules, function(index, module){
+          var result = module_invoke(module, 'image_path_alter', uri);
+          if (result) {
+            altered = true;
+            uri = result;
+            return false;
+          }
+      });
     }
-    else if (src.indexOf('s3://') != -1) {
-      src = uri.replace('s3://', drupalgap.settings.s3_public_path + '/');
+    if (!altered) {
+      // No one modified the image path, we'll use the default approach to
+      // generating the image src path.
+      var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
+      if (src.indexOf('public://') != -1) {
+        src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+      }
+      return src;
     }
-    return src;
+    else { return uri; }
   }
-  catch (error) {
-    alert('drupalgap_image_path - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

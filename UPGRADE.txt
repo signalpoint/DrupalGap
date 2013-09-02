@@ -24,6 +24,13 @@ version of DrupalGap to another.
 
 7.x-1.5-alpha => 7.x-1.6-alpha
 
+  The 'header' system block has been renamed to 'title'. In your settings.js
+  file, you'll need to update your "Blocks" settings to use the 'title' block
+  instead of the 'header' block. FYI, this block is used to display the page
+  title.
+  
+  ---
+
   The 'navigation' and 'management' system menus have been deprecated. If you
   were using these menus at all in settings.js, the menus will still work as is,
   they will now just be considered a 'custom' menu instead. If you were using
@@ -65,6 +72,8 @@ version of DrupalGap to another.
   form generation functions should now MODIFY the form object and return it. No
   longer do you CREATE the form and return it. Read the Forms documentation for
   more details on creating forms. http://drupalgap.org/node/76
+  
+  ---
   
   The structure of the default.settings.js file has changed from being one giant
   JSON object to a much more manageable set of lines of code. It is recommended

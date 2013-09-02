@@ -122,7 +122,7 @@ drupalgap.settings.blocks = {};
 // Easy Street 3 Theme Blocks
 drupalgap.settings.blocks.easystreet3 = {
   header:{
-    header:{}
+    title:{}
   },
   navigation:{
     user_menu_anonymous:{
