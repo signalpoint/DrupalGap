@@ -46,9 +46,6 @@ version of DrupalGap to another.
   example, before you could simply use:
   
     var node = node_load(123);
-    if (node) {
-      alert('Loaded: ' + node.title);
-    }
   
   Now that it is an asynchronous call, code like this would be used instead to
   retrieve a node:
@@ -65,7 +62,7 @@ version of DrupalGap to another.
   above.
   
   ---
-  
+
   See https://github.com/signalpoint/DrupalGap/issues/119 for information about
   adjusting any custom forms you may have previously created in a module. Now,
   the form and form_state will be passed to the form generation function. Your
