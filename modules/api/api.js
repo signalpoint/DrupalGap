@@ -199,7 +199,7 @@ function drupalgap_api_default_options() {
         cache = null; // Enable garbage collection
       }
     },
-    'error':function(jqXHR, textStatus, errorThrown, url){
+    'error':function(jqXHR, textStatus, errorThrown){
       // TODO - this is a good spot for a hook
       // e.g. hook_drupalgap_api_postprocess
       drupalgap_loading_message_hide();
@@ -217,7 +217,7 @@ function drupalgap_api_default_options() {
       }
       //if (this.error_alert) {
         navigator.notification.alert(
-          textStatus + ' (' + errorThrown + ') ' + extra_msg + '[' + url + ']',
+          textStatus + ' (' + errorThrown + ') ' + extra_msg,
           function(){},
           'DrupalGap API Call Error',
           'OK'
