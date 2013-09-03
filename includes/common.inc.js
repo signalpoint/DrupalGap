@@ -248,6 +248,28 @@ function drupalgap_goto(path) {
     // Determine the router path.
     var router_path = drupalgap_get_menu_link_router_path(path);
     
+    // Make sure we have a menu link item that can handle this router path,
+    // otherwise we'll goto the 404 page.
+    if (!drupalgap.menu_links[router_path]) {
+      // Is anyone trying to handle this 404?
+      var new_path = false;
+      var invocation_results = module_invoke_all('404', router_path);
+      if (invocation_results) {
+        $.each(invocation_results, function(index, result){
+            if (result !== false) {
+              new_path = result;
+              return false;
+            }
+        });
+      }
+      // If a 404 handler provided a new path use it, otherwise just use the
+      // system 404 page. Either way, update the router path before continuing
+      // with a normal page build.
+      if (new_path) { path = new_path; }
+      else { path = '404/' + path; }
+      router_path = drupalgap_get_menu_link_router_path(path);
+    }
+    
     // If the new router path is the same as the current router path and the new
     // path is the same as the current path, don't go anywhere, unless it is a
     // form submission, then continue.

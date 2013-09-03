@@ -26,32 +26,6 @@ function menu_execute_active_handler() {
       console.log(JSON.stringify(drupalgap.menu_links));
       console.log(JSON.stringify(drupalgap.menu_links[router_path]));
       alert('menu_execute_active_handler');*/
-      
-      // Make sure we have a menu link item that can handle this router path,
-      // otherwise we'll call it a 404.
-      if (!drupalgap.menu_links[router_path]) {
-        // Is anyone trying to handle this 404?
-        var invocation_results = module_invoke_all('404', router_path);
-        if (invocation_results) {
-          var proceed = true;
-          var new_path = false;
-          $.each(invocation_results, function(index, result){
-              if (result !== false) {
-                new_path = result;
-                proceed = false;
-                return false;
-              }
-          });
-          if (!proceed) {
-            drupalgap_goto(new_path);
-            return false; 
-          }
-        }
-        return '<h2>404 - Not Found</h2>' +
-               '<h3>Path</h3>' + path +
-               '<h3>Router Path</h3>' +
-               router_path;
-      }
 
       // Call the page call back for this router path and send along any arguments.
       var function_name = drupalgap.menu_links[router_path].page_callback;
