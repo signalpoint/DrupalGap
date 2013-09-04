@@ -9,7 +9,9 @@ function node_access(node) {
       console.log('node_access()');
       console.log(JSON.stringify(arguments));
     }
-    if (node.uid == drupalgap.user.uid) {
+    if (((node.uid == drupalgap.user.uid) 
+    		&& user_access('edit own '+node.type+' content'))
+    		|| user_access('edit any '+node.type+' content')){
       return true;
     }
     else {
