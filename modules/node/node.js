@@ -308,7 +308,7 @@ function node_page_view(node) {
           'theme':'jqm_item_list',
           'title':'Comments',
           'items':[],
-          'attributes':{'id':'comment_listing_items'},
+          'attributes':{'id':'comment_listing_items_'+node.nid},
         };
         
         // If the comments are open, show the comment form.
@@ -341,7 +341,7 @@ function node_page_view_pageshow() {
       console.log('node_page_view_pageshow()');
     }
     // Grab some recent comments and display it.
-    if ($('#comment_listing_items')) {
+    if ($('#comment_listing_items_'+arg(1))) {
       drupalgap.views_datasource.call({
         'path':'drupalgap/views_datasource/drupalgap_comments/' + arg(1),
         'success':function(data) {
@@ -358,7 +358,7 @@ function node_page_view_pageshow() {
                 'Comment:<br />' + object.comment.comment_body + "<hr />"; 
               items.push(html);
           });
-          drupalgap_item_list_populate("#comment_listing_items", items);
+          drupalgap_item_list_populate("#comment_listing_items_"+arg(1), items);
         },
       });
     }
