@@ -85,6 +85,7 @@ var drupalgap = {
   'router_path':'', /* The current menu router path. */
   'services':{},
   'sessid':null,
+  taxonomy_vocabularies:null, /* holds the services index of vocabularies */
   'theme_path':'',
   'themes':[],
   'theme_registry':{},
@@ -721,6 +722,25 @@ function drupalgap_jqm_page_events() {
   catch (error) {
     alert('drupalgap_jqm_page_events - ' + error);
   }
+}
+
+/**
+ * Given a JSON object with a page id, a jQM page event name, a callback
+ * function to handle the jQM page event and any page arguments, this function
+ * will return the inline JS code needed to handle the event.
+ */
+function drupalgap_jqm_page_event_script_code(options) {
+  try {
+    var script_code = '<script type="text/javascript">' +
+      '$("#' + options.page_id + '").on("' + options.jqm_page_event + '", drupalgap_jqm_page_event_fire("' +
+        options.jqm_page_event + '", "' +
+        options.jqm_page_event_callback + '", ' +
+        options.jqm_page_event_args +
+      '));' +
+    '</script>';
+    return script_code;
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

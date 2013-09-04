@@ -404,3 +404,69 @@ function taxonomy_vocabulary_load(vid) {
   catch (error) { drupalgap_error(error); }
 }
 
+/**
+ *
+ */
+function taxonomy_vocabulary_machine_name_load(name) {
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    
+    return entity_load('taxonomy_vocabulary', vid, options);
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ *
+ */
+function theme_taxonomy_term_reference(variables) {
+  try {
+    dpm(variables);
+    var html = '';
+    
+    // Make this a hidden field since the widget will just populate a value.
+    variables.attributes.type = 'hidden';
+    html += '<input ' + drupalgap_attributes(variables.attributes) + '/>';
+    
+    // What vocabulary are we using?
+    var vocabulary = variables.field_info_field.settings.allowed_values[0].vocabulary;
+    
+    // Prepare the variables for the widget and render it based on its type.
+    var widget_type = variables.field_info_instance.widget.type;
+    if (widget_type == 'options_select') { widget_type = 'select'; }
+    var widget_function = 'theme_' + widget_type;
+    var id = variables.attributes.id + '-' + widget_type;
+    if (drupalgap_function_exists(widget_function)) {
+      var fn = window[widget_function];
+      html += fn.call(null, {'id':id});
+      // Attach a pageshow handler to the current page (if it hasn't been
+      // already) that will load the terms into the widget.
+      //drupalgap.menu_links[drupalgap_router_path_get()]
+       var options = {
+         'page_id':drupalgap_get_page_id(drupalgap_path_get()),
+         'jqm_page_event':'pageshow',
+         'jqm_page_event_callback':'_theme_taxonomy_term_reference_load_items',
+         'jqm_page_event_args':null
+       };
+       html += drupalgap_jqm_page_event_script_code(options);
+    }
+    else {
+      console.log('WARNING: theme_taxonomy_term_reference() - unsupported widget type! (' + widget_type + ')');
+    }
+    
+    console.log(html);
+    return html;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ *
+ */
+function _theme_taxonomy_term_reference_load_items() {
+  try {
+    alert('_theme_taxonomy_term_reference_load_items');
+  }
+  catch (error) { drupalgap_error(error); }
+}
