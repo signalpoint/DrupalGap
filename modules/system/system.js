@@ -108,6 +108,11 @@ function system_menu() {
       'offline':{
         'title':'Offline',
         'page_callback':'system_offline_page',
+      },
+      '404/%':{
+        title:'404 - Not Found',
+        page_callback:'system_404_page',
+        page_arguments:[1]
       }
     };
     return items;
@@ -115,6 +120,16 @@ function system_menu() {
   catch (error) {
     alert('system_menu - ' + error);
   }
+}
+
+/**
+ * Page callback for the 404 page.
+ */
+function system_404_page(path) {
+  try {
+    return "Sorry, the '" + path + "' page was not found.";
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
