@@ -32,7 +32,11 @@ function drupalgap_block_load(delta) {
       });
     }
     if (block == null) {
-      alert('drupalgap_block_load - block load failed: ' + delta);
+      var msg = 'drupalgap_block_load - failed to load "' + delta + '" block!';
+      if (delta == 'header') {
+        msg += ' - Did you rename your "header" block to "title" in settings.js?';
+      }
+      alert(msg);
     }
     if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
       console.log(JSON.stringify(block));
