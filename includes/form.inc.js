@@ -25,6 +25,19 @@ function drupalgap_form_defaults(form_id) {
 }
 
 /**
+ * Given a form element, this will return true if access to the element is
+ * permitted, false otherwise.
+ */
+function drupalgap_form_element_access(element) {
+  try {
+    var access = true;
+    if (element.access == false) { access = false; }
+    return access;
+  }
+  catch (error) { drupalgap_error(); }
+}
+
+/**
  * Given a form element name and the form_id, this generates an html id
  * attribute value to be used in the DOM.
  */
@@ -261,15 +274,24 @@ function _drupalgap_form_render_elements(form) {
   try {
     var content = '';
     // For each form element, if the element objects name property isn't set,
-    // set it, then render the element.
+    // set it, then render the element if access is permitted.
     $.each(form.elements, function(name, element){
         if (!element.name) { element.name = name; }
-        content += _drupalgap_form_render_element(form, element);
+        if (drupalgap_form_element_access(element)) {
+          content += _drupalgap_form_render_element(form, element);
+        }
     });
-    // Add any form buttons to the form elements html.
+    // Add any form buttons to the form elements html, if access to the button
+    // is permitted.
     if (form.buttons && form.buttons.length != 0) {
       $.each(form.buttons, function(name, button){
-          content += '<button type="button" id="' + drupalgap_form_get_element_id(name, form.id) + '">' +  button.title + '</button>';
+          if (drupalgap_form_element_access(button)) {
+            var attributes = {
+              type:'button',
+              id:drupalgap_form_get_element_id(name, form.id)
+            };
+            content += '<button ' + drupalgap_attributes(attributes) + '">' +  button.title + '</button>';
+          }
       });
     }
     return content;
