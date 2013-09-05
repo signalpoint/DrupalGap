@@ -1,4 +1,21 @@
 /**
+ *
+ */
+function drupalgap_taxonomy_vocabularies_extract(taxonomy_vocabularies) {
+  try {
+    var results = false;
+    if (taxonomy_vocabularies.length > 0) {
+      results = {};
+      $.each(taxonomy_vocabularies, function(index, vocabulary){
+          eval('results.' + vocabulary.machine_name + ' = vocabulary;');
+      });
+    }
+    return results;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implements hook_field_formatter_view().
  */
 function taxonomy_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
@@ -409,10 +426,10 @@ function taxonomy_vocabulary_load(vid) {
  */
 function taxonomy_vocabulary_machine_name_load(name) {
   try {
-    var options = null;
-    if (arguments[1]) { options = arguments[1]; }
-    
-    return entity_load('taxonomy_vocabulary', vid, options);
+    if (drupalgap.taxonomy_vocabularies && drupalgap.taxonomy_vocabularies[name]) {
+      return drupalgap.taxonomy_vocabularies[name];
+    }
+    return false;
   }
   catch (error) { drupalgap_error(error); }
 }
@@ -422,7 +439,6 @@ function taxonomy_vocabulary_machine_name_load(name) {
  */
 function theme_taxonomy_term_reference(variables) {
   try {
-    dpm(variables);
     var html = '';
     
     // Make this a hidden field since the widget will just populate a value.
@@ -430,32 +446,38 @@ function theme_taxonomy_term_reference(variables) {
     html += '<input ' + drupalgap_attributes(variables.attributes) + '/>';
     
     // What vocabulary are we using?
-    var vocabulary = variables.field_info_field.settings.allowed_values[0].vocabulary;
+    var machine_name = variables.field_info_field.settings.allowed_values[0].vocabulary;
+    var taxonomy_vocabulary = taxonomy_vocabulary_machine_name_load(machine_name);
     
     // Prepare the variables for the widget and render it based on its type.
     var widget_type = variables.field_info_instance.widget.type;
     if (widget_type == 'options_select') { widget_type = 'select'; }
     var widget_function = 'theme_' + widget_type;
-    var id = variables.attributes.id + '-' + widget_type;
+    var widget_id = variables.attributes.id + '-' + widget_type;
     if (drupalgap_function_exists(widget_function)) {
       var fn = window[widget_function];
-      html += fn.call(null, {'id':id});
-      // Attach a pageshow handler to the current page (if it hasn't been
-      // already) that will load the terms into the widget.
-      //drupalgap.menu_links[drupalgap_router_path_get()]
+      html += fn.call(null, {
+        attributes:{
+          id:widget_id,
+          onchange:"_theme_taxonomy_term_reference_onchange(this, '" + variables.attributes.id + "');"
+        }
+      });
+      // Attach a pageshow handler to the current page that will load the terms
+      // into the widget.
        var options = {
          'page_id':drupalgap_get_page_id(drupalgap_path_get()),
          'jqm_page_event':'pageshow',
          'jqm_page_event_callback':'_theme_taxonomy_term_reference_load_items',
-         'jqm_page_event_args':null
+         'jqm_page_event_args':JSON.stringify({
+             'taxonomy_vocabulary':taxonomy_vocabulary,
+             'widget_id':widget_id
+         })
        };
        html += drupalgap_jqm_page_event_script_code(options);
     }
     else {
       console.log('WARNING: theme_taxonomy_term_reference() - unsupported widget type! (' + widget_type + ')');
     }
-    
-    console.log(html);
     return html;
   }
   catch (error) { drupalgap_error(error); }
@@ -464,9 +486,30 @@ function theme_taxonomy_term_reference(variables) {
 /**
  *
  */
-function _theme_taxonomy_term_reference_load_items() {
+function _theme_taxonomy_term_reference_load_items(options) {
   try {
-    alert('_theme_taxonomy_term_reference_load_items');
+    drupalgap.services.drupalgap_taxonomy.get_terms.call({
+        vid:options.taxonomy_vocabulary.vid,
+        success:function(terms){
+          if (terms.length > 0) {
+            $.each(terms, function(index, term){
+                var option = '<option value="' + term.tid + '">' + term.name + '</option>';
+                $('#' + options.widget_id).append(option);
+            });
+          }
+        }
+    });
   }
   catch (error) { drupalgap_error(error); }
 }
+
+/**
+ *
+ */
+function _theme_taxonomy_term_reference_onchange(input, id) {
+  try {
+    $('#' + id).val($(input).val());
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
