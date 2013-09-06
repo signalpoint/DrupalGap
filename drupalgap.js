@@ -61,6 +61,7 @@ var drupalgap = {
   'entity_info':{},
   'field_info_fields':{},
   'field_info_instances':{},
+  /*field_widget_info:{},*/
   'form_errors':{},
   'form_states':[],
   loading:false, /* indicates if the loading message is shown or not */
@@ -198,6 +199,8 @@ function drupalgap_bootstrap() {
     drupalgap_menus_load();
     // Initialize the theme registry.
     drupalgap_theme_registry_build();
+    // Initialize field widgets.
+    //drupalgap_field_widgets_load();
     // Attach device back button handler (Android).
     document.addEventListener("backbutton", drupalgap_back, false); 
   }
@@ -399,6 +402,32 @@ function drupalgap_deviceready() {
 function drupalgap_empty(value) {
   return (typeof value === "undefined" || value === null || value == '');
 }
+
+/**
+ *
+ */
+/*function drupalgap_field_widgets_load() {
+  try {
+    var modules = module_implements('field_widget_info');
+    if (!modules) { return null; }
+    $.each(modules, function(i, module){
+        var field_widgets = module_invoke(module, 'field_widget_info');
+        if (!field_widgets) { return; }
+        $.each(field_widgets, function(name, field_widget){
+            $.each(field_widget.field_types, function(j, field_type){
+                drupalgap.field_widget_info[field_type] = {
+                  'module':module,
+                  'field_widget':name
+                };
+            });
+        });
+    });
+    dpm(drupalgap.field_widget_info);
+  }
+  catch (error) {
+    alert('drupalgap_field_widgets_load - ' + error);
+  }
+}*/
 
 /**
  * Checks if a given file exists, returns true or false.

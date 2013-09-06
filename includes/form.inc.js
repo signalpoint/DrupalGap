@@ -44,12 +44,13 @@ function drupalgap_form_element_access(element) {
 function drupalgap_form_get_element_id(name, form_id) {
   try {
     if (name == null || name == '') { return ''; }
-    name =
+    var id =
       'edit-' +
       form_id.toLowerCase().replace(/_/g, '-') + '-' +
       name.toLowerCase().replace(/_/g,'-');
-    if (drupalgap.settings.debug) { console.log(name); }
-    return name;
+    // Any delta value to append to the id?
+    if (arguments[2]) { id += '-' + arguments[2]; }
+    return id;
   }
   catch (error) {
     alert('drupalgap_form_get_element_id - ' + error);
@@ -306,6 +307,8 @@ function _drupalgap_form_render_element(form, element) {
   try {
     var html = '';
     
+    if (!element) { return html; }
+    
     // Extract the element name.
     var name = element.name;
     
@@ -325,6 +328,9 @@ function _drupalgap_form_render_element(form, element) {
       html += theme('form_element_label', {'element':element});
     }
     
+    // Remember if we are going to use a module for the widget's implementation.
+    var using_field_widget_form = false;
+    
     // Generate default variables to send to theme().
     var variables = {
       attributes:{
@@ -339,8 +345,10 @@ function _drupalgap_form_render_element(form, element) {
     // If this element is a field, grab the info instance and info field for the
     // field, then attach them both to the variables object so all theme
     // functions will have access to that data.
+    // TODO - since only nodes have a 'type' element on the form, no other
+    // entity types have their field info attached to the variables object.
     var field_info_field = drupalgap_field_info_field(name);
-    if (field_info_field) {
+    if (field_info_field && form.elements.type) {
       var field_info_instance = drupalgap_field_info_instance(form.entity_type, name, form.elements.type.default_value);
       variables.field_info_field = field_info_field;
       variables.field_info_instance = field_info_instance;
@@ -486,13 +494,31 @@ function _drupalgap_form_render_element(form, element) {
         variables.value = element.default_value;
         delete variables.attributes.value;
         break;
+      default:
+        // This form element isn't known to DrupalGap core. Does the widget's
+        // module implement hook_field_widget_form()?
+        // TODO - eventually we'll want all field elements handled above to run
+        // through the new hook_field_widget_form() system.
+        if (variables.field_info_instance) {
+          var module = variables.field_info_instance.widget.module;
+          var field_widget_form_function = module + '_field_widget_form';
+          if (drupalgap_function_exists(field_widget_form_function)) {
+            using_field_widget_form = true;
+            // Grab the field widget implementor function, then call it.
+            var fn = window[field_widget_form_function];
+            // form, form_state, field, instance, langcode, items, delta, element
+            html += fn.call(form, null, variables.field_info_field, variables.field_info_instance, drupalgap.settings.language, form.elements[name], 0, element);
+          }
+        }
+        dpm(element);
+        break;
     }
     
     // Give modules a chance to alter the variables.
     //module_invoke_all('form_element_alter', form, element, variables);
     
     // If the element isn't an outlier, run it through the theme system.
-    if (element.type != 'submit' && element.type != 'image') {
+    if (element.type != 'submit' && element.type != 'image' && !using_field_widget_form) {
       // Theme the element.
       if (drupalgap_function_exists('theme_' + theme_function)) {
         html += theme(theme_function, variables);

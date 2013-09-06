@@ -103,8 +103,14 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
             'type':field_info.type,
             'title':field.label,
             'required':field.required,
-            'default_value':default_value,
+            'default_value':default_value, /* this will go away soon */
             'description':field.description,
+          };
+          // Now attach the field items within the language code. Note, it
+          // appears not all fields have a language code to use here, e.g.
+          // taxonomy term reference field don't!
+          form.elements[name][language] = {
+            'default_value':default_value
           };
         }
       });

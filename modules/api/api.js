@@ -263,6 +263,11 @@ function hook_block_view() {}
 function hook_entity_post_render_content(entity) { }
 
 /**
+ * Used by modules to provide field widgets for forms.
+ */
+function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) { }
+
+/**
  * Called after a form element is assembled. Use it to alter a form element.
  */
 //function hook_form_element_alter(form, element, variables) { }
