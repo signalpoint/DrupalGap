@@ -494,6 +494,10 @@ function _theme_taxonomy_term_reference_load_items(options) {
           if (terms.length > 0) {
             $.each(terms, function(index, term){
                 var option = '<option value="' + term.tid + '">' + term.name + '</option>';
+                // TODO - this line of code searches the DOM on every iteration,
+                // the reference to the widget should be set to a variable
+                // before the loop. This performance improvement should be used
+                // probably hundreds of spots within DrupalGap, doh!
                 $('#' + options.widget_id).append(option);
             });
           }

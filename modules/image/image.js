@@ -124,6 +124,8 @@ function _image_phonegap_camera_getPicture_success(options) {
 function _image_field_form_validate(form, form_state) {
   try {
     $.each(form.image_fields, function(index, name){
+         // Skip empty images.
+        if (!image_phonegap_camera_options[name][0]) { return; }
         // Create a unique file name using the UTC integer value.
         var d = new Date();
         var image_file_name = "" + d.valueOf() + ".jpg";
@@ -143,7 +145,6 @@ function _image_field_form_validate(form, form_state) {
         });
     });
     dpm(form_state);
-    alert('_image_field_form_validate');
   }
   catch (error) { drupalgap_error(error); }
 }
