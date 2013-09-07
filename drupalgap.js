@@ -692,7 +692,7 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
       drupalgap.page.jqm_events.push(key);
       var fn = window[callback];
       if (page_arguments) {
-        fn.call(null, page_arguments);
+        fn.apply(null, Array.prototype.slice.call(page_arguments));
       }
       else { fn(); }
     }
@@ -723,7 +723,7 @@ function drupalgap_jqm_page_events() {
       'pageloadfailed',
       'pageremove',
       'pageshow'
-    ];
+    ];        
   }
   catch (error) {
     alert('drupalgap_jqm_page_events - ' + error);

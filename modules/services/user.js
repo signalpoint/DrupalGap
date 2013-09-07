@@ -46,7 +46,7 @@ drupalgap.services.user = {
         // the drupalgap user and call drupalgap system connect.
         drupalgap.sessid = null;
         window.localStorage.removeItem('sessid');
-        drupalgap.user = {'uid':0};
+        drupalgap.user = {'uid':0,'roles':{'1':'anonymous user'}};
         drupalgap.services.drupalgap_system.connect.call({'async':false});
         // Remove all pages from the DOM.
         drupalgap_remove_pages_from_dom();
