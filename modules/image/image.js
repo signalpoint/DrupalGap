@@ -80,7 +80,7 @@ function _image_phonegap_camera_getPicture_success(options) {
   try {
     
     // Hold on to the image options in the global var.
-    image_phonegap_camera_options[options.field_name][0] = options;
+    image_phonegap_camera_options[options.field_name] = {0:options};
     
     // Hide the 'Add image' button and show the 'Upload' button.
     $('#' + options.id).hide();
