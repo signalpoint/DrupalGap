@@ -9,7 +9,9 @@ function node_access(node) {
       console.log('node_access()');
       console.log(JSON.stringify(arguments));
     }
-    if (node.uid == drupalgap.user.uid) {
+    if (((node.uid == drupalgap.user.uid) 
+    		&& user_access('edit own '+node.type+' content'))
+    		|| user_access('edit any '+node.type+' content')){
       return true;
     }
     else {
@@ -308,7 +310,7 @@ function node_page_view(node) {
           'theme':'jqm_item_list',
           'title':'Comments',
           'items':[],
-          'attributes':{'id':'comment_listing_items'},
+          'attributes':{'id':'comment_listing_items_' + node.nid},
         };
         
         // If the comments are open, show the comment form.
@@ -335,15 +337,15 @@ function node_page_view(node) {
 /**
  * jQM pageshow handler for node/% pages.
  */
-function node_page_view_pageshow() {
+function node_page_view_pageshow(node) {
   try {
     if (drupalgap.settings.debug) {
       console.log('node_page_view_pageshow()');
     }
     // Grab some recent comments and display it.
-    if ($('#comment_listing_items')) {
+    if ($('#comment_listing_items_'+arg(1))) {
       drupalgap.views_datasource.call({
-        'path':'drupalgap/views_datasource/drupalgap_comments/' + arg(1),
+        'path':'drupalgap/views_datasource/drupalgap_comments/' + node.nid,
         'success':function(data) {
           // Extract the comments into items, then drop them in the list.
           var items = [];
@@ -358,7 +360,7 @@ function node_page_view_pageshow() {
                 'Comment:<br />' + object.comment.comment_body + "<hr />"; 
               items.push(html);
           });
-          drupalgap_item_list_populate("#comment_listing_items", items);
+          drupalgap_item_list_populate("#comment_listing_items_" + node.nid, items);
         },
       });
     }

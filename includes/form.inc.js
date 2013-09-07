@@ -400,6 +400,8 @@ function _drupalgap_form_render_element(form, element) {
         if (element.value) {
           button_text = element.value;
         }
+        // Place a hidden input to hold the file id.
+        html += '<input id="' + element_id + '" type="hidden" value="" />';
         // Place variables into document for PhoneGap image processing.
         var element_id_base = element_id.replace(/-/g, '_'); 
         var image_field_source = element_id_base + '_imagefield_source';
@@ -414,7 +416,7 @@ function _drupalgap_form_render_element(form, element) {
         html += '<div>' + 
           '<div id="' + element_id + '-imagefield-msg"></div>' + 
           '<img id="' + element_id + '-imagefield" style="display: none;" />' + 
-          '<a href="#" data-role="button" id="' + element_id + '">' + button_text + '</a>' +
+          '<a href="#" data-role="button" id="' + element_id + '-button">' + button_text + '</a>' +
         '</div>';
         // Open extra javascript declaration.
         html += '<script type="text/javascript">';
@@ -445,7 +447,7 @@ function _drupalgap_form_render_element(form, element) {
           quality = drupalgap.settings.camera.quality;
         }
         // Add click handler for photo button.
-        html += '$("#' + element_id + '").on("click",function(){' +
+        html += '$("#' + element_id + '-button").on("click",function(){' +
           'var photo_options = {' +
             'quality: ' + quality + ',' +
             'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +

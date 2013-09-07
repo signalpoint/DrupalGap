@@ -254,16 +254,14 @@ function user_register(form, form_state) {
 function user_register_submit(form, form_state) {
   try {
     drupalgap.services.user.register.call({
-      'name':drupalgap.form_state.values.name,
-      'mail':drupalgap.form_state.values.mail,
+      'name':form_state.values.name,
+      'mail':form_state.values.mail,
       'success':function(data){
-        $.mobile.changePage(drupalgap.settings.front);
+        drupalgap_goto('');
       },
     });
   }
-  catch (error) {
-    alert('user_register_submit - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

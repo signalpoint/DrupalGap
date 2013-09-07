@@ -80,10 +80,10 @@ function _image_phonegap_camera_getPicture_success(options) {
   try {
     
     // Hold on to the image options in the global var.
-    image_phonegap_camera_options[options.field_name][0] = options;
+    image_phonegap_camera_options[options.field_name] = {0:options};
     
     // Hide the 'Add image' button and show the 'Upload' button.
-    $('#' + options.id).hide();
+    $('#' + options.id + '-button').hide();
     //$('#' + options.id + '_upload').show();
     
     // Show the captured photo as a thumbnail. When the photo is loaded, resize
@@ -124,8 +124,10 @@ function _image_phonegap_camera_getPicture_success(options) {
 function _image_field_form_validate(form, form_state) {
   try {
     $.each(form.image_fields, function(index, name){
-         // Skip empty images.
+        // Skip empty images.
         if (!image_phonegap_camera_options[name][0]) { return; }
+        // Skip image fields that already have their file id set.
+        if (form_state.values[name] != '') { return; }
         // Create a unique file name using the UTC integer value.
         var d = new Date();
         var image_file_name = "" + d.valueOf() + ".jpg";
@@ -140,11 +142,13 @@ function _image_field_form_validate(form, form_state) {
           'file':file,
           async:false,
           success:function(result){
+            // Set the hidden input and form state values with the file id.
+            var element_id = drupalgap_form_get_element_id(name, form.id);
+            $('#' + element_id).val(result.fid);
             form_state.values[name] = result.fid;
           }
         });
     });
-    dpm(form_state);
   }
   catch (error) { drupalgap_error(error); }
 }
