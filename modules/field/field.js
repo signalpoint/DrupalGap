@@ -26,6 +26,18 @@ function drupalgap_field_info_fields() {
 }
 
 /**
+ * Given an entity type, field name, and bundle name this will return a JSON
+ * object with data for the specified field name.
+ */
+function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
+  try {
+    var instances = drupalgap_field_info_instances(entity_type, bundle_name);
+    return instances[field_name];
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Given an entity type and/or a bundle name, this returns the field info
  * instances for the entity or the bundle.
  */

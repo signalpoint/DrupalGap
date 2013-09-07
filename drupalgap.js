@@ -682,12 +682,18 @@ function drupalgap_item_list_populate(list_css_selector, items) {
  * menu_execute_active_handler() to prevent jQM from firing inline page event
  * handlers more than once.
  */
-function drupalgap_jqm_page_event_fire(event, callback) {
+function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
   try {
-    if ($.inArray(event, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
-      drupalgap.page.jqm_events.push(event);
+    // Concatenate the event name and the callback name together into a unique
+    // key so multiple callbacks can handle the same event.
+    var key = event + '-' + callback;
+    if ($.inArray(key, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
+      drupalgap.page.jqm_events.push(key);
       var fn = window[callback];
-      fn();
+      if (page_arguments) {
+        fn.call(null, page_arguments);
+      }
+      else { fn(); }
     }
   }
   catch (error) {
@@ -716,11 +722,30 @@ function drupalgap_jqm_page_events() {
       'pageloadfailed',
       'pageremove',
       'pageshow'
-    ];
+    ];        
   }
   catch (error) {
     alert('drupalgap_jqm_page_events - ' + error);
   }
+}
+
+/**
+ * Given a JSON object with a page id, a jQM page event name, a callback
+ * function to handle the jQM page event and any page arguments, this function
+ * will return the inline JS code needed to handle the event.
+ */
+function drupalgap_jqm_page_event_script_code(options) {
+  try {
+    var script_code = '<script type="text/javascript">' +
+      '$("#' + options.page_id + '").on("' + options.jqm_page_event + '", drupalgap_jqm_page_event_fire("' +
+        options.jqm_page_event + '", "' +
+        options.jqm_page_event_callback + '", ' +
+        options.jqm_page_event_args +
+      '));' +
+    '</script>';
+    return script_code;
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
