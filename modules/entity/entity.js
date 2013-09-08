@@ -144,31 +144,22 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
  */
 function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_build_from_form_state');
-    }
     var entity = {};
-    // Use the default language, unless the entity has one specified.
-    /*var language = drupalgap.settings.language;
-    if (entity_edit.language) {
-      language = entity_edit.language;
-    }*/
+    var language = drupalgap.settings.language;
     $.each(form_state.values, function(name, value){
-        var key = drupalgap_field_key(name);
+        // Attach the key and value to the entity.
+        var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-          // Attach the key and value to the entity.
-          eval('entity.' + name + ' = {};');
-          eval('entity[name][drupalgap.settings.language] = [{"' + key + '":value}];');
+          var delta = 0;
+          eval('entity.' + name + ' = {' + language  + ':[{' + key + ':"' + value[language][delta] + '"}]}');
         }
         else {
-          entity[name] = value;  
+          entity[name] = value;    
         }
     });
     return entity;
   }
-  catch (error) {
-    alert('drupalgap_entity_build_from_form_state - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
