@@ -111,30 +111,6 @@ drupalgap.services.taxonomy_vocabulary = {
       }
     },
   }, // <!-- delete -->
-  'index':{
-    'options':{
-      'type':'get',
-      'path':'taxonomy_vocabulary.json',
-      'success':function(results){
-        dpm(results);
-        alert('index success');
-      },
-    },
-    'call':function(options){
-      try {
-        var api_options = drupalgap_chain_callbacks(drupalgap.services.taxonomy_vocabulary.index.options, options);
-        drupalgap.api.call(api_options);
-      }
-      catch (error) {
-        navigator.notification.alert(
-          error,
-          function(){},
-          'taxonomy_vocabulary Index Error',
-          'OK'
-        );
-      }
-    },
-  }, // <!-- index -->
   'getTree':{
     'options':{
       'type':'post',

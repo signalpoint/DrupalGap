@@ -39,7 +39,9 @@ function drupalgap_form_element_access(element) {
 
 /**
  * Given a form element name and the form_id, this generates an html id
- * attribute value to be used in the DOM.
+ * attribute value to be used in the DOM. An optional third argument is a
+ * string language code to use. An optional fourth argument is an integer delta
+ * value to use on field elements.
  */
 function drupalgap_form_get_element_id(name, form_id) {
   try {
@@ -48,8 +50,10 @@ function drupalgap_form_get_element_id(name, form_id) {
       'edit-' +
       form_id.toLowerCase().replace(/_/g, '-') + '-' +
       name.toLowerCase().replace(/_/g,'-');
-    // Any delta value to append to the id?
+    // Any language code to append to the id?
     if (arguments[2]) { id += '-' + arguments[2]; }
+    // Any delta value to append to the id?
+    if (typeof arguments[3] !== 'undefined') { id += '-' + arguments[3]; }
     return id;
   }
   catch (error) {
@@ -119,12 +123,22 @@ function drupalgap_form_state_values_assemble(form) {
     var form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
-      // Determine the css selector for the form element.
+      // Set delta if it is a field, also determine the css selector for the
+      // form element.
+      var delta = null;
+      var id = null;
+      if (element.is_field) {
+        delta = 0;
+        id = drupalgap_form_get_element_id(name, form.id, drupalgap.settings.language, delta);
+      }
+      else {
+        id = drupalgap_form_get_element_id(name, form.id);
+      }
       var selector = '';
       if (element.type == 'radios') {
-        selector = 'input:radio[name="' + drupalgap_form_get_element_id(name, form.id) + '"]:checked';
+        selector = 'input:radio[name="' + id  + '"]:checked';
       }
-      else { selector = '#' + drupalgap_form_get_element_id(name, form.id); }
+      else { selector = '#' + id; }
       // Determine the value of the form element.
       var value = null;
       if (element.type == 'checkbox') {
@@ -133,13 +147,23 @@ function drupalgap_form_state_values_assemble(form) {
       }
       if (value == null) { value = $(selector).val(); }
       // Set the form state value.
-      form_state.values[name] = value;
+      if (element.is_field) {
+        // TODO - is this the structure that Drupal follows?
+        form_state.values[name] = {};
+        form_state.values[name][drupalgap.settings.language] = {};
+        form_state.values[name][drupalgap.settings.language][delta] = value;
+      }
+      else {
+        form_state.values[name] = value;
+      }
     });
     // Attach the form state to drupalgap.form_states keyed by the form id.
     drupalgap.form_states[form.id] = form_state;
     if (drupalgap.settings.debug) {
       console.log(JSON.stringify(form_state));
     }
+    dpm(form);
+    dpm(form_state)
     return form_state;
   }
   catch (error) {
@@ -231,6 +255,32 @@ function drupalgap_form_load(form_id) {
           else if (!element.options.attributes) {
             form.elements[name].options.attributes = {};
           }
+          // Is this element a field?
+          var element_is_field = false;
+          var field_info_field = drupalgap_field_info_field(name);
+          var delta = null;
+          // TODO - since only nodes have a 'type' element on the form, no other
+          // entity types have their field info attached to the variables object.
+          if (field_info_field && form.elements.type) {
+            element_is_field = true;
+            delta = 0;
+          }
+          form.elements[name].is_field = element_is_field;
+          // If no id is set on the element, set it. Generate the html id
+          // attribute for this element, then save the id on the element object.
+          // If the element is a field, we'll append a language code and delta
+          // value to the id.
+          if (!form.elements[name].options.attributes.id) {
+            var id = null;
+            if (element_is_field) {
+              id = drupalgap_form_get_element_id(name, form.id, drupalgap.settings.language, delta);
+            }
+            else {
+              id = drupalgap_form_get_element_id(name, form.id);
+            }
+            form.elements[name].id = id;
+            form.elements[name].options.attributes.id = id;
+          }
       });
       
       // Give modules an opportunity to alter the form.
@@ -312,13 +362,27 @@ function _drupalgap_form_render_element(form, element) {
     // Extract the element name.
     var name = element.name;
     
-    // Grab the html id attribute for this element name, then save the id on the
-    // element.
-    var element_id = drupalgap_form_get_element_id(name, form.id);
-    element.id = element_id;
+    // Generate default variables.
+    var variables = {
+      attributes:{
+      'id':element.id
+      }
+    };
     
-    // If there wasn't a default value provided, set one.
+    // If this element is a field, grab the info instance and info field for the
+    // field, then attach them both to the variables object so all theme
+    // functions will have access to that data.
+    if (element.is_field) {
+      var field_info_field = drupalgap_field_info_field(name);
+      var field_info_instance = drupalgap_field_info_instance(form.entity_type, name, form.elements.type.default_value);
+      variables.field_info_field = field_info_field;
+      variables.field_info_instance = field_info_instance;
+    }
+    
+    // If there wasn't a default value provided, set one. Then set the default
+    // value into the variables' attributes.
     if (!element.default_value) { element.default_value = ''; }
+    variables.attributes.value = element.default_value;
     
     // Open the element.
     if (element.type != 'hidden') { html += '<div>'; }
@@ -331,28 +395,8 @@ function _drupalgap_form_render_element(form, element) {
     // Remember if we are going to use a module for the widget's implementation.
     var using_field_widget_form = false;
     
-    // Generate default variables to send to theme().
-    var variables = {
-      attributes:{
-        id:element_id,
-        value:element.default_value
-      }
-    };
-    
     // Merge element attributes into the variables object.
     variables.attributes = $.extend({}, variables.attributes, element.options.attributes);
-    
-    // If this element is a field, grab the info instance and info field for the
-    // field, then attach them both to the variables object so all theme
-    // functions will have access to that data.
-    // TODO - since only nodes have a 'type' element on the form, no other
-    // entity types have their field info attached to the variables object.
-    var field_info_field = drupalgap_field_info_field(name);
-    if (field_info_field && form.elements.type) {
-      var field_info_instance = drupalgap_field_info_instance(form.entity_type, name, form.elements.type.default_value);
-      variables.field_info_field = field_info_field;
-      variables.field_info_instance = field_info_instance;
-    }
     
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
@@ -401,9 +445,9 @@ function _drupalgap_form_render_element(form, element) {
           button_text = element.value;
         }
         // Place a hidden input to hold the file id.
-        html += '<input id="' + element_id + '" type="hidden" value="" />';
+        html += '<input id="' + element.id + '" type="hidden" value="" />';
         // Place variables into document for PhoneGap image processing.
-        var element_id_base = element_id.replace(/-/g, '_'); 
+        var element_id_base = element.id.replace(/-/g, '_'); 
         var image_field_source = element_id_base + '_imagefield_source';
         var imagefield_destination_type = element_id_base + '_imagefield_destination_type';
         var imagefield_data = element_id_base + '_imagefield_data';
@@ -412,11 +456,11 @@ function _drupalgap_form_render_element(form, element) {
         eval('var ' + imagefield_data + ' = null;');
         // Build an imagefield widget with PhoneGap. Contains a message
         // div, an image element, and button to add an image.
-        //'<a href="#" data-role="button" id="' + element_id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
+        //'<a href="#" data-role="button" id="' + element.id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
         html += '<div>' + 
-          '<div id="' + element_id + '-imagefield-msg"></div>' + 
-          '<img id="' + element_id + '-imagefield" style="display: none;" />' + 
-          '<a href="#" data-role="button" id="' + element_id + '-button">' + button_text + '</a>' +
+          '<div id="' + element.id + '-imagefield-msg"></div>' + 
+          '<img id="' + element.id + '-imagefield" style="display: none;" />' + 
+          '<a href="#" data-role="button" id="' + element.id + '-button">' + button_text + '</a>' +
         '</div>';
         // Open extra javascript declaration.
         html += '<script type="text/javascript">';
@@ -439,7 +483,7 @@ function _drupalgap_form_render_element(form, element) {
         // Define success callback function.
         var imagefield_success = element_id_base + '_success';
         html += 'function ' + imagefield_success + '(imageData) {' +
-          '_image_phonegap_camera_getPicture_success({field_name:"' + element.name + '", image:imageData, id:"' + element_id + '"})' +
+          '_image_phonegap_camera_getPicture_success({field_name:"' + element.name + '", image:imageData, id:"' + element.id + '"})' +
         '}';
         // Determine image quality.
         var quality = 50;
@@ -447,7 +491,7 @@ function _drupalgap_form_render_element(form, element) {
           quality = drupalgap.settings.camera.quality;
         }
         // Add click handler for photo button.
-        html += '$("#' + element_id + '-button").on("click",function(){' +
+        html += '$("#' + element.id + '-button").on("click",function(){' +
           'var photo_options = {' +
             'quality: ' + quality + ',' +
             'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
@@ -479,7 +523,7 @@ function _drupalgap_form_render_element(form, element) {
         var submit_attributes = {
           'type':'button',
           'data-theme':'b',
-          'id':element_id,
+          'id':element.id,
           'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
         };
         html += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
@@ -499,9 +543,7 @@ function _drupalgap_form_render_element(form, element) {
       default:
         // This form element isn't known to DrupalGap core. Does the widget's
         // module implement hook_field_widget_form()?
-        // TODO - eventually we'll want all field elements handled above to run
-        // through the new hook_field_widget_form() system.
-        if (variables.field_info_instance) {
+        /*if (variables.field_info_instance) {
           var module = variables.field_info_instance.widget.module;
           var field_widget_form_function = module + '_field_widget_form';
           if (drupalgap_function_exists(field_widget_form_function)) {
@@ -511,8 +553,7 @@ function _drupalgap_form_render_element(form, element) {
             // form, form_state, field, instance, langcode, items, delta, element
             html += fn.call(form, null, variables.field_info_field, variables.field_info_instance, drupalgap.settings.language, form.elements[name], 0, element);
           }
-        }
-        dpm(element);
+        }*/
         break;
     }
     

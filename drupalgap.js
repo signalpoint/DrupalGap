@@ -86,7 +86,6 @@ var drupalgap = {
   'router_path':'', /* The current menu router path. */
   'services':{},
   'sessid':null,
-  taxonomy_vocabularies:false, /* holds the services index of vocabularies */
   'theme_path':'',
   'themes':[],
   'theme_registry':{},

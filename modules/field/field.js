@@ -95,6 +95,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
       $.each(fields, function(name, field){
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
+          var delta = 0;
           var default_value = field.default_value;
           if (entity[name] && entity[name].length != 0 && entity[name][language][0].value) {
             default_value = entity[name][language][0].value;
@@ -106,10 +107,11 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
             'default_value':default_value, /* this will go away soon */
             'description':field.description,
           };
-          // Now attach the field items within the language code. Note, it
-          // appears not all fields have a language code to use here, e.g.
-          // taxonomy term reference field don't!
-          form.elements[name][language] = {
+          // Now attach the field items within the language code.
+          // TODO - It appears not all fields have a language code to use here,
+          // for example taxonomy term reference fields don't!
+          form.elements[name][language] = {};
+          form.elements[name][language][delta] = {
             'default_value':default_value
           };
         }
@@ -123,7 +125,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
 
 /**
  * Given a field name, this will return the key that should be used when
- * settings its value on an entity. If the field name is not a field, it returns
+ * setting its value on an entity. If the field name is not a field, it returns
  * false.
  */
 function drupalgap_field_key(field_name) {
