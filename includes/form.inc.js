@@ -378,19 +378,67 @@ function _drupalgap_form_render_element(form, element) {
     // Extract the element name.
     var name = element.name;
     
+    // Grab the language.
+    var language = drupalgap.settings.language;
+    
     // Generate default variables.
     var variables = {
-      attributes:{
-      'id':element.id
-      }
+      attributes:{}
     };
-    
-    // If this element is a field, grab the info instance and info field for the
-    // field, then attach them both to the variables object so all theme
-    // functions will have access to that data.
     if (element.is_field) {
-      variables.field_info_field = element.field_info_field;
-      variables.field_info_instance = element.field_info_instance;
+      // Grab the info instance and info field for the field, then attach them
+      // both to the variables object so all theme functions will have access
+      // to that data.
+      variables = {
+        field_info_field:element.field_info_field,
+        field_info_instance:element.field_info_instance
+      };
+      // What's the cardinatlity of this field?
+      var cardinality = parseInt(element.field_info_field.cardinality);
+      if (cardinality == -1) {
+        cardinality = 1; // we'll just add one element for now, until we
+                         // figure out how to handle the 'add another
+                         // item' feature.
+      }
+      // What module handles this element?
+      var module = element.field_info_instance.widget.module;
+      dpm(module);
+      dpm(cardinality);
+      // Determine the hook_field_widget_form() function for this field, then
+      // call it. Build the widget arguments into an array so we can apply them
+      // to the widget function.
+      var field_widget_form_function = module + '_field_widget_form';
+      if (drupalgap_function_exists(field_widget_form_function)) {
+        var fn = window[field_widget_form_function];
+        var widget_arguments = [];
+        widget_arguments.push(form);
+        widget_arguments.push(null);
+        widget_arguments.push(element.field_info_field);
+        widget_arguments.push(element.field_info_instance);
+        widget_arguments.push(language);
+        widget_arguments.push(form.elements[name][language]);
+        widget_arguments.push(0);
+        widget_arguments.push(element);
+        for (var delta = 0; delta < cardinality; delta++) {
+          widget_arguments[6] = delta;
+          fn.apply(null, widget_arguments);
+        }
+      }
+      else {
+        console.log('WARNING: _drupalgap_form_render_element() - ' + field_widget_form_function + '() does not exist!');
+      }
+      /*if (variables.field_info_instance) {
+        
+        
+        
+          using_field_widget_form = true;
+          // Grab the field widget implementor function, then call it.
+          
+        }
+      }*/
+    }
+    else {
+      variables.attributes.id = element.id;
     }
     
     // If there wasn't a default value provided, set one. Then set the default
@@ -555,19 +603,6 @@ function _drupalgap_form_render_element(form, element) {
         delete variables.attributes.value;
         break;
       default:
-        // This form element isn't known to DrupalGap core. Does the widget's
-        // module implement hook_field_widget_form()?
-        /*if (variables.field_info_instance) {
-          var module = variables.field_info_instance.widget.module;
-          var field_widget_form_function = module + '_field_widget_form';
-          if (drupalgap_function_exists(field_widget_form_function)) {
-            using_field_widget_form = true;
-            // Grab the field widget implementor function, then call it.
-            var fn = window[field_widget_form_function];
-            // form, form_state, field, instance, langcode, items, delta, element
-            html += fn.call(form, null, variables.field_info_field, variables.field_info_instance, drupalgap.settings.language, form.elements[name], 0, element);
-          }
-        }*/
         break;
     }
     

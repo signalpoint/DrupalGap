@@ -183,3 +183,33 @@ function text_field_formatter_view(entity_type, entity, field, instance, langcod
   catch (error) { drupalgap_error(error); }
 }
 
+/**
+ * Implements hook_field_widget_form().
+ */
+function text_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
+  try {
+    dpm('text_field_widget_form');
+    //dpm(form);
+    dpm(form.elements[element.name][langcode][delta]);
+    //dpm(arguments);
+    // Determine the widget type, then set the delta item's type property.
+    var type = null;
+    switch (element.type) {
+      case "text":
+        type = 'textfield';
+        break;
+      case 'textarea':
+      case 'text_long':
+      case "text_with_summary":
+      case 'text_textarea':
+        type = 'textarea';
+        // Add value to variables and remove the value attribute.
+        //variables.value = element.default_value;
+        //delete variables.attributes.value;
+    }
+    form.elements[element.name][langcode][delta].type = type;
+    dpm(form.elements[element.name][langcode][delta]);
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
