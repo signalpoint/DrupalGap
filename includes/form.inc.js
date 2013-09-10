@@ -53,7 +53,7 @@ function drupalgap_form_get_element_id(name, form_id) {
     // Any language code to append to the id?
     if (arguments[2]) { id += '-' + arguments[2]; }
     // Any delta value to append to the id?
-    if (typeof arguments[3] !== 'undefined') { id += '-' + arguments[3]; }
+    if (typeof arguments[3] !== 'undefined') { id += '-' + arguments[3] + '-value'; }
     return id;
   }
   catch (error) {
@@ -72,10 +72,6 @@ function drupalgap_form_get_element_id(name, form_id) {
 // css selectors used in jQuery and CSS. What to do?
 function drupalgap_form_render(form) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_form_render()');
-      console.log(JSON.stringify(form));
-    }
     // If no form id is provided, warn the user.
     if (!form.id) {
       return '<p>drupalgap_form_render() - missing form id!</p>' + JSON.stringify(form);
@@ -91,9 +87,7 @@ function drupalgap_form_render(form) {
     '</div></form>';
     return form_html;
   }
-  catch (error) {
-    alert('drupalgap_form_render - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -215,6 +209,9 @@ function drupalgap_form_load(form_id) {
       // Grab the form's function.
       var fn = window[function_name];
       
+      // Determine the language code.
+      var language = drupalgap.settings.language;
+      
       // Build the form arguments by iterating over each argument then adding
       // each to to the form arguments, afterwards remove the argument at index
       // zero because that is the form id.
@@ -239,7 +236,7 @@ function drupalgap_form_load(form_id) {
         consolidated_arguments.push(form);
         consolidated_arguments.push(form_state);
         $.each(form_arguments, function(index, argument){
-          consolidated_arguments.push(argument);    
+          consolidated_arguments.push(argument);
         });
         form = fn.apply(null, Array.prototype.slice.call(consolidated_arguments));
       }
@@ -249,37 +246,54 @@ function drupalgap_form_load(form_id) {
       // options and attributes on an element without having to worry about
       // testing for nulls and creating empty properties first.
       $.each(form.elements, function(name, element){
-          if (!element.options) {
-            form.elements[name].options = {attributes:{}};
-          }
-          else if (!element.options.attributes) {
-            form.elements[name].options.attributes = {};
-          }
-          // Is this element a field?
+          // If this element is a field, load its field_info_field and
+          // field_info_instance onto the element.
           var element_is_field = false;
           var field_info_field = drupalgap_field_info_field(name);
-          var delta = null;
           // TODO - since only nodes have a 'type' element on the form, no other
           // entity types have their field info attached to the variables object.
           if (field_info_field && form.elements.type) {
             element_is_field = true;
             form.elements[name].field_info_field = field_info_field;
             form.elements[name].field_info_instance = drupalgap_field_info_instance(form.entity_type, name, form.elements.type.default_value);
-            delta = 0;
           }
           form.elements[name].is_field = element_is_field;
-          // If no id is set on the element, set it. Generate the html id
-          // attribute for this element, then save the id on the element object.
           // If the element is a field, we'll append a language code and delta
-          // value to the id.
-          if (!form.elements[name].options.attributes.id) {
-            var id = null;
-            if (element_is_field) {
-              id = drupalgap_form_get_element_id(name, form.id, drupalgap.settings.language, delta);
+          // value to the id, along with the field items appeneded onto the
+          // element is the language code and delta values.
+          var id = null;
+          if (element_is_field) {
+            //dpm(element.field_info_field);
+            //dpm(element.field_info_instance);
+            // What's number of allowed values (cardinality) on this field? A
+            // cardinality of -1 means the field has unlimited values.
+            var cardinality = parseInt(element.field_info_field.cardinality);
+            if (cardinality == -1) {
+              cardinality = 1; // we'll just add one element for now, until we
+                               // figure out how to handle the 'add another
+                               // item' feature.
             }
-            else {
-              id = drupalgap_form_get_element_id(name, form.id);
+            form.elements[name][language] = {};
+            for (var delta = 0; delta < cardinality; delta++) {
+              // Generate the id for this element field item and set it and
+              // some default options onto the element item.
+              id = drupalgap_form_get_element_id(name, form.id, language, delta);
+              form.elements[name][language][delta] = {
+                'id':id,
+                options:{attributes:{'id':id}}
+              };
             }
+          }
+          else {
+            // This element is not a field, setup default options if none
+            // have been provided. Then set the element id.
+            if (!element.options) {
+              form.elements[name].options = {attributes:{}};
+            }
+            else if (!element.options.attributes) {
+              form.elements[name].options.attributes = {};
+            }
+            id = drupalgap_form_get_element_id(name, form.id);
             form.elements[name].id = id;
             form.elements[name].options.attributes.id = id;
           }
