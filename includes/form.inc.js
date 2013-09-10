@@ -163,7 +163,7 @@ function drupalgap_form_state_values_assemble(form) {
       console.log(JSON.stringify(form_state));
     }
     dpm(form);
-    dpm(form_state)
+    dpm(form_state);
     return form_state;
   }
   catch (error) {
@@ -263,6 +263,8 @@ function drupalgap_form_load(form_id) {
           // entity types have their field info attached to the variables object.
           if (field_info_field && form.elements.type) {
             element_is_field = true;
+            form.elements[name].field_info_field = field_info_field;
+            form.elements[name].field_info_instance = drupalgap_field_info_instance(form.entity_type, name, form.elements.type.default_value);
             delta = 0;
           }
           form.elements[name].is_field = element_is_field;
@@ -373,10 +375,8 @@ function _drupalgap_form_render_element(form, element) {
     // field, then attach them both to the variables object so all theme
     // functions will have access to that data.
     if (element.is_field) {
-      var field_info_field = drupalgap_field_info_field(name);
-      var field_info_instance = drupalgap_field_info_instance(form.entity_type, name, form.elements.type.default_value);
-      variables.field_info_field = field_info_field;
-      variables.field_info_instance = field_info_instance;
+      variables.field_info_field = element.field_info_field;
+      variables.field_info_instance = element.field_info_instance;
     }
     
     // If there wasn't a default value provided, set one. Then set the default
