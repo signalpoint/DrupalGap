@@ -265,8 +265,8 @@ function drupalgap_form_load(form_id) {
           if (element_is_field) {
             //dpm(element.field_info_field);
             //dpm(element.field_info_instance);
-            // What's number of allowed values (cardinality) on this field? A
-            // cardinality of -1 means the field has unlimited values.
+            // What's the number of allowed values (cardinality) on this field?
+            // A cardinality of -1 means the field has unlimited values.
             var cardinality = parseInt(element.field_info_field.cardinality);
             if (cardinality == -1) {
               cardinality = 1; // we'll just add one element for now, until we
@@ -385,14 +385,21 @@ function _drupalgap_form_render_element(form, element) {
     var variables = {
       attributes:{}
     };
+    
+    // Determine how many item(s) we're using on this element. Field elements
+    // are bundle in a language code and then keyed by a delta value. Other
+    // properties like nid, uid, title, etc are not bundled in a language code
+    // so we'll treat them as a signel item without a language code and delta.
+    
+    var items = null;
+    
     if (element.is_field) {
       // Grab the info instance and info field for the field, then attach them
       // both to the variables object so all theme functions will have access
       // to that data.
-      variables = {
-        field_info_field:element.field_info_field,
-        field_info_instance:element.field_info_instance
-      };
+      variables.field_info_field = element.field_info_field;
+      variables.field_info_instance = element.field_info_instance;
+      
       // What's the cardinatlity of this field?
       var cardinality = parseInt(element.field_info_field.cardinality);
       if (cardinality == -1) {
@@ -404,12 +411,12 @@ function _drupalgap_form_render_element(form, element) {
       var module = element.field_info_instance.widget.module;
       dpm(module);
       dpm(cardinality);
-      // Determine the hook_field_widget_form() function for this field, then
-      // call it. Build the widget arguments into an array so we can apply them
-      // to the widget function.
+      // Determine the hook_field_widget_form() function for this field. 
       var field_widget_form_function = module + '_field_widget_form';
       if (drupalgap_function_exists(field_widget_form_function)) {
         var fn = window[field_widget_form_function];
+        // Build the widget arguments into an array so we can apply them to the
+        // widget function.
         var widget_arguments = [];
         widget_arguments.push(form);
         widget_arguments.push(null);
@@ -419,51 +426,97 @@ function _drupalgap_form_render_element(form, element) {
         widget_arguments.push(form.elements[name][language]);
         widget_arguments.push(0);
         widget_arguments.push(element);
+        // Iterate over each delta and call the field widget hook.
         for (var delta = 0; delta < cardinality; delta++) {
+          // Replace the delta value in the arguments, then call the hook.
           widget_arguments[6] = delta;
           fn.apply(null, widget_arguments);
         }
+        // Extract the field items that were placed onto the form by the field
+        // widget hook.
+        items = form.elements[name][language];
       }
       else {
         console.log('WARNING: _drupalgap_form_render_element() - ' + field_widget_form_function + '() does not exist!');
       }
-      /*if (variables.field_info_instance) {
-        
-        
-        
-          using_field_widget_form = true;
-          // Grab the field widget implementor function, then call it.
-          
-        }
-      }*/
     }
     else {
-      variables.attributes.id = element.id;
+      items = {0:element};
+      //variables.attributes.id = element.id;
     }
     
-    // If there wasn't a default value provided, set one. Then set the default
-    // value into the variables' attributes.
-    if (!element.default_value) { element.default_value = ''; }
-    variables.attributes.value = element.default_value;
+    if (!items || items.length == 0) { return html; }
     
     // Open the element.
     if (element.type != 'hidden') { html += '<div>'; }
     
-    // Add a label to all fields, except submit and hidden fields.
-    if (element.type != 'submit' && element.type != 'hidden') {
-      html += theme('form_element_label', {'element':element});
+    dpm(name);
+    
+    $.each(items, function(index, item){
+        
+        dpm(item);
+        variables.attributes.id = item.id;
+        
+        // Add a label to the element, except submit and hidden elements.
+        if (index == 0 && element.type != 'submit' && element.type != 'hidden') {
+          var theme_variables = null;
+          if (element.is_field) {
+            item.title = element.title;
+            theme_variables = {'element':item};
+          }
+          else { theme_variables = {'element':element}; }
+          html += theme('form_element_label', theme_variables);
+        }
+        
+        // If there wasn't a default value provided, set one. Then set the default
+        // value into the variables' attributes.
+        if (!item.default_value) { item.default_value = ''; }
+        variables.attributes.value = item.default_value;
+        
+        // Merge element attributes into the variables object.
+        variables.attributes = $.extend({}, variables.attributes, item.options.attributes);
+        
+        // Depending on the element type, if necessary, adjust the variables and/or
+        // theme function to be used, then render the element by calling its theme
+        // function.
+        var theme_function = item.type;
+        
+        // If the element isn't an outlier, run it through the theme system.
+        if (item.type != 'submit' && item.type != 'image') {
+          // Theme the element.
+          if (drupalgap_function_exists('theme_' + theme_function)) {
+            html += theme(theme_function, variables);
+          }
+          else {
+            if (item.markup || item.markup == '') {
+              html += item.markup; 
+            }
+            else {
+              var msg = 'Field ' + item.type + ' not supported.';
+              html += '<div><em>' + msg + '</em></div>';
+              console.log('WARNING: _drupalgap_form_render_element() - ' + msg);
+            }
+          }
+        }
+        
+        
+    });
+    
+    // Added element description.
+    if (element.description && element.type != 'hidden') {
+      html += '<div>' + element.description + '</div>';
     }
     
-    // Remember if we are going to use a module for the widget's implementation.
-    var using_field_widget_form = false;
+    // Close element and add to form elements.
+    if (element.type != 'hidden') {
+      html += '</div><div>&nbsp;</div>';
+    }
     
-    // Merge element attributes into the variables object.
-    variables.attributes = $.extend({}, variables.attributes, element.options.attributes);
+    console.log(html);
+    // Return the element html.
+    return html;
     
-    // Depending on the element type, if necessary, adjust the variables and/or
-    // theme function to be used, then render the element by calling its theme
-    // function.
-    var theme_function = element.type;
+    
     
     // The following element types apply cleanly to their corresponding theme
     // functions:
@@ -609,36 +662,7 @@ function _drupalgap_form_render_element(form, element) {
     // Give modules a chance to alter the variables.
     //module_invoke_all('form_element_alter', form, element, variables);
     
-    // If the element isn't an outlier, run it through the theme system.
-    if (element.type != 'submit' && element.type != 'image' && !using_field_widget_form) {
-      // Theme the element.
-      if (drupalgap_function_exists('theme_' + theme_function)) {
-        html += theme(theme_function, variables);
-      }
-      else {
-        if (element.markup || element.markup == '') {
-          html += element.markup; 
-        }
-        else {
-          var msg = 'Field ' + element.type + ' not supported.';
-          html += '<div><em>' + msg + '</em></div>';
-          console.log('WARNING: _drupalgap_form_render_element() - ' + msg);
-        }
-      }
-    }
     
-    // Added element description.
-    if (element.description && element.type != 'hidden') {
-      html += '<div>' + element.description + '</div>';
-    }
-    
-    // Close element and add to form elements.
-    if (element.type != 'hidden') {
-      html += '</div><div>&nbsp;</div>';
-    }
-    
-    // Return the element html.
-    return html;
   }
   catch (error) { drupalgap_error(error); }
 }
