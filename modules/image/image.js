@@ -49,7 +49,7 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
 /**
  * Implements hook_form_alter().
  */
-function image_form_alter(form, form_state, form_id) {
+/*function image_form_alter(form, form_state, form_id) {
   // Make potential alterations to any entity edit form that has an image field
   // element(s).
   if (form.entity_type) {
@@ -70,7 +70,7 @@ function image_form_alter(form, form_state, form_id) {
       }
     }
   }
-} 
+}*/
 
 /**
  * The success callback function used when handling PhoneGap's camera

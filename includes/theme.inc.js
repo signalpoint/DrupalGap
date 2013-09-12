@@ -261,6 +261,16 @@ function theme_link(variables) {
 }
 
 /**
+ * Implementation of theme_submit().
+ */
+function theme_submit(variables) {
+  try {
+    return '<button ' + drupalgap_attributes(variables.attributes) + '>' + variables.element.value + '</button>';
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implementation of template_preprocess_page().
  */
 function template_preprocess_page(variables) {

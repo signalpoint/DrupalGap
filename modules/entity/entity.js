@@ -150,13 +150,22 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
         // Attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-          var delta = 0;
-          eval('entity.' + name + ' = {' + language  + ':[{' + key + ':"' + value[language][delta] + '"}]}');
+          var allowed_values = form.elements[name].field_info_field.cardinality;
+          if (allowed_values == -1) {
+            allowed_values = 1; // convert unlimited value fields to one, for now...
+          }
+          entity[name] = {};
+          entity[name][language] = [];
+          for (var delta = 0; delta < allowed_values; delta++) {
+            eval('entity[name][language].push({' + key + ':"' + value[language][delta] + '"});');
+            //eval('entity.' + name + ' = {' + language  + ':[{' + key + ':"' + value[language][delta] + '"}]}');
+          }
         }
         else {
           entity[name] = value;    
         }
     });
+    dpm(entity);
     return entity;
   }
   catch (error) { drupalgap_error(error); }

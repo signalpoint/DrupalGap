@@ -110,59 +110,57 @@ function drupalgap_form_set_error(name, message) {
  */
 function drupalgap_form_state_values_assemble(form) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_form_state_values_assemble()');
-      console.log(JSON.stringify(arguments));
-    }
     var form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
-      // Set delta if it is a field, also determine the css selector for the
-      // form element.
-      var delta = null;
       var id = null;
       if (element.is_field) {
-        delta = 0;
-        id = drupalgap_form_get_element_id(name, form.id, drupalgap.settings.language, delta);
+        form_state.values[name] = {};
+        form_state.values[name][drupalgap.settings.language] = {};
+        var allowed_values = element.field_info_field.cardinality;
+        if (allowed_values == -1) {
+          allowed_values = 1; // Convert unlimited value field to one for now...
+        }
+        for (var delta = 0; delta < allowed_values; delta++) {
+          id = drupalgap_form_get_element_id(name, form.id, drupalgap.settings.language, delta);
+          form_state.values[name][drupalgap.settings.language][delta] = _drupalgap_form_state_values_assemble_get_element_value(id, element);
+        }
       }
       else {
         id = drupalgap_form_get_element_id(name, form.id);
-      }
-      var selector = '';
-      if (element.type == 'radios') {
-        selector = 'input:radio[name="' + id  + '"]:checked';
-      }
-      else { selector = '#' + id; }
-      // Determine the value of the form element.
-      var value = null;
-      if (element.type == 'checkbox') {
-        if ($(selector).is(':checked')) { value = 1; }
-        else { value = 0; }
-      }
-      if (value == null) { value = $(selector).val(); }
-      // Set the form state value.
-      if (element.is_field) {
-        // TODO - is this the structure that Drupal follows?
-        form_state.values[name] = {};
-        form_state.values[name][drupalgap.settings.language] = {};
-        form_state.values[name][drupalgap.settings.language][delta] = value;
-      }
-      else {
-        form_state.values[name] = value;
+        form_state.values[name] = _drupalgap_form_state_values_assemble_get_element_value(id, element);
       }
     });
     // Attach the form state to drupalgap.form_states keyed by the form id.
     drupalgap.form_states[form.id] = form_state;
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(form_state));
-    }
-    dpm(form);
     dpm(form_state);
     return form_state;
   }
   catch (error) {
     alert('drupalgap_form_state_values_assemble - ' + error);
   }
+}
+
+/**
+ * 
+ */
+function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
+  try {
+    var value = null;
+    var selector = '';
+    if (element.type == 'radios') {
+      selector = 'input:radio[name="' + id  + '"]:checked';
+    }
+    else { selector = '#' + id; }
+    if (element.type == 'checkbox') {
+      if ($(selector).is(':checked')) { value = 1; }
+      else { value = 0; }
+    }
+    if (value == null) { value = $(selector).val(); }
+    if (typeof value === 'undefined') { value = null; }
+    return value;
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -409,8 +407,8 @@ function _drupalgap_form_render_element(form, element) {
       }
       // What module handles this element?
       var module = element.field_info_instance.widget.module;
-      dpm(module);
-      dpm(cardinality);
+      //dpm(module);
+      //dpm(cardinality);
       // Determine the hook_field_widget_form() function for this field. 
       var field_widget_form_function = module + '_field_widget_form';
       if (drupalgap_function_exists(field_widget_form_function)) {
@@ -450,12 +448,11 @@ function _drupalgap_form_render_element(form, element) {
     // Open the element.
     if (element.type != 'hidden') { html += '<div>'; }
     
-    dpm(name);
-    
     $.each(items, function(index, item){
         
-        dpm(item);
+        //dpm(item);
         variables.attributes.id = item.id;
+        variables.element = item;
         
         // Add a label to the element, except submit and hidden elements.
         if (index == 0 && element.type != 'submit' && element.type != 'hidden') {
@@ -481,9 +478,148 @@ function _drupalgap_form_render_element(form, element) {
         // function.
         var theme_function = item.type;
         
-        // If the element isn't an outlier, run it through the theme system.
-        if (item.type != 'submit' && item.type != 'image') {
-          // Theme the element.
+        // Make any preprocess modifications to the elements so they will map
+        // cleanly to their theme function.
+        // The following element types apply cleanly to their corresponding theme
+        // functions:
+        //   email
+        //   hidden
+        //   password
+        //   radios
+        //   select
+        //   textfield
+        //   textarea                                          
+        // The following element types need their theme function adjusted:
+        //   textarea
+        //   text_long
+        //   text_with_summary
+        //   text_textarea
+        // The following element types need their variables adjusted:
+        //   checkbox
+        //   radios
+        //   select
+        //   textarea
+        //   text_long
+        //   text_with_summary
+        //   text_textarea
+        // The following element types are not yet supported:
+        //   taxonomy_term_reference
+        //   ...
+        // The following fields are outliers and need to be converted to use a theme
+        // function.
+        //   image
+        //   submit
+        switch (item.type) {
+          case 'checkbox':
+            // If the checkbox has a default value of 1, check the box.
+            if (item.default_value == 1) { variables.checked = true; }
+            break;
+          case 'image':
+            // Set the default button text, and if a value was provided,
+            // overwrite the button text.
+            var button_text = 'Add Image';
+            if (item.value) {
+              button_text = item.value;
+            }
+            // Place a hidden input to hold the file id.
+            html += '<input id="' + item.id + '" type="hidden" value="" />';
+            // Place variables into document for PhoneGap image processing.
+            var item_id_base = item.id.replace(/-/g, '_'); 
+            var image_field_source = item_id_base + '_imagefield_source';
+            var imagefield_destination_type = item_id_base + '_imagefield_destination_type';
+            var imagefield_data = item_id_base + '_imagefield_data';
+            eval('var ' + image_field_source + ' = null;');
+            eval('var ' + imagefield_destination_type + ' = null;');
+            eval('var ' + imagefield_data + ' = null;');
+            // Build an imagefield widget with PhoneGap. Contains a message
+            // div, an image item, and button to add an image.
+            //'<a href="#" data-role="button" id="' + item.id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
+            html += '<div>' + 
+              '<div id="' + item.id + '-imagefield-msg"></div>' + 
+              '<img id="' + item.id + '-imagefield" style="display: none;" />' + 
+              '<a href="#" data-role="button" id="' + item.id + '-button">' + button_text + '</a>' +
+            '</div>';
+            // Open extra javascript declaration.
+            html += '<script type="text/javascript">';
+            // Add device ready listener for PhoneGap camera.
+            var event_listener = item_id_base +  '_imagefield_ready';
+            html += '$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").on("pageshow",function(){' +
+              'document.addEventListener("deviceready", ' + event_listener + ', false);' +
+            '});' + 
+            'function ' + event_listener +  '() {' +
+              image_field_source + ' = navigator.camera.PictureSourceType;' +
+              imagefield_destination_type + ' = navigator.camera.DestinationType;' +
+            '}';
+            // Define error callback function.
+            var imagefield_error = item_id_base + '_error';
+            html += 'function ' + imagefield_error + '(message) {' +
+              'if (message != "Camera cancelled.") {' +
+                'alert("' + imagefield_error + ' - " + message);' +
+              '}' +
+            '}';
+            // Define success callback function.
+            var imagefield_success = item_id_base + '_success';
+            html += 'function ' + imagefield_success + '(imageData) {' +
+              '_image_phonegap_camera_getPicture_success({field_name:"' + item.name + '", image:imageData, id:"' + item.id + '"})' +
+            '}';
+            // Determine image quality.
+            var quality = 50;
+            if (drupalgap.settings.camera.quality) {
+              quality = drupalgap.settings.camera.quality;
+            }
+            // Add click handler for photo button.
+            html += '$("#' + item.id + '-button").on("click",function(){' +
+              'var photo_options = {' +
+                'quality: ' + quality + ',' +
+                'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
+                'correctOrientation: true' +
+              '};' +
+              'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
+            '});';
+            // Close extra javascript declaration.
+            html += '</script>';
+            break;
+          case "radios":
+            // Add options and value to variables and remove the value attribute.
+            variables.options = item.options;
+            variables.value = item.default_value;
+            delete variables.attributes.value;
+            break;
+          case "select":
+            // Add options and value to variables and remove the value attribute.
+            variables.options = item.options;
+            variables.value = item.default_value;
+            delete variables.attributes.value;
+            // Required?
+            if (item.required) {
+              variables.options[-1] = 'Select';
+              variables.value = -1;
+            }
+            break;
+          case "submit":
+            variables.attributes.onclick = '_drupalgap_form_submit(\'' + form.id + '\');';
+            if (!variables.attributes['data-theme']) {
+              variables.attributes['data-theme'] = 'b';
+            }
+            break;
+          case "text":
+            theme_function = 'textfield';
+            break;
+          case 'textarea':
+          case 'text_long':
+          case "text_with_summary":
+          case 'text_textarea':
+            theme_function = 'textarea';
+            // Add value to variables and remove the value attribute.
+            variables.value = item.default_value;
+            delete variables.attributes.value;
+            break;
+        }
+        
+        
+        // If the item isn't an outlier, run it through the theme system.
+        //if (item.type != 'submit' && item.type != 'image') {
+          // Theme the item.
           if (drupalgap_function_exists('theme_' + theme_function)) {
             html += theme(theme_function, variables);
           }
@@ -497,12 +633,12 @@ function _drupalgap_form_render_element(form, element) {
               console.log('WARNING: _drupalgap_form_render_element() - ' + msg);
             }
           }
-        }
+        //}
         
         
     });
     
-    // Added element description.
+    // Add element description.
     if (element.description && element.type != 'hidden') {
       html += '<div>' + element.description + '</div>';
     }
@@ -512,152 +648,8 @@ function _drupalgap_form_render_element(form, element) {
       html += '</div><div>&nbsp;</div>';
     }
     
-    console.log(html);
     // Return the element html.
     return html;
-    
-    
-    
-    // The following element types apply cleanly to their corresponding theme
-    // functions:
-    //   email
-    //   hidden
-    //   password
-    //   radios
-    //   select
-    //   textfield
-    //   textarea                                          
-    // The following element types need their theme function adjusted:
-    //   textarea
-    //   text_long
-    //   text_with_summary
-    //   text_textarea
-    // The following element types need their variables adjusted:
-    //   checkbox
-    //   radios
-    //   select
-    //   textarea
-    //   text_long
-    //   text_with_summary
-    //   text_textarea
-    // The following element types are not yet supported:
-    //   taxonomy_term_reference
-    //   ...
-    // The following fields are outliers and need to be converted to use a theme
-    // function.
-    //   image
-    //   submit
-    switch (element.type) {
-      case 'checkbox':
-        // If the checkbox has a default value of 1, check the box.
-        if (element.default_value == 1) { variables.checked = true; }
-        break;
-      case 'image':
-        // Set the default button text, and if a value was provided,
-        // overwrite the button text.
-        var button_text = 'Add Image';
-        if (element.value) {
-          button_text = element.value;
-        }
-        // Place a hidden input to hold the file id.
-        html += '<input id="' + element.id + '" type="hidden" value="" />';
-        // Place variables into document for PhoneGap image processing.
-        var element_id_base = element.id.replace(/-/g, '_'); 
-        var image_field_source = element_id_base + '_imagefield_source';
-        var imagefield_destination_type = element_id_base + '_imagefield_destination_type';
-        var imagefield_data = element_id_base + '_imagefield_data';
-        eval('var ' + image_field_source + ' = null;');
-        eval('var ' + imagefield_destination_type + ' = null;');
-        eval('var ' + imagefield_data + ' = null;');
-        // Build an imagefield widget with PhoneGap. Contains a message
-        // div, an image element, and button to add an image.
-        //'<a href="#" data-role="button" id="' + element.id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
-        html += '<div>' + 
-          '<div id="' + element.id + '-imagefield-msg"></div>' + 
-          '<img id="' + element.id + '-imagefield" style="display: none;" />' + 
-          '<a href="#" data-role="button" id="' + element.id + '-button">' + button_text + '</a>' +
-        '</div>';
-        // Open extra javascript declaration.
-        html += '<script type="text/javascript">';
-        // Add device ready listener for PhoneGap camera.
-        var event_listener = element_id_base +  '_imagefield_ready';
-        html += '$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").on("pageshow",function(){' +
-          'document.addEventListener("deviceready", ' + event_listener + ', false);' +
-        '});' + 
-        'function ' + event_listener +  '() {' +
-          image_field_source + ' = navigator.camera.PictureSourceType;' +
-          imagefield_destination_type + ' = navigator.camera.DestinationType;' +
-        '}';
-        // Define error callback function.
-        var imagefield_error = element_id_base + '_error';
-        html += 'function ' + imagefield_error + '(message) {' +
-          'if (message != "Camera cancelled.") {' +
-            'alert("' + imagefield_error + ' - " + message);' +
-          '}' +
-        '}';
-        // Define success callback function.
-        var imagefield_success = element_id_base + '_success';
-        html += 'function ' + imagefield_success + '(imageData) {' +
-          '_image_phonegap_camera_getPicture_success({field_name:"' + element.name + '", image:imageData, id:"' + element.id + '"})' +
-        '}';
-        // Determine image quality.
-        var quality = 50;
-        if (drupalgap.settings.camera.quality) {
-          quality = drupalgap.settings.camera.quality;
-        }
-        // Add click handler for photo button.
-        html += '$("#' + element.id + '-button").on("click",function(){' +
-          'var photo_options = {' +
-            'quality: ' + quality + ',' +
-            'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
-            'correctOrientation: true' +
-          '};' +
-          'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
-        '});';
-        // Close extra javascript declaration.
-        html += '</script>';
-        break;
-      case "radios":
-        // Add options and value to variables and remove the value attribute.
-        variables.options = element.options;
-        variables.value = element.default_value;
-        delete variables.attributes.value;
-        break;
-      case "select":
-        // Add options and value to variables and remove the value attribute.
-        variables.options = element.options;
-        variables.value = element.default_value;
-        delete variables.attributes.value;
-        // Required?
-        if (element.required) {
-          variables.options[-1] = 'Select';
-          variables.value = -1;
-        }
-        break;
-      case "submit":
-        var submit_attributes = {
-          'type':'button',
-          'data-theme':'b',
-          'id':element.id,
-          'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
-        };
-        html += '<button ' + drupalgap_attributes(submit_attributes) + '>' + element.value + '</button>';
-        break;
-      case "text":
-        theme_function = 'textfield';
-        break;
-      case 'textarea':
-      case 'text_long':
-      case "text_with_summary":
-      case 'text_textarea':
-        theme_function = 'textarea';
-        // Add value to variables and remove the value attribute.
-        variables.value = element.default_value;
-        delete variables.attributes.value;
-        break;
-      default:
-        break;
-    }
     
     // Give modules a chance to alter the variables.
     //module_invoke_all('form_element_alter', form, element, variables);
