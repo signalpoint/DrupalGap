@@ -266,6 +266,15 @@ function hook_404(router_path) {}
 function hook_entity_post_render_content(entity) {}
 
 /**
+ * Called after drupalgap_entity_render_field() assembles the field content
+ * string. Use this to make modifications to the HTML output of the entity's
+ * field before it is displayed. The field content will be inside of
+ * reference.content, so to make modifications, change reference.content. For
+ * more info: http://stackoverflow.com/questions/518000/is-javascript-a-pass-by-reference-or-pass-by-value-language
+ */
+function hook_entity_post_render_field(entity, field_name, field, reference) {}
+
+/**
  * Called after drupalgap_image_path() assembles the image path. Use this hook
  * to make modifications to the image path. Return the modified path, or false
  * to allow the default path to be generated.

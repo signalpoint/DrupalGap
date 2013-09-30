@@ -133,6 +133,12 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
           break;
       }
     }
+    // Give modules a chance to alter the field content.
+    var reference = {'content':content};
+    module_invoke_all('entity_post_render_field', entity, field_name, field, reference);
+    if (reference.content != content) {
+      return reference.content;
+    }
     return content;
   }
   catch (error) { drupalgap_error(error); }
