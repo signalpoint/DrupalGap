@@ -880,9 +880,6 @@ function _entity_load_from_local_storage(entity_type, entity_id, options) {
   catch (error) { drupalgap_error(error); }
 }
 
-/**
- *
- */
 /*function element_set_attributes(element, map) {
   try {
     $.each(map, function(property, attribute){

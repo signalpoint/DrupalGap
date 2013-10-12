@@ -252,7 +252,14 @@ function hook_deviceready() {}
  */
 function hook_services_success(url, data) { }
 
+/**
+ * A hook used to declare custom block information.
+ */
 function hook_block_info() {}
+
+/**
+ * A hook used to render custom blocks.
+ */
 function hook_block_view() {}
 
 /**
@@ -263,13 +270,26 @@ function hook_block_view() {}
 function hook_entity_post_render_content(entity) {}
 
 /**
+ * This hook is used to make alterations to existing forms.
+ */
+function hook_form_alter(form, form_state, form_id) {}
+
+/**
  * Called after drupalgap_image_path() assembles the image path. Use this hook
  * to make modifications to the image path. Return the modified path, or false
  * to allow the default path to be generated.
  */
 function hook_image_path_alter(src) { }
 
+/**
+ * This hook is used by modules that need to execute custom code when the module
+ * is loaded.
+ */
 function hook_install() {}
+
+/**
+ * This hook is used to declare menu paths for custom pages.
+ */
 function hook_menu() {}
 
 function hook_mvc_model() {

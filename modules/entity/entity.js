@@ -80,7 +80,8 @@ function drupalgap_entity_render_content(entity_type, entity) {
 }
 
 /**
- *
+ * Given an entity_type, the entity, a field name, and the field this will
+ * render the field using the appropriate hook_field_formatter_view().
  */
 function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
   try {
