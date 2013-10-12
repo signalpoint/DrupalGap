@@ -12,6 +12,8 @@ drupalgap.services.drupalgap_system = {
         drupalgap.entity_info = data.entity_info;
         drupalgap.field_info_instances = data.field_info_instances;
         drupalgap.field_info_fields = data.field_info_fields;
+        drupalgap.taxonomy_vocabularies = data.taxonomy_vocabularies;
+        dpm(drupalgap.taxonomy_vocabularies);
         drupalgap_service_resource_extract_results({
           'service':'drupalgap_system',
           'resource':'connect',
