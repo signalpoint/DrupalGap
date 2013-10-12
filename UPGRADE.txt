@@ -40,32 +40,6 @@ version of DrupalGap to another.
 
   ---
 
-  Loading entities from the server has changed from synchronous to asynchronous.
-  This means that any time you load an entity, it will be loaded asynchronously
-  and you must provide a success callback to retrieve and use the entity. For
-  example, before you could simply use:
-  
-    var node = node_load(123);
-    if (node) {
-      alert('Loaded: ' + node.title);
-    }
-  
-  Now that it is an asynchronous call, code like this would be used instead to
-  retrieve a node:
-  
-    node_load(123, {
-        success:function(node){
-          alert('Loaded: ' + node.title);
-        }
-    });
-  
-  This change includes all core entity types. So any previous calls to
-  node_load(), comment_load(), file_load(), user_load(), taxonomy_term_load(),
-  etc must all be replaced with an asynchronous usage like the example code
-  above.
-  
-  ---
-  
   See https://github.com/signalpoint/DrupalGap/issues/119 for information about
   adjusting any custom forms you may have previously created in a module. Now,
   the form and form_state will be passed to the form generation function. Your
