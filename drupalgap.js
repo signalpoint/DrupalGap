@@ -85,7 +85,7 @@ var drupalgap = {
   'router_path':'', /* The current menu router path. */
   'services':{},
   'sessid':null,
-  taxonomy_vocabularies:null, /* holds the services index of vocabularies */
+  taxonomy_vocabularies:false, /* holds the services index of vocabularies */
   'theme_path':'',
   'themes':[],
   'theme_registry':{},
@@ -683,12 +683,18 @@ function drupalgap_item_list_populate(list_css_selector, items) {
  * menu_execute_active_handler() to prevent jQM from firing inline page event
  * handlers more than once.
  */
-function drupalgap_jqm_page_event_fire(event, callback) {
+function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
   try {
-    if ($.inArray(event, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
-      drupalgap.page.jqm_events.push(event);
+    // Concatenate the event name and the callback name together into a unique
+    // key so multiple callbacks can handle the same event.
+    var key = event + '-' + callback;
+    if ($.inArray(key, drupalgap.page.jqm_events) == -1 && drupalgap_function_exists(callback)) {
+      drupalgap.page.jqm_events.push(key);
       var fn = window[callback];
-      fn();
+      if (page_arguments) {
+        fn.apply(null, Array.prototype.slice.call(page_arguments));
+      }
+      else { fn(); }
     }
   }
   catch (error) {
@@ -717,7 +723,7 @@ function drupalgap_jqm_page_events() {
       'pageloadfailed',
       'pageremove',
       'pageshow'
-    ];
+    ];        
   }
   catch (error) {
     alert('drupalgap_jqm_page_events - ' + error);

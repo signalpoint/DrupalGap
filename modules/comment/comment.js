@@ -26,6 +26,8 @@ function comment_edit(form, form_state, comment) {
     
       // Add the entity's core fields to the form.
       drupalgap_entity_add_core_fields_to_form('comment', bundle, form, comment);
+      // TODO - fields like 'name' and 'mail' should not be shown when the user
+      // is authenticated.
       
       // Add the fields for this content type to the form.
       drupalgap_field_info_instances_add_to_form('comment', bundle, form, comment);
