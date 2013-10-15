@@ -157,6 +157,19 @@ function theme_image(variables) {
 }
 
 /**
+ * Implementation of theme_image_style().
+ */
+function theme_image_style(variables) {
+  try {
+    variables.path = image_style_url(variables.style_name, variables.path);
+    return theme_image(variables);
+  }
+  catch (error) {
+    alert('theme_image - ' + error);
+  }
+}
+
+/**
  * Theme's an item from an MVC collection.
  */
 function theme_item(variables) {
