@@ -42,13 +42,10 @@ version of DrupalGap to another.
 
   Loading entities from the server has changed from synchronous to asynchronous.
   This means that any time you load an entity, it will be loaded asynchronously
-  and you must provide a success callback to retrieve and use the entity. For
+  and you must provide a success callback to use the retrieved entity. For
   example, before you could simply use:
   
     var node = node_load(123);
-    if (node) {
-      alert('Loaded: ' + node.title);
-    }
   
   Now that it is an asynchronous call, code like this would be used instead to
   retrieve a node:
@@ -66,6 +63,38 @@ version of DrupalGap to another.
   
   ---
   
+  Now that entities are loaded asynchronously, the page title_callback system
+  needed to be changed to asynchronous as well. For example, before we could
+  create a title_callback for a custom page like this:
+  
+    function my_module_menu() {
+      var items = {
+        my_page:{
+          title:'My Page',
+          page_callback:'my_page_callback',
+          title_callback:'my_page_title_callback',
+          title_arguments:['Good Monkey']
+        }
+      };
+      return items;
+    }
+    
+    function my_page_title_callback(my_arg) {
+      return my_arg.replace('Good', 'Bad');
+    }
+  
+  Now the title_callback for the above example would be implemented like this:
+    
+    function my_page_title_callback(callback, my_arg) {
+      callback.call(null, my_arg.replace('Good', 'Bad'));
+    }
+  
+  As you can see, title_callback implementations now take a 'callback' argument
+  that needs to be called with your custom title so the page title will be
+  properly set.
+  
+  ---
+
   See https://github.com/signalpoint/DrupalGap/issues/119 for information about
   adjusting any custom forms you may have previously created in a module. Now,
   the form and form_state will be passed to the form generation function. Your

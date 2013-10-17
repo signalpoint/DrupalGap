@@ -70,7 +70,7 @@ function system_block_view(delta) {
         return '';
         break;
       case 'title':
-        return '<h1>' + drupalgap_get_title() + '</h1>';
+        return '<h1 id="drupalgap_page_title"></h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">Powered by: ' +

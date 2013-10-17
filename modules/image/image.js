@@ -73,6 +73,21 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
 }*/
 
 /**
+ * Given and image style name and image uri, this will return the absolute URL
+ * that can be used as a src value for an img element.
+ */
+function image_style_url(style_name, path) {
+  try {
+    var src = drupalgap.settings.site_path + drupalgap.settings.base_path + path;
+    if (src.indexOf('public://') != -1) {
+      src = src.replace('public://', drupalgap.settings.file_public_path + '/styles/' + style_name + '/public/');
+    }
+    return src;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * The success callback function used when handling PhoneGap's camera
  * getPicture() call.
  */

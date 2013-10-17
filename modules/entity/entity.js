@@ -46,11 +46,16 @@ function drupalgap_entity_render_content(entity_type, entity) {
     var field_content = {};
     var field_weights = {};
     $.each(field_info, function(field_name, field){
-        if (!field.display || !field.display['default']) { return; }
+        // Determine which display mode to use. The default mode will be used
+        // if the drupalgap display mode is not present.
+        var display = field.display['default'];
+        if (field.display['drupalgap']) {
+          display = field.display['drupalgap'];
+        }
         // Save the field name and weight.
-        field_weights[field_name] = field.display['default'].weight;
+        field_weights[field_name] = display.weight;
         // Save the field content.
-        field_content[field_name] = drupalgap_entity_render_field(entity_type, entity, field_name, field);
+        field_content[field_name] = drupalgap_entity_render_field(entity_type, entity, field_name, field, display);
     });
     // Extract the field weights and sort them.
     var extracted_weights = [];
@@ -82,12 +87,12 @@ function drupalgap_entity_render_content(entity_type, entity) {
 /**
  *
  */
-function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
+function drupalgap_entity_render_field(entity_type, entity, field_name, field, display) {
   try {
     var content = '';
     // Determine module that implements the hook_field_formatter_view,
     // then determine the hook's function name, then render the field content.
-    var module = field['display']['default']['module'];
+    var module = display['module'];
     var function_name = module + '_field_formatter_view';
     if (drupalgap_function_exists(function_name)) {
       // Grab the field formatter function, then grab the field items
@@ -103,7 +108,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
           items = entity[field_name];
         }
       }
-      var elements = fn(entity_type, entity, field, null, entity.language, items, field['display']['default']);
+      var elements = fn(entity_type, entity, field, null, entity.language, items, display);
       $.each(elements, function(delta, element){
           // If the element has markup, render it as is, if it is
           // themeable, then theme it.
@@ -119,11 +124,11 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
       console.log('WARNING: drupalgap_entity_render_field - ' + function_name + '() does not exist!');
     }
     // Render the field label, if necessary.
-    if (content != '' && field['display']['default']['label'] != 'hidden') {
+    if (content != '' && display['label'] != 'hidden') {
       var label = '<h3>' + field.label + '</h3>';
       // Place the label above or below the field content.
       label = '<div>' + label + '</div>';
-      switch (field['display']['default']['label']) {
+      switch (display['label']) {
         case 'below':
           content += label;
           break;
@@ -132,6 +137,12 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
           content = label + content;
           break;
       }
+    }
+    // Give modules a chance to alter the field content.
+    var reference = {'content':content};
+    module_invoke_all('entity_post_render_field', entity, field_name, field, reference);
+    if (reference.content != content) {
+      return reference.content;
     }
     return content;
   }
@@ -465,5 +476,45 @@ function drupalgap_entity_get_primary_key(entity_type) {
   catch (error) {
     alert('drupalgap_entity_get_primary_key - ' + error);
   }
+}
+
+/**
+ * Given an entity type and an entity id, this will return a render object for
+ * the entity's page view container.
+ */
+function _drupalgap_entity_page_view_container(entity_type, entity_id) {
+  try {
+    var id = _drupalgap_entity_page_view_container_id(entity_type, entity_id);
+    return {
+      markup:'<div id="' + id + '"></div>'
+    }
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given an entity type and id, this will return the unique id to be used for
+ * the entity's page container.
+ */
+function _drupalgap_entity_page_view_container_id(entity_type, entity_id) {
+  try {
+    return entity_type + '_' + entity_id + '_container';
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given an entity type, id and page build, this will render the page build and
+ * inject it into the container on the page.
+ */
+function _drupalgap_entity_page_view_container_inject(entity_type, entity_id, build) {
+  try {
+    // Get the container id, set the drupalgap.output to the page build, then
+    // inject the rendered page into the container.
+    var id = _drupalgap_entity_page_view_container_id(entity_type, entity_id);
+    drupalgap.output = build;
+    $('#' + id).html(drupalgap_render_page());
+  }
+  catch (error) { drupalgap_error(error); }
 }
 

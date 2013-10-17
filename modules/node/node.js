@@ -287,21 +287,20 @@ function node_page_pageshow() {
 /**
  * Page callback for node/%.
  */
-function node_page_view(node) {
+function node_page_view(nid) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page_view()');
-      console.log(JSON.stringify(arguments));
-    }
-    if (node) {
-      var build = {
-        'theme':'node',
-        'node':node, // TODO - is this line of code doing anything?
-        'title':{'markup':node.title}, // TODO - this is a core field and should probably by fetched from entity.js
-        'content':{'markup':node.content},
+    if (nid) {
+      var content = {
+        container:_drupalgap_entity_page_view_container('node', nid)
       };
+      return content;
+    }
+    else { drupalgap_error('No node id provided!'); }
+    
+    if (node) {
+      
       // If the comments are hidden, do nothing.
-      if (node.comment == 0) { }
+      /*if (node.comment == 0) { }
       // If the comments are closed or open, show the comments.
       else if (node.comment == 1 || node.comment == 2) {
         
@@ -321,29 +320,34 @@ function node_page_view(node) {
                 drupalgap_get_form('comment_edit', {'nid':node.nid})
           };
         }
-      }
-      
+      }*/
       return build;
     }
     else {
       alert('node_page_view - failed to load node (' + node.nid + ')');
     }
   }
-  catch (error) {
-    alert('node_page_view - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
  * jQM pageshow handler for node/% pages.
  */
-function node_page_view_pageshow(node) {
+function node_page_view_pageshow(nid) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page_view_pageshow()');
-    }
+    node_load(nid, {
+        success:function(node){
+          var build = {
+            'theme':'node',
+            'node':node, // TODO - is this line of code doing anything?
+            'title':{'markup':node.title}, // TODO - this is a core field and should probably by fetched from entity.js
+            'content':{'markup':node.content},
+          };
+          _drupalgap_entity_page_view_container_inject('node', node.nid, build);
+        }
+    });
     // Grab some recent comments and display it.
-    if ($('#comment_listing_items_'+arg(1))) {
+    /*if ($('#comment_listing_items')) {
       drupalgap.views_datasource.call({
         'path':'drupalgap/views_datasource/drupalgap_comments/' + node.nid,
         'success':function(data) {
@@ -363,21 +367,24 @@ function node_page_view_pageshow(node) {
           drupalgap_item_list_populate("#comment_listing_items_" + node.nid, items);
         },
       });
-    }
+    }*/
   }
-  catch (error) {
-    alert('node_page_view_pageshow - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
  * The title call back function for the node view page.
  */
-function node_page_title(node) {
+function node_page_title(callback, nid) {
   try {
+    // Try to load the node title, then send it back to the given callback.
     var title = '';
-    if (node && node.title) { title = node.title; }
-    return title;
+    var node = node_load(nid, {
+        success:function(node){
+          if (node && node.title) { title = node.title; }
+          callback.call(null, title);
+        }
+    });
   }
   catch (error) { drupalgap_error(error); }
 }
