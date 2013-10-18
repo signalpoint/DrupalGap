@@ -479,12 +479,12 @@ function drupalgap_entity_get_primary_key(entity_type) {
 }
 
 /**
- * Given an entity type and an entity id, this will return a render object for
- * the entity's page view container.
+ * Given an entity type, an entity id and a mode, this will return a render
+ * object for the entity's page container.
  */
-function _drupalgap_entity_page_view_container(entity_type, entity_id) {
+function _drupalgap_entity_page_container(entity_type, entity_id, mode) {
   try {
-    var id = _drupalgap_entity_page_view_container_id(entity_type, entity_id);
+    var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
     return {
       markup:'<div id="' + id + '"></div>'
     }
@@ -493,27 +493,54 @@ function _drupalgap_entity_page_view_container(entity_type, entity_id) {
 }
 
 /**
- * Given an entity type and id, this will return the unique id to be used for
- * the entity's page container.
+ * Given an entity type, an entity id, and a mode, this will return the unique
+ * id to be used for the entity's page container.
  */
-function _drupalgap_entity_page_view_container_id(entity_type, entity_id) {
+function _drupalgap_entity_page_container_id(entity_type, entity_id, mode) {
   try {
-    return entity_type + '_' + entity_id + '_container';
+    return entity_type + '_' + entity_id + '_' + mode + '_container';
   }
   catch (error) { drupalgap_error(error); }
 }
 
 /**
- * Given an entity type, id and page build, this will render the page build and
- * inject it into the container on the page.
+ * Given an entity type, id, mode and page build, this will render the page
+ * build and inject it into the container on the page.
  */
-function _drupalgap_entity_page_view_container_inject(entity_type, entity_id, build) {
+function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode, build) {
   try {
     // Get the container id, set the drupalgap.output to the page build, then
     // inject the rendered page into the container.
-    var id = _drupalgap_entity_page_view_container_id(entity_type, entity_id);
+    var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
     drupalgap.output = build;
     $('#' + id).html(drupalgap_render_page());
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * The page callback for entity edit forms.
+ */
+function entity_page_edit(form_id, entity_type, entity_id) {
+  try {
+    var content = {
+      container:_drupalgap_entity_page_container(entity_type, entity_id, 'edit')
+    };
+    return content;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * The pageshow callback for entity edit forms.
+ */
+function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
+  try {
+    entity_load(entity_type, entity_id, {
+        success:function(entity){
+          _drupalgap_entity_page_container_inject(entity_type, entity_id, 'edit', drupalgap_get_form(form_id, entity));
+        }
+    });
   }
   catch (error) { drupalgap_error(error); }
 }

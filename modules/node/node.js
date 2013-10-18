@@ -213,8 +213,9 @@ function node_menu() {
       },
       'node/%/edit':{
         'title':'Edit',
-        'page_callback':'drupalgap_get_form',
-        'page_arguments':['node_edit', 1],
+        'page_callback':'entity_page_edit',
+        'pageshow':'entity_page_edit_pageshow',
+        'page_arguments':['node_edit', 'node', 1],
         'weight':0,
         'type':'MENU_LOCAL_TASK',
         'access_callback':'node_access',
@@ -291,7 +292,7 @@ function node_page_view(nid) {
   try {
     if (nid) {
       var content = {
-        container:_drupalgap_entity_page_view_container('node', nid)
+        container:_drupalgap_entity_page_container('node', nid, 'view')
       };
       return content;
     }
@@ -343,7 +344,7 @@ function node_page_view_pageshow(nid) {
             'title':{'markup':node.title}, // TODO - this is a core field and should probably by fetched from entity.js
             'content':{'markup':node.content},
           };
-          _drupalgap_entity_page_view_container_inject('node', node.nid, build);
+          _drupalgap_entity_page_container_inject('node', node.nid, 'view', build);
         }
     });
     // Grab some recent comments and display it.
