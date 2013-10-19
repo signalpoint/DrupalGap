@@ -176,7 +176,6 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           entity[name] = value;    
         }
     });
-    dpm(entity);
     return entity;
   }
   catch (error) { drupalgap_error(error); }
