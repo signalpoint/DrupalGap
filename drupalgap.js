@@ -1332,15 +1332,29 @@ function variable_get(name, default_value) {
 }
 
 /**
- * Given an JSON object, this will output it to the console.
+ * Given an JSON object, this will output it to the console. It accepts an
+ * optional boolean as second argument, if it is false the output sent to the
+ * console will not use pretty printing in a Chrome/Ripple environment.
  */
 function dpm(data) {
   try {
     if (data) {
       // If we're in ripple we can output it directly to the console and it will
       // have pretty printing, otherwise we'll stringify it first.
-      if (typeof parent.window.ripple === 'function') { console.log(data); }
-      else { console.log(JSON.stringify(data)); }
+      // TODO - be careful, when just using console.log() with ripple, it will
+      // always print out the final value of data (because of pass by reference)
+      // this can be very misleading for debugging things.
+      if (typeof parent.window.ripple === 'function') {
+        if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
+          console.log(JSON.stringify(data));
+        }
+        else {
+          console.log(data);
+        }
+      }
+      else {
+        console.log(JSON.stringify(data));
+      }
     }
   }
   catch (error) {
