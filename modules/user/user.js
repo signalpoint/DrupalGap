@@ -173,6 +173,7 @@ function user_menu() {
       'user/%':{
         'title':'My account',
         'page_callback':'user_view',
+        'pageshow':'user_view_pageshow',
         'page_arguments':[1],
       },
       'user/%/view':{
@@ -360,45 +361,56 @@ function user_theme() {
 }
 
 /**
- * Generate an array for rendering the given user.
+ * Page callback for user/%.
  */
-function user_view(account) {
+function user_view(uid) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('user_view()');
-      console.log(JSON.stringify(arguments));
-    }
-    // Determine the incoming arguments, and set defaults if necessary.
-    var view_mode = 'full';
-    var langcode = null;
-    if (arguments[1]) { view_mode = arguments[1]; }
-    if (arguments[2]) { langcode = arguments[2]; }
-    if (!langcode) { langcode = drupalgap.settings.language; }
-    if (account) {
-      var build = {
-        'theme':'user_profile',
-        'account':account,
-        'view_mode':view_mode,
-        'language':langcode,
-        'name':{'markup':account.name},
-        'created':{'markup':(new Date(parseInt(account.created)*1000)).toDateString()},
+    if (uid) {
+      var content = {
+        container:_drupalgap_entity_page_container('user', uid, 'view')
       };
-      // Any picture?
-      if (account.picture && account.picture.fid) {
-        build.picture = {
-          'theme':'image',
-          'path':account.picture.url,
-        };
-      }
-      return build;
+      return content;
     }
-    else {
-      alert('user_view - account was empty!');
-    }
+    else { drupalgap_error('No user id provided!'); }
   }
-  catch (error) {
-    alert('user_view - ' + error);
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * jQM pageshow handler for node/% pages.
+ */
+function user_view_pageshow(uid) {
+  try {
+    user_load(uid, {
+        success:function(account){
+          // Determine the incoming arguments, and set defaults if necessary.
+          var view_mode = 'full';
+          var langcode = null;
+          if (arguments[1]) { view_mode = arguments[1]; }
+          if (arguments[2]) { langcode = arguments[2]; }
+          if (!langcode) { langcode = drupalgap.settings.language; }
+          if (account) {
+            var build = {
+              'theme':'user_profile',
+              'account':account,
+              'view_mode':view_mode,
+              'language':langcode,
+              'name':{'markup':account.name},
+              'created':{'markup':(new Date(parseInt(account.created)*1000)).toDateString()},
+            };
+            // Any picture?
+            if (account.picture && account.picture.fid) {
+              build.picture = {
+                'theme':'image',
+                'path':account.picture.url,
+              };
+            }
+            _drupalgap_entity_page_container_inject('user', account.uid, 'view', build);
+          }
+        }
+    });
   }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
