@@ -103,11 +103,7 @@ function node_edit(form, form_state, node) {
     drupalgap_entity_add_core_fields_to_form('node', node.type, form, node);
     
     // Add the fields for this content type to the form.
-    dpm('BEFORE');
-    dpm(form.elements, false);
     drupalgap_field_info_instances_add_to_form('node', node.type, form, node);
-    dpm('AFTER');
-    dpm(form.elements);
     
     // Add submit to form.
     form.elements.submit = {
@@ -131,21 +127,6 @@ function node_edit(form, form_state, node) {
   }
   catch (error) {
     alert('node_edit - ' + error);
-  }
-}
-
-/**
- * The node edit form's validation function.
- */
-function node_edit_validate(form, form_state) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('node_edit_validate()');
-      console.log(JSON.stringify(arguments));
-    }
-  }
-  catch (error) {
-    alert('node_edit_validate - ' + error);
   }
 }
 
