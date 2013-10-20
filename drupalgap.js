@@ -421,7 +421,6 @@ function drupalgap_empty(value) {
             });
         });
     });
-    dpm(drupalgap.field_widget_info);
   }
   catch (error) {
     alert('drupalgap_field_widgets_load - ' + error);

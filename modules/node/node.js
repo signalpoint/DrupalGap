@@ -114,6 +114,9 @@ function node_edit(form, form_state, node) {
     // Add cancel button to form.
     form.buttons['cancel'] = {
       'title':'Cancel',
+      attributes:{
+        onclick:"javascript:drupalgap_back();"
+      }
     };
     
     // Add delete button to form if we're editing a node.

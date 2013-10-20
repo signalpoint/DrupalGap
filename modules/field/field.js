@@ -78,7 +78,6 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
  */
 function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, form, entity) {
   try {
-    dpm('drupalgap_field_info_instances_add_to_form');
     // Grab the field info instances for this entity type and bundle.
     var fields = drupalgap_field_info_instances(entity_type, bundle_name);
     // Use the default language, unless the entity has one specified.
@@ -109,7 +108,6 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
           // TODO - It appears not all fields have a language code to use here,
           // for example taxonomy term reference fields don't!
           if (!form.elements[name][language]) { form.elements[name][language] = {}; }
-          else { dpm('language already set'); }
           form.elements[name][language][delta] = {
             'default_value':default_value
           };

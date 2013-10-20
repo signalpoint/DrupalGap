@@ -80,8 +80,7 @@ function drupalgap_form_get_element_id(name, form_id) {
     // Any language code to append to the id?
     if (arguments[2]) { id += '-' + arguments[2]; }
     // Any delta value to append to the id?
-    if (typeof arguments[3] !== 'undefined') { id += '-' + arguments[3]; }
-    id += '-value';
+    if (typeof arguments[3] !== 'undefined') { id += '-' + arguments[3] + '-value'; }
     return id;
   }
   catch (error) {
@@ -171,7 +170,6 @@ function drupalgap_form_state_values_assemble(form) {
     });
     // Attach the form state to drupalgap.form_states keyed by the form id.
     drupalgap.form_states[form.id] = form_state;
-    //dpm(form_state);
     return form_state;
   }
   catch (error) {
@@ -277,9 +275,6 @@ function drupalgap_form_load(form_id) {
         form = fn.apply(null, Array.prototype.slice.call(consolidated_arguments));
       }
       
-      dpm('FORM CALLBACK ASSEMBLED DATA');
-      dpm(form, false);
-      
       // Set empty options and attributes properties on each form element if the
       // element does not yet have any. This allows others to more easily modify
       // options and attributes on an element without having to worry about
@@ -304,8 +299,6 @@ function drupalgap_form_load(form_id) {
           // onto the element using the language code and delta values.
           var id = null;
           if (element_is_field) {
-            //dpm(element.field_info_field);
-            //dpm(element.field_info_instance);
             // What's the number of allowed values (cardinality) on this field?
             // A cardinality of -1 means the field has unlimited values.
             var cardinality = parseInt(element.field_info_field.cardinality);
@@ -413,8 +406,6 @@ function drupalgap_form_id_local_storage_key(form_id) {
 function _drupalgap_form_render_elements(form) {
   try {
     var content = '';
-    dpm('_drupalgap_form_render_elements');
-    dpm(form.elements);
     // For each form element, if the element objects name property isn't set,
     // set it, then render the element if access is permitted.
     $.each(form.elements, function(name, element){
@@ -432,6 +423,7 @@ function _drupalgap_form_render_elements(form) {
               type:'button',
               id:drupalgap_form_get_element_id(name, form.id)
             };
+            if (button.attributes) { $.extend(attributes, button.attributes); }
             content += '<button ' + drupalgap_attributes(attributes) + '">' +  button.title + '</button>';
           }
       });
@@ -471,13 +463,6 @@ function _drupalgap_form_render_element(form, element) {
     
     if (!items || items.length == 0) { return html; }
     
-    // START HERE - the form doesn't have the field item values, so it can't assemble it!
-    if (element.name == 'body') {
-      dpm(element.name);
-      dpm(element);
-      dpm(items);
-    }
-    
     // Grab the info instance and info field for the field, then attach them
     // both to the variables object so all theme functions will have access
     // to that data.
@@ -493,7 +478,6 @@ function _drupalgap_form_render_element(form, element) {
     // Render the element item(s). Remember the final delta value for later.
     var delta = 0;
     $.each(items, function(delta, item){
-        //dpm(item);
         variables.attributes.id = item.id;
         variables.element = item;
         
@@ -696,9 +680,6 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       case 'text_long':
       case "text_with_summary":
       case 'text_textarea':
-        dpm('rendering ' + item.type);
-        dpm(item);
-        dpm(variables);
         theme_function = 'textarea';
         // Add value to variables.
         variables.value = item.default_value;
@@ -737,7 +718,6 @@ function _drupalgap_form_element_items_load(form, form_state, element, language)
   try {
     var items = false;
     if (element.is_field) {
-      //dpm(element);
       // What's the cardinatlity (number of allowed values) on this field?
       var cardinality = parseInt(element.field_info_field.cardinality);
       if (cardinality == -1) {
@@ -745,10 +725,8 @@ function _drupalgap_form_element_items_load(form, form_state, element, language)
                          // figure out how to handle the 'add another
                          // item' feature.
         //cardinality = form.elements[element.name][language].length;
-        cardinality = Object.keys(form.elements[element.name][language]).length
-        //dpm(cardinality);
+        cardinality = Object.keys(form.elements[element.name][language]).length;
         if (!cardinality) { cardinality = 1; }
-        //dpm(cardinality);
       }
       items = _drupalgap_form_element_items_widget_load(form, form_state, element, language, cardinality);
     }

@@ -160,7 +160,6 @@ function drupalgap_node_assemble_data(options) {
     });
     
     // Return the data string.
-    dpm(data);
     return data;
   }
   catch (error) { drupalgap_error(error); }
