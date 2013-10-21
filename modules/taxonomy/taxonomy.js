@@ -119,6 +119,9 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
     // Add cancel button to form.
     form.buttons['cancel'] = {
       'title':'Cancel',
+      attributes:{
+        onclick:"javascript:drupalgap_back();"
+      }
     };
     
     // If we're editing a vocabulary set the form action to the vocabulary page
@@ -171,6 +174,9 @@ function taxonomy_form_term(form, form_state, term) {
     // Add cancel button to form.
     form.buttons['cancel'] = {
       'title':'Cancel',
+      attributes:{
+        onclick:"javascript:drupalgap_back();"
+      }
     };
     
     // If we are editing a term, set the form action to the term and add a

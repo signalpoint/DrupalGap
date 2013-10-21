@@ -128,9 +128,7 @@ function node_edit(form, form_state, node) {
     
     return form;
   }
-  catch (error) {
-    alert('node_edit - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -138,16 +136,10 @@ function node_edit(form, form_state, node) {
  */
 function node_edit_submit(form, form_state) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_edit_submit()');
-      console.log(JSON.stringify(arguments));
-    }
     var node = drupalgap_entity_build_from_form_state(form, form_state);
     drupalgap_entity_form_submit(form, form_state, node);
   }
-  catch (error) {
-    alert('node_edit_submit - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -212,9 +204,7 @@ function node_menu() {
     };
     return items;
   }
-  catch (error) {
-    alert('node_menu - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -222,10 +212,6 @@ function node_menu() {
  */
 function node_page() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page()');
-      console.log(JSON.stringify(arguments));
-    }
     var content = {
       'create_content':{
         'theme':'button_link',
@@ -242,9 +228,7 @@ function node_page() {
     // Return the content.
     return content;
   }
-  catch (error) {
-    alert('node_page - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -252,9 +236,6 @@ function node_page() {
  */
 function node_page_pageshow() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page_pageshow()');
-    }
     // Grab some recent content and display it.
     drupalgap.views_datasource.call({
       'path':'drupalgap/views_datasource/drupalgap_content',
@@ -268,9 +249,7 @@ function node_page_pageshow() {
       },
     });
   }
-  catch (error) {
-    alert('node_page_pageshow - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -383,17 +362,12 @@ function node_page_title(callback, nid) {
  */
 function node_theme() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_theme()');
-    }
     return {
       'node':{
         'template':'node',
       },
     };
   }
-  catch (error) {
-    alert('node_theme - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
