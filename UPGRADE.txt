@@ -22,23 +22,7 @@ version of DrupalGap to another.
 | Version Change Notes for Developers |
 |=====================================|
 
-7.x-1.5-alpha => 7.x-1.6-alpha
-
-  The 'header' system block has been renamed to 'title'. In your settings.js
-  file, you'll need to update your "Blocks" settings to use the 'title' block
-  instead of the 'header' block. FYI, this block is used to display the page
-  title.
-  
-  ---
-
-  The 'navigation' and 'management' system menus have been deprecated. If you
-  were using these menus at all in settings.js, the menus will still work as is,
-  they will now just be considered a 'custom' menu instead. If you were using
-  either of these menus programmatically, just create an empty custom menu
-  in settings.js using the 'navigation' or 'management' machine name, and that
-  will bring these menus back for you.
-
-  ---
+7.x-1.6-alpha => 7.x-1.7-alpha
 
   Loading entities from the server has changed from synchronous to asynchronous.
   This means that any time you load an entity, it will be loaded asynchronously
@@ -92,7 +76,23 @@ version of DrupalGap to another.
   As you can see, title_callback implementations now take a 'callback' argument
   that needs to be called with your custom title so the page title will be
   properly set.
+
+7.x-1.5-alpha => 7.x-1.6-alpha
+
+  The 'header' system block has been renamed to 'title'. In your settings.js
+  file, you'll need to update your "Blocks" settings to use the 'title' block
+  instead of the 'header' block. FYI, this block is used to display the page
+  title.
   
+  ---
+
+  The 'navigation' and 'management' system menus have been deprecated. If you
+  were using these menus at all in settings.js, the menus will still work as is,
+  they will now just be considered a 'custom' menu instead. If you were using
+  either of these menus programmatically, just create an empty custom menu
+  in settings.js using the 'navigation' or 'management' machine name, and that
+  will bring these menus back for you.
+
   ---
 
   See https://github.com/signalpoint/DrupalGap/issues/119 for information about
