@@ -48,6 +48,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
     $.each(field_info, function(field_name, field){
         // Determine which display mode to use. The default mode will be used
         // if the drupalgap display mode is not present.
+        if (!field.display) { return false; }
         var display = field.display['default'];
         if (field.display['drupalgap']) {
           display = field.display['drupalgap'];
