@@ -52,9 +52,6 @@ function node_add_page() {
  */
 function node_add_page_pageshow() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_add_page_pageshow()');
-    }
     drupalgap.services.drupalgap_content.content_types_user_permissions.call({
       'success':function(data) {
         var items = [];
@@ -67,9 +64,7 @@ function node_add_page_pageshow() {
       },
     });
   }
-  catch (error) {
-    alert('node_add_page_pageshow - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -77,14 +72,9 @@ function node_add_page_pageshow() {
  */
 function node_add_page_by_type(type) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_add_page_by_type(' + type + ')');
-    }
     return drupalgap_get_form('node_edit', {'type':type});
   }
-  catch (error) {
-    alert('node_add_page_by_type - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -92,10 +82,6 @@ function node_add_page_by_type(type) {
  */
 function node_edit(form, form_state, node) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_edit()');
-      console.log(JSON.stringify(arguments));
-    }
     // Setup form defaults.
     form.entity_type = 'node';
     
@@ -112,18 +98,11 @@ function node_edit(form, form_state, node) {
     };
     
     // Add cancel button to form.
-    form.buttons['cancel'] = {
-      'title':'Cancel',
-      attributes:{
-        onclick:"javascript:drupalgap_back();"
-      }
-    };
+    form.buttons['cancel'] = drupalgap_entity_edit_form_cancel_button();
     
     // Add delete button to form if we're editing a node.
     if (node && node.nid) {
-      form.buttons['delete'] = {
-        'title':'Delete',
-      };
+      form.buttons['delete'] = drupalgap_entity_edit_form_delete_button('node', node.nid);
     }
     
     return form;
@@ -159,9 +138,6 @@ function node_load(nid) {
  */
 function node_menu() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_menu()');
-    }
     var items = {
       'node':{
         'title':'Content',

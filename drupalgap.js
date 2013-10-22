@@ -1108,6 +1108,16 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
 }
 
 /**
+ * Given a page id, this will remove it from the DOM.
+ */
+function drupalgap_remove_page_from_dom(page_id) {
+  try {
+    $('#' + page_id).empty().remove();
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implementation of drupal_set_title().
  */
 function drupalgap_set_title(title) {

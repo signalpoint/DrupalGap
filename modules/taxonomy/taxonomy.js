@@ -117,24 +117,11 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
     };
     
     // Add cancel button to form.
-    form.buttons['cancel'] = {
-      'title':'Cancel',
-      attributes:{
-        onclick:"javascript:drupalgap_back();"
-      }
-    };
+    form.buttons['cancel'] = drupalgap_entity_edit_form_cancel_button();
     
-    // If we're editing a vocabulary set the form action to the vocabulary page
-    // view and add a delete button to form if we're editing a node.
-    // TODO - delete buttons should be automated for all entity types based
-    // on user's permission.
-    if (vocabulary && vocabulary.vid) {
-      // TODO - this action isn't being retained upon entity form submission
-      // drupalgap_goto...
-      form.action = 'taxonomy/vocabulary/' + vocabulary.vid;
-      form.buttons['delete'] = {
-        'title':'Delete',
-      };
+    // If we're editing a vocabulary add a delete button, if the user has access.
+    if (vocabulary && vocabulary.vid && user_access('administer taxonomy')) {
+      form.buttons['delete'] = drupalgap_entity_edit_form_delete_button('taxonomy_vocabulary', vocabulary.vid);
     }
     
     return form;
@@ -172,20 +159,11 @@ function taxonomy_form_term(form, form_state, term) {
     };
     
     // Add cancel button to form.
-    form.buttons['cancel'] = {
-      'title':'Cancel',
-      attributes:{
-        onclick:"javascript:drupalgap_back();"
-      }
-    };
+    form.buttons['cancel'] = drupalgap_entity_edit_form_cancel_button();
     
-    // If we are editing a term, set the form action to the term and add a
-    // delete button to the form.
-    if (term && term.tid) {
-      form.action = 'taxonomy/term/' + term.tid;
-      form.buttons['delete'] = {
-        'title':'Delete',
-      };
+    // If we are editing a term, add a delete button.
+    if (term && term.tid && user_access('administer taxonomy')) {
+      form.buttons['delete'] = drupalgap_entity_edit_form_delete_button('taxonomy_term', term.tid);
     }
     
     return form;

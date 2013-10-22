@@ -4,9 +4,6 @@
  */
 function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form, entity) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_add_core_fields_to_form');
-    }
     // Grab the core fields for this entity type and bundle.
     var fields = drupalgap_entity_get_core_fields(entity_type);
     // Iterate over each core field in the entity and add it to the form. If there is
@@ -26,9 +23,70 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
       };
     });
   }
-  catch (error) {
-    alert('drupalgap_entity_add_core_fields_to_form - ' + error);
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Returns the 'Cancel' button object that is used on entity edit forms.
+ */
+function drupalgap_entity_edit_form_cancel_button() {
+  try {
+    return {
+      'title':'Cancel',
+      attributes:{
+        onclick:"javascript:drupalgap_back();"
+      }
+    };
   }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Returns the 'Delete' button object that is used on entity edit forms.
+ */
+function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
+  try {
+    return {
+      'title':'Delete',
+      attributes:{
+        onclick:"javascript:drupalgap_entity_edit_form_delete_confirmation('" + entity_type + "', " + entity_id + ");"
+      }
+    };
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ *
+ */
+function drupalgap_entity_edit_form_delete_confirmation(entity_type, entity_id) {
+  try {
+    if (confirm('Delete this content, are you sure? This action cannot be undone...')) {
+      // Grab the service resource for this entity type, and its primary key.
+      var service_resource = drupalgap_services_get_entity_resource(entity_type);
+      if (!service_resource) { return false; }
+      var primary_key = drupalgap_entity_get_primary_key(entity_type);
+      if (!primary_key) { return false; }
+      // Set up the api call arguments and success callback.
+      var call_arguments = {};
+      call_arguments[primary_key] = entity_id;
+      call_arguments.success = function(result) {
+        // Remove the entities page from the DOM, if it exists.
+        var entity_page_path = entity_type + '/' + entity_id;
+        var entity_page_id = drupalgap_get_page_id(entity_page_path);
+        if (drupalgap_page_in_dom(entity_page_id)) {
+          drupalgap_remove_page_from_dom(entity_page_id);
+        }
+        // Remove the entity from local storage.
+        window.localStorage.removeItem(entity_local_storage_key(entity_type, entity_id));
+        alert('Deleted content!');
+        drupalgap_goto('', {'form_submission':true});
+      };
+      // Call the delete resource.
+      service_resource.del.call(call_arguments);
+    }
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -184,36 +242,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
 
 /**
  * Given a form, form_state and entity, this will call the appropriate service
- * resource c.r.u.d. operation.
+ * resource to create or update the entity.
  */
 function drupalgap_entity_form_submit(form, form_state, entity) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_form_submit');
-      console.log(JSON.stringify(arguments));
-    }
-    var service_resource = null;
-    switch (form.entity_type) {
-      case 'comment':
-        service_resource = drupalgap.services.comment;
-        break;
-      case 'node':
-        service_resource = drupalgap.services.node;
-        break;
-      case 'taxonomy_term':
-        service_resource = drupalgap.services.taxonomy_term;
-        break;
-      case 'taxonomy_vocabulary':
-        service_resource = drupalgap.services.taxonomy_vocabulary;
-        break;
-      case 'user':
-        service_resource = drupalgap.services.user;
-        break;
-      default:
-        alert('drupalgap_entity_form_submit - unsupported entity type - ' + form.entity_type);
-        return null;
-        break;
-    }
+    var service_resource = drupalgap_services_get_entity_resource(form.entity_type);
+    if (!service_resource) { return false; }
     
     // Grab the primary key name for this entity type.
     var primary_key = drupalgap_entity_get_primary_key(form.entity_type);
@@ -234,6 +268,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
     if (entity_type == 'user') {
       entity_type = 'account'; 
     }
+    // TODO - is this a bug? Why are we setting entity_type equal to entity here?
     call_arguments[entity_type] = entity;
     
     // Setup the success call back to go back to the entity page view.
@@ -267,9 +302,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       service_resource.update.call(call_arguments);
     }
   }
-  catch (error) {
-    alert('drupalgap_entity_form_submit - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

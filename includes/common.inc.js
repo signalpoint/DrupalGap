@@ -313,7 +313,7 @@ function drupalgap_goto(path) {
       // down the line will know the page is reloading. We can't pass along the
       // actual reloadPage option since it may collide with jQM later on.
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        $('#' + page_id).empty().remove();
+        drupalgap_remove_page_from_dom(page_id);
         delete options.reloadPage;
         options.reloadingPage = true;
       }
