@@ -18,7 +18,8 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
       field_info_field:element.field_info_field,
       field_info_instance:element.field_info_instance
     };
-    window[element.field_info_instance.widget.module + '_field_widget_form'].apply(null, _drupalgap_form_element_items_widget_arguments(form, null, element, language, delta+1));
+    var field_widget_form_function = element.field_info_instance.widget.module + '_field_widget_form'; 
+    window[field_widget_form_function].apply(null, _drupalgap_form_element_items_widget_arguments(form, null, element, language, delta+1));
     drupalgap_form_local_storage_save(form);
     $(add_another_item_button).before(_drupalgap_form_render_element_item(form, element, variables, item));
   }
@@ -172,9 +173,7 @@ function drupalgap_form_state_values_assemble(form) {
     drupalgap.form_states[form.id] = form_state;
     return form_state;
   }
-  catch (error) {
-    alert('drupalgap_form_state_values_assemble - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -205,10 +204,6 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
  */
 function drupalgap_get_form(form_id) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_get_form(' + form_id + ')');
-      console.log(JSON.stringify(arguments));
-    }
     var html = '';
     var form = drupalgap_form_load.apply(null, Array.prototype.slice.call(arguments));
     if (form) {
@@ -218,9 +213,7 @@ function drupalgap_get_form(form_id) {
     else { alert('drupalgap_get_form - failed to get form (' + form_id + ')'); }
     return html;
   }
-  catch (error) {
-    alert('drupalgap_get_form - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -229,10 +222,6 @@ function drupalgap_get_form(form_id) {
  */
 function drupalgap_form_load(form_id) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_form_load(' + form_id + ')');
-      console.log(JSON.stringify(arguments));
-    }
     
     var form = drupalgap_form_defaults(form_id);
     
@@ -448,20 +437,34 @@ function _drupalgap_form_render_element(form, element) {
     // Grab the language.
     var language = drupalgap.settings.language;
     
+    var items = false;
+    
+    // If this element is a field, extract the items from the language code and
+    // determine what module and hook will handle the items. If the element is
+    // not a field, just flatten it into a single item collection.
+    var module = false;
+    var field_widget_form_function_name = false;
+    var field_widget_form_function = false;
+    if (element.is_field) {
+      items = element[language];
+      module = element.field_info_instance.widget.module; 
+      field_widget_form_function_name = module + '_field_widget_form';
+      if (drupalgap_function_exists(field_widget_form_function_name)) {
+        var field_widget_form_function = window[field_widget_form_function_name];
+      }
+      else {
+        console.log('WARNING: _drupalgap_form_render_element() - ' + field_widget_form_function_name + '() does not exist!');
+      }
+    }
+    else { items = {0:element}; }
+    
+    // If there were no items, just return.
+    if (!items || items.length == 0) { return html; }
+    
     // Generate default variables.
     var variables = {
       attributes:{}
     };
-    
-    // Determine how many item(s) we're using on this element. Field elements
-    // are bundled in a language code and then keyed by a delta value. Other
-    // properties like nid, uid, title, etc are not bundled in a language code
-    // so we'll treat them as a signel item without a language code and delta.
-    
-    //var items = null;
-    var items = _drupalgap_form_element_items_load(form, null, element, language);
-    
-    if (!items || items.length == 0) { return html; }
     
     // Grab the info instance and info field for the field, then attach them
     // both to the variables object so all theme functions will have access
@@ -478,7 +481,10 @@ function _drupalgap_form_render_element(form, element) {
     // Render the element item(s). Remember the final delta value for later.
     var delta = 0;
     $.each(items, function(delta, item){
+        // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
+        
+        // Attach the item as the element onto variables.
         variables.element = item;
         
         // Add a label to the element, except submit and hidden elements.
@@ -499,7 +505,14 @@ function _drupalgap_form_render_element(form, element) {
         
         // Merge element attributes into the variables object.
         variables.attributes = $.extend({}, variables.attributes, item.options.attributes);
-    
+        
+        // Call the hook_field_widget_form() if necessary. Merge any changes
+        // to the item back into this item.
+        if (field_widget_form_function) {
+          field_widget_form_function.apply(null, [form, null, element.field_info_field, element.field_info_instance, language, items, delta, element]);
+          $.extend(item, items[delta]);
+        }
+        
         // Render the element item.
         html += _drupalgap_form_render_element_item(form, element, variables, item);
     });
@@ -538,7 +551,8 @@ function _drupalgap_form_render_element(form, element) {
 }
 
 /**
- *
+ * Given a form, an element, the variables for a theme function, and the element
+ * item, this will return the html rendering of the element item.
  */
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
@@ -673,38 +687,40 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
           variables.attributes['data-theme'] = 'b';
         }
         break;
-      case "text":
-        theme_function = 'textfield';
+      /*case "text":
+        //theme_function = 'textfield';
         break;
       case 'textarea':
       case 'text_long':
       case "text_with_summary":
       case 'text_textarea':
-        theme_function = 'textarea';
+        //dpm(variables, false);
+        //theme_function = 'textarea';
         // Add value to variables.
-        variables.value = item.default_value;
+        //variables.value = item.default_value;
         //delete variables.attributes.value;
-        break;
+        break;*/
     }
     
+    // If the item has a value, attach it to the variables for the theme function.
+    if (typeof item.value !== 'undefined') {
+      variables.value = item.value;
+    }
     
     // If the item isn't an outlier, run it through the theme system.
-    //if (item.type != 'submit' && item.type != 'image') {
-      // Theme the item.
-      if (drupalgap_function_exists('theme_' + theme_function)) {
-        html += theme(theme_function, variables);
+    if (drupalgap_function_exists('theme_' + theme_function)) {
+      html += theme(theme_function, variables);
+    }
+    else {
+      if (item.markup || item.markup == '') {
+        html += item.markup; 
       }
       else {
-        if (item.markup || item.markup == '') {
-          html += item.markup; 
-        }
-        else {
-          var msg = 'Field ' + item.type + ' not supported.';
-          html += '<div><em>' + msg + '</em></div>';
-          console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
-        }
+        var msg = 'Field ' + item.type + ' not supported.';
+        html += '<div><em>' + msg + '</em></div>';
+        console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
       }
-    //}
+    }
     
     return html;
   }
@@ -712,9 +728,12 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
 }
 
 /**
- *
+ * Given a form, the form state, an element in the form, and a language code,
+ * this will generate the Forms API Element Item(s) for the given element. Field
+ * elements will be keyed by a language code and delta value(s), while flat
+ * elements will be keyed be delta zero.
  */
-function _drupalgap_form_element_items_load(form, form_state, element, language) {
+/*function _drupalgap_form_element_items_load(form, form_state, element, language) {
   try {
     var items = false;
     if (element.is_field) {
@@ -737,10 +756,12 @@ function _drupalgap_form_element_items_load(form, form_state, element, language)
     return items;
   }
   catch (error) { drupalgap_error(error); }
-}
+}*/
 
 /**
- *
+ * Given an element name, the form, a language code and a delta value, this
+ * will return default values that can be used to place an item element into a
+ * Forms API object.
  */
 function drupalgap_form_element_item_create(name, form, language, delta) {
   try {
@@ -758,19 +779,19 @@ function drupalgap_form_element_item_create(name, form, language, delta) {
 /**
  *
  */
-function _drupalgap_form_element_item_load(form, form_state, element, language, delta) {
+/*function _drupalgap_form_element_item_load(form, form_state, element, language, delta) {
   try {
     var items = _drupalgap_form_element_items_load(form, form_state, element, language);
     if (items && items[delta]) { return items[delta]; }
     return false;
   }
   catch (error) { drupalgap_error(error); }
-}
+}*/
 
 /**
  *
  */
-function _drupalgap_form_element_items_widget_load(form, form_state, element, language, cardinality) {
+/*function _drupalgap_form_element_items_widget_load(form, form_state, element, language, cardinality) {
   try {
     var items = false;
     // What module handles this element?
@@ -799,7 +820,7 @@ function _drupalgap_form_element_items_widget_load(form, form_state, element, la
     return items;
   }
   catch (error) { drupalgap_error(error); }
-}
+}*/
 
 /**
  *

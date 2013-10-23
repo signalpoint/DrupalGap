@@ -5,9 +5,7 @@ function drupalgap_field_info_field(field_name) {
   try {
     return drupalgap.field_info_fields[field_name];
   }
-  catch (error) {
-    alert('drupalgap_field_info_field - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -15,14 +13,9 @@ function drupalgap_field_info_field(field_name) {
  */
 function drupalgap_field_info_fields() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_field_info_fields');
-    }
     return drupalgap.field_info_fields;
   }
-  catch (error) {
-    alert('drupalgap_field_info_fields - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -43,16 +36,7 @@ function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
  */
 function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_field_info_instances');
-    }
     var field_info_instances;
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_field_info_instances()');
-      console.log(JSON.stringify(arguments));
-      console.log('drupalgap.field_info_instances[' + entity_type + ']');
-      console.log(JSON.stringify(drupalgap.field_info_instances[entity_type]));
-    }
     if (!bundle_name) {
       field_info_instances = drupalgap.field_info_instances[entity_type];
     }
@@ -61,15 +45,9 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
         field_info_instances = drupalgap.field_info_instances[entity_type][bundle_name];  
       }
     }
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_field_info_instances()');
-      console.log(JSON.stringify(field_info_instances));
-    }
     return field_info_instances;
   }
-  catch(error) {
-    alert('drupalgap_field_info_instances - ' + error);
-  }
+  catch(error) { drupalgap_error(error); }
 }
 
 /**
@@ -92,32 +70,37 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
       $.each(fields, function(name, field){
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
-          var delta = 0;
-          var default_value = field.default_value;
-          if (entity[name] && entity[name].length != 0 && entity[name][language][0].value) {
-            default_value = entity[name][language][0].value;
-          }
           form.elements[name] = {
             'type':field_info.type,
             'title':field.label,
             'required':field.required,
-            /*'default_value':default_value,*/ /* this will go away soon */
             'description':field.description,
           };
-          // Now attach the field items within the language code.
-          // TODO - It appears not all fields have a language code to use here,
-          // for example taxonomy term reference fields don't!
           if (!form.elements[name][language]) { form.elements[name][language] = {}; }
-          form.elements[name][language][delta] = {
-            'default_value':default_value
-          };
+          var default_value = field.default_value;
+          var delta = 0;
+          var cardinality = parseInt(field_info.cardinality);
+          if (cardinality == -1) {
+            cardinality = 1; // we'll just add one element for now, until we
+                             // figure out how to handle the 'add another
+                             // item' feature.
+          }
+          for (var delta = 0; delta < cardinality; delta++) {
+            if (entity[name] && entity[name].length != 0 && entity[name][language][delta].value) {
+              default_value = entity[name][language][delta].value;
+            }
+            // TODO - It appears not all fields have a language code to use here,
+            // for example taxonomy term reference fields don't!
+            form.elements[name][language][delta] = {
+              'value':default_value
+            };
+          }
+          
         }
       });
     }
   }
-  catch (error) {
-    alert('drupalgap_field_info_instances_add_to_form - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -126,18 +109,21 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
  * false.
  */
 function drupalgap_field_key(field_name) {
-  // Determine the key to use for the value. By default, most fields
-  // use 'value' as the key.
-  var key = false;
-  var field_info = drupalgap_field_info_field(field_name);
-  if (field_info) {
-    key = 'value';
-    // Images use fid as the key.
-    if (field_info.module == 'image' && field_info.type == 'image') {
-      key = 'fid';
+  try {
+    // Determine the key to use for the value. By default, most fields
+    // use 'value' as the key.
+    var key = false;
+    var field_info = drupalgap_field_info_field(field_name);
+    if (field_info) {
+      key = 'value';
+      // Images use fid as the key.
+      if (field_info.module == 'image' && field_info.type == 'image') {
+        key = 'fid';
+      }
     }
+    return key;
   }
-  return key;
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -196,11 +182,8 @@ function text_field_widget_form(form, form_state, field, instance, langcode, ite
       case "text_with_summary":
       case 'text_textarea':
         type = 'textarea';
-        // Add value to variables and remove the value attribute.
-        //variables.value = element.default_value;
-        //delete variables.attributes.value;
     }
-    form.elements[element.name][langcode][delta].type = type;
+    items[delta].type = type;
   }
   catch (error) { drupalgap_error(error); }
 }

@@ -43,25 +43,21 @@ function drupalgap_remove_pages_from_dom() {
  */
 function drupalgap_attributes(attributes) {
   try {
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log('drupalgap_attributes()');
-      console.log(JSON.stringify(arguments));
-    }
     var attribute_string = '';
     if (attributes) {
       $.each(attributes, function(name, value){
-          // TODO - if someone passes in a value with double quotes, this will
-          // break. e.g. 'onclick':'_drupalgap_form_submit("' + form.id + "');'
-          // will break, but 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
-          // will work.
-          attribute_string += name + '="' + value + '" ';
+          if (value != '') {
+            // TODO - if someone passes in a value with double quotes, this will
+            // break. e.g. 'onclick':'_drupalgap_form_submit("' + form.id + "');'
+            // will break, but 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
+            // will work.
+            attribute_string += name + '="' + value + '" ';  
+          }
       });
     }
     return attribute_string;
   }
-  catch (error) {
-    alert('drupalgap_attributes - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**

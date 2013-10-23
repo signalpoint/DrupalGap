@@ -57,7 +57,10 @@ function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
 }
 
 /**
- *
+ * Given an entity type and id, this will display a confirmation dialogue and
+ * will subsequently delete the entity if the user confirms the dialogue box.
+ * The Services module retains Drupal user permissions so users without proper
+ * permissions will not be able to delete the entities from the server.
  */
 function drupalgap_entity_edit_form_delete_confirmation(entity_type, entity_id) {
   try {
@@ -79,7 +82,7 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type, entity_id) 
         }
         // Remove the entity from local storage.
         window.localStorage.removeItem(entity_local_storage_key(entity_type, entity_id));
-        alert('Deleted content!');
+        alert('Deleted.');
         drupalgap_goto('', {'form_submission':true});
       };
       // Call the delete resource.

@@ -266,7 +266,7 @@ function hook_404(router_path) {}
 function hook_entity_post_render_content(entity) { }
 
 /**
- * Used by modules to provide field widgets for forms.
+ * Used by modules to provide field widgets for form element items. 
  */
 function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) { }
 

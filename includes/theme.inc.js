@@ -68,15 +68,9 @@ function path_to_theme() {
  */
 function theme(hook, variables) {
   try {
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log('theme()');
-      console.log(JSON.stringify(arguments));
-    }
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
-    if (variables.markup) {
-      return variables.markup;
-    }
+    if (variables.markup) { return variables.markup; }
     var content = '';
     var theme_function = 'theme_' + hook;
     if (eval('typeof ' + theme_function) == 'function') {
@@ -90,22 +84,15 @@ function theme(hook, variables) {
           variables.attributes = {};
         }
       }
-      if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-        console.log(theme_function + '()');
-        console.log(JSON.stringify(variables));
-      }
       var fn = window[theme_function];
       content = fn.call(null, variables);
-      if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) { console.log(content); }
     }
     else {
       console.log('WARNING: ' + theme_function + '() does not exist');
     }
     return content;
   }
-  catch (error) {
-    alert('theme - ' + error);
-  }
+  catch (error) { alert('theme - ' + error); }
 }
 
 /**
