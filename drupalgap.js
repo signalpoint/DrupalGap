@@ -1268,16 +1268,7 @@ function drupalgap_onload() {
 
 /*
  * Given a drupal permission machine name, this function returns true if the
- * current user has that permission, false otherwise. Here is example input
- * that checks to see if the current user has the 'access content' permission.
- *  Example Usage:
- *    var has_access = user_access('access content');
- *    if (has_access) {
- *      alert("You have the 'access content' permission.");
- *    }
- *    else {
- *      alert("You do not have the 'access content' permission.");
- *    }
+ * current user has that permission, false otherwise.
  */
 function user_access(permission) {
   try {
