@@ -27,21 +27,6 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
 }
 
 /**
- * Returns the 'Cancel' button object that is used on entity edit forms.
- */
-function drupalgap_entity_edit_form_cancel_button() {
-  try {
-    return {
-      'title':'Cancel',
-      attributes:{
-        onclick:"javascript:drupalgap_back();"
-      }
-    };
-  }
-  catch (error) { drupalgap_error(error); }
-}
-
-/**
  * Returns the 'Delete' button object that is used on entity edit forms.
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {

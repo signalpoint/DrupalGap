@@ -98,7 +98,7 @@ function node_edit(form, form_state, node) {
     };
     
     // Add cancel button to form.
-    form.buttons['cancel'] = drupalgap_entity_edit_form_cancel_button();
+    form.buttons['cancel'] = drupalgap_form_cancel_button();
     
     // Add delete button to form if we're editing a node.
     if (node && node.nid) {

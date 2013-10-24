@@ -275,12 +275,9 @@ function theme_submit(variables) {
  */
 function template_preprocess_page(variables) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('template_preprocess_page()');
-      console.log(JSON.stringify(variables));
-    }
     // Set up default attribute's for the page's div container.
     if (typeof variables.attributes === 'undefined') { variables.attributes = {}; }
+    
     // TODO - is this needed?
     variables.attributes['data-role'] = 'page';
     
@@ -289,10 +286,6 @@ function template_preprocess_page(variables) {
     
     // Place the variables into drupalgap.page
     drupalgap.page.variables = variables;
-    
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(drupalgap.page));
-    }
   }
   catch (error) {
     alert('template_preprocess_page - ' + error);
@@ -305,12 +298,6 @@ function template_preprocess_page(variables) {
 function template_process_page(variables) {
   try {
     var drupalgap_path = drupalgap_path_get();
-    if (drupalgap.settings.debug) {
-      console.log('template_process_page()');
-      console.log(JSON.stringify(arguments));
-      console.log(drupalgap_path);
-      console.log(JSON.stringify(drupalgap.menu_links[drupalgap_path]));
-    }
     // Execute the active menu handler to assemble the page output. We need to
     // do this before we render the regions below.
     drupalgap.output = menu_execute_active_handler();
@@ -318,15 +305,9 @@ function template_process_page(variables) {
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap_path);
     $.each(drupalgap.theme.regions, function(index, region){
-        if (drupalgap.settings.debug) {
-          console.log('template_process_page - rendering region (' + region.name + ') for page id (' + page_id + ')');
-        }
         var page_html = $("#" + page_id).html();
         eval('page_html = page_html.replace(/{:' + region.name + ':}/g, drupalgap_render_region(region));');
         $("#" + page_id).html(page_html);
-        if (drupalgap.settings.debug) {
-          console.log('template_process_page - rendered region (' + region.name + ') for page id (' + page_id + ')');
-        }
     });
   }
   catch (error) {

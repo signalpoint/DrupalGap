@@ -117,7 +117,7 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
     };
     
     // Add cancel button to form.
-    form.buttons['cancel'] = drupalgap_entity_edit_form_cancel_button();
+    form.buttons['cancel'] = drupalgap_form_cancel_button();
     
     // If we're editing a vocabulary add a delete button, if the user has access.
     if (vocabulary && vocabulary.vid && user_access('administer taxonomy')) {
@@ -159,7 +159,7 @@ function taxonomy_form_term(form, form_state, term) {
     };
     
     // Add cancel button to form.
-    form.buttons['cancel'] = drupalgap_entity_edit_form_cancel_button();
+    form.buttons['cancel'] = drupalgap_form_cancel_button();
     
     // If we are editing a term, add a delete button.
     if (term && term.tid && user_access('administer taxonomy')) {

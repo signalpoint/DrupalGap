@@ -89,6 +89,8 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
             if (entity[name] && entity[name].length != 0 && entity[name][language][delta].value) {
               default_value = entity[name][language][delta].value;
             }
+            // If the default_value is null, set it to an empty string.
+            if (default_value == null) { default_value = ""; }
             // TODO - It appears not all fields have a language code to use here,
             // for example taxonomy term reference fields don't!
             form.elements[name][language][delta] = {
@@ -144,6 +146,32 @@ function number_field_formatter_view(entity_type, entity, field, instance, langc
       });
     }
     return element;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function options_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
+  try {
+    //dpm(items, false);
+    switch (element.type) {
+      case 'checkbox':
+        // If the checkbox has a default value of 1, check the box.
+        if (items[delta].default_value == 1) { items[delta].checked = true; }
+        break;
+      case "radios":
+        break;
+      case "select":
+        // If the select list is required, add a 'Select' option and set it as
+        // the default.
+        if (items[delta].required) {
+          items[delta].options[-1] = 'Select';
+          items[delta].value = -1;
+        }
+        break;
+    }
   }
   catch (error) { drupalgap_error(error); }
 }
