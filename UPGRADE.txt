@@ -18,11 +18,36 @@ version of DrupalGap to another.
   then re-installing it. If you're using Ripple in Chrome, then clear the
   Chrome web browser cache.
 
+|==================|
+| DrupalGap Module |
+|==================|
+
+  Be sure you are running the latest recommended version of the DrupalGap module
+  on your Drupal site. If you are using development snapshots of the DrupalGap
+  mobile application development kit, you may need to use the dev version of the
+  DrupalGap module alongside it.
+
 |=====================================|
 | Version Change Notes for Developers |
 |=====================================|
 
 7.x-1.6-alpha => 7.x-1.7-alpha
+
+  The DrupalGap module now provides a "Display Mode" for your content types. For
+  example, the Article content type that comes packaged with Drupal now has a
+  custom display called "DrupalGap":
+  
+    admin/structure/types/manage/article/display/drupalgap
+
+  By default, all DrupalGap display modes show nothing. You must specify what
+  fields, labels and formats to use on your content types when they are
+  displayed in your mobile app.
+  
+  For more information on Display Modes visit:
+  
+    http://drupalgap.org/node/184
+
+  ---
 
   Loading entities from the server has changed from synchronous to asynchronous.
   This means that any time you load an entity, it will be loaded asynchronously
