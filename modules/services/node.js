@@ -132,21 +132,30 @@ function drupalgap_node_assemble_data(options) {
     $.each(fields, function(field_name, field){
         var key = drupalgap_field_key(field_name);
         if (key) {
-          // Skip fields without values.
-          if (typeof options.node[field_name][lng][0][key] === 'undefined' ||
-              !options.node[field_name][lng][0][key] ||
-              options.node[field_name][lng][0][key] == '') { return; }
-          // Encode the value.
-          var value = encodeURIComponent(options.node[field_name][lng][0][key]);
-          // Add the key and value to the data string. Note, select does not work
-          // with [und][0][value] but works with [und][value]
-          if (field.widget.type == 'options_select') {
-            data += '&node[' + field_name + '][' + lng + '][' + key + ']=';
+          // Iterate over each delta value in the field cardinality.
+          var field_info_field = drupalgap_field_info_field(field_name);
+          var allowed_values = field_info_field.cardinality;
+          if (allowed_values == -1) {
+            allowed_values = 1; // convert unlimited value fields to one, for now...
           }
-          else {
-            data += '&node[' + field_name + '][' + lng + '][0][' + key + ']=';
+          for (var delta = 0; delta < allowed_values; delta++) {
+            // Skip fields without values.
+            if (typeof options.node[field_name][lng][delta][key] === 'undefined' ||
+                !options.node[field_name][lng][delta][key] ||
+                options.node[field_name][lng][delta][key] == '') { continue; }
+            // Encode the value.
+            var value = encodeURIComponent(options.node[field_name][lng][delta][key]);
+            if (!value) { continue; }
+            // Add the key and value to the data string. Note, select does not work
+            // with [und][0][value] but works with [und][value]
+            if (field.widget.type == 'options_select') {
+              data += '&node[' + field_name + '][' + lng + '][' + key + ']=';
+            }
+            else {
+              data += '&node[' + field_name + '][' + lng + '][' + delta + '][' + key + ']=';
+            }
+            data += value;
           }
-          data += value;
         }
     });
     

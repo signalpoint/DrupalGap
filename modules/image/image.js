@@ -28,6 +28,78 @@ function image_field_formatter_view(entity_type, entity, field, instance, langco
 }
 
 /**
+ * Implements hook_field_widget_form().
+ */
+function image_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
+  try {
+    // Set the default button text, and if a value was provided,
+    // overwrite the button text.
+    /*var button_text = 'Add Image';
+    if (item.value) {
+      button_text = item.value;
+    }
+    // Place a hidden input to hold the file id.
+    html += '<input id="' + item.id + '" type="hidden" value="" />';
+    // Place variables into document for PhoneGap image processing.
+    var item_id_base = item.id.replace(/-/g, '_'); 
+    var image_field_source = item_id_base + '_imagefield_source';
+    var imagefield_destination_type = item_id_base + '_imagefield_destination_type';
+    var imagefield_data = item_id_base + '_imagefield_data';
+    eval('var ' + image_field_source + ' = null;');
+    eval('var ' + imagefield_destination_type + ' = null;');
+    eval('var ' + imagefield_data + ' = null;');
+    // Build an imagefield widget with PhoneGap. Contains a message
+    // div, an image item, and button to add an image.
+    //'<a href="#" data-role="button" id="' + item.id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
+    html += '<div>' + 
+      '<div id="' + item.id + '-imagefield-msg"></div>' + 
+      '<img id="' + item.id + '-imagefield" style="display: none;" />' + 
+      '<a href="#" data-role="button" id="' + item.id + '-button">' + button_text + '</a>' +
+    '</div>';
+    // Open extra javascript declaration.
+    html += '<script type="text/javascript">';
+    // Add device ready listener for PhoneGap camera.
+    var event_listener = item_id_base +  '_imagefield_ready';
+    html += '$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").on("pageshow",function(){' +
+      'document.addEventListener("deviceready", ' + event_listener + ', false);' +
+    '});' + 
+    'function ' + event_listener +  '() {' +
+      image_field_source + ' = navigator.camera.PictureSourceType;' +
+      imagefield_destination_type + ' = navigator.camera.DestinationType;' +
+    '}';
+    // Define error callback function.
+    var imagefield_error = item_id_base + '_error';
+    html += 'function ' + imagefield_error + '(message) {' +
+      'if (message != "Camera cancelled.") {' +
+        'alert("' + imagefield_error + ' - " + message);' +
+      '}' +
+    '}';
+    // Define success callback function.
+    var imagefield_success = item_id_base + '_success';
+    html += 'function ' + imagefield_success + '(imageData) {' +
+      '_image_phonegap_camera_getPicture_success({field_name:"' + item.name + '", image:imageData, id:"' + item.id + '"})' +
+    '}';
+    // Determine image quality.
+    var quality = 50;
+    if (drupalgap.settings.camera.quality) {
+      quality = drupalgap.settings.camera.quality;
+    }
+    // Add click handler for photo button.
+    html += '$("#' + item.id + '-button").on("click",function(){' +
+      'var photo_options = {' +
+        'quality: ' + quality + ',' +
+        'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
+        'correctOrientation: true' +
+      '};' +
+      'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
+    '});';
+    // Close extra javascript declaration.
+    html += '</script>';*/
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Given an entity type and optional bundle name, this will return an array
  * containing any image field names present, false otherwise.
  */
@@ -49,7 +121,7 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
 /**
  * Implements hook_form_alter().
  */
-function image_form_alter(form, form_state, form_id) {
+/*function image_form_alter(form, form_state, form_id) {
   // Make potential alterations to any entity edit form that has an image field
   // element(s).
   if (form.entity_type) {
@@ -70,7 +142,22 @@ function image_form_alter(form, form_state, form_id) {
       }
     }
   }
-} 
+}*/
+
+/**
+ * Given and image style name and image uri, this will return the absolute URL
+ * that can be used as a src value for an img element.
+ */
+function image_style_url(style_name, path) {
+  try {
+    var src = drupalgap.settings.site_path + drupalgap.settings.base_path + path;
+    if (src.indexOf('public://') != -1) {
+      src = src.replace('public://', drupalgap.settings.file_public_path + '/styles/' + style_name + '/public/');
+    }
+    return src;
+  }
+  catch (error) { drupalgap_error(error); }
+}
 
 /**
  * The success callback function used when handling PhoneGap's camera

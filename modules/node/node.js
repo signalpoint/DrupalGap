@@ -52,9 +52,6 @@ function node_add_page() {
  */
 function node_add_page_pageshow() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_add_page_pageshow()');
-    }
     drupalgap.services.drupalgap_content.content_types_user_permissions.call({
       'success':function(data) {
         var items = [];
@@ -67,9 +64,7 @@ function node_add_page_pageshow() {
       },
     });
   }
-  catch (error) {
-    alert('node_add_page_pageshow - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -77,14 +72,9 @@ function node_add_page_pageshow() {
  */
 function node_add_page_by_type(type) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_add_page_by_type(' + type + ')');
-    }
     return drupalgap_get_form('node_edit', {'type':type});
   }
-  catch (error) {
-    alert('node_add_page_by_type - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -92,10 +82,6 @@ function node_add_page_by_type(type) {
  */
 function node_edit(form, form_state, node) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_edit()');
-      console.log(JSON.stringify(arguments));
-    }
     // Setup form defaults.
     form.entity_type = 'node';
     
@@ -112,37 +98,16 @@ function node_edit(form, form_state, node) {
     };
     
     // Add cancel button to form.
-    form.buttons['cancel'] = {
-      'title':'Cancel',
-    };
+    form.buttons['cancel'] = drupalgap_form_cancel_button();
     
     // Add delete button to form if we're editing a node.
     if (node && node.nid) {
-      form.buttons['delete'] = {
-        'title':'Delete',
-      };
+      form.buttons['delete'] = drupalgap_entity_edit_form_delete_button('node', node.nid);
     }
     
     return form;
   }
-  catch (error) {
-    alert('node_edit - ' + error);
-  }
-}
-
-/**
- * The node edit form's validation function.
- */
-function node_edit_validate(form, form_state) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('node_edit_validate()');
-      console.log(JSON.stringify(arguments));
-    }
-  }
-  catch (error) {
-    alert('node_edit_validate - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -150,16 +115,10 @@ function node_edit_validate(form, form_state) {
  */
 function node_edit_submit(form, form_state) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_edit_submit()');
-      console.log(JSON.stringify(arguments));
-    }
     var node = drupalgap_entity_build_from_form_state(form, form_state);
     drupalgap_entity_form_submit(form, form_state, node);
   }
-  catch (error) {
-    alert('node_edit_submit - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -179,9 +138,6 @@ function node_load(nid) {
  */
 function node_menu() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_menu()');
-    }
     var items = {
       'node':{
         'title':'Content',
@@ -213,8 +169,9 @@ function node_menu() {
       },
       'node/%/edit':{
         'title':'Edit',
-        'page_callback':'drupalgap_get_form',
-        'page_arguments':['node_edit', 1],
+        'page_callback':'entity_page_edit',
+        'pageshow':'entity_page_edit_pageshow',
+        'page_arguments':['node_edit', 'node', 1],
         'weight':0,
         'type':'MENU_LOCAL_TASK',
         'access_callback':'node_access',
@@ -223,9 +180,7 @@ function node_menu() {
     };
     return items;
   }
-  catch (error) {
-    alert('node_menu - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -233,10 +188,6 @@ function node_menu() {
  */
 function node_page() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page()');
-      console.log(JSON.stringify(arguments));
-    }
     var content = {
       'create_content':{
         'theme':'button_link',
@@ -253,9 +204,7 @@ function node_page() {
     // Return the content.
     return content;
   }
-  catch (error) {
-    alert('node_page - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -263,9 +212,6 @@ function node_page() {
  */
 function node_page_pageshow() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page_pageshow()');
-    }
     // Grab some recent content and display it.
     drupalgap.views_datasource.call({
       'path':'drupalgap/views_datasource/drupalgap_content',
@@ -279,29 +225,26 @@ function node_page_pageshow() {
       },
     });
   }
-  catch (error) {
-    alert('node_page_pageshow - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
  * Page callback for node/%.
  */
-function node_page_view(node) {
+function node_page_view(nid) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page_view()');
-      console.log(JSON.stringify(arguments));
-    }
-    if (node) {
-      var build = {
-        'theme':'node',
-        'node':node, // TODO - is this line of code doing anything?
-        'title':{'markup':node.title}, // TODO - this is a core field and should probably by fetched from entity.js
-        'content':{'markup':node.content},
+    if (nid) {
+      var content = {
+        container:_drupalgap_entity_page_container('node', nid, 'view')
       };
+      return content;
+    }
+    else { drupalgap_error('No node id provided!'); }
+    
+    if (node) {
+      
       // If the comments are hidden, do nothing.
-      if (node.comment == 0) { }
+      /*if (node.comment == 0) { }
       // If the comments are closed or open, show the comments.
       else if (node.comment == 1 || node.comment == 2) {
         
@@ -321,29 +264,34 @@ function node_page_view(node) {
                 drupalgap_get_form('comment_edit', {'nid':node.nid})
           };
         }
-      }
-      
+      }*/
       return build;
     }
     else {
       alert('node_page_view - failed to load node (' + node.nid + ')');
     }
   }
-  catch (error) {
-    alert('node_page_view - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
  * jQM pageshow handler for node/% pages.
  */
-function node_page_view_pageshow(node) {
+function node_page_view_pageshow(nid) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_page_view_pageshow()');
-    }
+    node_load(nid, {
+        success:function(node){
+          var build = {
+            'theme':'node',
+            'node':node, // TODO - is this line of code doing anything?
+            'title':{'markup':node.title}, // TODO - this is a core field and should probably by fetched from entity.js
+            'content':{'markup':node.content},
+          };
+          _drupalgap_entity_page_container_inject('node', node.nid, 'view', build);
+        }
+    });
     // Grab some recent comments and display it.
-    if ($('#comment_listing_items_'+arg(1))) {
+    /*if ($('#comment_listing_items')) {
       drupalgap.views_datasource.call({
         'path':'drupalgap/views_datasource/drupalgap_comments/' + node.nid,
         'success':function(data) {
@@ -363,21 +311,24 @@ function node_page_view_pageshow(node) {
           drupalgap_item_list_populate("#comment_listing_items_" + node.nid, items);
         },
       });
-    }
+    }*/
   }
-  catch (error) {
-    alert('node_page_view_pageshow - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
  * The title call back function for the node view page.
  */
-function node_page_title(node) {
+function node_page_title(callback, nid) {
   try {
+    // Try to load the node title, then send it back to the given callback.
     var title = '';
-    if (node && node.title) { title = node.title; }
-    return title;
+    var node = node_load(nid, {
+        success:function(node){
+          if (node && node.title) { title = node.title; }
+          callback.call(null, title);
+        }
+    });
   }
   catch (error) { drupalgap_error(error); }
 }
@@ -387,17 +338,12 @@ function node_page_title(node) {
  */
 function node_theme() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('node_theme()');
-    }
     return {
       'node':{
         'template':'node',
       },
     };
   }
-  catch (error) {
-    alert('node_theme - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 

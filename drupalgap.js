@@ -61,6 +61,7 @@ var drupalgap = {
   'entity_info':{},
   'field_info_fields':{},
   'field_info_instances':{},
+  /*field_widget_info:{},*/
   'form_errors':{},
   'form_states':[],
   loading:false, /* indicates if the loading message is shown or not */
@@ -85,7 +86,6 @@ var drupalgap = {
   'router_path':'', /* The current menu router path. */
   'services':{},
   'sessid':null,
-  taxonomy_vocabularies:false, /* holds the services index of vocabularies */
   'theme_path':'',
   'themes':[],
   'theme_registry':{},
@@ -198,6 +198,8 @@ function drupalgap_bootstrap() {
     drupalgap_menus_load();
     // Initialize the theme registry.
     drupalgap_theme_registry_build();
+    // Initialize field widgets.
+    //drupalgap_field_widgets_load();
     // Attach device back button handler (Android).
     document.addEventListener("backbutton", drupalgap_back, false); 
   }
@@ -399,6 +401,31 @@ function drupalgap_deviceready() {
 function drupalgap_empty(value) {
   return (typeof value === "undefined" || value === null || value == '');
 }
+
+/**
+ *
+ */
+/*function drupalgap_field_widgets_load() {
+  try {
+    var modules = module_implements('field_widget_info');
+    if (!modules) { return null; }
+    $.each(modules, function(i, module){
+        var field_widgets = module_invoke(module, 'field_widget_info');
+        if (!field_widgets) { return; }
+        $.each(field_widgets, function(name, field_widget){
+            $.each(field_widget.field_types, function(j, field_type){
+                drupalgap.field_widget_info[field_type] = {
+                  'module':module,
+                  'field_widget':name
+                };
+            });
+        });
+    });
+  }
+  catch (error) {
+    alert('drupalgap_field_widgets_load - ' + error);
+  }
+}*/
 
 /**
  * Checks if a given file exists, returns true or false.
@@ -1081,6 +1108,16 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
 }
 
 /**
+ * Given a page id, this will remove it from the DOM.
+ */
+function drupalgap_remove_page_from_dom(page_id) {
+  try {
+    $('#' + page_id).empty().remove();
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implementation of drupal_set_title().
  */
 function drupalgap_set_title(title) {
@@ -1231,16 +1268,7 @@ function drupalgap_onload() {
 
 /*
  * Given a drupal permission machine name, this function returns true if the
- * current user has that permission, false otherwise. Here is example input
- * that checks to see if the current user has the 'access content' permission.
- *  Example Usage:
- *    var has_access = user_access('access content');
- *    if (has_access) {
- *      alert("You have the 'access content' permission.");
- *    }
- *    else {
- *      alert("You do not have the 'access content' permission.");
- *    }
+ * current user has that permission, false otherwise.
  */
 function user_access(permission) {
   try {
@@ -1304,13 +1332,30 @@ function variable_get(name, default_value) {
 }
 
 /**
- * Given an JSON object, this will output it to the console.
+ * Given an JSON object, this will output it to the console. It accepts an
+ * optional boolean as second argument, if it is false the output sent to the
+ * console will not use pretty printing in a Chrome/Ripple environment.
  */
 function dpm(data) {
   try {
-    var name = arguments.callee.caller.name;
-    if (name && name != '') { console.log(); }
-    if (data) { console.log(JSON.stringify(data)); }
+    if (data) {
+      // If we're in ripple we can output it directly to the console and it will
+      // have pretty printing, otherwise we'll stringify it first.
+      // TODO - be careful, when just using console.log() with ripple, it will
+      // always print out the final value of data (because of pass by reference)
+      // this can be very misleading for debugging things.
+      if (typeof parent.window.ripple === 'function') {
+        if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
+          console.log(JSON.stringify(data));
+        }
+        else {
+          console.log(data);
+        }
+      }
+      else {
+        console.log(JSON.stringify(data));
+      }
+    }
   }
   catch (error) {
     alert('dpm - ' + error);
@@ -1322,13 +1367,13 @@ function dpm(data) {
  * http://tylerfrankenstein.com/code/javascript-date-time-yyyy-mm-dd-hh-mm-ss
  */
 function js_yyyy_mm_dd_hh_mm_ss () {
-  now = new Date();
-  year = "" + now.getFullYear();
-  month = "" + (now.getMonth() + 1); if (month.length == 1) { month = "0" + month; }
-  day = "" + now.getDate(); if (day.length == 1) { day = "0" + day; }
-  hour = "" + now.getHours(); if (hour.length == 1) { hour = "0" + hour; }
-  minute = "" + now.getMinutes(); if (minute.length == 1) { minute = "0" + minute; }
-  second = "" + now.getSeconds(); if (second.length == 1) { second = "0" + second; }
+  var now = new Date();
+  var year = "" + now.getFullYear();
+  var month = "" + (now.getMonth() + 1); if (month.length == 1) { month = "0" + month; }
+  var day = "" + now.getDate(); if (day.length == 1) { day = "0" + day; }
+  var hour = "" + now.getHours(); if (hour.length == 1) { hour = "0" + hour; }
+  var minute = "" + now.getMinutes(); if (minute.length == 1) { minute = "0" + minute; }
+  var second = "" + now.getSeconds(); if (second.length == 1) { second = "0" + second; }
   return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
 }
 

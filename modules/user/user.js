@@ -173,6 +173,7 @@ function user_menu() {
       'user/%':{
         'title':'My account',
         'page_callback':'user_view',
+        'pageshow':'user_view_pageshow',
         'page_arguments':[1],
       },
       'user/%/view':{
@@ -182,8 +183,9 @@ function user_menu() {
       },
       'user/%/edit':{
         'title':'Edit',
-        'page_callback':'drupalgap_get_form',
-        'page_arguments':['user_profile_form', 1],
+        'page_callback':'entity_page_edit',
+        'pageshow':'entity_page_edit_pageshow',
+        'page_arguments':['user_profile_form', 'user', 1],
         'access_callback':'user_edit_access',
         'access_arguments':[1],
         'weight':0,
@@ -269,10 +271,6 @@ function user_register_submit(form, form_state) {
  */
 function user_profile_form(form, form_state, account) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('user_profile_form()');
-      console.log(JSON.stringify(arguments));
-    }
     // Setup form defaults.
     form.entity_type = 'user';
     
@@ -311,13 +309,14 @@ function user_profile_form(form, form_state, account) {
     // Add cancel button to form.
     form.buttons['cancel'] = {
       'title':'Cancel',
+      attributes:{
+        onclick:"javascript:drupalgap_back();"
+      }
     };
     
     return form;
   }
-  catch (error) {
-    alert('user_profile_form - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -325,16 +324,10 @@ function user_profile_form(form, form_state, account) {
  */
 function user_profile_form_submit(form, form_state) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('user_profile_form_submit()');
-      console.log(JSON.stringify(arguments));
-    }
     var account = drupalgap_entity_build_from_form_state(form, form_state);
     drupalgap_entity_form_submit(form, form_state, account);
   }
-  catch (error) {
-    alert('user_profile_form_submit - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -342,9 +335,6 @@ function user_profile_form_submit(form, form_state) {
  */
 function user_theme() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('user_theme()');
-    }
     return {
       'user_picture':{
         'template':'user-picture',
@@ -354,51 +344,60 @@ function user_theme() {
       },
     };
   }
-  catch (error) {
-    alert('user_theme - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
- * Generate an array for rendering the given user.
+ * Page callback for user/%.
  */
-function user_view(account) {
+function user_view(uid) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('user_view()');
-      console.log(JSON.stringify(arguments));
-    }
-    // Determine the incoming arguments, and set defaults if necessary.
-    var view_mode = 'full';
-    var langcode = null;
-    if (arguments[1]) { view_mode = arguments[1]; }
-    if (arguments[2]) { langcode = arguments[2]; }
-    if (!langcode) { langcode = drupalgap.settings.language; }
-    if (account) {
-      var build = {
-        'theme':'user_profile',
-        'account':account,
-        'view_mode':view_mode,
-        'language':langcode,
-        'name':{'markup':account.name},
-        'created':{'markup':(new Date(parseInt(account.created)*1000)).toDateString()},
+    if (uid) {
+      var content = {
+        container:_drupalgap_entity_page_container('user', uid, 'view')
       };
-      // Any picture?
-      if (account.picture && account.picture.fid) {
-        build.picture = {
-          'theme':'image',
-          'path':account.picture.url,
-        };
-      }
-      return build;
+      return content;
     }
-    else {
-      alert('user_view - account was empty!');
-    }
+    else { drupalgap_error('No user id provided!'); }
   }
-  catch (error) {
-    alert('user_view - ' + error);
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * jQM pageshow handler for node/% pages.
+ */
+function user_view_pageshow(uid) {
+  try {
+    user_load(uid, {
+        success:function(account){
+          // Determine the incoming arguments, and set defaults if necessary.
+          var view_mode = 'full';
+          var langcode = null;
+          if (arguments[1]) { view_mode = arguments[1]; }
+          if (arguments[2]) { langcode = arguments[2]; }
+          if (!langcode) { langcode = drupalgap.settings.language; }
+          if (account) {
+            var build = {
+              'theme':'user_profile',
+              'account':account,
+              'view_mode':view_mode,
+              'language':langcode,
+              'name':{'markup':account.name},
+              'created':{'markup':(new Date(parseInt(account.created)*1000)).toDateString()},
+            };
+            // Any picture?
+            if (account.picture && account.picture.fid) {
+              build.picture = {
+                'theme':'image',
+                'path':account.picture.url,
+              };
+            }
+            _drupalgap_entity_page_container_inject('user', account.uid, 'view', build);
+          }
+        }
+    });
   }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -408,9 +407,6 @@ function user_view(account) {
  */
 function drupalgap_user_has_role(role) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_user_has_role(' + role + ')');
-    }
     var has_role = false;
     var account = null;
     if (arguments[1]) { account = arguments[1]; }
@@ -423,8 +419,6 @@ function drupalgap_user_has_role(role) {
     });
     return has_role;
   }
-  catch (error) {
-    alert('drupalgap_user_has_role - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
