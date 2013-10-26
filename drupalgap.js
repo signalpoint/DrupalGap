@@ -720,6 +720,9 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
       drupalgap.page.jqm_events.push(key);
       var fn = window[callback];
       if (page_arguments) {
+        // If the page arguments aren't an array, place them into an array so
+        // they can be applied to the callback function.
+        if (!$.isArray(page_arguments)) { page_arguments = [page_arguments]; }
         fn.apply(null, Array.prototype.slice.call(page_arguments));
       }
       else { fn(); }

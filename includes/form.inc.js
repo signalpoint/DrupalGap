@@ -438,7 +438,6 @@ function _drupalgap_form_render_elements(form) {
     // set it, then render the element if access is permitted.
     $.each(form.elements, function(name, element){
         if (!element.name) { element.name = name; }
-        dpm(name);
         if (drupalgap_form_element_access(element)) {
           content += _drupalgap_form_render_element(form, element);
         }

@@ -191,23 +191,18 @@ function options_field_widget_form(form, form_state, field, instance, langcode, 
                 onchange:"_theme_taxonomy_term_reference_onchange(this, '" + items[delta].id + "');"
               }
           });
+          // Attach a pageshow handler to the current page that will load the terms
+          // into the widget.
           var options = {
-            'taxonomy_vocabulary':taxonomy_vocabulary,
-            'widget_id':widget_id
+            'page_id':drupalgap_get_page_id(drupalgap_path_get()),
+            'jqm_page_event':'pageshow',                    
+            'jqm_page_event_callback':'_theme_taxonomy_term_reference_load_items',
+            'jqm_page_event_args':JSON.stringify({
+                'taxonomy_vocabulary':taxonomy_vocabulary,
+                'widget_id':widget_id
+            })
           };
-          items[delta].children.push({markup:"_theme_taxonomy_term_reference_load_items(" + JSON.stringify(options) + ")"});
-            // Attach a pageshow handler to the current page that will load the terms
-            // into the widget.
-            /*var options = {
-              'page_id':drupalgap_get_page_id(drupalgap_path_get()),
-              'jqm_page_event':'pageshow',                    
-              'jqm_page_event_callback':'_theme_taxonomy_term_reference_load_items',
-              'jqm_page_event_args':JSON.stringify({
-                  'taxonomy_vocabulary':taxonomy_vocabulary,
-                  'widget_id':widget_id
-              })
-            };
-            html += drupalgap_jqm_page_event_script_code(options);*/
+          items[delta].children.push({markup:drupalgap_jqm_page_event_script_code(options)});
         break;
     }
   }
