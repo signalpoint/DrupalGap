@@ -137,6 +137,8 @@ function drupalgap_entity_render_content(entity_type, entity) {
  */
 function drupalgap_entity_render_field(entity_type, entity, field_name, field, display) {
   try {
+    dpm(field_name);
+    dpm(display);
     var content = '';
     // Determine module that implements the hook_field_formatter_view,
     // then determine the hook's function name, then render the field content.

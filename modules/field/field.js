@@ -155,21 +155,59 @@ function number_field_formatter_view(entity_type, entity, field, instance, langc
  */
 function options_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
-    //dpm(items, false);
     switch (element.type) {
       case 'checkbox':
         // If the checkbox has a default value of 1, check the box.
         if (items[delta].default_value == 1) { items[delta].checked = true; }
         break;
-      case "radios":
+      case 'radios':
         break;
-      case "select":
+      case 'select':
         // If the select list is required, add a 'Select' option and set it as
         // the default.
         if (items[delta].required) {
           items[delta].options[-1] = 'Select';
           items[delta].value = -1;
         }
+        break;
+      case 'taxonomy_term_reference':
+          // Change the item type to a hidden input.
+          items[delta].type = 'hidden';
+          // What vocabulary are we using?
+          var machine_name = field.settings.allowed_values[0].vocabulary;
+          var taxonomy_vocabulary = taxonomy_vocabulary_machine_name_load(machine_name);
+          
+          var widget_type = false;
+          if (instance.widget.type == 'options_select') { widget_type = 'select'; }
+          else {
+            console.log('WARNING: options_field_widget_form() - ' + instance.widget.type + ' not yet supported for ' + element.type + ' form elements!');
+            return false;
+          }
+          var widget_id = items[delta].id + '-' + widget_type;
+          items[delta].children.push({
+              type:widget_type,
+              attributes:{
+                id:widget_id,
+                onchange:"_theme_taxonomy_term_reference_onchange(this, '" + items[delta].id + "');"
+              }
+          });
+          var options = {
+            'taxonomy_vocabulary':taxonomy_vocabulary,
+            'widget_id':widget_id
+          };
+          items[delta].children.push({markup:"_theme_taxonomy_term_reference_load_items(" + JSON.stringify(options) + ")"});
+            // Attach a pageshow handler to the current page that will load the terms
+            // into the widget.
+            /*var options = {
+              'page_id':drupalgap_get_page_id(drupalgap_path_get()),
+              'jqm_page_event':'pageshow',                    
+              'jqm_page_event_callback':'_theme_taxonomy_term_reference_load_items',
+              'jqm_page_event_args':JSON.stringify({
+                  'taxonomy_vocabulary':taxonomy_vocabulary,
+                  'widget_id':widget_id
+              })
+            };
+            html += drupalgap_jqm_page_event_script_code(options);*/
         break;
     }
   }

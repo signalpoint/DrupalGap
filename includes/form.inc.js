@@ -438,6 +438,7 @@ function _drupalgap_form_render_elements(form) {
     // set it, then render the element if access is permitted.
     $.each(form.elements, function(name, element){
         if (!element.name) { element.name = name; }
+        dpm(name);
         if (drupalgap_form_element_access(element)) {
           content += _drupalgap_form_render_element(form, element);
         }
@@ -496,6 +497,7 @@ function _drupalgap_form_render_element(form, element) {
     }
     if (module) {
       field_widget_form_function_name = module + '_field_widget_form';
+      
       if (drupalgap_function_exists(field_widget_form_function_name)) {
         field_widget_form_function = window[field_widget_form_function_name];
       }
@@ -532,6 +534,10 @@ function _drupalgap_form_render_element(form, element) {
         
         // Attach the item as the element onto variables.
         variables.element = item;
+        
+        // Create an array for the item's children if it doesn't exist already.
+        // This is used by field widget forms to extend form elements.
+        if (!items[delta].children) { items[delta].children = []; }
         
         // Add a label to the element, except submit and hidden elements.
         if (delta == 0 && element.type != 'submit' && element.type != 'hidden') {
@@ -603,10 +609,6 @@ function _drupalgap_form_render_element(form, element) {
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
     var html = '';
-    
-    // Depending on the element type, if necessary, adjust the variables and/or
-    // theme function to be used, then render the element by calling its theme
-    // function.
     var theme_function = item.type;
     
     // Make any preprocess modifications to the elements so they will map
@@ -631,7 +633,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       }
     }
     
-    // If the item isn't an outlier, run it through the theme system.
+    // Run the item through the theme system if a theme function exists, or try
+    // to use the item marku, or let the user know the field isn't supported.
     if (drupalgap_function_exists('theme_' + theme_function)) {
       html += theme(theme_function, variables);
     }
@@ -641,6 +644,20 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         var msg = 'Field ' + item.type + ' not supported.';
         html += '<div><em>' + msg + '</em></div>';
         console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
+      }
+    }
+    
+    // Render any item children. If the child has markup, just it it, otherwise
+    // run the child through theme().
+    if (item.children && item.children.length > 0) {
+      for (var i = 0; i < item.children.length; i++) {
+        if (item.children[i].markup) { html += item.children[i].markup; }
+        else if (item.children[i].type) {
+          html += theme(item.children[i].type, item.children[i]);
+        }
+        else {
+          console.log('WARNING: _drupalgap_form_render_element_item() - failed to render child ' + i + ' for ' + element.name);
+        }
       }
     }
     

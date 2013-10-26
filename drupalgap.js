@@ -86,6 +86,7 @@ var drupalgap = {
   'router_path':'', /* The current menu router path. */
   'services':{},
   'sessid':null,
+  taxonomy_vocabularies:false, /* holds the services index of vocabularies */
   'theme_path':'',
   'themes':[],
   'theme_registry':{},
@@ -1273,14 +1274,9 @@ function drupalgap_onload() {
 function user_access(permission) {
   try {
     // Make sure they provided a permission.
-    if (permission == null) {
-      alert("user_access - permission not provided");
-      return false;
-    }
+    if (permission == null) { return false; }
     // User 1 always has permission.
-    if (drupalgap.user.uid == 1) {
-      return true;
-    }
+    if (drupalgap.user.uid == 1) { return true; }
     // For everyone else, assume they don't have permission. Iterate over
     // drupalgap.user.permissions to see if the current user has the given
     // permission, then return the result.
@@ -1355,6 +1351,9 @@ function dpm(data) {
       else {
         console.log(JSON.stringify(data));
       }
+    }
+    else {
+      console.log('<null>');
     }
   }
   catch (error) {
