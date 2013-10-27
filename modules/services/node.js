@@ -117,6 +117,12 @@ drupalgap.services.node = {
 function drupalgap_node_assemble_data(options) {
   try {
     
+    // TODO - this needs to be turned into drupalgap_entity_assemble_date() and
+    // instead of iterating over possible fields, it should iterate over the
+    // fields set in the options.entity variable, that way it builds the data
+    // string off of whatever is sent in, and we don't have to guess how to
+    // build it.
+    
     // Determine language code and start building data string.
     var lng = drupalgap.settings.language;
     var data = 'node[language]=' + encodeURIComponent(lng);
@@ -145,7 +151,8 @@ function drupalgap_node_assemble_data(options) {
                 options.node[field_name][lng][delta][key] == '') { continue; }
             // Encode the value.
             var value = encodeURIComponent(options.node[field_name][lng][delta][key]);
-            if (!value) { continue; }
+            // TODO - someone is passing a 'null' string instead of null, but who?
+            if (!value || value == 'null') { continue; }
             // Add the key and value to the data string. Note, select does not work
             // with [und][0][value] but works with [und][value]
             if (field.widget.type == 'options_select') {

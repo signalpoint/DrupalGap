@@ -533,6 +533,10 @@ function _drupalgap_form_render_element(form, element) {
         // Attach the item as the element onto variables.
         variables.element = item;
         
+        // Create an array for the item's children if it doesn't exist already.
+        // This is used by field widget forms to extend form elements.
+        if (!items[delta].children) { items[delta].children = []; }
+        
         // Add a label to the element, except submit and hidden elements.
         if (delta == 0 && element.type != 'submit' && element.type != 'hidden') {
           var theme_variables = null;
@@ -643,6 +647,21 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
       }
     }
+    
+    // Render any item children. If the child has markup, just use the html,
+    // otherwise run the child through theme().
+    if (item.children && item.children.length > 0) {
+      for (var i = 0; i < item.children.length; i++) {
+        if (item.children[i].markup) { html += item.children[i].markup; }
+        else if (item.children[i].type) {
+          html += theme(item.children[i].type, item.children[i]);
+        }
+        else {
+          console.log('WARNING: _drupalgap_form_render_element_item() - failed to render child ' + i + ' for ' + element.name);
+        }
+      }
+    }
+
     
     return html;
   }
@@ -920,6 +939,9 @@ function theme_form_element_label(variables) {
 function theme_hidden(variables) {
   try {
     variables.attributes.type = 'hidden';
+    if (!variables.attributes.value && variables.value != null) {
+      variables.attributes.value = variables.value;
+    }
     var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
     return output;
   }
