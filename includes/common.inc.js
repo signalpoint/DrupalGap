@@ -43,25 +43,21 @@ function drupalgap_remove_pages_from_dom() {
  */
 function drupalgap_attributes(attributes) {
   try {
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log('drupalgap_attributes()');
-      console.log(JSON.stringify(arguments));
-    }
     var attribute_string = '';
     if (attributes) {
       $.each(attributes, function(name, value){
-          // TODO - if someone passes in a value with double quotes, this will
-          // break. e.g. 'onclick':'_drupalgap_form_submit("' + form.id + "');'
-          // will break, but 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
-          // will work.
-          attribute_string += name + '="' + value + '" ';
+          if (value != '') {
+            // TODO - if someone passes in a value with double quotes, this will
+            // break. e.g. 'onclick':'_drupalgap_form_submit("' + form.id + "');'
+            // will break, but 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
+            // will work.
+            attribute_string += name + '="' + value + '" ';  
+          }
       });
     }
     return attribute_string;
   }
-  catch (error) {
-    alert('drupalgap_attributes - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -313,7 +309,7 @@ function drupalgap_goto(path) {
       // down the line will know the page is reloading. We can't pass along the
       // actual reloadPage option since it may collide with jQM later on.
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        $('#' + page_id).empty().remove();
+        drupalgap_remove_page_from_dom(page_id);
         delete options.reloadPage;
         options.reloadingPage = true;
       }
@@ -727,6 +723,60 @@ function drupalgap_render_region(region) {
 }
 
 /**
+ * An interal callback used to handle the setting of the page title during the
+ * pageshow event.
+ */
+function _drupalgap_page_title_pageshow(page_arguments) {
+  try {
+    var router_path = drupalgap_router_path_get();
+    // Set the page title. First we'll see if the hook_menu() item has a
+    // title variable set, then check for a title_callback function.
+    var title_arguments = [];
+    if (typeof drupalgap.menu_links[router_path].title !== 'undefined') {
+      drupalgap_set_title(drupalgap.menu_links[router_path].title);
+    }
+    if (typeof drupalgap.menu_links[router_path].title_callback !== 'undefined') {
+      var function_name = drupalgap.menu_links[router_path].title_callback;
+      if (drupalgap_function_exists(function_name)) {
+        // Grab the title callback function.
+        var fn = window[function_name];
+        // Place the internal success callback handler on the front of the
+        // title arguments.
+        title_arguments.unshift(_drupalgap_page_title_pageshow_success);
+        // Are there any additional arguments to send to the title callback?
+        if (drupalgap.menu_links[router_path].title_arguments) {
+          // For each title argument, if the argument is an integer, grab the
+          // corresponding arg(#), otherwise just push the arg onto the title
+          // arguments.
+          var args = arg(null, drupalgap_path_get());
+          $.each(drupalgap.menu_links[router_path].title_arguments, function(index, object){
+              if (is_int(object) && args[object]) { title_arguments.push(args[object]); }
+              else { title_arguments.push(object); }
+          });
+        }
+        // Call the title callback function with the title arguments.
+        drupalgap_set_title(fn.apply(null, Array.prototype.slice.call(title_arguments)));
+      }
+    }
+    else {
+      _drupalgap_page_title_pageshow_success(drupalgap_get_title());
+    }
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * An internal function used to set the page title when the page title callback
+ * function is successful.
+ */
+function _drupalgap_page_title_pageshow_success(title) {
+  try {
+    $('h1#drupalgap_page_title').html(title);
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implementation of arg(index = null, path = null).
  */
 function arg() {
@@ -759,15 +809,16 @@ function arg() {
 }
 
 /**
- * Given an entity type and an entity id, this will load and return the entity
- * JSON, false otherwise. It will first try to load the entity from local
- * storage, if it can't it will retrieve the entity from the server then save
- * it to local storage.
+ * Given an entity type and an entity id, this will load the entity JSON object
+ * then send it to the success callback provided in the options. It will first
+ * try to load the entity from local storage, if it can't it will retrieve the
+ * entity from the Drupal server then save it to local storage. Local storage
+ * load and save attempts will be ignored if entity caching is disabled.
  */
 function entity_load(entity_type, ids) {
   try {
     if (!is_int(ids)) {
-      alert('entity_load(' + entity_type + ') - only single ids supported at this time!');
+      alert('entity_load(' + entity_type + ') - only single ids supported at this time, sorry!');
       return false;
     }
     var entity = false;
@@ -776,10 +827,21 @@ function entity_load(entity_type, ids) {
     // Grab any options.
     var options = null;
     if (arguments[2]) { options = arguments[2]; }
+    // Confirm caller attached a success callback function.
+    if (!options || typeof options.success !== 'function') {
+      var dev_msg = 'No success callback function was provided to ' + entity_type + '_load(' + entity_id + ') by caller!';
+      var user_msg = 'Sorry, there was a problem loading ' + entity_type + ' #' + entity_id + '!';
+      drupalgap_error(dev_msg, user_msg);
+      return;
+    }
     // If entity caching is enabled, try to load the entity from local storage.
+    // If a copy is available in local storage, send it to the success callback.
     if (drupalgap.settings.cache.entity && drupalgap.settings.cache.entity.enabled) {
       entity = _entity_load_from_local_storage(entity_type, entity_id, options);
-      if (entity) { return entity; }
+      if (entity) {
+        options.success(entity);
+        return;
+      }
     }
     
     // We didn't load the entity from local storage. Let's grab it from the
@@ -795,8 +857,8 @@ function entity_load(entity_type, ids) {
     if ($.inArray(entity_type, entity_types) && drupalgap.services[entity_type]) {
       var primary_key = drupalgap_entity_get_primary_key(entity_type);
       var call_options = {
-        'async':false,
-        'success':function(data){
+        /*'async':false,*/
+        success:function(data){
           // Set the entity equal to the returned data.
           entity = data;
           // Is entity caching enabled? 
@@ -814,23 +876,23 @@ function entity_load(entity_type, ids) {
               JSON.stringify(entity)
             );
           }
+          // Send the entity back to the caller's success callback function.
+          options.success(entity);
         }
       };
       call_options[primary_key] = entity_id;
       drupalgap.services[entity_type].retrieve.call(call_options);
     }
     else {
-      entity = false;
       drupalgap_error('Failed to load entity! (' + entity_type + ', ' + entity_id + ')');
     }
-    return entity;
   }
   catch (error) { drupalgap_error(error); }
 }
 
 /**
  * An internal function used by entity_load() to attempt loading an entity
- * form local storage.
+ * from local storage.
  */
 function _entity_load_from_local_storage(entity_type, entity_id, options) {
   try {
@@ -880,9 +942,6 @@ function _entity_load_from_local_storage(entity_type, entity_id, options) {
   catch (error) { drupalgap_error(error); }
 }
 
-/**
- *
- */
 /*function element_set_attributes(element, map) {
   try {
     $.each(map, function(property, attribute){

@@ -70,7 +70,7 @@ function system_block_view(delta) {
         return '';
         break;
       case 'title':
-        return '<h1>' + drupalgap_get_title() + '</h1>';
+        return '<h1 id="drupalgap_page_title"></h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">Powered by: ' +
@@ -254,10 +254,6 @@ function offline_try_again() {
  */
 function system_regions_list() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('system_regions_list()');
-      console.log(JSON.stringify(arguments));
-    }
     var regions = ['header', 'content', 'footer'];
     return regions;
   }
@@ -271,12 +267,18 @@ function system_regions_list() {
  */
 function system_settings_form(form, form_state) {
   try {
-    if (form.elements && !form.elements.submit) {
+    // Add submit button to form if one isn't present.
+    if (!form.elements.submit) {
       form.elements.submit = {
         type:'submit',
         value:'Save configuration'
       };
     }
+    // Add cancel button to form if one isn't present.
+    if (!form.buttons.cancel) {
+      form.buttons['cancel'] = drupalgap_form_cancel_button();
+    }
+    // Attach submit handler.
     form.submit.push('system_settings_form_submit');
     return form;
   }

@@ -4,9 +4,6 @@
  */
 function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form, entity) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_add_core_fields_to_form');
-    }
     // Grab the core fields for this entity type and bundle.
     var fields = drupalgap_entity_get_core_fields(entity_type);
     // Iterate over each core field in the entity and add it to the form. If there is
@@ -26,9 +23,58 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
       };
     });
   }
-  catch (error) {
-    alert('drupalgap_entity_add_core_fields_to_form - ' + error);
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Returns the 'Delete' button object that is used on entity edit forms.
+ */
+function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
+  try {
+    return {
+      'title':'Delete',
+      attributes:{
+        onclick:"javascript:drupalgap_entity_edit_form_delete_confirmation('" + entity_type + "', " + entity_id + ");"
+      }
+    };
   }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given an entity type and id, this will display a confirmation dialogue and
+ * will subsequently delete the entity if the user confirms the dialogue box.
+ * The Services module retains Drupal user permissions so users without proper
+ * permissions will not be able to delete the entities from the server.
+ */
+function drupalgap_entity_edit_form_delete_confirmation(entity_type, entity_id) {
+  try {
+    if (confirm('Delete this content, are you sure? This action cannot be undone...')) {
+      // Grab the service resource for this entity type, and its primary key.
+      var service_resource = drupalgap_services_get_entity_resource(entity_type);
+      if (!service_resource) { return false; }
+      var primary_key = drupalgap_entity_get_primary_key(entity_type);
+      if (!primary_key) { return false; }
+      // Set up the api call arguments and success callback.
+      var call_arguments = {};
+      call_arguments[primary_key] = entity_id;
+      call_arguments.success = function(result) {
+        // Remove the entities page from the DOM, if it exists.
+        var entity_page_path = entity_type + '/' + entity_id;
+        var entity_page_id = drupalgap_get_page_id(entity_page_path);
+        if (drupalgap_page_in_dom(entity_page_id)) {
+          drupalgap_remove_page_from_dom(entity_page_id);
+        }
+        // Remove the entity from local storage.
+        window.localStorage.removeItem(entity_local_storage_key(entity_type, entity_id));
+        alert('Deleted.');
+        drupalgap_goto('', {'form_submission':true});
+      };
+      // Call the delete resource.
+      service_resource.del.call(call_arguments);
+    }
+  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -46,11 +92,17 @@ function drupalgap_entity_render_content(entity_type, entity) {
     var field_content = {};
     var field_weights = {};
     $.each(field_info, function(field_name, field){
-        if (!field.display || !field.display['default']) { return; }
+        // Determine which display mode to use. The default mode will be used
+        // if the drupalgap display mode is not present.
+        if (!field.display) { return false; }
+        var display = field.display['default'];
+        if (field.display['drupalgap']) {
+          display = field.display['drupalgap'];
+        }
         // Save the field name and weight.
-        field_weights[field_name] = field.display['default'].weight;
+        field_weights[field_name] = display.weight;
         // Save the field content.
-        field_content[field_name] = drupalgap_entity_render_field(entity_type, entity, field_name, field);
+        field_content[field_name] = drupalgap_entity_render_field(entity_type, entity, field_name, field, display);
     });
     // Extract the field weights and sort them.
     var extracted_weights = [];
@@ -80,14 +132,15 @@ function drupalgap_entity_render_content(entity_type, entity) {
 }
 
 /**
- *
+ * Given an entity_type, the entity, a field name, and the field this will
+ * render the field using the appropriate hook_field_formatter_view().
  */
-function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
+function drupalgap_entity_render_field(entity_type, entity, field_name, field, display) {
   try {
     var content = '';
     // Determine module that implements the hook_field_formatter_view,
     // then determine the hook's function name, then render the field content.
-    var module = field['display']['default']['module'];
+    var module = display['module'];
     var function_name = module + '_field_formatter_view';
     if (drupalgap_function_exists(function_name)) {
       // Grab the field formatter function, then grab the field items
@@ -103,7 +156,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
           items = entity[field_name];
         }
       }
-      var elements = fn(entity_type, entity, field, null, entity.language, items, field['display']['default']);
+      var elements = fn(entity_type, entity, field, null, entity.language, items, display);
       $.each(elements, function(delta, element){
           // If the element has markup, render it as is, if it is
           // themeable, then theme it.
@@ -119,11 +172,11 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
       console.log('WARNING: drupalgap_entity_render_field - ' + function_name + '() does not exist!');
     }
     // Render the field label, if necessary.
-    if (content != '' && field['display']['default']['label'] != 'hidden') {
+    if (content != '' && display['label'] != 'hidden') {
       var label = '<h3>' + field.label + '</h3>';
       // Place the label above or below the field content.
       label = '<div>' + label + '</div>';
-      switch (field['display']['default']['label']) {
+      switch (display['label']) {
         case 'below':
           content += label;
           break;
@@ -132,6 +185,12 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
           content = label + content;
           break;
       }
+    }
+    // Give modules a chance to alter the field content.
+    var reference = {'content':content};
+    module_invoke_all('entity_post_render_field', entity, field_name, field, reference);
+    if (reference.content != content) {
+      return reference.content;
     }
     return content;
   }
@@ -144,65 +203,40 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field) {
  */
 function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_build_from_form_state');
-    }
     var entity = {};
-    // Use the default language, unless the entity has one specified.
-    /*var language = drupalgap.settings.language;
-    if (entity_edit.language) {
-      language = entity_edit.language;
-    }*/
+    var language = drupalgap.settings.language;
     $.each(form_state.values, function(name, value){
-        var key = drupalgap_field_key(name);
+        // Attach the key and value to the entity.
+        var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-          // Attach the key and value to the entity.
-          eval('entity.' + name + ' = {};');
-          eval('entity[name][drupalgap.settings.language] = [{"' + key + '":value}];');
+          var allowed_values = form.elements[name].field_info_field.cardinality;
+          if (allowed_values == -1) {
+            allowed_values = 1; // convert unlimited value fields to one, for now...
+          }
+          entity[name] = {};
+          entity[name][language] = [];
+          for (var delta = 0; delta < allowed_values; delta++) {
+            eval('entity[name][language].push({' + key + ':"' + value[language][delta] + '"});');
+            //eval('entity.' + name + ' = {' + language  + ':[{' + key + ':"' + value[language][delta] + '"}]}');
+          }
         }
         else {
-          entity[name] = value;  
+          entity[name] = value;    
         }
     });
     return entity;
   }
-  catch (error) {
-    alert('drupalgap_entity_build_from_form_state - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
  * Given a form, form_state and entity, this will call the appropriate service
- * resource c.r.u.d. operation.
+ * resource to create or update the entity.
  */
 function drupalgap_entity_form_submit(form, form_state, entity) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_entity_form_submit');
-      console.log(JSON.stringify(arguments));
-    }
-    var service_resource = null;
-    switch (form.entity_type) {
-      case 'comment':
-        service_resource = drupalgap.services.comment;
-        break;
-      case 'node':
-        service_resource = drupalgap.services.node;
-        break;
-      case 'taxonomy_term':
-        service_resource = drupalgap.services.taxonomy_term;
-        break;
-      case 'taxonomy_vocabulary':
-        service_resource = drupalgap.services.taxonomy_vocabulary;
-        break;
-      case 'user':
-        service_resource = drupalgap.services.user;
-        break;
-      default:
-        alert('drupalgap_entity_form_submit - unsupported entity type - ' + form.entity_type);
-        return null;
-        break;
-    }
+    var service_resource = drupalgap_services_get_entity_resource(form.entity_type);
+    if (!service_resource) { return false; }
     
     // Grab the primary key name for this entity type.
     var primary_key = drupalgap_entity_get_primary_key(form.entity_type);
@@ -223,6 +257,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
     if (entity_type == 'user') {
       entity_type = 'account'; 
     }
+    // TODO - is this a bug? Why are we setting entity_type equal to entity here?
     call_arguments[entity_type] = entity;
     
     // Setup the success call back to go back to the entity page view.
@@ -256,9 +291,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       service_resource.update.call(call_arguments);
     }
   }
-  catch (error) {
-    alert('drupalgap_entity_form_submit - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -465,5 +498,72 @@ function drupalgap_entity_get_primary_key(entity_type) {
   catch (error) {
     alert('drupalgap_entity_get_primary_key - ' + error);
   }
+}
+
+/**
+ * Given an entity type, an entity id and a mode, this will return a render
+ * object for the entity's page container.
+ */
+function _drupalgap_entity_page_container(entity_type, entity_id, mode) {
+  try {
+    var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
+    return {
+      markup:'<div id="' + id + '"></div>'
+    }
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given an entity type, an entity id, and a mode, this will return the unique
+ * id to be used for the entity's page container.
+ */
+function _drupalgap_entity_page_container_id(entity_type, entity_id, mode) {
+  try {
+    return entity_type + '_' + entity_id + '_' + mode + '_container';
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given an entity type, id, mode and page build, this will render the page
+ * build and inject it into the container on the page.
+ */
+function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode, build) {
+  try {
+    // Get the container id, set the drupalgap.output to the page build, then
+    // inject the rendered page into the container.
+    var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
+    drupalgap.output = build;
+    $('#' + id).html(drupalgap_render_page());
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * The page callback for entity edit forms.
+ */
+function entity_page_edit(form_id, entity_type, entity_id) {
+  try {
+    var content = {
+      container:_drupalgap_entity_page_container(entity_type, entity_id, 'edit')
+    };
+    return content;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * The pageshow callback for entity edit forms.
+ */
+function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
+  try {
+    entity_load(entity_type, entity_id, {
+        success:function(entity){
+          _drupalgap_entity_page_container_inject(entity_type, entity_id, 'edit', drupalgap_get_form(form_id, entity));
+        }
+    });
+  }
+  catch (error) { drupalgap_error(error); }
 }
 

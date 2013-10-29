@@ -18,9 +18,93 @@ version of DrupalGap to another.
   then re-installing it. If you're using Ripple in Chrome, then clear the
   Chrome web browser cache.
 
+|==================|
+| DrupalGap Module |
+|==================|
+
+  Be sure you are running the latest recommended version of the DrupalGap module
+  on your Drupal site. If you are using development snapshots of the DrupalGap
+  mobile application development kit, you may need to use the dev version of the
+  DrupalGap module alongside it.
+
 |=====================================|
 | Version Change Notes for Developers |
 |=====================================|
+
+7.x-1.6-alpha => 7.x-1.7-alpha
+
+  The DrupalGap module now provides a "Display Mode" for your content types. For
+  example, the Article content type that comes packaged with Drupal now has a
+  custom display called "DrupalGap":
+  
+    admin/structure/types/manage/article/display/drupalgap
+
+  By default, all DrupalGap display modes show nothing. You must specify what
+  fields, labels and formats to use on your content types when they are
+  displayed in your mobile app.
+  
+  For more information on Display Modes visit:
+  
+    http://drupalgap.org/node/184
+
+  ---
+
+  Loading entities from the server has changed from synchronous to asynchronous.
+  This means that any time you load an entity, it will be loaded asynchronously
+  and you must provide a success callback to use the retrieved entity. For
+  example, before you could simply use:
+  
+    var node = node_load(123);
+  
+  Now that it is an asynchronous call, code like this would be used instead to
+  retrieve a node:
+  
+    node_load(123, {
+        success:function(node){
+          alert('Loaded: ' + node.title);
+        }
+    });
+  
+  This change includes all core entity types. So any previous calls to
+  node_load(), comment_load(), file_load(), user_load(), taxonomy_term_load(),
+  etc must all be replaced with an asynchronous usage like the example code
+  above.
+  
+  ---
+  
+  Now that entities are loaded asynchronously, the page title_callback system
+  needed to be changed to asynchronous as well. For example, before we could
+  create a title_callback for a custom page like this:
+  
+    function my_module_menu() {
+      var items = {
+        my_page:{
+          title:'My Page',
+          page_callback:'my_page_callback',
+          title_callback:'my_page_title_callback',
+          title_arguments:['Good Monkey']
+        }
+      };
+      return items;
+    }
+    
+    function my_page_title_callback(my_arg) {
+      return my_arg.replace('Good', 'Bad');
+    }
+  
+  Now the title_callback for the above example would be implemented like this:
+    
+    function my_page_title_callback(callback, my_arg) {
+      callback.call(null, my_arg.replace('Good', 'Bad'));
+    }
+  
+  As you can see, title_callback implementations now take a 'callback' argument
+  that needs to be called with your custom title so the page title will be
+  properly set.
+  
+  ---
+  
+  js_yyyy_mm_dd_hh_mm_ss() has been renamed to date_yyyy_mm_dd_hh_mm_ss().
 
 7.x-1.5-alpha => 7.x-1.6-alpha
 
@@ -40,32 +124,6 @@ version of DrupalGap to another.
 
   ---
 
-  Loading entities from the server has changed from synchronous to asynchronous.
-  This means that any time you load an entity, it will be loaded asynchronously
-  and you must provide a success callback to retrieve and use the entity. For
-  example, before you could simply use:
-  
-    var node = node_load(123);
-    if (node) {
-      alert('Loaded: ' + node.title);
-    }
-  
-  Now that it is an asynchronous call, code like this would be used instead to
-  retrieve a node:
-  
-    node_load(123, {
-        success:function(node){
-          alert('Loaded: ' + node.title);
-        }
-    });
-  
-  This change includes all core entity types. So any previous calls to
-  node_load(), comment_load(), file_load(), user_load(), taxonomy_term_load(),
-  etc must all be replaced with an asynchronous usage like the example code
-  above.
-  
-  ---
-  
   See https://github.com/signalpoint/DrupalGap/issues/119 for information about
   adjusting any custom forms you may have previously created in a module. Now,
   the form and form_state will be passed to the form generation function. Your

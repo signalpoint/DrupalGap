@@ -1,4 +1,18 @@
 /**
+ * Given an entity type, this will return its corresponding service resource, or
+ * null if the resource doesn't exist.
+ */
+function drupalgap_services_get_entity_resource(entity_type) {
+  try {
+    if (drupalgap.services[entity_type]) {
+      return drupalgap.services[entity_type];
+    }
+    else { return null; }
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Given a json drupalgap options array from a service resource results call,
  * this extracts data based on the resource and populates necessary global vars.
  */
