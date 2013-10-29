@@ -182,14 +182,14 @@ function drupalgap_get_path(type, name) {
  */
 function drupalgap_back() {
   try {
-    drupalgap.back = true;
-    history.back();
-    drupalgap_path_set(drupalgap.back_path);
-    return false;
+    if (drupalgap_path_get() != drupalgap.settings.front) {
+      drupalgap.back = true;
+      history.back();
+      drupalgap_path_set(drupalgap.back_path);
+      return false;
+    }
   }
-  catch (error) {
-    alert('drupalgap_back' + error);
-  }
+  catch (error) { alert('drupalgap_back' + error); }
 }
 
 /**
