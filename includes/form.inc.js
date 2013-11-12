@@ -646,8 +646,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       }
     }
     
-    // Render any item children. If the child has markup, just it it, otherwise
-    // run the child through theme().
+    // Render any item children. If the child has markup, just use the html,
+    // otherwise run the child through theme().
     if (item.children && item.children.length > 0) {
       for (var i = 0; i < item.children.length; i++) {
         if (item.children[i].markup) { html += item.children[i].markup; }
@@ -936,6 +936,9 @@ function theme_form_element_label(variables) {
 function theme_hidden(variables) {
   try {
     variables.attributes.type = 'hidden';
+    if (!variables.attributes.value && variables.value != null) {
+      variables.attributes.value = variables.value;
+    }
     var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
     return output;
   }

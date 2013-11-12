@@ -208,6 +208,9 @@ drupalgap.settings.camera = {
  **************/
 
 // Debug
+//   PhoneGap 3.0.0 and above note, you must install a plugin to see console
+//   log messages. See the 'Debug console' section here:
+//   http://docs.phonegap.com/en/edge/guide_cli_index.md.html#The%20Command-line%20Interface
 drupalgap.settings.debug = false; /* Set to true to see console.log debug
                                      information. Set to false when publishing
                                      app! */
