@@ -208,7 +208,7 @@ function taxonomy_term_page(tid) {
           title:"Content",
           items:[],
           attributes:{
-            id:"taxonomy_term_node_listing_items"
+            id:"taxonomy_term_node_listing_items_" + tid
           },
         }
       };
@@ -243,7 +243,7 @@ function taxonomy_term_pageshow(tid) {
               $.each(data, function(index, node){
                   items.push(l(node.title, 'node/' + node.nid));
               });
-              drupalgap_item_list_populate("#taxonomy_term_node_listing_items", items);
+              drupalgap_item_list_populate("#taxonomy_term_node_listing_items_" + tid, items);
             }
           });
         }
@@ -303,7 +303,7 @@ function taxonomy_vocabulary_page(vid) {
           title:"Terms",
           items:[],
           attributes:{
-            id:"taxonomy_term_listing_items"
+            id:"taxonomy_term_listing_items_" + vid
           }
         }
       };
@@ -338,7 +338,7 @@ function taxonomy_vocabulary_pageshow(vid) {
                 $.each(data, function(index, term){
                     items.push(l(term.name, 'taxonomy/term/' + term.tid));
                 });
-                drupalgap_item_list_populate("#taxonomy_term_listing_items", items);
+                drupalgap_item_list_populate("#taxonomy_term_listing_items_" + vid, items);
               }
           });
         }
