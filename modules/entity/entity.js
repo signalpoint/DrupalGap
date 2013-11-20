@@ -27,6 +27,97 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle_name, form
 }
 
 /**
+ * Given an entity type, the bundle, the entity (assembled from form state
+ * values) and any options, this assembles the ?data= string for the entity
+ * service resource call URLs.
+ */
+function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
+  try {
+    
+    var data = '';
+    var lng = drupalgap.settings.language;
+    
+    switch (entity_type) {
+      case 'node':
+        data = 'node[language]=' + encodeURIComponent(lng);
+        if (entity.type) {
+          data += '&node[type]=' + encodeURIComponent(entity.type);
+        }
+        if (entity.title) {
+          data += '&node[title]=' + encodeURIComponent(entity.title);
+        }
+        break;
+      default:
+        console.log('WARNING - drupalgap_entity_assemble_data(): ' + entity_type + ' is not supported yet!');
+        return false;
+        break;
+    }
+    
+    // Iterate over the fields on this entity and add them to the data string.
+    var fields = drupalgap_field_info_instances(entity_type, bundle);
+    $.each(fields, function(field_name, field){
+        var key = drupalgap_field_key(field_name);
+        if (key) {
+          // Iterate over each delta value in the field cardinality.
+          var field_info_field = drupalgap_field_info_field(field_name);
+          var allowed_values = field_info_field.cardinality;
+          if (allowed_values == -1) {
+            allowed_values = 1; // convert unlimited value fields to one, for now...
+          }
+          for (var delta = 0; delta < allowed_values; delta++) {
+            
+            // Add the key and value to the data string. Note, select does not work
+            // with [und][0][value] but works with [und][value]
+            // TODO - we also need to add on any other keys present on this item
+            // e.g. - the date module wants to put extra stuff here via the
+            // form state values element item!
+            // TODO - instead, I think there should be a hook that fields must
+            // implement that will assemble the data string for that field, yes
+            // oh yes, this would be the better way to do it!
+            
+            // Determine the hook_field_data_string function name. If it exists,
+            // use it to populate the data string, otherwise just fall back to
+            // a default data string.
+            var function_name = field.widget.module + '_field_data_string';
+            if (!drupalgap_function_exists(function_name)) {
+              console.log('WARNING: drupalgap_entity_assemble_data() - the ' +
+                          function_name + ' function does not exist, using core field data string assembly.');
+              // Skip fields without values.
+              if (typeof entity[field_name][lng][delta][key] === 'undefined' ||
+                  !entity[field_name][lng][delta][key] ||
+                  entity[field_name][lng][delta][key] == '') { continue; }
+              // Encode the value.
+              var value = encodeURIComponent(entity[field_name][lng][delta][key]);
+              // TODO - someone is passing a 'null' string instead of null, but who?
+              if (!value || value == 'null') { continue; }
+              data += '&' + entity_type + '[' + field_name + '][' + lng + '][' + delta + '][' + key + ']=' + value;
+            }
+            else {
+              var fn = window[function_name];
+              var field_data_string = fn.call(undefined, entity_type, bundle, entity, field, lng, delta, options);
+              if (field_data_string) {
+                data += '&' + fn.call(undefined, entity_type, bundle, entity, field, lng, delta, options);
+              }
+            }
+            
+            /*if (field.widget.type == 'options_select') {
+              data += '&' + entity_type + '[' + field_name + '][' + lng + '][' + key + ']=';
+            }
+            else {
+              data += '&' + entity_type + '[' + field_name + '][' + lng + '][' + delta + '][' + key + ']=';
+            }
+            data += value;*/
+          }
+        }
+    });
+    
+    // Return the data string.
+    return data;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Returns the 'Delete' button object that is used on entity edit forms.
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
