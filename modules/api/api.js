@@ -273,6 +273,13 @@ function hook_404(router_path) {}
 function hook_entity_post_render_content(entity) { }
 
 /**
+ * Used by fields to assemble the data string used with entity create and
+ * update service resources. Return false if there is no value for the field's
+ * delta item.
+ */
+function hook_field_data_string(entity_type, bundle, entity, instance, langcode, delta, options) { }
+
+/**
  * Used by modules to provide field widgets for form element items. 
  */
 function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) { }
