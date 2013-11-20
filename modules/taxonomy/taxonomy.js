@@ -76,21 +76,6 @@ function taxonomy_menu() {
         'type':'MENU_LOCAL_TASK',
         'access_arguments':['administer taxonomy'],
       },
-      /*'admin/structure/taxonomy':{
-        'title':'Taxonomy',
-        'page_callback':'drupalgap_get_form',
-        'page_arguments':['taxonomy_overview_vocabularies'],
-        'access_arguments':['administer taxonomy'],
-      },
-      'admin/structure/taxonomy/list':{
-        'title':'List',
-        'type':'MENU_DEFAULT_LOCAL_TASK',
-        'weight':-10,
-      },
-      'admin/structure/taxonomy/add':{
-        'title':'Add vocabulary',
-        'page_callback':'taxonomy_form_vocabulary',
-      },*/
     };
     return items;
   }
