@@ -85,19 +85,20 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
                              // figure out how to handle the 'add another
                              // item' feature.
           }
-          for (var delta = 0; delta < cardinality; delta++) {
-            if (entity[name] && entity[name].length != 0 && entity[name][language][delta].value) {
-              default_value = entity[name][language][delta].value;
+          if (entity[name] && entity[name].length != 0) {
+            for (var delta = 0; delta < cardinality; delta++) {
+              if (entity[name][language][delta] && typeof entity[name][language][delta].value !== 'undefined') {
+                default_value = entity[name][language][delta].value;
+              }
+              // If the default_value is null, set it to an empty string.
+              if (default_value == null) { default_value = ""; }
+              // TODO - It appears not all fields have a language code to use here,
+              // for example taxonomy term reference fields don't!
+              form.elements[name][language][delta] = {
+                'value':default_value
+              };
             }
-            // If the default_value is null, set it to an empty string.
-            if (default_value == null) { default_value = ""; }
-            // TODO - It appears not all fields have a language code to use here,
-            // for example taxonomy term reference fields don't!
-            form.elements[name][language][delta] = {
-              'value':default_value
-            };
           }
-          
         }
       });
     }
