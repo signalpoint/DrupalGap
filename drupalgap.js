@@ -833,9 +833,6 @@ function drupalgap_max_width() {
  */
 function drupalgap_menu_access(path) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_menu_access(' + path + ')');
-    }
     // User #1 is allowed to do anything, I mean anything.
     if (drupalgap.user.uid == 1) { return true; }
     // Everybody else will not have access unless we prove otherwise.
@@ -857,9 +854,11 @@ function drupalgap_menu_access(path) {
         }
       }
       else {
-        // There is an access call back specified, call it by passing along any
-        // arguments. Replace any entity argument ids with the entity object, if
-        // it hasn't been already.
+        
+        // An access callback function is specified for this path...
+        
+        // START HERE: https://github.com/signalpoint/DrupalGap/issues/191
+        
         var function_name = drupalgap.menu_links[path].access_callback;
         if (drupalgap_function_exists(function_name)) {
           // Grab the access callback function and make a copy of the path's
@@ -890,10 +889,6 @@ function drupalgap_menu_access(path) {
  */
 function drupalgap_module_load(module_name) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_module_load()');
-      console.log(JSON.stringify(arguments));
-    }
     var loaded_module = null;
     $.each(drupalgap.modules, function(bundle, modules){
         if (!loaded_module) {
@@ -910,14 +905,9 @@ function drupalgap_module_load(module_name) {
           return false;
         }
     });
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(loaded_module));
-    }
     return loaded_module;
   }
-  catch (error) {
-    alert('drupalgap_module_load - ' + error);
-  }
+  catch (error) { alert('drupalgap_module_load - ' + error); }
 }
 
 /**
@@ -1126,14 +1116,9 @@ function drupalgap_remove_page_from_dom(page_id) {
  */
 function drupalgap_set_title(title) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_set_title(' + title + ')');
-    }
     if (title) { drupalgap.page.title = title; }
   }
-  catch (error) {
-    alert('drupalgap_set_title - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
@@ -1175,10 +1160,6 @@ function drupalgap_settings_load() {
  */
 function drupalgap_theme_load() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_theme_load()');
-      console.log(JSON.stringify(arguments));
-    }
     if (!drupalgap.settings.theme) {
       alert('drupalgap_theme_load - no theme specified in settings.js');
     }

@@ -771,7 +771,8 @@ function _drupalgap_page_title_pageshow(page_arguments) {
  */
 function _drupalgap_page_title_pageshow_success(title) {
   try {
-    $('h1#drupalgap_page_title').html(title);
+    var id = system_title_block_id(drupalgap_path_get());
+    $('h1#' + id).html(title);
   }
   catch (error) { drupalgap_error(error); }
 }

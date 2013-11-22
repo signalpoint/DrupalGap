@@ -3,9 +3,6 @@
  */
 function system_block_info() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('system_block_info()');
-    }
     // System blocks.
     var blocks = {
       'main':{
@@ -35,15 +32,9 @@ function system_block_info() {
         var block_delta = menu.menu_name;
         eval('blocks.' + block_delta + ' = {"name":"' + block_delta + '","delta":"' + block_delta + '","module":"menu"};');
     });
-    if (drupalgap.settings.debug) {
-      console.log('system_block_info() - blocks');
-      console.log(JSON.stringify(blocks));
-    }
     return blocks;
   }
-  catch (error) {
-    alert('system_block_info - ' + error);
-  }
+  catch (error) { alert('system_block_info - ' + error); }
 }
 
 /**
@@ -51,9 +42,6 @@ function system_block_info() {
  */
 function system_block_view(delta) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('system_block_view(' + delta + ')');
-    }
     switch (delta) {
       case 'main':
         // This is the main content block, it is required to be in a theme's region
@@ -70,7 +58,8 @@ function system_block_view(delta) {
         return '';
         break;
       case 'title':
-        return '<h1 id="drupalgap_page_title"></h1>';
+        var title_id = system_title_block_id(drupalgap_path_get());
+        return '<h1 id="' + title_id + '"></h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">Powered by: ' +
@@ -296,6 +285,17 @@ function system_settings_form_submit(form, form_state) {
       });
     }
     alert('The configuration options have been saved.');
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ *
+ */
+function system_title_block_id(path) {
+  try {
+    var id = 'drupalgap_page_title_' + drupalgap_get_page_id(path);
+    return id;
   }
   catch (error) { drupalgap_error(error); }
 }

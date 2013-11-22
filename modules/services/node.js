@@ -9,7 +9,7 @@ drupalgap.services.node = {
     'call':function(options){
       try {
         var api_options = drupalgap_chain_callbacks(drupalgap.services.node.create.options, options);
-        api_options.data = drupalgap_node_assemble_data(options);
+        api_options.data = drupalgap_entity_assemble_data('node', options.node.type, options.node);
         drupalgap.api.call(api_options);
       }
       catch (error) {
@@ -65,7 +65,7 @@ drupalgap.services.node = {
     'call':function(options){
       try {
         var api_options = drupalgap_chain_callbacks(drupalgap.services.node.update.options, options);
-        api_options.data = drupalgap_node_assemble_data(options);
+        api_options.data = drupalgap_entity_assemble_data('node', options.node.type, options.node);
         api_options.path = 'node/' + options.node.nid + '.json';
         drupalgap.api.call(api_options);
       }
