@@ -277,7 +277,7 @@ function hook_entity_post_render_content(entity) { }
  * update service resources. Return false if there is no value for the field's
  * delta item.
  */
-function hook_field_data_string(entity_type, bundle, entity, instance, langcode, delta, options) { }
+function hook_field_data_string(entity_type, bundle, entity, field, instance, langcode, delta, options) { }
 
 /**
  * Used by modules to provide field widgets for form element items. 
