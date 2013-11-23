@@ -476,6 +476,8 @@ function _drupalgap_form_render_element(form, element) {
     // Grab the language.
     var language = drupalgap.settings.language;
     
+    // We'll assume the element has no items (e.g. title, nid, vid, etc), unless
+    // we determine later that this element is a field, then it'll have items.
     var items = false;
     
     // If this element is a field, extract the items from the language code and
@@ -608,6 +610,9 @@ function _drupalgap_form_render_element(form, element) {
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
     var html = '';
+    // Depending on the element type, if necessary, adjust the variables and/or
+    // theme function to be used, then render the element by calling its theme
+    // function.
     var theme_function = item.type;
     
     // Make any preprocess modifications to the elements so they will map
