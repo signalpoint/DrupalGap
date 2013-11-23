@@ -66,14 +66,7 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
           }
           for (var delta = 0; delta < allowed_values; delta++) {
             
-            // Add the key and value to the data string. Note, select does not work
-            // with [und][0][value] but works with [und][value]
-            // TODO - we also need to add on any other keys present on this item
-            // e.g. - the date module wants to put extra stuff here via the
-            // form state values element item!
-            // TODO - instead, I think there should be a hook that fields must
-            // implement that will assemble the data string for that field, yes
-            // oh yes, this would be the better way to do it!
+            // Add the key and value to the data string.
             
             // Determine the hook_field_data_string function name. If it exists,
             // use it to populate the data string, otherwise just fall back to
@@ -94,19 +87,21 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
             }
             else {
               var fn = window[function_name];
-              var field_data_string = fn.call(undefined, entity_type, bundle, entity, field, lng, delta, options);
-              if (field_data_string) {
-                data += '&' + fn.call(undefined, entity_type, bundle, entity, field, lng, delta, options);
+              var field_data_string = fn.call(
+                undefined,
+                entity_type,
+                bundle,
+                entity,
+                field_info_field,
+                field,
+                lng,
+                delta,
+                options
+              );
+              if (field_data_string && field_data_string != '') {
+                data += '&' + field_data_string;
               }
             }
-            
-            /*if (field.widget.type == 'options_select') {
-              data += '&' + entity_type + '[' + field_name + '][' + lng + '][' + key + ']=';
-            }
-            else {
-              data += '&' + entity_type + '[' + field_name + '][' + lng + '][' + delta + '][' + key + ']=';
-            }
-            data += value;*/
           }
         }
     });
