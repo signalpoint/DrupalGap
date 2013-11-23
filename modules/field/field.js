@@ -123,6 +123,9 @@ function drupalgap_field_key(field_name) {
       if (field_info.module == 'image' && field_info.type == 'image') {
         key = 'fid';
       }
+      else if (field_info.module == 'taxonomy' && field_info.type == 'taxonomy_term_reference') {
+        key = 'tid';
+      }
     }
     return key;
   }
@@ -147,6 +150,28 @@ function number_field_formatter_view(entity_type, entity, field, instance, langc
       });
     }
     return element;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Implements hook_field_data_string().
+ */
+function options_field_data_string(entity_type, bundle, entity, info, instance, langcode, delta, options) {
+  try {
+    var field_name = instance.field_name;
+    var key = drupalgap_field_key(field_name);
+    var value = entity[instance.field_name][langcode][delta][key];
+    var data = '';
+    // Note, select does not work with [und][0][value] but works with
+    // [und][value]. Otherwise, use the default data string.
+    if (instance.widget.type == 'options_select') {
+      data = entity_type + '[' + field_name + '][' + langcode + '][' + key + ']=' + encodeURIComponent(value);  
+    }
+    else {
+      data = entity_type + '[' + field_name + '][' + langcode + '][' + delta + '][' + key + ']=' + encodeURIComponent(value);
+    }
+    return data;
   }
   catch (error) { drupalgap_error(error); }
 }
