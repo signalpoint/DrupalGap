@@ -683,25 +683,18 @@ function drupalgap_includes_load() {
 
 /**
  * Given an html list element id and an array of items, this will clear the
- * list, populate it with the items, destroy the list and then refresh the list
- * with the new items.
+ * list, populate it with the items, and then refresh the list.
  */
 function drupalgap_item_list_populate(list_css_selector, items) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_item_list_populate()');
-      console.log(JSON.stringify(arguments));
-    }
     // TODO - this could use some validation and alerts for improper input.
     $(list_css_selector).html("");
     for (var i = 0; i < items.length; i ++) {
       $(list_css_selector).append($("<li></li>",{"html":items[i]}));
     }
-    $(list_css_selector).listview("destroy").listview();
+    $(list_css_selector).listview('refresh').listview();
   }
-  catch (error) {
-    alert('drupalgap_item_list_populate - ' + error);
-  }
+  catch (error) { drupalgap_error(error); }
 }
 
 /**
