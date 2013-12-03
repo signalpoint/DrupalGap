@@ -163,6 +163,7 @@ function options_field_data_string(entity_type, bundle, entity, info, instance, 
     var key = drupalgap_field_key(field_name);
     var value = entity[instance.field_name][langcode][delta][key];
     var data = '';
+    if (value == '') { return data; }
     // Note, select does not work with [und][0][value] but works with
     // [und][value]. Otherwise, use the default data string.
     if (instance.widget.type == 'options_select') {
