@@ -32,16 +32,16 @@ function image_field_formatter_view(entity_type, entity, field, instance, langco
  */
 function image_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
+    // Change the item type to a hidden input to hold the file id.
+    items[delta].type = 'hidden';
+    
     // Set the default button text, and if a value was provided,
     // overwrite the button text.
-    /*var button_text = 'Add Image';
-    if (item.value) {
-      button_text = item.value;
-    }
-    // Place a hidden input to hold the file id.
-    html += '<input id="' + item.id + '" type="hidden" value="" />';
+    var button_text = 'Add Image';
+    if (items[delta].value) { button_text = item.value; }
+    
     // Place variables into document for PhoneGap image processing.
-    var item_id_base = item.id.replace(/-/g, '_'); 
+    var item_id_base = items[delta].id.replace(/-/g, '_'); 
     var image_field_source = item_id_base + '_imagefield_source';
     var imagefield_destination_type = item_id_base + '_imagefield_destination_type';
     var imagefield_data = item_id_base + '_imagefield_data';
@@ -51,10 +51,10 @@ function image_field_widget_form(form, form_state, field, instance, langcode, it
     // Build an imagefield widget with PhoneGap. Contains a message
     // div, an image item, and button to add an image.
     //'<a href="#" data-role="button" id="' + item.id + '_upload" style="display: none;" onclick="_image_phonegap_camera_getPicture_upload();">Upload</a>'
-    html += '<div>' + 
-      '<div id="' + item.id + '-imagefield-msg"></div>' + 
-      '<img id="' + item.id + '-imagefield" style="display: none;" />' + 
-      '<a href="#" data-role="button" id="' + item.id + '-button">' + button_text + '</a>' +
+    var html = '<div>' + 
+      '<div id="' + items[delta].id + '-imagefield-msg"></div>' + 
+      '<img id="' + items[delta].id + '-imagefield" style="display: none;" />' + 
+      '<a href="#" data-role="button" id="' + items[delta].id + '-button">' + button_text + '</a>' +
     '</div>';
     // Open extra javascript declaration.
     html += '<script type="text/javascript">';
@@ -77,7 +77,7 @@ function image_field_widget_form(form, form_state, field, instance, langcode, it
     // Define success callback function.
     var imagefield_success = item_id_base + '_success';
     html += 'function ' + imagefield_success + '(imageData) {' +
-      '_image_phonegap_camera_getPicture_success({field_name:"' + item.name + '", image:imageData, id:"' + item.id + '"})' +
+      '_image_phonegap_camera_getPicture_success({field_name:"' + field.field_name + '", image:imageData, id:"' + items[delta].id + '"})' +
     '}';
     // Determine image quality.
     var quality = 50;
@@ -85,7 +85,7 @@ function image_field_widget_form(form, form_state, field, instance, langcode, it
       quality = drupalgap.settings.camera.quality;
     }
     // Add click handler for photo button.
-    html += '$("#' + item.id + '-button").on("click",function(){' +
+    html += '$("#' + items[delta].id + '-button").on("click",function(){' +
       'var photo_options = {' +
         'quality: ' + quality + ',' +
         'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
@@ -94,7 +94,9 @@ function image_field_widget_form(form, form_state, field, instance, langcode, it
       'navigator.camera.getPicture(' + imagefield_success + ', ' + imagefield_error + ', photo_options);' +
     '});';
     // Close extra javascript declaration.
-    html += '</script>';*/
+    html += '</script>';
+    // Add html to the item's children.
+    items[delta].children.push({markup:html});
   }
   catch (error) { drupalgap_error(error); }
 }
@@ -121,7 +123,7 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
 /**
  * Implements hook_form_alter().
  */
-/*function image_form_alter(form, form_state, form_id) {
+function image_form_alter(form, form_state, form_id) {
   // Make potential alterations to any entity edit form that has an image field
   // element(s).
   if (form.entity_type) {
@@ -131,7 +133,8 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
     if (image_fields) {
       // Attach the image field names to the form for later reference.
       form.image_fields = image_fields;
-      // Prepend a custom validate submit handler to the form to handle images.
+      // Prepend a custom validate and submit handlers to the form to handle
+      // images.
       form.validate.unshift('_image_field_form_validate');
       form.submit.unshift('_image_field_form_submit');
       // For each image field, create a place for it in the global var.
@@ -142,7 +145,7 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
       }
     }
   }
-}*/
+}
 
 /**
  * Given and image style name and image uri, this will return the absolute URL
@@ -210,11 +213,12 @@ function _image_phonegap_camera_getPicture_success(options) {
  */
 function _image_field_form_validate(form, form_state) {
   try {
+    // TODO - this needs mutli value field support (delta)
     $.each(form.image_fields, function(index, name){
         // Skip empty images.
         if (!image_phonegap_camera_options[name][0]) { return; }
         // Skip image fields that already have their file id set.
-        if (form_state.values[name] != '') { return; }
+        if (form_state.values[name][drupalgap.settings.language][0] != '') { return; }
         // Create a unique file name using the UTC integer value.
         var d = new Date();
         var image_file_name = "" + d.valueOf() + ".jpg";
@@ -232,7 +236,7 @@ function _image_field_form_validate(form, form_state) {
             // Set the hidden input and form state values with the file id.
             var element_id = drupalgap_form_get_element_id(name, form.id);
             $('#' + element_id).val(result.fid);
-            form_state.values[name] = result.fid;
+            form_state.values[name][drupalgap.settings.language][0] = result.fid;
           }
         });
     });
