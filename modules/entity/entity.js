@@ -66,6 +66,13 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
           }
           for (var delta = 0; delta < allowed_values; delta++) {
             
+            // Skip fields without values.
+            // TODO - someone is passing a 'null' string instead of null, but who?
+            if (typeof entity[field_name][lng][delta][key] === 'undefined' ||
+                !entity[field_name][lng][delta][key] ||
+                entity[field_name][lng][delta][key] == '' ||
+                entity[field_name][lng][delta][key] == 'null') { continue; }
+            
             // Add the key and value to the data string.
             
             // Determine the hook_field_data_string function name. If it exists,
@@ -75,14 +82,10 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
             if (!drupalgap_function_exists(function_name)) {
               console.log('WARNING: drupalgap_entity_assemble_data() - the ' +
                           function_name + ' function does not exist, using core field data string assembly.');
-              // Skip fields without values.
-              if (typeof entity[field_name][lng][delta][key] === 'undefined' ||
-                  !entity[field_name][lng][delta][key] ||
-                  entity[field_name][lng][delta][key] == '') { continue; }
+              
               // Encode the value.
               var value = encodeURIComponent(entity[field_name][lng][delta][key]);
-              // TODO - someone is passing a 'null' string instead of null, but who?
-              if (!value || value == 'null') { continue; }
+              if (!value) { continue; }
               data += '&' + entity_type + '[' + field_name + '][' + lng + '][' + delta + '][' + key + ']=' + value;
             }
             else {
@@ -107,6 +110,7 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
     });
     
     // Return the data string.
+    //dpm(data);
     return data;
   }
   catch (error) { drupalgap_error(error); }
