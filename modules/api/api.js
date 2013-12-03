@@ -280,6 +280,11 @@ function hook_entity_post_render_content(entity) { }
 function hook_field_data_string(entity_type, bundle, entity, field, instance, langcode, delta, options) { }
 
 /**
+ * Used by fields to render their items when being displayed on an entity.
+ */
+function hook_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) { }
+
+/**
  * Used by modules to provide field widgets for form element items. 
  */
 function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) { }
