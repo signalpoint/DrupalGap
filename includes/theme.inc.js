@@ -261,6 +261,37 @@ function theme_link(variables) {
 }
 
 /**
+ * Implementation of theme_table().
+ */
+function theme_table(variables) {
+  try {
+    var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
+    if (variables.header) {
+      html += '<tr>';
+      $.each(variables.header, function(index, column){
+          if (column.data) {
+            html += '<th>' + column.data + '</th>';
+          }
+      });
+      html += '</tr>';
+    }
+    if (variables.rows) {
+      $.each(variables.rows, function(row_index, row){
+          html += '<tr>';
+          if (row) {
+            $.each(row, function(column_index, column){
+                html += '<td>' + column + '</td>';
+            });
+          }
+          html += '</tr>';
+      });
+    }
+    return html + '</table>';
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Implementation of theme_submit().
  */
 function theme_submit(variables) {
