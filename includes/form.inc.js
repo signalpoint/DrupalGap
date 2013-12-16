@@ -624,7 +624,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       if (!variables.attributes['data-theme']) {
         variables.attributes['data-theme'] = 'b';
       }
-      variables.attributes.type = 'button';
+      if (typeof variables.attributes.type === 'undefined') {
+        variables.attributes.type = 'button';
+      }
     }
     
     // Merge the item into variables.
@@ -639,7 +641,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     }
     
     // Run the item through the theme system if a theme function exists, or try
-    // to use the item marku, or let the user know the field isn't supported.
+    // to use the item markup, or let the user know the field isn't supported.
     if (drupalgap_function_exists('theme_' + theme_function)) {
       html += theme(theme_function, variables);
     }
