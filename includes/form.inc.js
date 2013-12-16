@@ -624,6 +624,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       if (!variables.attributes['data-theme']) {
         variables.attributes['data-theme'] = 'b';
       }
+      variables.attributes.type = 'button';
     }
     
     // Merge the item into variables.
