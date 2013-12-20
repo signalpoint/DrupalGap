@@ -801,7 +801,7 @@ function drupalgap_loading_message_show() {
  */
 function drupalgap_loading_message_hide() {
   try {
-    $.mobile.hidePageLoadingMsg();
+    $.mobile.loading('hide');
     drupalgap.loading = false;
   }
   catch (error) { drupalgap_error(error); }
