@@ -33,6 +33,12 @@ version of DrupalGap to another.
 
 7.x-1.6-alpha => 7.x-1.7-alpha
 
+  Now that we've upgraded to jQueryMobile 1.4, there are only two (instead of 5)
+  data themes available. All apps will look different (but better and cleaner)
+  when upgrading.
+
+  ---
+
   The DrupalGap module now provides a "Display Mode" for your content types. For
   example, the Article content type that comes packaged with Drupal now has a
   custom display called "DrupalGap":
