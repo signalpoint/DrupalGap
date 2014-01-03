@@ -309,9 +309,9 @@ function drupalgap_deviceready() {
   drupalgap_bootstrap();
   
   // Verify site path is set.
-  if (!drupalgap.settings.site_path || drupalgap.settings.site_path == '') {
+  if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
     navigator.notification.alert(
-        'No site path to Drupal set in the app/settings.js file!',
+        'No site_path to Drupal set in the app/settings.js file!',
         function(){},
         'Error',
         'OK'
@@ -366,7 +366,8 @@ function drupalgap_deviceready() {
           var msg = 'drupalgap_deviceready() - failed connection to ' +
             drupalgap.settings.site_path;
           if (errorThrown != '') { msg += ' - ' + errorThrown; }
-          msg += ' - Check your device\'s connection and check that ' + drupalgap.settings.site_path +
+          msg += ' - Check your device\'s connection and check that ' +
+                 Drupal.settings.site_path +
                  ' is online. If you continue to have problems visit ' + 
                  'www.drupalgap.org for troubleshooting info.';
           navigator.notification.alert(
@@ -381,17 +382,22 @@ function drupalgap_deviceready() {
       // If we have a session id in local storage, then we'll use it as the
       // CSRF token when making the initial call to system connect. This will
       // determine if the user is still authenticated with Drupal or not.
-      var token = window.localStorage.getItem('sessid');
+      /*var token = window.localStorage.getItem('sessid');
       if (token) {
         drupalgap.sessid = token;
         options.token = token;
         options.beforeSend = function (request) {
           request.setRequestHeader("X-CSRF-Token", options.token);
         };
-      }
+      }*/
       
       // DrupalGap System Connect Service Resource
-      drupalgap.services.drupalgap_system.connect.call(options);
+      // @todo - replace this with a call to system_connect. But first, you'll
+      // have to change the DrupalGap module to do an alter on the default
+      // Services system connect resource, then you can drop the
+      // drupalgap_system resource.
+      //drupalgap.services.drupalgap_system.connect.call(options);
+      system_connect(options);
     }
   }
 }
@@ -633,9 +639,9 @@ function drupalgap_image_path(uri) {
     if (!altered) {
       // No one modified the image path, we'll use the default approach to
       // generating the image src path.
-      var src = drupalgap.settings.site_path + drupalgap.settings.base_path + uri;
+      var src = Drupal.settings.site_path + Drupal.settings.base_path + uri;
       if (src.indexOf('public://') != -1) {
-        src = src.replace('public://', drupalgap.settings.file_public_path + '/');
+        src = src.replace('public://', Drupal.settings.file_public_path + '/');
       }
       return src;
     }
@@ -1374,33 +1380,5 @@ function date_yyyy_mm_dd_hh_mm_ss_parts() {
     return result;
   }
   catch (error) { drupalgap_error(error); }
-}
-
-// http://stackoverflow.com/a/3886106/763010
-function is_int(n) {
-  if (typeof n === 'string') {
-    n = parseInt(n);
-  }
-  return typeof n === 'number' && n % 1 == 0;
-}
-
-/**
- * Javascript equivalent of php's time() function.
- */
-function time() {
-  var d = new Date();
-  return Math.floor(d/1000);
-}
-
-function ucfirst (str) {
-  // http://kevin.vanzonneveld.net
-  // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  // +   bugfixed by: Onno Marsman
-  // +   improved by: Brett Zamir (http://brett-zamir.me)
-  // *     example 1: ucfirst('kevin van zonneveld');
-  // *     returns 1: 'Kevin van zonneveld'
-  str += '';
-  var f = str.charAt(0).toUpperCase();
-  return f + str.substr(1);
 }
 

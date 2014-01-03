@@ -214,11 +214,12 @@ function _image_phonegap_camera_getPicture_success(options) {
 function _image_field_form_validate(form, form_state) {
   try {
     // TODO - this needs mutli value field support (delta)
+    var lng = language_default();
     $.each(form.image_fields, function(index, name){
         // Skip empty images.
         if (!image_phonegap_camera_options[name][0]) { return; }
         // Skip image fields that already have their file id set.
-        if (form_state.values[name][drupalgap.settings.language][0] != '') { return; }
+        if (form_state.values[name][lng][0] != '') { return; }
         // Create a unique file name using the UTC integer value.
         var d = new Date();
         var image_file_name = "" + d.valueOf() + ".jpg";
@@ -236,7 +237,7 @@ function _image_field_form_validate(form, form_state) {
             // Set the hidden input and form state values with the file id.
             var element_id = drupalgap_form_get_element_id(name, form.id);
             $('#' + element_id).val(result.fid);
-            form_state.values[name][drupalgap.settings.language][0] = result.fid;
+            form_state.values[name][lng][0] = result.fid;
           }
         });
     });

@@ -1,28 +1,44 @@
+window.localStorage.clear();
+
+// Init DrupalGap settings object.
+drupalgap.settings = {}; // Do not remove this line.
+
 /* Specify DrupalGap Mobile Application Settings Here */
-drupalgap.settings = {};
 
-/***************|
- * Drupal Paths |
- ***************/
+/****************************************|
+ * Drupal Settings (provided by jDrupal) |
+ ****************************************/
  
-// Site Path
-drupalgap.settings.site_path = ''; // e.g. http://www.example.com
-
-// Base Path
-drupalgap.settings.base_path = '/';
+/* Drupal Paths */
+ 
+// Site Path (do not use a trailing slash)
+Drupal.settings.site_path = ''; // e.g. http://www.example.com
 
 // Default Services Endpoint Path
-drupalgap.settings.default_services_endpoint = 'drupalgap';
+Drupal.settings.endpoint = 'drupalgap';
 
 // Public Files Directory Path
-drupalgap.settings.file_public_path = 'sites/default/files';
+Drupal.settings.file_public_path = 'sites/default/files';
 
-// Clean URLs (optional)
-drupalgap.settings.clean_urls = false; // Setting to false is recommended.
+// The Default Language Code
+Drupal.settings.language_default = 'und';
 
-/*************|
- * Appearance |
- *************/
+/* Drupal Caching */
+
+// Set to true to enable entity local storage caching.
+Drupal.settings.cache.entity.enabled = true;
+
+// Number of seconds before cached copy of entity expires. Set to 0 to cache
+// forever, set to 60 for one minute, etc.
+Drupal.settings.cache.entity.expiration = 3600;
+
+/*********************|
+ * DrupalGap Settings |
+ *********************/
+
+/***********************|
+ * DrupalGap Appearance |
+ ***********************/
 
 // App Title
 drupalgap.settings.title = 'DrupalGap';
@@ -35,9 +51,6 @@ drupalgap.settings.theme = 'easystreet3';
 
 // Logo
 drupalgap.settings.logo = 'themes/easystreet3/images/drupalgap.jpg';
-
-// Language
-drupalgap.settings.language = 'und';
 
 // Loading Animation - http://view.jquerymobile.com/1.3.2/dist/demos/widgets/loader/
 drupalgap.settings.loading = {
@@ -227,12 +240,4 @@ drupalgap.settings.cache = {};
 
 // Theme Registry - Set to true to load the page.tpl.html contents from cache.
 drupalgap.settings.cache.theme_registry = true;
-
-// Entities - Allow entities retrieved from the Drupal server to be cached on
-//            the mobile device using local storage.
-drupalgap.settings.cache.entity = {
-  enabled:true,   /* Set to true to enable entity local storage caching. */
-  expiration:3600 /* Number of seconds before cached copy of entity expires. Set
-                     to 0 to cache forever, set to 60 for one minute, etc. */
-};
 

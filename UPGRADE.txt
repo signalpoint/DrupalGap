@@ -33,6 +33,33 @@ version of DrupalGap to another.
 
 7.x-1.6-alpha => 7.x-1.7-alpha
 
+  One big change is that DrupalGap now utilizes jDrupal, a JavaScript Library
+  for Drupal with a RESTful API for Services.
+
+  Some drupalgap.settings variables have been moved to the Drupal.settings
+  namespace because we are now using jDrupal. Update your settings from/to:
+  
+    drupalgap.settings.site_path => Drupal.settings.site_path
+    drupalgap.settings.base_path => Drupal.settings.base_path
+    drupalgap.settings.file_public_path => Drupal.settings.file_public_path;
+    drupalgap.settings.cache.entity => Drupal.settings.cache.entity
+    drupalgap.settings.cache.entity.enabled => Drupal.settings.cache.entity.enabled
+    drupalgap.settings.cache.entity.expiration => Drupal.settings.cache.entity.expiration
+
+  The following settings have been changed from/to:
+  
+    drupalgap.settings.default_services_endpoint => Drupal.settings.endpoint
+    drupalgap.settings.language => Drupal.settings.language_default
+  
+  Any use of drupalgap.settings.language should be replaced with a call to the
+  new function language_default().
+
+  The following setting(s) have been deprecated:
+  
+    clean_urls
+  
+  ---
+
   The DrupalGap module now provides a "Display Mode" for your content types. For
   example, the Article content type that comes packaged with Drupal now has a
   custom display called "DrupalGap":

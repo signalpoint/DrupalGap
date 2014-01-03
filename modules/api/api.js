@@ -41,6 +41,11 @@ drupalgap.api = {
       if (drupalgap.settings.debug) { dpm(call_options.url); }
       
       // Get CSRF token.
+      services_get_csrf_token(call_options);
+      return;
+      
+      
+      
       _drupalgap_api_get_csrf_token(call_options, {
           success:function() {
             

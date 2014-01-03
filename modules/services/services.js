@@ -22,7 +22,7 @@ function drupalgap_service_resource_extract_results(options) {
       if (options.resource == 'connect' || options.resource == 'login') {
         // Depending on the service resource, extract the permissions
         // from the options data.
-        permissions = {};
+        var permissions = {};
         if (options.service == 'drupalgap_system' && options.resource == 'connect') {
           permissions = options.data.user_permissions;
         }

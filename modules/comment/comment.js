@@ -77,15 +77,3 @@ function comment_edit_submit(form, form_state) {
   }
 }
 
-/**
- * Loads a comment object and returns it, returns false if the load fails.
- */
-function comment_load(cid) {
-  try {
-    var options = null;
-    if (arguments[1]) { options = arguments[1]; }
-    return entity_load('comment', cid, options);
-  }
-  catch (error) { drupalgap_error(error); }
-}
-

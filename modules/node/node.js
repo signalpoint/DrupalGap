@@ -122,18 +122,6 @@ function node_edit_submit(form, form_state) {
 }
 
 /**
- * Loads a node object and returns it. Returns false if the node load fails.
- */
-function node_load(nid) {
-  try {
-    var options = null;
-    if (arguments[1]) { options = arguments[1]; }
-    return entity_load('node', nid, options);
-  }
-  catch (error) { drupalgap_error(error); }
-}
-
-/**
  * Implements hook_menu().
  */
 function node_menu() {

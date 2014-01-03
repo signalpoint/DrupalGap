@@ -35,7 +35,7 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
   try {
     
     var data = '';
-    var lng = drupalgap.settings.language;
+    var lng = language_default();
     
     switch (entity_type) {
       case 'node':
@@ -294,7 +294,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name, field, d
 function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
     var entity = {};
-    var language = drupalgap.settings.language;
+    var language = language_default();
     $.each(form_state.values, function(name, value){
         // Attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
@@ -437,7 +437,7 @@ function drupalgap_entity_get_core_fields(entity_type) {
         fields.language = {
           'type':'hidden',
           'required':true,
-          'default_value':drupalgap.settings.language,
+          'default_value':language_default(),
         };
         break;
       case 'user':
@@ -555,35 +555,12 @@ function drupalgap_entity_get_info() {
 }
 
 /**
+ * @deprecated Since 7.x-1.7-alpha you should use entity_primary_key() instead.
  * Given an entity type, this returns the primary key identifier for it.
  */
 function drupalgap_entity_get_primary_key(entity_type) {
   try {
-    var primary_key = null;
-    switch (entity_type) {
-      case 'comment':
-        primary_key = 'cid';
-        break;
-      case 'file':
-        primary_key = 'fid';
-        break;
-      case 'node':
-        primary_key = 'nid';
-        break;
-      case 'taxonomy_term':
-        primary_key = 'tid';
-        break;
-      case 'taxonomy_vocabulary':
-        primary_key = 'vid';
-        break;
-      case 'user':
-        primary_key = 'uid';
-        break;
-      default:
-        alert('drupalgap_entity_get_primary_key - unsported entity type - ' + entity_type);
-        break;
-    }
-    return primary_key;
+    return entity_primary_key(entity_type);
   }
   catch (error) {
     alert('drupalgap_entity_get_primary_key - ' + error);

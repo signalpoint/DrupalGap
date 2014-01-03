@@ -59,7 +59,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name, fo
     // Grab the field info instances for this entity type and bundle.
     var fields = drupalgap_field_info_instances(entity_type, bundle_name);
     // Use the default language, unless the entity has one specified.
-    var language = drupalgap.settings.language;
+    var language = language_default();
     if (entity && entity.language) {
       language = entity.language;
     }

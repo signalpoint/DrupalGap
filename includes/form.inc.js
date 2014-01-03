@@ -9,7 +9,7 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
     var selector = '.' + drupalgap_form_get_element_container_class(name) + ' .drupalgap_form_add_another_item';
     var add_another_item_button = $(selector); 
     var form = drupalgap_form_local_storage_load(form_id);
-    var language = drupalgap.settings.language;
+    var language = language_default();
     var item = drupalgap_form_element_item_create(name, form, language, delta+1);
     form.elements[name][language][delta+1] = item;
     var element = form.elements[name];
@@ -187,20 +187,21 @@ function drupalgap_form_set_error(name, message) {
  */
 function drupalgap_form_state_values_assemble(form) {
   try {
+    var lng = language_default();
     var form_state = {'values':{}};
     $.each(form.elements, function(name, element) {
       if (name == 'submit') { return; } // Always skip the form 'submit'.
       var id = null;
       if (element.is_field) {
         form_state.values[name] = {};
-        form_state.values[name][drupalgap.settings.language] = {};
+        form_state.values[name][lng] = {};
         var allowed_values = element.field_info_field.cardinality;
         if (allowed_values == -1) {
           allowed_values = 1; // Convert unlimited value field to one for now...
         }
         for (var delta = 0; delta < allowed_values; delta++) {
-          id = drupalgap_form_get_element_id(name, form.id, drupalgap.settings.language, delta);
-          form_state.values[name][drupalgap.settings.language][delta] = _drupalgap_form_state_values_assemble_get_element_value(id, element);
+          id = drupalgap_form_get_element_id(name, form.id, lng, delta);
+          form_state.values[name][dlng][delta] = _drupalgap_form_state_values_assemble_get_element_value(id, element);
         }
       }
       else {
@@ -272,7 +273,7 @@ function drupalgap_form_load(form_id) {
       var fn = window[function_name];
       
       // Determine the language code.
-      var language = drupalgap.settings.language;
+      var language = language_default();
       
       // Build the form arguments by iterating over each argument then adding
       // each to to the form arguments, afterwards remove the argument at index
@@ -474,7 +475,7 @@ function _drupalgap_form_render_element(form, element) {
     var name = element.name;
     
     // Grab the language.
-    var language = drupalgap.settings.language;
+    var language = language_default();
     
     // We'll assume the element has no items (e.g. title, nid, vid, etc), unless
     // we determine later that this element is a field, then it'll have items.

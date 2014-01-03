@@ -124,7 +124,7 @@ function drupalgap_node_assemble_data(options) {
     // build it.
     
     // Determine language code and start building data string.
-    var lng = drupalgap.settings.language;
+    var lng = language_default();
     var data = 'node[language]=' + encodeURIComponent(lng);
     if (options.node.type) {
       data += '&node[type]=' + encodeURIComponent(options.node.type);

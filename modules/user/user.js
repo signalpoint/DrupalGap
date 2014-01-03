@@ -67,18 +67,6 @@ function user_listing_pageshow() {
 }
 
 /**
- * Loads a user object.
- */
-function user_load(uid) {
-  try {
-    var options = null;
-    if (arguments[1]) { options = arguments[1]; }
-    return entity_load('user', uid, options);
-  }
-  catch (error) { drupalgap_error(error); }
-}
-
-/**
  * The user login form.
  */
 function user_login(form, form_state) {
@@ -375,7 +363,7 @@ function user_view_pageshow(uid) {
           var langcode = null;
           if (arguments[1]) { view_mode = arguments[1]; }
           if (arguments[2]) { langcode = arguments[2]; }
-          if (!langcode) { langcode = drupalgap.settings.language; }
+          if (!langcode) { langcode = language_default(); }
           if (account) {
             var build = {
               'theme':'user_profile',

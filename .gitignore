@@ -6,6 +6,9 @@ app/.gitignore
 app/README.*
 res
 
+# Ignore a potential jDrupal folder
+jDrupal
+
 # Ignore jQM Theme Roller Files
 themes/images
 themes/*.css

@@ -131,8 +131,9 @@ function drupalgap_comment_assemble_data(options) {
     data += '&homepage=' + encodeURIComponent(options.comment.homepage);
   }
   if (options.comment.comment_body) {
-    data += '&comment_body[' + drupalgap.settings.language +'][0][value]=' +
-      encodeURIComponent(options.comment.comment_body[drupalgap.settings.language][0].value);
+    var lng = language_default();
+    data += '&comment_body[' + lng +'][0][value]=' +
+      encodeURIComponent(options.comment.comment_body[lng][0].value);
   }
   return data;
 }
