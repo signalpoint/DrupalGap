@@ -1,6 +1,6 @@
 window.localStorage.clear();
 
-// Init DrupalGap settings object.
+// Initialize DrupalGap settings object.
 drupalgap.settings = {}; // Do not remove this line.
 
 /* Specify DrupalGap Mobile Application Settings Here */
