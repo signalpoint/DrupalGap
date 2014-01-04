@@ -94,6 +94,16 @@ var drupalgap = {
 }; // <!-- drupalgap -->
 
 /**
+ * This is called once the <body> element's onload is fired. We then set the
+ * PhoneGap 'deviceready' event listener to drupalgap_deviceready().
+ */
+function drupalgap_onload() {
+  // Place the drupalgap module in Drupal.modules.
+  Drupal.modules['drupalgap'] = {};
+  document.addEventListener("deviceready", _drupalgap_deviceready, false);
+}
+
+/**
  * Given a path to a javascript file relative to the app's www directory,
  * this will load the javascript file so it will be available in scope.
  */
@@ -180,13 +190,16 @@ function drupalgap_blocks_load() {
 
 /**
  * Loads up all necessary assets to make DrupalGap ready.
+ * @todo - this needs to be a hook so drupal_bootstrap can call others like this
+ * one.
  */
 function drupalgap_bootstrap() {
   try {
     // Load up settings.
-    drupalgap_settings_load();
+    //drupalgap_settings_load();
     // Load up includes.
-    drupalgap_includes_load();
+    //drupalgap_includes_load(); // moved to jDrupal
+    /*
     // Load up modules.
     drupalgap_modules_load();
     // Load up the theme.
@@ -199,10 +212,10 @@ function drupalgap_bootstrap() {
     drupalgap_menus_load();
     // Initialize the theme registry.
     drupalgap_theme_registry_build();
-    // Initialize field widgets.
-    //drupalgap_field_widgets_load();
+    */
+    
     // Attach device back button handler (Android).
-    document.addEventListener("backbutton", drupalgap_back, false); 
+    //document.addEventListener("backbutton", drupalgap_back, false); 
   }
   catch (error) {
     alert('drupalgap_bootstrap - ' + error);
@@ -304,9 +317,9 @@ function drupalgap_check_connection() {
 /**
  * Implements PhoneGap's deviceready().
  */
-function drupalgap_deviceready() {
+function _drupalgap_deviceready() {
   // PhoneGap is loaded and it is now safe for DrupalGap to start...
-  drupalgap_bootstrap();
+  //drupalgap_bootstrap();
   
   // Verify site path is set.
   if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
@@ -316,8 +329,9 @@ function drupalgap_deviceready() {
         'Error',
         'OK'
     );
-    return false;
+    return;
   }
+  
   // Check device connection. If the device is offline, warn the user and then
   // go to the offline page.
   drupalgap_check_connection();
@@ -329,7 +343,7 @@ function drupalgap_deviceready() {
         'Offline',
         'OK'
     );
-    return false;
+    return;
   }
   else {
 
@@ -340,12 +354,12 @@ function drupalgap_deviceready() {
     var proceed = true;
     var invocation_results = module_invoke_all('deviceready');
     if (invocation_results && invocation_results.length > 0) {
-      $.each(invocation_results, function(index, object){
-          if (object === false) {
-            proceed = false;
-            return false;
-          }
-      });
+      for (var i = 0; i < invocation_results; i++) {
+        if (!invocation_results[i]) {
+          proceed = false;
+          break;
+        }
+      }
     }
     if (!proceed) {
       drupalgap_goto('');
@@ -359,7 +373,7 @@ function drupalgap_deviceready() {
           // Call all hook_device_connected implementations then go to
           // the front page.
           module_invoke_all('device_connected');
-          drupalgap_goto('');
+          //drupalgap_goto('');
         },
         'error':function(jqXHR, textStatus, errorThrown) {
           // Build an informative error message and display it.
@@ -885,28 +899,13 @@ function drupalgap_menu_access(path) {
 
 /**
  * Given a module name, this will return the module inside drupalgap.modules.
+ * @deprecated, moved to jDrupal
  */
 function drupalgap_module_load(module_name) {
   try {
-    var loaded_module = null;
-    $.each(drupalgap.modules, function(bundle, modules){
-        if (!loaded_module) {
-          $.each(modules, function(index, module){
-              if (module.name == module_name) {
-                // Save reference to module, then break out of loop.
-                loaded_module = module;
-                return false;
-              }
-          });
-        }
-        else {
-          // Module loaded, break out of loop.
-          return false;
-        }
-    });
-    return loaded_module;
+    return module_load(module_name);
   }
-  catch (error) { alert('drupalgap_module_load - ' + error); }
+  catch (error) { console.log('drupalgap_module_load - ' + error); }
 }
 
 /**
@@ -1121,35 +1120,42 @@ function drupalgap_set_title(title) {
 }
 
 /**
- * Loads the settings specified in app/settings.js into the app.
+ * Implements hook_services_request_postprocess_alter().
+ */
+function drupalgap_services_request_postprocess_alter(options, result) {
+  try {
+    // Extract drupalgap system connect service resource results.
+    if (options.service == 'system' && options.resource == 'connect') {
+      drupalgap.entity_info = result.entity_info;
+      drupalgap.field_info_instances = result.field_info_instances;
+      drupalgap.field_info_fields = result.field_info_fields;
+      // @todo - need to bring these back in, with a makefile!!!!
+      /*drupalgap.taxonomy_vocabularies = drupalgap_taxonomy_vocabularies_extract(
+        result.taxonomy_vocabularies
+      );
+      drupalgap_service_resource_extract_results({
+        service: options.service,
+        resource: options.resource,
+        data: result
+      });*/
+      console.log(drupalgap);
+    }
+  }
+  catch (error) {
+    console.log('drupalgap_services_request_postprocess_alter - ' + error);
+  }
+}
+
+/**
+ * @deprecated - Loads the settings specified in app/settings.js into the app.
  */
 function drupalgap_settings_load() {
   try {
-    settings_file_path = 'app/settings.js';
-    jQuery.ajax({
-      async:false,
-      type:'GET',
-      url:settings_file_path,
-      data:null,
-      success:function(){
-        if (drupalgap.settings.debug) {
-          // Set the title to the settings title.
-          drupalgap_set_title(drupalgap.settings.title);
-        }
-      },
-      dataType:'script',
-      error: function(xhr, textStatus, errorThrown) {
-        navigator.notification.alert(
-          'Failed to load the settings.js file in the app folder!',
-          function(){},
-          'Error',
-          'OK'
-        );
-      }
-    });
+    console.log('WARNING: drupalgap_settings_load() is deprecated!');
+    drupal_settings_load();
   }
   catch(error) {
-    alert('drupalgap_settings_load - ' + error);
+    console.log('drupalgap_settings_load - ' + error);
   }
 }
 
@@ -1222,10 +1228,6 @@ function drupalgap_theme_load() {
  */
 function drupalgap_theme_registry_build() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_theme_registry_build()');
-      console.log(JSON.stringify(arguments));
-    }
     var modules = module_implements('theme');
     $.each(modules, function(index, module){
         var function_name = module + '_theme';
@@ -1240,14 +1242,6 @@ function drupalgap_theme_registry_build() {
   catch (error) {
     alert('drupalgap_theme_registry_build - ' + error);
   }
-}
-
-/**
- * This is called once the <body> element's onload is fired. We then set the
- * PhoneGap 'deviceready' event listener to drupalgap_deviceready().
- */
-function drupalgap_onload() {
-  document.addEventListener("deviceready", drupalgap_deviceready, false);
 }
 
 /*
