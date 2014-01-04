@@ -7,10 +7,10 @@
 
 # Create the list of files
 lintfiles = src/drupalgap.js\
-				src/includes/common.inc.js\
+#				src/includes/common.inc.js\
 
 files =	src/drupalgap.js\
-				src/includes/common.inc.js\
+#				src/includes/common.inc.js\
 
 .DEFAULT_GOAL := all
 
