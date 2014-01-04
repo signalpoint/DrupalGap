@@ -7,10 +7,10 @@
 
 # Create the list of files
 lintfiles = src/drupalgap.js\
-#				src/includes/common.inc.js\
+				src/includes/common.inc.js\
 
 files =	src/drupalgap.js\
-#				src/includes/common.inc.js\
+				src/includes/common.inc.js\
 
 .DEFAULT_GOAL := all
 
@@ -24,14 +24,14 @@ jslint: ${lintfiles}
 js: ${files}
 																@echo "Generating aggregated bin/drupalgap.js file"
 																@cat > bin/drupalgap.js $^
-																@echo "Generating compressed bin/drupalgap.min.js file"
-																curl -s \
-																				-d compilation_level=SIMPLE_OPTIMIZATIONS \
-																				-d output_format=text \
-																				-d output_info=compiled_code \
-																				--data-urlencode "js_code@bin/drupalgap.js" \
-																				http://closure-compiler.appspot.com/compile \
-																				> bin/drupalgap.min.js
+#																@echo "Generating compressed bin/drupalgap.min.js file"
+#																curl -s \
+#																				-d compilation_level=SIMPLE_OPTIMIZATIONS \
+#																				-d output_format=text \
+#																				-d output_info=compiled_code \
+#																				--data-urlencode "js_code@bin/drupalgap.js" \
+#																				http://closure-compiler.appspot.com/compile \
+#																				> bin/drupalgap.min.js
 
 # Create the documentation from source code.
 jsdoc: ${files}
