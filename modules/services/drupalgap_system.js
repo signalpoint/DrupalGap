@@ -1,9 +1,14 @@
+// @deprecated
 drupalgap.services.drupalgap_system = {
   'connect':{
     'options':{
       'type':'post',
       'path':'drupalgap_system/connect.json',
       'success':function(data){
+        var message = 'drupalgap_system.connect has been deprecated! ' + 
+          'Use system_connect() instead.';
+        alert(message);
+        return;
         // Set the session id.
         //drupalgap.sessid = data.system_connect.sessid;
         // Set the drupalgap.user to the system connect user.
