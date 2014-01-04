@@ -102,6 +102,111 @@ function drupalgap_onload() {
 }
 
 /**
+ * Implements PhoneGap's deviceready().
+ */
+function _drupalgap_deviceready() {
+  try {
+    // PhoneGap is loaded and it is now safe for DrupalGap to start...
+    //drupalgap_bootstrap();
+
+    // Verify site path is set.
+    if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
+      navigator.notification.alert(
+          'No site_path to Drupal set in the app/settings.js file!',
+          function() {},
+          'Error',
+          'OK'
+      );
+      return;
+    }
+
+    // Check device connection. If the device is offline, warn the user and then
+    // go to the offline page.
+    drupalgap_check_connection();
+    if (!drupalgap.online) {
+      module_invoke_all('device_offline');
+      navigator.notification.alert(
+          'No connection found!',
+          function() { drupalgap_goto('offline'); },
+          'Offline',
+          'OK'
+      );
+      return;
+    }
+    else {
+
+      // Device is online, let's call any implementations of hook_deviceready().
+      // If any implementation returns false, that means they don't want
+      // DrupalGap to continue with the System Connect call, so we'll skip that
+      // and go straight to the App's front page.
+      var proceed = true;
+      var invocation_results = module_invoke_all('deviceready');
+      if (invocation_results && invocation_results.length > 0) {
+        for (var i = 0; i < invocation_results; i++) {
+          if (!invocation_results[i]) {
+            proceed = false;
+            break;
+          }
+        }
+      }
+      if (!proceed) {
+        drupalgap_goto('');
+        // TODO - if module's are going to skip the System Connect call, then we
+        // need to make sure drupalgap.user is set up with appropriate defaults.
+      }
+      else {
+        // Device is online, let's build the default system connect options.
+        var options = {
+          success: function(result) {
+            // Call all hook_device_connected implementations then go to
+            // the front page.
+            module_invoke_all('device_connected');
+            //drupalgap_goto('');
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            // Build an informative error message and display it.
+            var msg = 'drupalgap_deviceready() - failed connection to ' +
+              drupalgap.settings.site_path;
+            if (errorThrown != '') { msg += ' - ' + errorThrown; }
+            msg += ' - Check your device\'s connection and check that ' +
+                   Drupal.settings.site_path +
+                   ' is online. If you continue to have problems visit ' +
+                   'www.drupalgap.org for troubleshooting info.';
+            navigator.notification.alert(
+                msg,
+                function() { drupalgap_goto('offline'); },
+                'Unable to Connect to Drupal',
+                'OK'
+            );
+          }
+        };
+
+        // If we have a session id in local storage, then we'll use it as the
+        // CSRF token when making the initial call to system connect. This will
+        // determine if the user is still authenticated with Drupal or not.
+        /*var token = window.localStorage.getItem('sessid');
+        if (token) {
+          drupalgap.sessid = token;
+          options.token = token;
+          options.beforeSend = function (request) {
+            request.setRequestHeader("X-CSRF-Token", options.token);
+          };
+        }*/
+
+        // DrupalGap System Connect Service Resource
+        // @todo - replace this with a call to system_connect. But first, you'll
+        // have to change the DrupalGap module to do an alter on the default
+        // Services system connect resource, then you can drop the
+        // drupalgap_system resource.
+        //drupalgap.services.drupalgap_system.connect.call(options);
+        system_connect(options);
+      }
+    }
+  }
+  catch (error) { console.log('_drupalgap_deviceready - ' + error); }
+}
+
+/**
  * Given a path to a javascript file relative to the app's www directory,
  * this will load the javascript file so it will be available in scope.
  */
@@ -301,111 +406,6 @@ function drupalgap_check_connection() {
     return states[networkState];
   }
   catch (error) { console.log('drupalgap_check_connection - ' + error); }
-}
-
-/**
- * Implements PhoneGap's deviceready().
- */
-function _drupalgap_deviceready() {
-  try {
-    // PhoneGap is loaded and it is now safe for DrupalGap to start...
-    //drupalgap_bootstrap();
-
-    // Verify site path is set.
-    if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      navigator.notification.alert(
-          'No site_path to Drupal set in the app/settings.js file!',
-          function() {},
-          'Error',
-          'OK'
-      );
-      return;
-    }
-
-    // Check device connection. If the device is offline, warn the user and then
-    // go to the offline page.
-    drupalgap_check_connection();
-    if (!drupalgap.online) {
-      module_invoke_all('device_offline');
-      navigator.notification.alert(
-          'No connection found!',
-          function() { drupalgap_goto('offline'); },
-          'Offline',
-          'OK'
-      );
-      return;
-    }
-    else {
-
-      // Device is online, let's call any implementations of hook_deviceready().
-      // If any implementation returns false, that means they don't want
-      // DrupalGap to continue with the System Connect call, so we'll skip that
-      // and go straight to the App's front page.
-      var proceed = true;
-      var invocation_results = module_invoke_all('deviceready');
-      if (invocation_results && invocation_results.length > 0) {
-        for (var i = 0; i < invocation_results; i++) {
-          if (!invocation_results[i]) {
-            proceed = false;
-            break;
-          }
-        }
-      }
-      if (!proceed) {
-        drupalgap_goto('');
-        // TODO - if module's are going to skip the System Connect call, then we
-        // need to make sure drupalgap.user is set up with appropriate defaults.
-      }
-      else {
-        // Device is online, let's build the default system connect options.
-        var options = {
-          success: function(result) {
-            // Call all hook_device_connected implementations then go to
-            // the front page.
-            module_invoke_all('device_connected');
-            //drupalgap_goto('');
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-            // Build an informative error message and display it.
-            var msg = 'drupalgap_deviceready() - failed connection to ' +
-              drupalgap.settings.site_path;
-            if (errorThrown != '') { msg += ' - ' + errorThrown; }
-            msg += ' - Check your device\'s connection and check that ' +
-                   Drupal.settings.site_path +
-                   ' is online. If you continue to have problems visit ' +
-                   'www.drupalgap.org for troubleshooting info.';
-            navigator.notification.alert(
-                msg,
-                function() { drupalgap_goto('offline'); },
-                'Unable to Connect to Drupal',
-                'OK'
-            );
-          }
-        };
-
-        // If we have a session id in local storage, then we'll use it as the
-        // CSRF token when making the initial call to system connect. This will
-        // determine if the user is still authenticated with Drupal or not.
-        /*var token = window.localStorage.getItem('sessid');
-        if (token) {
-          drupalgap.sessid = token;
-          options.token = token;
-          options.beforeSend = function (request) {
-            request.setRequestHeader("X-CSRF-Token", options.token);
-          };
-        }*/
-
-        // DrupalGap System Connect Service Resource
-        // @todo - replace this with a call to system_connect. But first, you'll
-        // have to change the DrupalGap module to do an alter on the default
-        // Services system connect resource, then you can drop the
-        // drupalgap_system resource.
-        //drupalgap.services.drupalgap_system.connect.call(options);
-        system_connect(options);
-      }
-    }
-  }
-  catch (error) { console.log('_drupalgap_deviceready - ' + error); }
 }
 
 /**
@@ -1125,11 +1125,11 @@ function drupalgap_services_request_postprocess_alter(options, result) {
       drupalgap.field_info_instances = result.field_info_instances;
       drupalgap.field_info_fields = result.field_info_fields;
       // @todo - need to bring these back in, with a makefile!!!!
-      /*drupalgap.taxonomy_vocabularies =
+      drupalgap.taxonomy_vocabularies =
         drupalgap_taxonomy_vocabularies_extract(
           result.taxonomy_vocabularies
         );
-      drupalgap_service_resource_extract_results({
+      /*drupalgap_service_resource_extract_results({
         service: options.service,
         resource: options.resource,
         data: result
