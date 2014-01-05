@@ -16,15 +16,14 @@
 /**
  * Given a block delta, this will return the corresponding
  * block from drupalgap.blocks.
+ * @param {String} delta
+ * @return {Object}
  */
 function drupalgap_block_load(delta) {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('drupalgap_block_load(' + delta + ')');
-    }
     var block = null;
     if (drupalgap.blocks) {
-      $.each(drupalgap.blocks, function(index, object){
+      $.each(drupalgap.blocks, function(index, object) {
           if (object[delta]) {
             block = object[delta];
             return false;
@@ -34,7 +33,8 @@ function drupalgap_block_load(delta) {
     if (block == null) {
       var msg = 'drupalgap_block_load - failed to load "' + delta + '" block!';
       if (delta == 'header') {
-        msg += ' - Did you rename your "header" block to "title" in settings.js?';
+        msg +=
+          ' - Did you rename your "header" block to "title" in settings.js?';
       }
       alert(msg);
     }
@@ -43,8 +43,6 @@ function drupalgap_block_load(delta) {
     }
     return block;
   }
-  catch (error) {
-    alert('drupalgap_block_load - ' + error);
-  }
+  catch (error) { console.log('drupalgap_block_load - ' + error); }
 }
 

@@ -11,6 +11,7 @@ lintfiles = src/drupalgap.js\
 				src/includes/form.inc.js\
 				src/includes/menu.inc.js\
 				src/includes/theme.inc.js\
+				src/modules/block/block.js\
 				src/modules/taxonomy/taxonomy.js\
 
 files =	src/drupalgap.js\
@@ -18,6 +19,7 @@ files =	src/drupalgap.js\
 				src/includes/form.inc.js\
 				src/includes/menu.inc.js\
 				src/includes/theme.inc.js\
+				src/modules/block/block.js\
 				src/modules/taxonomy/taxonomy.js\
 
 .DEFAULT_GOAL := all
