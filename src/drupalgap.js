@@ -96,9 +96,21 @@ var drupalgap = {
  * PhoneGap 'deviceready' event listener to drupalgap_deviceready().
  */
 function drupalgap_onload() {
-  // Place the drupalgap module in Drupal.modules.
-  Drupal.modules['drupalgap'] = {};
-  document.addEventListener('deviceready', _drupalgap_deviceready, false);
+  try {
+    // At this point, the Drupal object has been initialized by jDrupal. Let's
+    // add DrupalGap's modules onto the Drupal JSON object. Remember, all of the
+    // module source code is included via the makefile's bin generation.
+    var modules = [
+      'drupalgap',
+      'taxonomy'
+    ];
+    for (var i = 0; i < modules.length; i++) {
+      var module = modules[i];
+      Drupal.modules[module] = module_object_template(module);
+    }
+    document.addEventListener('deviceready', _drupalgap_deviceready, false);
+  }
+  catch (error) { console.log('drupalgap_onload - ' + error); }
 }
 
 /**
