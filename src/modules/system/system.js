@@ -291,6 +291,7 @@ function system_settings_form_submit(form, form_state) {
           variable_set(variable, value);
       });
     }
+    // @todo - a nice spot to have a drupal_set_message function, eh?
     alert('The configuration options have been saved.');
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
