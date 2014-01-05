@@ -35,7 +35,6 @@ var drupalgap = {
   module_paths: [],
   includes: [
       {name: 'common' },
-      {name: 'file' },
       {name: 'form' },
       {name: 'menu' },
       {name: 'theme' }
@@ -93,17 +92,34 @@ var drupalgap = {
 
 /**
  * This is called once the <body> element's onload is fired. We then set the
- * PhoneGap 'deviceready' event listener to drupalgap_deviceready().
+ * PhoneGap 'deviceready' event listener to _drupalgap_deviceready().
  */
 function drupalgap_onload() {
   try {
-    // At this point, the Drupal object has been initialized by jDrupal. Let's
-    // add DrupalGap's modules onto the Drupal JSON object. Remember, all of the
-    // module source code is included via the makefile's bin generation.
+    // At this point, the Drupal object has been initialized by jDrupal and has
+    // loaded the app/settings.js into the <head>. Let's add DrupalGap's modules
+    // onto the Drupal JSON object. Remember, all of the module source code is
+    // included via the makefile's bin generation.
     var modules = [
       'drupalgap',
-      'taxonomy'
+      'block',
+      'comment',
+      'entity',
+      'field',
+      'image',
+      'menu',
+      'mvc',
+      'node',
+      'system',
+      'taxonomy',
+      'user',
+      'views_datasource'
     ];
+    // @todo - Grab the old drupalgap.modules and iterate over contrib and
+    // custom to help bring in older modules. Eventually this can be removed
+    // after a few version releases, but the CHANGELOG.txt needs to mention
+    // this.
+
     for (var i = 0; i < modules.length; i++) {
       var module = modules[i];
       Drupal.modules[module] = module_object_template(module);
@@ -223,13 +239,8 @@ function _drupalgap_deviceready() {
  */
 function drupalgap_bootstrap() {
   try {
-    // Load up settings.
-    //drupalgap_settings_load();
-    // Load up includes.
-    //drupalgap_includes_load(); // moved to jDrupal
-    /*
-    // Load up modules.
-    drupalgap_modules_load();
+    // Load up any contrib and/or custom modules.
+    drupalgap_load_modules();
     // Load up the theme.
     drupalgap_theme_load();
     // Load up blocks.
@@ -246,6 +257,59 @@ function drupalgap_bootstrap() {
     //document.addEventListener("backbutton", drupalgap_back, false);
   }
   catch (error) { console.log('drupalgap_bootstrap - ' + error); }
+}
+
+/**
+ * Loads each drupalgap module so they are available in the JS scope.
+ */
+function drupalgap_load_modules() {
+  try {
+    if (drupalgap.modules != null && drupalgap.modules.length != 0) {
+      $.each(drupalgap.modules, function(bundle, modules) {
+        $.each(modules, function(index, module) {
+          // Determine module directory.
+          dir = drupalgap_modules_get_bundle_directory(bundle);
+          module_base_path = dir + '/' + module.name;
+          // Add module .js file to array of paths to load.
+          module_path = module_base_path + '/' + module.name + '.js';
+          modules_paths = [module_path];
+          // If there are any includes with this module, add them to the list of
+          // paths to include.
+          if (module.includes != null && module.includes.length != 0) {
+            $.each(module.includes, function(include_index, include_object) {
+              modules_paths.push(
+                module_base_path + '/' + include_object.name + '.js'
+              );
+            });
+          }
+          // Now load all the paths for this module.
+          $.each(modules_paths,
+            function(modules_paths_index, modules_paths_object) {
+              jQuery.ajax({
+                  async: false,
+                  type: 'GET',
+                  url: modules_paths_object,
+                  data: null,
+                  success: function() {
+                    if (drupalgap.settings.debug) {
+                      // Print the module path to the console.
+                      console.log(modules_paths_object);
+                    }
+                  },
+                  dataType: 'script',
+                  error: function(xhr, textStatus, errorThrown) {
+                    alert('Failed to load module! (' + module.name + ')');
+                  }
+              });
+            }
+          );
+        });
+      });
+      // Now invoke hook_install on all modules.
+      module_invoke_all('install');
+    }
+  }
+  catch (error) { console.log('drupalgap_load_modules - ' + error); }
 }
 
 /**
@@ -919,59 +983,6 @@ function drupalgap_modules_get_bundle_directory(bundle) {
   catch (error) {
     console.log('drupalgap_modules_get_bundle_directory - ' + error);
   }
-}
-
-/**
- * Loads each drupalgap module so they are available in the JS scope.
- */
-function drupalgap_modules_load() {
-  try {
-    if (drupalgap.modules != null && drupalgap.modules.length != 0) {
-      $.each(drupalgap.modules, function(bundle, modules) {
-        $.each(modules, function(index, module) {
-          // Determine module directory.
-          dir = drupalgap_modules_get_bundle_directory(bundle);
-          module_base_path = dir + '/' + module.name;
-          // Add module .js file to array of paths to load.
-          module_path = module_base_path + '/' + module.name + '.js';
-          modules_paths = [module_path];
-          // If there are any includes with this module, add them to the list of
-          // paths to include.
-          if (module.includes != null && module.includes.length != 0) {
-            $.each(module.includes, function(include_index, include_object) {
-              modules_paths.push(
-                module_base_path + '/' + include_object.name + '.js'
-              );
-            });
-          }
-          // Now load all the paths for this module.
-          $.each(modules_paths,
-            function(modules_paths_index, modules_paths_object) {
-              jQuery.ajax({
-                  async: false,
-                  type: 'GET',
-                  url: modules_paths_object,
-                  data: null,
-                  success: function() {
-                    if (drupalgap.settings.debug) {
-                      // Print the module path to the console.
-                      console.log(modules_paths_object);
-                    }
-                  },
-                  dataType: 'script',
-                  error: function(xhr, textStatus, errorThrown) {
-                    alert('Failed to load module! (' + module.name + ')');
-                  }
-              });
-            }
-          );
-        });
-      });
-      // Now invoke hook_install on all modules.
-      module_invoke_all('install');
-    }
-  }
-  catch (error) { console.log('drupalgap_modules_load - ' + error); }
 }
 
 /**
