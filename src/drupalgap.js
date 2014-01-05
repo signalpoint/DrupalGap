@@ -119,7 +119,7 @@ function drupalgap_onload() {
 function _drupalgap_deviceready() {
   try {
     // PhoneGap is loaded and it is now safe for DrupalGap to start...
-    //drupalgap_bootstrap();
+    drupalgap_bootstrap();
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
@@ -219,6 +219,36 @@ function _drupalgap_deviceready() {
 }
 
 /**
+ * Loads up all necessary assets to make DrupalGap ready.
+ */
+function drupalgap_bootstrap() {
+  try {
+    // Load up settings.
+    //drupalgap_settings_load();
+    // Load up includes.
+    //drupalgap_includes_load(); // moved to jDrupal
+    /*
+    // Load up modules.
+    drupalgap_modules_load();
+    // Load up the theme.
+    drupalgap_theme_load();
+    // Load up blocks.
+    drupalgap_blocks_load();
+    // Initialize menu links.
+    menu_router_build();
+    // Initialize menus.
+    drupalgap_menus_load();
+    // Initialize the theme registry.
+    drupalgap_theme_registry_build();
+    */
+
+    // Attach device back button handler (Android).
+    //document.addEventListener("backbutton", drupalgap_back, false);
+  }
+  catch (error) { console.log('drupalgap_bootstrap - ' + error); }
+}
+
+/**
  * Given a path to a javascript file relative to the app's www directory,
  * this will load the javascript file so it will be available in scope.
  */
@@ -297,36 +327,6 @@ function drupalgap_blocks_load() {
     }
   }
   catch (error) { console.log('drupalgap_blocks_load - ' + error); }
-}
-
-/**
- * Loads up all necessary assets to make DrupalGap ready.
- */
-function drupalgap_bootstrap() {
-  try {
-    // Load up settings.
-    //drupalgap_settings_load();
-    // Load up includes.
-    //drupalgap_includes_load(); // moved to jDrupal
-    /*
-    // Load up modules.
-    drupalgap_modules_load();
-    // Load up the theme.
-    drupalgap_theme_load();
-    // Load up blocks.
-    drupalgap_blocks_load();
-    // Initialize menu links.
-    menu_router_build();
-    // Initialize menus.
-    drupalgap_menus_load();
-    // Initialize the theme registry.
-    drupalgap_theme_registry_build();
-    */
-
-    // Attach device back button handler (Android).
-    //document.addEventListener("backbutton", drupalgap_back, false);
-  }
-  catch (error) { console.log('drupalgap_bootstrap - ' + error); }
 }
 
 /**
