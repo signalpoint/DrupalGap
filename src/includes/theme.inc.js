@@ -6,7 +6,7 @@
 $(document).on('pagebeforechange', function(e, data) {
     try {
       // If we're moving backwards, reset drupalgap.back and return.
-      if (drupalgap.back) {
+      if (drupalgap && drupalgap.back) {
         drupalgap.back = false;
         return;
       }
@@ -23,10 +23,10 @@ $(document).on('pagebeforechange', function(e, data) {
         // If drupalgap_goto() determined that it is necessary to prevent the
         // default page from reloading, then we'll skip the page
         // processing and reset the prevention boolean.
-        if (!drupalgap.page.process) {
+        if (drupalgap && !drupalgap.page.process) {
           drupalgap.page.process = true;
         }
-        else {
+        else if (drupalgap) {
           // Pre process, then process the page.
           template_preprocess_page(drupalgap.page.variables);
           template_process_page(drupalgap.page.variables);
