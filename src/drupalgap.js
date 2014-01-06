@@ -99,7 +99,8 @@ function drupalgap_onload() {
     // At this point, the Drupal object has been initialized by jDrupal and has
     // loaded the app/settings.js into the <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
-    // included via the makefile's bin generation.
+    // included via the makefile's bin generation. However, the core modules
+    // hook_install() implementations haven't been called yet.
     var modules = [
       'drupalgap',
       'block',
@@ -122,7 +123,7 @@ function drupalgap_onload() {
 
     for (var i = 0; i < modules.length; i++) {
       var module = modules[i];
-      Drupal.modules[module] = module_object_template(module);
+      Drupal.modules.core[module] = module_object_template(module);
     }
     document.addEventListener('deviceready', _drupalgap_deviceready, false);
   }
@@ -189,7 +190,7 @@ function _drupalgap_deviceready() {
             // Call all hook_device_connected implementations then go to
             // the front page.
             module_invoke_all('device_connected');
-            //drupalgap_goto('');
+            drupalgap_goto('');
           },
           error: function(jqXHR, textStatus, errorThrown) {
             // Build an informative error message and display it.
@@ -239,77 +240,135 @@ function _drupalgap_deviceready() {
  */
 function drupalgap_bootstrap() {
   try {
-    // Load up any contrib and/or custom modules.
+    // Load up any contrib and/or custom modules (the DG core moodules have
+    // already been loaded at this point), load the theme and all blocks. Then
+    // build the menu router, load the menus, and build the theme registry.
     drupalgap_load_modules();
-    // Load up the theme.
-    drupalgap_theme_load();
-    // Load up blocks.
-    drupalgap_blocks_load();
-    // Initialize menu links.
+    drupalgap_load_theme();
+    drupalgap_load_blocks();
     menu_router_build();
-    // Initialize menus.
     drupalgap_menus_load();
-    // Initialize the theme registry.
     drupalgap_theme_registry_build();
-    */
 
     // Attach device back button handler (Android).
-    //document.addEventListener("backbutton", drupalgap_back, false);
+    document.addEventListener('backbutton', drupalgap_back, false);
   }
   catch (error) { console.log('drupalgap_bootstrap - ' + error); }
 }
 
 /**
- * Loads each drupalgap module so they are available in the JS scope.
+ * Loads any contrib or custom modules specifed in the settings.js file.
  */
 function drupalgap_load_modules() {
   try {
-    if (drupalgap.modules != null && drupalgap.modules.length != 0) {
-      $.each(drupalgap.modules, function(bundle, modules) {
-        $.each(modules, function(index, module) {
-          // Determine module directory.
-          dir = drupalgap_modules_get_bundle_directory(bundle);
-          module_base_path = dir + '/' + module.name;
-          // Add module .js file to array of paths to load.
-          module_path = module_base_path + '/' + module.name + '.js';
-          modules_paths = [module_path];
-          // If there are any includes with this module, add them to the list of
-          // paths to include.
-          if (module.includes != null && module.includes.length != 0) {
-            $.each(module.includes, function(include_index, include_object) {
-              modules_paths.push(
-                module_base_path + '/' + include_object.name + '.js'
-              );
-            });
-          }
-          // Now load all the paths for this module.
-          $.each(modules_paths,
-            function(modules_paths_index, modules_paths_object) {
-              jQuery.ajax({
-                  async: false,
-                  type: 'GET',
-                  url: modules_paths_object,
-                  data: null,
-                  success: function() {
-                    if (drupalgap.settings.debug) {
-                      // Print the module path to the console.
-                      console.log(modules_paths_object);
-                    }
-                  },
-                  dataType: 'script',
-                  error: function(xhr, textStatus, errorThrown) {
-                    alert('Failed to load module! (' + module.name + ')');
-                  }
+    var module_types = ['contrib', 'custom'];
+    $.each(module_types, function(index, bundle) {
+        $.each(Drupal.modules[bundle], function(index, module) {
+            // Determine module directory.
+            dir = drupalgap_modules_get_bundle_directory(bundle);
+            module_base_path = dir + '/' + module.name;
+            // Add module .js file to array of paths to load.
+            module_path = module_base_path + '/' + module.name + '.js';
+            modules_paths = [module_path];
+            // If there are any includes with this module, add them to the
+            // list of paths to include.
+            if (module.includes != null && module.includes.length != 0) {
+              $.each(module.includes, function(include_index, include_object) {
+                modules_paths.push(
+                  module_base_path + '/' + include_object.name + '.js'
+                );
               });
             }
-          );
-        });
+            // Now load all the paths for this module.
+            $.each(modules_paths,
+              function(modules_paths_index, modules_paths_object) {
+                jQuery.ajax({
+                    async: false,
+                    type: 'GET',
+                    url: modules_paths_object,
+                    data: null,
+                    success: function() {
+                        console.log('Loaded module: ' + modules_paths_object);
+                    },
+                    dataType: 'script',
+                    error: function(xhr, textStatus, errorThrown) {
+                      alert('Failed to load module! (' + module.name + ')');
+                    }
+                });
+              }
+            );
       });
-      // Now invoke hook_install on all modules.
-      module_invoke_all('install');
-    }
+    });
+    // Now invoke hook_install on all modules, including core.
+    module_invoke_all('install');
   }
   catch (error) { console.log('drupalgap_load_modules - ' + error); }
+}
+
+/**
+ * Load the theme specified by drupalgap.settings.theme into drupalgap.theme
+ * Returns true on success, false if it fails.
+ * @return {Boolean}
+ */
+function drupalgap_load_theme() {
+  try {
+    if (!drupalgap.settings.theme) {
+      alert('drupalgap_load_theme - no theme specified in settings.js');
+    }
+    else {
+      // Pull the theme name from the settings.js file.
+      var theme_name = drupalgap.settings.theme;
+      // Let's try to load to theme's js file first by looking in the core
+      // themes directory, then in the app/themes directory.
+      var theme_path = 'themes/' + theme_name + '/' + theme_name + '.js';
+      if (!drupalgap_file_exists(theme_path)) {
+        theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
+        if (!drupalgap_file_exists(theme_path)) {
+          var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
+            'The theme\'s JS file does not exist: ' + theme_path;
+          alert(error_msg);
+          return false;
+        }
+      }
+      // We found the theme's js file, add it to the page.
+      drupalgap_add_js(theme_path);
+      // Call the theme's template_info implementation.
+      var template_info_function = theme_name + '_info';
+      if (drupalgap_function_exists(template_info_function)) {
+        var fn = window[template_info_function];
+        drupalgap.theme = fn();
+        if (drupalgap.settings.debug) {
+          console.log('theme loaded: ' + theme_name);
+          console.log(JSON.stringify(drupalgap.theme));
+        }
+        // For each region in the name, set the 'name' value on the region JSON.
+        $.each(drupalgap.theme.regions, function(name, region) {
+            drupalgap.theme.regions[name].name = name;
+        });
+        // Make sure the theme implements the required regions.
+        var regions = system_regions_list();
+        for (var i = 0; i < regions.length; i++) {
+          var region = regions[i];
+          if (typeof drupalgap.theme.regions[region] === 'undefined') {
+            console.log('WARNING: drupalgap_load_theme() - The "' +
+                        theme_name + '" theme does not have the "' + region +
+                        '" region specified in "' + theme_name + '_info()."');
+          }
+        }
+        // Theme loaded successfully! Set the drupalgap.theme_path and return
+        // true.
+        drupalgap.theme_path = theme_path.replace('/' + theme_name + '.js', '');
+        return true;
+      }
+      else {
+        var error_msg = 'drupalgap_load_theme() - failed - ' +
+          template_info_function + '() does not exist!';
+        alert(error_msg);
+      }
+    }
+    return false;
+  }
+  catch (error) { console.log('drupalgap_load_theme - ' + error); }
 }
 
 /**
@@ -363,7 +422,7 @@ function drupalgap_add_css() {
  * Rounds up all blocks defined by hook_block_info and places them in the
  * drupalgap.blocks array.
  */
-function drupalgap_blocks_load() {
+function drupalgap_load_blocks() {
   try {
     /*drupalgap.blocks[0] = {};
     var modules = module_implements('block_info');
@@ -390,7 +449,7 @@ function drupalgap_blocks_load() {
       console.log(JSON.stringify(drupalgap.blocks));
     }
   }
-  catch (error) { console.log('drupalgap_blocks_load - ' + error); }
+  catch (error) { console.log('drupalgap_load_blocks - ' + error); }
 }
 
 /**
@@ -1175,72 +1234,6 @@ function drupalgap_settings_load() {
   catch (error) {
     console.log('drupalgap_settings_load - ' + error);
   }
-}
-
-/**
- * Load the theme specified by drupalgap.settings.theme into drupalgap.theme
- * Returns true on success, false if it fails.
- * @return {Boolean}
- */
-function drupalgap_theme_load() {
-  try {
-    if (!drupalgap.settings.theme) {
-      alert('drupalgap_theme_load - no theme specified in settings.js');
-    }
-    else {
-      // Pull the theme name from the settings.js file.
-      var theme_name = drupalgap.settings.theme;
-      // Let's try to load to theme's js file first by looking in the core
-      // themes directory, then in the app/themes directory.
-      var theme_path = 'themes/' + theme_name + '/' + theme_name + '.js';
-      if (!drupalgap_file_exists(theme_path)) {
-        theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
-        if (!drupalgap_file_exists(theme_path)) {
-          var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
-            'The theme\'s JS file does not exist: ' + theme_path;
-          alert(error_msg);
-          return false;
-        }
-      }
-      // We found the theme's js file, add it to the page.
-      drupalgap_add_js(theme_path);
-      // Call the theme's template_info implementation.
-      var template_info_function = theme_name + '_info';
-      if (drupalgap_function_exists(template_info_function)) {
-        var fn = window[template_info_function];
-        drupalgap.theme = fn();
-        if (drupalgap.settings.debug) {
-          console.log('theme loaded: ' + theme_name);
-          console.log(JSON.stringify(drupalgap.theme));
-        }
-        // For each region in the name, set the 'name' value on the region JSON.
-        $.each(drupalgap.theme.regions, function(name, region) {
-            drupalgap.theme.regions[name].name = name;
-        });
-        // Make sure the theme implements the required regions.
-        var regions = system_regions_list();
-        for (var i = 0; i < regions.length; i++) {
-          var region = regions[i];
-          if (typeof drupalgap.theme.regions[region] === 'undefined') {
-            console.log('WARNING: drupalgap_theme_load() - The "' +
-                        theme_name + '" theme does not have the "' + region +
-                        '" region specified in "' + theme_name + '_info()."');
-          }
-        }
-        // Theme loaded successfully! Set the drupalgap.theme_path and return
-        // true.
-        drupalgap.theme_path = theme_path.replace('/' + theme_name + '.js', '');
-        return true;
-      }
-      else {
-        var error_msg = 'drupalgap_theme_load() - failed - ' +
-          template_info_function + '() does not exist!';
-        alert(error_msg);
-      }
-    }
-    return false;
-  }
-  catch (error) { console.log('drupalgap_theme_load - ' + error); }
 }
 
 /**
