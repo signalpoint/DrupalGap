@@ -64,14 +64,16 @@ drupalgap.settings.loading = {
  *****************************************/
 
 // Contributed Modules - www/app/modules
-drupalgap.modules.contrib = [
-  /*{name:'example'},*/
-];
+
+// E.g., these 2 lines will load the module at www/app/modules/example
+//var example_contrib_module = module_object_template('example');
+//Drupal.modules.contrib.example = example_contrib_module;
 
 // Custom Modules - www/app/modules/custom
-drupalgap.modules.custom = [
-  /*{name:'example'},*/
-];
+
+// E.g., these 2 lines will load the module at www/app/modules/custom/example
+//var example_custom_module = module_object_template('example');
+//Drupal.modules.custom.example = example_custom_module;
 
 /***************************************|
  * Menus - http://drupalgap.org/node/85 |
