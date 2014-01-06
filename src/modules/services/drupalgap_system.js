@@ -11,8 +11,8 @@ drupalgap.services.drupalgap_system = {
         return;
         // Set the session id.
         //drupalgap.sessid = data.system_connect.sessid;
-        // Set the drupalgap.user to the system connect user.
-        drupalgap.user = data.system_connect.user;
+        // Set the Drupal.user to the system connect user.
+        Drupal.user = data.system_connect.user;
         // Extract drupalgap service resource results.
         drupalgap.entity_info = data.entity_info;
         drupalgap.field_info_instances = data.field_info_instances;

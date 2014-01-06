@@ -434,8 +434,8 @@ function drupalgap_goto_prepare_path(path) {
     // Change 'user' to 'user/login' for anonymous users, or change it to
     // e.g. 'user/123/view' for authenticated users.
     else if (path == 'user') {
-      if (drupalgap.user.uid != 0) {
-        path = 'user/' + drupalgap.user.uid + '/view';
+      if (Drupal.user.uid != 0) {
+        path = 'user/' + Drupal.user.uid + '/view';
       }
       else {
         path = 'user/login';

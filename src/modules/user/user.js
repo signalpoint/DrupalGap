@@ -7,7 +7,7 @@ function user_edit_access(account) {
   try {
     // If the current user is looking at their own account, or if they have the
     // 'administer users' permission, then they are allowed to edit the account.
-    if (drupalgap.user.uid == account.uid || user_access('administer users')) {
+    if (Drupal.user.uid == account.uid || user_access('administer users')) {
       return true;
     }
     return false;
@@ -270,7 +270,7 @@ function user_profile_form(form, form_state, account) {
     // Add password fields to the form. We show the current password field only
     // if the user is editing their account. We show the password and confirm
     // password field no matter what.
-    if (drupalgap.user.uid == account.uid) {
+    if (Drupal.user.uid == account.uid) {
       form.elements.current_pass = {
         'title': 'Current password',
         'type': 'password',
@@ -413,7 +413,7 @@ function drupalgap_user_has_role(role) {
     var has_role = false;
     var account = null;
     if (arguments[1]) { account = arguments[1]; }
-    else { account = drupalgap.user; }
+    else { account = Drupal.user; }
     $.each(account.roles, function(rid, value) {
         if (role == value) {
           has_role = true;

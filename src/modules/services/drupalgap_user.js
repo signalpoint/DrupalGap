@@ -29,8 +29,8 @@ drupalgap.services.drupalgap_user = {
             }
         });
         
-        // Extract the system connect user and set drupalgap.user with it.
-        drupalgap.user = data.drupalgap_system_connect.system_connect.user;
+        // Extract the system connect user and set Drupal.user with it.
+        Drupal.user = data.drupalgap_system_connect.system_connect.user;
         drupalgap.field_info_instances = data.drupalgap_system_connect.field_info_instances;
         drupalgap.field_info_fields = data.drupalgap_system_connect.field_info_fields;
         

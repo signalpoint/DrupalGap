@@ -181,7 +181,7 @@ function _drupalgap_deviceready() {
       if (!proceed) {
         drupalgap_goto('');
         // TODO - if module's are going to skip the System Connect call, then we
-        // need to make sure drupalgap.user is set up with appropriate defaults.
+        // need to make sure Drupal.user is set up with appropriate defaults.
       }
       else {
         // Device is online, let's build the default system connect options.
@@ -961,7 +961,7 @@ function drupalgap_max_width() {
 function drupalgap_menu_access(path) {
   try {
     // User #1 is allowed to do anything, I mean anything.
-    if (drupalgap.user.uid == 1) { return true; }
+    if (Drupal.user.uid == 1) { return true; }
     // Everybody else will not have access unless we prove otherwise.
     var access = false;
     if (drupalgap.menu_links[path]) {
@@ -1211,11 +1211,11 @@ function drupalgap_services_request_postprocess_alter(options, result) {
         drupalgap_taxonomy_vocabularies_extract(
           result.taxonomy_vocabularies
         );
-      /*drupalgap_service_resource_extract_results({
+      drupalgap_service_resource_extract_results({
         service: options.service,
         resource: options.resource,
         data: result
-      });*/
+      });
     }
   }
   catch (error) {
@@ -1267,13 +1267,13 @@ function user_access(permission) {
     // Make sure they provided a permission.
     if (permission == null) { return false; }
     // User 1 always has permission.
-    if (drupalgap.user.uid == 1) { return true; }
+    if (Drupal.user.uid == 1) { return true; }
     // For everyone else, assume they don't have permission. Iterate over
-    // drupalgap.user.permissions to see if the current user has the given
+    // Drupal.user.permissions to see if the current user has the given
     // permission, then return the result.
     var access = false;
-    if (drupalgap.user.permissions && drupalgap.user.permissions.length != 0) {
-      $.each(drupalgap.user.permissions, function(index, user_permission) {
+    if (Drupal.user.permissions && Drupal.user.permissions.length != 0) {
+      $.each(Drupal.user.permissions, function(index, user_permission) {
         if (permission == user_permission) {
           access = true;
           return;

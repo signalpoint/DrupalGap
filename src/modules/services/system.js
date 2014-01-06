@@ -7,7 +7,7 @@ drupalgap.services.system = {
         // Set the session id.
         //drupalgap.sessid = data.sessid;
         // Extract data and set drupalgap variables.
-        drupalgap.user = data.user;
+        Drupal.user = data.user;
       },
     },
     'call':function(options){

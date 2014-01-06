@@ -106,7 +106,7 @@ function _drupalgap_api_get_csrf_token(call_options, options) {
     if ($.inArray(call_options.type.toUpperCase(), types) == -1) {
       // Anonymous users don't need the CSRF token, unless we're calling system
       // connect, then we need to pass along the token if we have one.
-      if (drupalgap.user.uid == 0 &&
+      if (Drupal.user.uid == 0 &&
           call_options.service_resource != 'drupalgap_system/connect.json' &&
           call_options.service_resource != 'system/connect.json') {
         options.success.call();

@@ -4,7 +4,7 @@ drupalgap.services.user = {
       'type':'post',
       'path':'user/login.json',
       'success':function(data){
-        drupalgap.user = data.user;
+        Drupal.user = data.user;
         // WARNING - we don't automatically make a call to acquire the CSRF
         // token here. The DrupalGap User Login resource automatically gets the
         // token, but since this is the default implementation of the Services
@@ -46,7 +46,7 @@ drupalgap.services.user = {
         // the drupalgap user and call drupalgap system connect.
         drupalgap.sessid = null;
         window.localStorage.removeItem('sessid');
-        drupalgap.user = {'uid':0,'roles':{'1':'anonymous user'}};
+        Drupal.user = {'uid':0,'roles':{'1':'anonymous user'}};
         drupalgap.services.drupalgap_system.connect.call({'async':false});
         // Remove all pages from the DOM.
         drupalgap_remove_pages_from_dom();
