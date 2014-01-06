@@ -19,6 +19,7 @@ lintfiles = src/drupalgap.js\
 				src/modules/menu/menu.js\
 				src/modules/mvc/mvc.js\
 				src/modules/node/node.js\
+				src/modules/services/services.js\
 				src/modules/system/system.js\
 				src/modules/user/user.js\
 				src/modules/taxonomy/taxonomy.js\
@@ -37,6 +38,7 @@ files =	src/drupalgap.js\
 				src/modules/menu/menu.js\
 				src/modules/mvc/mvc.js\
 				src/modules/node/node.js\
+				src/modules/services/services.js\
 				src/modules/system/system.js\
 				src/modules/user/user.js\
 				src/modules/taxonomy/taxonomy.js\
@@ -52,16 +54,16 @@ jslint: ${lintfiles}
 
 # Create an aggregated js file and a compressed js file.
 js: ${files}
-																@echo "Generating aggregated bin/drupalgap.js file"
-																@cat > bin/drupalgap.js $^
-#																@echo "Generating compressed bin/drupalgap.min.js file"
-#																curl -s \
-#																				-d compilation_level=SIMPLE_OPTIMIZATIONS \
-#																				-d output_format=text \
-#																				-d output_info=compiled_code \
-#																				--data-urlencode "js_code@bin/drupalgap.js" \
-#																				http://closure-compiler.appspot.com/compile \
-#																				> bin/drupalgap.min.js
+				@echo "Generating aggregated bin/drupalgap.js file"
+				@cat > bin/drupalgap.js $^
+#				@echo "Generating compressed bin/drupalgap.min.js file"
+#				curl -s \
+#					-d compilation_level=SIMPLE_OPTIMIZATIONS \
+#					-d output_format=text \
+#					-d output_info=compiled_code \
+#					--data-urlencode "js_code@bin/drupalgap.js" \
+#					http://closure-compiler.appspot.com/compile \
+#					> bin/drupalgap.min.js
 
 # Create the documentation from source code.
 jsdoc: ${files}
