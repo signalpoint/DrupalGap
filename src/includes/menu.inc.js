@@ -149,10 +149,6 @@ function menu_execute_active_handler() {
  */
 function menu_get_item() {
   try {
-    if (drupalgap.settings.debug) {
-      console.log('menu_get_item()');
-      console.log(JSON.stringify(arguments));
-    }
     var path = null;
     var router_item = null;
     if (arguments[0]) { path = arguments[0]; }
@@ -233,9 +229,6 @@ function menu_router_build() {
             drupalgap.menu_links[path] = menu_item;
         });
     });
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(drupalgap.menu_links));
-    }
   }
   catch (error) { console.log('menu_router_build - ' + error); }
 }
@@ -574,4 +567,3 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
     console.log('drupalgap_menu_router_build_relationships - ' + error);
   }
 }
-
