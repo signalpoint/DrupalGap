@@ -59,6 +59,14 @@ version of DrupalGap to another.
     clean_urls
   
   ---
+  
+  The modules system has moved out of DrupalGap and into jDrupal. So you need to
+  update your settings.js file to load the modules into jDrupal. In your
+  settings.js file, replace all occurrences of "drupalgap.modules" with
+  "Drupal.modules". View the app/default.settings.js file to see the new syntax
+  you must use in your app/settings.js file.
+
+  ---
 
   The DrupalGap module now provides a "Display Mode" for your content types. For
   example, the Article content type that comes packaged with Drupal now has a
