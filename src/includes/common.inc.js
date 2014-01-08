@@ -476,7 +476,9 @@ function drupalgap_jqm_active_page_url() {
   try {
     // WARNING: when the app first loads, this value may be much different than
     // you expect. It certainly is not the front page path, because on Android
-    // for example it returns '/android_asset/www/index.html'.
+    // for example it returns '/android_asset/www/index.html'. Also, when the
+    // app first loads, activePage is null, so just return an empty string.
+    if (!$.mobile.activePage) { return ''; }
     return $.mobile.activePage.data('url');
   }
   catch (error) { console.log('drupalgap_jqm_active_page_url - ' + error); }
