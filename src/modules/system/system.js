@@ -131,11 +131,10 @@ function system_404_page(path) {
  */
 function system_dashboard_page() {
   try {
-    if (drupalgap.settings.debug) { console.log('system_dashboard_page()'); }
     var content = {};
     content.site_info = {
       markup: '<h4 style="text-align: center;">' +
-        drupalgap.settings.site_path +
+        Drupal.settings.site_path +
       '</h4>'
     };
     content.welcome = {
