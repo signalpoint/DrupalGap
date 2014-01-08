@@ -713,35 +713,6 @@ function drupalgap_get_placeholders_from_html(html) {
 }
 
 /**
- * Given a type and name, this will return the path to the asset if it is found,
- * false otherwise.
- * @param {String} type
- * @param {String} name
- * @return {*}
- */
-function drupalgap_get_path(type, name) {
-  try {
-    var path = '';
-    var found_it = false;
-    if (type == 'module') {
-      $.each(drupalgap.modules, function(bundle, modules) {
-        $.each(modules, function(index, module) {
-          if (name == module.name) {
-            path = drupalgap_modules_get_bundle_directory(bundle) + '/';
-            path += module.name;
-            found_it = true;
-          }
-          if (found_it) { return false; }
-        });
-        if (found_it) { return false; }
-      });
-    }
-    return path;
-  }
-  catch (error) { console.log('drupalgap_get_path - ' + error); }
-}
-
-/**
  * Returns the current page's title.
  * @return {String}
  */
@@ -1270,7 +1241,7 @@ function drupalgap_settings_load() {
 }
 
 /**
- * This calls all implements of hook_theme and builds the DrupalGap theme
+ * This calls all implementations of hook_theme and builds the DrupalGap theme
  * registry.
  */
 function drupalgap_theme_registry_build() {
@@ -1281,8 +1252,13 @@ function drupalgap_theme_registry_build() {
         var fn = window[function_name];
         var hook_theme = fn();
         $.each(hook_theme, function(element, variables) {
-            variables.path = drupalgap_get_path('module', module);
-            eval('drupalgap.theme_registry.' + element + ' = variables;');
+            //variables.path = drupalgap_get_path('module', module);
+            variables.path = drupalgap_get_path(
+              'theme',
+              drupalgap.settings.theme
+            );
+            //eval('drupalgap.theme_registry.' + element + ' = variables;');
+            drupalgap.theme_registry[element] = variables;
         });
     });
   }

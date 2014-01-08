@@ -79,6 +79,13 @@ version of DrupalGap to another.
     });
   
   ---
+
+  The node.tpl.html and user-profile.tpl.html files have been moved out of there
+  core module folders and now live in the easystreet3 theme folder. Anyone who
+  has implemented a custom theme needs to add these two .tpl.html files to their
+  theme's folder.
+
+  ---
   
   The modules system has moved out of DrupalGap and into jDrupal. So you need to
   update your settings.js file to load the modules into jDrupal. In your
