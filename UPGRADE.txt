@@ -57,6 +57,26 @@ version of DrupalGap to another.
   The following setting(s) have been deprecated:
   
     clean_urls
+
+  ---
+
+  drupalgap.views_datasource has been deprecated, instead use a call to
+  views_datasource_get_view_result(). For example, before you would make a Views
+  Datasource call like this:
+
+    var options = {
+      path: 'my_view_url',
+      success: function(result){ /* ... */}
+    };
+    drupalgap.views_datasource.call(options);
+
+  Now you make the call like this:
+
+    views_datasource_get_view_result('my_view_url', {
+        success: function(result) {
+          /* ... */
+        }
+    });
   
   ---
   
