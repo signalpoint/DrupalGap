@@ -1,8 +1,5 @@
 window.localStorage.clear();
 
-// Initialize the drupglap JSON object.
-var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
-
 /* Specify DrupalGap Mobile Application Settings Here */
 
 /****************************************|

@@ -1,3 +1,5 @@
+var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
+
 /**
  * Initializes the drupalgap json object.
  * @return {Object}
@@ -112,7 +114,8 @@ function drupalgap_onload() {
     // loaded the app/settings.js into the <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
     // included via the makefile's bin generation. However, the core modules
-    // hook_install() implementations haven't been called yet.
+    // hook_install() implementations haven't been called yet, so we add them to
+    // the module listing so they can be invoked by hooks later on.
     var modules = [
       'drupalgap',
       'block',
@@ -128,11 +131,6 @@ function drupalgap_onload() {
       'user',
       'views_datasource'
     ];
-    // @todo - Grab the old drupalgap.modules and iterate over contrib and
-    // custom to help bring in older modules. Eventually this can be removed
-    // after a few version releases, but the CHANGELOG.txt needs to mention
-    // this.
-
     for (var i = 0; i < modules.length; i++) {
       var module = modules[i];
       Drupal.modules.core[module] = module_object_template(module);
@@ -192,8 +190,8 @@ function _drupalgap_deviceready() {
       }
       if (!proceed) {
         drupalgap_goto('');
-        // TODO - if module's are going to skip the System Connect call, then we
-        // need to make sure Drupal.user is set up with appropriate defaults.
+        // @todo - if module's are going to skip the System Connect call, then
+        // we need to make sure Drupal.user is set up with appropriate defaults.
       }
       else {
         // Device is online, let's build the default system connect options.
