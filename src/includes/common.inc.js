@@ -175,13 +175,49 @@ function drupalgap_get_path(type, name) {
           }
       });
     }
+    else if (type == 'theme') { path = 'themes/' + name; }
     else {
-      alert('drupalgap_get_path - unsupported type (' + type + ')');
+      console.log(
+        'WARNING: drupalgap_get_path - unsupported type (' + type + ')'
+      );
     }
     return path;
   }
   catch (error) { console.log('drupalgap_get_path - ' + error); }
 }
+
+/* @todo - Somehow we ended up with two implemetations of this function. This
+  one here was in drupalgap.js, we temporarily move it here until it is
+  determined it has no value. If it does, merge the code into the
+  implementation of the function above. */
+/**
+ * Given a type and name, this will return the path to the asset if it is found,
+ * false otherwise.
+ * @param {String} type
+ * @param {String} name
+ * @return {*}
+ */
+/*function drupalgap_get_path(type, name) {
+  try {
+    var path = '';
+    var found_it = false;
+    if (type == 'module') {
+      $.each(drupalgap.modules, function(bundle, modules) {
+        $.each(modules, function(index, module) {
+          if (name == module.name) {
+            path = drupalgap_modules_get_bundle_directory(bundle) + '/';
+            path += module.name;
+            found_it = true;
+          }
+          if (found_it) { return false; }
+        });
+        if (found_it) { return false; }
+      });
+    }
+    return path;
+  }
+  catch (error) { console.log('drupalgap_get_path - ' + error); }
+}*/
 
 /**
  * Change the page to the previous page.
