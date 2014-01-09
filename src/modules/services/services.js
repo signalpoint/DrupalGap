@@ -6,6 +6,8 @@
  */
 function drupalgap_services_get_entity_resource(entity_type) {
   try {
+    // @todo - deprecate this function, it is no longer needed now that entity
+    // c.r.u.d. is built into jDrupal.
     if (drupalgap.services[entity_type]) {
       return drupalgap.services[entity_type];
     }
@@ -17,6 +19,31 @@ function drupalgap_services_get_entity_resource(entity_type) {
 }
 
 /**
+ * Returns the name of the function [entity_type]_(load|save|delete) to be used
+ * when in need of an entity C.R.U.D. operation.
+ * @param {String} entity_type
+ * @param {String} crud
+ * @return {String}
+ */
+function services_get_resource_function_for_entity(entity_type, crud) {
+  try {
+    var name = entity_type + '_';
+    switch (crud) {
+      case 'create': name += 'save'; break;
+      case 'retrieve': name += 'load'; break;
+      case 'update': name += 'save'; break;
+      case 'delete': name += 'delete'; break;
+      default: name += 'load'; break;
+    }
+    return name;
+  }
+  catch (error) {
+    console.log('services_get_resource_function_for_entity - ' + error);
+  }
+}
+
+
+/**
  * Given a json drupalgap options array from a service resource results call,
  * this extracts data based on the resource and populates necessary global vars.
  * @param {Object} options
@@ -24,10 +51,18 @@ function drupalgap_services_get_entity_resource(entity_type) {
 function drupalgap_service_resource_extract_results(options) {
   try {
     if (options.service == 'system' && options.resource == 'connect') {
+      // The system connect resource's success function places what is in
+      // options.data.user to overwrite Drupal.user, so anything we want in
+      // the Drupal.user object must be added to options.data.user isntead.
+      // Extract and build the user's permissions.
+      options.data.user.permissions = [];
       var permissions = options.data.user_permissions;
       for (var permission in permissions) {
-        Drupal.user.permissions.push(permissions[permission]);
+        options.data.user.permissions.push(permissions[permission]);
       }
+      // Pull out the content types user permissions.
+      options.data.user.content_types_user_permissions =
+        options.data.content_types_user_permissions;
     }
   }
   catch (error) {
