@@ -249,7 +249,7 @@ function drupalgap_form_state_values_assemble(form) {
         }
         for (var delta = 0; delta < allowed_values; delta++) {
           id = drupalgap_form_get_element_id(name, form.id, lng, delta);
-          form_state.values[name][dlng][delta] =
+          form_state.values[name][lng][delta] =
             _drupalgap_form_state_values_assemble_get_element_value(
               id,
               element
@@ -1015,7 +1015,6 @@ function _drupalgap_form_submit(form_id) {
 
     // Call the form's submit function(s), if any.
     $.each(form.submit, function(index, function_name) {
-        if (drupalgap.settings.debug) { console.log(function_name + '()'); }
         var fn = window[function_name];
         fn.apply(null, Array.prototype.slice.call([form, form_state]));
     });
