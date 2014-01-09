@@ -175,15 +175,8 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
     var confirm_msg =
       'Delete this content, are you sure? This action cannot be undone...';
     if (confirm(confirm_msg)) {
-      // Grab the service resource for this entity type, and its primary key.
-      var service_resource =
-        drupalgap_services_get_entity_resource(entity_type);
-      if (!service_resource) { return false; }
-      var primary_key = drupalgap_entity_get_primary_key(entity_type);
-      if (!primary_key) { return false; }
       // Set up the api call arguments and success callback.
       var call_arguments = {};
-      call_arguments[primary_key] = entity_id;
       call_arguments.success = function(result) {
         // Remove the entities page from the DOM, if it exists.
         var entity_page_path = entity_type + '/' + entity_id;
@@ -192,14 +185,20 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
           drupalgap_remove_page_from_dom(entity_page_id);
         }
         // Remove the entity from local storage.
+        // @todo - this should be moved to jDrupal.
         window.localStorage.removeItem(
           entity_local_storage_key(entity_type, entity_id)
         );
-        console.log('Deleted.');
+        // Go to the front page.
         drupalgap_goto('', {'form_submission': true});
       };
-      // Call the delete resource.
-      service_resource.del.call(call_arguments);
+      // Call the delete function.
+      var name = services_get_resource_function_for_entity(
+        entity_type,
+        'delete'
+      );
+      var fn = window[name];
+      fn(entity_id, call_arguments);
     }
   }
   catch (error) {
@@ -398,9 +397,6 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
  */
 function drupalgap_entity_form_submit(form, form_state, entity) {
   try {
-    var service_resource =
-      drupalgap_services_get_entity_resource(form.entity_type);
-    if (!service_resource) { return false; }
 
     // Grab the primary key name for this entity type.
     var primary_key = drupalgap_entity_get_primary_key(form.entity_type);
@@ -414,17 +410,6 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
     // Let's set up the api call arguments.
     var call_arguments = {};
 
-    // Attach the entity to the call arguments, keyed by its type. There is a
-    // special case for the user entity type, we want to call it 'account' so
-    // CRUD understands it.
-    var entity_type = form.entity_type;
-    if (entity_type == 'user') {
-      entity_type = 'account';
-    }
-    // @todo - is this a bug? Why are we setting entity_type equal to entity
-    // here?
-    call_arguments[entity_type] = entity;
-
     // Setup the success call back to go back to the entity page view.
     call_arguments.success = function(result) {
 
@@ -437,7 +422,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       if (form.action) {
         destination = form.action;
       }
-      // TODO - this drupalgap_goto probably shouldn't be here... the drupalgap
+      // @todo - this drupalgap_goto probably shouldn't be here... the drupalgap
       // form submission handler should be the one who handles the call to
       // drupalgap_goto. We're going to need to make a separate call back
       // function in form.js to handle these entity async callbacks (and
@@ -447,16 +432,19 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
 
     // Depending on if we are creating a new entity, or editing an existing one,
     // call the appropriate service resource.
-    if (!editing) {
-      service_resource.create.call(call_arguments);
-    }
-    else {
-      // Remove the entity from local storage, then call the update resource.
+    var crud = 'create';
+    if (editing) {
+      crud = 'update';
+      // Remove the entity from local storage.
+      // @todo This should be moved to jDrupal.
       window.localStorage.removeItem(
         entity_local_storage_key(form.entity_type, entity[primary_key])
       );
-      service_resource.update.call(call_arguments);
     }
+    var fn = window[
+      services_get_resource_function_for_entity(form.entity_type, crud)
+    ];
+    fn(entity, call_arguments);
   }
   catch (error) { console.log('drupalgap_entity_form_submit - ' + error); }
 }
