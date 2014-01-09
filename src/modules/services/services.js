@@ -6,6 +6,10 @@
  */
 function drupalgap_services_get_entity_resource(entity_type) {
   try {
+    console.log(
+      'WARNING: drupalgap_services_get_entity_resource() is deprecated! ' +
+      'Use services_get_resource_function_for_entity() instead.'
+    );
     // @todo - deprecate this function, it is no longer needed now that entity
     // c.r.u.d. is built into jDrupal.
     if (drupalgap.services[entity_type]) {
@@ -19,8 +23,8 @@ function drupalgap_services_get_entity_resource(entity_type) {
 }
 
 /**
- * Returns the name of the function [entity_type]_(load|save|delete) to be used
- * when in need of an entity C.R.U.D. operation.
+ * Returns the name of the function jDrupal function to be used when in need of
+ * an entity C.R.U.D. operation.
  * @param {String} entity_type
  * @param {String} crud
  * @return {String}
