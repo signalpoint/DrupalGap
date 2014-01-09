@@ -30,33 +30,22 @@ function node_add_page() {
       'node_type_listing': {
         'theme': 'jqm_item_list',
         'title': 'Content Types',
-        'items': [],
         'attributes': {'id': 'node_type_listing_items'}
       }
     };
+    var items = [];
+    $.each(
+      Drupal.user.content_types_user_permissions,
+      function(type, permissions) {
+        if (permissions.create) {
+          items.push(l(type, 'node/add/' + type));
+        }
+      }
+    );
+    content.node_type_listing.items = items;
     return content;
   }
   catch (error) { console.log('node_add_page - ' + error); }
-}
-
-/**
- * The jQM pageshow callback for the node add page.
- */
-function node_add_page_pageshow() {
-  try {
-    drupalgap.services.drupalgap_content.content_types_user_permissions.call({
-      'success': function(data) {
-        var items = [];
-        $.each(data, function(type, permissions) {
-            if (permissions.create) {
-              items.push(l(type, 'node/add/' + type));
-            }
-        });
-        drupalgap_item_list_populate('#node_type_listing_items', items);
-      }
-    });
-  }
-  catch (error) { console.log('node_add_page_pageshow - ' + error); }
 }
 
 /**
@@ -136,8 +125,7 @@ function node_menu() {
       },
       'node/add': {
         'title': 'Add content',
-        'page_callback': 'node_add_page',
-        'pageshow': 'node_add_page_pageshow'
+        'page_callback': 'node_add_page'
       },
       'node/add/%': {
         'title': 'Add content',
