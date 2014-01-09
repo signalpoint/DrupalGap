@@ -577,13 +577,18 @@ function drupalgap_check_connection() {
 }
 
 /**
+ * @deprecated Use empty() instead.
  * Returns true if given value is empty. A generic way to test for emptiness.
  * @param {*} value
  * @return {Boolean}
  */
 function drupalgap_empty(value) {
   try {
-    return (typeof value === 'undefined' || value === null || value == '');
+    console.log(
+      'WARNING: drupalgap_empty() is deprecated! ' +
+      'Use empty() instead.'
+    );
+    return empty(value);
   }
   catch (error) { console.log('drupalgap_empty - ' + error); }
 }
