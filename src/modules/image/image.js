@@ -21,7 +21,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
   langcode, items, display) {
   try {
     var element = {};
-    if (!drupalgap_empty(items)) {
+    if (!empty(items)) {
       $.each(items, function(delta, item) {
           // TODO - add support for image_style
           element[delta] = {

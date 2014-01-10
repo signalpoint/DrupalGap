@@ -175,7 +175,7 @@ function number_field_formatter_view(entity_type, entity, field, instance,
     if (typeof items === 'string') {
       items = {0: {value: items}};
     }
-    if (!drupalgap_empty(items)) {
+    if (!empty(items)) {
       $.each(items, function(delta, item) {
           element[delta] = {
             markup: item.value
@@ -319,7 +319,7 @@ function text_field_formatter_view(entity_type, entity, field, instance,
   langcode, items, display) {
   try {
     var element = {};
-    if (!drupalgap_empty(items)) {
+    if (!empty(items)) {
       $.each(items, function(delta, item) {
           element[delta] = {
             markup: item.value

@@ -39,7 +39,7 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
     if (typeof items === 'string') {
       items = {0: {tid: items}};
     }
-    if (!drupalgap_empty(items)) {
+    if (!empty(items)) {
       $.each(items, function(delta, item) {
           element[delta] = {
             theme: 'link',
