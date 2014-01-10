@@ -399,7 +399,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
   try {
 
     // Grab the primary key name for this entity type.
-    var primary_key = drupalgap_entity_get_primary_key(form.entity_type);
+    var primary_key = entity_primary_key(form.entity_type);
 
     // Determine if we are editing an entity or creating a new one.
     var editing = false;
@@ -748,9 +748,6 @@ function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
  */
 function entity_services_request_postprocess_alter(options, result) {
   try {
-    dpm('entity_services_request_postprocess_alter');
-    dpm(options);
-    dpm(result);
     // If we're retrieving an entity, render the entity's content.
     if (
       options.resource == 'retrieve' &&
