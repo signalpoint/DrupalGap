@@ -741,3 +741,25 @@ function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
   catch (error) { console.log('entity_page_edit_pageshow - ' + error); }
 }
 
+/**
+ * Implements hook_services_request_postprocess_alter().
+ * @param {Object} options
+ * @param {*} result
+ */
+function entity_services_request_postprocess_alter(options, result) {
+  try {
+    dpm('entity_services_request_postprocess_alter');
+    dpm(options);
+    dpm(result);
+    // If we're retrieving an entity, render the entity's content.
+    if (
+      options.resource == 'retrieve' &&
+      in_array(options.service, entity_types()
+    )) { drupalgap_entity_render_content(options.service, result); }
+  }
+  catch (error) {
+    console.log('entity_services_request_postprocess_alter - ' + error);
+  }
+}
+
+
