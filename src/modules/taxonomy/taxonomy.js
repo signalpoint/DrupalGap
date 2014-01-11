@@ -322,12 +322,11 @@ function taxonomy_vocabularies_page() {
  */
 function taxonomy_vocabularies_pageshow() {
   try {
-    // @todo - replace with a call to the vocabulary index function.
-    drupalgap.services.drupalgap_taxonomy.get_vocabularies.call({
-        success: function(data) {
+    taxonomy_vocabulary_index(null, {
+        success: function(vocabularies) {
           // Extract the vocabs into items, then drop them in the list.
           var items = [];
-          $.each(data, function(index, vocabulary) {
+          $.each(vocabularies, function(index, vocabulary) {
               items.push(
                 l(vocabulary.name, 'taxonomy/vocabulary/' + vocabulary.vid)
               );
@@ -393,18 +392,24 @@ function taxonomy_vocabulary_pageshow(vid) {
             'view',
             content
           );
-          drupalgap.services.drupalgap_taxonomy.get_terms.call({
-              'vid': vocabulary.vid,
-              'success': function(data) {
-                // Extract the terms into items, then drop them in the list.
-                var items = [];
-                $.each(data, function(index, term) {
-                    items.push(l(term.name, 'taxonomy/term/' + term.tid));
-                });
-                drupalgap_item_list_populate(
-                  '#taxonomy_term_listing_items_' + vid,
-                  items
-                );
+          var query = {
+            parameters: {
+              vid: vid
+            }
+          };
+          taxonomy_term_index(query, {
+              success: function(terms) {
+                if (terms.length != 0) {
+                  // Extract the terms into items, then drop them in the list.
+                  var items = [];
+                  $.each(terms, function(index, term) {
+                      items.push(l(term.name, 'taxonomy/term/' + term.tid));
+                  });
+                  drupalgap_item_list_populate(
+                    '#taxonomy_term_listing_items_' + vid,
+                    items
+                  );
+                }
               }
           });
         }
