@@ -9,7 +9,11 @@ drupalgap.services.drupalgap_taxonomy = {
     },
     'call':function(options){
       try {
-        drupalgap.api.call(drupalgap_chain_callbacks(drupalgap.services.drupalgap_taxonomy.get_vocabularies.options, options));
+        console.log(
+          'WARNING: drupalgap.services.drupalgap_taxonomy.get_vocabularies ' +
+          'has been deprecated! Use taxonomy_vocabulary_index() instead.';
+        );
+        taxonomy_vocabulary_index(null, options);
       }
       catch (error) {
         navigator.notification.alert(
@@ -31,9 +35,16 @@ drupalgap.services.drupalgap_taxonomy = {
     },
     'call':function(options){
       try {
-        var api_options = drupalgap_chain_callbacks(drupalgap.services.drupalgap_taxonomy.get_terms.options, options);
-        api_options.data = 'vid=' + options.vid;
-        drupalgap.api.call(api_options);
+        console.log(
+          'WARNING: drupalgap.services.drupalgap_taxonomy.get_terms ' +
+          'has been deprecated! Use taxonomy_term_index() instead.';
+        );
+        var query = {
+          parameters: {
+            vid: options.vid
+          }
+        };
+        taxonomy_term_index(query, options);
       }
       catch (error) {
         navigator.notification.alert(
