@@ -1204,18 +1204,17 @@ function drupalgap_set_title(title) {
 }
 
 /**
- * Implements hook_services_request_postprocess_alter().
+ * Implements hook_services_request_pre_postprocess_alter().
  * @param {Object} options
  * @param {*} result
  */
-function drupalgap_services_request_postprocess_alter(options, result) {
+function drupalgap_services_request_pre_postprocess_alter(options, result) {
   try {
     // Extract drupalgap system connect service resource results.
     if (options.service == 'system' && options.resource == 'connect') {
       drupalgap.entity_info = result.entity_info;
       drupalgap.field_info_instances = result.field_info_instances;
       drupalgap.field_info_fields = result.field_info_fields;
-      // @todo - need to bring these back in, with a makefile!!!!
       drupalgap.taxonomy_vocabularies =
         drupalgap_taxonomy_vocabularies_extract(
           result.taxonomy_vocabularies
@@ -1226,9 +1225,66 @@ function drupalgap_services_request_postprocess_alter(options, result) {
         data: result
       });
     }
+    // Whenever a user logs out, remove all the pages from the DOM.
+    else if (options.service == 'user' &&
+      (options.resource == 'logout' || options.resource == 'login')) {
+      drupalgap_remove_pages_from_dom();
+    }
+    // Whenever an entity is created, updated or deleted, remove the
+    // corresponing DrupalGap core page(s) from the DOM so the pages will be
+    // rebuilt properly next time they are loaded.
+    else if (
+      in_array(options.resource, ['create', 'update', 'delete']) &&
+      in_array(options.service, entity_types())
+    ) {
+      var entity_type = options.entity_type;
+      var entity_id = options.entity_id;
+      var bundle = options.bundle || null;
+      var paths = [];
+      if (options.resource != 'create') {
+        var prefix = entity_type;
+        if (in_array(entity_type, ['taxonomy_vocabulary', 'taxonomy_term'])) {
+          prefix = prefix.replace('_', '/', prefix);
+        }
+        paths.push(prefix + '/' + entity_id);
+        paths.push(prefix + '/' + entity_id + '/view');
+        // @todo This page won't get removed since it is the current page...
+        // maybe when an entity is updated or deleted, we need a transitional
+        // page that says "Deleting [entity]..." that way we can remove this
+        // page (since it is not possible to remove the current page in jQM).
+        // Actually now that I think about, we should have a confirmation page
+        // when deleting an entity just like Drupal, and that should take care
+        // of the deletion case. Not sure what to do about the update case...
+        // maybe some type of pageshow handler on entity view pages that can
+        // remove the edit form for the entity.
+        paths.push(prefix + '/' + entity_id + '/edit');
+      }
+      else {
+        switch (entity_type) {
+          case 'node':
+            // @todo This page won't get removed since it is the current page...
+            paths.push('node/add/' + bundle);
+            break;
+        }
+      }
+      // Add extras depending on the entity type.
+      switch (entity_type) {
+        case 'node': paths.push('node'); break;
+        case 'taxonomy_vocabulary': paths.push('taxonomy/vocabularies'); break;
+        case 'user': paths.push('user-listing'); break;
+      }
+      // Convert the paths to page ids, then remove them from the DOM.
+      var pages = [];
+      $.each(paths, function(index, path) {
+          pages.push(drupalgap_get_page_id(path));
+      });
+      $.each(pages, function(index, page_id) {
+          drupalgap_remove_page_from_dom(page_id);
+      });
+    }
   }
   catch (error) {
-    console.log('drupalgap_services_request_postprocess_alter - ' + error);
+    console.log('drupalgap_services_request_pre_postprocess_alter - ' + error);
   }
 }
 
@@ -1238,7 +1294,7 @@ function drupalgap_services_request_postprocess_alter(options, result) {
 function drupalgap_settings_load() {
   try {
     console.log('WARNING: drupalgap_settings_load() is deprecated!');
-    drupal_settings_load();
+    //drupal_settings_load();
   }
   catch (error) {
     console.log('drupalgap_settings_load - ' + error);
