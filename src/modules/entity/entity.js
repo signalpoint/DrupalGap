@@ -412,22 +412,47 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
 
     // Setup the success call back to go back to the entity page view.
     call_arguments.success = function(result) {
-
-      // By default we'll try to redirect to [entity-type]/[entity-id]. Note,
-      // this doesn't work for taxonomy_vocabulary and taxonomy_term since
-      // they have paths of taxonomy/vocabulary and taxonomy/term. So once
-      // all of the entity forms have an action, we can get rid of this default
-      // setting and just use the action.
-      var destination = form.entity_type + '/' + eval('result.' + primary_key);
-      if (form.action) {
-        destination = form.action;
+      try {
+        // By default we'll try to redirect to [entity-type]/[entity-id]. Note,
+        // this doesn't work for taxonomy_vocabulary and taxonomy_term since
+        // they have paths of taxonomy/vocabulary and taxonomy/term. So once
+        // all of the entity forms have an action, we can get rid of this
+        // default setting and just use the action.
+        var destination =
+          form.entity_type + '/' + eval('result.' + primary_key);
+        if (form.action) {
+          destination = form.action;
+        }
+        // @todo - this drupalgap_goto probably shouldn't be here... the
+        // drupalgap form submission handler should be the one who handles the
+        // call to drupalgap_goto. We're going to need to make a separate call
+        // back function in form.js to handle these entity async callbacks (and
+        // every other developer).
+        drupalgap_goto(destination, {'form_submission': true});
       }
-      // @todo - this drupalgap_goto probably shouldn't be here... the drupalgap
-      // form submission handler should be the one who handles the call to
-      // drupalgap_goto. We're going to need to make a separate call back
-      // function in form.js to handle these entity async callbacks (and
-      // every other developer).
-      drupalgap_goto(destination, {'form_submission': true});
+      catch (error) {
+        console.log('drupalgap_entity_form_submit - success - ' + error);
+      }
+    };
+
+    // Setup the error call back.
+    call_arguments.error = function(xhr, status, message) {
+      try {
+        // If there were any form errors, display them in an alert.
+        var responseText = JSON.parse(xhr.responseText);
+        if (typeof responseText === 'object' && responseText.form_errors) {
+          var msg = '';
+          $.each(responseText.form_errors, function(element_name, error_msg) {
+              if (error_msg != '') {
+                msg += $('<div>' + error_msg + '</div>').text() + '\n';
+              }
+          });
+          if (msg != '') { alert(msg); }
+        }
+      }
+      catch (error) {
+        console.log('drupalgap_entity_form_submit - error - ' + error);
+      }
     };
 
     // Depending on if we are creating a new entity, or editing an existing one,
@@ -742,11 +767,11 @@ function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
 }
 
 /**
- * Implements hook_services_request_postprocess_alter().
+ * Implements hook_services_request_pre_postprocess_alter().
  * @param {Object} options
  * @param {*} result
  */
-function entity_services_request_postprocess_alter(options, result) {
+function entity_services_request_pre_postprocess_alter(options, result) {
   try {
     // If we're retrieving an entity, render the entity's content.
     if (
@@ -755,7 +780,7 @@ function entity_services_request_postprocess_alter(options, result) {
     )) { drupalgap_entity_render_content(options.service, result); }
   }
   catch (error) {
-    console.log('entity_services_request_postprocess_alter - ' + error);
+    console.log('entity_services_request_pre_postprocess_alter - ' + error);
   }
 }
 
