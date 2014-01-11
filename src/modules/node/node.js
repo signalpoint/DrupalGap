@@ -191,17 +191,18 @@ function node_page() {
 function node_page_pageshow() {
   try {
     // Grab some recent content and display it.
-    drupalgap.views_datasource.call({
-      'path': 'drupalgap/views_datasource/drupalgap_content',
-      'success': function(data) {
-        // Extract the nodes into items, then drop them in the list.
-        var items = [];
-        $.each(data.nodes, function(index, object) {
-            items.push(l(object.node.title, 'node/' + object.node.nid));
-        });
-        drupalgap_item_list_populate('#node_listing_items', items);
+    views_datasource_get_view_result(
+      'drupalgap/views_datasource/drupalgap_content', {
+        success: function(content) {
+          // Extract the nodes into items, then drop them in the list.
+          var items = [];
+          $.each(content.nodes, function(index, object) {
+              items.push(l(object.node.title, 'node/' + object.node.nid));
+          });
+          drupalgap_item_list_populate('#node_listing_items', items);
+        }
       }
-    });
+    );
   }
   catch (error) { console.log('node_page_pageshow - ' + error); }
 }
