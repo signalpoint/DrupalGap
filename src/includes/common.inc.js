@@ -17,6 +17,21 @@ function drupalgap_add_page_to_dom(page_id, html) {
 }
 
 /**
+ * Attempts to remove given page from the DOM, will not remove the current page.
+ * @param {String} page_id
+ */
+function drupalgap_remove_page_from_dom(page_id) {
+  try {
+    var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
+    if (current_page_id != page_id) {
+      $('#' + page_id).empty().remove();
+      delete drupalgap.pages[page_id];
+    }
+  }
+  catch (error) { console.log('drupalgap_remove_page_from_dom - ' + error); }
+}
+
+/**
  * Removes all pages from the DOM except the current one.
  */
 function drupalgap_remove_pages_from_dom() {
