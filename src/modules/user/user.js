@@ -322,6 +322,32 @@ function user_profile_form_submit(form, form_state) {
 }
 
 /**
+ * Implements hook_services_postprocess().
+ * @param {Object} options
+ * @param {Object} result
+ */
+function user_services_postprocess(options, result) {
+  try {
+    // Don't process any other services.
+    if (options.service != 'user') { return; }
+    // Only process login, logout and registration.
+    if (!in_array(options.resource, ['login', 'logout', 'register'])) {
+      return;
+    }
+    // If there were any form errors, alert them to the user.
+    var response = JSON.parse(result.responseText);
+    if ($.isArray(response)) {
+      var msg = '';
+      $.each(response, function(index, message) {
+          msg += message + '\n';
+      });
+      if (msg != '') { alert(msg); }
+    }
+  }
+  catch (error) { console.log('user_services_postprocess - ' + error); }
+}
+
+/**
  * Implements hook_theme().
  * @return {Object}
  */
