@@ -105,8 +105,7 @@ function drupalgap_init() {
 }
 
 /**
- * This is called once the <body> element's onload is fired. We then set the
- * PhoneGap 'deviceready' event listener to _drupalgap_deviceready().
+ * This is called once the <body> element's onload is fired.
  */
 function drupalgap_onload() {
   try {
@@ -135,6 +134,7 @@ function drupalgap_onload() {
       var module = modules[i];
       Drupal.modules.core[module] = module_object_template(module);
     }
+    // Add PhoneGap's deviceready listener.
     document.addEventListener('deviceready', _drupalgap_deviceready, false);
   }
   catch (error) { console.log('drupalgap_onload - ' + error); }
@@ -370,10 +370,6 @@ function drupalgap_load_theme() {
       if (drupalgap_function_exists(template_info_function)) {
         var fn = window[template_info_function];
         drupalgap.theme = fn();
-        if (drupalgap.settings.debug) {
-          console.log('theme loaded: ' + theme_name);
-          console.log(JSON.stringify(drupalgap.theme));
-        }
         // For each region in the name, set the 'name' value on the region JSON.
         $.each(drupalgap.theme.regions, function(name, region) {
             drupalgap.theme.regions[name].name = name;
