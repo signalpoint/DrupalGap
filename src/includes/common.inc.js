@@ -165,7 +165,7 @@ function drupalgap_get_path(type, name) {
     var path = null;
     if (type == 'module') {
       var found_module = false;
-      $.each(drupalgap.modules, function(bundle, modules) {
+      $.each(Drupal.modules, function(bundle, modules) {
           if (found_module) { return false; }
           else {
             $.each(modules, function(index, module) {
@@ -190,7 +190,10 @@ function drupalgap_get_path(type, name) {
           }
       });
     }
-    else if (type == 'theme') { path = 'themes/' + name; }
+    else if (type == 'theme') {
+      // @todo Add support for custom themes.
+      path = 'themes/' + name;
+    }
     else {
       console.log(
         'WARNING: drupalgap_get_path - unsupported type (' + type + ')'
@@ -217,7 +220,7 @@ function drupalgap_get_path(type, name) {
     var path = '';
     var found_it = false;
     if (type == 'module') {
-      $.each(drupalgap.modules, function(bundle, modules) {
+      $.each(Drupal.modules, function(bundle, modules) {
         $.each(modules, function(index, module) {
           if (name == module.name) {
             path = drupalgap_modules_get_bundle_directory(bundle) + '/';
