@@ -1,5 +1,3 @@
-window.localStorage.clear();
-
 /* Specify DrupalGap Mobile Application Settings Here */
 
 /****************************************|
@@ -22,12 +20,15 @@ Drupal.settings.language_default = 'und';
 
 /* Drupal Caching */
 
-// Set to true to enable entity local storage caching.
+// Set to true to enable local storage caching.
 Drupal.settings.cache.entity.enabled = true;
+Drupal.settings.cache.views.enabled = true;
 
-// Number of seconds before cached copy of entity expires. Set to 0 to cache
-// forever, set to 60 for one minute, etc.
+// Number of seconds before cached copy expires. Set to 0 to cache forever, set
+// to 60 for one minute, etc.
 Drupal.settings.cache.entity.expiration = 3600;
+Drupal.settings.cache.views.expiration = 3600;
+
 
 /*********************|
  * DrupalGap Settings |
