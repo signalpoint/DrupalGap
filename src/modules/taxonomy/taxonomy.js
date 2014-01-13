@@ -505,17 +505,20 @@ function theme_taxonomy_term_reference(variables) {
  */
 function _theme_taxonomy_term_reference_load_items(options) {
   try {
-    drupalgap.services.drupalgap_taxonomy.get_terms.call({
-        vid: options.taxonomy_vocabulary.vid,
+    var query = {
+      parameters: {
+        vid: options.taxonomy_vocabulary.vid
+      }
+    };
+    taxonomy_term_index(query, {
         success: function(terms) {
-          if (terms.length > 0) {
-            $.each(terms, function(index, term) {
-                var option = '<option value="' + term.tid + '">' +
-                  term.name +
-                '</option>';
-                $('#' + options.widget_id).append(option);
-            });
-          }
+          if (terms.length == 0) { return; }
+          $.each(terms, function(index, term) {
+              var option = '<option value="' + term.tid + '">' +
+                term.name +
+              '</option>';
+              $('#' + options.widget_id).append(option);
+          });
         }
     });
   }
