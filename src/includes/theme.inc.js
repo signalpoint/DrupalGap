@@ -233,7 +233,7 @@ function theme_link(variables) {
   try {
     var text = '';
     if (variables.text) { text = variables.text; }
-    if (typeof variables.path !== 'undefined') {
+    if (typeof variables.path !== 'undefined' && variables.path) {
       // By default our onclick will use a drupalgap_goto(). If we have any
       // incoming link options, then modify the link accordingly.
       var onclick = 'drupalgap_goto(\'' + variables.path + '\');';
