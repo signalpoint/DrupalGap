@@ -1204,6 +1204,31 @@ function drupalgap_set_title(title) {
 }
 
 /**
+ * Implements hook_services_preprocess().
+ * @param {Object} options
+ */
+function drupalgap_services_preprocess(options) {
+  try {
+    // Show the loading icon.
+    drupalgap_loading_message_show();
+  }
+  catch (error) { console.log('drupalgap_services_preprocess - ' + error); }
+}
+
+/**
+ * Implements hook_services_postprocess().
+ * @param {Object} options
+ * @param {Object} result
+ */
+function drupalgap_services_postprocess(options, result) {
+  try {
+    // Hide the loading icon.
+    drupalgap_loading_message_hide();
+  }
+  catch (error) { console.log('drupalgap_services_postprocess - ' + error); }
+}
+
+/**
  * Implements hook_services_request_pre_postprocess_alter().
  * @param {Object} options
  * @param {*} result
