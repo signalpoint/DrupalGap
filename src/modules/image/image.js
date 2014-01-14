@@ -59,8 +59,10 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
 
     // Set the default button text, and if a value was provided,
     // overwrite the button text.
-    var button_text = 'Add Image';
+    var button_text = 'Take Photo';
     if (items[delta].value) { button_text = item.value; }
+    var browse_button_text = 'Browse';
+    if (items[delta].value2) { browse_button_text = item.value2; }
 
     // Place variables into document for PhoneGap image processing.
     var item_id_base = items[delta].id.replace(/-/g, '_');
@@ -72,12 +74,19 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
     eval('var ' + imagefield_destination_type + ' = null;');
     eval('var ' + imagefield_data + ' = null;');
     // Build an imagefield widget with PhoneGap. Contains a message
-    // div, an image item, and button to add an image.
+    // div, an image item, a button to add an image, and a button to browse for
+    // images.
+    var browse_button_id = items[delta].id + '-browse-button';
     var html = '<div>' +
       '<div id="' + items[delta].id + '-imagefield-msg"></div>' +
       '<img id="' + items[delta].id + '-imagefield" style="display: none;" />' +
-      '<a href="#" data-role="button" id="' + items[delta].id + '-button">' +
+      '<a href="#" data-role="button" data-icon="camera" ' +
+        'id="' + items[delta].id + '-button">' +
         button_text +
+      '</a>' +
+      '<a href="#" data-role="button" data-icon="grid" ' +
+        'id="' + browse_button_id + '">' +
+        browse_button_text +
       '</a>' +
     '</div>';
     // Open extra javascript declaration.
@@ -98,7 +107,9 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
     // Define error callback function.
     var imagefield_error = item_id_base + '_error';
     html += 'function ' + imagefield_error + '(message) {' +
-      'if (message != "Camera cancelled.") {' +
+      'if (message != "Camera cancelled." && ' +
+        'message != "Selection cancelled.")' +
+      '{' +
         'alert("' + imagefield_error + ' - " + message);' +
       '}' +
     '}';
@@ -126,6 +137,19 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
         imagefield_success + ', ' +
         imagefield_error + ', ' +
         'photo_options);' +
+    '});';
+    // Add click handler for browse button.
+    html += '$("#' + browse_button_id + '").on("click",function(){' +
+      'var browse_photo_options = {' +
+        'quality: ' + quality + ',' +
+        'sourceType: ' + image_field_source + '.PHOTOLIBRARY,' +
+        'destinationType: ' + imagefield_destination_type + '.DATA_URL,' +
+        'correctOrientation: true' +
+      '};' +
+      'navigator.camera.getPicture(' +
+        imagefield_success + ', ' +
+        imagefield_error + ', ' +
+        'browse_photo_options);' +
     '});';
     // Close extra javascript declaration.
     html += '</script>';
@@ -235,7 +259,7 @@ function _image_phonegap_camera_getPicture_success(options) {
     image_phonegap_camera_options[options.field_name] = {0: options};
 
     // Hide the 'Add image' button and show the 'Upload' button.
-    $('#' + options.id + '-button').hide();
+    //$('#' + options.id + '-button').hide();
     //$('#' + options.id + '_upload').show();
 
     // Show the captured photo as a thumbnail. When the photo is loaded, resize
