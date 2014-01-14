@@ -64,31 +64,46 @@ function path_to_theme() {
  */
 function theme(hook, variables) {
   try {
+
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
+    if (!variables) { variables = {}; }
     if (variables.markup) { return variables.markup; }
     var content = '';
-    var theme_function = 'theme_' + hook;
-    if (eval('typeof ' + theme_function) == 'function') {
-      // If no attributes are coming in, look to variables.options.attributes
-      // as a secondary option, otherwise setup an empty JSON object for them.
-      if (typeof variables.attributes === 'undefined') {
-        if (variables.options && variables.options.attributes) {
-          variables.attributes = variables.options.attributes;
-        }
-        else {
-          variables.attributes = {};
-        }
+
+    // First see if the current theme implements the hook, if it does use it, if
+    // it doesn't fallback to the core theme implementation of the hook.
+    var theme_function = drupalgap.settings.theme + '_' + hook;
+    if (!function_exists(theme_function)) {
+      theme_function = 'theme_' + hook;
+      if (!function_exists(theme_function)) {
+        console.log('WARNING: ' + theme_function + '() does not exist');
+        return content;
       }
-      var fn = window[theme_function];
-      content = fn.call(null, variables);
     }
-    else {
-      console.log('WARNING: ' + theme_function + '() does not exist');
+
+    // If no attributes are coming in, look to variables.options.attributes
+    // as a secondary option, otherwise setup an empty JSON object for them.
+    if (
+      typeof variables.attributes === 'undefined' ||
+      !variables.attributes
+    ) {
+      if (variables.options && variables.options.attributes) {
+        variables.attributes = variables.options.attributes;
+      }
+      else {
+        variables.attributes = {};
+      }
     }
+    // If there is no class name, set an empty one.
+    if (!variables.attributes.class) {
+      variables.attributes.class = '';
+    }
+    var fn = window[theme_function];
+    content = fn.call(null, variables);
     return content;
   }
-  catch (error) { alert('theme - ' + error); }
+  catch (error) { console.log('theme - ' + error); }
 }
 
 /**
@@ -272,6 +287,86 @@ function theme_link(variables) {
 }
 
 /**
+ * Themes a pager.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_pager(variables) {
+  try {
+    var html = '';
+    variables.attributes.class += ' pager';
+    var items = [];
+    items.push(theme('pager_previous'));
+    items.push(theme('pager_next'));
+    html += '<div data-role="navbar">' + theme('item_list', {
+        items: items,
+        attributes: variables.attributes
+    }) + '</div>';
+    console.log(html);
+    return html;
+  }
+  catch (error) { console.log('theme_pager - ' + error); }
+}
+
+/**
+ * Themes a pager link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_pager_link(variables) {
+  try {
+    return l(variables.text, null, variables);
+  }
+  catch (error) { console.log('theme_pager_link - ' + error); }
+}
+
+/**
+ * Themes a pager next link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_pager_next(variables) {
+  try {
+    var html;
+    variables.text = '&raquo;';
+    variables.attributes.class += ' pager_next';
+    html = theme_pager_link(variables);
+    return html;
+  }
+  catch (error) { console.log('theme_pager_next - ' + error); }
+}
+
+/**
+ * Themes a pager previous link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_pager_previous(variables) {
+  try {
+    var html;
+    variables.text = '&laquo;';
+    variables.attributes.class += ' pager_prev';
+    html = theme_pager_link(variables);
+    return html;
+  }
+  catch (error) { console.log('theme_pager_previous - ' + error); }
+}
+
+/**
+ * Implementation of theme_submit().
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_submit(variables) {
+  try {
+    return '<button ' + drupalgap_attributes(variables.attributes) + '>' +
+      variables.element.value +
+    '</button>';
+  }
+  catch (error) { console.log('theme_submit - ' + error); }
+}
+
+/**
  * Implementation of theme_table().
  * @param {Object} variables
  * @return {String}
@@ -302,20 +397,6 @@ function theme_table(variables) {
     return html + '</table>';
   }
   catch (error) { console.log('theme_table - ' + error); }
-}
-
-/**
- * Implementation of theme_submit().
- * @param {Object} variables
- * @return {String}
- */
-function theme_submit(variables) {
-  try {
-    return '<button ' + drupalgap_attributes(variables.attributes) + '>' +
-      variables.element.value +
-    '</button>';
-  }
-  catch (error) { console.log('theme_submit - ' + error); }
 }
 
 /**
