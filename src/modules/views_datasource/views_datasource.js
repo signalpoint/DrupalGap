@@ -116,6 +116,22 @@ function views_embed_view(path, options) {
 }
 
 /**
+ * @deprecated - views_datasource_get_view_result() instead.
+ */
+drupalgap.views_datasource = {
+  'options': { /* these are set by drupalgap_api_default_options() */ },
+  'call': function(options) {
+    try {
+      var msg = 'WARNING: drupalgap.views_datasource has been deprecated! ' +
+      'Use views_datasource_get_view_result() instead.';
+      console.log(msg);
+      views_datasource_get_view_result(options.path, options);
+    }
+    catch (error) { console.log('drupalgap.views_datasource - ' + error); }
+  }
+};
+
+/**
  * Theme's a view.
  * @param {Object} variables
  * @return {String}
@@ -148,18 +164,132 @@ function theme_views_view(variables) {
 }
 
 /**
- * @deprecated - views_datasource_get_view_result() instead.
+ * Themes a pager.
+ * @param {Object} variables
+ * @return {String}
  */
-drupalgap.views_datasource = {
-  'options': { /* these are set by drupalgap_api_default_options() */ },
-  'call': function(options) {
-    try {
-      var msg = 'WARNING: drupalgap.views_datasource has been deprecated! ' +
-      'Use views_datasource_get_view_result() instead.';
-      console.log(msg);
-      views_datasource_get_view_result(options.path, options);
+function theme_pager(variables) {
+  try {
+    var html = '';
+    // Extract the pager data.
+    var pager = variables.results.pager;
+    var page = pager.page;
+    var pages = pager.pages;
+    var count = pager.count;
+    var limit = pager.limit;
+    var page = pager.page;
+    // Add css class name(s).
+    //variables.attributes.class += ' pager';
+    // Add the pager items to the list.
+    var items = [];
+    if (page != 0) { items.push(theme('pager_previous', variables)); }
+    if (page != pages - 1) { items.push(theme('pager_next', variables)); }
+    if (items.length > 0) {
+      // Make sure we have an id to use since we need to dynamically build the
+      // navbar container for the pager. If we don't have one, generate a random
+      // one.
+      var id = variables.attributes.id;
+      if (!id) { id = 'theme_pager_' + user_password(); }
+      html += '<div id="' + id + '" data-role="navbar">' + theme('item_list', {
+          items: items
+      }) + '</div>' +
+      '<script type="text/javascript">' +
+        '$("#' + id + '").navbar();' +
+      '</script>';
     }
-    catch (error) { console.log('drupalgap.views_datasource - ' + error); }
+    //'$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").page();' +
+    return html;
   }
-};
+  catch (error) { console.log('theme_pager - ' + error); }
+}
+
+/**
+ * Themes a pager link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_pager_link(variables) {
+  try {
+    var link_vars = {
+      attributes: {
+        onclick: "_theme_pager_link_click('" +
+          variables.path + "', " +
+          variables.page +
+        ')'
+      }
+    };
+    return l(variables.text, null, link_vars);
+  }
+  catch (error) { console.log('theme_pager_link - ' + error); }
+}
+
+/**
+ * An internal function used to handle clicks on pager links.
+ * @param {String} path
+ * @param {String} page
+ */
+function _theme_pager_link_click(path, page) {
+  try {
+    if (drupalgap.menu_links[_views_view_router_path] &&
+      drupalgap.menu_links[_views_view_router_path].pageshow
+    ) {
+      var pageshow = window[
+        drupalgap.menu_links[_views_view_router_path].pageshow
+      ];
+      // If the path already has a 'page' arg in it, remove it.
+      var new_path = path.replace('&page=' + _views_view_previous_page, '') +
+        '&page=' + page;
+      pageshow(new_path);
+    }
+  }
+  catch (error) { console.log('_theme_pager_link_click - ' + error); }
+}
+
+/**
+ * Themes a pager next link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_pager_next(variables) {
+  try {
+    var html;
+    var page = variables.results.pager.page;
+    _views_view_previous_page = page;
+    var link_vars = {
+      text: '&raquo;',
+      path: variables.results.path,
+      page: (page + 1),
+      attributes: {
+        'class': 'pager_next'
+      }
+    };
+    html = theme_pager_link(link_vars);
+    return html;
+  }
+  catch (error) { console.log('theme_pager_next - ' + error); }
+}
+
+/**
+ * Themes a pager previous link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_pager_previous(variables) {
+  try {
+    var html;
+    var page = variables.results.pager.page;
+    _views_view_previous_page = page;
+    var link_vars = {
+      text: '&laquo;',
+      path: variables.results.path,
+      page: (page - 1),
+      attributes: {
+        'class': 'pager_previous'
+      }
+    };
+    html = theme_pager_link(link_vars);
+    return html;
+  }
+  catch (error) { console.log('theme_pager_previous - ' + error); }
+}
 
