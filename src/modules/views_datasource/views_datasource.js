@@ -1,5 +1,6 @@
-var _views_view_router_path;
+var _views_view_id;
 var _views_view_previous_page;
+var _views_view_row_callback;
 
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
@@ -89,12 +90,21 @@ function views_datasource_get_view_result(path, options) {
  */
 function views_embed_view(path, options) {
   try {
-    _views_view_router_path = drupalgap_router_path_get();
     views_datasource_get_view_result(path, {
         success: function(results) {
           try {
             if (!options.success) { return; }
             options.results = results;
+            // We need a unique id for the div container, so if one isn't
+            // provided, generate one randomly.
+            if (!options.attributes) { options.attributes = {}; }
+            var id = options.attributes.id;
+            if (!id) {
+              id = 'view-' + user_password();
+              options.attributes.id = id;
+            }
+            _views_view_id = id;
+            _views_view_row_callback = options.row_callback;
             var html = theme('views_view', options);
             options.success(html);
           }
@@ -116,10 +126,10 @@ function views_embed_view(path, options) {
 }
 
 /**
- * @deprecated - views_datasource_get_view_result() instead.
+ * @deprecated - Use views_datasource_get_view_result() instead.
  */
 drupalgap.views_datasource = {
-  'options': { /* these are set by drupalgap_api_default_options() */ },
+  'options': { },
   'call': function(options) {
     try {
       var msg = 'WARNING: drupalgap.views_datasource has been deprecated! ' +
@@ -130,6 +140,46 @@ drupalgap.views_datasource = {
     catch (error) { console.log('drupalgap.views_datasource - ' + error); }
   }
 };
+
+/**
+ * Themes a view.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_view(variables) {
+  try {
+    // Since we'll by making an asynchronous call to load the view, we'll just
+    // return an empty div container, with a script snippet to load the view.
+    var html = '<div id="' + _views_view_id + '" class="view"></div>';
+    var options = {
+      page_id: drupalgap_get_page_id(),
+      jqm_page_event: 'pageshow',
+      jqm_page_event_callback: '_theme_view',
+      jqm_page_event_args: JSON.stringify(variables)
+    };
+    html += drupalgap_jqm_page_event_script_code(options);
+    return html;
+  }
+  catch (error) { console.log('theme_view - ' + error); }
+}
+
+/**
+ * An internal function used to theme a view.
+ * @param {Object} variables
+ */
+function _theme_view(variables) {
+  try {
+    var page = 0;
+    if (variables.page) { page = variables.page; }
+    views_embed_view(variables.path + '&page=' + page, {
+        row_callback: variables.row_callback,
+        success: function(html) {
+          $('#' + variables.attributes.id).html(html);
+        }
+    });
+  }
+  catch (error) { console.log('_theme_view - ' + error); }
+}
 
 /**
  * Theme's a view.
@@ -151,11 +201,18 @@ function theme_views_view(variables) {
     // Are we rendering the pager above the results (default)?
     html += pager;
     // Render the rows.
-    var rows = '';
+    var rows = '<div class="views-rows">';
     $.each(results[root], function(count, object) {
         var row = object[child];
-        rows += '<div>' + JSON.stringify(row) + '</div>';
+        if (variables.row_callback && function_exists(variables.row_callback)) {
+          row_callback = window[variables.row_callback];
+          rows += row_callback(row);
+        }
+        else {
+          rows += '<div>' + JSON.stringify(row) + '</div>';
+        }
     });
+    rows += '</div>';
     html += rows;
     // @todo - Are we rendering the pager below the results?
     return html;
@@ -178,8 +235,6 @@ function theme_pager(variables) {
     var count = pager.count;
     var limit = pager.limit;
     var page = pager.page;
-    // Add css class name(s).
-    //variables.attributes.class += ' pager';
     // Add the pager items to the list.
     var items = [];
     if (page != 0) { items.push(theme('pager_previous', variables)); }
@@ -197,7 +252,6 @@ function theme_pager(variables) {
         '$("#' + id + '").navbar();' +
       '</script>';
     }
-    //'$("#' + drupalgap_get_page_id(drupalgap_path_get()) + '").page();' +
     return html;
   }
   catch (error) { console.log('theme_pager - ' + error); }
@@ -230,17 +284,14 @@ function theme_pager_link(variables) {
  */
 function _theme_pager_link_click(path, page) {
   try {
-    if (drupalgap.menu_links[_views_view_router_path] &&
-      drupalgap.menu_links[_views_view_router_path].pageshow
-    ) {
-      var pageshow = window[
-        drupalgap.menu_links[_views_view_router_path].pageshow
-      ];
-      // If the path already has a 'page' arg in it, remove it.
-      var new_path = path.replace('&page=' + _views_view_previous_page, '') +
-        '&page=' + page;
-      pageshow(new_path);
-    }
+    _theme_view({
+        path: path.replace('&page=' + _views_view_previous_page, ''),
+        page: page,
+        row_callback: _views_view_row_callback,
+        attributes: {
+          options: _views_view_id
+        }
+    });
   }
   catch (error) { console.log('_theme_pager_link_click - ' + error); }
 }
