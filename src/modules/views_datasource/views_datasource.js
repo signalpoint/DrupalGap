@@ -1,7 +1,3 @@
-var _views_view_id;
-var _views_view_previous_page;
-var _views_view_row_callback;
-
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
  * results and pass them along to the provided success callback.
@@ -84,73 +80,20 @@ function views_datasource_get_view_result(path, options) {
 }
 
 /**
- * Returns the html string to options.success, used to embed a view.
- * @param {String} path
- * @param {Object} options
- */
-function views_embed_view(path, options) {
-  try {
-    views_datasource_get_view_result(path, {
-        success: function(results) {
-          try {
-            if (!options.success) { return; }
-            options.results = results;
-            // We need a unique id for the div container, so if one isn't
-            // provided, generate one randomly.
-            if (!options.attributes) { options.attributes = {}; }
-            var id = options.attributes.id;
-            if (!id) {
-              id = 'view-' + user_password();
-              options.attributes.id = id;
-            }
-            _views_view_id = id;
-            _views_view_row_callback = options.row_callback;
-            var html = theme('views_view', options);
-            options.success(html);
-          }
-          catch (error) {
-            console.log('views_embed_view - success - ' + error);
-          }
-        },
-        error: function(xhr, status, message) {
-          try {
-            if (options.error) { options.error(xhr, status, message); }
-          }
-          catch (error) {
-            console.log('views_embed_view - error - ' + error);
-          }
-        }
-    });
-  }
-  catch (error) { console.log('views_embed_view - ' + error); }
-}
-
-/**
- * @deprecated - Use views_datasource_get_view_result() instead.
- */
-drupalgap.views_datasource = {
-  'options': { },
-  'call': function(options) {
-    try {
-      var msg = 'WARNING: drupalgap.views_datasource has been deprecated! ' +
-      'Use views_datasource_get_view_result() instead.';
-      console.log(msg);
-      views_datasource_get_view_result(options.path, options);
-    }
-    catch (error) { console.log('drupalgap.views_datasource - ' + error); }
-  }
-};
-
-/**
  * Themes a view.
  * @param {Object} variables
  * @return {String}
  */
 function theme_view(variables) {
   try {
+    // Throw a warning if no id is provided.
+    if (!variables.attributes.id) {
+      console.log('WARNING: theme_view() - No id specified on attributes!');
+      return '';
+    }
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
-    var html = '<div id="' + _views_view_id + '" class="view"></div>';
+    var html = '<div id="' + variables.attributes.id + '" class="view"></div>';
     var options = {
       page_id: drupalgap_get_page_id(),
       jqm_page_event: 'pageshow',
@@ -171,14 +114,50 @@ function _theme_view(variables) {
   try {
     var page = 0;
     if (variables.page) { page = variables.page; }
-    views_embed_view(variables.path + '&page=' + page, {
-        row_callback: variables.row_callback,
+    var variables_copy = $.extend(
+      {},
+      {
         success: function(html) {
           $('#' + variables.attributes.id).html(html);
         }
-    });
+      },
+      variables
+    );
+    views_embed_view(variables.path + '&page=' + page, variables_copy);
   }
   catch (error) { console.log('_theme_view - ' + error); }
+}
+
+/**
+ * Returns the html string to options.success, used to embed a view.
+ * @param {String} path
+ * @param {Object} options
+ */
+function views_embed_view(path, options) {
+  try {
+    views_datasource_get_view_result(path, {
+        success: function(results) {
+          try {
+            if (!options.success) { return; }
+            options.results = results;
+            var html = theme('views_view', options);
+            options.success(html);
+          }
+          catch (error) {
+            console.log('views_embed_view - success - ' + error);
+          }
+        },
+        error: function(xhr, status, message) {
+          try {
+            if (options.error) { options.error(xhr, status, message); }
+          }
+          catch (error) {
+            console.log('views_embed_view - error - ' + error);
+          }
+        }
+    });
+  }
+  catch (error) { console.log('views_embed_view - ' + error); }
 }
 
 /**
@@ -243,8 +222,7 @@ function theme_pager(variables) {
       // Make sure we have an id to use since we need to dynamically build the
       // navbar container for the pager. If we don't have one, generate a random
       // one.
-      var id = variables.attributes.id;
-      if (!id) { id = 'theme_pager_' + user_password(); }
+      var id = 'theme_pager_' + user_password();
       html += '<div id="' + id + '" data-role="navbar">' + theme('item_list', {
           items: items
       }) + '</div>' +
@@ -260,38 +238,24 @@ function theme_pager(variables) {
 /**
  * Themes a pager link.
  * @param {Object} variables
+ * @param {Object} link_vars
  * @return {String}
  */
-function theme_pager_link(variables) {
+function theme_pager_link(variables, link_vars) {
   try {
-    var link_vars = {
-      attributes: {
-        onclick: "_theme_pager_link_click('" +
-          variables.path + "', " +
-          variables.page +
-        ')'
-      }
-    };
-    return l(variables.text, null, link_vars);
+    var onclick = '_theme_pager_link_click(' + JSON.stringify(variables) + ')';
+    return "<a href='#' onclick='" + onclick + "'>" + link_vars.text + '</a>';
   }
   catch (error) { console.log('theme_pager_link - ' + error); }
 }
 
 /**
  * An internal function used to handle clicks on pager links.
- * @param {String} path
- * @param {String} page
+ * @param {Object} variables
  */
-function _theme_pager_link_click(path, page) {
+function _theme_pager_link_click(variables) {
   try {
-    _theme_view({
-        path: path.replace('&page=' + _views_view_previous_page, ''),
-        page: page,
-        row_callback: _views_view_row_callback,
-        attributes: {
-          options: _views_view_id
-        }
-    });
+    _theme_view(variables);
   }
   catch (error) { console.log('_theme_pager_link_click - ' + error); }
 }
@@ -304,17 +268,14 @@ function _theme_pager_link_click(path, page) {
 function theme_pager_next(variables) {
   try {
     var html;
-    var page = variables.results.pager.page;
-    _views_view_previous_page = page;
+    variables.page = variables.results.pager.page + 1;
     var link_vars = {
       text: '&raquo;',
-      path: variables.results.path,
-      page: (page + 1),
       attributes: {
         'class': 'pager_next'
       }
     };
-    html = theme_pager_link(link_vars);
+    html = theme_pager_link(variables, link_vars);
     return html;
   }
   catch (error) { console.log('theme_pager_next - ' + error); }
@@ -328,19 +289,32 @@ function theme_pager_next(variables) {
 function theme_pager_previous(variables) {
   try {
     var html;
-    var page = variables.results.pager.page;
-    _views_view_previous_page = page;
+    variables.page = variables.results.pager.page - 1;
     var link_vars = {
       text: '&laquo;',
-      path: variables.results.path,
-      page: (page - 1),
       attributes: {
         'class': 'pager_previous'
       }
     };
-    html = theme_pager_link(link_vars);
+    html = theme_pager_link(variables, link_vars);
     return html;
   }
   catch (error) { console.log('theme_pager_previous - ' + error); }
 }
+
+/**
+ * @deprecated - Use views_datasource_get_view_result() instead.
+ */
+drupalgap.views_datasource = {
+  'options': { },
+  'call': function(options) {
+    try {
+      var msg = 'WARNING: drupalgap.views_datasource has been deprecated! ' +
+      'Use views_datasource_get_view_result() instead.';
+      console.log(msg);
+      views_datasource_get_view_result(options.path, options);
+    }
+    catch (error) { console.log('drupalgap.views_datasource - ' + error); }
+  }
+};
 
