@@ -1,3 +1,6 @@
+var _views_view_router_path;
+var _views_view_previous_page;
+
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
  * results and pass them along to the provided success callback.
@@ -19,7 +22,6 @@ function views_datasource_get_view_result(path, options) {
       var result = window.localStorage.getItem(path);
       if (result) {
         // Loaded from local storage, did it expire?
-        dpm(result);
         result = JSON.parse(result);
         if (typeof result.expiration !== 'undefined' &&
           result.expiration != 0 &&
@@ -44,6 +46,10 @@ function views_datasource_get_view_result(path, options) {
         success: function(result) {
           try {
             if (options.success) {
+              // Add the parh to the result.
+              result.path = path;
+              // If any views caching is enabled, cache the results in local
+              // storage.
               if (Drupal.settings.cache.views.enabled) {
                 var expiration =
                   time() + Drupal.settings.cache.views.expiration;
@@ -74,6 +80,71 @@ function views_datasource_get_view_result(path, options) {
     });
   }
   catch (error) { console.log('views_datasource_get_view_result - ' + error); }
+}
+
+/**
+ * Returns the html string to options.success, used to embed a view.
+ * @param {String} path
+ * @param {Object} options
+ */
+function views_embed_view(path, options) {
+  try {
+    _views_view_router_path = drupalgap_router_path_get();
+    views_datasource_get_view_result(path, {
+        success: function(results) {
+          try {
+            if (!options.success) { return; }
+            options.results = results;
+            var html = theme('views_view', options);
+            options.success(html);
+          }
+          catch (error) {
+            console.log('views_embed_view - success - ' + error);
+          }
+        },
+        error: function(xhr, status, message) {
+          try {
+            if (options.error) { options.error(xhr, status, message); }
+          }
+          catch (error) {
+            console.log('views_embed_view - error - ' + error);
+          }
+        }
+    });
+  }
+  catch (error) { console.log('views_embed_view - ' + error); }
+}
+
+/**
+ * Theme's a view.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_views_view(variables) {
+  try {
+    var html = '';
+    // Extract the results.
+    var results = variables.results;
+    // Determine the root and child object name. We use nodes and node by
+    // default, unless one was provided.
+    var root = 'nodes'; if (variables.root) { root = variables.root; }
+    var child = 'node'; if (variables.child) { child = variables.child; }
+    // Render the pager, if necessary.
+    var pager = '';
+    if (results.pager) { pager += theme('pager', variables); }
+    // Are we rendering the pager above the results (default)?
+    html += pager;
+    // Render the rows.
+    var rows = '';
+    $.each(results[root], function(count, object) {
+        var row = object[child];
+        rows += '<div>' + JSON.stringify(row) + '</div>';
+    });
+    html += rows;
+    // @todo - Are we rendering the pager below the results?
+    return html;
+  }
+  catch (error) { console.log('theme_views_view - ' + error); }
 }
 
 /**
