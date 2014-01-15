@@ -84,6 +84,47 @@ function views_datasource_get_view_result(path, options) {
 }
 
 /**
+ * Themes a view.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_view(variables) {
+  try {
+    // Since we'll by making an asynchronous call to load the view, we'll just
+    // return an empty div container, with a script snippet to load the view.
+    var html = '<div id="' + _views_view_id + '" class="view"></div>';
+    var options = {
+      page_id: drupalgap_get_page_id(),
+      jqm_page_event: 'pageshow',
+      jqm_page_event_callback: '_theme_view',
+      jqm_page_event_args: JSON.stringify(variables)
+    };
+    html += drupalgap_jqm_page_event_script_code(options);
+    return html;
+  }
+  catch (error) { console.log('theme_view - ' + error); }
+}
+
+/**
+ * An internal function used to theme a view.
+ * @param {Object} variables
+ */
+function _theme_view(variables) {
+  try {
+    var page = 0;
+    if (variables.page) { page = variables.page; }
+    views_embed_view(variables.path + '&page=' + page, {
+        row_callback: variables.row_callback,
+        empty_callback: variables.empty_callback,
+        success: function(html) {
+          $('#' + variables.attributes.id).html(html);
+        }
+    });
+  }
+  catch (error) { console.log('_theme_view - ' + error); }
+}
+
+/**
  * Returns the html string to options.success, used to embed a view.
  * @param {String} path
  * @param {Object} options
@@ -126,62 +167,6 @@ function views_embed_view(path, options) {
 }
 
 /**
- * @deprecated - Use views_datasource_get_view_result() instead.
- */
-drupalgap.views_datasource = {
-  'options': { },
-  'call': function(options) {
-    try {
-      var msg = 'WARNING: drupalgap.views_datasource has been deprecated! ' +
-      'Use views_datasource_get_view_result() instead.';
-      console.log(msg);
-      views_datasource_get_view_result(options.path, options);
-    }
-    catch (error) { console.log('drupalgap.views_datasource - ' + error); }
-  }
-};
-
-/**
- * Themes a view.
- * @param {Object} variables
- * @return {String}
- */
-function theme_view(variables) {
-  try {
-    // Since we'll by making an asynchronous call to load the view, we'll just
-    // return an empty div container, with a script snippet to load the view.
-    var html = '<div id="' + _views_view_id + '" class="view"></div>';
-    var options = {
-      page_id: drupalgap_get_page_id(),
-      jqm_page_event: 'pageshow',
-      jqm_page_event_callback: '_theme_view',
-      jqm_page_event_args: JSON.stringify(variables)
-    };
-    html += drupalgap_jqm_page_event_script_code(options);
-    return html;
-  }
-  catch (error) { console.log('theme_view - ' + error); }
-}
-
-/**
- * An internal function used to theme a view.
- * @param {Object} variables
- */
-function _theme_view(variables) {
-  try {
-    var page = 0;
-    if (variables.page) { page = variables.page; }
-    views_embed_view(variables.path + '&page=' + page, {
-        row_callback: variables.row_callback,
-        success: function(html) {
-          $('#' + variables.attributes.id).html(html);
-        }
-    });
-  }
-  catch (error) { console.log('_theme_view - ' + error); }
-}
-
-/**
  * Theme's a view.
  * @param {Object} variables
  * @return {String}
@@ -195,6 +180,13 @@ function theme_views_view(variables) {
     // default, unless one was provided.
     var root = 'nodes'; if (variables.root) { root = variables.root; }
     var child = 'node'; if (variables.child) { child = variables.child; }
+    // Are the results empty? If so, return the empty callback's html, if it
+    // exists.
+    if (results[root].length == 0 && variables.empty_callback &&
+      function_exists(variables.empty_callback)) {
+      var empty_callback = window[variables.empty_callback];
+      return empty_callback(variables);
+    }
     // Render the pager, if necessary.
     var pager = '';
     if (results.pager) { pager += theme('pager', variables); }
@@ -343,4 +335,21 @@ function theme_pager_previous(variables) {
   }
   catch (error) { console.log('theme_pager_previous - ' + error); }
 }
+
+
+/**
+ * @deprecated - Use views_datasource_get_view_result() instead.
+ */
+drupalgap.views_datasource = {
+  'options': { },
+  'call': function(options) {
+    try {
+      var msg = 'WARNING: drupalgap.views_datasource has been deprecated! ' +
+      'Use views_datasource_get_view_result() instead.';
+      console.log(msg);
+      views_datasource_get_view_result(options.path, options);
+    }
+    catch (error) { console.log('drupalgap.views_datasource - ' + error); }
+  }
+};
 
