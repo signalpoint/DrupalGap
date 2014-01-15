@@ -174,11 +174,19 @@ function theme_views_view(variables) {
     var root = results.view.root;
     var child = results.view.child;
     // Are the results empty? If so, return the empty callback's html, if it
-    // exists.
+    // exists. Often times, the empty callback will want to place html that
+    // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
+    // the creation of the content area.
     if (results.view.count == 0 && variables.empty_callback &&
       function_exists(variables.empty_callback)
     ) {
       var empty_callback = window[variables.empty_callback];
+      var selector = '#' + drupalgap_get_page_id() +
+        " div[data-role$='content']";
+      $(selector).hide('slow');
+      setTimeout(function() {
+          $(selector).trigger('create').show('fast');
+      }, 100);
       return empty_callback(results.view);
     }
     // Are we rendering the pager above the results (default)?
