@@ -887,8 +887,9 @@ function drupalgap_jqm_page_events() {
 
 /**
  * Given a JSON object with a page id, a jQM page event name, a callback
- * function to handle the jQM page event and any page arguments, this function
- * will return the inline JS code needed to handle the event.
+ * function to handle the jQM page event and any page arguments (as a JSON
+ * string), this function will return the inline JS code needed to handle the
+ * event.
  * @param {Object} options
  * @return {String}
  */
