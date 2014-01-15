@@ -174,6 +174,13 @@ function theme_views_view(variables) {
     // default, unless one was provided.
     var root = 'nodes'; if (variables.root) { root = variables.root; }
     var child = 'node'; if (variables.child) { child = variables.child; }
+    // Are the results empty? If so, return the empty callback's html, if it
+    // exists.
+    if (results[root].length == 0 && variables.empty_callback &&
+      function_exists(variables.empty_callback)) {
+      var empty_callback = window[variables.empty_callback];
+      return empty_callback(variables);
+    }
     // Render the pager, if necessary.
     var pager = '';
     if (results.pager) { pager += theme('pager', variables); }
