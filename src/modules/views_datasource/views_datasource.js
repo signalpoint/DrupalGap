@@ -170,33 +170,33 @@ function theme_views_view(variables) {
     var html = '';
     // Extract the results.
     var results = variables.results;
-    // Determine the root and child object name. We use nodes and node by
-    // default, unless one was provided.
-    var root = 'nodes'; if (variables.root) { root = variables.root; }
-    var child = 'node'; if (variables.child) { child = variables.child; }
+    // Extract the root and child object name.
+    var root = results.view.root;
+    var child = results.view.child;
     // Are the results empty? If so, return the empty callback's html, if it
     // exists.
-    if (results[root].length == 0 && variables.empty_callback &&
-      function_exists(variables.empty_callback)) {
+    if (results.view.count == 0 && variables.empty_callback &&
+      function_exists(variables.empty_callback)
+    ) {
       var empty_callback = window[variables.empty_callback];
-      return empty_callback(variables);
+      return empty_callback(results.view);
     }
-    // Render the pager, if necessary.
-    var pager = '';
-    if (results.pager) { pager += theme('pager', variables); }
     // Are we rendering the pager above the results (default)?
-    html += pager;
+    html += theme('pager', variables);
     // Render the rows.
     var rows = '<div class="views-rows">';
     $.each(results[root], function(count, object) {
+        // Extract the row.
         var row = object[child];
+        // Mark the row count.
+        row.count = count;
+        // If a row_callback function exists, call it to render the row,
+        // otherwise use the default row render mechanism.
         if (variables.row_callback && function_exists(variables.row_callback)) {
           row_callback = window[variables.row_callback];
-          rows += row_callback(row);
+          rows += row_callback(results.view, row);
         }
-        else {
-          rows += '<div>' + JSON.stringify(row) + '</div>';
-        }
+        else { rows += '<div>' + JSON.stringify(row) + '</div>'; }
     });
     rows += '</div>';
     html += rows;
@@ -214,13 +214,15 @@ function theme_views_view(variables) {
 function theme_pager(variables) {
   try {
     var html = '';
-    // Extract the pager data.
-    var pager = variables.results.pager;
-    var page = pager.page;
-    var pages = pager.pages;
-    var count = pager.count;
-    var limit = pager.limit;
-    var page = pager.page;
+    // Extract the view and pager data.
+    var view = variables.results.view;
+    var page = view.page;
+    var pages = view.pages;
+    var count = view.count;
+    var limit = view.limit;
+    var page = view.page;
+    // If we don't have any results, return.
+    if (count == 0) { return html; }
     // Add the pager items to the list.
     var items = [];
     if (page != 0) { items.push(theme('pager_previous', variables)); }
@@ -275,7 +277,7 @@ function _theme_pager_link_click(variables) {
 function theme_pager_next(variables) {
   try {
     var html;
-    variables.page = variables.results.pager.page + 1;
+    variables.page = variables.results.view.page + 1;
     var link_vars = {
       text: '&raquo;',
       attributes: {
@@ -296,7 +298,7 @@ function theme_pager_next(variables) {
 function theme_pager_previous(variables) {
   try {
     var html;
-    variables.page = variables.results.pager.page - 1;
+    variables.page = variables.results.view.page - 1;
     var link_vars = {
       text: '&laquo;',
       attributes: {
