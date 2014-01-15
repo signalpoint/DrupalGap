@@ -139,11 +139,13 @@ function drupalgap_check_visibility(type, data) {
 /**
  * Given a path, this will return the id for the page's div element.
  * For example, a string path of 'foo/bar' would result in an id of 'foo_bar'.
+ * If no path is provided, it will return the current page's id.
  * @param {String} path
  * @return {String}
  */
 function drupalgap_get_page_id(path) {
   try {
+    if (!path) { path = drupalgap_path_get(); }
     var id = path.toLowerCase().replace(/\//g, '_').replace(/-/g, '_');
     if (drupalgap.settings.debug) {
       console.log(id);
