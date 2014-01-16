@@ -202,6 +202,10 @@ function number_field_formatter_view(entity_type, entity, field, instance,
 function options_field_data_string(entity_type, bundle, entity, info, instance,
   langcode, delta, options) {
   try {
+    console.log('WARNING: options_field_data_string() is deprecated! ' +
+      'Data strings are no longer used, instead call e.g. node_save().');
+    return '';
+
     var field_name = instance.field_name;
     var key = drupalgap_field_key(field_name);
     var value = entity[instance.field_name][langcode][delta][key];
