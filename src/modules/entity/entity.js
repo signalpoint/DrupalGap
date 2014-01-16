@@ -444,7 +444,19 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
           var msg = '';
           $.each(responseText.form_errors, function(element_name, error_msg) {
               if (error_msg != '') {
-                msg += $('<div>' + error_msg + '</div>').text() + '\n';
+                // The element name tends to come back weird, e.g.
+                // "field_art_type][und", so let's trim anything at and after
+                // the first "]".
+                var pos = element_name.indexOf(']');
+                if (pos != -1) {
+                  element_name = element_name.substr(0, pos);
+                }
+                var label = element_name;
+                if (form.elements[element_name].title) {
+                  label += form.elements[element_name].title;
+                }
+                msg += $('<div>(' + label + ') - ' +
+                  error_msg + '</div>').text() + '\n';
               }
           });
           if (msg != '') { alert(msg); }
