@@ -366,19 +366,22 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           if (allowed_values == -1) {
             allowed_values = 1;
           }
+          // Make sure there is at least one value before creating the form
+          // element on the entity.
+          if (empty(value[language][0])) { return; }
           entity[name] = {};
           entity[name][language] = [];
           for (var delta = 0; delta < allowed_values; delta++) {
-            eval(
-              'entity[name][language].push(' +
-                '{' + key + ':"' + value[language][delta] + '"}' +
-              ');'
-            );
+            if (!empty(value[language][delta])) {
+              eval(
+                'entity[name][language].push(' +
+                  '{' + key + ':"' + value[language][delta] + '"}' +
+                ');'
+              );
+            }
           }
         }
-        else {
-          entity[name] = value;
-        }
+        else if (!empty(value)) { entity[name] = value; }
     });
     return entity;
   }
