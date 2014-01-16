@@ -189,8 +189,8 @@ function theme_views_view(variables) {
       }, 100);
       return empty_callback(results.view);
     }
-    // Are we rendering the pager above the results (default)?
-    html += theme('pager', variables);
+    // If we have any pages, render the pager.
+    if (results.view.pages) { html += theme('pager', variables); }
     // Render the rows.
     var rows = '<div class="views-rows">';
     $.each(results[root], function(count, object) {
