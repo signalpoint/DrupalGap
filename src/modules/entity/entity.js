@@ -45,6 +45,10 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
  */
 function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
   try {
+    
+    console.log('WARNING: drupalgap_entity_assemble_data() has been ' +
+      'deprecated! Now just call e.g. node_save() for auto assembly.');
+    return;
 
     var data = '';
     var lng = language_default();
