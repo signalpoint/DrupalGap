@@ -14,6 +14,7 @@ function drupalgap_init() {
            { name: 'comment' },
            { name: 'entity' },
            { name: 'field' },
+           { name: 'file' },
            { name: 'image' },
            { name: 'menu' },
            { name: 'mvc' },
@@ -114,13 +115,14 @@ function drupalgap_onload() {
     // onto the Drupal JSON object. Remember, all of the module source code is
     // included via the makefile's bin generation. However, the core modules
     // hook_install() implementations haven't been called yet, so we add them to
-    // the module listing so they can be invoked by hooks later on.
+    // the module listing so they can be invoked later on.
     var modules = [
       'drupalgap',
       'block',
       'comment',
       'entity',
       'field',
+      'file',
       'image',
       'menu',
       'mvc',
