@@ -453,7 +453,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
                 }
                 var label = element_name;
                 if (form.elements[element_name].title) {
-                  label += form.elements[element_name].title;
+                  label = form.elements[element_name].title;
                 }
                 msg += $('<div>(' + label + ') - ' +
                   error_msg + '</div>').text() + '\n';
