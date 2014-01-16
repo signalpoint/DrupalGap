@@ -370,14 +370,24 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           // element on the entity.
           if (empty(value[language][0])) { return; }
           entity[name] = {};
-          entity[name][language] = [];
+          // Some fields (e.g. taxonomy term reference) do not use a delta value
+          // in the service call, so we convert them here....
+          var use_code = true;
+          if (form.elements[name].type == 'taxonomy_term_reference') {
+            use_code = false;
+            entity[name][language] = {};
+          }
+          else { entity[name][language] = []; }
+          // Now iterate over each delta on the form element, and add the value
+          // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
             if (!empty(value[language][delta])) {
-              eval(
-                'entity[name][language].push(' +
-                  '{' + key + ':"' + value[language][delta] + '"}' +
-                ');'
-              );
+              if (use_code) {
+                var item = {};
+                item[key] = value[language][delta];
+                entity[name][language].push(item);
+              }
+              else { entity[name][language][key] = value[language][delta]; }
             }
           }
         }
