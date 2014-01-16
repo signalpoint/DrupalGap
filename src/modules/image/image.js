@@ -315,7 +315,7 @@ function _image_field_form_validate(form, form_state) {
         if (form_state.values[name][lng][0] != '') { return; }
         // Create a unique file name using the UTC integer value.
         var d = new Date();
-        var image_file_name = '' + d.valueOf() + '.jpg';
+        var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
         // Build the data for the file create resource.
         var file = {'file': {
           'file': image_phonegap_camera_options[name][0].image,
@@ -325,14 +325,10 @@ function _image_field_form_validate(form, form_state) {
         file_save(file, {
             async: false,
             success: function(result) {
-              alert('File save success!');
               // Set the hidden input and form state values with the file id.
               var element_id = drupalgap_form_get_element_id(name, form.id);
               $('#' + element_id).val(result.fid);
               form_state.values[name][lng][0] = result.fid;
-            },
-            error: function(xhr, status, message) {
-              alert('File save error!');
             }
         });
     });
