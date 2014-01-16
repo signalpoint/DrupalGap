@@ -322,16 +322,18 @@ function _image_field_form_validate(form, form_state) {
           'filename': image_file_name,
           'filepath': 'public://' + image_file_name
         }};
-        // Call the file create resource.
-        drupalgap.services.file.create.call({
-          'file': file,
-          async: false,
-          success: function(result) {
-            // Set the hidden input and form state values with the file id.
-            var element_id = drupalgap_form_get_element_id(name, form.id);
-            $('#' + element_id).val(result.fid);
-            form_state.values[name][lng][0] = result.fid;
-          }
+        file_save(file, {
+            async: false,
+            success: function(result) {
+              alert('File save success!');
+              // Set the hidden input and form state values with the file id.
+              var element_id = drupalgap_form_get_element_id(name, form.id);
+              $('#' + element_id).val(result.fid);
+              form_state.values[name][lng][0] = result.fid;
+            },
+            error: function(xhr, status, message) {
+              alert('File save error!');
+            }
         });
     });
   }
