@@ -55,10 +55,15 @@ drupalgap.settings.loader = {
   loading: {
     text: 'Loading...',
     textVisible: true,
-    theme: 'a'
+    theme: 'b'
   },
   saving: {
     text: 'Saving...',
+    textVisible: true,
+    theme: 'b'
+  },
+  deleting: {
+    text: 'Deleting...',
     textVisible: true,
     theme: 'b'
   }
