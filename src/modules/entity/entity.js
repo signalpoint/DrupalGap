@@ -347,8 +347,8 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
 }
 
 /**
- * Given a form and form_state, this will assemble the entity based on the
- * form_state values and return the entity as a json object.
+ * Given a form and form_state, this will assemble an entity from the form_state
+ * values and return the entity as a JSON object.
  * @param {Object} form
  * @param {Object} form_state
  * @return {Object}
@@ -358,36 +358,79 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
     var entity = {};
     var language = language_default();
     $.each(form_state.values, function(name, value) {
+
+        // Determine wether or not this element is a field. If it is, determine
+        // it's module and field assembly hook.
+        var is_field = false;
+        var module = false;
+        var hook = false;
+        if (form.elements[name].is_field) {
+          is_field = true;
+          module = form.elements[name].field_info_field.module;
+          hook = module + '_assemble_form_state_into_field';
+          if (!function_exists(hook)) { hook = false; }
+        }
+
         // Attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
+
+          // Determine how many allowed values for this field.
           var allowed_values = form.elements[name].field_info_field.cardinality;
+
           // Convert unlimited value fields to one, for now...
-          if (allowed_values == -1) {
-            allowed_values = 1;
-          }
+          if (allowed_values == -1) { allowed_values = 1; }
+
           // Make sure there is at least one value before creating the form
           // element on the entity.
           if (empty(value[language][0])) { return; }
+
+          // Create an empty object to house the field on the entity.
           entity[name] = {};
+
           // Some fields (e.g. taxonomy term reference) do not use a delta value
-          // in the service call, so we convert them here....
-          var use_code = true;
+          // in the service call, so we prepare for that here.
+          var use_delta = true;
           if (form.elements[name].type == 'taxonomy_term_reference') {
-            use_code = false;
+            use_delta = false;
             entity[name][language] = {};
           }
           else { entity[name][language] = []; }
+
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
             if (!empty(value[language][delta])) {
-              if (use_code) {
+
+              // Extract the value.
+              var field_value = value[language][delta];
+
+              // If this element is a field, give the field's module an
+              // opportunity to assemble its own value, otherwise we'll just
+              // use the field value extracted above.
+              if (is_field && hook) {
+                var fn = window[hook];
+                field_value = fn(form.entity_type,
+                  form.bundle,
+                  field_value,
+                  form.elements[name].field_info_field,
+                  form.elements[name].field_info_instance,
+                  language,
+                  delta
+                );
+              }
+
+              // If we don't need a delta value, place the field value using the
+              // key. If we're using a delta value, push the key and value onto
+              // the field to indicate the delta.
+              if (!use_delta) {
+                entity[name][language][key] = field_value;
+              }
+              else {
                 var item = {};
-                item[key] = value[language][delta];
+                item[key] = field_value;
                 entity[name][language].push(item);
               }
-              else { entity[name][language][key] = value[language][delta]; }
             }
           }
         }
