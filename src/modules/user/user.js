@@ -65,6 +65,7 @@ function user_listing_pageshow() {
 function user_login_form(form, form_state) {
   try {
     form.entity_type = 'user';
+    form.bundle = null;
     form.elements.name = {
       'type': 'textfield',
       'title': 'Username',
@@ -208,6 +209,7 @@ function user_page() {
 function user_register_form(form, form_state) {
   try {
     form.entity_type = 'user';
+    form.bundle = null;
     form.elements.name = {
       'type': 'textfield',
       'title': 'Username',
@@ -260,6 +262,7 @@ function user_profile_form(form, form_state, account) {
   try {
     // Setup form defaults.
     form.entity_type = 'user';
+    form.bundle = null;
 
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form('user', null, form, account);

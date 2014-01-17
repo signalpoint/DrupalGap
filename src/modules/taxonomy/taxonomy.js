@@ -127,6 +127,7 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
 
     // Setup form defaults.
     form.entity_type = 'taxonomy_vocabulary';
+    form.bundle = null;
     form.action = 'taxonomy/vocabularies';
 
     // Add the entity's core fields to the form.
@@ -184,6 +185,7 @@ function taxonomy_form_term(form, form_state, term) {
   try {
     // Setup form defaults.
     form.entity_type = 'taxonomy_term';
+    form.bundle = null;
     form.action = 'taxonomy/vocabularies';
 
     // Add the entity's core fields to the form.

@@ -8,6 +8,10 @@
 function comment_edit(form, form_state, comment) {
   try {
 
+    // Setup form defaults.
+    form.entity_type = 'comment';
+    form.bundle = null;
+
     // If there is no comment object coming in, make an empty one with a node
     // id. Note, once the form.js submit handler is aware of its own entity and
     // can pass it along to this function (and others) when loading a form

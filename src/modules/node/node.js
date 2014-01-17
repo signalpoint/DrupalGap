@@ -71,6 +71,7 @@ function node_edit(form, form_state, node) {
   try {
     // Setup form defaults.
     form.entity_type = 'node';
+    form.bundle = node.type;
 
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form('node', node.type, form, node);
