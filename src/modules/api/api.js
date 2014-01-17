@@ -238,6 +238,20 @@ function drupalgap_api_default_options() {
 }
 
 /**
+ * When an form submission for an entity is assembling the entity json object to
+ * send to the server, some form element fields need to be assembled in unique
+ * ways to match the entity's structure in Drupal. Modules that implement fields
+ * can use this hook to properly assemble the item value (by delta) and return
+ * it.
+ */
+function hook_assemble_form_state_into_field(entity_type, bundle,
+  form_state_value, field, instance, langcode, delta) {
+  try {
+  }
+  catch (error) { console.log(' - ' + error); }
+}
+
+/**
  * When the app is first loading up, DrupalGap checks to see if the device has
  * a connection, if it does then this hook is called. Implementations of this
  * hook need to return true if they'd like DrupalGap to continue, or return
