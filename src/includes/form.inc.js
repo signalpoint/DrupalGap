@@ -1019,7 +1019,7 @@ function _drupalgap_form_submit(form_id) {
         });
 
         // If there were validation errors, show the form errors and stop the
-        // form submission.
+        // form submission. Otherwise submit the form.
         if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
           var html = '';
           $.each(drupalgap.form_errors, function(name, message) {
@@ -1033,7 +1033,7 @@ function _drupalgap_form_submit(form_id) {
           );
           //return false;
         }
-        form_submission();
+        else { form_submission(); }
       }
       catch (error) {
         console.log('_drupalgap_form_submit - form_validation - ' + error);
@@ -1048,18 +1048,8 @@ function _drupalgap_form_submit(form_id) {
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
         });
-
         // Remove the form from local storage.
         drupalgap_form_local_storage_delete(form_id);
-
-        if (form.action) {
-          console.log('Sexy action news!');
-          drupalgap_goto(form.action, {'form_submission': true});
-        }
-        else {
-          console.log('WARNING: _drupalgap_form_submit - form_submission - ' +
-            'form.action was not set, so we are not redirecting anywhere.');
-        }
       }
       catch (error) {
         console.log('_drupalgap_form_submit - form_submission - ' + error);
@@ -1074,11 +1064,9 @@ function _drupalgap_form_submit(form_id) {
     if (form.entity_type &&
       image_fields_present_on_entity_type(form.entity_type, form.bundle)
     ) {
-      console.log('There were some image fields... oh no!');
       _image_field_form_process(form, form_state, {
           success: form_validation
       });
-      //form_validation();
     }
     else {
       // There were no image fields on the form, proceed normally with form
