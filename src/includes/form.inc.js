@@ -475,6 +475,24 @@ function drupalgap_form_load(form_id) {
 }
 
 /**
+ * Given a form id, this will delete the form from local storage.
+ * If the form isn't in local storage, this returns false.
+ * @param {String} form_id
+ * @return {Object}
+ */
+function drupalgap_form_local_storage_delete(form_id) {
+  try {
+    var result = window.localStorage.removeItem(
+      drupalgap_form_id_local_storage_key(form_id)
+    );
+    return result;
+  }
+  catch (error) {
+    console.log('drupalgap_form_local_storage_delete - ' + error);
+  }
+}
+
+/**
  * Given a form id, this will load the form from local storage and return it.
  * If the form isn't in local storage, this returns false.
  * @param {String} form_id
@@ -1019,12 +1037,14 @@ function _drupalgap_form_submit(form_id) {
         fn.apply(null, Array.prototype.slice.call([form, form_state]));
     });
 
-    // TODO - the call to the form's submit function should be async and we
+    // @todo - the call to the form's submit function should be async and we
     // should have a success callback here that checks the form.action and
     // then does a drupalgap_goto there once the form is submitted. Right now,
     // for example, drupalgap_entity_form_submit() takes care of the
     // drupalgap_goto call, should that be handled here?
-    // TODO - remove the form from local storage? probably.
+
+    // Remove the form from local storage.
+    drupalgap_form_local_storage_delete(form_id);
   }
   catch (error) { console.log('_drupalgap_form_submit - ' + error); }
 }
