@@ -45,7 +45,7 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
  */
 function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
   try {
-    
+
     console.log('WARNING: drupalgap_entity_assemble_data() has been ' +
       'deprecated! Now just call e.g. node_save() for auto assembly.');
     return;
@@ -473,21 +473,17 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
     // Setup the success call back to go back to the entity page view.
     call_arguments.success = function(result) {
       try {
-        // By default we'll try to redirect to [entity-type]/[entity-id]. Note,
-        // this doesn't work for taxonomy_vocabulary and taxonomy_term since
-        // they have paths of taxonomy/vocabulary and taxonomy/term. So once
-        // all of the entity forms have an action, we can get rid of this
-        // default setting and just use the action.
-        var destination =
-          form.entity_type + '/' + eval('result.' + primary_key);
-        if (form.action) {
-          destination = form.action;
+        // If no one has provided a form.action to submit this form to,
+        // by default we'll try to redirect to [entity-type]/[entity-id]. For
+        // taxonomy, we replace the underscore with a forward slash in the path.
+        var destination = form.action;
+        if (!destination) {
+          var prefix = form.entity_type;
+          if (prefix == 'taxonomy_vocabulary' || prefix == 'taxonomy_term') {
+            prefix = prefix.replace('_', '/');
+          }
+          destination = prefix + '/' + result[primary_key];
         }
-        // @todo - this drupalgap_goto probably shouldn't be here... the
-        // drupalgap form submission handler should be the one who handles the
-        // call to drupalgap_goto. We're going to need to make a separate call
-        // back function in form.js to handle these entity async callbacks (and
-        // every other developer).
         drupalgap_goto(destination, {'form_submission': true});
       }
       catch (error) {
