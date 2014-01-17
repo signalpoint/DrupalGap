@@ -23,8 +23,8 @@ function drupalgap_services_get_entity_resource(entity_type) {
 }
 
 /**
- * Returns the name of the function jDrupal function to be used when in need of
- * an entity C.R.U.D. operation.
+ * Returns the name of the jDrupal function to be used when in need of an entity
+ * C.R.U.D. operation.
  * @param {String} entity_type
  * @param {String} crud
  * @return {String}
