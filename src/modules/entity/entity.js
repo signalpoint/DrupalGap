@@ -483,8 +483,8 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
             prefix = prefix.replace('_', '/');
           }
           destination = prefix + '/' + result[primary_key];
+          form.action = destination;
         }
-        drupalgap_goto(destination, {'form_submission': true});
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - success - ' + error);
