@@ -1002,49 +1002,90 @@ function _drupalgap_form_submit(form_id) {
     // Assemble the form state values.
     var form_state = drupalgap_form_state_values_assemble(form);
 
-    // Clear our previous form errors.
+    // Clear out previous form errors.
     drupalgap.form_errors = {};
 
-    // Call drupalgap form's api validate.
-    _drupalgap_form_validate(form, form_state);
+    // Build the form validation wrapper function.
+    var form_validation = function() {
+      try {
+        // Call drupalgap form's api validate.
+        _drupalgap_form_validate(form, form_state);
 
-    // Call the form's validate function(s), if any.
-    $.each(form.validate, function(index, function_name) {
-        if (drupalgap.settings.debug) { console.log(function_name + '()'); }
-        var fn = window[function_name];
-        fn.apply(null, Array.prototype.slice.call([form, form_state]));
-    });
+        // Call the form's validate function(s), if any.
+        $.each(form.validate, function(index, function_name) {
+            if (drupalgap.settings.debug) { console.log(function_name + '()'); }
+            var fn = window[function_name];
+            fn.apply(null, Array.prototype.slice.call([form, form_state]));
+        });
 
-    // If there were validation errors, show the form errors and stop the
-    // form submission.
-    if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
-      var html = '';
-      $.each(drupalgap.form_errors, function(name, message) {
-          html += message + '\n\n';
+        // If there were validation errors, show the form errors and stop the
+        // form submission.
+        if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
+          var html = '';
+          $.each(drupalgap.form_errors, function(name, message) {
+              html += message + '\n\n';
+          });
+          navigator.notification.alert(
+            html,
+            function() {},
+            'Warning',
+            'OK'
+          );
+          //return false;
+        }
+        form_submission();
+      }
+      catch (error) {
+        console.log('_drupalgap_form_submit - form_validation - ' + error);
+      }
+    };
+
+    // Build the form submission wrapper function.
+    var form_submission = function() {
+      try {
+        // Call the form's submit function(s), if any.
+        $.each(form.submit, function(index, function_name) {
+            var fn = window[function_name];
+            fn.apply(null, Array.prototype.slice.call([form, form_state]));
+        });
+
+        // Remove the form from local storage.
+        drupalgap_form_local_storage_delete(form_id);
+
+        if (form.action) {
+          console.log('Sexy action news!');
+          drupalgap_goto(form.action, {'form_submission': true});
+        }
+        else {
+          console.log('WARNING: _drupalgap_form_submit - form_submission - ' +
+            'form.action was not set, so we are not redirecting anywhere.');
+        }
+      }
+      catch (error) {
+        console.log('_drupalgap_form_submit - form_submission - ' + error);
+      }
+    };
+
+    // Get ready to validate and submit the form, but first...
+
+    // If this is an entity form, and there is an image field on the form, we
+    // need to asynchronously process the image field, then continue onward
+    // with normal form validation and submission.
+    if (form.entity_type &&
+      image_fields_present_on_entity_type(form.entity_type, form.bundle)
+    ) {
+      console.log('There were some image fields... oh no!');
+      _image_field_form_process(form, form_state, {
+          success: form_validation
       });
-      navigator.notification.alert(
-        html,
-        function() {},
-        'Warning',
-        'OK'
-      );
-      return false;
+      //form_validation();
     }
-
-    // Call the form's submit function(s), if any.
-    $.each(form.submit, function(index, function_name) {
-        var fn = window[function_name];
-        fn.apply(null, Array.prototype.slice.call([form, form_state]));
-    });
-
-    // @todo - the call to the form's submit function should be async and we
-    // should have a success callback here that checks the form.action and
-    // then does a drupalgap_goto there once the form is submitted. Right now,
-    // for example, drupalgap_entity_form_submit() takes care of the
-    // drupalgap_goto call, should that be handled here?
-
-    // Remove the form from local storage.
-    drupalgap_form_local_storage_delete(form_id);
+    else {
+      // There were no image fields on the form, proceed normally with form
+      // validation, which will in turn process the submission if there are no
+      // validation errors.
+      form_validation();
+    }
   }
   catch (error) { console.log('_drupalgap_form_submit - ' + error); }
 }
