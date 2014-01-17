@@ -179,6 +179,8 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
     var confirm_msg =
       'Delete this content, are you sure? This action cannot be undone...';
     if (confirm(confirm_msg)) {
+      // Change the jQM loader mode to saving.
+      drupalgap.loader = 'deleting';
       // Set up the api call arguments and success callback.
       var call_arguments = {};
       call_arguments.success = function(result) {
@@ -524,7 +526,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
       }
     };
 
-    // Change the loader mode to saving.
+    // Change the jQM loader mode to saving.
     drupalgap.loader = 'saving';
 
     // Depending on if we are creating a new entity, or editing an existing one,
