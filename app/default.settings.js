@@ -50,11 +50,18 @@ drupalgap.settings.theme = 'easystreet3';
 // Logo
 drupalgap.settings.logo = 'themes/easystreet3/images/drupalgap.jpg';
 
-// Loading Animation - http://view.jquerymobile.com/1.3.2/dist/demos/widgets/loader/
-drupalgap.settings.loading = {
-  text: 'Loading...',
-  textVisible: true,
-  theme:'a'
+// Loader Animations - http://demos.jquerymobile.com/1.4.0/loader/
+drupalgap.settings.loader = {
+  loading: {
+    text: 'Loading...',
+    textVisible: true,
+    theme: 'a'
+  },
+  saving: {
+    text: 'Saving...',
+    textVisible: true,
+    theme: 'b'
+  }
 };
 
 /*****************************************|
