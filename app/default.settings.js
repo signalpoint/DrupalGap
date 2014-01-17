@@ -90,21 +90,53 @@ drupalgap.settings.loader = {
 /***************************************|
  * Menus - http://drupalgap.org/node/85 |
  ***************************************/
-drupalgap.settings.menus = {};
+drupalgap.settings.menus = {}; // Do not remove this line.
 
 // User Menu Anonymous
 drupalgap.settings.menus['user_menu_anonymous'] = {
   links:[
-    {title:'Login','path':'user/login'},
-    {title:'Register','path':'user/register'}
+    {
+      title: 'Login',
+      path: 'user/login',
+      options: {
+        attributes: {
+          'data-theme': 'b'
+        }
+      }
+    },
+    {
+      title: 'Register',
+      path: 'user/register',
+      options: {
+        attributes: {
+          'data-theme': 'b'
+        }
+      }
+    }
   ]
 };
 
 // User Menu Authenticated
 drupalgap.settings.menus['user_menu_authenticated'] = {
   links:[
-    {title:'My Account','path':'user'},
-    {title:'Logout','path':'user/logout'}
+    {
+      title: 'My Account',
+      path: 'user',
+      options: {
+        attributes: {
+          'data-theme': 'b'
+        }
+      }
+    },
+    {
+      title: 'Logout',
+      path: 'user/logout',
+      options: {
+        attributes: {
+          'data-theme': 'b'
+        }
+      }
+    }
   ]
 };
 
@@ -144,7 +176,7 @@ drupalgap.settings.menus['main_menu'] = {
 /****************************************|
  * Blocks - http://drupalgap.org/node/83 |
  ****************************************/
-drupalgap.settings.blocks = {};
+drupalgap.settings.blocks = {}; // Do not remove this line.
 
 // Easy Street 3 Theme Blocks
 drupalgap.settings.blocks.easystreet3 = {
@@ -185,7 +217,7 @@ drupalgap.settings.blocks.easystreet3 = {
 /****************************************************|
  * Region Menu Links - http://drupalgap.org/node/173 |
  ****************************************************/
-drupalgap.settings.menus.regions = {};
+drupalgap.settings.menus.regions = {}; // Do not remove this line.
 
 // Header Region Links
 drupalgap.settings.menus.regions['header'] = {
@@ -245,7 +277,7 @@ Drupal.settings.debug = false; /* Set to true to see console.log debug
 /***********************|
  * Performance Settings |
  ***********************/
-drupalgap.settings.cache = {};
+drupalgap.settings.cache = {}; // Do not remove this line.
 
 // Theme Registry - Set to true to load the page.tpl.html contents from cache.
 drupalgap.settings.cache.theme_registry = true;
