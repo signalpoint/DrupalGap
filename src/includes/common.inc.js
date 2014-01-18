@@ -18,14 +18,22 @@ function drupalgap_add_page_to_dom(page_id, html) {
 
 /**
  * Attempts to remove given page from the DOM, will not remove the current page.
+ * You may force the removal by passing in a second argument as a JSON object
+ * with a 'force' property set to true.
  * @param {String} page_id
  */
 function drupalgap_remove_page_from_dom(page_id) {
   try {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
-    if (current_page_id != page_id) {
+    var options = {};
+    if (arguments[1]) { options = arguments[1]; }
+    if (current_page_id != page_id || options.force) {
       $('#' + page_id).empty().remove();
       delete drupalgap.pages[page_id];
+    }
+    else {
+      console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
+        'the current page (' + page_id + ') from the DOM!');
     }
   }
   catch (error) { console.log('drupalgap_remove_page_from_dom - ' + error); }
@@ -147,9 +155,6 @@ function drupalgap_get_page_id(path) {
   try {
     if (!path) { path = drupalgap_path_get(); }
     var id = path.toLowerCase().replace(/\//g, '_').replace(/-/g, '_');
-    if (drupalgap.settings.debug) {
-      console.log(id);
-    }
     return id;
   }
   catch (error) { console.log('drupalgap_get_page_id - ' + error); }
@@ -372,9 +377,12 @@ function drupalgap_goto(path) {
       // Reload the page? If so, remove the page from the DOM, delete the
       // reloadPage option, then set the reloadingPage option to true so others
       // down the line will know the page is reloading. We can't pass along the
-      // actual reloadPage option since it may collide with jQM later on.
+      // actual reloadPage option since it may collide with jQM later on. We
+      // have to use 'force' when removing the page from the DOM since DG won't
+      // remove it since it thinks we are already on the page, so it won't
+      // remove it.
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        drupalgap_remove_page_from_dom(page_id);
+        drupalgap_remove_page_from_dom(page_id, { force: true });
         delete options.reloadPage;
         options.reloadingPage = true;
       }
