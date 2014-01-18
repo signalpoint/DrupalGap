@@ -34,9 +34,9 @@ Drupal.settings.cache.views.expiration = 3600;
  * DrupalGap Settings |
  *********************/
 
-/***********************|
- * DrupalGap Appearance |
- ***********************/
+/*************|
+ * Appearance |
+ *************/
 
 // App Title
 drupalgap.settings.title = 'DrupalGap';
