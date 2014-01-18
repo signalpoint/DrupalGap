@@ -118,7 +118,12 @@ function _theme_view(variables) {
       {},
       {
         success: function(html) {
-          $('#' + variables.attributes.id).html(html);
+          try {
+            $('#' + variables.attributes.id).html(html);
+          }
+          catch (error) {
+            console.log('_theme_view - success - ' + error);
+          }
         }
       },
       variables
@@ -183,7 +188,7 @@ function theme_views_view(variables) {
       var empty_callback = window[variables.empty_callback];
       var selector = '#' + drupalgap_get_page_id() +
         " div[data-role$='content']";
-      $(selector).hide('slow');
+      $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
       }, 100);
