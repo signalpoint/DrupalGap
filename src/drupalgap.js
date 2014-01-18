@@ -3,7 +3,7 @@ var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
 // Setup the jQueryMobile loader to show/hide itself while navigating between
 // pages in the app.
-$(document).on('pagebeforecreate', '[data-role="page"]', function() {
+/*$(document).on('pagebeforecreate', '[data-role="page"]', function() {
     setTimeout(function() {
         drupalgap.loading = true;
         $.mobile.loading('show', drupalgap_loader_options());
@@ -14,7 +14,7 @@ $(document).on('pageshow', '[data-role="page"]', function() {
         drupalgap.loading = false;
         $.mobile.loading('hide');
     }, 100);
-});
+});*/
 
 /**
  * Initializes the drupalgap json object.
