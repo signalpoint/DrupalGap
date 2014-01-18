@@ -119,6 +119,10 @@ function _theme_view(variables) {
       {
         success: function(html) {
           try {
+            setTimeout(function() {
+                drupalgap.loading = false;
+                $.mobile.loading('hide');
+            }, 100);
             $('#' + variables.attributes.id).html(html);
           }
           catch (error) {
@@ -128,6 +132,10 @@ function _theme_view(variables) {
       },
       variables
     );
+    setTimeout(function() {
+        drupalgap.loading = true;
+        $.mobile.loading('show', drupalgap_loader_options());
+    }, 1);
     views_embed_view(variables.path + '&page=' + page, variables_copy);
   }
   catch (error) { console.log('_theme_view - ' + error); }
