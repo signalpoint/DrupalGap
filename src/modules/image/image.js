@@ -288,11 +288,12 @@ function _image_field_form_process(form, form_state, options) {
   try {
     // @todo - this needs mutli value field support (delta)
     var lng = language_default();
+    var processed_an_image = false;
     $.each(form.image_fields, function(index, name) {
         // Skip empty images.
-        if (!image_phonegap_camera_options[name][0]) { return; }
+        if (!image_phonegap_camera_options[name][0]) { return false; }
         // Skip image fields that already have their file id set.
-        if (form_state.values[name][lng][0] != '') { return; }
+        if (form_state.values[name][lng][0] != '') { return false; }
         // Create a unique file name using the UTC integer value.
         var d = new Date();
         var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
@@ -302,8 +303,9 @@ function _image_field_form_process(form, form_state, options) {
           'filename': image_file_name,
           'filepath': 'public://' + image_file_name
         }};
-        // Change the loader mode to saving.
+        // Change the loader mode to saving, and save the file.
         drupalgap.loader = 'saving';
+        processed_an_image = true;
         file_save(file, {
             success: function(result) {
               try {
@@ -321,6 +323,8 @@ function _image_field_form_process(form, form_state, options) {
         // @todo - for now we only support the first image field on the form.
         return false;
     });
+    // If no images were processed, we need to continue onward anyway.
+    if (!processed_an_image && options.success) { options.success(); }
   }
   catch (error) { console.log('_image_field_form_validate - ' + error); }
 }
