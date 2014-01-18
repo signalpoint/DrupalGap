@@ -112,17 +112,16 @@ function theme_view(variables) {
  */
 function _theme_view(variables) {
   try {
+    // Determine what page of the view we're on.
     var page = 0;
     if (variables.page) { page = variables.page; }
+    // Make a copy of variables and prepare the success callback for embedding
+    // the view.
     var variables_copy = $.extend(
       {},
       {
         success: function(html) {
           try {
-            setTimeout(function() {
-                drupalgap.loading = false;
-                $.mobile.loading('hide');
-            }, 100);
             $('#' + variables.attributes.id).html(html);
           }
           catch (error) {
@@ -132,10 +131,7 @@ function _theme_view(variables) {
       },
       variables
     );
-    setTimeout(function() {
-        drupalgap.loading = true;
-        $.mobile.loading('show', drupalgap_loader_options());
-    }, 1);
+    // Finally, embed the view.
     views_embed_view(variables.path + '&page=' + page, variables_copy);
   }
   catch (error) { console.log('_theme_view - ' + error); }
