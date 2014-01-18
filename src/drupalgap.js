@@ -942,8 +942,12 @@ function drupalgap_loading_message_show() {
     var options = drupalgap_loader_options();
     if (arguments[0]) { options = arguments[0]; }
     // Show the loading message.
-    $.mobile.loading('show', options);
-    drupalgap.loading = true;
+    //$.mobile.loading('show', options);
+    //drupalgap.loading = true;
+    setTimeout(function() {
+        $.mobile.loading('show', options);
+        drupalgap.loading = true;
+    }, 1);
   }
   catch (error) { console.log('drupalgap_loading_message_show - ' + error); }
 }
@@ -953,9 +957,14 @@ function drupalgap_loading_message_show() {
  */
 function drupalgap_loading_message_hide() {
   try {
-    $.mobile.loading('hide');
+    /*$.mobile.loading('hide');
     drupalgap.loading = false;
-    drupalgap.loader = 'loading';
+    drupalgap.loader = 'loading';*/
+    setTimeout(function() {
+        $.mobile.loading('hide');
+        drupalgap.loading = false;
+        drupalgap.loader = 'loading';
+    }, 100);
   }
   catch (error) { console.log('drupalgap_loading_message_hide - ' + error); }
 }
