@@ -173,6 +173,13 @@ version of DrupalGap to another.
   The drupalgap.settings.loading variable has been renamed to
   drupalgap.settings.loader and now contains two default modes, one for saving
   and one for loading. View the default.settings.js file for details.
+  
+  ---
+  
+  The user_login form and user_register form have had their form ids renamed to
+  user_login_form and user_register_form. Any hook_form_alter() implementations
+  that modified these forms, need to update the form id used to properly make
+  the alterations.
 
 7.x-1.5-alpha => 7.x-1.6-alpha
 
