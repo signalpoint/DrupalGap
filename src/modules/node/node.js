@@ -131,7 +131,8 @@ function node_menu() {
       'node/add/%': {
         'title': 'Add content',
         'page_callback': 'node_add_page_by_type',
-        'page_arguments': [2]
+        'page_arguments': [2],
+        options: {reloadPage: true}
       },
       'node/%': {
         'title': 'Node',
@@ -154,7 +155,8 @@ function node_menu() {
         'weight': 0,
         'type': 'MENU_LOCAL_TASK',
         'access_callback': 'node_access',
-        'access_arguments': [1]
+        'access_arguments': [1],
+        options: {reloadPage: true}
       }
     };
     return items;

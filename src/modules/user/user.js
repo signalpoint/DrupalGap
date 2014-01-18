@@ -172,7 +172,8 @@ function user_menu() {
         'access_callback': 'user_edit_access',
         'access_arguments': [1],
         'weight': 0,
-        'type': 'MENU_LOCAL_TASK'
+        'type': 'MENU_LOCAL_TASK',
+        options: {reloadPage: true}
       },
       'user-listing': {
         'title': 'Users',

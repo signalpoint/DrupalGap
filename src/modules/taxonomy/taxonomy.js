@@ -87,7 +87,8 @@ function taxonomy_menu() {
         ],
         'weight': 0,
         'type': 'MENU_LOCAL_TASK',
-        'access_arguments': ['administer taxonomy']
+        'access_arguments': ['administer taxonomy'],
+        options: {reloadPage: true}
       },
       'taxonomy/term/%': {
         'title': 'Taxonomy term',
@@ -107,7 +108,8 @@ function taxonomy_menu() {
         'page_arguments': ['taxonomy_form_term', 'taxonomy_term', 2],
         'weight': 0,
         'type': 'MENU_LOCAL_TASK',
-        'access_arguments': ['administer taxonomy']
+        'access_arguments': ['administer taxonomy'],
+        options: {reloadPage: true}
       }
     };
     return items;
