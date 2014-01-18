@@ -1,4 +1,20 @@
+// Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
+
+// Setup the jQueryMobile loader to show/hide itself while navigating between
+// pages in the app.
+$(document).on('pagebeforecreate', '[data-role="page"]', function() {
+    setTimeout(function() {
+        drupalgap.loading = true;
+        $.mobile.loading('show', drupalgap_loader_options());
+    }, 1);
+});
+$(document).on('pageshow', '[data-role="page"]', function() {
+    setTimeout(function() {
+        drupalgap.loading = false;
+        $.mobile.loading('hide');
+    }, 100);
+});
 
 /**
  * Initializes the drupalgap json object.
@@ -915,6 +931,7 @@ function drupalgap_jqm_page_event_script_code(options) {
 
 /**
  * Show the jQueryMobile loading message.
+ * @see http://stackoverflow.com/a/16277865/763010
  */
 function drupalgap_loading_message_show() {
   try {
@@ -922,20 +939,7 @@ function drupalgap_loading_message_show() {
     if (drupalgap.loading === 'undefined') { drupalgap.loading = false; }
     // Return if the loading message is already shown.
     if (drupalgap.loading) { return; }
-    // Determine the mode.
-    var mode = drupalgap.loader;
-    // Set default options.
-    var text = 'Loading...';
-    var textVisible = true;
-    if (mode == 'saving') { var text = 'Saving...'; }
-    var options = {
-      text: text,
-      textVisible: textVisible
-    };
-    // Override the options if any were sent in.
-    if (drupalgap.settings.loader && drupalgap.settings.loader[mode]) {
-      options = drupalgap.settings.loader[mode];
-    }
+    var options = drupalgap_loader_options();
     if (arguments[0]) { options = arguments[0]; }
     // Show the loading message.
     $.mobile.loading('show', options);
@@ -951,10 +955,31 @@ function drupalgap_loading_message_hide() {
   try {
     $.mobile.loading('hide');
     drupalgap.loading = false;
-    // Force the loader mode back to loading (in case it was 'saving').
     drupalgap.loader = 'loading';
   }
   catch (error) { console.log('drupalgap_loading_message_hide - ' + error); }
+}
+
+/**
+ * Returns the jQM loader options based on the current mode and settings.js.
+ * @return {Object}
+ */
+function drupalgap_loader_options() {
+  try {
+    var mode = drupalgap.loader;
+    var text = 'Loading...';
+    var textVisible = true;
+    if (mode == 'saving') { var text = 'Saving...'; }
+    var options = {
+      text: text,
+      textVisible: textVisible
+    };
+    if (drupalgap.settings.loader && drupalgap.settings.loader[mode]) {
+      options = drupalgap.settings.loader[mode];
+    }
+    return options;
+  }
+  catch (error) { console.log(' - ' + error); }
 }
 
 /**
