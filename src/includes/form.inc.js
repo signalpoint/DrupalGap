@@ -76,6 +76,9 @@ function drupalgap_form_defaults(form_id) {
     form.id = form_id;
     form.elements = {};
     form.buttons = {};
+    // Create a prefix and suffix.
+    form.prefix = '';
+    form.suffix = '';
     // Create empty arrays for the form's validation and submission handlers,
     // then add the default call back functions to their respective array, if
     // they exist.
@@ -201,13 +204,23 @@ function drupalgap_form_render(form) {
     }
     // If the form already exists in the DOM, remove it.
     if ($('form#' + form.id).length) { $('form#' + form.id).remove(); }
+    // Render the prefix and suffix and wrap them in their own div.
+    var prefix = form.prefix;
+    if (!empty(prefix)) {
+      prefix = '<div class="form_prefix">' + prefix + '</div>';
+    }
+    var suffix = form.suffix;
+    if (!empty(suffix)) {
+      suffix = '<div class="form_suffix">' + suffix + '</div>';
+    }
     // Render the form's input elements.
     var form_elements = _drupalgap_form_render_elements(form);
     // Return the form html.
     var form_html =
-    '<form id="' + form.id + '"><div><div id="drupalgap_form_errors"></div>' +
+    '<form id="' + form.id + '">' + prefix + '<div>' +
+      '<div id="drupalgap_form_errors"></div>' +
       form_elements +
-    '</div></form>';
+    '</div>' + suffix + '</form>';
     return form_html;
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
