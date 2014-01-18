@@ -167,6 +167,12 @@ version of DrupalGap to another.
   ---
   
   js_yyyy_mm_dd_hh_mm_ss() has been renamed to date_yyyy_mm_dd_hh_mm_ss().
+  
+  ---
+  
+  The drupalgap.settings.loading variable has been renamed to
+  drupalgap.settings.loader and now contains two default modes, one for saving
+  and one for loading. View the default.settings.js file for details.
 
 7.x-1.5-alpha => 7.x-1.6-alpha
 

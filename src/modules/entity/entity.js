@@ -179,6 +179,8 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
     var confirm_msg =
       'Delete this content, are you sure? This action cannot be undone...';
     if (confirm(confirm_msg)) {
+      // Change the jQM loader mode to saving.
+      drupalgap.loader = 'deleting';
       // Set up the api call arguments and success callback.
       var call_arguments = {};
       call_arguments.success = function(result) {
@@ -474,8 +476,9 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
     call_arguments.success = function(result) {
       try {
         // If no one has provided a form.action to submit this form to,
-        // by default we'll try to redirect to [entity-type]/[entity-id]. For
-        // taxonomy, we replace the underscore with a forward slash in the path.
+        // by default we'll try to redirect to [entity-type]/[entity-id] to view
+        // the entity. For taxonomy, we replace the underscore with a forward
+        // slash in the path.
         var destination = form.action;
         if (!destination) {
           var prefix = form.entity_type;
@@ -483,8 +486,8 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
             prefix = prefix.replace('_', '/');
           }
           destination = prefix + '/' + result[primary_key];
-          form.action = destination;
         }
+        drupalgap_goto(destination, {'form_submission': true});
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - success - ' + error);
@@ -522,6 +525,9 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
         console.log('drupalgap_entity_form_submit - error - ' + error);
       }
     };
+
+    // Change the jQM loader mode to saving.
+    drupalgap.loader = 'saving';
 
     // Depending on if we are creating a new entity, or editing an existing one,
     // call the appropriate service resource.

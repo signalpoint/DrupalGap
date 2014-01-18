@@ -198,17 +198,11 @@ function image_form_alter(form, form_state, form_id) {
     // field element(s).
     if (form.entity_type) {
       var bundle = form.bundle;
-      /*if (form.entity_type == 'node') {
-        bundle = form.elements.type.default_value;
-      }*/
       var image_fields =
         image_fields_present_on_entity_type(form.entity_type, bundle);
       if (image_fields) {
         // Attach the image field names to the form for later reference.
         form.image_fields = image_fields;
-        // Prepend a custom validate and submit handlers to the form to handle
-        // images.
-        //form.validate.unshift('_image_field_form_validate');
         // For each image field, create a place for it in the global var.
         if ($.isArray(image_fields)) {
           $.each(image_fields, function(index, name) {
@@ -284,58 +278,6 @@ function _image_phonegap_camera_getPicture_success(options) {
 }
 
 /**
- * Handles the click on the 'Upload' button on image field form elements.
- */
-/*function _image_phonegap_camera_getPicture_upload() {
-  try {
-    // Use the global options.
-    var options = image_phonegap_camera_options;
-    // Hide the upload button.
-    $('#' + options.id + '_upload').hide();
-  }
-  catch(error) {
-    console.log('_image_phonegap_camera_getPicture_upload - ' + error);
-    }
-}*/
-
-/**
- * A custom form validate handler for forms that contain image fields.
- * @param {Object} form
- * @param {Object} form_state
- */
-function _image_field_form_validate(form, form_state) {
-  try {
-    // TODO - this needs mutli value field support (delta)
-    var lng = language_default();
-    $.each(form.image_fields, function(index, name) {
-        // Skip empty images.
-        if (!image_phonegap_camera_options[name][0]) { return; }
-        // Skip image fields that already have their file id set.
-        if (form_state.values[name][lng][0] != '') { return; }
-        // Create a unique file name using the UTC integer value.
-        var d = new Date();
-        var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
-        // Build the data for the file create resource.
-        var file = {'file': {
-          'file': image_phonegap_camera_options[name][0].image,
-          'filename': image_file_name,
-          'filepath': 'public://' + image_file_name
-        }};
-        file_save(file, {
-            async: false,
-            success: function(result) {
-              // Set the hidden input and form state values with the file id.
-              var element_id = drupalgap_form_get_element_id(name, form.id);
-              $('#' + element_id).val(result.fid);
-              form_state.values[name][lng][0] = result.fid;
-            }
-        });
-    });
-  }
-  catch (error) { console.log('_image_field_form_validate - ' + error); }
-}
-
-/**
  * An internal function used to upload images to the server, retreive their file
  * id and then populate the corresponding form element's value with the file id.
  * @param {Object} form
@@ -346,7 +288,6 @@ function _image_field_form_process(form, form_state, options) {
   try {
     // @todo - this needs mutli value field support (delta)
     var lng = language_default();
-    var processed_an_image = false;
     $.each(form.image_fields, function(index, name) {
         // Skip empty images.
         if (!image_phonegap_camera_options[name][0]) { return; }
@@ -361,10 +302,11 @@ function _image_field_form_process(form, form_state, options) {
           'filename': image_file_name,
           'filepath': 'public://' + image_file_name
         }};
+        // Change the loader mode to saving.
+        drupalgap.loader = 'saving';
         file_save(file, {
             success: function(result) {
               try {
-                processed_an_image = true;
                 // Set the hidden input and form state values with the file id.
                 var element_id = drupalgap_form_get_element_id(name, form.id);
                 $('#' + element_id).val(result.fid);
@@ -379,8 +321,6 @@ function _image_field_form_process(form, form_state, options) {
         // @todo - for now we only support the first image field on the form.
         return false;
     });
-    // If no images were processed, continue onto the provided success callback.
-    if (!processed_an_image && options.success) { options.success(); }
   }
   catch (error) { console.log('_image_field_form_validate - ' + error); }
 }

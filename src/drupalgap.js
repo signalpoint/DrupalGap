@@ -71,6 +71,7 @@ function drupalgap_init() {
       form_errors: {},
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
+      loader: 'loading', /* used to determine the jQM loader mode */
       menus: {},
       menu_links: {},
       menu_router: {},
@@ -921,12 +922,20 @@ function drupalgap_loading_message_show() {
     if (drupalgap.loading === 'undefined') { drupalgap.loading = false; }
     // Return if the loading message is already shown.
     if (drupalgap.loading) { return; }
-    // Set default options. Override the options if any were set or sent in.
+    // Determine the mode.
+    var mode = drupalgap.loader;
+    // Set default options.
+    var text = 'Loading...';
+    var textVisible = true;
+    if (mode == 'saving') { var text = 'Saving...'; }
     var options = {
-      text: 'Loading...',
-      textVisible: true
+      text: text,
+      textVisible: textVisible
     };
-    if (drupalgap.settings.loading) { options = drupalgap.settings.loading; }
+    // Override the options if any were sent in.
+    if (drupalgap.settings.loader && drupalgap.settings.loader[mode]) {
+      options = drupalgap.settings.loader[mode];
+    }
     if (arguments[0]) { options = arguments[0]; }
     // Show the loading message.
     $.mobile.loading('show', options);
@@ -942,6 +951,8 @@ function drupalgap_loading_message_hide() {
   try {
     $.mobile.loading('hide');
     drupalgap.loading = false;
+    // Force the loader mode back to loading (in case it was 'saving').
+    drupalgap.loader = 'loading';
   }
   catch (error) { console.log('drupalgap_loading_message_hide - ' + error); }
 }
