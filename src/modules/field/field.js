@@ -260,11 +260,26 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
       case 'radios':
         break;
       case 'select':
+      case 'list_text':
+        if (instance.widget.type == 'options_select') {
+          items[delta].type = 'select';
+        }
         // If the select list is required, add a 'Select' option and set it as
         // the default.
         if (items[delta].required) {
           items[delta].options[-1] = 'Select';
           items[delta].value = -1;
+        }
+        // If there are any allowed values, place them on the options list. Then
+        // check for a default value, and set it if necessary.
+        if (field.settings.allowed_values) {
+          $.each(field.settings.allowed_values, function(key, value) {
+              items[delta].options[key] = value;
+          });
+          if (instance.default_value &&
+            typeof instance.default_value[delta].value !== 'undefined') {
+              items[delta].value = instance.default_value[delta].value;
+          }
         }
         break;
       case 'taxonomy_term_reference':
