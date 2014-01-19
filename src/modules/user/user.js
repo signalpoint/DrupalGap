@@ -223,6 +223,9 @@ function user_register_form(form, form_state) {
       'title': 'E-mail address',
       'required': true
     };
+    // @todo - instead of a null bundle, it appears drupal uses the bundle
+    // 'user' instead.
+    drupalgap_field_info_instances_add_to_form('user', null, form, null);
     form.elements.submit = {
       'type': 'submit',
       'value': 'Create new account'
@@ -239,10 +242,7 @@ function user_register_form(form, form_state) {
  */
 function user_register_form_submit(form, form_state) {
   try {
-    var account = {
-      name: form_state.values.name,
-      mail: form_state.values.mail
-    };
+    var account = drupalgap_entity_build_from_form_state(form, form_state);
     user_register(account, {
       success: function(data) {
         drupalgap_goto('');
