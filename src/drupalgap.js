@@ -110,6 +110,7 @@ function drupalgap_init() {
       services: {},
       sessid: null,
       settings: {},
+      site_settings: {}, /* holds variable settings from the Drupal site */
       taxonomy_vocabularies: false, /* holds vocabs from system connect */
       theme_path: '',
       themes: [],
@@ -1294,9 +1295,10 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
         data: result
       });
     }
-    // Whenever a user logs out, remove all the pages from the DOM.
+    // Whenever a user logs in, out or registers, remove all pages from the DOM.
     else if (options.service == 'user' &&
-      (options.resource == 'logout' || options.resource == 'login')) {
+      (options.resource == 'logout' || options.resource == 'login' ||
+        options.resource == 'register')) {
       drupalgap_remove_pages_from_dom();
     }
     // Whenever an entity is created, updated or deleted, remove the
