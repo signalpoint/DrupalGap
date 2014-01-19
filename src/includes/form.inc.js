@@ -850,44 +850,6 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
 }
 
 /**
- * Given a form, the form state, an element in the form, and a language code,
- * this will generate the Forms API Element Item(s) for the given element. Field
- * elements will be keyed by a language code and delta value(s), while flat
- * elements will be keyed be delta zero.
- */
-/*function _drupalgap_form_element_items_load(form, form_state, element,
-  language) {
-  try {
-    var items = false;
-    if (element.is_field) {
-      // What's the cardinatlity (number of allowed values) on this field?
-      var cardinality = parseInt(element.field_info_field.cardinality);
-      if (cardinality == -1) {
-        //cardinality = 1; // we'll just add one element for now, until we
-                         // figure out how to handle the 'add another
-                         // item' feature.
-        //cardinality = form.elements[element.name][language].length;
-        cardinality = Object.keys(form.elements[element.name][language]).length;
-        if (!cardinality) { cardinality = 1; }
-      }
-      items = _drupalgap_form_element_items_widget_load(
-        form,
-        form_state,
-        element,
-        language,
-        cardinality
-      );
-    }
-    else {
-      items = {0:element};
-      //variables.attributes.id = element.id;
-    }
-    return items;
-  }
-  catch (error) { console.log(' - ' + error); }
-}*/
-
-/**
  * Given an element name, the form, a language code and a delta value, this
  * will return default values that can be used to place an item element into a
  * Forms API object.
@@ -911,64 +873,6 @@ function drupalgap_form_element_item_create(name, form, language, delta) {
     console.log('drupalgap_form_element_item_create - ' + error);
   }
 }
-
-/**
- *
- */
-/*function _drupalgap_form_element_item_load(form, form_state, element,
-  language, delta) {
-  try {
-    var items =
-      _drupalgap_form_element_items_load(form, form_state, element, language);
-    if (items && items[delta]) { return items[delta]; }
-    return false;
-  }
-  catch (error) { console.log(' - ' + error); }
-}*/
-
-/**
- *
- */
-/*function _drupalgap_form_element_items_widget_load(form, form_state, element,
-  language, cardinality) {
-  try {
-    var items = false;
-    // What module handles this element?
-    var module = element.field_info_instance.widget.module;
-    // Determine the hook_field_widget_form() function for this field.
-    var field_widget_form_function = module + '_field_widget_form';
-    if (drupalgap_function_exists(field_widget_form_function)) {
-      var fn = window[field_widget_form_function];
-      // Build the widget arguments into an array so we can apply them to the
-      // widget function.
-      // Iterate over each delta and call the field widget hook.
-      for (var delta = 0; delta < cardinality; delta++) {
-        var widget_arguments = _drupalgap_form_element_items_widget_arguments(
-          form,
-          form_state,
-          element,
-          language,
-          delta
-        );
-        fn.apply(null, widget_arguments);
-      }
-      // Extract the field items that were placed onto the form by the field
-      // widget hook.
-      items = form.elements[element.name][language];
-      // Update the form in local storage in case any field widgets changed
-      // the form.
-      //drupalgap_form_local_storage_save(form);
-    }
-    else {
-      console.log(
-        'WARNING: _drupalgap_form_element_items_widget_load() - ' +
-        field_widget_form_function + '() does not exist!'
-      );
-    }
-    return items;
-  }
-  catch (error) { console.log(' - ' + error); }
-}*/
 
 /**
  *
