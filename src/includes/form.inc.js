@@ -781,6 +781,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // theme function to be used, then render the element by calling its theme
     // function.
     if (item.type == 'text') { item.type = 'textfield'; }
+    else if (item.type == 'list_text') { item.type = 'select'; }
     var theme_function = item.type;
 
     // Make any preprocess modifications to the elements so they will map
