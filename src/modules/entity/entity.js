@@ -394,10 +394,18 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           // Create an empty object to house the field on the entity.
           entity[name] = {};
 
-          // Some fields (e.g. taxonomy term reference) do not use a delta value
-          // in the service call, so we prepare for that here.
+          // Some fields do not use a delta value in the service call, so we
+          // prepare for that here.
+          // @todo - Do all options_select widgets really have no delta value?
+          // Or is it only single value fields that don't have it? We need to
+          // test this.
           var use_delta = true;
-          if (form.elements[name].type == 'taxonomy_term_reference') {
+          if (
+            form.elements[name].type ==
+              'taxonomy_term_reference' ||
+            form.elements[name].field_info_instance.widget.type ==
+              'options_select'
+          ) {
             use_delta = false;
             entity[name][language] = {};
           }
