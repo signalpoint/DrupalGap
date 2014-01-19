@@ -1043,14 +1043,18 @@ function drupalgap_menu_access(path) {
 
         var function_name = drupalgap.menu_links[path].access_callback;
         if (drupalgap_function_exists(function_name)) {
-          // Grab the access callback function and make a copy of the path's
+          // Grab the access callback function. If there are any access args
+          // send them along, or just call the function directly.
           // access arguments.
           var fn = window[function_name];
-          var access_arguments =
-            drupalgap.menu_links[path].access_arguments.slice(0);
-          var args = arg();
-          drupalgap_prepare_argument_entities(access_arguments, args);
-          return fn.apply(null, Array.prototype.slice.call(access_arguments));
+          if (drupalgap.menu_links[path].access_arguments) {
+            var access_arguments =
+              drupalgap.menu_links[path].access_arguments.slice(0);
+            var args = arg();
+            drupalgap_prepare_argument_entities(access_arguments, args);
+            return fn.apply(null, Array.prototype.slice.call(access_arguments));
+          }
+          else { return fn(); }
         }
         else {
           console.log('drupalgap_menu_access - access call back (' +
