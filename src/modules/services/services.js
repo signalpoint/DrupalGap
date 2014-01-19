@@ -67,6 +67,8 @@ function drupalgap_service_resource_extract_results(options) {
       // Pull out the content types user permissions.
       options.data.user.content_types_user_permissions =
         options.data.content_types_user_permissions;
+      // Pull out the site settings.
+      drupalgap.site_settings = options.data.site_settings;
     }
   }
   catch (error) {
