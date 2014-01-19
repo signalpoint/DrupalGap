@@ -1062,7 +1062,11 @@ function _drupalgap_form_submit(form_id) {
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
         });
         // Remove the form from local storage.
-        drupalgap_form_local_storage_delete(form_id);
+        // @todo - we can't do this here because often times a form's submit
+        // handler makes asynchronous calls (i.e. user login) and although the
+        // form validated, server side may say the input was invalid, so the
+        // user will still be on the form, except we already removed the form.
+        //drupalgap_form_local_storage_delete(form_id);
       }
       catch (error) {
         console.log('_drupalgap_form_submit - form_submission - ' + error);
