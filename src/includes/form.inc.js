@@ -402,17 +402,14 @@ function drupalgap_form_load(form_id) {
           // field_info_instance onto the element.
           var element_is_field = false;
           var field_info_field = drupalgap_field_info_field(name);
-          // TODO - since only nodes have a 'type' element on the form, no other
-          // entity types have their field info attached to the variables
-          // object.
-          if (field_info_field && form.elements.type) {
+          if (field_info_field) {
             element_is_field = true;
             form.elements[name].field_info_field = field_info_field;
             form.elements[name].field_info_instance =
               drupalgap_field_info_instance(
                 form.entity_type,
                 name,
-                form.elements.type.default_value
+                form.bundle
               );
           }
           form.elements[name].is_field = element_is_field;
@@ -783,6 +780,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
+    if (item.type == 'text') { item.type = 'textfield'; }
     var theme_function = item.type;
 
     // Make any preprocess modifications to the elements so they will map
@@ -835,7 +833,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         }
         else {
           console.log(
-            'WARNING: _drupalgap_form_render_element_item() - ' +
+            'WARNING: _drupalgap_form_render_element_item - ' +
             'failed to render child ' + i + ' for ' + element.name
           );
         }
