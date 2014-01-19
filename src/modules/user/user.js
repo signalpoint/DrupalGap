@@ -151,6 +151,7 @@ function user_menu() {
         'title': 'Register',
         'page_callback': 'drupalgap_get_form',
         'page_arguments': ['user_register_form'],
+        'access_callback': 'user_register_access',
         options: {reloadPage: true}
       },
       'user/%': {
@@ -202,6 +203,25 @@ function user_page() {
 }
 
 /**
+ * Access callback for the user registration page.
+ * @return {Boolean}
+ */
+function user_register_access() {
+  try {
+    switch (drupalgap.site_settings.user_register) {
+      case '0': // admins only can register
+        return false;
+        break;
+      case '1': // visitors can register
+      case '2': // visitors can register, but admin approval is needed
+        return true;
+        break;
+    }
+  }
+  catch (error) { console.log('user_register_access - ' + error); }
+}
+
+/**
  * The user registration form.
  * @param {Object} form
  * @param {Object} form_state
@@ -239,6 +259,15 @@ function user_register_form(form, form_state) {
     // @todo - instead of a null bundle, it appears drupal uses the bundle
     // 'user' instead.
     drupalgap_field_info_instances_add_to_form('user', null, form, null);
+    // Add registration messages to form.
+    form.user_register = {
+      'user_mail_register_no_approval_required_body': 'Registration complete!',
+      'user_mail_register_pending_approval_required_body':
+        'Registration complete, waiting for administrator approval.',
+      'user_mail_register_email_verification_body':
+        'Registration complete, check your e-mail inbox to verify the account.'
+    };
+    // Add submit button.
     form.elements.submit = {
       'type': 'submit',
       'value': 'Create new account'
@@ -276,9 +305,32 @@ function user_register_form_submit(form, form_state) {
     var account = drupalgap_entity_build_from_form_state(form, form_state);
     user_register(account, {
       success: function(data) {
-        // @todo - Inform the user the status of their account. i.e. admin
-        // approval required, verify e-mail address, etc.
-        drupalgap_goto('');
+        // Check if e-mail verification is required or not..
+        if (!drupalgap.site_settings.user_email_verification) {
+          // E-mail verification not needed, if administrator approval is
+          // needed, notify the user, otherwise log them in.
+          if (drupalgap.site_settings.user_register == '2') {
+            alert(
+            form.user_register.user_mail_register_pending_approval_required_body
+            );
+            drupalgap_goto('');
+          }
+          else {
+            alert(
+              form.user_register.user_mail_register_no_approval_required_body
+            );
+            user_login(account.name, account.pass, {
+                success: function(result) {
+                  drupalgap_goto('');
+                }
+            });
+          }
+        }
+        else {
+          // E-mail verification needed... notify the user.
+          alert(form.user_register.user_mail_register_email_verification_body);
+          drupalgap_goto('');
+        }
       }
     });
   }
