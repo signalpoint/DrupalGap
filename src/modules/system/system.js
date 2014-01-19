@@ -104,10 +104,13 @@ function system_menu() {
         'title': 'Offline',
         'page_callback': 'system_offline_page'
       },
-      '404/%': {
+      '401': {
+        title: '401 - Not Authorized',
+        page_callback: 'system_401_page'
+      },
+      '404': {
         title: '404 - Not Found',
-        page_callback: 'system_404_page',
-        page_arguments: [1]
+        page_callback: 'system_404_page'
       }
     };
     return items;
@@ -116,13 +119,23 @@ function system_menu() {
 }
 
 /**
+ * Page callback for the 401 page.
+ * @param {String} path
+ * @return {String}
+ */
+function system_401_page(path) {
+  try { return 'Sorry, you are not authorized to view this page.'; }
+  catch (error) { console.log('system_401_page - ' + error); }
+}
+
+/**
  * Page callback for the 404 page.
  * @param {String} path
  * @return {String}
  */
 function system_404_page(path) {
-  try { return "Sorry, the '" + path + "' page was not found."; }
-  catch (error) { console.log(' - ' + error); }
+  try { return 'Sorry, the page you requested was not found.'; }
+  catch (error) { console.log('system_404_page - ' + error); }
 }
 
 /**

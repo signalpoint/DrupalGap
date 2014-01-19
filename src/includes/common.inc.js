@@ -327,7 +327,14 @@ function drupalgap_goto(path) {
       // system 404 page. Either way, update the router path before continuing
       // with a normal page build.
       if (new_path) { path = new_path; }
-      else { path = '404/' + path; }
+      else { path = '404'; }
+      router_path = drupalgap_get_menu_link_router_path(path);
+    }
+
+    // Make sure the user has access to this router path, if the don't send them
+    // to the 401 page.
+    if (!drupalgap_menu_access(router_path)) {
+      path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
     }
 
