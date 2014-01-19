@@ -47,8 +47,10 @@ function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
 function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
     var field_info_instances;
+    // If there is no bundle, pull the fields out of the wrapper.
     if (!bundle_name) {
-      field_info_instances = drupalgap.field_info_instances[entity_type];
+      field_info_instances =
+        drupalgap.field_info_instances[entity_type][entity_type];
     }
     else {
       if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
@@ -62,28 +64,35 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
 }
 
 /**
- * Given an entity type, bundle name, form and entity, this will add the
+ * Given an entity type, bundle, form and entity, this will add the
  * entity's fields to the given form.
  * @param {String} entity_type
- * @param {String} bundle_name
+ * @param {String} bundle
  * @param {Object} form
  * @param {Object} entity
  */
-function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name,
+function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
   form, entity) {
   try {
     // Grab the field info instances for this entity type and bundle.
-    var fields = drupalgap_field_info_instances(entity_type, bundle_name);
+    var fields = drupalgap_field_info_instances(entity_type, bundle);
+    // If there is no bundle, pull the fields out of the wrapper.
+    //if (!bundle) { fields = fields[entity_type]; }
     // Use the default language, unless the entity has one specified.
     var language = language_default();
-    if (entity && entity.language) {
-      language = entity.language;
-    }
+    if (entity && entity.language) { language = entity.language; }
     // Iterate over each field in the entity and add it to the form. If there is
     // a value present in the entity, then set the field's form element default
     // value equal to the field value.
     if (fields) {
       $.each(fields, function(name, field) {
+        // The user registration form is a special case, in that we only want
+        // to place fields that are set to display on the user registration
+        // form. Skip any fields not set to display.
+        if (form.id == 'user_register_form' &&
+          !field.settings.user_register_form) {
+          return;
+        }
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
           form.elements[name] = {
@@ -103,7 +112,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle_name,
                              // figure out how to handle the 'add another
                              // item' feature.
           }
-          if (entity[name] && entity[name].length != 0) {
+          if (entity && entity[name] && entity[name].length != 0) {
             for (var delta = 0; delta < cardinality; delta++) {
               if (
                 entity[name][language][delta] &&
