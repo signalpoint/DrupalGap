@@ -223,6 +223,19 @@ function user_register_form(form, form_state) {
       'title': 'E-mail address',
       'required': true
     };
+    // If e-mail verification is not requred, provide password fields.
+    if (!drupalgap.site_settings.user_email_verification) {
+      form.elements.pass = {
+        type: 'password',
+        title: 'Password',
+        required: true
+      };
+      form.elements.pass2 = {
+        type: 'password',
+        title: 'Confirm password',
+        required: true
+      };
+    }
     // @todo - instead of a null bundle, it appears drupal uses the bundle
     // 'user' instead.
     drupalgap_field_info_instances_add_to_form('user', null, form, null);
@@ -236,6 +249,24 @@ function user_register_form(form, form_state) {
 }
 
 /**
+ * Define the form's validation function (optional).
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function user_register_form_validate(form, form_state) {
+  try {
+    // If e-mail verification is not required, make sure the passwords match.
+    if (!drupalgap.site_settings.user_email_verification &&
+      form_state.values.pass != form_state.values.pass2) {
+      drupalgap_form_set_error('pass', 'Passwords do not match!');
+    }
+  }
+  catch (error) {
+    console.log('user_register_form_validate - ' + error);
+  }
+}
+
+/**
  * The user registration form submit handler.
  * @param {Object} form
  * @param {Object} form_state
@@ -245,6 +276,8 @@ function user_register_form_submit(form, form_state) {
     var account = drupalgap_entity_build_from_form_state(form, form_state);
     user_register(account, {
       success: function(data) {
+        // @todo - Inform the user the status of their account. i.e. admin
+        // approval required, verify e-mail address, etc.
         drupalgap_goto('');
       }
     });
