@@ -999,6 +999,50 @@ function _drupalgap_form_submit(form_id) {
 }
 
 /**
+ * When a service call results in an error, this function is used to extract the
+ * request's response form errors into a human readble string and returns it. If
+ * there are no form errors, it will return false.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} xhr
+ * @param {String} status
+ * @param {String} message
+ * @return {String, Boolean}
+ */
+function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
+  message) {
+  try {
+    var responseText = JSON.parse(xhr.responseText);
+    if (typeof responseText === 'object' && responseText.form_errors) {
+      var msg = '';
+      $.each(responseText.form_errors, function(element_name, error_msg) {
+          if (error_msg != '') {
+            // The element name tends to come back weird, e.g.
+            // "field_art_type][und", so let's trim anything at and after
+            // the first "]".
+            var pos = element_name.indexOf(']');
+            if (pos != -1) {
+              element_name = element_name.substr(0, pos);
+            }
+            var label = element_name;
+            if (
+              form.elements[element_name] &&
+              form.elements[element_name].title
+            ) { label = form.elements[element_name].title; }
+            msg += $('<div>(' + label + ') - ' +
+              error_msg + '</div>').text() + '\n';
+          }
+      });
+      if (msg != '') { return msg; }
+    }
+    return false;
+  }
+  catch (error) {
+    console.log('_drupalgap_form_submit_response_errors - ' + error);
+  }
+}
+
+/**
  * An internal function used by the DrupalGap forms api to validate all the
  * elements on a form.
  * @param {Object} form
