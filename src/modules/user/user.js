@@ -243,8 +243,14 @@ function user_register_form(form, form_state) {
       'title': 'E-mail address',
       'required': true
     };
-    // If e-mail verification is not requred, provide password fields.
+    // If e-mail verification is not requred, provide password fields and
+    // the confirm e-mail address field.
     if (!drupalgap.site_settings.user_email_verification) {
+      form.elements.conf_mail = {
+        type: 'email',
+        title: 'Confirm e-mail address',
+        required: true
+      };
       form.elements.pass = {
         type: 'password',
         title: 'Password',
@@ -331,6 +337,12 @@ function user_register_form_submit(form, form_state) {
           alert(form.user_register.user_mail_register_email_verification_body);
           drupalgap_goto('');
         }
+      },
+      error: function(xhr, status, message) {
+        // If there were any form errors, display them.
+        var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
+          status, message);
+        if (msg) { alert(msg); }
       }
     });
   }
