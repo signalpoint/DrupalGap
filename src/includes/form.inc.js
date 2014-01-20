@@ -864,8 +864,13 @@ function drupalgap_form_element_item_create(name, form, language, delta) {
     // some default options onto the element item.
     var id = drupalgap_form_get_element_id(name, form.id, language, delta);
     return {
-      'id': id,
-      options: {attributes: {'id': id}}
+      id: id,
+      options: {
+        attributes: {
+          id: id
+        }
+      },
+      required: form.elements[name].required
     };
   }
   catch (error) {
@@ -941,13 +946,7 @@ function _drupalgap_form_submit(form_id) {
           $.each(drupalgap.form_errors, function(name, message) {
               html += message + '\n\n';
           });
-          navigator.notification.alert(
-            html,
-            function() {},
-            'Warning',
-            'OK'
-          );
-          //return false;
+          alert(html);
         }
         else { form_submission(); }
       }
@@ -1054,17 +1053,18 @@ function _drupalgap_form_validate(form, form_state) {
         if (name == 'submit') { return; }
         if (element.required) {
           var valid = true;
-          // Check for null value.
-          if (form_state.values[name] == null) {
-            valid = false;
+          var value = null;
+          if (element.is_field) {
+            value = form_state.values[name][language_default()][0].value;
           }
-          // Check for empty string value.
-          else if (form_state.values[name] == '') {
+          else { value = form_state.values[name]; }
+          // Check for empty values.
+          if (empty(value)) {
             valid = false;
           }
           // Check for a -1 value on a select list.
-          else if (element.type == 'select' && form_state.values[name] == -1) {
-            // TODO - this approach to select list validation will not allow
+          else if (element.type == 'select' && value == -1) {
+            // @todo - this approach to select list validation will not allow
             // a developer to have a select list option with a -1 value.
             valid = false;
           }
