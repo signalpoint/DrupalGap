@@ -506,28 +506,9 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
     call_arguments.error = function(xhr, status, message) {
       try {
         // If there were any form errors, display them in an alert.
-        var responseText = JSON.parse(xhr.responseText);
-        if (typeof responseText === 'object' && responseText.form_errors) {
-          var msg = '';
-          $.each(responseText.form_errors, function(element_name, error_msg) {
-              if (error_msg != '') {
-                // The element name tends to come back weird, e.g.
-                // "field_art_type][und", so let's trim anything at and after
-                // the first "]".
-                var pos = element_name.indexOf(']');
-                if (pos != -1) {
-                  element_name = element_name.substr(0, pos);
-                }
-                var label = element_name;
-                if (form.elements[element_name].title) {
-                  label = form.elements[element_name].title;
-                }
-                msg += $('<div>(' + label + ') - ' +
-                  error_msg + '</div>').text() + '\n';
-              }
-          });
-          if (msg != '') { alert(msg); }
-        }
+        var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
+          status, message);
+        if (msg) { alert(msg); }
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - error - ' + error);
