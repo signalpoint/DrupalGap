@@ -1055,7 +1055,7 @@ function _drupalgap_form_validate(form, form_state) {
           var valid = true;
           var value = null;
           if (element.is_field) {
-            value = form_state.values[name][language_default()][0].value;
+            value = form_state.values[name][language_default()][0];
           }
           else { value = form_state.values[name]; }
           // Check for empty values.
