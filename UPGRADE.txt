@@ -33,9 +33,72 @@ version of DrupalGap to another.
 
 7.x-1.6-alpha => 7.x-1.7-alpha
 
+
   Now that we've upgraded to jQueryMobile 1.4, there are only two (instead of 5)
   data themes available. All apps will look different (but better and cleaner)
   when upgrading.
+  
+  ---
+
+  One big change is that DrupalGap now utilizes jDrupal, a JavaScript Library
+  for Drupal with a RESTful API for Services.
+
+  Some drupalgap.settings variables have been moved to the Drupal.settings
+  namespace because we are now using jDrupal. Update your settings from/to:
+  
+    drupalgap.settings.site_path => Drupal.settings.site_path
+    drupalgap.settings.base_path => Drupal.settings.base_path
+    drupalgap.settings.file_public_path => Drupal.settings.file_public_path;
+    drupalgap.settings.cache.entity => Drupal.settings.cache.entity
+    drupalgap.settings.cache.entity.enabled => Drupal.settings.cache.entity.enabled
+    drupalgap.settings.cache.entity.expiration => Drupal.settings.cache.entity.expiration
+
+  The following settings have been changed from/to:
+  
+    drupalgap.settings.default_services_endpoint => Drupal.settings.endpoint
+    drupalgap.settings.language => Drupal.settings.language_default
+  
+  Any use of drupalgap.settings.language should be replaced with a call to the
+  new function language_default().
+
+  The following setting(s) have been deprecated:
+  
+    clean_urls
+
+  ---
+
+  drupalgap.views_datasource has been deprecated, instead use a call to
+  views_datasource_get_view_result(). For example, before you would make a Views
+  Datasource call like this:
+
+    var options = {
+      path: 'my_view_url',
+      success: function(result){ /* ... */}
+    };
+    drupalgap.views_datasource.call(options);
+
+  Now you make the call like this:
+
+    views_datasource_get_view_result('my_view_url', {
+        success: function(result) {
+          /* ... */
+        }
+    });
+  
+  ---
+
+  The node.tpl.html and user-profile.tpl.html files have been moved out of there
+  core module folders and now live in the easystreet3 theme folder. Anyone who
+  has implemented a custom theme needs to add these two .tpl.html files to their
+  theme's folder.
+
+  ---
+  
+  The modules system has moved out of DrupalGap and into jDrupal. So you need to
+  update your settings.js file to load the modules into jDrupal. In your
+  settings.js file, replace all occurrences of "drupalgap.modules" with
+  "Drupal.modules". View the app/default.settings.js file to see the new syntax
+  you must use in your app/settings.js file.
 
   ---
 
@@ -111,6 +174,19 @@ version of DrupalGap to another.
   ---
   
   js_yyyy_mm_dd_hh_mm_ss() has been renamed to date_yyyy_mm_dd_hh_mm_ss().
+  
+  ---
+  
+  The drupalgap.settings.loading variable has been renamed to
+  drupalgap.settings.loader and now contains two default modes, one for saving
+  and one for loading. View the default.settings.js file for details.
+  
+  ---
+  
+  The user_login form and user_register form have had their form ids renamed to
+  user_login_form and user_register_form. Any hook_form_alter() implementations
+  that modified these forms, need to update the form id used to properly make
+  the alterations.
 
 7.x-1.5-alpha => 7.x-1.6-alpha
 

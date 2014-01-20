@@ -8,7 +8,8 @@ function easystreet3_info() {
       "regions":{
         "header":{
           "attributes":{
-            "data-role":"header"
+            "data-role":"header",
+            'data-theme': 'b',
           }
         },
         "navigation":{
@@ -28,7 +29,9 @@ function easystreet3_info() {
         },
         "footer":{
           "attributes":{
-            "data-role":"footer"
+            "data-role":"footer",
+            'data-theme': 'b',
+            'data-position': 'fixed'
           }
         }
       }
