@@ -13,3 +13,6 @@ jDrupal
 bin/themes/images
 bin/themes/*.css
 
+# Ignore tools
+tools/*
+
