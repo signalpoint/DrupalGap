@@ -316,9 +316,20 @@ function drupalgap_load_modules() {
               }
           });
         }
-        $.each(Drupal.modules[bundle], function(index, module) {
+        $.each(Drupal.modules[bundle], function(module_name, module) {
+            // If the module object is empty, initialize a module object.
+            if ($.isEmptyObject(module)) {
+              Drupal.modules[bundle][module_name] =
+                module_object_template(module_name);
+              module = Drupal.modules[bundle][module_name];
+            }
+            // If the module's name isn't set, set it.
+            if (!module.name) {
+              Drupal.modules[bundle][module_name].name = module_name;
+              module = Drupal.modules[bundle][module_name];
+            }
             // Determine module directory.
-            dir = drupalgap_modules_get_bundle_directory(bundle);
+            var dir = drupalgap_modules_get_bundle_directory(bundle);
             module_base_path = dir + '/' + module.name;
             // Add module .js file to array of paths to load.
             module_path = module_base_path + '/' + module.name + '.js';
