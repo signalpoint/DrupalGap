@@ -73,19 +73,13 @@ drupalgap.settings.loader = {
  * Modules - http://drupalgap.org/node/74 |
  *****************************************/
 
-// Contributed Modules - www/app/modules
+/** Contributed Modules - www/app/modules **/
 
-// E.g., these 2 lines will load the module at www/app/modules/example
-//var example_contrib_module = module_object_template('example');
-//Drupal.modules.contrib.example = example_contrib_module;
-// @todo - make this an easy one liner, e.g. module_load('contrib', 'date', {...});
+//Drupal.modules.contrib['example'] = {};
 
-// Custom Modules - www/app/modules/custom
+/** Custom Modules - www/app/modules/custom **/
 
-// E.g., these 2 lines will load the module at www/app/modules/custom/example
-//var example_custom_module = module_object_template('example');
-//Drupal.modules.custom.example = example_custom_module;
-// @todo - make this an easy one liner, e.g. module_load('custom', 'my_module', {...});
+//Drupal.modules.custom['my_module'] = {};
 
 /***************************************|
  * Menus - http://drupalgap.org/node/85 |
