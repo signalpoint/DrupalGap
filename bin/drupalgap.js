@@ -621,31 +621,6 @@ function drupalgap_empty(value) {
 }
 
 /**
- *
- */
-/*function drupalgap_field_widgets_load() {
-  try {
-    var modules = module_implements('field_widget_info');
-    if (!modules) { return null; }
-    $.each(modules, function(i, module){
-        var field_widgets = module_invoke(module, 'field_widget_info');
-        if (!field_widgets) { return; }
-        $.each(field_widgets, function(name, field_widget){
-            $.each(field_widget.field_types, function(j, field_type){
-                drupalgap.field_widget_info[field_type] = {
-                  'module':module,
-                  'field_widget':name
-                };
-            });
-        });
-    });
-  }
-  catch (error) {
-    alert('drupalgap_field_widgets_load - ' + error);
-  }
-}*/
-
-/**
  * Checks if a given file exists, returns true or false.
  * @param  {string} path
  *   A path to a file
@@ -2808,7 +2783,7 @@ function drupalgap_form_state_values_assemble(form) {
  *
  * @param {String} id
  * @param {Object} element
- * @return {String,Number}
+ * @return {String|Number}
  */
 function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
   try {
@@ -3523,7 +3498,7 @@ function _drupalgap_form_submit(form_id) {
  * @param {Object} xhr
  * @param {String} status
  * @param {String} message
- * @return {String, Boolean}
+ * @return {String|Boolean}
  */
 function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
   message) {
@@ -4399,7 +4374,7 @@ $(document).on('pagebeforechange', function(e, data) {
 
 /**
  * Returns the path to the current DrupalGap theme, false otherwise.
- * @return {String,Boolean}
+ * @return {String|Boolean}
  */
 function path_to_theme() {
   try {
@@ -5572,8 +5547,8 @@ function drupalgap_entity_get_core_fields(entity_type) {
  * Given an entity_type, this returns the entity JSON info, if it exists, false
  * otherwise. You may optionally call this function with no arguments to
  * retrieve the JSON info for all entity types. See also
- * http://api.drupal.org/api/drupal/includes%21common.inc/function/entity_get_info/7
- * @return {Object,Boolean}
+ * @see http://api.drupal.org/api/drupal/includes%21common.inc/function/entity_get_info/7
+ * @return {Object|Boolean}
  */
 function drupalgap_entity_get_info() {
   try {
@@ -7276,7 +7251,7 @@ function node_theme() {
  * Given an entity type, this will return its corresponding service resource, or
  * null if the resource doesn't exist.
  * @param {String} entity_type
- * @return {Object,null}
+ * @return {?Type|Object|null}
  */
 function drupalgap_services_get_entity_resource(entity_type) {
   try {
@@ -7389,7 +7364,7 @@ drupalgap.services.rss = {
  * over the RSS items and assemble them into a nice array of JSON objects and
  * return them. Returns null if it fails.
  * @param {Object} data
- * @return {Array,null}
+ * @return {?Type|Array|null}
  */
 function drupalgap_services_rss_extract_items(data) {
   try {
@@ -8641,7 +8616,7 @@ function taxonomy_vocabularies_pageshow() {
 /**
  * Page callback for taxonomy/vocabulary/%
  * @param {Number} vid
- * @return {String,Object}
+ * @return {String|Object}
  */
 function taxonomy_vocabulary_page(vid) {
   try {
@@ -8723,7 +8698,7 @@ function taxonomy_vocabulary_pageshow(vid) {
  * object for the vocabulary that is attached to the
  * drupalgap.taxonomy_vocabularies object, or false if it doesn't exist.
  * @param {String} name
- * @return {Object,Boolean}
+ * @return {Object|Boolean}
  */
 function taxonomy_vocabulary_machine_name_load(name) {
   try {
