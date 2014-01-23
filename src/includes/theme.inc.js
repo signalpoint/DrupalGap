@@ -41,7 +41,7 @@ $(document).on('pagebeforechange', function(e, data) {
 
 /**
  * Returns the path to the current DrupalGap theme, false otherwise.
- * @return {String,Boolean}
+ * @return {String|Boolean}
  */
 function path_to_theme() {
   try {

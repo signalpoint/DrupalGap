@@ -621,31 +621,6 @@ function drupalgap_empty(value) {
 }
 
 /**
- *
- */
-/*function drupalgap_field_widgets_load() {
-  try {
-    var modules = module_implements('field_widget_info');
-    if (!modules) { return null; }
-    $.each(modules, function(i, module){
-        var field_widgets = module_invoke(module, 'field_widget_info');
-        if (!field_widgets) { return; }
-        $.each(field_widgets, function(name, field_widget){
-            $.each(field_widget.field_types, function(j, field_type){
-                drupalgap.field_widget_info[field_type] = {
-                  'module':module,
-                  'field_widget':name
-                };
-            });
-        });
-    });
-  }
-  catch (error) {
-    alert('drupalgap_field_widgets_load - ' + error);
-  }
-}*/
-
-/**
  * Checks if a given file exists, returns true or false.
  * @param  {string} path
  *   A path to a file

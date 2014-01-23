@@ -345,7 +345,7 @@ function taxonomy_vocabularies_pageshow() {
 /**
  * Page callback for taxonomy/vocabulary/%
  * @param {Number} vid
- * @return {String,Object}
+ * @return {String|Object}
  */
 function taxonomy_vocabulary_page(vid) {
   try {
@@ -427,7 +427,7 @@ function taxonomy_vocabulary_pageshow(vid) {
  * object for the vocabulary that is attached to the
  * drupalgap.taxonomy_vocabularies object, or false if it doesn't exist.
  * @param {String} name
- * @return {Object,Boolean}
+ * @return {Object|Boolean}
  */
 function taxonomy_vocabulary_machine_name_load(name) {
   try {

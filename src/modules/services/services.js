@@ -2,7 +2,7 @@
  * Given an entity type, this will return its corresponding service resource, or
  * null if the resource doesn't exist.
  * @param {String} entity_type
- * @return {Object,null}
+ * @return {Object|null}
  */
 function drupalgap_services_get_entity_resource(entity_type) {
   try {
@@ -115,7 +115,7 @@ drupalgap.services.rss = {
  * over the RSS items and assemble them into a nice array of JSON objects and
  * return them. Returns null if it fails.
  * @param {Object} data
- * @return {Array,null}
+ * @return {Array|null}
  */
 function drupalgap_services_rss_extract_items(data) {
   try {

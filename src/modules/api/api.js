@@ -280,7 +280,7 @@ function hook_block_info() {}
 function hook_block_view() {}
 
 /**
- *
+ * A hook used to handle a 404 in the app.
  */
 function hook_404(router_path) {}
 

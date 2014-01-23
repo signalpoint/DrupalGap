@@ -291,7 +291,7 @@ function drupalgap_form_state_values_assemble(form) {
  *
  * @param {String} id
  * @param {Object} element
- * @return {String,Number}
+ * @return {String|Number}
  */
 function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
   try {
@@ -1006,7 +1006,7 @@ function _drupalgap_form_submit(form_id) {
  * @param {Object} xhr
  * @param {String} status
  * @param {String} message
- * @return {String, Boolean}
+ * @return {String|Boolean}
  */
 function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
   message) {

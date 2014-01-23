@@ -693,8 +693,8 @@ function drupalgap_entity_get_core_fields(entity_type) {
  * Given an entity_type, this returns the entity JSON info, if it exists, false
  * otherwise. You may optionally call this function with no arguments to
  * retrieve the JSON info for all entity types. See also
- * http://api.drupal.org/api/drupal/includes%21common.inc/function/entity_get_info/7
- * @return {Object,Boolean}
+ * @see http://api.drupal.org/api/drupal/includes%21common.inc/function/entity_get_info/7
+ * @return {Object|Boolean}
  */
 function drupalgap_entity_get_info() {
   try {

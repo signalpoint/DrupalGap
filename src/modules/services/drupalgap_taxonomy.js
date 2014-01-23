@@ -11,7 +11,7 @@ drupalgap.services.drupalgap_taxonomy = {
       try {
         console.log(
           'WARNING: drupalgap.services.drupalgap_taxonomy.get_vocabularies ' +
-          'has been deprecated! Use taxonomy_vocabulary_index() instead.';
+          'has been deprecated! Use taxonomy_vocabulary_index() instead.'
         );
         taxonomy_vocabulary_index(null, options);
       }
@@ -37,7 +37,7 @@ drupalgap.services.drupalgap_taxonomy = {
       try {
         console.log(
           'WARNING: drupalgap.services.drupalgap_taxonomy.get_terms ' +
-          'has been deprecated! Use taxonomy_term_index() instead.';
+          'has been deprecated! Use taxonomy_term_index() instead.'
         );
         var query = {
           parameters: {
