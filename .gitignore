@@ -5,6 +5,7 @@ app/settings.js
 app/.gitignore
 app/README.*
 res
+config.xml
 
 # Ignore a potential jDrupal folder
 jDrupal

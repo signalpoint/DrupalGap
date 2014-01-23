@@ -98,7 +98,7 @@ version of DrupalGap to another.
   update your settings.js file to load the modules into jDrupal. In your
   settings.js file, replace all occurrences of "drupalgap.modules" with
   "Drupal.modules". View the app/default.settings.js file to see the new syntax
-  you must use in your app/settings.js file.
+  you must use in your app/settings.js file to load modules.
 
   ---
 
