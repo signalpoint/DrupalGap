@@ -21,8 +21,8 @@ Drupal.settings.language_default = 'und';
 /* Drupal Caching */
 
 // Set to true to enable local storage caching.
-Drupal.settings.cache.entity.enabled = true;
-Drupal.settings.cache.views.enabled = true;
+Drupal.settings.cache.entity.enabled = false;
+Drupal.settings.cache.views.enabled = false;
 
 // Number of seconds before cached copy expires. Set to 0 to cache forever, set
 // to 60 for one minute, etc.
