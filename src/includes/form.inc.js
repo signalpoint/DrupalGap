@@ -830,6 +830,13 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       for (var i = 0; i < item.children.length; i++) {
         if (item.children[i].markup) { html += item.children[i].markup; }
         else if (item.children[i].type) {
+          // Is there a title for a label?
+          if (item.children[i].title) {
+            html += theme('form_element_label', {
+                element: item.children[i]
+            });
+          }
+          // Render the child with the theme system.
           html += theme(item.children[i].type, item.children[i]);
         }
         else {
