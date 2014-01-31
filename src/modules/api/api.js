@@ -266,6 +266,7 @@ function hook_deviceready() {}
  * any services from within your implementation, you may run into an infinite
  * loop in your code. See http://drupalgap.org/project/force_authentication for
  * example usage.
+ * @deprecated - use hook_services_postprocess() instead.
  */
 function hook_services_success(url, data) { }
 
