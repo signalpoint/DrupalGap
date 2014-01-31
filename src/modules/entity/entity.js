@@ -320,7 +320,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
     }
     else {
       console.log(
-        'WARNING: drupalgap_entity_render_field - ' + function_name + '()' +
+        'WARNING: drupalgap_entity_render_field - ' + function_name + '() ' +
         'does not exist!'
       );
     }
