@@ -238,14 +238,22 @@ function drupalgap_api_default_options() {
 }
 
 /**
- * When an form submission for an entity is assembling the entity json object to
+ * When a form submission for an entity is assembling the entity json object to
  * send to the server, some form element fields need to be assembled in unique
  * ways to match the entity's structure in Drupal. Modules that implement fields
  * can use this hook to properly assemble the item value (by delta) and return
  * it.
+ * @param {Object} entity_type
+ * @param {String} bundle
+ * @param {String} form_state_value
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Number} delta
+ * @param {Object} field_key
  */
 function hook_assemble_form_state_into_field(entity_type, bundle,
-  form_state_value, field, instance, langcode, delta) {
+  form_state_value, field, instance, langcode, delta, field_key) {
   try {
   }
   catch (error) { console.log(' - ' + error); }
