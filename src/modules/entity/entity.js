@@ -419,6 +419,18 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // Extract the value.
               var field_value = value[language][delta];
 
+              // By default, we'll assume we'll be attaching this element item's
+              // value according to a key (usually 'value' is the default key
+              // used by Drupal fields). However, we'll give modules that
+              // implement hook_assemble_form_state_into_field() an opportunity
+              // to specify no usage of a key if their item doesn't need one.
+              // The geofield module is an example of field that doesn't use a
+              // key.
+              var field_key = {
+                value: 'value',
+                use_key: true
+              };
+
               // If this element is a field, give the field's module an
               // opportunity to assemble its own value, otherwise we'll just
               // use the field value extracted above.
@@ -430,7 +442,8 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   form.elements[name].field_info_field,
                   form.elements[name].field_info_instance,
                   language,
-                  delta
+                  delta,
+                  field_key
                 );
               }
 
@@ -441,9 +454,14 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 entity[name][language][key] = field_value;
               }
               else {
-                var item = {};
-                item[key] = field_value;
-                entity[name][language].push(item);
+                if (field_key.use_key) {
+                  var item = {};
+                  item[key] = field_value;
+                  entity[name][language].push(item);
+                }
+                else {
+                  entity[name][language].push(field_value);
+                }
               }
             }
           }
