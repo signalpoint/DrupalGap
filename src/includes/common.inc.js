@@ -7,8 +7,12 @@
  */
 function drupalgap_add_page_to_dom(page_id, html) {
   try {
-    // Set the page id and add the page to the dom body.
+    // Set the page id, the page class name and add the page to the dom body.
     html = html.replace(/{:drupalgap_page_id:}/g, page_id);
+    html = html.replace(
+      /{:drupalgap_page_class:}/g,
+      drupalgap_page_class_get(drupalgap.router_path)
+    );
     $('body').append(html);
     // Add the page id to drupalgap.pages.
     drupalgap.pages.push(page_id);
@@ -515,6 +519,24 @@ function drupalgap_goto_prepare_path(path) {
     return path;
   }
   catch (error) { console.log('drupalgap_goto_prepare_path - ' + error); }
+}
+
+/**
+ * Given a router path, this will return the CSS class name that can be used for
+ * the page container.
+ * @param {String} router_path The page router path.
+ * @return {String} A css class name.
+ */
+function drupalgap_page_class_get(router_path) {
+  try {
+    // Replace '/' and '%' with underscores, then trim any trailing underscores.
+    var class_name = router_path.replace(/[\/%]/g, '_');
+    while (class_name.lastIndexOf('_') == class_name.length - 1) {
+      class_name = class_name.substr(0, class_name.length - 1);
+    }
+    return class_name;
+  }
+  catch (error) { console.log('drupalgap_page_class_get - ' + error); }
 }
 
 /**

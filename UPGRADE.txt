@@ -31,6 +31,14 @@ version of DrupalGap to another.
 | Version Change Notes for Developers |
 |=====================================|
 
+7.x-1.7-alpha => 7.x-1.8-alpha
+
+  The page.tpl.html files for themes now should include a class name placeholder
+  on their page's container div. For example, the easystreet3 theme's
+  page.tpl.html file now contains this class attribute placeholder:
+  
+    class="{:drupalgap_page_class:}"
+
 7.x-1.6-alpha => 7.x-1.7-alpha
 
 
