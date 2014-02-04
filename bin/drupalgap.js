@@ -8178,6 +8178,7 @@ function user_services_postprocess(options, result) {
       return;
     }
     // If there were any form errors, alert them to the user.
+    if (!result.responseText) { return; }
     var response = JSON.parse(result.responseText);
     if ($.isArray(response)) {
       var msg = '';
