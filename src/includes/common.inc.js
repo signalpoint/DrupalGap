@@ -127,17 +127,32 @@ function drupalgap_check_visibility(type, data) {
     // Pages.
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
+      var current_path = drupalgap_path_get();
       $.each(data.pages.value, function(page_index, path) {
-          if (path == '') {
-            path = drupalgap.settings.front;
-          }
-          if (path == drupalgap_path_get()) {
+          if (path == '') { path = drupalgap.settings.front; }
+          if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
           }
           else {
-            if (data.pages.mode == 'include') { visible = false; }
-            else if (data.pages.mode == 'exclude') { visible = true; }
+            // It wasn't a direct path match, is there a wildcard that matches
+            // the router path?
+            if (path.indexOf('*') != -1) {
+              var router_path =
+                drupalgap_get_menu_link_router_path(current_path);
+              if (router_path.replace(/%/g, '*') == path) {
+                if (data.pages.mode == 'include') { visible = true; }
+                else if (data.pages.mode == 'exclude') { visible = false; }
+              }
+              else {
+                if (data.pages.mode == 'include') { visible = false; }
+                else if (data.pages.mode == 'exclude') { visible = true; }
+              }
+            }
+            else {
+              if (data.pages.mode == 'include') { visible = false; }
+              else if (data.pages.mode == 'exclude') { visible = true; }
+            }
           }
           // Break out of the loop if already determined to be visible.
           if (visible) { return false; }
