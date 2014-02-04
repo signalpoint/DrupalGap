@@ -1659,17 +1659,32 @@ function drupalgap_check_visibility(type, data) {
     // Pages.
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
+      var current_path = drupalgap_path_get();
       $.each(data.pages.value, function(page_index, path) {
-          if (path == '') {
-            path = drupalgap.settings.front;
-          }
-          if (path == drupalgap_path_get()) {
+          if (path == '') { path = drupalgap.settings.front; }
+          if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
           }
           else {
-            if (data.pages.mode == 'include') { visible = false; }
-            else if (data.pages.mode == 'exclude') { visible = true; }
+            // It wasn't a direct path match, is there a wildcard that matches
+            // the router path?
+            if (path.indexOf('*') != -1) {
+              var router_path =
+                drupalgap_get_menu_link_router_path(current_path);
+              if (router_path.replace(/%/g, '*') == path) {
+                if (data.pages.mode == 'include') { visible = true; }
+                else if (data.pages.mode == 'exclude') { visible = false; }
+              }
+              else {
+                if (data.pages.mode == 'include') { visible = false; }
+                else if (data.pages.mode == 'exclude') { visible = true; }
+              }
+            }
+            else {
+              if (data.pages.mode == 'include') { visible = false; }
+              else if (data.pages.mode == 'exclude') { visible = true; }
+            }
           }
           // Break out of the loop if already determined to be visible.
           if (visible) { return false; }
@@ -3584,11 +3599,11 @@ function _drupalgap_form_validate(form, form_state) {
             valid = false;
           }
           // Check for a -1 value on a select list.
-          /*else if (element.type == 'select' && value == -1) {
+          else if (element.type == 'select' && value == -1) {
             // @todo - this approach to select list validation will not allow
             // a developer to have a select list option with a -1 value.
             valid = false;
-          }*/
+          }
           if (!valid) {
             var field_title = name;
             if (element.title) { field_title = element.title; }
@@ -4053,14 +4068,18 @@ function menu_router_build() {
 function drupalgap_get_menu_link_router_path(path) {
   try {
 
-    // TODO - Why is this function called twice sometimes? E.G. via an MVC item
+    // @TODO - Why is this function called twice sometimes? E.G. via an MVC item
     // view item/local_users/user/0, this function gets called twice in one page
     // load, that can't be good.
 
-    // TODO - this function has a limitation in the types of menu paths it can
+    // @TODO - this function has a limitation in the types of menu paths it can
     // handle, for example a menu path of 'collection/%/%/list' with a path of
     // 'collection/local_users/user/list' can't find eachother. So we had to
     // change the mvc_menu() item path to be collection/list/%/%.
+
+    // @TODO - each time this function is called, we should create a static
+    // record of the result router path, keyed by the incoming path, that way
+    // this heavy function can be called more often with less resource.
 
     // Is this path defined in drupalgap.menu_links? If it is, use it's router
     // path if it is defined, otherwise just set its router path to its own
@@ -4154,10 +4173,6 @@ function drupalgap_get_menu_link_router_path(path) {
     if (!router_path) { router_path = path; }
 
     // Finally, return the router path.
-    if (drupalgap.settings.debug) {
-      console.log(args);
-      console.log('router_path: ' + path + ' => ' + router_path);
-    }
     return router_path;
   }
   catch (error) {
@@ -6018,11 +6033,8 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
         // If the select list is required, add a 'Select' option and set it as
         // the default.
         if (items[delta].required) {
-          //items[delta].options[-1] = '- Please select -';
-          //items[delta].options.push('- Please select -');
-          dpm(items[delta].options);
-          // @TODO - shouldn't this just be an empty string, like Drupal?
-          items[delta].value = '';
+          items[delta].options[-1] = 'Select';
+          items[delta].value = -1;
         }
         // If there are any allowed values, place them on the options list. Then
         // check for a default value, and set it if necessary.
