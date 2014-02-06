@@ -1013,7 +1013,13 @@ function drupalgap_menu_access(path) {
         // names, so check that user account's role(s) for that permission to
         // grant access.
         if (drupalgap.menu_links[path].access_arguments) {
-          // TODO - implement
+          if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
+            $.each(drupalgap.menu_links[path].access_arguments, function(index, 
+              permission){
+              access = user_access(permission);
+              if (access) { return false; }
+            });
+          }
         }
         else {
           // There is no access callback and no access arguments specified with
@@ -1385,35 +1391,6 @@ function drupalgap_theme_registry_build() {
     });
   }
   catch (error) { console.log('drupalgap_theme_registry_build - ' + error); }
-}
-
-/*
- * Given a drupal permission machine name, this function returns true if the
- * current user has that permission, false otherwise.
- * @param {String} permission
- * @return {Boolean}
- */
-function user_access(permission) {
-  try {
-    // Make sure they provided a permission.
-    if (permission == null) { return false; }
-    // User 1 always has permission.
-    if (Drupal.user.uid == 1) { return true; }
-    // For everyone else, assume they don't have permission. Iterate over
-    // Drupal.user.permissions to see if the current user has the given
-    // permission, then return the result.
-    var access = false;
-    if (Drupal.user.permissions && Drupal.user.permissions.length != 0) {
-      $.each(Drupal.user.permissions, function(index, user_permission) {
-        if (permission == user_permission) {
-          access = true;
-          return;
-        }
-      });
-    }
-    return access;
-  }
-  catch (error) { console.log('user_access - ' + error); }
 }
 
 /**
@@ -7775,6 +7752,32 @@ function system_title_block_id(path) {
     return id;
   }
   catch (error) { console.log('system_title_block_id - ' + error); }
+}
+
+/**
+ * Determine whether the user has a given privilege. Optionally pass in a user
+ * account JSON object for the second paramater to check that particular
+ * account.
+ * @param {String} string The permission, such as "administer nodes", being
+ *                        checked for.
+ * @return {Boolean}
+ */
+function user_access(string) {
+  try {
+    var account;
+    if (arguments[1]) { account = arguments[1]; }
+    else { account = Drupal.user; }
+    if (account.uid == 1) { return true; }
+    var access = false;
+    $.each(account.permissions, function(index, object){
+        if (object.permission == string) {
+          access = true;
+          return false;
+        }
+    });
+    return access;
+  }
+  catch (error) { console.log('user_access - ' + error); }
 }
 
 /**
