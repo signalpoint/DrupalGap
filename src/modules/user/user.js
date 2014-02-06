@@ -1,4 +1,30 @@
 /**
+ * Determine whether the user has a given privilege. Optionally pass in a user
+ * account JSON object for the second paramater to check that particular
+ * account.
+ * @param {String} string The permission, such as "administer nodes", being
+ *                        checked for.
+ * @return {Boolean}
+ */
+function user_access(string) {
+  try {
+    var account;
+    if (arguments[1]) { account = arguments[1]; }
+    else { account = Drupal.user; }
+    if (account.uid == 1) { return true; }
+    var access = false;
+    $.each(account.permissions, function(index, object){
+        if (object.permission == string) {
+          access = true;
+          return false;
+        }
+    });
+    return access;
+  }
+  catch (error) { console.log('user_access - ' + error); }
+}
+
+/**
  * The access callback for the user/%/edit page.
  * @param {Object} account
  * @return {Boolean}
