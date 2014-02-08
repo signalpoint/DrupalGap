@@ -205,7 +205,7 @@ function system_offline_page() {
       'message': {
         'markup': '<h2>Failed Connection</h2>' +
           "<p>Oops! We couldn't connect to:</p>" +
-          '<p>' + drupalgap.settings.site_path + '</p>'
+          '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
         'theme': 'button',
@@ -233,8 +233,8 @@ function offline_try_again() {
   try {
     var connection = drupalgap_check_connection();
     if (drupalgap.online) {
-      drupalgap.services.drupalgap_system.connect.call({
-        'success': function() {
+      system_connect({
+        success: function() {
           drupalgap_goto('');
         }
       });
