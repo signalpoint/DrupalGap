@@ -38,7 +38,7 @@ For complete details, please visit the DrupalGap Hello World documentation.
 4. Specify your Drupal site path (with NO trailing slash) in settings.js,
    for example:
 
-     'site_path':'http://www.drupalgap.org',
+     Drupal.settings.site_path = 'http://www.example.com';
 
 5. Run your new Mobile Application!
 
