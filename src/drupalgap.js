@@ -1015,7 +1015,7 @@ function drupalgap_menu_access(path) {
         if (drupalgap.menu_links[path].access_arguments) {
           if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
             $.each(drupalgap.menu_links[path].access_arguments, function(index, 
-              permission){
+              permission) {
               access = user_access(permission);
               if (access) { return false; }
             });

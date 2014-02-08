@@ -13,7 +13,7 @@ function user_access(string) {
     else { account = Drupal.user; }
     if (account.uid == 1) { return true; }
     var access = false;
-    $.each(account.permissions, function(index, object){
+    $.each(account.permissions, function(index, object) {
         if (object.permission == string) {
           access = true;
           return false;
