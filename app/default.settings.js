@@ -201,6 +201,7 @@ drupalgap.settings.blocks.easystreet3 = {
     primary_local_tasks:{},
   },
   content:{
+    messages: {},
     main:{}
   },
   footer:{
