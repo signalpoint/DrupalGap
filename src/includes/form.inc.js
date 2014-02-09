@@ -176,7 +176,7 @@ function drupalgap_form_get_element_id(name, form_id) {
  */
 function drupalgap_form_get_element_container_class(name) {
   try {
-    return 'field-name-' + name.replace(/_/g, '-');
+    return 'form-item field-name-' + name.replace(/_/g, '-');
   }
   catch (error) {
     console.log('drupalgap_form_get_element_container_class - ' + error);
@@ -749,17 +749,11 @@ function _drupalgap_form_render_element(form, element) {
       html += '<div>' + element.description + '</div>';
     }
 
-    // Close the element container and add a spacer div.
-    if (element.type != 'hidden') {
-      html += '</div><div>&nbsp;</div>';
-    }
+    // Close the element container.
+    if (element.type != 'hidden') { html += '</div>'; }
 
     // Return the element html.
     return html;
-
-    // Give modules a chance to alter the variables.
-    //module_invoke_all('form_element_alter', form, element, variables);
-
 
   }
   catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
