@@ -6,6 +6,14 @@
  */
 function views_datasource_get_view_result(path, options) {
   try {
+    // Since we do not use clean URLs, replace any potential question marks from
+    // the path with an ampersand so the path will not be invalid.
+    if (path.indexOf('?') != -1) {
+      var replacement = path.replace('?', '&');
+      console.log('WARNING: views_datasource_get_view_result - replacing "' +
+        path + '" with "' + replacement + '"');
+      path = replacement;
+    }
     // If local storage caching is enabled, let's see if we can load the results
     // from there. If we successfully loaded the result, make sure it didn't
     // expire. If it did expire, remove it from local storage. If we don't have
@@ -43,7 +51,7 @@ function views_datasource_get_view_result(path, options) {
         success: function(result) {
           try {
             if (options.success) {
-              // Add the parh to the result.
+              // Add the path to the result.
               result.path = path;
               // If any views caching is enabled, cache the results in local
               // storage.
