@@ -350,8 +350,8 @@ function drupalgap_goto(path) {
       router_path = drupalgap_get_menu_link_router_path(path);
     }
 
-    // Make sure the user has access to this router path, if the don't send them
-    // to the 401 page.
+    // Make sure the user has access to this router path, if they don't send
+    // them to the 401 page.
     if (!drupalgap_menu_access(router_path)) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
@@ -374,6 +374,8 @@ function drupalgap_goto(path) {
     // accurracy we compare the jQM active page url with the destination page
     // id.
     if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
+      // Clear any messages from the page before returning.
+      drupalgap_clear_messages();
       return false;
     }
 
@@ -413,6 +415,8 @@ function drupalgap_goto(path) {
         options.reloadingPage = true;
       }
       else if (!options.form_submission) {
+        // Clear any messages from the page.
+        drupalgap_clear_messages();
         drupalgap.page.process = false;
         $.mobile.changePage('#' + page_id, options);
         return;
