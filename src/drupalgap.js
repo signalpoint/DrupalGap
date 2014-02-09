@@ -88,6 +88,7 @@ function drupalgap_init() {
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
+      messages: [],
       menus: {},
       menu_links: {},
       menu_router: {},
@@ -1013,7 +1014,13 @@ function drupalgap_menu_access(path) {
         // names, so check that user account's role(s) for that permission to
         // grant access.
         if (drupalgap.menu_links[path].access_arguments) {
-          // TODO - implement
+          if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
+            $.each(drupalgap.menu_links[path].access_arguments, function(index, 
+              permission) {
+              access = user_access(permission);
+              if (access) { return false; }
+            });
+          }
         }
         else {
           // There is no access callback and no access arguments specified with
@@ -1228,6 +1235,38 @@ function drupalgap_remove_page_from_dom(page_id) {
 }
 
 /**
+ * Sets a message to display to the user. Optionally pass in a second argument
+ * to specify the message type: status, warning, error
+ * @param {String} message
+ */
+function drupalgap_set_message(message) {
+  try {
+    if (empty(message)) { return; }
+    var type = 'status';
+    if (arguments[1]) { type = arguments[1]; }
+    var msg = {
+      message: message,
+      type: type
+    };
+    drupalgap.messages.push(msg);
+  }
+  catch (error) { console.log('drupalgap_set_message - ' + error); }
+}
+
+/**
+ * Clears the messages from the current page. Optionally pass in a page id to
+ * clear messages from a particular page.
+ */
+function drupalgap_clear_messages() {
+  try {
+    var page_id = arguments[0];
+    if (empty(page_id)) { page_id = drupalgap_get_page_id(); }
+    $('#' + page_id + ' div.messages').remove();
+  }
+  catch (error) { console.log('drupalgap_clear_messages - ' + error); }
+}
+
+/**
  * Implementation of drupal_set_title().
  * @param {String} title
  */
@@ -1385,35 +1424,6 @@ function drupalgap_theme_registry_build() {
     });
   }
   catch (error) { console.log('drupalgap_theme_registry_build - ' + error); }
-}
-
-/*
- * Given a drupal permission machine name, this function returns true if the
- * current user has that permission, false otherwise.
- * @param {String} permission
- * @return {Boolean}
- */
-function user_access(permission) {
-  try {
-    // Make sure they provided a permission.
-    if (permission == null) { return false; }
-    // User 1 always has permission.
-    if (Drupal.user.uid == 1) { return true; }
-    // For everyone else, assume they don't have permission. Iterate over
-    // Drupal.user.permissions to see if the current user has the given
-    // permission, then return the result.
-    var access = false;
-    if (Drupal.user.permissions && Drupal.user.permissions.length != 0) {
-      $.each(Drupal.user.permissions, function(index, user_permission) {
-        if (permission == user_permission) {
-          access = true;
-          return;
-        }
-      });
-    }
-    return access;
-  }
-  catch (error) { console.log('user_access - ' + error); }
 }
 
 /**

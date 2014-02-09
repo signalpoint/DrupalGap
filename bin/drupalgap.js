@@ -88,6 +88,7 @@ function drupalgap_init() {
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
+      messages: [],
       menus: {},
       menu_links: {},
       menu_router: {},
@@ -1013,7 +1014,13 @@ function drupalgap_menu_access(path) {
         // names, so check that user account's role(s) for that permission to
         // grant access.
         if (drupalgap.menu_links[path].access_arguments) {
-          // TODO - implement
+          if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
+            $.each(drupalgap.menu_links[path].access_arguments, function(index, 
+              permission) {
+              access = user_access(permission);
+              if (access) { return false; }
+            });
+          }
         }
         else {
           // There is no access callback and no access arguments specified with
@@ -1228,6 +1235,38 @@ function drupalgap_remove_page_from_dom(page_id) {
 }
 
 /**
+ * Sets a message to display to the user. Optionally pass in a second argument
+ * to specify the message type: status, warning, error
+ * @param {String} message
+ */
+function drupalgap_set_message(message) {
+  try {
+    if (empty(message)) { return; }
+    var type = 'status';
+    if (arguments[1]) { type = arguments[1]; }
+    var msg = {
+      message: message,
+      type: type
+    };
+    drupalgap.messages.push(msg);
+  }
+  catch (error) { console.log('drupalgap_set_message - ' + error); }
+}
+
+/**
+ * Clears the messages from the current page. Optionally pass in a page id to
+ * clear messages from a particular page.
+ */
+function drupalgap_clear_messages() {
+  try {
+    var page_id = arguments[0];
+    if (empty(page_id)) { page_id = drupalgap_get_page_id(); }
+    $('#' + page_id + ' div.messages').remove();
+  }
+  catch (error) { console.log('drupalgap_clear_messages - ' + error); }
+}
+
+/**
  * Implementation of drupal_set_title().
  * @param {String} title
  */
@@ -1385,35 +1424,6 @@ function drupalgap_theme_registry_build() {
     });
   }
   catch (error) { console.log('drupalgap_theme_registry_build - ' + error); }
-}
-
-/*
- * Given a drupal permission machine name, this function returns true if the
- * current user has that permission, false otherwise.
- * @param {String} permission
- * @return {Boolean}
- */
-function user_access(permission) {
-  try {
-    // Make sure they provided a permission.
-    if (permission == null) { return false; }
-    // User 1 always has permission.
-    if (Drupal.user.uid == 1) { return true; }
-    // For everyone else, assume they don't have permission. Iterate over
-    // Drupal.user.permissions to see if the current user has the given
-    // permission, then return the result.
-    var access = false;
-    if (Drupal.user.permissions && Drupal.user.permissions.length != 0) {
-      $.each(Drupal.user.permissions, function(index, user_permission) {
-        if (permission == user_permission) {
-          access = true;
-          return;
-        }
-      });
-    }
-    return access;
-  }
-  catch (error) { console.log('user_access - ' + error); }
 }
 
 /**
@@ -1882,8 +1892,8 @@ function drupalgap_goto(path) {
       router_path = drupalgap_get_menu_link_router_path(path);
     }
 
-    // Make sure the user has access to this router path, if the don't send them
-    // to the 401 page.
+    // Make sure the user has access to this router path, if they don't send
+    // them to the 401 page.
     if (!drupalgap_menu_access(router_path)) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
@@ -1906,6 +1916,8 @@ function drupalgap_goto(path) {
     // accurracy we compare the jQM active page url with the destination page
     // id.
     if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
+      // Clear any messages from the page before returning.
+      drupalgap_clear_messages();
       return false;
     }
 
@@ -1945,6 +1957,8 @@ function drupalgap_goto(path) {
         options.reloadingPage = true;
       }
       else if (!options.form_submission) {
+        // Clear any messages from the page.
+        drupalgap_clear_messages();
         drupalgap.page.process = false;
         $.mobile.changePage('#' + page_id, options);
         return;
@@ -4068,18 +4082,14 @@ function menu_router_build() {
 function drupalgap_get_menu_link_router_path(path) {
   try {
 
-    // @TODO - Why is this function called twice sometimes? E.G. via an MVC item
+    // TODO - Why is this function called twice sometimes? E.G. via an MVC item
     // view item/local_users/user/0, this function gets called twice in one page
     // load, that can't be good.
 
-    // @TODO - this function has a limitation in the types of menu paths it can
+    // TODO - this function has a limitation in the types of menu paths it can
     // handle, for example a menu path of 'collection/%/%/list' with a path of
     // 'collection/local_users/user/list' can't find eachother. So we had to
     // change the mvc_menu() item path to be collection/list/%/%.
-
-    // @TODO - each time this function is called, we should create a static
-    // record of the result router path, keyed by the incoming path, that way
-    // this heavy function can be called more often with less resource.
 
     // Is this path defined in drupalgap.menu_links? If it is, use it's router
     // path if it is defined, otherwise just set its router path to its own
@@ -4173,6 +4183,10 @@ function drupalgap_get_menu_link_router_path(path) {
     if (!router_path) { router_path = path; }
 
     // Finally, return the router path.
+    if (drupalgap.settings.debug) {
+      console.log(args);
+      console.log('router_path: ' + path + ' => ' + router_path);
+    }
     return router_path;
   }
   catch (error) {
@@ -7465,6 +7479,10 @@ function system_block_info() {
         'delta': 'main',
         'module': 'system'
       },
+      messages: {
+        delta: 'messages',
+        module: 'system'
+      },
       'logo': {
         'delta': 'logo',
         'module': 'system'
@@ -7511,6 +7529,19 @@ function system_block_view(delta) {
         // comments, etc). Depending on the menu link router, we need to route
         // this through the appropriate template files and functions.
         return drupalgap_render_page();
+        break;
+      case 'messages':
+        // If there are any messages waiting to be displayed, render them, then
+        // clear out the messages array.
+        var html = '';
+        if (drupalgap.messages.length == 0) { return html; }
+        $.each(drupalgap.messages, function(index, msg) {
+            html += '<div class="messages ' + msg.type + '">' +
+              msg.message +
+            '</div>';
+        });
+        drupalgap.messages = [];
+        return html;
         break;
       case 'logo':
         if (drupalgap.settings.logo) {
@@ -7660,7 +7691,7 @@ function system_offline_page() {
       'message': {
         'markup': '<h2>Failed Connection</h2>' +
           "<p>Oops! We couldn't connect to:</p>" +
-          '<p>' + drupalgap.settings.site_path + '</p>'
+          '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
         'theme': 'button',
@@ -7688,8 +7719,8 @@ function offline_try_again() {
   try {
     var connection = drupalgap_check_connection();
     if (drupalgap.online) {
-      drupalgap.services.drupalgap_system.connect.call({
-        'success': function() {
+      system_connect({
+        success: function() {
           drupalgap_goto('');
         }
       });
@@ -7775,6 +7806,32 @@ function system_title_block_id(path) {
     return id;
   }
   catch (error) { console.log('system_title_block_id - ' + error); }
+}
+
+/**
+ * Determine whether the user has a given privilege. Optionally pass in a user
+ * account JSON object for the second paramater to check that particular
+ * account.
+ * @param {String} string The permission, such as "administer nodes", being
+ *                        checked for.
+ * @return {Boolean}
+ */
+function user_access(string) {
+  try {
+    var account;
+    if (arguments[1]) { account = arguments[1]; }
+    else { account = Drupal.user; }
+    if (account.uid == 1) { return true; }
+    var access = false;
+    $.each(account.permissions, function(index, object) {
+        if (object.permission == string) {
+          access = true;
+          return false;
+        }
+    });
+    return access;
+  }
+  catch (error) { console.log('user_access - ' + error); }
 }
 
 /**
