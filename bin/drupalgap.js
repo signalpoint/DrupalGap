@@ -88,6 +88,7 @@ function drupalgap_init() {
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
+      messages: [],
       menus: {},
       menu_links: {},
       menu_router: {},
@@ -1234,6 +1235,38 @@ function drupalgap_remove_page_from_dom(page_id) {
 }
 
 /**
+ * Sets a message to display to the user. Optionally pass in a second argument
+ * to specify the message type: status, warning, error
+ * @param {String} message
+ */
+function drupalgap_set_message(message) {
+  try {
+    if (empty(message)) { return; }
+    var type = 'status';
+    if (arguments[1]) { type = arguments[1]; }
+    var msg = {
+      message: message,
+      type: type
+    };
+    drupalgap.messages.push(msg);
+  }
+  catch (error) { console.log('drupalgap_set_message - ' + error); }
+}
+
+/**
+ * Clears the messages from the current page. Optionally pass in a page id to
+ * clear messages from a particular page.
+ */
+function drupalgap_clear_messages() {
+  try {
+    var page_id = arguments[0];
+    if (empty(page_id)) { page_id = drupalgap_get_page_id(); }
+    $('#' + page_id + ' div.messages').remove();
+  }
+  catch (error) { console.log('drupalgap_clear_messages - ' + error); }
+}
+
+/**
  * Implementation of drupal_set_title().
  * @param {String} title
  */
@@ -1859,8 +1892,8 @@ function drupalgap_goto(path) {
       router_path = drupalgap_get_menu_link_router_path(path);
     }
 
-    // Make sure the user has access to this router path, if the don't send them
-    // to the 401 page.
+    // Make sure the user has access to this router path, if they don't send
+    // them to the 401 page.
     if (!drupalgap_menu_access(router_path)) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
@@ -1883,6 +1916,8 @@ function drupalgap_goto(path) {
     // accurracy we compare the jQM active page url with the destination page
     // id.
     if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
+      // Clear any messages from the page before returning.
+      drupalgap_clear_messages();
       return false;
     }
 
@@ -1922,6 +1957,8 @@ function drupalgap_goto(path) {
         options.reloadingPage = true;
       }
       else if (!options.form_submission) {
+        // Clear any messages from the page.
+        drupalgap_clear_messages();
         drupalgap.page.process = false;
         $.mobile.changePage('#' + page_id, options);
         return;
@@ -7442,6 +7479,10 @@ function system_block_info() {
         'delta': 'main',
         'module': 'system'
       },
+      messages: {
+        delta: 'messages',
+        module: 'system'
+      },
       'logo': {
         'delta': 'logo',
         'module': 'system'
@@ -7488,6 +7529,19 @@ function system_block_view(delta) {
         // comments, etc). Depending on the menu link router, we need to route
         // this through the appropriate template files and functions.
         return drupalgap_render_page();
+        break;
+      case 'messages':
+        // If there are any messages waiting to be displayed, render them, then
+        // clear out the messages array.
+        var html = '';
+        if (drupalgap.messages.length == 0) { return html; }
+        $.each(drupalgap.messages, function(index, msg) {
+            html += '<div class="messages ' + msg.type + '">' +
+              msg.message +
+            '</div>';
+        });
+        drupalgap.messages = [];
+        return html;
         break;
       case 'logo':
         if (drupalgap.settings.logo) {
