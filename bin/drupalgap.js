@@ -5703,7 +5703,7 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
     // inject the rendered page into the container.
     var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
     drupalgap.output = build;
-    $('#' + id).html(drupalgap_render_page());
+    $('#' + id).html(drupalgap_render_page()).trigger('create');
   }
   catch (error) {
     console.log('_drupalgap_entity_page_container_inject - ' + error);
