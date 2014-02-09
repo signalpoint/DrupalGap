@@ -2719,7 +2719,7 @@ function drupalgap_form_get_element_id(name, form_id) {
  */
 function drupalgap_form_get_element_container_class(name) {
   try {
-    return 'field-name-' + name.replace(/_/g, '-');
+    return 'form-item field-name-' + name.replace(/_/g, '-');
   }
   catch (error) {
     console.log('drupalgap_form_get_element_container_class - ' + error);
@@ -3292,17 +3292,11 @@ function _drupalgap_form_render_element(form, element) {
       html += '<div>' + element.description + '</div>';
     }
 
-    // Close the element container and add a spacer div.
-    if (element.type != 'hidden') {
-      html += '</div><div>&nbsp;</div>';
-    }
+    // Close the element container.
+    if (element.type != 'hidden') { html += '</div>'; }
 
     // Return the element html.
     return html;
-
-    // Give modules a chance to alter the variables.
-    //module_invoke_all('form_element_alter', form, element, variables);
-
 
   }
   catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
@@ -4082,14 +4076,18 @@ function menu_router_build() {
 function drupalgap_get_menu_link_router_path(path) {
   try {
 
-    // TODO - Why is this function called twice sometimes? E.G. via an MVC item
+    // @TODO - Why is this function called twice sometimes? E.G. via an MVC item
     // view item/local_users/user/0, this function gets called twice in one page
     // load, that can't be good.
 
-    // TODO - this function has a limitation in the types of menu paths it can
+    // @TODO - this function has a limitation in the types of menu paths it can
     // handle, for example a menu path of 'collection/%/%/list' with a path of
     // 'collection/local_users/user/list' can't find eachother. So we had to
     // change the mvc_menu() item path to be collection/list/%/%.
+
+    // @TODO - each time this function is called, we should create a static
+    // record of the result router path, keyed by the incoming path, that way
+    // this heavy function can be called more often with less resource.
 
     // Is this path defined in drupalgap.menu_links? If it is, use it's router
     // path if it is defined, otherwise just set its router path to its own
@@ -4183,10 +4181,6 @@ function drupalgap_get_menu_link_router_path(path) {
     if (!router_path) { router_path = path; }
 
     // Finally, return the router path.
-    if (drupalgap.settings.debug) {
-      console.log(args);
-      console.log('router_path: ' + path + ' => ' + router_path);
-    }
     return router_path;
   }
   catch (error) {
