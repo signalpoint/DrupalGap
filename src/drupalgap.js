@@ -88,6 +88,7 @@ function drupalgap_init() {
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
+      messages: [],
       menus: {},
       menu_links: {},
       menu_router: {},
@@ -1231,6 +1232,38 @@ function drupalgap_remove_page_from_dom(page_id) {
     $('#' + page_id).empty().remove();
   }
   catch (error) { console.log('drupalgap_remove_page_from_dom - ' + error); }
+}
+
+/**
+ * Sets a message to display to the user. Optionally pass in a second argument
+ * to specify the message type: status, warning, error
+ * @param {String} message
+ */
+function drupalgap_set_message(message) {
+  try {
+    if (empty(message)) { return; }
+    var type = 'status';
+    if (arguments[1]) { type = arguments[1]; }
+    var msg = {
+      message: message,
+      type: type
+    };
+    drupalgap.messages.push(msg);
+  }
+  catch (error) { console.log('drupalgap_set_message - ' + error); }
+}
+
+/**
+ * Clears the messages from the current page. Optionally pass in a page id to
+ * clear messages from a particular page.
+ */
+function drupalgap_clear_messages() {
+  try {
+    var page_id = arguments[0];
+    if (empty(page_id)) { page_id = drupalgap_get_page_id(); }
+    $('#' + page_id + ' div.messages').remove();
+  }
+  catch (error) { console.log('drupalgap_clear_messages - ' + error); }
 }
 
 /**
