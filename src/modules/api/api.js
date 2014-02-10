@@ -266,6 +266,8 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
  * false if you'd like DrupalGap to NOT continue. If DrupalGap continues, it
  * will perform a System Connect resource call then go to the App's front page.
  * This is called during DrupalGap's "deviceready" implementation for PhoneGap.
+ * Note, the Drupal.user object is not initialized at this point, and always
+ * appears to be an anonymous user.
  */
 function hook_deviceready() {}
 
