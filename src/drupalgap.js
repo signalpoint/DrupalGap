@@ -35,22 +35,7 @@ function drupalgap_init() {
            { name: 'menu' },
            { name: 'mvc' },
            { name: 'node' },
-           /*{ name: 'services',
-             'includes':[
-               {'name':'comment'},
-               {'name':'drupalgap_content'},
-               {'name':'drupalgap_system'},
-               {'name':'drupalgap_taxonomy'},
-               {'name':'drupalgap_user'},
-               {'name':'file'},
-               {'name':'node'},
-               {'name':'services'},
-               {'name':'system'},
-               {'name':'taxonomy_term'},
-               {'name':'taxonomy_vocabulary'},
-               {'name':'user'},
-             ]
-           },*/
+           /*{ name: 'services'},*/
            { name: 'system' },
            { name: 'taxonomy' },
            { name: 'user' },
