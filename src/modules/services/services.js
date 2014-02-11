@@ -64,6 +64,10 @@ function drupalgap_service_resource_extract_results(options) {
       for (var permission in permissions) {
         options.data.user.permissions.push(permissions[permission]);
       }
+      // Pull out the content types, and set them by their type.
+      $.each(options.data.content_types_list, function(index, object) {
+          drupalgap.content_types_list[object.type] = object;
+      });
       // Pull out the content types user permissions.
       options.data.user.content_types_user_permissions =
         options.data.content_types_user_permissions;
