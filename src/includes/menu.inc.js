@@ -12,18 +12,12 @@ function menu_execute_active_handler() {
     if (!path) { path = drupalgap_path_get(); }
     var page_id = drupalgap_get_page_id(path);
 
-    // TODO - Check to make sure the user has access to this DrupalGap menu
-    // path!
+    // @todo - Make sure the user has access to this DrupalGap menu path!
 
     // Get the router path.
     var router_path = drupalgap_router_path_get();
 
     if (router_path) {
-      /*console.log(path);
-      console.log(router_path);
-      console.log(JSON.stringify(drupalgap.menu_links));
-      console.log(JSON.stringify(drupalgap.menu_links[router_path]));
-      alert('menu_execute_active_handler');*/
 
       // Call the page call back for this router path and send along any
       // arguments.
@@ -232,24 +226,6 @@ function menu_router_build() {
   }
   catch (error) { console.log('menu_router_build - ' + error); }
 }
-
-/**
- * Sets the active path, which determines which page is loaded.
- */
-// We could not use this because the page id has already been generated
-// here, and any arguments present generate a page id that won't match
-// the page already generated.
-/*function menu_set_active_item(path) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('menu_set_active_item(' + path + ')');
-    }
-    drupalgap_path_set(path);
-  }
-  catch (error) {
-    alert('menu_set_active_item - ' + error);
-  }
-}*/
 
 /**
  * Given a menu link path, this determines and returns the router path as a
@@ -477,8 +453,6 @@ function drupalgap_menus_load() {
         });
       }
     }
-    //console.log(JSON.stringify(drupalgap.menus));
-    //alert('drupalgap_menus_load');
   }
   catch (error) { console.log('drupalgap_menus_load - ' + error); }
 }

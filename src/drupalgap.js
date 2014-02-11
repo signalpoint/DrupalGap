@@ -157,12 +157,10 @@ function _drupalgap_deviceready() {
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      navigator.notification.alert(
-          'No site_path to Drupal set in the app/settings.js file!',
-          function() {},
-          'Error',
-          'OK'
-      );
+      var msg = 'No site_path to Drupal set in the app/settings.js file!';
+      drupalgap_alert(msg, {
+          title: 'Error'
+      });
       return;
     }
 
@@ -171,12 +169,10 @@ function _drupalgap_deviceready() {
     drupalgap_check_connection();
     if (!drupalgap.online) {
       module_invoke_all('device_offline');
-      navigator.notification.alert(
-          'No connection found!',
-          function() { drupalgap_goto('offline'); },
-          'Offline',
-          'OK'
-      );
+      drupalgap_alert('No connection found!', {
+          title: 'Offline',
+          alertCallback: function() { drupalgap_goto('offline'); }
+      });
       return;
     }
     else {
@@ -218,12 +214,10 @@ function _drupalgap_deviceready() {
                    Drupal.settings.site_path +
                    ' is online. If you continue to have problems visit ' +
                    'www.drupalgap.org for troubleshooting info.';
-            navigator.notification.alert(
-                msg,
-                function() { drupalgap_goto('offline'); },
-                'Unable to Connect to Drupal',
-                'OK'
-            );
+           drupalgap_alert(msg, {
+               title: 'Unable to Connect to Drupal',
+               alertCallback: function() { drupalgap_goto('offline'); }
+           });
           }
         };
 
@@ -326,7 +320,8 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      alert('Failed to load module! (' + module.name + ')');
+                      var msg = 'Failed to load module! (' + module.name + ')';
+                      drupalgap_alert(msg);
                     }
                 });
               }
@@ -347,7 +342,8 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      alert('drupalgap_load_theme - no theme specified in settings.js');
+      var msg = 'drupalgap_load_theme - no theme specified in settings.js';
+      drupalgap_alert(msg);
     }
     else {
       // Pull the theme name from the settings.js file.
@@ -360,7 +356,7 @@ function drupalgap_load_theme() {
         if (!drupalgap_file_exists(theme_path)) {
           var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
             'The theme\'s JS file does not exist: ' + theme_path;
-          alert(error_msg);
+          drupalgap_alert(error_msg);
           return false;
         }
       }
@@ -393,7 +389,7 @@ function drupalgap_load_theme() {
       else {
         var error_msg = 'drupalgap_load_theme() - failed - ' +
           template_info_function + '() does not exist!';
-        alert(error_msg);
+        drupalgap_alert(error_msg);
       }
     }
     return false;

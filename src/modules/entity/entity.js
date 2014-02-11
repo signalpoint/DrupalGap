@@ -522,7 +522,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
         // If there were any form errors, display them in an alert.
         var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
           status, message);
-        if (msg) { alert(msg); }
+        if (msg) { drupalgap_alert(msg); }
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - error - ' + error);

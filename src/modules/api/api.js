@@ -364,5 +364,3 @@ function hook_mvc_model() {
 function hook_mvc_view() {}
 function hook_mvc_controller() {}
 
-// TODO - list all other core hooks here.
-

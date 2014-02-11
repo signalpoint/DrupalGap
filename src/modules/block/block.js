@@ -9,7 +9,7 @@
     }
   }
   catch (error) {
-    alert('block_load - ' + error);
+    drupalgap_alert('block_load - ' + error);
   }
 }*/
 
@@ -36,7 +36,7 @@ function drupalgap_block_load(delta) {
         msg +=
           ' - Did you rename your "header" block to "title" in settings.js?';
       }
-      alert(msg);
+      drupalgap_alert(msg);
     }
     if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
       console.log(JSON.stringify(block));

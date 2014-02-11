@@ -202,11 +202,10 @@ function drupalgap_get_path(type, name) {
                   else if (bundle == 'contrib') { path += 'app/modules'; }
                   else if (bundle == 'custom') { path += 'app/modules/custom'; }
                   else {
-                    alert(
-                      'drupalgap_get_path - unknown module bundle (' +
-                        bundle +
-                      ')'
-                    );
+                    var msg = 'drupalgap_get_path - unknown module bundle (' +
+                      bundle +
+                    ')';
+                    drupalgap_alert(msg);
                     return false;
                   }
                   path += '/' + name;
@@ -292,15 +291,13 @@ function drupalgap_error(message) {
                         arguments.callee.caller.name + ' - ' +
                         message;
     console.log(error_message);
-    if (drupalgap.settings.debug) { alert(error_message); }
+    if (drupalgap.settings.debug) { drupalgap_alert(error_message); }
     // If a message for the user was passed in, display it to the user.
-    if (arguments[1]) { alert(arguments[1]); }
+    if (arguments[1]) { drupalgap_alert(arguments[1]); }
     // Goto the error page if we are not already there.
     if (drupalgap_path_get() != 'error') { drupalgap_goto('error'); }
   }
-  catch (error) {
-    alert('drupalgap_error - ' + error);
-  }
+  catch (error) { console.log('drupalgap_error - ' + error); }
 }
 
 /**
@@ -491,7 +488,7 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
         }
       }
       else {
-        alert(
+        drupalgap_alert(
           'drupalgap_goto_generate_page_and_go - ' +
           'failed to load theme\'s page.tpl.html file'
         );
@@ -517,7 +514,7 @@ function drupalgap_goto_prepare_path(path) {
     // If the path is an empty string, change it to the front page path.
     if (path == '') {
       if (!drupalgap.settings.front) {
-        alert(
+        drupalgap_alert(
           'drupalgap_goto_prepare_path - ' +
           'no front page specified in settings.js!'
         );
@@ -785,8 +782,9 @@ function drupalgap_render_region(region) {
   try {
     // Make sure there are blocks specified for this theme in settings.js.
     if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
-      alert('drupalgap_render_region - there are no blocks for the "' +
-            drupalgap.settings.theme + ' " theme in the settings.js file!');
+      var msg = 'drupalgap_render_region - there are no blocks for the "' +
+        drupalgap.settings.theme + ' " theme in the settings.js file!';
+      drupalgap_alert(msg);
       return '';
     }
     // Grab the current path.

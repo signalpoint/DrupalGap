@@ -342,7 +342,7 @@ function user_register_form_submit(form, form_state) {
           // E-mail verification not needed, if administrator approval is
           // needed, notify the user, otherwise log them in.
           if (drupalgap.site_settings.user_register == '2') {
-            alert(
+            drupalgap_alert(
             form.user_register.user_mail_register_pending_approval_required_body
             );
             drupalgap_goto('');
@@ -360,7 +360,9 @@ function user_register_form_submit(form, form_state) {
         }
         else {
           // E-mail verification needed... notify the user.
-          alert(form.user_register.user_mail_register_email_verification_body);
+          drupalgap_alert(
+            form.user_register.user_mail_register_email_verification_body
+          );
           drupalgap_goto('');
         }
       },
@@ -368,7 +370,7 @@ function user_register_form_submit(form, form_state) {
         // If there were any form errors, display them.
         var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
           status, message);
-        if (msg) { alert(msg); }
+        if (msg) { drupalgap_alert(msg); }
       }
     });
   }
@@ -469,7 +471,7 @@ function user_services_postprocess(options, result) {
       $.each(response, function(index, message) {
           msg += message + '\n';
       });
-      if (msg != '') { alert(msg); }
+      if (msg != '') { drupalgap_alert(msg); }
     }
   }
   catch (error) { console.log('user_services_postprocess - ' + error); }
