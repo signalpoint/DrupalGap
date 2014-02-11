@@ -3,14 +3,11 @@
  * @param {Object} form
  * @param {Object} form_state
  * @param {Object} comment
+ * @param {Object} node
  * @return {Object}
  */
-function comment_edit(form, form_state, comment) {
+function comment_edit(form, form_state, comment, node) {
   try {
-
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.bundle = null;
 
     // If there is no comment object coming in, make an empty one with a node
     // id. Note, once the form.js submit handler is aware of its own entity and
@@ -19,58 +16,56 @@ function comment_edit(form, form_state, comment) {
     // be needed.
     if (!comment) { comment = {'nid': arg(1)}; }
 
-    // Load up the node specified in the comment.
-    var node = node_load(comment.nid);
+    // Setup form defaults.
+    form.entity_type = 'comment';
+    form.bundle = node.type;
 
-    if (node) {
-      // Setup form defaults.
-      form.entity_type = 'comment';
-      form.action = 'node/' + node.nid;
+    // Setup form defaults.
+    form.entity_type = 'comment';
+    form.action = 'node/' + node.nid;
 
-      // Determine the comment bundle from the node type.
-      var bundle = 'comment_node_' + node.type;
+    // Determine the comment bundle from the node type.
+    var bundle = 'comment_node_' + node.type;
 
-      // Add the entity's core fields to the form.
-      drupalgap_entity_add_core_fields_to_form(
-        'comment',
-        bundle,
-        form,
-        comment
-      );
-      // @todo - fields like 'name' and 'mail' should not be shown when the user
-      // is authenticated.
+    // Add the entity's core fields to the form.
+    drupalgap_entity_add_core_fields_to_form(
+      'comment',
+      bundle,
+      form,
+      comment
+    );
+    // @todo - fields like 'name' and 'mail' should not be shown when
+    // the user is authenticated.
 
-      // Add the fields for this content type to the form.
-      drupalgap_field_info_instances_add_to_form(
-        'comment',
-        bundle,
-        form,
-        comment
-      );
+    // Add the fields for this content type to the form.
+    drupalgap_field_info_instances_add_to_form(
+      'comment',
+      bundle,
+      form,
+      comment
+    );
 
-      // Add submit to form.
-      form.elements.submit = {
-        'type': 'submit',
-        'value': 'Save'
+    // Add submit to form.
+    form.elements.submit = {
+      'type': 'submit',
+      'value': 'Save'
+    };
+
+    // Add cancel button to form.
+    form.buttons['cancel'] = {
+      'title': 'Cancel'
+    };
+
+    // Add delete button to form if we're editing a comment.
+    if (comment && comment.cid) {
+      form.buttons['delete'] = {
+        'title': 'Delete'
       };
-
-      // Add cancel button to form.
-      form.buttons['cancel'] = {
-        'title': 'Cancel'
-      };
-
-      // Add delete button to form if we're editing a comment.
-      if (comment && comment.cid) {
-        form.buttons['delete'] = {
-          'title': 'Delete'
-        };
-      }
-
-      return form;
     }
-    else {
-      return 'comment_edit - failed to load node!';
-    }
+
+    form.prefix += '<h2>Add comment</h2>';
+
+    return form;
   }
   catch (error) { console.log('comment_edit - ' + error); }
 }

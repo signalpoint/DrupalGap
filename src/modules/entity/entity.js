@@ -10,7 +10,7 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
   form, entity) {
   try {
     // Grab the core fields for this entity type and bundle.
-    var fields = drupalgap_entity_get_core_fields(entity_type);
+    var fields = drupalgap_entity_get_core_fields(entity_type, bundle);
     // Iterate over each core field in the entity and add it to the form. If
     // there is a value present in the entity, then set the field's form element
     // default value equal to the core field value.
@@ -554,9 +554,10 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
 /**
  * Given an entity type, this returns its core fields as forms api elements.
  * @param {String} entity_type
+ * @param {String} bundle
  * @return {Object}
  */
-function drupalgap_entity_get_core_fields(entity_type) {
+function drupalgap_entity_get_core_fields(entity_type, bundle) {
   try {
     // @todo - was this function what we were tyring to accomplish with the
     // early entity_info hook imitations?
@@ -565,7 +566,10 @@ function drupalgap_entity_get_core_fields(entity_type) {
     var fields = {};
     switch (entity_type) {
       case 'comment':
-        // Add each schema field to the fields collection.
+        // Add each schema field to the field collection.
+        dpm(drupalgap.content_types_list);
+        dpm(bundle);
+        //dpm(drupalgap.entity_info[entity_type]);
         $.each(
           drupalgap.entity_info[entity_type].schema_fields_sql['base table'],
           function(index, name) {
@@ -578,12 +582,36 @@ function drupalgap_entity_get_core_fields(entity_type) {
             eval('fields.' + name + ' = field;');
           }
         );
-        // Make modifications to comment fields.
         fields['nid'].required = true;
         fields['subject'].type = 'textfield';
         fields['name'].type = 'textfield';
-        fields['mail'].type = 'textfield';
-        fields['homepage'].type = 'textfield';
+        // Depending on this content type's comment settings, let's make
+        // modifications to the form elements.
+        // admin/structure/types/manage/article
+        // 0 = Anonymous posters may not enter their contact information
+        // 1 = Anonymous posters may leave their contact information
+        // 2 = Anonymous posters must leave their contact information
+        var content_type = bundle.replace('comment_node_', '');
+        var comment_anonymous =
+          drupalgap.content_types_list[content_type].comment_anonymous;
+        switch (comment_anonymous) {
+          case '0':
+            delete(fields['mail']);
+            delete(fields['homepage']);
+            break;
+          case '1':
+            break;
+          case '2':
+            fields['mail'].required = true;
+            fields['homepage'].required = true;
+            break;
+          default:
+            console.log('WARNING: drupalgap_entity_get_core_fields - ' +
+              'Unknown anonymous comment setting: ' + comment_anonymous);
+            break;
+        }
+        if (fields['mail']) { fields['mail'].type = 'textfield'; }
+        if (fields['homepage']) { fields['homepage'].type = 'textfield'; }
         break;
       case 'node':
         fields.nid = {

@@ -224,36 +224,6 @@ function node_page_view(nid) {
       return content;
     }
     else { drupalgap_error('No node id provided!'); }
-
-    if (node) {
-
-      // If the comments are hidden, do nothing.
-      /*if (node.comment == 0) { }
-      // If the comments are closed or open, show the comments.
-      else if (node.comment == 1 || node.comment == 2) {
-
-        // Build an empty list for the comments
-        build.comments = {
-          'theme':'jqm_item_list',
-          'title':'Comments',
-          'items':[],
-          'attributes':{'id':'comment_listing_items_' + node.nid},
-        };
-
-        // If the comments are open, show the comment form.
-        if (node.comment == 2) {
-          build.comments_form = {
-            'markup':
-              '<h2>Add comment</h2>' +
-                drupalgap_get_form('comment_edit', {'nid':node.nid})
-          };
-        }
-      }*/
-      return build;
-    }
-    else {
-      console.log('node_page_view - failed to load node (' + node.nid + ')');
-    }
   }
   catch (error) { console.log('node_page_view - ' + error); }
 }
@@ -274,6 +244,31 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node.title},
             'content': {'markup': node.content}
           };
+          // If the comments are closed or open, show the comments.
+          if (node.comment != 0) {
+            if (node.comment == 1 || node.comment == 2) {
+
+              // Build an empty list for the comments
+              var comments = {
+                title: 'Comments',
+                items: [],
+                attributes: {
+                  id: 'comment_listing_items_' + node.nid
+                }
+              };
+              build.content.markup += theme('jqm_item_list', comments);
+
+              // If the comments are open, show the comment form.
+              if (node.comment == 2) {
+                build.content.markup += drupalgap_get_form(
+                  'comment_edit',
+                  { nid: node.nid },
+                  node
+                );
+              }
+            }
+          }
+
           _drupalgap_entity_page_container_inject(
             'node', node.nid, 'view', build
           );
