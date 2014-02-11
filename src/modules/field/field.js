@@ -261,6 +261,8 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
         break;
       case 'select':
       case 'list_text':
+      case 'list_float':
+      case 'list_integer':
         if (instance.widget.type == 'options_select') {
           items[delta].type = 'select';
         }
