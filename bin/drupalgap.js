@@ -4814,11 +4814,14 @@ function drupalgap_block_load(delta) {
  * @param {Object} form
  * @param {Object} form_state
  * @param {Object} comment
- * @param {Object} node
  * @return {Object}
  */
-function comment_edit(form, form_state, comment, node) {
+function comment_edit(form, form_state, comment) {
   try {
+
+    // Setup form defaults.
+    form.entity_type = 'comment';
+    form.bundle = null;
 
     // If there is no comment object coming in, make an empty one with a node
     // id. Note, once the form.js submit handler is aware of its own entity and
@@ -4827,56 +4830,58 @@ function comment_edit(form, form_state, comment, node) {
     // be needed.
     if (!comment) { comment = {'nid': arg(1)}; }
 
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.bundle = node.type;
+    // Load up the node specified in the comment.
+    var node = node_load(comment.nid);
 
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.action = 'node/' + node.nid;
+    if (node) {
+      // Setup form defaults.
+      form.entity_type = 'comment';
+      form.action = 'node/' + node.nid;
 
-    // Determine the comment bundle from the node type.
-    var bundle = 'comment_node_' + node.type;
+      // Determine the comment bundle from the node type.
+      var bundle = 'comment_node_' + node.type;
 
-    // Add the entity's core fields to the form.
-    drupalgap_entity_add_core_fields_to_form(
-      'comment',
-      bundle,
-      form,
-      comment
-    );
-    // @todo - fields like 'name' and 'mail' should not be shown when
-    // the user is authenticated.
+      // Add the entity's core fields to the form.
+      drupalgap_entity_add_core_fields_to_form(
+        'comment',
+        bundle,
+        form,
+        comment
+      );
+      // @todo - fields like 'name' and 'mail' should not be shown when the user
+      // is authenticated.
 
-    // Add the fields for this content type to the form.
-    drupalgap_field_info_instances_add_to_form(
-      'comment',
-      bundle,
-      form,
-      comment
-    );
+      // Add the fields for this content type to the form.
+      drupalgap_field_info_instances_add_to_form(
+        'comment',
+        bundle,
+        form,
+        comment
+      );
 
-    // Add submit to form.
-    form.elements.submit = {
-      'type': 'submit',
-      'value': 'Save'
-    };
-
-    // Add cancel button to form.
-    form.buttons['cancel'] = {
-      'title': 'Cancel'
-    };
-
-    // Add delete button to form if we're editing a comment.
-    if (comment && comment.cid) {
-      form.buttons['delete'] = {
-        'title': 'Delete'
+      // Add submit to form.
+      form.elements.submit = {
+        'type': 'submit',
+        'value': 'Save'
       };
+
+      // Add cancel button to form.
+      form.buttons['cancel'] = {
+        'title': 'Cancel'
+      };
+
+      // Add delete button to form if we're editing a comment.
+      if (comment && comment.cid) {
+        form.buttons['delete'] = {
+          'title': 'Delete'
+        };
+      }
+
+      return form;
     }
-
-    form.prefix += '<h2>Add comment</h2>';
-
-    return form;
+    else {
+      return 'comment_edit - failed to load node!';
+    }
   }
   catch (error) { console.log('comment_edit - ' + error); }
 }
@@ -4906,7 +4911,7 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
   form, entity) {
   try {
     // Grab the core fields for this entity type and bundle.
-    var fields = drupalgap_entity_get_core_fields(entity_type, bundle);
+    var fields = drupalgap_entity_get_core_fields(entity_type);
     // Iterate over each core field in the entity and add it to the form. If
     // there is a value present in the entity, then set the field's form element
     // default value equal to the core field value.
@@ -5450,10 +5455,9 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
 /**
  * Given an entity type, this returns its core fields as forms api elements.
  * @param {String} entity_type
- * @param {String} bundle
  * @return {Object}
  */
-function drupalgap_entity_get_core_fields(entity_type, bundle) {
+function drupalgap_entity_get_core_fields(entity_type) {
   try {
     // @todo - was this function what we were tyring to accomplish with the
     // early entity_info hook imitations?
@@ -5462,10 +5466,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
     var fields = {};
     switch (entity_type) {
       case 'comment':
-        // Add each schema field to the field collection.
-        dpm(drupalgap.content_types_list);
-        dpm(bundle);
-        //dpm(drupalgap.entity_info[entity_type]);
+        // Add each schema field to the fields collection.
         $.each(
           drupalgap.entity_info[entity_type].schema_fields_sql['base table'],
           function(index, name) {
@@ -5478,36 +5479,12 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
             eval('fields.' + name + ' = field;');
           }
         );
+        // Make modifications to comment fields.
         fields['nid'].required = true;
         fields['subject'].type = 'textfield';
         fields['name'].type = 'textfield';
-        // Depending on this content type's comment settings, let's make
-        // modifications to the form elements.
-        // admin/structure/types/manage/article
-        // 0 = Anonymous posters may not enter their contact information
-        // 1 = Anonymous posters may leave their contact information
-        // 2 = Anonymous posters must leave their contact information
-        var content_type = bundle.replace('comment_node_', '');
-        var comment_anonymous =
-          drupalgap.content_types_list[content_type].comment_anonymous;
-        switch (comment_anonymous) {
-          case '0':
-            delete(fields['mail']);
-            delete(fields['homepage']);
-            break;
-          case '1':
-            break;
-          case '2':
-            fields['mail'].required = true;
-            fields['homepage'].required = true;
-            break;
-          default:
-            console.log('WARNING: drupalgap_entity_get_core_fields - ' +
-              'Unknown anonymous comment setting: ' + comment_anonymous);
-            break;
-        }
-        if (fields['mail']) { fields['mail'].type = 'textfield'; }
-        if (fields['homepage']) { fields['homepage'].type = 'textfield'; }
+        fields['mail'].type = 'textfield';
+        fields['homepage'].type = 'textfield';
         break;
       case 'node':
         fields.nid = {
@@ -7215,6 +7192,36 @@ function node_page_view(nid) {
       return content;
     }
     else { drupalgap_error('No node id provided!'); }
+
+    if (node) {
+
+      // If the comments are hidden, do nothing.
+      /*if (node.comment == 0) { }
+      // If the comments are closed or open, show the comments.
+      else if (node.comment == 1 || node.comment == 2) {
+
+        // Build an empty list for the comments
+        build.comments = {
+          'theme':'jqm_item_list',
+          'title':'Comments',
+          'items':[],
+          'attributes':{'id':'comment_listing_items_' + node.nid},
+        };
+
+        // If the comments are open, show the comment form.
+        if (node.comment == 2) {
+          build.comments_form = {
+            'markup':
+              '<h2>Add comment</h2>' +
+                drupalgap_get_form('comment_edit', {'nid':node.nid})
+          };
+        }
+      }*/
+      return build;
+    }
+    else {
+      console.log('node_page_view - failed to load node (' + node.nid + ')');
+    }
   }
   catch (error) { console.log('node_page_view - ' + error); }
 }
@@ -7235,31 +7242,6 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node.title},
             'content': {'markup': node.content}
           };
-          // If the comments are closed or open, show the comments.
-          if (node.comment != 0) {
-            if (node.comment == 1 || node.comment == 2) {
-
-              // Build an empty list for the comments
-              var comments = {
-                title: 'Comments',
-                items: [],
-                attributes: {
-                  id: 'comment_listing_items_' + node.nid
-                }
-              };
-              build.content.markup += theme('jqm_item_list', comments);
-
-              // If the comments are open, show the comment form.
-              if (node.comment == 2) {
-                build.content.markup += drupalgap_get_form(
-                  'comment_edit',
-                  { nid: node.nid },
-                  node
-                );
-              }
-            }
-          }
-
           _drupalgap_entity_page_container_inject(
             'node', node.nid, 'view', build
           );
