@@ -233,7 +233,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
         // if the drupalgap display mode is not present.
         if (!field.display) { return false; }
         var display = field.display['default'];
-        if (field.display['drupalgap']) {
+        if (field.display['drupalgap'] && field.display['drupalgap'].module) {
           display = field.display['drupalgap'];
         }
         // Save the field name and weight.
@@ -300,9 +300,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
         if (entity[field_name][entity.language]) {
           items = entity[field_name][entity.language];
         }
-        else {
-          items = entity[field_name];
-        }
+        else { items = entity[field_name]; }
       }
       var elements = fn(
         entity_type, entity, field, null, entity.language, items, display
@@ -344,9 +342,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
     module_invoke_all(
       'entity_post_render_field', entity, field_name, field, reference
     );
-    if (reference.content != content) {
-      return reference.content;
-    }
+    if (reference.content != content) { return reference.content; }
     return content;
   }
   catch (error) { console.log('drupalgap_entity_render_field - ' + error); }
