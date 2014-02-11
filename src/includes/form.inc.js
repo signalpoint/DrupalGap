@@ -714,6 +714,7 @@ function _drupalgap_form_render_element(form, element) {
               delta,
               element
           ]);
+          // @todo - sometimes an item gets merged without a type here, why?
           $.extend(item, items[delta]);
         }
 
@@ -727,7 +728,7 @@ function _drupalgap_form_render_element(form, element) {
     });
 
     // Show the 'Add another item' button on unlimited value fields.
-    if (element.field_info_field &&
+    /*if (element.field_info_field &&
       element.field_info_field.cardinality == -1) {
       var add_another_item_variables = {
         text: 'Add another item',
@@ -742,7 +743,7 @@ function _drupalgap_form_render_element(form, element) {
         }
       };
       html += theme('button', add_another_item_variables);
-    }
+    }*/
 
     // Add element description.
     if (element.description && element.type != 'hidden') {
@@ -774,15 +775,23 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
-    if (item.type == 'text') { item.type = 'textfield'; }
-    else if (item.type == 'list_text') { item.type = 'select'; }
+    switch (item.type) {
+      case 'text':
+        item.type = 'textfield';
+        break;
+      case 'list_text':
+      case 'list_float':
+      case 'list_integer':
+        item.type = 'select';
+        break;
+    }
     var theme_function = item.type;
 
     // Make any preprocess modifications to the elements so they will map
     // cleanly to their theme function. A hook_field_widget_form() should be
     // used instead here.
     if (item.type == 'submit') {
-      // TODO - convert this to a field widget form hook?
+      // @todo - convert this to a field widget form hook?
       variables.attributes.onclick =
         '_drupalgap_form_submit(\'' + form.id + '\');';
       if (!variables.attributes['data-theme']) {
@@ -812,6 +821,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     else {
       if (item.markup || item.markup == '') { html += item.markup; }
       else {
+        // @todo - the reason for this warning sometimes happens because the
+        // item.type is lost with $.extend in _drupalgap_form_render_element().
         var msg = 'Field ' + item.type + ' not supported.';
         html += '<div><em>' + msg + '</em></div>';
         console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
