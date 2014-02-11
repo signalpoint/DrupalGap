@@ -347,7 +347,8 @@ function hook_image_path_alter(src) { }
 
 /**
  * This hook is used by modules that need to execute custom code when the module
- * is loaded.
+ * is loaded. Note, the Drupal.user object is not initialized at this point, and
+ * always appears to be an anonymous user.
  */
 function hook_install() {}
 
