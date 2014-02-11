@@ -35,22 +35,7 @@ function drupalgap_init() {
            { name: 'menu' },
            { name: 'mvc' },
            { name: 'node' },
-           /*{ name: 'services',
-             'includes':[
-               {'name':'comment'},
-               {'name':'drupalgap_content'},
-               {'name':'drupalgap_system'},
-               {'name':'drupalgap_taxonomy'},
-               {'name':'drupalgap_user'},
-               {'name':'file'},
-               {'name':'node'},
-               {'name':'services'},
-               {'name':'system'},
-               {'name':'taxonomy_term'},
-               {'name':'taxonomy_vocabulary'},
-               {'name':'user'},
-             ]
-           },*/
+           /*{ name: 'services'},*/
            { name: 'system' },
            { name: 'taxonomy' },
            { name: 'user' },
@@ -495,62 +480,6 @@ function drupalgap_load_blocks() {
     }
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
-}
-
-/**
- * Takes option set 2, grabs the success/error callback(s), if any,
- * and appends them onto option set 1's callback(s), then returns
- * the newly assembled option set.
- * @param {Object} options_set_1
- * @param {Object} options_set_2
- * @return {Object}
- */
-function drupalgap_chain_callbacks(options_set_1, options_set_2) {
-
-  // Setup the new options.
-  var new_options_set = {};
-  $.extend(true, new_options_set, options_set_1);
-
-  // Chain the success callbacks.
-  if (options_set_2.success) {
-    if (new_options_set.success) {
-      if (!$.isArray(new_options_set.success)) {
-        var backup = new_options_set.success;
-        new_options_set.success = [];
-        new_options_set.success.push(backup);
-      }
-      new_options_set.success.push(options_set_2.success);
-    }
-    else {
-      new_options_set.success = options_set_2.success;
-    }
-  }
-
-  // Chain the error callbacks.
-  if (options_set_2.error) {
-    if (new_options_set.error) {
-      if (!$.isArray(new_options_set.error)) {
-        var backup = new_options_set.error;
-        new_options_set.error = [];
-        new_options_set.error.push(backup);
-      }
-      new_options_set.error.push(options_set_2.error);
-    }
-    else {
-      new_options_set.error = options_set_2.error;
-    }
-  }
-
-  // For all other variables in option set 2, add them to the new option set.
-  $.each(options_set_2, function(index, object) {
-    if (index != 'success' && index != 'error') {
-      new_options_set[index] = object;
-    }
-  });
-
-  // Return the new option set.
-  //console.log(JSON.stringify(new_options_set));
-  return new_options_set;
 }
 
 /**
