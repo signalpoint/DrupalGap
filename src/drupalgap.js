@@ -81,6 +81,7 @@ function drupalgap_init() {
       back: false, /* moving backwards or not */
       back_path: '', /* the path to move back to */
       blocks: [],
+      content_types_list: {}, /* holds info about each content type */
       entity_info: {},
       field_info_fields: {},
       field_info_instances: {},
@@ -91,7 +92,7 @@ function drupalgap_init() {
       messages: [],
       menus: {},
       menu_links: {},
-      menu_router: {},
+      menu_router: {}, /* @todo - doesn't appear to be used at all, remove it */
       mvc: {
         models: {},
         views: {},
@@ -241,24 +242,7 @@ function _drupalgap_deviceready() {
           }
         };
 
-        // If we have a session id in local storage, then we'll use it as the
-        // CSRF token when making the initial call to system connect. This will
-        // determine if the user is still authenticated with Drupal or not.
-        /*var token = window.localStorage.getItem('sessid');
-        if (token) {
-          drupalgap.sessid = token;
-          options.token = token;
-          options.beforeSend = function (request) {
-            request.setRequestHeader("X-CSRF-Token", options.token);
-          };
-        }*/
-
-        // DrupalGap System Connect Service Resource
-        // @todo - replace this with a call to system_connect. But first, you'll
-        // have to change the DrupalGap module to do an alter on the default
-        // Services system connect resource, then you can drop the
-        // drupalgap_system resource.
-        //drupalgap.services.drupalgap_system.connect.call(options);
+        // Make the system connect call.
         system_connect(options);
       }
     }
