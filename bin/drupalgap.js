@@ -1607,11 +1607,13 @@ function drupalgap_check_visibility(type, data) {
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
       var current_path = drupalgap_path_get();
+      var current_path_parts = current_path.split('/');
       $.each(data.pages.value, function(page_index, path) {
           if (path == '') { path = drupalgap.settings.front; }
           if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
+            return false;
           }
           else {
             // It wasn't a direct path match, is there a wildcard that matches
@@ -1622,19 +1624,32 @@ function drupalgap_check_visibility(type, data) {
               if (router_path.replace(/%/g, '*') == path) {
                 if (data.pages.mode == 'include') { visible = true; }
                 else if (data.pages.mode == 'exclude') { visible = false; }
+                return false;
               }
               else {
+                var path_parts = path.split('/');
+                var match = true;
+                if (path_parts.length == 0) { match = false; }
+                else if (path_parts.length == current_path_parts.length) {
+                  for (var i = 0; i < path_parts.length; i++) {
+                    if (path_parts[i] != current_path_parts[i]) {
+                      match = false;
+                      break;
+                    }
+                  }
+                }
                 if (data.pages.mode == 'include') { visible = false; }
                 else if (data.pages.mode == 'exclude') { visible = true; }
+                if (!match) { visible = !visible; }
               }
             }
             else {
+              // There's no wildcard in the rule, and it wasn't a direct path
+              // match.
               if (data.pages.mode == 'include') { visible = false; }
               else if (data.pages.mode == 'exclude') { visible = true; }
             }
           }
-          // Break out of the loop if already determined to be visible.
-          if (visible) { return false; }
       });
     }
     return visible;
@@ -2315,11 +2330,7 @@ function drupalgap_render_region(region) {
         }
       }
       // Render each block in the region.
-      $.each(
-        eval(
-          'drupalgap.settings.blocks[drupalgap.settings.theme].' +
-          region.name
-        ),
+      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
           // Check the block's visibility settings.
           var render_block = false;
@@ -4691,21 +4702,6 @@ function template_process_page(variables) {
 }
 
 /**
- * Load a block from a given module and block delta value.
- */
-/*function block_load(module, delta) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('block_load()');
-      console.log(JSON.stringify(arguments));
-    }
-  }
-  catch (error) {
-    drupalgap_alert('block_load - ' + error);
-  }
-}*/
-
-/**
  * Given a block delta, this will return the corresponding
  * block from drupalgap.blocks.
  * @param {String} delta
@@ -4724,14 +4720,7 @@ function drupalgap_block_load(delta) {
     }
     if (block == null) {
       var msg = 'drupalgap_block_load - failed to load "' + delta + '" block!';
-      if (delta == 'header') {
-        msg +=
-          ' - Did you rename your "header" block to "title" in settings.js?';
-      }
       drupalgap_alert(msg);
-    }
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log(JSON.stringify(block));
     }
     return block;
   }
