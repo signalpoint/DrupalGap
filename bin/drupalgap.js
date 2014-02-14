@@ -3285,10 +3285,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     var theme_function = item.type;
 
     // If the element is disabled, add the 'disabled' attribute.
-    if (element.disabled) {
-      dpm('DISABLED');
-      variables.attributes.disabled = '';
-    }
+    if (element.disabled) { variables.attributes.disabled = ''; }
 
     // Make any preprocess modifications to the elements so they will map
     // cleanly to their theme function. A hook_field_widget_form() should be
@@ -4756,16 +4753,13 @@ function comment_edit(form, form_state, comment, node) {
     // be needed.
     if (!comment) { comment = {'nid': arg(1)}; }
 
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.bundle = node.type;
-
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.action = 'node/' + node.nid;
-
     // Determine the comment bundle from the node type.
     var bundle = 'comment_node_' + node.type;
+
+    // Setup form defaults.
+    form.entity_type = 'comment';
+    form.bundle = bundle;
+    form.action = 'node/' + node.nid;
 
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form(
@@ -4774,8 +4768,6 @@ function comment_edit(form, form_state, comment, node) {
       form,
       comment
     );
-    // @todo - fields like 'name' and 'mail' should not be shown when
-    // the user is authenticated.
 
     // Add the fields for this content type to the form.
     drupalgap_field_info_instances_add_to_form(
@@ -5289,7 +5281,6 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
     // @todo - was this function what we were tyring to accomplish with the
     // early entity_info hook imitations?
     // @todo - And why is this function not populated dynamically via Drupal?
-    // WTF?!
     var fields = {};
     switch (entity_type) {
       case 'comment':
@@ -5663,6 +5654,20 @@ function drupalgap_field_info_fields() {
 function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
   try {
     var instances = drupalgap_field_info_instances(entity_type, bundle_name);
+    if (!instances) {
+      var msg = 'WARNING: drupalgap_field_info_instance - instance was null ' +
+      'for entity (' + entity_type + ') bundle (' + bundle_name + ') using ' +
+      'field (' + field_name + ')';
+      console.log(msg);
+      return null;
+    }
+    if (!instances[field_name]) {
+      var msg = 'WARNING: drupalgap_field_info_instance - ' +
+        '"' + field_name + '" does not exist for entity (' + entity_type + ')' +
+        ' bundle (' + bundle_name + ')';
+      console.log(msg);
+      return null;
+    }
     return instances[field_name];
   }
   catch (error) { console.log('drupalgap_field_info_instance - ' + error); }
