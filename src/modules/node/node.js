@@ -248,57 +248,70 @@ function node_page_view_pageshow(nid) {
           if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
 
-              // Build an empty list for the comments
-              var comments = {
-                title: 'Comments',
-                items: [],
-                attributes: {
-                  id: 'comment_listing_items_' + node.nid
+              // Grab any comments and display them.
+              var query = {
+                parameters: {
+                  nid: node.nid
                 }
               };
-              build.content.markup += theme('jqm_item_list', comments);
-
-              // If the comments are open, show the comment form.
-              if (node.comment == 2) {
-                build.content.markup += drupalgap_get_form(
-                  'comment_edit',
-                  { nid: node.nid },
-                  node
-                );
-              }
+              comment_index(query, {
+                  success: function(results) {
+                    try {
+                      dpm(results);
+                      // Build an empty list for the comments
+                      var comments = {
+                        title: 'Comments',
+                        items: [],
+                        attributes: {
+                          id: 'comment_listing_items_' + node.nid
+                        }
+                      };
+                      $.each(results, function(index, comment) {
+                          var html = '';
+                          if (user_access('administer comments')) {
+                            html += l(
+                              'Edit',
+                              'comment/' + comment.cid + '/edit'
+                            );
+                          }
+                          html += comment.created + '<br />' +
+                            'Author: ' + comment.name + '<br />' +
+                            'Subject: ' + comment.subject + '<br />' +
+                            'Comment:<br />' +
+                            '<hr />';
+                          comments.items.push(html);
+                      });
+                      build.content.markup += theme('jqm_item_list', comments);
+                      // If the comments are open, show the comment form.
+                      if (node.comment == 2) {
+                        build.content.markup += drupalgap_get_form(
+                          'comment_edit',
+                          { nid: node.nid },
+                          node
+                        );
+                      }
+                      // Finally, inject the page.
+                      _drupalgap_entity_page_container_inject(
+                        'node', node.nid, 'view', build
+                      );
+                    }
+                    catch (error) {
+                      var msg = 'node_page_view_pageshow - comment_index - ' +
+                        error;
+                      console.log(msg);
+                    }
+                  }
+              });
             }
           }
-
-          _drupalgap_entity_page_container_inject(
-            'node', node.nid, 'view', build
-          );
+          else {
+            // Comments are disabled, so let's inject the page.
+            _drupalgap_entity_page_container_inject(
+              'node', node.nid, 'view', build
+            );
+          }
         }
     });
-    // Grab some recent comments and display it.
-    /*if ($('#comment_listing_items')) {
-      drupalgap.views_datasource.call({
-        'path':'drupalgap/views_datasource/drupalgap_comments/' + node.nid,
-        'success':function(data) {
-          // Extract the comments into items, then drop them in the list.
-          var items = [];
-          $.each(data.comments, function(index, object){
-              var html = '';
-              if (user_access('administer comments')) {
-                html += l('Edit', 'comment/' + object.comment.cid + '/edit');
-              }
-              html += object.comment.created + "<br />" +
-                'Author: ' + object.comment.name + "<br />"+
-                'Subject: ' + object.comment.subject + "<br />" +
-                'Comment:<br />' + object.comment.comment_body + "<hr />";
-              items.push(html);
-          });
-          drupalgap_item_list_populate(
-            "#comment_listing_items_" + node.nid,
-            items
-          );
-        },
-      });
-    }*/
   }
   catch (error) { console.log('node_page_view_pageshow - ' + error); }
 }
