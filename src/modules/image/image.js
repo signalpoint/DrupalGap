@@ -110,7 +110,7 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
       'if (message != "Camera cancelled." && ' +
         'message != "Selection cancelled.")' +
       '{' +
-        'alert("' + imagefield_error + ' - " + message);' +
+        'drupalgap_alert("' + imagefield_error + ' - " + message);' +
       '}' +
     '}';
     // Define success callback function.

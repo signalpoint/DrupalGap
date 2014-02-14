@@ -35,22 +35,7 @@ function drupalgap_init() {
            { name: 'menu' },
            { name: 'mvc' },
            { name: 'node' },
-           /*{ name: 'services',
-             'includes':[
-               {'name':'comment'},
-               {'name':'drupalgap_content'},
-               {'name':'drupalgap_system'},
-               {'name':'drupalgap_taxonomy'},
-               {'name':'drupalgap_user'},
-               {'name':'file'},
-               {'name':'node'},
-               {'name':'services'},
-               {'name':'system'},
-               {'name':'taxonomy_term'},
-               {'name':'taxonomy_vocabulary'},
-               {'name':'user'},
-             ]
-           },*/
+           /*{ name: 'services'},*/
            { name: 'system' },
            { name: 'taxonomy' },
            { name: 'user' },
@@ -172,12 +157,10 @@ function _drupalgap_deviceready() {
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      navigator.notification.alert(
-          'No site_path to Drupal set in the app/settings.js file!',
-          function() {},
-          'Error',
-          'OK'
-      );
+      var msg = 'No site_path to Drupal set in the app/settings.js file!';
+      drupalgap_alert(msg, {
+          title: 'Error'
+      });
       return;
     }
 
@@ -186,12 +169,10 @@ function _drupalgap_deviceready() {
     drupalgap_check_connection();
     if (!drupalgap.online) {
       module_invoke_all('device_offline');
-      navigator.notification.alert(
-          'No connection found!',
-          function() { drupalgap_goto('offline'); },
-          'Offline',
-          'OK'
-      );
+      drupalgap_alert('No connection found!', {
+          title: 'Offline',
+          alertCallback: function() { drupalgap_goto('offline'); }
+      });
       return;
     }
     else {
@@ -233,12 +214,10 @@ function _drupalgap_deviceready() {
                    Drupal.settings.site_path +
                    ' is online. If you continue to have problems visit ' +
                    'www.drupalgap.org for troubleshooting info.';
-            navigator.notification.alert(
-                msg,
-                function() { drupalgap_goto('offline'); },
-                'Unable to Connect to Drupal',
-                'OK'
-            );
+           drupalgap_alert(msg, {
+               title: 'Unable to Connect to Drupal',
+               alertCallback: function() { drupalgap_goto('offline'); }
+           });
           }
         };
 
@@ -341,7 +320,8 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      alert('Failed to load module! (' + module.name + ')');
+                      var msg = 'Failed to load module! (' + module.name + ')';
+                      drupalgap_alert(msg);
                     }
                 });
               }
@@ -362,7 +342,8 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      alert('drupalgap_load_theme - no theme specified in settings.js');
+      var msg = 'drupalgap_load_theme - no theme specified in settings.js';
+      drupalgap_alert(msg);
     }
     else {
       // Pull the theme name from the settings.js file.
@@ -375,7 +356,7 @@ function drupalgap_load_theme() {
         if (!drupalgap_file_exists(theme_path)) {
           var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
             'The theme\'s JS file does not exist: ' + theme_path;
-          alert(error_msg);
+          drupalgap_alert(error_msg);
           return false;
         }
       }
@@ -408,7 +389,7 @@ function drupalgap_load_theme() {
       else {
         var error_msg = 'drupalgap_load_theme() - failed - ' +
           template_info_function + '() does not exist!';
-        alert(error_msg);
+        drupalgap_alert(error_msg);
       }
     }
     return false;
@@ -464,6 +445,34 @@ function drupalgap_add_css() {
 }
 
 /**
+ * Alerts a message to the user using PhoneGap's alert. It is important to
+ * understand this is an async function, so code will continue to execute while
+ * the alert is displayed to the user.
+ * You may optionally pass in a second argument as a JSON object with the
+ * following properties:
+ *   alertCallback - the function to call after the user presses OK
+ *   title - the title to use on the alert box, defaults to 'Alert'
+ *   buttonName - the text to place on the button, default to 'OK'
+ * @param {String} message
+ */
+function drupalgap_alert(message) {
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    var alertCallback = function() { };
+    var title = 'Alert';
+    var buttonName = 'OK';
+    if (options) {
+      if (options.alertCallback) { alertCallback = options.alertCallback; }
+      if (options.title) { title = options.title; }
+      if (options.buttonName) { title = options.buttonName; }
+    }
+    navigator.notification.alert(message, alertCallback, title, buttonName);
+  }
+  catch (error) { console.log('drupalgap_alert - ' + error); }
+}
+
+/**
  * Rounds up all blocks defined by hook_block_info and places them in the
  * drupalgap.blocks array.
  */
@@ -495,62 +504,6 @@ function drupalgap_load_blocks() {
     }
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
-}
-
-/**
- * Takes option set 2, grabs the success/error callback(s), if any,
- * and appends them onto option set 1's callback(s), then returns
- * the newly assembled option set.
- * @param {Object} options_set_1
- * @param {Object} options_set_2
- * @return {Object}
- */
-function drupalgap_chain_callbacks(options_set_1, options_set_2) {
-
-  // Setup the new options.
-  var new_options_set = {};
-  $.extend(true, new_options_set, options_set_1);
-
-  // Chain the success callbacks.
-  if (options_set_2.success) {
-    if (new_options_set.success) {
-      if (!$.isArray(new_options_set.success)) {
-        var backup = new_options_set.success;
-        new_options_set.success = [];
-        new_options_set.success.push(backup);
-      }
-      new_options_set.success.push(options_set_2.success);
-    }
-    else {
-      new_options_set.success = options_set_2.success;
-    }
-  }
-
-  // Chain the error callbacks.
-  if (options_set_2.error) {
-    if (new_options_set.error) {
-      if (!$.isArray(new_options_set.error)) {
-        var backup = new_options_set.error;
-        new_options_set.error = [];
-        new_options_set.error.push(backup);
-      }
-      new_options_set.error.push(options_set_2.error);
-    }
-    else {
-      new_options_set.error = options_set_2.error;
-    }
-  }
-
-  // For all other variables in option set 2, add them to the new option set.
-  $.each(options_set_2, function(index, object) {
-    if (index != 'success' && index != 'error') {
-      new_options_set[index] = object;
-    }
-  });
-
-  // Return the new option set.
-  //console.log(JSON.stringify(new_options_set));
-  return new_options_set;
 }
 
 /**

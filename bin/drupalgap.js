@@ -35,22 +35,7 @@ function drupalgap_init() {
            { name: 'menu' },
            { name: 'mvc' },
            { name: 'node' },
-           /*{ name: 'services',
-             'includes':[
-               {'name':'comment'},
-               {'name':'drupalgap_content'},
-               {'name':'drupalgap_system'},
-               {'name':'drupalgap_taxonomy'},
-               {'name':'drupalgap_user'},
-               {'name':'file'},
-               {'name':'node'},
-               {'name':'services'},
-               {'name':'system'},
-               {'name':'taxonomy_term'},
-               {'name':'taxonomy_vocabulary'},
-               {'name':'user'},
-             ]
-           },*/
+           /*{ name: 'services'},*/
            { name: 'system' },
            { name: 'taxonomy' },
            { name: 'user' },
@@ -172,12 +157,10 @@ function _drupalgap_deviceready() {
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      navigator.notification.alert(
-          'No site_path to Drupal set in the app/settings.js file!',
-          function() {},
-          'Error',
-          'OK'
-      );
+      var msg = 'No site_path to Drupal set in the app/settings.js file!';
+      drupalgap_alert(msg, {
+          title: 'Error'
+      });
       return;
     }
 
@@ -186,12 +169,10 @@ function _drupalgap_deviceready() {
     drupalgap_check_connection();
     if (!drupalgap.online) {
       module_invoke_all('device_offline');
-      navigator.notification.alert(
-          'No connection found!',
-          function() { drupalgap_goto('offline'); },
-          'Offline',
-          'OK'
-      );
+      drupalgap_alert('No connection found!', {
+          title: 'Offline',
+          alertCallback: function() { drupalgap_goto('offline'); }
+      });
       return;
     }
     else {
@@ -233,12 +214,10 @@ function _drupalgap_deviceready() {
                    Drupal.settings.site_path +
                    ' is online. If you continue to have problems visit ' +
                    'www.drupalgap.org for troubleshooting info.';
-            navigator.notification.alert(
-                msg,
-                function() { drupalgap_goto('offline'); },
-                'Unable to Connect to Drupal',
-                'OK'
-            );
+           drupalgap_alert(msg, {
+               title: 'Unable to Connect to Drupal',
+               alertCallback: function() { drupalgap_goto('offline'); }
+           });
           }
         };
 
@@ -341,7 +320,8 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      alert('Failed to load module! (' + module.name + ')');
+                      var msg = 'Failed to load module! (' + module.name + ')';
+                      drupalgap_alert(msg);
                     }
                 });
               }
@@ -362,7 +342,8 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      alert('drupalgap_load_theme - no theme specified in settings.js');
+      var msg = 'drupalgap_load_theme - no theme specified in settings.js';
+      drupalgap_alert(msg);
     }
     else {
       // Pull the theme name from the settings.js file.
@@ -375,7 +356,7 @@ function drupalgap_load_theme() {
         if (!drupalgap_file_exists(theme_path)) {
           var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
             'The theme\'s JS file does not exist: ' + theme_path;
-          alert(error_msg);
+          drupalgap_alert(error_msg);
           return false;
         }
       }
@@ -408,7 +389,7 @@ function drupalgap_load_theme() {
       else {
         var error_msg = 'drupalgap_load_theme() - failed - ' +
           template_info_function + '() does not exist!';
-        alert(error_msg);
+        drupalgap_alert(error_msg);
       }
     }
     return false;
@@ -464,6 +445,34 @@ function drupalgap_add_css() {
 }
 
 /**
+ * Alerts a message to the user using PhoneGap's alert. It is important to
+ * understand this is an async function, so code will continue to execute while
+ * the alert is displayed to the user.
+ * You may optionally pass in a second argument as a JSON object with the
+ * following properties:
+ *   alertCallback - the function to call after the user presses OK
+ *   title - the title to use on the alert box, defaults to 'Alert'
+ *   buttonName - the text to place on the button, default to 'OK'
+ * @param {String} message
+ */
+function drupalgap_alert(message) {
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    var alertCallback = function() { };
+    var title = 'Alert';
+    var buttonName = 'OK';
+    if (options) {
+      if (options.alertCallback) { alertCallback = options.alertCallback; }
+      if (options.title) { title = options.title; }
+      if (options.buttonName) { title = options.buttonName; }
+    }
+    navigator.notification.alert(message, alertCallback, title, buttonName);
+  }
+  catch (error) { console.log('drupalgap_alert - ' + error); }
+}
+
+/**
  * Rounds up all blocks defined by hook_block_info and places them in the
  * drupalgap.blocks array.
  */
@@ -495,62 +504,6 @@ function drupalgap_load_blocks() {
     }
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
-}
-
-/**
- * Takes option set 2, grabs the success/error callback(s), if any,
- * and appends them onto option set 1's callback(s), then returns
- * the newly assembled option set.
- * @param {Object} options_set_1
- * @param {Object} options_set_2
- * @return {Object}
- */
-function drupalgap_chain_callbacks(options_set_1, options_set_2) {
-
-  // Setup the new options.
-  var new_options_set = {};
-  $.extend(true, new_options_set, options_set_1);
-
-  // Chain the success callbacks.
-  if (options_set_2.success) {
-    if (new_options_set.success) {
-      if (!$.isArray(new_options_set.success)) {
-        var backup = new_options_set.success;
-        new_options_set.success = [];
-        new_options_set.success.push(backup);
-      }
-      new_options_set.success.push(options_set_2.success);
-    }
-    else {
-      new_options_set.success = options_set_2.success;
-    }
-  }
-
-  // Chain the error callbacks.
-  if (options_set_2.error) {
-    if (new_options_set.error) {
-      if (!$.isArray(new_options_set.error)) {
-        var backup = new_options_set.error;
-        new_options_set.error = [];
-        new_options_set.error.push(backup);
-      }
-      new_options_set.error.push(options_set_2.error);
-    }
-    else {
-      new_options_set.error = options_set_2.error;
-    }
-  }
-
-  // For all other variables in option set 2, add them to the new option set.
-  $.each(options_set_2, function(index, object) {
-    if (index != 'success' && index != 'error') {
-      new_options_set[index] = object;
-    }
-  });
-
-  // Return the new option set.
-  //console.log(JSON.stringify(new_options_set));
-  return new_options_set;
 }
 
 /**
@@ -1654,11 +1607,13 @@ function drupalgap_check_visibility(type, data) {
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
       var current_path = drupalgap_path_get();
+      var current_path_parts = current_path.split('/');
       $.each(data.pages.value, function(page_index, path) {
           if (path == '') { path = drupalgap.settings.front; }
           if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
+            return false;
           }
           else {
             // It wasn't a direct path match, is there a wildcard that matches
@@ -1669,19 +1624,32 @@ function drupalgap_check_visibility(type, data) {
               if (router_path.replace(/%/g, '*') == path) {
                 if (data.pages.mode == 'include') { visible = true; }
                 else if (data.pages.mode == 'exclude') { visible = false; }
+                return false;
               }
               else {
+                var path_parts = path.split('/');
+                var match = true;
+                if (path_parts.length == 0) { match = false; }
+                else if (path_parts.length == current_path_parts.length) {
+                  for (var i = 0; i < path_parts.length; i++) {
+                    if (path_parts[i] != current_path_parts[i]) {
+                      match = false;
+                      break;
+                    }
+                  }
+                }
                 if (data.pages.mode == 'include') { visible = false; }
                 else if (data.pages.mode == 'exclude') { visible = true; }
+                if (!match) { visible = !visible; }
               }
             }
             else {
+              // There's no wildcard in the rule, and it wasn't a direct path
+              // match.
               if (data.pages.mode == 'include') { visible = false; }
               else if (data.pages.mode == 'exclude') { visible = true; }
             }
           }
-          // Break out of the loop if already determined to be visible.
-          if (visible) { return false; }
       });
     }
     return visible;
@@ -1728,11 +1696,10 @@ function drupalgap_get_path(type, name) {
                   else if (bundle == 'contrib') { path += 'app/modules'; }
                   else if (bundle == 'custom') { path += 'app/modules/custom'; }
                   else {
-                    alert(
-                      'drupalgap_get_path - unknown module bundle (' +
-                        bundle +
-                      ')'
-                    );
+                    var msg = 'drupalgap_get_path - unknown module bundle (' +
+                      bundle +
+                    ')';
+                    drupalgap_alert(msg);
                     return false;
                   }
                   path += '/' + name;
@@ -1818,15 +1785,13 @@ function drupalgap_error(message) {
                         arguments.callee.caller.name + ' - ' +
                         message;
     console.log(error_message);
-    if (drupalgap.settings.debug) { alert(error_message); }
+    if (drupalgap.settings.debug) { drupalgap_alert(error_message); }
     // If a message for the user was passed in, display it to the user.
-    if (arguments[1]) { alert(arguments[1]); }
+    if (arguments[1]) { drupalgap_alert(arguments[1]); }
     // Goto the error page if we are not already there.
     if (drupalgap_path_get() != 'error') { drupalgap_goto('error'); }
   }
-  catch (error) {
-    alert('drupalgap_error - ' + error);
-  }
+  catch (error) { console.log('drupalgap_error - ' + error); }
 }
 
 /**
@@ -2017,7 +1982,7 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
         }
       }
       else {
-        alert(
+        drupalgap_alert(
           'drupalgap_goto_generate_page_and_go - ' +
           'failed to load theme\'s page.tpl.html file'
         );
@@ -2043,7 +2008,7 @@ function drupalgap_goto_prepare_path(path) {
     // If the path is an empty string, change it to the front page path.
     if (path == '') {
       if (!drupalgap.settings.front) {
-        alert(
+        drupalgap_alert(
           'drupalgap_goto_prepare_path - ' +
           'no front page specified in settings.js!'
         );
@@ -2311,8 +2276,9 @@ function drupalgap_render_region(region) {
   try {
     // Make sure there are blocks specified for this theme in settings.js.
     if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
-      alert('drupalgap_render_region - there are no blocks for the "' +
-            drupalgap.settings.theme + ' " theme in the settings.js file!');
+      var msg = 'drupalgap_render_region - there are no blocks for the "' +
+        drupalgap.settings.theme + ' " theme in the settings.js file!';
+      drupalgap_alert(msg);
       return '';
     }
     // Grab the current path.
@@ -2364,11 +2330,7 @@ function drupalgap_render_region(region) {
         }
       }
       // Render each block in the region.
-      $.each(
-        eval(
-          'drupalgap.settings.blocks[drupalgap.settings.theme].' +
-          region.name
-        ),
+      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
           // Check the block's visibility settings.
           var render_block = false;
@@ -2861,7 +2823,10 @@ function drupalgap_get_form(form_id) {
       // Render the form.
       html = drupalgap_form_render(form);
     }
-    else { alert('drupalgap_get_form - failed to get form (' + form_id + ')'); }
+    else {
+      var msg = 'drupalgap_get_form - failed to get form (' + form_id + ')';
+      drupalgap_alert(msg);
+    }
     return html;
   }
   catch (error) { console.log('drupalgap_get_form - ' + error); }
@@ -3004,7 +2969,7 @@ function drupalgap_form_load(form_id) {
     else {
       var error_msg = 'drupalgap_form_load - no callback function (' +
                        function_name + ') available for form (' + form_id + ')';
-      alert(error_msg);
+      drupalgap_alert(error_msg);
     }
     return form;
   }
@@ -3455,7 +3420,8 @@ function _drupalgap_form_submit(form_id) {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
     if (!form) {
-      alert('_drupalgap_form_submit - failed to load form: ' + form_id);
+      var msg = '_drupalgap_form_submit - failed to load form: ' + form_id;
+      drupalgap_alert(msg);
       return false;
     }
 
@@ -3485,7 +3451,7 @@ function _drupalgap_form_submit(form_id) {
           $.each(drupalgap.form_errors, function(name, message) {
               html += message + '\n\n';
           });
-          alert(html);
+          drupalgap_alert(html);
         }
         else { form_submission(); }
       }
@@ -3823,18 +3789,12 @@ function menu_execute_active_handler() {
     if (!path) { path = drupalgap_path_get(); }
     var page_id = drupalgap_get_page_id(path);
 
-    // TODO - Check to make sure the user has access to this DrupalGap menu
-    // path!
+    // @todo - Make sure the user has access to this DrupalGap menu path!
 
     // Get the router path.
     var router_path = drupalgap_router_path_get();
 
     if (router_path) {
-      /*console.log(path);
-      console.log(router_path);
-      console.log(JSON.stringify(drupalgap.menu_links));
-      console.log(JSON.stringify(drupalgap.menu_links[router_path]));
-      alert('menu_execute_active_handler');*/
 
       // Call the page call back for this router path and send along any
       // arguments.
@@ -4043,24 +4003,6 @@ function menu_router_build() {
   }
   catch (error) { console.log('menu_router_build - ' + error); }
 }
-
-/**
- * Sets the active path, which determines which page is loaded.
- */
-// We could not use this because the page id has already been generated
-// here, and any arguments present generate a page id that won't match
-// the page already generated.
-/*function menu_set_active_item(path) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('menu_set_active_item(' + path + ')');
-    }
-    drupalgap_path_set(path);
-  }
-  catch (error) {
-    alert('menu_set_active_item - ' + error);
-  }
-}*/
 
 /**
  * Given a menu link path, this determines and returns the router path as a
@@ -4288,8 +4230,6 @@ function drupalgap_menus_load() {
         });
       }
     }
-    //console.log(JSON.stringify(drupalgap.menus));
-    //alert('drupalgap_menus_load');
   }
   catch (error) { console.log('drupalgap_menus_load - ' + error); }
 }
@@ -4762,21 +4702,6 @@ function template_process_page(variables) {
 }
 
 /**
- * Load a block from a given module and block delta value.
- */
-/*function block_load(module, delta) {
-  try {
-    if (drupalgap.settings.debug) {
-      console.log('block_load()');
-      console.log(JSON.stringify(arguments));
-    }
-  }
-  catch (error) {
-    alert('block_load - ' + error);
-  }
-}*/
-
-/**
  * Given a block delta, this will return the corresponding
  * block from drupalgap.blocks.
  * @param {String} delta
@@ -4795,14 +4720,7 @@ function drupalgap_block_load(delta) {
     }
     if (block == null) {
       var msg = 'drupalgap_block_load - failed to load "' + delta + '" block!';
-      if (delta == 'header') {
-        msg +=
-          ' - Did you rename your "header" block to "title" in settings.js?';
-      }
-      alert(msg);
-    }
-    if (drupalgap.settings.debug && drupalgap.settings.debug_level == 2) {
-      console.log(JSON.stringify(block));
+      drupalgap_alert(msg);
     }
     return block;
   }
@@ -4814,11 +4732,14 @@ function drupalgap_block_load(delta) {
  * @param {Object} form
  * @param {Object} form_state
  * @param {Object} comment
- * @param {Object} node
  * @return {Object}
  */
-function comment_edit(form, form_state, comment, node) {
+function comment_edit(form, form_state, comment) {
   try {
+
+    // Setup form defaults.
+    form.entity_type = 'comment';
+    form.bundle = null;
 
     // If there is no comment object coming in, make an empty one with a node
     // id. Note, once the form.js submit handler is aware of its own entity and
@@ -4827,56 +4748,58 @@ function comment_edit(form, form_state, comment, node) {
     // be needed.
     if (!comment) { comment = {'nid': arg(1)}; }
 
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.bundle = node.type;
+    // Load up the node specified in the comment.
+    var node = node_load(comment.nid);
 
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.action = 'node/' + node.nid;
+    if (node) {
+      // Setup form defaults.
+      form.entity_type = 'comment';
+      form.action = 'node/' + node.nid;
 
-    // Determine the comment bundle from the node type.
-    var bundle = 'comment_node_' + node.type;
+      // Determine the comment bundle from the node type.
+      var bundle = 'comment_node_' + node.type;
 
-    // Add the entity's core fields to the form.
-    drupalgap_entity_add_core_fields_to_form(
-      'comment',
-      bundle,
-      form,
-      comment
-    );
-    // @todo - fields like 'name' and 'mail' should not be shown when
-    // the user is authenticated.
+      // Add the entity's core fields to the form.
+      drupalgap_entity_add_core_fields_to_form(
+        'comment',
+        bundle,
+        form,
+        comment
+      );
+      // @todo - fields like 'name' and 'mail' should not be shown when the user
+      // is authenticated.
 
-    // Add the fields for this content type to the form.
-    drupalgap_field_info_instances_add_to_form(
-      'comment',
-      bundle,
-      form,
-      comment
-    );
+      // Add the fields for this content type to the form.
+      drupalgap_field_info_instances_add_to_form(
+        'comment',
+        bundle,
+        form,
+        comment
+      );
 
-    // Add submit to form.
-    form.elements.submit = {
-      'type': 'submit',
-      'value': 'Save'
-    };
-
-    // Add cancel button to form.
-    form.buttons['cancel'] = {
-      'title': 'Cancel'
-    };
-
-    // Add delete button to form if we're editing a comment.
-    if (comment && comment.cid) {
-      form.buttons['delete'] = {
-        'title': 'Delete'
+      // Add submit to form.
+      form.elements.submit = {
+        'type': 'submit',
+        'value': 'Save'
       };
+
+      // Add cancel button to form.
+      form.buttons['cancel'] = {
+        'title': 'Cancel'
+      };
+
+      // Add delete button to form if we're editing a comment.
+      if (comment && comment.cid) {
+        form.buttons['delete'] = {
+          'title': 'Delete'
+        };
+      }
+
+      return form;
     }
-
-    form.prefix += '<h2>Add comment</h2>';
-
-    return form;
+    else {
+      return 'comment_edit - failed to load node!';
+    }
   }
   catch (error) { console.log('comment_edit - ' + error); }
 }
@@ -4906,7 +4829,7 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
   form, entity) {
   try {
     // Grab the core fields for this entity type and bundle.
-    var fields = drupalgap_entity_get_core_fields(entity_type, bundle);
+    var fields = drupalgap_entity_get_core_fields(entity_type);
     // Iterate over each core field in the entity and add it to the form. If
     // there is a value present in the entity, then set the field's form element
     // default value equal to the core field value.
@@ -5418,7 +5341,7 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
         // If there were any form errors, display them in an alert.
         var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
           status, message);
-        if (msg) { alert(msg); }
+        if (msg) { drupalgap_alert(msg); }
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - error - ' + error);
@@ -5450,10 +5373,9 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
 /**
  * Given an entity type, this returns its core fields as forms api elements.
  * @param {String} entity_type
- * @param {String} bundle
  * @return {Object}
  */
-function drupalgap_entity_get_core_fields(entity_type, bundle) {
+function drupalgap_entity_get_core_fields(entity_type) {
   try {
     // @todo - was this function what we were tyring to accomplish with the
     // early entity_info hook imitations?
@@ -5462,10 +5384,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
     var fields = {};
     switch (entity_type) {
       case 'comment':
-        // Add each schema field to the field collection.
-        dpm(drupalgap.content_types_list);
-        dpm(bundle);
-        //dpm(drupalgap.entity_info[entity_type]);
+        // Add each schema field to the fields collection.
         $.each(
           drupalgap.entity_info[entity_type].schema_fields_sql['base table'],
           function(index, name) {
@@ -5478,36 +5397,12 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
             eval('fields.' + name + ' = field;');
           }
         );
+        // Make modifications to comment fields.
         fields['nid'].required = true;
         fields['subject'].type = 'textfield';
         fields['name'].type = 'textfield';
-        // Depending on this content type's comment settings, let's make
-        // modifications to the form elements.
-        // admin/structure/types/manage/article
-        // 0 = Anonymous posters may not enter their contact information
-        // 1 = Anonymous posters may leave their contact information
-        // 2 = Anonymous posters must leave their contact information
-        var content_type = bundle.replace('comment_node_', '');
-        var comment_anonymous =
-          drupalgap.content_types_list[content_type].comment_anonymous;
-        switch (comment_anonymous) {
-          case '0':
-            delete(fields['mail']);
-            delete(fields['homepage']);
-            break;
-          case '1':
-            break;
-          case '2':
-            fields['mail'].required = true;
-            fields['homepage'].required = true;
-            break;
-          default:
-            console.log('WARNING: drupalgap_entity_get_core_fields - ' +
-              'Unknown anonymous comment setting: ' + comment_anonymous);
-            break;
-        }
-        if (fields['mail']) { fields['mail'].type = 'textfield'; }
-        if (fields['homepage']) { fields['homepage'].type = 'textfield'; }
+        fields['mail'].type = 'textfield';
+        fields['homepage'].type = 'textfield';
         break;
       case 'node':
         fields.nid = {
@@ -6293,7 +6188,7 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
       'if (message != "Camera cancelled." && ' +
         'message != "Selection cancelled.")' +
       '{' +
-        'alert("' + imagefield_error + ' - " + message);' +
+        'drupalgap_alert("' + imagefield_error + ' - " + message);' +
       '}' +
     '}';
     // Define success callback function.
@@ -6789,7 +6684,7 @@ function mvc_install() {
       }
     }
     //console.log(JSON.stringify(drupalgap.mvc.models));
-    //alert('drupalgap_mvc_init');
+    //drupalgap_alert('drupalgap_mvc_init');
     // These may not be needed. Perhaps we should just call assumed hooks that
     // should be implemented for any custom views and controllers at the time
     // they are needed, probably no need to bundle them inside drupalgap.mvc.
@@ -6829,7 +6724,7 @@ function mvc_model_system_fields() {
   try {
     return ['id', 'module', 'type'];
   }
-  catch (error) { alert('mvc_model_system_fields - ' + error); }
+  catch (error) { console.log('mvc_model_system_fields - ' + error); }
 }
 
 // We'll need developer friendly front end functions, e.g.
@@ -6905,7 +6800,8 @@ function drupalgap_mvc_model_create_form_submit(form, form_state) {
       drupalgap_goto(path);
     }
     else {
-      alert('drupalgap_mvc_model_create_form_submit - failed to save item!');
+      var msg = 'drupalgap_mvc_model_create_form_submit - failed to save item!';
+      drupalgap_alert(msg);
     }
   }
   catch (error) {
@@ -7215,6 +7111,36 @@ function node_page_view(nid) {
       return content;
     }
     else { drupalgap_error('No node id provided!'); }
+
+    if (node) {
+
+      // If the comments are hidden, do nothing.
+      /*if (node.comment == 0) { }
+      // If the comments are closed or open, show the comments.
+      else if (node.comment == 1 || node.comment == 2) {
+
+        // Build an empty list for the comments
+        build.comments = {
+          'theme':'jqm_item_list',
+          'title':'Comments',
+          'items':[],
+          'attributes':{'id':'comment_listing_items_' + node.nid},
+        };
+
+        // If the comments are open, show the comment form.
+        if (node.comment == 2) {
+          build.comments_form = {
+            'markup':
+              '<h2>Add comment</h2>' +
+                drupalgap_get_form('comment_edit', {'nid':node.nid})
+          };
+        }
+      }*/
+      return build;
+    }
+    else {
+      console.log('node_page_view - failed to load node (' + node.nid + ')');
+    }
   }
   catch (error) { console.log('node_page_view - ' + error); }
 }
@@ -7235,31 +7161,6 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node.title},
             'content': {'markup': node.content}
           };
-          // If the comments are closed or open, show the comments.
-          if (node.comment != 0) {
-            if (node.comment == 1 || node.comment == 2) {
-
-              // Build an empty list for the comments
-              var comments = {
-                title: 'Comments',
-                items: [],
-                attributes: {
-                  id: 'comment_listing_items_' + node.nid
-                }
-              };
-              build.content.markup += theme('jqm_item_list', comments);
-
-              // If the comments are open, show the comment form.
-              if (node.comment == 2) {
-                build.content.markup += drupalgap_get_form(
-                  'comment_edit',
-                  { nid: node.nid },
-                  node
-                );
-              }
-            }
-          }
-
           _drupalgap_entity_page_container_inject(
             'node', node.nid, 'view', build
           );
@@ -7422,7 +7323,7 @@ drupalgap.services.rss = {
     'call': function(options) {
       try {
         if (!options.url) {
-          alert('drupalgap.services.rss.retrieve.call - missing url');
+          drupalgap_alert('drupalgap.services.rss.retrieve.call - missing url');
           return false;
         }
         var api_options =
@@ -7433,12 +7334,7 @@ drupalgap.services.rss = {
         drupalgap.api.call(api_options);
       }
       catch (error) {
-        navigator.notification.alert(
-          error,
-          function() {},
-          'RSS Retrieve Error',
-          'OK'
-        );
+        console.log('RSS Retrieve Error - ' + error);
       }
     }
   } // <!-- get_variable -->
@@ -7735,12 +7631,10 @@ function offline_try_again() {
       });
     }
     else {
-      navigator.notification.alert(
-          'Sorry, no connection found! (' + connection + ')',
-          function() { },
-          'Offline',
-          'OK'
-      );
+      var msg = 'Sorry, no connection found! (' + connection + ')';
+      drupalgap_alert(msg, {
+          title: 'Offline'
+      });
       return false;
     }
   }
@@ -7798,8 +7692,8 @@ function system_settings_form_submit(form, form_state) {
           variable_set(variable, value);
       });
     }
-    // @todo - a nice spot to have a drupal_set_message function, eh?
-    alert('The configuration options have been saved.');
+    // @todo - a nice spot to have a drupalgap_set_message function, eh?
+    drupalgap_alert('The configuration options have been saved.');
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
 }
@@ -8161,7 +8055,7 @@ function user_register_form_submit(form, form_state) {
           // E-mail verification not needed, if administrator approval is
           // needed, notify the user, otherwise log them in.
           if (drupalgap.site_settings.user_register == '2') {
-            alert(
+            drupalgap_alert(
             form.user_register.user_mail_register_pending_approval_required_body
             );
             drupalgap_goto('');
@@ -8179,7 +8073,9 @@ function user_register_form_submit(form, form_state) {
         }
         else {
           // E-mail verification needed... notify the user.
-          alert(form.user_register.user_mail_register_email_verification_body);
+          drupalgap_alert(
+            form.user_register.user_mail_register_email_verification_body
+          );
           drupalgap_goto('');
         }
       },
@@ -8187,7 +8083,7 @@ function user_register_form_submit(form, form_state) {
         // If there were any form errors, display them.
         var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
           status, message);
-        if (msg) { alert(msg); }
+        if (msg) { drupalgap_alert(msg); }
       }
     });
   }
@@ -8288,7 +8184,7 @@ function user_services_postprocess(options, result) {
       $.each(response, function(index, message) {
           msg += message + '\n';
       });
-      if (msg != '') { alert(msg); }
+      if (msg != '') { drupalgap_alert(msg); }
     }
   }
   catch (error) { console.log('user_services_postprocess - ' + error); }

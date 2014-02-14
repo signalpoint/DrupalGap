@@ -137,7 +137,7 @@ function mvc_install() {
       }
     }
     //console.log(JSON.stringify(drupalgap.mvc.models));
-    //alert('drupalgap_mvc_init');
+    //drupalgap_alert('drupalgap_mvc_init');
     // These may not be needed. Perhaps we should just call assumed hooks that
     // should be implemented for any custom views and controllers at the time
     // they are needed, probably no need to bundle them inside drupalgap.mvc.
@@ -177,7 +177,7 @@ function mvc_model_system_fields() {
   try {
     return ['id', 'module', 'type'];
   }
-  catch (error) { alert('mvc_model_system_fields - ' + error); }
+  catch (error) { console.log('mvc_model_system_fields - ' + error); }
 }
 
 // We'll need developer friendly front end functions, e.g.
@@ -253,7 +253,8 @@ function drupalgap_mvc_model_create_form_submit(form, form_state) {
       drupalgap_goto(path);
     }
     else {
-      alert('drupalgap_mvc_model_create_form_submit - failed to save item!');
+      var msg = 'drupalgap_mvc_model_create_form_submit - failed to save item!';
+      drupalgap_alert(msg);
     }
   }
   catch (error) {

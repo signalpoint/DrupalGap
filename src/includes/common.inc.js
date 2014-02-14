@@ -128,11 +128,13 @@ function drupalgap_check_visibility(type, data) {
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
       var current_path = drupalgap_path_get();
+      var current_path_parts = current_path.split('/');
       $.each(data.pages.value, function(page_index, path) {
           if (path == '') { path = drupalgap.settings.front; }
           if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
+            return false;
           }
           else {
             // It wasn't a direct path match, is there a wildcard that matches
@@ -143,19 +145,32 @@ function drupalgap_check_visibility(type, data) {
               if (router_path.replace(/%/g, '*') == path) {
                 if (data.pages.mode == 'include') { visible = true; }
                 else if (data.pages.mode == 'exclude') { visible = false; }
+                return false;
               }
               else {
+                var path_parts = path.split('/');
+                var match = true;
+                if (path_parts.length == 0) { match = false; }
+                else if (path_parts.length == current_path_parts.length) {
+                  for (var i = 0; i < path_parts.length; i++) {
+                    if (path_parts[i] != current_path_parts[i]) {
+                      match = false;
+                      break;
+                    }
+                  }
+                }
                 if (data.pages.mode == 'include') { visible = false; }
                 else if (data.pages.mode == 'exclude') { visible = true; }
+                if (!match) { visible = !visible; }
               }
             }
             else {
+              // There's no wildcard in the rule, and it wasn't a direct path
+              // match.
               if (data.pages.mode == 'include') { visible = false; }
               else if (data.pages.mode == 'exclude') { visible = true; }
             }
           }
-          // Break out of the loop if already determined to be visible.
-          if (visible) { return false; }
       });
     }
     return visible;
@@ -202,11 +217,10 @@ function drupalgap_get_path(type, name) {
                   else if (bundle == 'contrib') { path += 'app/modules'; }
                   else if (bundle == 'custom') { path += 'app/modules/custom'; }
                   else {
-                    alert(
-                      'drupalgap_get_path - unknown module bundle (' +
-                        bundle +
-                      ')'
-                    );
+                    var msg = 'drupalgap_get_path - unknown module bundle (' +
+                      bundle +
+                    ')';
+                    drupalgap_alert(msg);
                     return false;
                   }
                   path += '/' + name;
@@ -292,15 +306,13 @@ function drupalgap_error(message) {
                         arguments.callee.caller.name + ' - ' +
                         message;
     console.log(error_message);
-    if (drupalgap.settings.debug) { alert(error_message); }
+    if (drupalgap.settings.debug) { drupalgap_alert(error_message); }
     // If a message for the user was passed in, display it to the user.
-    if (arguments[1]) { alert(arguments[1]); }
+    if (arguments[1]) { drupalgap_alert(arguments[1]); }
     // Goto the error page if we are not already there.
     if (drupalgap_path_get() != 'error') { drupalgap_goto('error'); }
   }
-  catch (error) {
-    alert('drupalgap_error - ' + error);
-  }
+  catch (error) { console.log('drupalgap_error - ' + error); }
 }
 
 /**
@@ -491,7 +503,7 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
         }
       }
       else {
-        alert(
+        drupalgap_alert(
           'drupalgap_goto_generate_page_and_go - ' +
           'failed to load theme\'s page.tpl.html file'
         );
@@ -517,7 +529,7 @@ function drupalgap_goto_prepare_path(path) {
     // If the path is an empty string, change it to the front page path.
     if (path == '') {
       if (!drupalgap.settings.front) {
-        alert(
+        drupalgap_alert(
           'drupalgap_goto_prepare_path - ' +
           'no front page specified in settings.js!'
         );
@@ -785,8 +797,9 @@ function drupalgap_render_region(region) {
   try {
     // Make sure there are blocks specified for this theme in settings.js.
     if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
-      alert('drupalgap_render_region - there are no blocks for the "' +
-            drupalgap.settings.theme + ' " theme in the settings.js file!');
+      var msg = 'drupalgap_render_region - there are no blocks for the "' +
+        drupalgap.settings.theme + ' " theme in the settings.js file!';
+      drupalgap_alert(msg);
       return '';
     }
     // Grab the current path.
@@ -838,11 +851,7 @@ function drupalgap_render_region(region) {
         }
       }
       // Render each block in the region.
-      $.each(
-        eval(
-          'drupalgap.settings.blocks[drupalgap.settings.theme].' +
-          region.name
-        ),
+      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
           // Check the block's visibility settings.
           var render_block = false;

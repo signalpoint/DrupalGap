@@ -334,7 +334,10 @@ function drupalgap_get_form(form_id) {
       // Render the form.
       html = drupalgap_form_render(form);
     }
-    else { alert('drupalgap_get_form - failed to get form (' + form_id + ')'); }
+    else {
+      var msg = 'drupalgap_get_form - failed to get form (' + form_id + ')';
+      drupalgap_alert(msg);
+    }
     return html;
   }
   catch (error) { console.log('drupalgap_get_form - ' + error); }
@@ -477,7 +480,7 @@ function drupalgap_form_load(form_id) {
     else {
       var error_msg = 'drupalgap_form_load - no callback function (' +
                        function_name + ') available for form (' + form_id + ')';
-      alert(error_msg);
+      drupalgap_alert(error_msg);
     }
     return form;
   }
@@ -928,7 +931,8 @@ function _drupalgap_form_submit(form_id) {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
     if (!form) {
-      alert('_drupalgap_form_submit - failed to load form: ' + form_id);
+      var msg = '_drupalgap_form_submit - failed to load form: ' + form_id;
+      drupalgap_alert(msg);
       return false;
     }
 
@@ -958,7 +962,7 @@ function _drupalgap_form_submit(form_id) {
           $.each(drupalgap.form_errors, function(name, message) {
               html += message + '\n\n';
           });
-          alert(html);
+          drupalgap_alert(html);
         }
         else { form_submission(); }
       }

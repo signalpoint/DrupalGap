@@ -92,7 +92,7 @@ drupalgap.services.rss = {
     'call': function(options) {
       try {
         if (!options.url) {
-          alert('drupalgap.services.rss.retrieve.call - missing url');
+          drupalgap_alert('drupalgap.services.rss.retrieve.call - missing url');
           return false;
         }
         var api_options =
@@ -103,12 +103,7 @@ drupalgap.services.rss = {
         drupalgap.api.call(api_options);
       }
       catch (error) {
-        navigator.notification.alert(
-          error,
-          function() {},
-          'RSS Retrieve Error',
-          'OK'
-        );
+        console.log('RSS Retrieve Error - ' + error);
       }
     }
   } // <!-- get_variable -->
