@@ -790,6 +790,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     }
     var theme_function = item.type;
 
+    // If the element is disabled, add the 'disabled' attribute.
+    if (element.disabled) { variables.attributes.disabled = ''; }
+
     // Make any preprocess modifications to the elements so they will map
     // cleanly to their theme function. A hook_field_widget_form() should be
     // used instead here.
