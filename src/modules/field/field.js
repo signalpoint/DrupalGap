@@ -32,6 +32,20 @@ function drupalgap_field_info_fields() {
 function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
   try {
     var instances = drupalgap_field_info_instances(entity_type, bundle_name);
+    if (!instances) {
+      var msg = 'WARNING: drupalgap_field_info_instance - instance was null ' +
+      'for entity (' + entity_type + ') bundle (' + bundle_name + ') using ' +
+      'field (' + field_name + ')';
+      console.log(msg);
+      return null;
+    }
+    if (!instances[field_name]) {
+      var msg = 'WARNING: drupalgap_field_info_instance - ' +
+        '"' + field_name + '" does not exist for entity (' + entity_type + ')' +
+        ' bundle (' + bundle_name + ')';
+      console.log(msg);
+      return null;
+    }
     return instances[field_name];
   }
   catch (error) { console.log('drupalgap_field_info_instance - ' + error); }
