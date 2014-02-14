@@ -80,6 +80,11 @@ function drupalgap_attributes(attributes) {
             // will work.
             attribute_string += name + '="' + value + '" ';
           }
+          else {
+            // The value was empty, just place the attribute name on the
+            // element.
+            attribute_string += name + ' ';
+          }
       });
     }
     return attribute_string;
