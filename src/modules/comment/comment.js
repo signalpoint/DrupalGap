@@ -16,16 +16,13 @@ function comment_edit(form, form_state, comment, node) {
     // be needed.
     if (!comment) { comment = {'nid': arg(1)}; }
 
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.bundle = node.type;
-
-    // Setup form defaults.
-    form.entity_type = 'comment';
-    form.action = 'node/' + node.nid;
-
     // Determine the comment bundle from the node type.
     var bundle = 'comment_node_' + node.type;
+
+    // Setup form defaults.
+    form.entity_type = 'comment';
+    form.bundle = bundle;
+    form.action = 'node/' + node.nid;
 
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form(
@@ -34,8 +31,6 @@ function comment_edit(form, form_state, comment, node) {
       form,
       comment
     );
-    // @todo - fields like 'name' and 'mail' should not be shown when
-    // the user is authenticated.
 
     // Add the fields for this content type to the form.
     drupalgap_field_info_instances_add_to_form(
