@@ -4499,7 +4499,9 @@ function theme_item_list(variables) {
     // theme them too.
     var type = 'ul';
     if (variables.type) { type = variables.type; }
-    var html = '<' + type + ' ' +
+    var html = '';
+    if (variables.title) { html += '<h2>' + variables.title + '</h2>'; }
+    html += '<' + type + ' ' +
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
       $.each(variables.items, function(index, item) {
@@ -4841,11 +4843,21 @@ function theme_comment(variables) {
     var comment = variables.comment;
     var html = '';
     var comment_content = '';
+    var picture = '';
+    if (comment.picture_uri) {
+      comment_content += theme(
+        'image',
+        { path: drupalgap_image_path(comment.picture_uri) }
+      );
+    }
+    var created = new Date(comment.created * 1000);
+    created = created.toLocaleDateString() + ' at ' +
+      created.toLocaleTimeString();
     comment_content +=
       '<h2>' + comment.name + '</h2>' +
       '<h3>' + comment.subject + '<h3/>' +
       '<p>' + comment.content + '</p>' +
-      '<p class="ui-li-aside">' + comment.created + '</p>';
+      '<p class="ui-li-aside">' + created + '</p>';
     html += l(comment_content, 'user/' + comment.uid);
     if (user_access('administer comments')) {
       html += l('Edit', 'comment/' + comment.cid + '/edit', {
