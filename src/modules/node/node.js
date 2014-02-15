@@ -236,6 +236,7 @@ function node_page_view_pageshow(nid) {
   try {
     node_load(nid, {
         success: function(node) {
+          // Build the node display.
           var build = {
             'theme': 'node',
             // @todo - is this line of code doing anything?
@@ -244,8 +245,16 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node.title},
             'content': {'markup': node.content}
           };
+          // Build an empty list for the comments.
+          var comments = {
+            title: 'Comments',
+            items: [],
+            attributes: {
+              id: comment_list_id(node.nid)
+            }
+          };
           // If the comments are closed or open, show the comments.
-          if (node.comment != 0) {
+          if (node.comment != 0 && node.comment_count != 0) {
             if (node.comment == 1 || node.comment == 2) {
 
               // Grab any comments and display them.
@@ -257,30 +266,12 @@ function node_page_view_pageshow(nid) {
               comment_index(query, {
                   success: function(results) {
                     try {
-                      dpm(results);
-                      // Build an empty list for the comments
-                      var comments = {
-                        title: 'Comments',
-                        items: [],
-                        attributes: {
-                          id: 'comment_listing_items_' + node.nid
-                        }
-                      };
                       $.each(results, function(index, comment) {
-                          var html = '';
-                          if (user_access('administer comments')) {
-                            html += l(
-                              'Edit',
-                              'comment/' + comment.cid + '/edit'
-                            );
-                          }
-                          html += comment.created + '<br />' +
-                            'Author: ' + comment.name + '<br />' +
-                            'Subject: ' + comment.subject + '<br />' +
-                            'Comment:<br />' +
-                            '<hr />';
-                          comments.items.push(html);
+                          comments.items.push(theme('comment', {
+                              comment: comment
+                          }));
                       });
+                      // Render the comment list.
                       build.content.markup += theme('jqm_item_list', comments);
                       // If the comments are open, show the comment form.
                       if (node.comment == 2) {
@@ -305,7 +296,9 @@ function node_page_view_pageshow(nid) {
             }
           }
           else {
-            // Comments are disabled, so let's inject the page.
+            // Comments are disabled, so let's render an empty list, then inject
+            // the content into the page.
+            build.content.markup += theme('jqm_item_list', comments);
             _drupalgap_entity_page_container_inject(
               'node', node.nid, 'view', build
             );
