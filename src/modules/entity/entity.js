@@ -128,6 +128,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
     // the weights and rendered field content as we iterate through the fields,
     // then at the end will append them in order onto the entity's content.
     var field_info = drupalgap_field_info_instances(entity_type, entity.type);
+    if (!field_info) { return; }
     var field_content = {};
     var field_weights = {};
     $.each(field_info, function(field_name, field) {
