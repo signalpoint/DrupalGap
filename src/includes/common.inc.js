@@ -249,39 +249,6 @@ function drupalgap_get_path(type, name) {
   catch (error) { console.log('drupalgap_get_path - ' + error); }
 }
 
-/* @todo - Somehow we ended up with two implemetations of this function. This
-  one here was in drupalgap.js, we temporarily move it here until it is
-  determined it has no value. If it does, merge the code into the
-  implementation of the function above. */
-/**
- * Given a type and name, this will return the path to the asset if it is found,
- * false otherwise.
- * @param {String} type
- * @param {String} name
- * @return {*}
- */
-/*function drupalgap_get_path(type, name) {
-  try {
-    var path = '';
-    var found_it = false;
-    if (type == 'module') {
-      $.each(Drupal.modules, function(bundle, modules) {
-        $.each(modules, function(index, module) {
-          if (name == module.name) {
-            path = drupalgap_modules_get_bundle_directory(bundle) + '/';
-            path += module.name;
-            found_it = true;
-          }
-          if (found_it) { return false; }
-        });
-        if (found_it) { return false; }
-      });
-    }
-    return path;
-  }
-  catch (error) { console.log('drupalgap_get_path - ' + error); }
-}*/
-
 /**
  * Change the page to the previous page.
  */
@@ -390,6 +357,8 @@ function drupalgap_goto(path) {
     // was a form submission, then we'll let the page rebuild itself. For
     // accurracy we compare the jQM active page url with the destination page
     // id.
+    // @todo - this boolean doesn't match the comment description of the code
+    // block, i.e. the form_submission check is opposite of what it says
     if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
       // Clear any messages from the page before returning.
       drupalgap_clear_messages();
