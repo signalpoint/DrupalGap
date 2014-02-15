@@ -1728,39 +1728,6 @@ function drupalgap_get_path(type, name) {
   catch (error) { console.log('drupalgap_get_path - ' + error); }
 }
 
-/* @todo - Somehow we ended up with two implemetations of this function. This
-  one here was in drupalgap.js, we temporarily move it here until it is
-  determined it has no value. If it does, merge the code into the
-  implementation of the function above. */
-/**
- * Given a type and name, this will return the path to the asset if it is found,
- * false otherwise.
- * @param {String} type
- * @param {String} name
- * @return {*}
- */
-/*function drupalgap_get_path(type, name) {
-  try {
-    var path = '';
-    var found_it = false;
-    if (type == 'module') {
-      $.each(Drupal.modules, function(bundle, modules) {
-        $.each(modules, function(index, module) {
-          if (name == module.name) {
-            path = drupalgap_modules_get_bundle_directory(bundle) + '/';
-            path += module.name;
-            found_it = true;
-          }
-          if (found_it) { return false; }
-        });
-        if (found_it) { return false; }
-      });
-    }
-    return path;
-  }
-  catch (error) { console.log('drupalgap_get_path - ' + error); }
-}*/
-
 /**
  * Change the page to the previous page.
  */
@@ -1869,6 +1836,8 @@ function drupalgap_goto(path) {
     // was a form submission, then we'll let the page rebuild itself. For
     // accurracy we compare the jQM active page url with the destination page
     // id.
+    // @todo - this boolean doesn't match the comment description of the code
+    // block, i.e. the form_submission check is opposite of what it says
     if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
       // Clear any messages from the page before returning.
       drupalgap_clear_messages();
@@ -4816,6 +4785,81 @@ function comment_edit_submit(form, form_state) {
 }
 
 /**
+ * Given a node id, this will return the id to use on the html list for the
+ * comments.
+ * @param {Number} nid
+ * @return {String}
+ */
+function comment_list_id(nid) {
+  try {
+    return 'comment_listing_items_' + nid;
+  }
+  catch (error) { console.log('comment_list_id - ' + error); }
+}
+
+/**
+ * Implements hook_services_postprocess().
+ * @param {Object} options
+ * @param {Object} result
+ */
+function comment_services_postprocess(options, result) {
+  try {
+    if (options.service == 'comment' && options.resource == 'create') {
+      // If we're on the node view page, inject the comment into the comment
+      // listing.
+      var path = drupalgap_path_get();
+      var router_path = drupalgap_get_menu_link_router_path(path);
+      if (router_path == 'node/%') {
+        node_load(arg(1), {
+            reset: true,
+            success: function(node) {
+              comment_load(result.cid, {
+                  success: function(comment) {
+                    var list_id = comment_list_id(node.nid);
+                    $('#' + list_id).append(
+                      '<li>' + theme('comment', {
+                          comment: comment
+                      }) + '</li>'
+                    ).listview('refresh');
+                  }
+              });
+            }
+        });
+      }
+    }
+  }
+  catch (error) { console.log('comment_services_postprocess - ' + error); }
+}
+
+/**
+ * Theme's a comment.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_comment(variables) {
+  try {
+    var comment = variables.comment;
+    var html = '';
+    var comment_content = '';
+    comment_content +=
+      '<h2>' + comment.name + '</h2>' +
+      '<h3>' + comment.subject + '<h3/>' +
+      '<p>' + comment.content + '</p>' +
+      '<p class="ui-li-aside">' + comment.created + '</p>';
+    html += l(comment_content, 'user/' + comment.uid);
+    if (user_access('administer comments')) {
+      html += l('Edit', 'comment/' + comment.cid + '/edit', {
+          attributes: {
+            'data-icon': 'gear'
+          }
+      });
+    }
+    return html;
+  }
+  catch (error) { console.log('theme_comment - ' + error); }
+}
+
+/**
  * Given an entity type, bundle name, form and entity, this will add the
  * entity's core fields to the form via the DrupalGap forms api.
  * @param {String} entity_type
@@ -4945,6 +4989,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
     // the weights and rendered field content as we iterate through the fields,
     // then at the end will append them in order onto the entity's content.
     var field_info = drupalgap_field_info_instances(entity_type, entity.type);
+    if (!field_info) { return; }
     var field_content = {};
     var field_weights = {};
     $.each(field_info, function(field_name, field) {
@@ -7076,6 +7121,7 @@ function node_page_view_pageshow(nid) {
   try {
     node_load(nid, {
         success: function(node) {
+          // Build the node display.
           var build = {
             'theme': 'node',
             // @todo - is this line of code doing anything?
@@ -7084,61 +7130,66 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node.title},
             'content': {'markup': node.content}
           };
+          // Build an empty list for the comments.
+          var comments = {
+            title: 'Comments',
+            items: [],
+            attributes: {
+              id: comment_list_id(node.nid)
+            }
+          };
           // If the comments are closed or open, show the comments.
-          if (node.comment != 0) {
+          if (node.comment != 0 && node.comment_count != 0) {
             if (node.comment == 1 || node.comment == 2) {
 
-              // Build an empty list for the comments
-              var comments = {
-                title: 'Comments',
-                items: [],
-                attributes: {
-                  id: 'comment_listing_items_' + node.nid
+              // Grab any comments and display them.
+              var query = {
+                parameters: {
+                  nid: node.nid
                 }
               };
-              build.content.markup += theme('jqm_item_list', comments);
-
-              // If the comments are open, show the comment form.
-              if (node.comment == 2) {
-                build.content.markup += drupalgap_get_form(
-                  'comment_edit',
-                  { nid: node.nid },
-                  node
-                );
-              }
+              comment_index(query, {
+                  success: function(results) {
+                    try {
+                      $.each(results, function(index, comment) {
+                          comments.items.push(theme('comment', {
+                              comment: comment
+                          }));
+                      });
+                      // Render the comment list.
+                      build.content.markup += theme('jqm_item_list', comments);
+                      // If the comments are open, show the comment form.
+                      if (node.comment == 2) {
+                        build.content.markup += drupalgap_get_form(
+                          'comment_edit',
+                          { nid: node.nid },
+                          node
+                        );
+                      }
+                      // Finally, inject the page.
+                      _drupalgap_entity_page_container_inject(
+                        'node', node.nid, 'view', build
+                      );
+                    }
+                    catch (error) {
+                      var msg = 'node_page_view_pageshow - comment_index - ' +
+                        error;
+                      console.log(msg);
+                    }
+                  }
+              });
             }
           }
-
-          _drupalgap_entity_page_container_inject(
-            'node', node.nid, 'view', build
-          );
+          else {
+            // Comments are disabled, so let's render an empty list, then inject
+            // the content into the page.
+            build.content.markup += theme('jqm_item_list', comments);
+            _drupalgap_entity_page_container_inject(
+              'node', node.nid, 'view', build
+            );
+          }
         }
     });
-    // Grab some recent comments and display it.
-    /*if ($('#comment_listing_items')) {
-      drupalgap.views_datasource.call({
-        'path':'drupalgap/views_datasource/drupalgap_comments/' + node.nid,
-        'success':function(data) {
-          // Extract the comments into items, then drop them in the list.
-          var items = [];
-          $.each(data.comments, function(index, object){
-              var html = '';
-              if (user_access('administer comments')) {
-                html += l('Edit', 'comment/' + object.comment.cid + '/edit');
-              }
-              html += object.comment.created + "<br />" +
-                'Author: ' + object.comment.name + "<br />"+
-                'Subject: ' + object.comment.subject + "<br />" +
-                'Comment:<br />' + object.comment.comment_body + "<hr />";
-              items.push(html);
-          });
-          drupalgap_item_list_populate(
-            "#comment_listing_items_" + node.nid,
-            items
-          );
-        },
-      });
-    }*/
   }
   catch (error) { console.log('node_page_view_pageshow - ' + error); }
 }
