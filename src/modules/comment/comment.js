@@ -78,3 +78,78 @@ function comment_edit_submit(form, form_state) {
   catch (error) { console.log('comment_edit_submit - ' + error); }
 }
 
+/**
+ * Given a node id, this will return the id to use on the html list for the
+ * comments.
+ * @param {Number} nid
+ * @return {String}
+ */
+function comment_list_id(nid) {
+  try {
+    return 'comment_listing_items_' + nid;
+  }
+  catch (error) { console.log('comment_list_id - ' + error); }
+}
+
+/**
+ * Implements hook_services_postprocess().
+ * @param {Object} options
+ * @param {Object} result
+ */
+function comment_services_postprocess(options, result) {
+  try {
+    if (options.service == 'comment' && options.resource == 'create') {
+      // If we're on the node view page, inject the comment into the comment
+      // listing.
+      var path = drupalgap_path_get();
+      var router_path = drupalgap_get_menu_link_router_path(path);
+      if (router_path == 'node/%') {
+        node_load(arg(1), {
+            reset: true,
+            success: function(node) {
+              comment_load(result.cid, {
+                  success: function(comment) {
+                    var list_id = comment_list_id(node.nid);
+                    $('#' + list_id).append(
+                      '<li>' + theme('comment', {
+                          comment: comment
+                      }) + '</li>'
+                    ).listview('refresh');
+                  }
+              });
+            }
+        });
+      }
+    }
+  }
+  catch (error) { console.log('comment_services_postprocess - ' + error); }
+}
+
+/**
+ * Theme's a comment.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_comment(variables) {
+  try {
+    var comment = variables.comment;
+    var html = '';
+    var comment_content = '';
+    comment_content +=
+      '<h2>' + comment.name + '</h2>' +
+      '<h3>' + comment.subject + '<h3/>' +
+      '<p>' + comment.content + '</p>' +
+      '<p class="ui-li-aside">' + comment.created + '</p>';
+    html += l(comment_content, 'user/' + comment.uid);
+    if (user_access('administer comments')) {
+      html += l('Edit', 'comment/' + comment.cid + '/edit', {
+          attributes: {
+            'data-icon': 'gear'
+          }
+      });
+    }
+    return html;
+  }
+  catch (error) { console.log('theme_comment - ' + error); }
+}
+
