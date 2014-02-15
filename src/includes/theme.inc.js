@@ -202,7 +202,9 @@ function theme_item_list(variables) {
     // theme them too.
     var type = 'ul';
     if (variables.type) { type = variables.type; }
-    var html = '<' + type + ' ' +
+    var html = '';
+    if (variables.title) { html += '<h2>' + variables.title + '</h2>'; }
+    html += '<' + type + ' ' +
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
       $.each(variables.items, function(index, item) {
