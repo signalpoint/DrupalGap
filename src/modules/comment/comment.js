@@ -46,16 +46,11 @@ function comment_edit(form, form_state, comment, node) {
       'value': 'Save'
     };
 
-    // Add cancel button to form.
-    form.buttons['cancel'] = {
-      'title': 'Cancel'
-    };
-
-    // Add delete button to form if we're editing a comment.
+    // Add cancel and delete button to form if we're editing a comment.
     if (comment && comment.cid) {
-      form.buttons['delete'] = {
-        'title': 'Delete'
-      };
+      form.buttons['cancel'] = drupalgap_form_cancel_button();
+      form.buttons['delete'] =
+        drupalgap_entity_edit_form_delete_button('comment', comment.cid);
     }
 
     form.prefix += '<h2>Add comment</h2>';
