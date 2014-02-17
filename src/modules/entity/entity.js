@@ -127,7 +127,9 @@ function drupalgap_entity_render_content(entity_type, entity) {
     // need to be appended accorind to their weight, so we'll keep track of
     // the weights and rendered field content as we iterate through the fields,
     // then at the end will append them in order onto the entity's content.
-    var field_info = drupalgap_field_info_instances(entity_type, entity.type);
+    var bundle = entity.type;
+    if (entity_type == 'comment') { bundle = entity.bundle; }
+    var field_info = drupalgap_field_info_instances(entity_type, bundle);
     if (!field_info) { return; }
     var field_content = {};
     var field_weights = {};
@@ -797,6 +799,12 @@ function entity_services_request_pre_postprocess_alter(options, result) {
       options.resource == 'retrieve' &&
       in_array(options.service, entity_types()
     )) { drupalgap_entity_render_content(options.service, result); }
+    // If we're indexing comments, render its content.
+    else if (options.service == 'comment' && options.resource == 'index') {
+      $.each(result, function(index, object) {
+          drupalgap_entity_render_content(options.service, result[index]);
+      });
+    }
   }
   catch (error) {
     console.log('entity_services_request_pre_postprocess_alter - ' + error);
