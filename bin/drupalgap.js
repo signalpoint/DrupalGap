@@ -1478,6 +1478,23 @@ function date_yyyy_mm_dd_hh_mm_ss_parts() {
 }
 
 /**
+ * @see http://www.dconnell.co.uk/blog/index.php/2012/03/12/scroll-to-any-element-using-jquery/
+ */
+function scrollToElement(selector, time, verticalOffset) {
+  try {
+    time = typeof(time) != 'undefined' ? time : 1000;
+    verticalOffset = typeof(verticalOffset) != 'undefined' ? verticalOffset : 0;
+    element = $(selector);
+    offset = element.offset();
+    offsetTop = offset.top + verticalOffset;
+    $('html, body').animate({
+        scrollTop: offsetTop
+    }, time);
+  }
+  catch (error) { console.log('scrollToElement - ' + error); }
+}
+
+/**
  * Given a page id, and the theme's page.tpl.html string, this takes the page
  * template html and adds it to the DOM. It doesn't actually render the page,
  * that is taken care of by pagebeforechange when it calls the template system.
@@ -4803,7 +4820,7 @@ function comment_services_postprocess(options, result) {
   try {
     if (options.service == 'comment' && options.resource == 'create') {
       // If we're on the node view page, inject the comment into the comment
-      // listing.
+      // listing, then scroll the page to the new comment
       var path = drupalgap_path_get();
       var router_path = drupalgap_get_menu_link_router_path(path);
       if (router_path == 'node/%') {
@@ -4818,6 +4835,7 @@ function comment_services_postprocess(options, result) {
                           comment: comment
                       }) + '</li>'
                     ).listview('refresh');
+                    scrollToElement('#' + list_id + ' li:last-child', 500);
                   }
               });
             }
@@ -7154,45 +7172,65 @@ function node_page_view_pageshow(nid) {
             }
           };
           // If the comments are closed or open, show the comments.
-          if (node.comment != 0 && node.comment_count != 0) {
+          if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
-
-              // Grab any comments and display them.
-              var query = {
-                parameters: {
-                  nid: node.nid
-                }
-              };
-              comment_index(query, {
-                  success: function(results) {
-                    try {
-                      $.each(results, function(index, comment) {
-                          comments.items.push(theme('comment', {
-                              comment: comment
-                          }));
-                      });
-                      // Render the comment list.
-                      build.content.markup += theme('jqm_item_list', comments);
-                      // If the comments are open, show the comment form.
-                      if (node.comment == 2) {
-                        build.content.markup += drupalgap_get_form(
-                          'comment_edit',
-                          { nid: node.nid },
-                          node
+              // Render the comment form, so we can add it to the content later.
+              var comment_form = '';
+              if (node.comment == 2) {
+                comment_form = drupalgap_get_form(
+                  'comment_edit',
+                  { nid: node.nid },
+                  node
+                );
+              }
+              // If there are any comments, load them.
+              if (node.comment_count != 0) {
+                var query = {
+                  parameters: {
+                    nid: node.nid
+                  }
+                };
+                comment_index(query, {
+                    success: function(results) {
+                      try {
+                        $.each(results, function(index, comment) {
+                            comments.items.push(theme('comment', {
+                                comment: comment
+                            }));
+                        });
+                        // Render the comment list.
+                        build.content.markup += theme(
+                          'jqm_item_list',
+                          comments
+                        );
+                        // If the comments are open, show the comment form.
+                        if (node.comment == 2) {
+                          build.content.markup += comment_form;
+                        }
+                        // Finally, inject the page.
+                        _drupalgap_entity_page_container_inject(
+                          'node', node.nid, 'view', build
                         );
                       }
-                      // Finally, inject the page.
-                      _drupalgap_entity_page_container_inject(
-                        'node', node.nid, 'view', build
-                      );
+                      catch (error) {
+                        var msg = 'node_page_view_pageshow - comment_index - ' +
+                          error;
+                        console.log(msg);
+                      }
                     }
-                    catch (error) {
-                      var msg = 'node_page_view_pageshow - comment_index - ' +
-                        error;
-                      console.log(msg);
-                    }
-                  }
-              });
+                });
+              }
+              else {
+                // There weren't any comments, show the comment form if comments
+                // are open, then inject the page.
+                build.content.markup += theme('jqm_item_list', comments);
+                if (node.comment == 2) {
+                  build.content.markup += comment_form;
+                }
+                _drupalgap_entity_page_container_inject(
+                  'node', node.nid, 'view', build
+                );
+              }
             }
           }
           else {
