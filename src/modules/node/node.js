@@ -254,45 +254,65 @@ function node_page_view_pageshow(nid) {
             }
           };
           // If the comments are closed or open, show the comments.
-          if (node.comment != 0 && node.comment_count != 0) {
+          if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
-
-              // Grab any comments and display them.
-              var query = {
-                parameters: {
-                  nid: node.nid
-                }
-              };
-              comment_index(query, {
-                  success: function(results) {
-                    try {
-                      $.each(results, function(index, comment) {
-                          comments.items.push(theme('comment', {
-                              comment: comment
-                          }));
-                      });
-                      // Render the comment list.
-                      build.content.markup += theme('jqm_item_list', comments);
-                      // If the comments are open, show the comment form.
-                      if (node.comment == 2) {
-                        build.content.markup += drupalgap_get_form(
-                          'comment_edit',
-                          { nid: node.nid },
-                          node
+              // Render the comment form, so we can add it to the content later.
+              var comment_form = '';
+              if (node.comment == 2) {
+                comment_form = drupalgap_get_form(
+                  'comment_edit',
+                  { nid: node.nid },
+                  node
+                );
+              }
+              // If there are any comments, load them.
+              if (node.comment_count != 0) {
+                var query = {
+                  parameters: {
+                    nid: node.nid
+                  }
+                };
+                comment_index(query, {
+                    success: function(results) {
+                      try {
+                        $.each(results, function(index, comment) {
+                            comments.items.push(theme('comment', {
+                                comment: comment
+                            }));
+                        });
+                        // Render the comment list.
+                        build.content.markup += theme(
+                          'jqm_item_list',
+                          comments
+                        );
+                        // If the comments are open, show the comment form.
+                        if (node.comment == 2) {
+                          build.content.markup += comment_form;
+                        }
+                        // Finally, inject the page.
+                        _drupalgap_entity_page_container_inject(
+                          'node', node.nid, 'view', build
                         );
                       }
-                      // Finally, inject the page.
-                      _drupalgap_entity_page_container_inject(
-                        'node', node.nid, 'view', build
-                      );
+                      catch (error) {
+                        var msg = 'node_page_view_pageshow - comment_index - ' +
+                          error;
+                        console.log(msg);
+                      }
                     }
-                    catch (error) {
-                      var msg = 'node_page_view_pageshow - comment_index - ' +
-                        error;
-                      console.log(msg);
-                    }
-                  }
-              });
+                });
+              }
+              else {
+                // There weren't any comments, show the comment form if comments
+                // are open, then inject the page.
+                build.content.markup += theme('jqm_item_list', comments);
+                if (node.comment == 2) {
+                  build.content.markup += comment_form;
+                }
+                _drupalgap_entity_page_container_inject(
+                  'node', node.nid, 'view', build
+                );
+              }
             }
           }
           else {
