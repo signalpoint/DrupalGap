@@ -95,7 +95,7 @@ function comment_services_postprocess(options, result) {
   try {
     if (options.service == 'comment' && options.resource == 'create') {
       // If we're on the node view page, inject the comment into the comment
-      // listing.
+      // listing, then scroll the page to the new comment
       var path = drupalgap_path_get();
       var router_path = drupalgap_get_menu_link_router_path(path);
       if (router_path == 'node/%') {
@@ -110,6 +110,7 @@ function comment_services_postprocess(options, result) {
                           comment: comment
                       }) + '</li>'
                     ).listview('refresh');
+                    scrollToElement('#' + list_id + ' li:last-child', 500);
                   }
               });
             }
