@@ -218,7 +218,8 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
           else if (element.theme) {
             element_content = theme(element.theme, element);
           }
-          content += '<div>' + element_content + '</div>';
+          //content += '<div>' + element_content + '</div>';
+          content += element_content;
       });
     }
     else {
@@ -278,7 +279,9 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           if (!function_exists(hook)) { hook = false; }
         }
 
-        // Attach the key and value to the entity.
+        // Retrieve the potential key for the element, if we don't get one
+        // then it is a flat field that should be attached as a property to the
+        // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
 
