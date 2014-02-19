@@ -2545,6 +2545,22 @@ function drupalgap_form_cancel_button() {
 }
 
 /**
+ * Given a jQuery selector to a form, this will clear all the elements on
+ * the UI.
+ * @see http://stackoverflow.com/a/6364313/763010
+ */
+function drupalgap_form_clear(form_selector) {
+  try {
+    $(':input', form_selector)
+     .not(':button, :submit, :reset, :hidden')
+     .val('')
+     .removeAttr('checked')
+     .removeAttr('selected');
+  }
+  catch (error) { console.log('drupalgap_form_clear - ' + error); }
+}
+
+/**
  * Given a form id, this will assemble and return the default form JSON object.
  * @param {String} form_id
  * @return {Object}
@@ -4042,6 +4058,7 @@ function drupalgap_get_menu_link_router_path(path) {
     if (args) {
       var args_size = args.length;
       switch (args[0]) {
+        case 'comment':
         case 'user':
         case 'node':
           if (args_size > 1 && is_int(parseInt(args[1]))) {
@@ -4724,6 +4741,119 @@ function drupalgap_block_load(delta) {
 }
 
 /**
+ * Implements hook_menu().
+ * @return {Object}
+ */
+function comment_menu() {
+  try {
+    var items = {
+      'comment/%': {
+        title: 'Comment',
+        page_callback: 'comment_page_view',
+        page_arguments: [1],
+        pageshow: 'comment_page_view_pageshow',
+        title_callback: 'comment_page_title',
+        title_arguments: [1]
+      },
+      'comment/%/view': {
+        title: 'View',
+        type: 'MENU_DEFAULT_LOCAL_TASK',
+        weight: -10
+      },
+      'comment/%/edit': {
+        title: 'Edit',
+        page_callback: 'entity_page_edit',
+        pageshow: 'entity_page_edit_pageshow',
+        page_arguments: ['comment_edit', 'comment', 1],
+        weight: 0,
+        type: 'MENU_LOCAL_TASK',
+        access_callback: 'comment_access',
+        access_arguments: [1],
+        options: { reloadPage: true }
+      }
+    };
+    return items;
+  }
+  catch (error) { console.log('comment_menu - ' + error); }
+}
+
+/**
+ * Given a comment, this determines if the current user has access to it.
+ * Returns true if so, false otherwise.
+ * @param {Object} comment
+ * @return {Boolean}
+ */
+function comment_access(comment) {
+  try {
+    if (comment.uid == Drupal.user.uid && user_access('edit own comments') ||
+      user_access('administer comments')) {
+      return true;
+    }
+    else { return false; }
+  }
+  catch (error) { console.log('comment_access - ' + error); }
+}
+
+/**
+ * Page callback for comment/%.
+ * @param {Number} cid
+ * @return {Object}
+ */
+function comment_page_view(cid) {
+  try {
+    if (cid) {
+      var content = {
+        container: _drupalgap_entity_page_container('comment', cid, 'view')
+      };
+      return content;
+    }
+    else { drupalgap_error('No comment id provided!'); }
+  }
+  catch (error) { console.log('comment_page_view - ' + error); }
+}
+
+/**
+ * jQM pageshow handler for comment/% pages.
+ * @param {Number} cid
+ */
+function comment_page_view_pageshow(cid) {
+  try {
+    comment_load(cid, {
+        success: function(comment) {
+          var item = theme('comment', { comment: comment });
+          var content = theme('jqm_item_list', {items: [item]});
+          _drupalgap_entity_page_container_inject(
+            'comment',
+            cid,
+            'view',
+            content
+          );
+        }
+    });
+  }
+  catch (error) { console.log('comment_page_view_pageshow - ' + error); }
+}
+
+/**
+ * The title call back function for the comment view page.
+ * @param {Function} callback
+ * @param {Number} cid
+ */
+function comment_page_title(callback, cid) {
+  try {
+    // Try to load the comment subject, then send it back to the given callback.
+    var title = '';
+    var comment = comment_load(cid, {
+        success: function(comment) {
+          if (comment && comment.subject) { title = comment.subject; }
+          callback.call(null, title);
+        }
+    });
+  }
+  catch (error) { console.log('comment_page_title - ' + error); }
+}
+
+/**
  * The comment edit form.
  * @param {Object} form
  * @param {Object} form_state
@@ -4742,12 +4872,15 @@ function comment_edit(form, form_state, comment, node) {
     if (!comment) { comment = {'nid': arg(1)}; }
 
     // Determine the comment bundle from the node type.
-    var bundle = 'comment_node_' + node.type;
+    var node_type = null;
+    if (node && node.type) { node_type = node.type; }
+    else { node_type = comment.node_type.replace('comment_node_', ''); }
+    var bundle = 'comment_node_' + node_type;
 
     // Setup form defaults.
     form.entity_type = 'comment';
     form.bundle = bundle;
-    form.action = 'node/' + node.nid;
+    form.action = 'node/' + comment.nid;
 
     // Add the entity's core fields to the form.
     drupalgap_entity_add_core_fields_to_form(
@@ -4820,7 +4953,8 @@ function comment_services_postprocess(options, result) {
   try {
     if (options.service == 'comment' && options.resource == 'create') {
       // If we're on the node view page, inject the comment into the comment
-      // listing, then scroll the page to the new comment
+      // listing, then scroll the page to the newly inserted/rendered comment,
+      // then clear the form input.
       var path = drupalgap_path_get();
       var router_path = drupalgap_get_menu_link_router_path(path);
       if (router_path == 'node/%') {
@@ -4836,6 +4970,9 @@ function comment_services_postprocess(options, result) {
                       }) + '</li>'
                     ).listview('refresh');
                     scrollToElement('#' + list_id + ' li:last-child', 500);
+                    var form_selector = '#' + drupalgap_get_page_id() +
+                      ' #comment_edit';
+                    drupalgap_form_clear(form_selector);
                   }
               });
             }
@@ -5406,7 +5543,8 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
             break;
           default:
             console.log('WARNING: drupalgap_entity_get_core_fields - ' +
-              'Unknown anonymous comment setting: ' + comment_anonymous);
+              'Unknown anonymous comment setting (' + content_type + '): ' +
+              comment_anonymous);
             break;
         }
         // Only anonymous users get the mail and homepage fields.
@@ -6927,7 +7065,7 @@ function node_access(node) {
   try {
     if (
       (
-        node.uid == drupalgap.user.uid &&
+        node.uid == Drupal.user.uid &&
         user_access('edit own ' + node.type + ' content')
       ) ||
       user_access('edit any ' + node.type + ' content')
