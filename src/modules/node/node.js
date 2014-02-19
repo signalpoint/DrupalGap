@@ -9,7 +9,7 @@ function node_access(node) {
   try {
     if (
       (
-        node.uid == drupalgap.user.uid &&
+        node.uid == Drupal.user.uid &&
         user_access('edit own ' + node.type + ' content')
       ) ||
       user_access('edit any ' + node.type + ' content')
