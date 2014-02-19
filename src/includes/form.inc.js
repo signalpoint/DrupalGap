@@ -65,6 +65,22 @@ function drupalgap_form_cancel_button() {
 }
 
 /**
+ * Given a jQuery selector to a form, this will clear all the elements on
+ * the UI.
+ * @see http://stackoverflow.com/a/6364313/763010
+ */
+function drupalgap_form_clear(form_selector) {
+  try {
+    $(':input', form_selector)
+     .not(':button, :submit, :reset, :hidden')
+     .val('')
+     .removeAttr('checked')
+     .removeAttr('selected');
+  }
+  catch (error) { console.log('drupalgap_form_clear - ' + error); }
+}
+
+/**
  * Given a form id, this will assemble and return the default form JSON object.
  * @param {String} form_id
  * @return {Object}
