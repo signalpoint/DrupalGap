@@ -4904,14 +4904,18 @@ function comment_edit(form, form_state, comment, node) {
       'value': 'Save'
     };
 
-    // Add cancel and delete button to form if we're editing a comment.
+    // Add cancel and delete button to form if we're editing a comment. Also
+    // figure out a form title to use in the prefix.
+    var form_title = 'Add comment';
     if (comment && comment.cid) {
+      form_title = 'Edit comment';
       form.buttons['cancel'] = drupalgap_form_cancel_button();
       form.buttons['delete'] =
         drupalgap_entity_edit_form_delete_button('comment', comment.cid);
     }
 
-    form.prefix += '<h2>Add comment</h2>';
+    // Add a prefix.
+    form.prefix += '<h2>' + form_title + '</h2>';
 
     return form;
   }
@@ -5241,7 +5245,8 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
           else if (element.theme) {
             element_content = theme(element.theme, element);
           }
-          content += '<div>' + element_content + '</div>';
+          //content += '<div>' + element_content + '</div>';
+          content += element_content;
       });
     }
     else {
@@ -5301,8 +5306,11 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           if (!function_exists(hook)) { hook = false; }
         }
 
-        // Attach the key and value to the entity.
+        // Retrieve the potential key for the element, if we don't get one
+        // then it is a flat field that should be attached as a property to the
+        // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
+        //if (!key && !empty(value)) { entity[name] = value; }
         if (key) {
 
           // Determine how many allowed values for this field.
@@ -5390,7 +5398,9 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             }
           }
         }
-        else if (!empty(value)) { entity[name] = value; }
+        else {
+          if (!empty(value)) { entity[name] = value; }
+        }
     });
     return entity;
   }
