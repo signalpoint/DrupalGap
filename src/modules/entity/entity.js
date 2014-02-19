@@ -520,7 +520,8 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
             break;
           default:
             console.log('WARNING: drupalgap_entity_get_core_fields - ' +
-              'Unknown anonymous comment setting: ' + comment_anonymous);
+              'Unknown anonymous comment setting (' + content_type + '): ' +
+              comment_anonymous);
             break;
         }
         // Only anonymous users get the mail and homepage fields.
