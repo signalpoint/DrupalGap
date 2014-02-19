@@ -271,6 +271,7 @@ function drupalgap_get_menu_link_router_path(path) {
     if (args) {
       var args_size = args.length;
       switch (args[0]) {
+        case 'comment':
         case 'user':
         case 'node':
           if (args_size > 1 && is_int(parseInt(args[1]))) {
