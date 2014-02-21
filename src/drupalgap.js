@@ -207,15 +207,12 @@ function _drupalgap_deviceready() {
           },
           error: function(jqXHR, textStatus, errorThrown) {
             // Build an informative error message and display it.
-            var msg = 'drupalgap_deviceready() - failed connection to ' +
-              drupalgap.settings.site_path;
+            var msg = 'Failed connection to ' + drupalgap.settings.site_path;
             if (errorThrown != '') { msg += ' - ' + errorThrown; }
             msg += ' - Check your device\'s connection and check that ' +
-                   Drupal.settings.site_path +
-                   ' is online. If you continue to have problems visit ' +
-                   'www.drupalgap.org for troubleshooting info.';
+                   Drupal.settings.site_path + ' is online.';
            drupalgap_alert(msg, {
-               title: 'Unable to Connect to Drupal',
+               title: 'Unable to Connect',
                alertCallback: function() { drupalgap_goto('offline'); }
            });
           }

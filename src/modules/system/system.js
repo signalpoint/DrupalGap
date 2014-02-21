@@ -203,8 +203,7 @@ function system_error_page() {
   try {
     var content = {
       info: {
-        markup: '<p>An unexpected error has occurred! Review console.log() ' +
-               'messages for more information!</p>'
+        markup: '<p>An unexpected error has occurred!</p>'
       }
     };
     return content;
