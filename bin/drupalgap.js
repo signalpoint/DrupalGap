@@ -207,15 +207,12 @@ function _drupalgap_deviceready() {
           },
           error: function(jqXHR, textStatus, errorThrown) {
             // Build an informative error message and display it.
-            var msg = 'drupalgap_deviceready() - failed connection to ' +
-              drupalgap.settings.site_path;
+            var msg = 'Failed connection to ' + drupalgap.settings.site_path;
             if (errorThrown != '') { msg += ' - ' + errorThrown; }
             msg += ' - Check your device\'s connection and check that ' +
-                   Drupal.settings.site_path +
-                   ' is online. If you continue to have problems visit ' +
-                   'www.drupalgap.org for troubleshooting info.';
+                   Drupal.settings.site_path + ' is online.';
            drupalgap_alert(msg, {
-               title: 'Unable to Connect to Drupal',
+               title: 'Unable to Connect',
                alertCallback: function() { drupalgap_goto('offline'); }
            });
           }
@@ -5310,7 +5307,6 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
         // then it is a flat field that should be attached as a property to the
         // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
-        //if (!key && !empty(value)) { entity[name] = value; }
         if (key) {
 
           // Determine how many allowed values for this field.
@@ -5398,9 +5394,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             }
           }
         }
-        else {
-          if (!empty(value)) { entity[name] = value; }
-        }
+        else if (!empty(value)) { entity[name] = value; }
     });
     return entity;
   }
@@ -7777,8 +7771,7 @@ function system_error_page() {
   try {
     var content = {
       info: {
-        markup: '<p>An unexpected error has occurred! Review console.log() ' +
-               'messages for more information!</p>'
+        markup: '<p>An unexpected error has occurred!</p>'
       }
     };
     return content;
