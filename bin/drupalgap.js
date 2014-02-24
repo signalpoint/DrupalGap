@@ -6362,7 +6362,8 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
         'message != "Selection cancelled." && ' +
         'message != "no image selected")' +
       '{' +
-        'drupalgap_alert("' + imagefield_error + ' - " + message);' +
+        'console.log("' + imagefield_error + '");' +
+        'drupalgap_alert(message);' +
       '}' +
     '}';
     // Define success callback function.
