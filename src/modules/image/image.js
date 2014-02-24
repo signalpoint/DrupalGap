@@ -108,7 +108,8 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
     var imagefield_error = item_id_base + '_error';
     html += 'function ' + imagefield_error + '(message) {' +
       'if (message != "Camera cancelled." && ' +
-        'message != "Selection cancelled.")' +
+        'message != "Selection cancelled." && ' +
+        'message != "no image selected")' +
       '{' +
         'drupalgap_alert("' + imagefield_error + ' - " + message);' +
       '}' +
