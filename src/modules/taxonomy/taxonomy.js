@@ -7,7 +7,7 @@
 function drupalgap_taxonomy_vocabularies_extract(taxonomy_vocabularies) {
   try {
     var results = false;
-    if (taxonomy_vocabularies.length > 0) {
+    if (taxonomy_vocabularies && taxonomy_vocabularies.length > 0) {
       results = {};
       $.each(taxonomy_vocabularies, function(index, vocabulary) {
           eval('results.' + vocabulary.machine_name + ' = vocabulary;');
