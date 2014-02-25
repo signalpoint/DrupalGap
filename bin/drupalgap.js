@@ -8229,6 +8229,10 @@ function user_register_form_validate(form, form_state) {
       form_state.values.pass != form_state.values.pass2) {
       drupalgap_form_set_error('pass', 'Passwords do not match!');
     }
+    // If there are two e-mail address fields on the form, make sure they match.
+    if (!empty(form_state.values.mail) && !empty(form_state.values.conf_mail) &&
+      form_state.values.mail != form_state.values.conf_mail
+    ) { drupalgap_form_set_error('pass', 'Passwords do not match!'); }
   }
   catch (error) {
     console.log('user_register_form_validate - ' + error);
