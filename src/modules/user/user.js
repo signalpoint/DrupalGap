@@ -324,7 +324,7 @@ function user_register_form_validate(form, form_state) {
     // If there are two e-mail address fields on the form, make sure they match.
     if (!empty(form_state.values.mail) && !empty(form_state.values.conf_mail) &&
       form_state.values.mail != form_state.values.conf_mail
-    ) { drupalgap_form_set_error('pass', 'E-mail addresses do not match!'); }
+    ) { drupalgap_form_set_error('mail', 'E-mail addresses do not match!'); }
   }
   catch (error) {
     console.log('user_register_form_validate - ' + error);
