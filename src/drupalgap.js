@@ -28,6 +28,7 @@ function drupalgap_init() {
            { name: 'api' },
            { name: 'block' },
            { name: 'comment' },
+           { name: 'contact' },
            { name: 'entity' },
            { name: 'field' },
            { name: 'file' },
@@ -35,7 +36,6 @@ function drupalgap_init() {
            { name: 'menu' },
            { name: 'mvc' },
            { name: 'node' },
-           /*{ name: 'services'},*/
            { name: 'system' },
            { name: 'taxonomy' },
            { name: 'user' },
@@ -49,17 +49,6 @@ function drupalgap_init() {
           {name: 'menu' },
           {name: 'theme' }
       ],
-      /**
-       * User Default Values
-       *   Do not change these values unless you are feeling adventurous.
-       */
-      /*'user':{
-        'uid':0,
-        'name':'Anonymous',
-        'roles':{
-          '1':'anonymous user'
-        },
-      },*/
       online: false,
       destination: '',
       api: {},
@@ -125,6 +114,7 @@ function drupalgap_onload() {
       'drupalgap',
       'block',
       'comment',
+      'contact',
       'entity',
       'field',
       'file',
