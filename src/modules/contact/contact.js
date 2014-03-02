@@ -12,6 +12,15 @@ function contact_menu() {
       pageshow: 'contact_site_form_pageshow',
       access_arguments: ['access site-wide contact form']
     };
+    items['user/%/contact'] = {
+      title: 'User contact',
+      page_callback: 'drupalgap_get_form',
+      page_arguments: ['contact_personal_form', 1],
+      pageshow: 'contact_personal_form_pageshow',
+      access_arguments: ['access user contact forms'],
+      weight: 10,
+      type: 'MENU_LOCAL_TASK'
+    };
     return items;
   }
   catch (error) { console.log('contact_menu - ' + error); }
@@ -45,6 +54,21 @@ function contact_site(options) {
     Drupal.services.call(options);
   }
   catch (error) { console.log('contact_site - ' + error); }
+}
+
+/**
+ * The contact personal service resource.
+ * @param {Object} options
+ */
+function contact_personal(options) {
+  try {
+    options.method = 'POST';
+    options.path = 'contact/personal.json';
+    options.service = 'contact';
+    options.resource = 'personal';
+    Drupal.services.call(options);
+  }
+  catch (error) { console.log('contact_personal - ' + error); }
 }
 
 /**
@@ -160,8 +184,141 @@ function contact_site_form_submit(form, form_state) {
   });
 }
 
-//contact_personal_form
+/**
+ * The personal contact form.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Number} recipient
+ * @return {Object}
+ */
+function contact_personal_form(form, form_state, recipient) {
+  try {
+    // @TODO - when providing a personal contact form, make sure the user has
+    // their personal contact form enabled.
+    form.elements.name = {
+      title: 'Your name',
+      type: 'textfield',
+      required: true
+    };
+    form.elements.mail = {
+      title: 'Your e-mail address',
+      type: 'email',
+      required: true
+    };
+    form.elements.to = {
+      type: 'hidden',
+      required: true
+    };
+    var container_id = contact_personal_form_to_container_id(recipient);
+    form.elements.to_display = {
+      title: 'To',
+      markup: '<div id="' + container_id + '"></div>'
+    };
+    form.elements.subject = {
+      title: 'Subject',
+      type: 'textfield',
+      required: true
+    };
+    form.elements.message = {
+      title: 'Message',
+      type: 'textarea',
+      required: true
+    };
+    form.elements.copy = {
+      title: 'Send yourself a copy?',
+      type: 'checkbox',
+      default_value: 0,
+      access: false
+    };
+    form.elements.submit = {
+      type: 'submit',
+      value: 'Send message'
+    };
+    // If the user is logged in, set the default values.
+    if (Drupal.user.uid != 0) {
+      form.elements.name.default_value = Drupal.user.name;
+      form.elements.name.disabled = true;
+      form.elements.mail.default_value = Drupal.user.mail;
+      form.elements.mail.disabled = true;
+      form.elements.copy.access = true;
+    }
+    return form;
+  }
+  catch (error) { console.log('contact_personal_form - ' + error); }
+}
 
-// @TODO - when providing a personal contact form, make sure the user has their
-// personal contact form enabled.
+/**
+ * The pageshow callback for the personal contact form.
+ * @param {Object} form
+ * @param {Number} recipient
+ */
+function contact_personal_form_pageshow(form, recipient) {
+  try {
+    user_load(recipient, {
+        success: function(account) {
+          // Make sure the user has their contact form enabled.
+          if (!account.data.contact) {
+            $('#' + drupalgap_get_page_id() + ' #drupalgap_form_errors').html(
+              "<div class='messages warning'>" +
+                "Sorry, this user's contact form is disabled." +
+              '</div>'
+            );
+            return;
+          }
+          // Populate hidden value for the 'to' field.
+          var container_id = contact_personal_form_to_container_id(recipient);
+          $('#' + container_id).html(l(account.name, 'user/' + account.uid));
+          var hidden_selector = '#' + drupalgap_get_page_id() +
+            ' #edit-contact-personal-form-to';
+          $(hidden_selector).val(account.name);
+        }
+    });
+  }
+  catch (error) { console.log('contact_personal_form_pageshow - ' + error); }
+}
+
+/**
+ * The personal contact form submit handler.
+ * @param {Ojbect} form
+ * @param {Ojbect} form_state
+ */
+function contact_personal_form_submit(form, form_state) {
+  var data = {
+    name: form_state.values['name'],
+    mail: form_state.values['mail'],
+    to: form_state.values['to'],
+    subject: form_state.values['subject'],
+    category: form_state.values['category'],
+    message: form_state.values['message'],
+    copy: form_state.values['copy']
+  };
+  contact_personal({
+      data: JSON.stringify(data),
+      success: function(result) {
+        if (result[0]) { drupalgap_alert('Your message has been sent!'); }
+        else {
+          drupalgap_alert(
+            'There was a problem sending your message!',
+            { title: 'Error' }
+          );
+        }
+        drupalgap_form_clear();
+      }
+  });
+}
+
+/**
+ * Returns the div container id to use on the "to" markup on the personal
+ * contact form.
+ * @param {Number} recipient
+ * @return {String}
+ */
+function contact_personal_form_to_container_id(recipient) {
+  try {
+    return 'contact_personal_form_user_' + recipient;
+  }
+  catch (error) {
+    console.log('contact_personal_form_to_container_id - ' + error);
+  }
+}
 
