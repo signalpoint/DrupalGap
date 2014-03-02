@@ -13,6 +13,7 @@ lintfiles = src/drupalgap.js\
 				src/includes/theme.inc.js\
 				src/modules/block/block.js\
 				src/modules/comment/comment.js\
+				src/modules/contact/contact.js\
 				src/modules/entity/entity.js\
 				src/modules/field/field.js\
 				src/modules/file/file.js\
@@ -33,6 +34,7 @@ files =	src/drupalgap.js\
 				src/includes/theme.inc.js\
 				src/modules/block/block.js\
 				src/modules/comment/comment.js\
+				src/modules/contact/contact.js\
 				src/modules/entity/entity.js\
 				src/modules/field/field.js\
 				src/modules/file/file.js\
