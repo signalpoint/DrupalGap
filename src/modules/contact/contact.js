@@ -180,6 +180,18 @@ function contact_site_form_submit(form, form_state) {
           );
         }
         drupalgap_form_clear();
+      },
+      error: function(xhr, status, message) {
+        if (message) {
+          message = JSON.parse(message);
+          if (message.form_errors) {
+            var errors = '';
+            $.each(message.form_errors, function(element, error) {
+                errors += error + '\n';
+            });
+            if (errors != '') { drupalgap_alert(errors); }
+          }
+        }
       }
   });
 }
@@ -303,6 +315,18 @@ function contact_personal_form_submit(form, form_state) {
           );
         }
         drupalgap_form_clear();
+      },
+      error: function(xhr, status, message) {
+        if (message) {
+          message = JSON.parse(message);
+          if (message.form_errors) {
+            var errors = '';
+            $.each(message.form_errors, function(element, error) {
+                errors += error + '\n';
+            });
+            if (errors != '') { drupalgap_alert(errors); }
+          }
+        }
       }
   });
 }
