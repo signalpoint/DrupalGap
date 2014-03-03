@@ -5286,7 +5286,7 @@ function contact_personal_form_pageshow(form, recipient) {
           if (!account.data.contact) {
             $('#' + drupalgap_get_page_id() + ' #drupalgap_form_errors').html(
               "<div class='messages warning'>" +
-                "Sorry, that user's contact form is disabled." +
+                "Sorry, this user's contact form is disabled." +
               '</div>'
             );
             return;
@@ -9590,8 +9590,41 @@ function theme_views_view(variables) {
     }
     // If we have any pages, render the pager.
     if (results.view.pages) { html += theme('pager', variables); }
-    // Render the rows.
-    var rows = '<div class="views-rows">';
+    // Depending on the format, let's render the container opening and closing,
+    // and then render the rows.
+    if (!variables.format) { variables.format = 'unformatted_list'; }
+    var open = '';
+    var close = '';
+    var open_row = '';
+    var close_row = '';
+    switch (variables.format) {
+      case 'ul':
+        open = '<ul data-role="listview">';
+        close = '</ul>';
+        open_row = '<li>';
+        close_row = '</li>';
+        break;
+      case 'ol':
+        open = '<ol data-role="listview">';
+        close = '</ol>';
+        open_row = '<li>';
+        close_row = '</li>';
+        break;
+      case 'table':
+        open = '<table>';
+        close = '</table>';
+        open_row = '<tr>';
+        close_row = '</tr>';
+        break;
+      case 'unformatted_list':
+      default:
+        open = '<div class="views-rows">';
+        close = '</div>';
+        open_row = '<div>';
+        close_row = '</div>';
+        break;
+    }
+    var rows = '' + open;
     $.each(results[root], function(count, object) {
         // Extract the row.
         var row = object[child];
@@ -9599,15 +9632,25 @@ function theme_views_view(variables) {
         row.count = count;
         // If a row_callback function exists, call it to render the row,
         // otherwise use the default row render mechanism.
+        var row_content = '';
         if (variables.row_callback && function_exists(variables.row_callback)) {
           row_callback = window[variables.row_callback];
-          rows += row_callback(results.view, row);
+          row_content = row_callback(results.view, row);
         }
-        else { rows += '<div>' + JSON.stringify(row) + '</div>'; }
+        else { row_content = JSON.stringify(row); }
+        rows += open_row + row_content + close_row;
     });
-    rows += '</div>';
+    rows += close;
     html += rows;
-    // @todo - Are we rendering the pager below the results?
+    // Since the views content is injected dynamically after the page is loaded,
+    // we need to have jQM refresh the page to add its styling.
+    var selector = '#' + drupalgap_get_page_id() +
+      " div[data-role$='content']";
+    $(selector).hide();
+    setTimeout(function() {
+        $(selector).trigger('create').show('fast');
+    }, 100);
+    // @TODO - Are we rendering the pager below the results?
     return html;
   }
   catch (error) { console.log('theme_views_view - ' + error); }
