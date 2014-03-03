@@ -39,7 +39,7 @@ function drupalgap_init() {
            { name: 'system' },
            { name: 'taxonomy' },
            { name: 'user' },
-           { name: 'views_datasource' }
+           { name: 'views' }
          ]
       },
       module_paths: [],
@@ -125,7 +125,7 @@ function drupalgap_onload() {
       'system',
       'taxonomy',
       'user',
-      'views_datasource'
+      'views'
     ];
     for (var i = 0; i < modules.length; i++) {
       var module = modules[i];
