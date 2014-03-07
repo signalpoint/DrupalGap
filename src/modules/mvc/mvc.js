@@ -1,5 +1,5 @@
 /**
- * The page callback for collection/list/%/%.
+ * The page callback for mvc/collection/list/%/%.
  * @param {String} module
  * @param {String} type
  * @return {Object}
@@ -16,7 +16,7 @@ function collection_list_page(module, type) {
     var collection = collection_load(module, type);
     if (collection) {
       $.each(collection, function(id, item) {
-          var path = 'item/' + module + '/' + type + '/' + id;
+          var path = 'mvc/item/' + module + '/' + type + '/' + id;
           items.push(l(item.name, path));
       });
       content.collection_list.items = items;
@@ -154,13 +154,18 @@ function mvc_install() {
 function mvc_menu() {
   try {
     var items = {
-      'collection/list/%/%': {
+      'mvc/collection/list/%/%': {
         'page_callback': 'collection_list_page',
-        'page_arguments': [2, 3]
+        'page_arguments': [3, 4]
       },
-      'item/%/%/%': {
+      'mvc/item/%/%/%': {
         'page_callback': 'item_view_page',
-        'page_arguments': [1, 2, 3]
+        'page_arguments': [2, 3, 4]
+      },
+      'mvc/item-add/%/%': {
+        title: 'Add',
+        page_callback: 'drupalgap_get_form',
+        page_arguments: ['drupalgap_mvc_model_create_form', 2, 3]
       }
     };
     return items;
@@ -210,13 +215,15 @@ function model_load(module, name) {
 /**
  * Given a module type, and model type, this generates and returns the form JSON
  * object to create a model item.
+ * @param {Object} form
+ * @param {Object} form_state
  * @param {String} module
  * @param {String} type
  * @return {Object}
  */
-function drupalgap_mvc_model_create_form(module, type) {
+function drupalgap_mvc_model_create_form(form, form_state, module, type) {
    try {
-    var form = drupalgap_form_defaults('drupalgap_mvc_model_create_form');
+    //var form = drupalgap_form_defaults('drupalgap_mvc_model_create_form');
     var model = model_load(module, type);
     if (model) {
       // @todo - this could be dangerous just overriding the elements variable,
@@ -247,7 +254,7 @@ function drupalgap_mvc_model_create_form_submit(form, form_state) {
                  form_state.values.module + '/' +
                  form_state.values.type + '/' +
                  form_state.values.id;*/
-      var path = 'collection/list/' +
+      var path = 'mvc/collection/list/' +
                  form_state.values.module + '/' +
                  form_state.values.type;
       drupalgap_goto(path);
@@ -322,7 +329,7 @@ function item_save(item) {
 }
 
 /**
- * The page callback for item/%/%/%.
+ * The page callback for mvc/item/%/%/%.
  * @param {String} module
  * @param {String} type
  * @param {Object} item
