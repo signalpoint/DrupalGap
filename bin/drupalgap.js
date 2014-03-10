@@ -7153,8 +7153,8 @@ function mvc_install() {
       var models = module_invoke(module, 'mvc_model');
       if (models) {
         // Create namespace for model, keyed by module name.
-        if (!eval('drupalgap.mvc.models.' + module)) {
-          eval('drupalgap.mvc.models.' + module + ' = {};');
+        if (!drupalgap.mvc.models[module]) {
+          drupalgap.mvc.models[module] = {};
         }
         // For each model type...
         $.each(models, function(model_type, model) {
@@ -7178,21 +7178,24 @@ function mvc_install() {
               'default_value': model_type
             };
             // Add each model type to its namespace within drupalgap.mvc.models
-            eval(
-              'drupalgap.mvc.models.' + module + '.' + model_type + ' = model;'
+            drupalgap.mvc.models[module][model_type] = model;
+            // Save an empty collection to local storage for this model type, if
+            // one doesn't already exist.
+            var collection_key = mvc_get_collection_key(
+              'collection',
+              module,
+              model_type
             );
-            // Save an empty collection to local storage for this model type.
-            window.localStorage.setItem(
-              mvc_get_collection_key('collection', module, model_type),
-              '[]'
-            );
-            // Save settings for the collection to local storage. The auto
-            // increment value represents an item id, we start counting at zero
-            // since the collection is an array.
-            window.localStorage.setItem(
-              mvc_get_collection_key('settings', module, model_type),
-              '{"auto_increment":0}'
-            );
+            if (!window.localStorage.getItem(collection_key)) {
+              window.localStorage.setItem(collection_key, '[]');
+              // Save settings for the collection to local storage. The auto
+              // increment value represents an item id, we start counting at
+              // zero since the collection is an array.
+              window.localStorage.setItem(
+                mvc_get_collection_key('settings', module, model_type),
+                '{"auto_increment":0}'
+              );
+            }
         });
       }
     }
@@ -7225,7 +7228,7 @@ function mvc_menu() {
       'mvc/item-add/%/%': {
         title: 'Add',
         page_callback: 'drupalgap_get_form',
-        page_arguments: ['drupalgap_mvc_model_create_form', 2, 3]
+        page_arguments: ['item_create_form', 2, 3]
       }
     };
     return items;
@@ -7281,16 +7284,16 @@ function model_load(module, name) {
  * @param {String} type
  * @return {Object}
  */
-function drupalgap_mvc_model_create_form(form, form_state, module, type) {
+function item_create_form(form, form_state, module, type) {
    try {
-    //var form = drupalgap_form_defaults('drupalgap_mvc_model_create_form');
+    //var form = drupalgap_form_defaults('item_create_form');
     var model = model_load(module, type);
     if (model) {
       // @todo - this could be dangerous just overriding the elements variable,
       // we should iterate over the model fields and add them one by one
       // instead.
       form.elements = model.fields;
-      form.buttons.cancel = {'title': 'Cancel'};
+      form.buttons.cancel = drupalgap_form_cancel_button();
       form.elements.submit = {
         type: 'submit',
         value: 'Create'
@@ -7298,7 +7301,7 @@ function drupalgap_mvc_model_create_form(form, form_state, module, type) {
     }
     return form;
   }
-  catch (error) { console.log('drupalgap_mvc_model_create_form - ' + error); }
+  catch (error) { console.log('item_create_form - ' + error); }
 }
 
 /**
@@ -7306,7 +7309,7 @@ function drupalgap_mvc_model_create_form(form, form_state, module, type) {
  * @param {Object} form
  * @param {Object} form_state
  */
-function drupalgap_mvc_model_create_form_submit(form, form_state) {
+function item_create_form_submit(form, form_state) {
   try {
     // Save the item and then view it.
     if (item_save(form_state.values)) {
@@ -7317,15 +7320,18 @@ function drupalgap_mvc_model_create_form_submit(form, form_state) {
       var path = 'mvc/collection/list/' +
                  form_state.values.module + '/' +
                  form_state.values.type;
-      drupalgap_goto(path);
+      // If there is a form action path set, use that instead.
+      if (form.action) { path = form.action; }
+      // Go to our destination path, and force a reload on the page.
+      drupalgap_goto(path, {reloadPage: true});
     }
     else {
-      var msg = 'drupalgap_mvc_model_create_form_submit - failed to save item!';
+      var msg = 'item_create_form_submit - failed to save item!';
       drupalgap_alert(msg);
     }
   }
   catch (error) {
-    console.log('drupalgap_mvc_model_create_form_submit - ' + error);
+    console.log('item_create_form_submit - ' + error);
   }
 }
 
