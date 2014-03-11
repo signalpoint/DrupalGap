@@ -452,11 +452,48 @@ function drupalgap_alert(message) {
     if (options) {
       if (options.alertCallback) { alertCallback = options.alertCallback; }
       if (options.title) { title = options.title; }
-      if (options.buttonName) { title = options.buttonName; }
+      if (options.buttonName) { buttonName = options.buttonName; }
     }
     navigator.notification.alert(message, alertCallback, title, buttonName);
   }
   catch (error) { console.log('drupalgap_alert - ' + error); }
+}
+
+/**
+ * Displays a confirmation message to the user using PhoneGap's confirm. It is
+ * important to understand this is an async function, so code will continue to
+ * execute while the confirmation is displayed to the user.
+ * You may optionally pass in a second argument as a JSON object with the
+ * following properties:
+ *   confirmCallback - the function to call after the user presses a button. The
+ *               button label is passed to the function.
+ *   title - the title to use on the alert box, defaults to 'Alert'
+ *   buttonLabels - the text to place on the OK, and Cancel buttons, separated
+ *                  by comma.
+ * @param {String} message
+ */
+function drupalgap_confirm(message) {
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    var confirmCallback = function(button) { };
+    var title = 'Confirm';
+    var buttonLabels = ['OK', 'Cancel'];
+    if (options) {
+      if (options.confirmCallback) {
+        confirmCallback = options.confirmCallback;
+      }
+      if (options.title) { title = options.title; }
+      if (options.buttonLabels) { buttonLabels = options.buttonLabels; }
+    }
+    navigator.notification.confirm(
+        message,
+        confirmCallback,
+        title,
+        buttonLabels
+    );
+  }
+  catch (error) { console.log('drupalgap_confirm - ' + error); }
 }
 
 /**
