@@ -452,11 +452,48 @@ function drupalgap_alert(message) {
     if (options) {
       if (options.alertCallback) { alertCallback = options.alertCallback; }
       if (options.title) { title = options.title; }
-      if (options.buttonName) { title = options.buttonName; }
+      if (options.buttonName) { buttonName = options.buttonName; }
     }
     navigator.notification.alert(message, alertCallback, title, buttonName);
   }
   catch (error) { console.log('drupalgap_alert - ' + error); }
+}
+
+/**
+ * Displays a confirmation message to the user using PhoneGap's confirm. It is
+ * important to understand this is an async function, so code will continue to
+ * execute while the confirmation is displayed to the user.
+ * You may optionally pass in a second argument as a JSON object with the
+ * following properties:
+ *   confirmCallback - the function to call after the user presses a button. The
+ *               button label is passed to the function.
+ *   title - the title to use on the alert box, defaults to 'Alert'
+ *   buttonLabels - the text to place on the OK, and Cancel buttons, separated
+ *                  by comma.
+ * @param {String} message
+ */
+function drupalgap_confirm(message) {
+  try {
+    var options = null;
+    if (arguments[1]) { options = arguments[1]; }
+    var confirmCallback = function(button) { };
+    var title = 'Confirm';
+    var buttonLabels = ['OK', 'Cancel'];
+    if (options) {
+      if (options.confirmCallback) {
+        confirmCallback = options.confirmCallback;
+      }
+      if (options.title) { title = options.title; }
+      if (options.buttonLabels) { buttonLabels = options.buttonLabels; }
+    }
+    navigator.notification.confirm(
+        message,
+        confirmCallback,
+        title,
+        buttonLabels
+    );
+  }
+  catch (error) { console.log('drupalgap_confirm - ' + error); }
 }
 
 /**
@@ -1337,12 +1374,10 @@ function drupalgap_theme_registry_build() {
         var fn = window[function_name];
         var hook_theme = fn();
         $.each(hook_theme, function(element, variables) {
-            //variables.path = drupalgap_get_path('module', module);
             variables.path = drupalgap_get_path(
               'theme',
               drupalgap.settings.theme
             );
-            //eval('drupalgap.theme_registry.' + element + ' = variables;');
             drupalgap.theme_registry[element] = variables;
         });
     });
@@ -2129,17 +2164,16 @@ function drupalgap_render_page() {
       content = output;
     }
     else if (output_type === 'object') {
-
       // The page came back as a render object. Let's define the names of
       // variables that are reserved for theme processing.
       var render_variables = ['theme', 'view_mode', 'language'];
 
       // Is there a theme value specified in the output and the registry?
-      if (output.theme && eval('drupalgap.theme_registry.' + output.theme)) {
+      if (output.theme && drupalgap.theme_registry[output.theme]) {
 
         // Extract the theme object template and determine the template file
         // name and path.
-        var template = eval('drupalgap.theme_registry.' + output.theme + ';');
+        var template = drupalgap.theme_registry[output.theme];
         var template_file_name = output.theme.replace(/_/g, '-') + '.tpl.html';
         var template_file_path = template.path + '/' + template_file_name;
 
@@ -2159,26 +2193,20 @@ function drupalgap_render_page() {
             if (placeholders) {
 
               // Replace each placeholder with html.
-              if (drupalgap.settings.debug) {
-                console.log(JSON.stringify(placeholders));
-              }
-              // TODO - each placeholder should have its own container div and
-              // unique id
+              // @todo - each placeholder should have its own container div and
+              // unique id.
               $.each(placeholders, function(index, placeholder) {
                   var html = '';
-                  if (eval('output.' + placeholder)) {
+                  if (output[placeholder]) {
                     // Grab the element variable from the output.
-                    var element = eval('output.' + placeholder);
+                    var element = output[placeholder];
                     // If it is markup, render it as is, if it is themeable,
                     // then theme it.
-                    if (eval('output.' + placeholder + '.markup')) {
-                      html = eval('output.' + placeholder + '.markup');
+                    if (output[placeholder].markup) {
+                      html = output[placeholder].markup;
                     }
-                    else if (eval('output.' + placeholder + '.theme')) {
-                      html = theme(
-                        eval('output.' + placeholder + '.theme'),
-                        element
-                      );
+                    else if (output[placeholder].theme) {
+                      html = theme(output[placeholder].theme, element);
                     }
                     // Now remove the variable from the output.
                     delete output[placeholder];
@@ -2194,20 +2222,10 @@ function drupalgap_render_page() {
             }
             else {
               // There were no place holders found, do nothing, ok.
-              if (drupalgap.settings.debug) {
-                console.log(
-                  'drupalgap_render_page - no placeholders found (' +
-                    template_file_html +
-                  ')'
-                );
-              }
             }
 
             // Finally add the rendered template file to the content.
             content += template_file_html;
-            if (drupalgap.settings.debug) {
-              console.log(content);
-            }
           }
           else {
             console.log(
@@ -2227,7 +2245,7 @@ function drupalgap_render_page() {
       }
 
       // Iterate over any remaining variables and theme them.
-      // TODO - each remaining variables should have its own container div and
+      // @todo - each remaining variables should have its own container div and
       // unique id, similar to the placeholder div containers mentioned above.
       $.each(output, function(element, variables) {
           if ($.inArray(element, render_variables) == -1) {
@@ -2255,7 +2273,7 @@ function drupalgap_render_region(region) {
     // Make sure there are blocks specified for this theme in settings.js.
     if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
       var msg = 'drupalgap_render_region - there are no blocks for the "' +
-        drupalgap.settings.theme + ' " theme in the settings.js file!';
+        drupalgap.settings.theme + '" theme in the settings.js file!';
       drupalgap_alert(msg);
       return '';
     }
