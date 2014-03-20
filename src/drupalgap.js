@@ -1374,12 +1374,10 @@ function drupalgap_theme_registry_build() {
         var fn = window[function_name];
         var hook_theme = fn();
         $.each(hook_theme, function(element, variables) {
-            //variables.path = drupalgap_get_path('module', module);
             variables.path = drupalgap_get_path(
               'theme',
               drupalgap.settings.theme
             );
-            //eval('drupalgap.theme_registry.' + element + ' = variables;');
             drupalgap.theme_registry[element] = variables;
         });
     });
