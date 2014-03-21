@@ -1470,13 +1470,16 @@ function date_yyyy_mm_dd_hh_mm_ss() {
 }
 
 /**
- * Returns an array with the parts for the current time.
+ * Returns an array with the parts for the current time. You may optionally
+ * pass in a JS date object to use that date instead.
  * @return {Array}
  */
 function date_yyyy_mm_dd_hh_mm_ss_parts() {
   try {
     var result = [];
-    var now = new Date();
+    var now = null;
+    if (arguments[0]) { now = arguments[0]; }
+    else { now = new Date(); }
     var year = '' + now.getFullYear();
     var month = '' + (now.getMonth() + 1);
     if (month.length == 1) { month = '0' + month; }
@@ -1497,6 +1500,22 @@ function date_yyyy_mm_dd_hh_mm_ss_parts() {
     return result;
   }
   catch (error) { console.log('date_yyyy_mm_dd_hh_mm_ss_parts - ' + error); }
+}
+
+/**
+ * Given a year and month (0-11), this will return the number of days in that
+ * month.
+ * @see http://stackoverflow.com/a/1810990/763010
+ * @param {Number} year
+ * @param {Number} month
+ * @return {Number}
+ */
+function date_number_of_days_in_month(year, month) {
+  try {
+    var d = new Date(year, month, 0);
+    return d.getDate();
+  }
+  catch (error) { console.log('date_number_of_days_in_month - ' + error); }
 }
 
 /**
@@ -3341,7 +3360,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     if (item.children && item.children.length > 0) {
       for (var i = 0; i < item.children.length; i++) {
         if (item.children[i].markup) { html += item.children[i].markup; }
-        else if (item.children[i].type) {
+        else if (item.children[i].type || item.children[i].theme) {
+          var theme_type = item.children[i].type;
+          if (!theme_type) { theme_type = item.children[i].theme; }
           // Is there a title for a label?
           if (item.children[i].title) {
             html += theme('form_element_label', {
@@ -3349,7 +3370,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
             });
           }
           // Render the child with the theme system.
-          html += theme(item.children[i].type, item.children[i]);
+          html += theme(theme_type, item.children[i]);
         }
         else {
           console.log(
@@ -6646,8 +6667,6 @@ function image_field_formatter_view(entity_type, entity, field, instance,
 }
 
 /**
- * Implements hook_field_widget_form().
- /**
  * Implements hook_field_widget_form().
  * @param {Object} form
  * @param {Object} form_state

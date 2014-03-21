@@ -39,6 +39,9 @@ version of DrupalGap to another.
   
     class="{:drupalgap_page_class:}"
 
+  jQueryMobile has been updated to 1.4.2, be sure to update any custom theme's
+  to use this new version.
+
 7.x-1.6-alpha => 7.x-1.7-alpha
 
 
