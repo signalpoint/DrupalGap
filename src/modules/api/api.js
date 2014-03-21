@@ -315,9 +315,22 @@ function hook_field_data_string(entity_type, bundle, entity, field, instance, la
 function hook_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) { }
 
 /**
- * Used by modules to provide field widgets for form element items. 
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
  */
-function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) { }
+function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
+  try {
+    // Used by modules to provide field widgets for form element items.
+  }
+  catch (error) { console.log('hook_field_widget_form - ' + error); }
+}
 
 /**
  * Called after a form element is assembled. Use it to alter a form element.
