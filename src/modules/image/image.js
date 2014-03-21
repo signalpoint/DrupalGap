@@ -40,8 +40,6 @@ function image_field_formatter_view(entity_type, entity, field, instance,
 
 /**
  * Implements hook_field_widget_form().
- /**
- * Implements hook_field_widget_form().
  * @param {Object} form
  * @param {Object} form_state
  * @param {Object} field
