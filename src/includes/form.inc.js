@@ -856,7 +856,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     if (item.children && item.children.length > 0) {
       for (var i = 0; i < item.children.length; i++) {
         if (item.children[i].markup) { html += item.children[i].markup; }
-        else if (item.children[i].type) {
+        else if (item.children[i].type || item.children[i].theme) {
+          var theme_type = item.children[i].type;
+          if (!theme_type) { theme_type = item.children[i].theme; }
           // Is there a title for a label?
           if (item.children[i].title) {
             html += theme('form_element_label', {
@@ -864,7 +866,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
             });
           }
           // Render the child with the theme system.
-          html += theme(item.children[i].type, item.children[i]);
+          html += theme(theme_type, item.children[i]);
         }
         else {
           console.log(
