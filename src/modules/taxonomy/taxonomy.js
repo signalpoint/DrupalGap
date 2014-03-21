@@ -54,6 +54,46 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
 }
 
 /**
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
+ */
+function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
+  items, delta, element) {
+  try {
+    items[delta].type = 'hidden';
+    var widget_items = [
+      l('Beige', null),
+      l('Blue', null),
+      l('Black', null),
+      l('Brown', null),
+      l('Red', null),
+      l('Green', null),
+      l('Orange', null)
+    ];
+    var widget = {
+      theme: 'item_list',
+      items: widget_items,
+      attributes: {
+        'id': items[delta].id + '-list',
+        'data-role': 'listview',
+        'data-filter': 'true',
+        'data-filter-reveal': 'true',
+        'data-filter-placeholder': '...'
+      }
+    };
+    items[delta].children.push(widget);
+  }
+  catch (error) { console.log('taxonomy_field_widget_form - ' + error); }
+}
+
+/**
  * Implements hook_menu().
  * @return {Object}
  */
