@@ -70,33 +70,82 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
     items[delta].type = 'hidden';
     var item_options = {
       attributes: {
-        onclick: '_taxonomy_field_widget_form_click("' + + '")'
+        onclick: '_taxonomy_field_widget_form_click(this)'
       }
     };
-    var widget_items = [
-      l('Beige', null, item_options),
-      l('Blue', null, item_options),
-      l('Black', null, item_options),
-      l('Brown', null, item_options),
-      l('Red', null, item_options),
-      l('Green', null, item_options),
-      l('Orange', null, item_options)
-    ];
+    // Build the widget and attach it to the item.
     var widget = {
       theme: 'item_list',
-      items: widget_items,
+      items: [],
       attributes: {
         'id': items[delta].id + '-list',
         'data-role': 'listview',
         'data-filter': 'true',
-        'data-filter-reveal': 'true',
         'data-inset': 'true',
         'data-filter-placeholder': '...'
       }
     };
     items[delta].children.push(widget);
+    // Attach JS to handle the widget's data fetching.
+    var machine_name = field.settings.allowed_values[0].vocabulary;
+    var vocabulary = taxonomy_vocabulary_machine_name_load(machine_name);
+    var vid = vocabulary.vid;
+    var js = '<script type="text/javascript">' +
+      '$("#' + widget.attributes.id + '").on("filterablebeforefilter",' +
+        'function(e, d) {' +
+          '_taxonomy_field_widget_form_autocomplete(' + vid + ', this, e, d)' +
+        '}' +
+      ');' +
+    '</script>';
+    items[delta].children.push({
+        markup: js
+    });
   }
   catch (error) { console.log('taxonomy_field_widget_form - ' + error); }
+}
+
+/**
+ * Handles the remote data fetching for taxonomy term reference autocomplete
+ * tagging widget.
+ * @param {Number} vid
+ * @param {Object} list
+ * @param {Object} e
+ * @param {Object} data
+ */
+function _taxonomy_field_widget_form_autocomplete(vid, list, e, data) {
+  try {
+    var $ul = $(list),
+        $input = $(data.input),
+        value = $input.val(),
+        html = '';
+    $ul.html('');
+    if (value && value.length > 2) {
+        $ul.html('<li><div class="ui-loader">' +
+          '<span class="ui-icon ui-icon-loading"></span>' +
+          '</div></li>');
+        $ul.listview('refresh');
+        var query = {
+          parameters: {
+            vid: vid
+          }
+        };
+        taxonomy_term_index(query, {
+            success: function(terms) {
+              if (terms.length == 0) { return; }
+              dpm(terms);
+              $.each(terms, function(index, term) {
+                  html += '<li>' + term.name + '</li>';
+              });
+              $ul.html(html);
+              $ul.listview('refresh');
+              $ul.trigger('updatelayout');
+            }
+        });
+    }
+  }
+  catch (error) {
+    console.log('_taxonomy_field_widget_form_autocomplete - ' + error);
+  }
 }
 
 /**
@@ -482,7 +531,7 @@ function taxonomy_vocabulary_pageshow(vid) {
 }
 
 /**
- * Given a vocabulary name (not the machine name) this will return the JSON
+ * Given a vocabulary machine name this will return the JSON
  * object for the vocabulary that is attached to the
  * drupalgap.taxonomy_vocabularies object, or false if it doesn't exist.
  * @param {String} name
