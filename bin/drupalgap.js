@@ -8648,7 +8648,7 @@ function user_register_form_submit(form, form_state) {
             drupalgap_goto('');
           }
           else {
-            alert(
+            drupalgap_alert(
               form.user_register.user_mail_register_no_approval_required_body
             );
             user_login(account.name, account.pass, {
