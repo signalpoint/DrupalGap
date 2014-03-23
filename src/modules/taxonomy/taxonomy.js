@@ -68,14 +68,19 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
   items, delta, element) {
   try {
     items[delta].type = 'hidden';
+    var item_options = {
+      attributes: {
+        onclick: '_taxonomy_field_widget_form_click("' + + '")'
+      }
+    };
     var widget_items = [
-      l('Beige', null),
-      l('Blue', null),
-      l('Black', null),
-      l('Brown', null),
-      l('Red', null),
-      l('Green', null),
-      l('Orange', null)
+      l('Beige', null, item_options),
+      l('Blue', null, item_options),
+      l('Black', null, item_options),
+      l('Brown', null, item_options),
+      l('Red', null, item_options),
+      l('Green', null, item_options),
+      l('Orange', null, item_options)
     ];
     var widget = {
       theme: 'item_list',
@@ -85,12 +90,26 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
         'data-role': 'listview',
         'data-filter': 'true',
         'data-filter-reveal': 'true',
+        'data-inset': 'true',
         'data-filter-placeholder': '...'
       }
     };
     items[delta].children.push(widget);
   }
   catch (error) { console.log('taxonomy_field_widget_form - ' + error); }
+}
+
+/**
+ * Handles clicks on taxonomy term reference autocomplete widgets.
+ * @param {String} id The id of the hidden input.
+ * @param {String} tid The term id.
+ * @param {String} name The term name.
+ */
+function _taxonomy_field_widget_form_click(id, tid, name) {
+  try {
+    dpm($(item));
+  }
+  catch (error) { console.log('_taxonomy_field_widget_form_click - ' + error); }
 }
 
 /**
