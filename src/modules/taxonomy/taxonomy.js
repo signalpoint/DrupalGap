@@ -120,8 +120,14 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
         $input = $(data.input),
         value = $input.val(),
         html = '';
-    // Save a reference to this text input field.
+    // Save a reference to this text input field. Then attach an on change
+    // handler that will set the hidden input's value when the text field
+    // changes. Keep in mind, later on we listen for clicks on autocomplete
+    // results to populate this same hidden input's field.
     _taxonomy_field_widget_form_autocomplete_input = $input;
+    $(_taxonomy_field_widget_form_autocomplete_input).on('change', function() {
+        $('#' + id).val($(this).val());
+    });
     // Clear the list, then set up its input handlers.
     $ul.html('');
     if (value && value.length > 0) {
@@ -130,7 +136,7 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
           '</div></li>');
         $ul.listview('refresh');
         var path =
-          'drupalgap/taxonomy-term-autocomplete/' + vid + '?name=' +
+          'drupalgap/taxonomy-term-autocomplete/' + vid + '&name=' +
           encodeURIComponent(value);
         views_datasource_get_view_result(path, {
             success: function(results) {
