@@ -251,6 +251,7 @@ function drupalgap_api_default_options() {
  * @param {String} langcode
  * @param {Number} delta
  * @param {Object} field_key
+ * @return {Object}
  */
 function hook_assemble_form_state_into_field(entity_type, bundle,
   form_state_value, field, instance, langcode, delta, field_key) {
