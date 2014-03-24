@@ -68,17 +68,13 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
   items, delta, element) {
   try {
     items[delta].type = 'hidden';
-    var item_options = {
-      attributes: {
-        onclick: '_taxonomy_field_widget_form_click(this)'
-      }
-    };
     // Build the widget and attach it to the item.
+    var list_id = items[delta].id + '-list';
     var widget = {
       theme: 'item_list',
       items: [],
       attributes: {
-        'id': items[delta].id + '-list',
+        'id': list_id,
         'data-role': 'listview',
         'data-filter': 'true',
         'data-inset': 'true',
@@ -91,9 +87,11 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
     var vocabulary = taxonomy_vocabulary_machine_name_load(machine_name);
     var vid = vocabulary.vid;
     var js = '<script type="text/javascript">' +
-      '$("#' + widget.attributes.id + '").on("filterablebeforefilter",' +
+      '$("#' + list_id + '").on("filterablebeforefilter",' +
         'function(e, d) {' +
-          '_taxonomy_field_widget_form_autocomplete(' + vid + ', this, e, d)' +
+          '_taxonomy_field_widget_form_autocomplete(' +
+            '"' + items[delta].id + '", ' + vid + ', this, e, d' +
+          ')' +
         '}' +
       ');' +
     '</script>';
@@ -104,37 +102,53 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
   catch (error) { console.log('taxonomy_field_widget_form - ' + error); }
 }
 
+var _taxonomy_field_widget_form_autocomplete_input = null;
+
 /**
  * Handles the remote data fetching for taxonomy term reference autocomplete
  * tagging widget.
+ * @param {String} id The id of the hidden input that will hold the term id.
  * @param {Number} vid
- * @param {Object} list
+ * @param {Object} list The unordered list that displays the terms.
  * @param {Object} e
  * @param {Object} data
  */
-function _taxonomy_field_widget_form_autocomplete(vid, list, e, data) {
+function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
   try {
+    // Setup the vars to handle this widget.
     var $ul = $(list),
         $input = $(data.input),
         value = $input.val(),
         html = '';
+    // Save a reference to this text input field.
+    _taxonomy_field_widget_form_autocomplete_input = $input;
+    // Clear the list, then set up its input handlers.
     $ul.html('');
-    if (value && value.length > 2) {
+    if (value && value.length > 0) {
         $ul.html('<li><div class="ui-loader">' +
           '<span class="ui-icon ui-icon-loading"></span>' +
           '</div></li>');
         $ul.listview('refresh');
-        var query = {
-          parameters: {
-            vid: vid
-          }
-        };
-        taxonomy_term_index(query, {
-            success: function(terms) {
-              if (terms.length == 0) { return; }
-              dpm(terms);
-              $.each(terms, function(index, term) {
-                  html += '<li>' + term.name + '</li>';
+        var path =
+          'drupalgap/taxonomy-term-autocomplete/' + vid + '?name=' +
+          encodeURIComponent(value);
+        views_datasource_get_view_result(path, {
+            success: function(results) {
+              if (results.terms.length == 0) { return; }
+              $.each(results.terms, function(index, object) {
+                  var attributes = {
+                    tid: object.term.tid,
+                    vid: vid,
+                    name: object.term.name,
+                    onclick: '_taxonomy_field_widget_form_click(' +
+                      "'" + id + "', " +
+                      "'" + $ul.attr('id') + "', " +
+                      'this' +
+                    ')'
+                  };
+                  html += '<li ' + drupalgap_attributes(attributes) + '>' +
+                    object.term.name +
+                  '</li>';
               });
               $ul.html(html);
               $ul.listview('refresh');
@@ -150,15 +164,47 @@ function _taxonomy_field_widget_form_autocomplete(vid, list, e, data) {
 
 /**
  * Handles clicks on taxonomy term reference autocomplete widgets.
- * @param {String} id The id of the hidden input.
- * @param {String} tid The term id.
- * @param {String} name The term name.
+ * @param {String} id The id of the hidden input that will hold the term name.
+ * @param {String} list_id The id of the list that holds the terms.
+ * @param {Object} item The list item that was just clicked.
  */
-function _taxonomy_field_widget_form_click(id, tid, name) {
+function _taxonomy_field_widget_form_click(id, list_id, item) {
   try {
-    dpm($(item));
+    var tid = $(item).attr('name');
+    $('#' + id).val(tid);
+    $(_taxonomy_field_widget_form_autocomplete_input).val($(item).attr('name'));
+    $('#' + list_id).html('');
   }
   catch (error) { console.log('_taxonomy_field_widget_form_click - ' + error); }
+}
+
+/**
+ * Implements hook_assemble_form_state_into_field().
+ * @param {Object} entity_type
+ * @param {String} bundle
+ * @param {String} form_state_value
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Number} delta
+ * @param {Object} field_key
+ * @return {Object}
+ */
+function taxonomy_assemble_form_state_into_field(entity_type, bundle,
+  form_state_value, field, instance, langcode, delta, field_key) {
+  try {
+    dpm(field);
+    dpm(instance);
+    var result = {};
+    if (instance.widget.type == 'taxonomy_autocomplete') {
+      field_key = null;
+      result[Drupal.settings.language_default] = form_state_value;
+    }
+    return result;
+  }
+  catch (error) {
+    console.log('taxonomy_assemble_form_state_into_field - ' + error);
+  }
 }
 
 /**
