@@ -329,10 +329,13 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // implement hook_assemble_form_state_into_field() an opportunity
               // to specify no usage of a key if their item doesn't need one.
               // The geofield module is an example of field that doesn't use a
-              // key.
+              // key. The use_wrapper flag allows others to completely override
+              // the use of a wrapper around the field value, e.g. taxonomy term
+              // reference autocomplete.
               var field_key = {
                 value: 'value',
-                use_key: true
+                use_key: true,
+                use_wrapper: true
               };
 
               // If this element is a field, give the field's module an
@@ -355,7 +358,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // key. If we're using a delta value, push the key and value onto
               // the field to indicate the delta.
               if (!use_delta) {
-                entity[name][language][key] = field_value;
+                if (!field_key.use_wrapper) {
+                  entity[name][language] = field_value;
+                }
+                else {
+                  entity[name][language][key] = field_value;
+                }
               }
               else {
                 if (field_key.use_key) {
