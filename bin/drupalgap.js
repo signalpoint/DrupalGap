@@ -5730,10 +5730,13 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // implement hook_assemble_form_state_into_field() an opportunity
               // to specify no usage of a key if their item doesn't need one.
               // The geofield module is an example of field that doesn't use a
-              // key.
+              // key. The use_wrapper flag allows others to completely override
+              // the use of a wrapper around the field value, e.g. taxonomy term
+              // reference autocomplete.
               var field_key = {
                 value: 'value',
-                use_key: true
+                use_key: true,
+                use_wrapper: true
               };
 
               // If this element is a field, give the field's module an
@@ -5756,7 +5759,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // key. If we're using a delta value, push the key and value onto
               // the field to indicate the delta.
               if (!use_delta) {
-                entity[name][language][key] = field_value;
+                if (!field_key.use_wrapper) {
+                  entity[name][language] = field_value;
+                }
+                else {
+                  entity[name][language][key] = field_value;
+                }
               }
               else {
                 if (field_key.use_key) {
@@ -8937,6 +8945,163 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
 }
 
 /**
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
+ */
+function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
+  items, delta, element) {
+  try {
+    items[delta].type = 'hidden';
+    // Build the widget and attach it to the item.
+    var list_id = items[delta].id + '-list';
+    var widget = {
+      theme: 'item_list',
+      items: [],
+      attributes: {
+        'id': list_id,
+        'data-role': 'listview',
+        'data-filter': 'true',
+        'data-inset': 'true',
+        'data-filter-placeholder': '...'
+      }
+    };
+    items[delta].children.push(widget);
+    // Attach JS to handle the widget's data fetching.
+    var machine_name = field.settings.allowed_values[0].vocabulary;
+    var vocabulary = taxonomy_vocabulary_machine_name_load(machine_name);
+    var vid = vocabulary.vid;
+    var js = '<script type="text/javascript">' +
+      '$("#' + list_id + '").on("filterablebeforefilter",' +
+        'function(e, d) {' +
+          '_taxonomy_field_widget_form_autocomplete(' +
+            '"' + items[delta].id + '", ' + vid + ', this, e, d' +
+          ')' +
+        '}' +
+      ');' +
+    '</script>';
+    items[delta].children.push({
+        markup: js
+    });
+  }
+  catch (error) { console.log('taxonomy_field_widget_form - ' + error); }
+}
+
+var _taxonomy_field_widget_form_autocomplete_input = null;
+
+/**
+ * Handles the remote data fetching for taxonomy term reference autocomplete
+ * tagging widget.
+ * @param {String} id The id of the hidden input that will hold the term id.
+ * @param {Number} vid
+ * @param {Object} list The unordered list that displays the terms.
+ * @param {Object} e
+ * @param {Object} data
+ */
+function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
+  try {
+    // Setup the vars to handle this widget.
+    var $ul = $(list),
+        $input = $(data.input),
+        value = $input.val(),
+        html = '';
+    // Save a reference to this text input field.
+    _taxonomy_field_widget_form_autocomplete_input = $input;
+    // Clear the list, then set up its input handlers.
+    $ul.html('');
+    if (value && value.length > 0) {
+        $ul.html('<li><div class="ui-loader">' +
+          '<span class="ui-icon ui-icon-loading"></span>' +
+          '</div></li>');
+        $ul.listview('refresh');
+        var path =
+          'drupalgap/taxonomy-term-autocomplete/' + vid + '?name=' +
+          encodeURIComponent(value);
+        views_datasource_get_view_result(path, {
+            success: function(results) {
+              if (results.terms.length == 0) { return; }
+              $.each(results.terms, function(index, object) {
+                  var attributes = {
+                    tid: object.term.tid,
+                    vid: vid,
+                    name: object.term.name,
+                    onclick: '_taxonomy_field_widget_form_click(' +
+                      "'" + id + "', " +
+                      "'" + $ul.attr('id') + "', " +
+                      'this' +
+                    ')'
+                  };
+                  html += '<li ' + drupalgap_attributes(attributes) + '>' +
+                    object.term.name +
+                  '</li>';
+              });
+              $ul.html(html);
+              $ul.listview('refresh');
+              $ul.trigger('updatelayout');
+            }
+        });
+    }
+  }
+  catch (error) {
+    console.log('_taxonomy_field_widget_form_autocomplete - ' + error);
+  }
+}
+
+/**
+ * Handles clicks on taxonomy term reference autocomplete widgets.
+ * @param {String} id The id of the hidden input that will hold the term name.
+ * @param {String} list_id The id of the list that holds the terms.
+ * @param {Object} item The list item that was just clicked.
+ */
+function _taxonomy_field_widget_form_click(id, list_id, item) {
+  try {
+    var tid = $(item).attr('name');
+    $('#' + id).val(tid);
+    $(_taxonomy_field_widget_form_autocomplete_input).val($(item).attr('name'));
+    $('#' + list_id).html('');
+  }
+  catch (error) { console.log('_taxonomy_field_widget_form_click - ' + error); }
+}
+
+/**
+ * Implements hook_assemble_form_state_into_field().
+ * @param {Object} entity_type
+ * @param {String} bundle
+ * @param {String} form_state_value
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Number} delta
+ * @param {Object} field_key
+ * @return {Object}
+ */
+function taxonomy_assemble_form_state_into_field(entity_type, bundle,
+  form_state_value, field, instance, langcode, delta, field_key) {
+  try {
+    var result = null;
+    switch (instance.widget.type) {
+      case 'taxonomy_autocomplete':
+        field_key.use_wrapper = false;
+        result = form_state_value;
+        break;
+      case 'options_select':
+        result = form_state_value;
+        break;
+    }
+    return result;
+  }
+  catch (error) {
+    console.log('taxonomy_assemble_form_state_into_field - ' + error);
+  }
+}
+
+/**
  * Implements hook_menu().
  * @return {Object}
  */
@@ -9306,7 +9471,7 @@ function taxonomy_vocabulary_pageshow(vid) {
 }
 
 /**
- * Given a vocabulary name (not the machine name) this will return the JSON
+ * Given a vocabulary machine name this will return the JSON
  * object for the vocabulary that is attached to the
  * drupalgap.taxonomy_vocabularies object, or false if it doesn't exist.
  * @param {String} name
