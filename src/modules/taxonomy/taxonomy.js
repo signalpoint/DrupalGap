@@ -193,12 +193,15 @@ function _taxonomy_field_widget_form_click(id, list_id, item) {
 function taxonomy_assemble_form_state_into_field(entity_type, bundle,
   form_state_value, field, instance, langcode, delta, field_key) {
   try {
-    dpm(field);
-    dpm(instance);
-    var result = {};
-    if (instance.widget.type == 'taxonomy_autocomplete') {
-      field_key = null;
-      result[Drupal.settings.language_default] = form_state_value;
+    var result = null;
+    switch (instance.widget.type) {
+      case 'taxonomy_autocomplete':
+        field_key.use_wrapper = false;
+        result = form_state_value;
+        break;
+      case 'options_select':
+        result = form_state_value;
+        break;
     }
     return result;
   }
