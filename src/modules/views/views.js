@@ -212,7 +212,12 @@ function theme_views_view(variables) {
       return empty_callback(results.view);
     }
     // If we have any pages, render the pager.
-    if (results.view.pages) { html += theme('pager', variables); }
+    if (results.view.pages) {
+      html += theme('pager', variables);
+      // Place an empty header on the page so the results won't overlap the
+      // pager.
+      html += '<h2 class="dg_empty_list_header">&nbsp;</h2>';
+    }
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
     if (!variables.format) { variables.format = 'unformatted_list'; }

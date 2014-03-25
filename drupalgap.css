@@ -68,3 +68,11 @@ div.messages ul li {
   list-style-image: none;
 }
 
+/**
+ * Lists
+ */
+.dg_empty_list_header {
+  line-height: 0em;
+  margin: 0em 0em 1.3em 0em;
+}
+
