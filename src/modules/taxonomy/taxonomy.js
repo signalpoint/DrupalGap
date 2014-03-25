@@ -91,7 +91,7 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
         'function(e, d) {' +
           '_taxonomy_field_widget_form_autocomplete(' +
             '"' + items[delta].id + '", ' + vid + ', this, e, d' +
-          ')' +
+          ');' +
         '}' +
       ');' +
     '</script>';
