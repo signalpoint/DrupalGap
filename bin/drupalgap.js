@@ -4463,6 +4463,163 @@ function theme(hook, variables) {
   catch (error) { console.log('theme - ' + error); }
 }
 
+// A global variable to hold onto the autocomplete text field input selector.
+var _theme_autocomplete_input_selector;
+
+// A global variable to hold onto the autocomplete remote boolean.
+var _theme_autocomplete_remote;
+
+/**
+ * Themes an autocomplete.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_autocomplete(variables) {
+  try {
+    var html = '';
+
+    // Are we dealing with a remote data set.
+    var remote = false;
+    if (variables.remote) { remote = true; }
+    variables.remote = remote;
+    _theme_autocomplete_remote = variables.remote;
+
+    // Make sure we have an id to use on the list.
+    var id = null;
+    if (variables.attributes.id) { id = variables.attributes.id; }
+    else {
+      id = 'autocomplete_' + user_password();
+      variables.attributes.id = id;
+    }
+
+    // Build the widget variables.
+    var items = _theme_autocomplete_prepare_items(variables);
+    var widget = {
+      items: items,
+      attributes: {
+        'id': id,
+        'data-role': 'listview',
+        'data-filter': 'true',
+        'data-inset': 'true',
+        'data-filter-placeholder': '...'
+      }
+    };
+
+    // Handle a remote data set.
+    var js = '';
+    if (variables.remote) {
+      // We have a remote data set.
+      js = '<script type="text/javascript">' +
+        '$("#' + id + '").on("filterablebeforefilter", function(e, d) {' +
+          '_theme_autocomplete(this, e, d);' +
+        '});' +
+      '</script>';
+    }
+    else {
+      // Local data sets are handled automatically, just set this attribute.
+      widget.attributes['data-filter-reveal'] = true;
+      // Save a reference to the autocomplete text field input.
+      var selector = '#' + drupalgap_get_page_id() +
+        ' input[data-type="search"]';
+      js = '<script type="text/javascript">' +
+        '_theme_autocomplete_input_selector = \'' + selector + '\';' +
+      '</script>';
+    }
+
+    // Theme the list and add the js to it, then return the html.
+    html += theme('item_list', widget);
+    html += js;
+    return html;
+  }
+  catch (error) { console.log('theme_autocomplete - ' + error); }
+}
+
+/**
+ * An internal function used to handle remote data for an autocomplete.
+ * @param {Object} list The unordered list that displays the items.
+ * @param {Object} e
+ * @param {Object} data
+ */
+function _theme_autocomplete(list, e, data) {
+  try {
+    // Setup the vars to handle this widget.
+    var $ul = $(list),
+        $input = $(data.input),
+        value = $input.val(),
+        html = '';
+    // Clear the list, then set up its input handlers.
+    $ul.html('');
+    if (value && value.length > 0) {
+      $ul.html('<li><div class="ui-loader">' +
+        '<span class="ui-icon ui-icon-loading"></span>' +
+        '</div></li>');
+      $ul.listview('refresh');
+    }
+  }
+  catch (error) { console.log('_theme_autocomplete - ' + error); }
+}
+
+/**
+ * An internal function used to prepare the items for an autocomplete list.
+ * @param {Object} variables
+ * @return {*}
+ */
+function _theme_autocomplete_prepare_items(variables) {
+  try {
+    // Make sure we have an items array.
+    var items = [];
+    if (variables.items) { items = variables.items; }
+
+    // Prepare the items, and return them.
+    var _items = [];
+    if (items.length > 0) {
+      $.each(items, function(index, item) {
+          var value = '';
+          var label = '';
+          if (typeof item === 'string') {
+            value = item;
+            label = item;
+          }
+          else {
+            value = item.value;
+            label = item.label;
+          }
+          var options = {
+            attributes: {
+              value: value,
+              onclick: '_theme_autocomplete_click(\'' +
+                variables.attributes.id +
+              '\', this)'
+            }
+          };
+          var _item = l(label, null, options);
+          _items.push(_item);
+      });
+    }
+    return _items;
+  }
+  catch (error) { console.log('_theme_autocomplete_prepare_items - ' + error); }
+}
+
+/**
+ * An internal function used to handle clicks on items in autocomplete results.
+ * @param {String} list_id The id of the list that holds the terms.
+ * @param {Object} item The list item anchor that was just clicked.
+ */
+function _theme_autocomplete_click(list_id, item) {
+  try {
+    $(_theme_autocomplete_input_selector).val($(item).attr('value'));
+    if (_theme_autocomplete_remote) {
+      $('#' + list_id).html('');
+    }
+    else {
+      $('#' + list_id + ' li').addClass('ui-screen-hidden');
+      $('#' + list_id).listview('refresh');
+    }
+  }
+  catch (error) { console.log('_theme_autocomplete_click - ' + error); }
+}
+
 /**
  * Themes a button.
  * @param {Object} variables
@@ -8982,7 +9139,7 @@ function taxonomy_field_widget_form(form, form_state, field, instance, langcode,
         'function(e, d) {' +
           '_taxonomy_field_widget_form_autocomplete(' +
             '"' + items[delta].id + '", ' + vid + ', this, e, d' +
-          ')' +
+          ');' +
         '}' +
       ');' +
     '</script>';
