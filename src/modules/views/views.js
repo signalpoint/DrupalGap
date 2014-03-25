@@ -10,8 +10,6 @@ function views_datasource_get_view_result(path, options) {
     // the path with an ampersand so the path will not be invalid.
     if (path.indexOf('?') != -1) {
       var replacement = path.replace('?', '&');
-      console.log('WARNING: views_datasource_get_view_result - replacing "' +
-        path + '" with "' + replacement + '"');
       path = replacement;
     }
     // If local storage caching is enabled, let's see if we can load the results
@@ -145,6 +143,10 @@ function _theme_view(variables) {
   catch (error) { console.log('_theme_view - ' + error); }
 }
 
+// A global variable used to hold the current views' results during a views
+// embed view call.
+var _views_embed_view_results = null;
+
 /**
  * Returns the html string to options.success, used to embed a view.
  * @param {String} path
@@ -155,6 +157,7 @@ function views_embed_view(path, options) {
     views_datasource_get_view_result(path, {
         success: function(results) {
           try {
+            _views_embed_view_results = results;
             if (!options.success) { return; }
             options.results = results;
             var html = theme('views_view', options);
@@ -166,6 +169,7 @@ function views_embed_view(path, options) {
         },
         error: function(xhr, status, message) {
           try {
+            _views_embed_view_results = null;
             if (options.error) { options.error(xhr, status, message); }
           }
           catch (error) {
@@ -186,7 +190,8 @@ function theme_views_view(variables) {
   try {
     var html = '';
     // Extract the results.
-    var results = variables.results;
+    var results = _views_embed_view_results;
+    if (!results) { return html; }
     // Extract the root and child object name.
     var root = results.view.root;
     var child = results.view.child;
@@ -320,10 +325,30 @@ function theme_pager(variables) {
  */
 function theme_pager_link(variables, link_vars) {
   try {
-    var onclick = '_theme_pager_link_click(' + JSON.stringify(variables) + ')';
+    var onclick = _theme_pager_link_onclick(variables);
     return "<a href='#' onclick='" + onclick + "'>" + link_vars.text + '</a>';
   }
   catch (error) { console.log('theme_pager_link - ' + error); }
+}
+
+/**
+ * An internal function used to generate the onclick handler JS for a pager
+ * link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function _theme_pager_link_onclick(variables) {
+  try {
+    // Make a copy of variables. While doing so remove any results from it
+    // because we don't want them in the onclick handler's html. The results
+    // will be available in the _views_embed_view_results variable if they are
+    // needed
+    var copy = $.extend({ }, { }, variables);
+    if (copy.results) { delete copy.results; }
+    var onclick = '_theme_pager_link_click(' + JSON.stringify(copy) + ')';
+    return onclick;
+  }
+  catch (error) { console.log('_theme_pager_link_onclick - ' + error); }
 }
 
 /**
