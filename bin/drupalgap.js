@@ -4607,23 +4607,44 @@ function _theme_autocomplete(list, e, data) {
       // Prepare the path to the view.
       var path = _theme_autocomplete_variables.path + '?' +
         _theme_autocomplete_variables.filter + '=' + encodeURIComponent(value);
-      // Retrieve JSON results.
+      // Any extra params to send along?
+      if (_theme_autocomplete_variables.params) {
+        path += '&' + _theme_autocomplete_variables.params;
+      }
+      // Retrieve JSON results. Keep in mind, we use this for retrieving Views
+      // JSON results and custom hook_menu() path results in Drupal.
       views_datasource_get_view_result(path, {
           success: function(results) {
-            if (results[results.view.root].length == 0) { return; }
+            // If this was a custom path, don't use a wrapper around the
+            // results like the one used by Views Datasource.
+            var wrapped = true;
+            if (_theme_autocomplete_variables.custom) { wrapped = false; }
+
+            // Extract the result items based on the presence of the wrapper or
+            // not.
+            var result_items = null;
+            if (wrapped) { result_items = results[results.view.root]; }
+            else { result_items = results; }
+
+            // If there are no results, just return.
+            if (result_items.length == 0) { return; }
+
             // Convert the result into an items array for a list. Each item will
             // be a JSON object with a "value" and "label" properties.
             var items = [];
             var _value = _theme_autocomplete_variables.value;
             var _label = _theme_autocomplete_variables.label;
-            $.each(results[results.view.root], function(index, object) {
-                var _item = object[results.view.child];
+            $.each(result_items, function(index, object) {
+                var _item = null;
+                if (wrapped) { _item = object[results.view.child]; }
+                else { _item = object; }
                 var item = {
                   value: _item[_value],
                   label: _item[_label]
                 };
                 items.push(item);
             });
+
             // Now render the items, add them to list and refresh the list.
             if (items.length == 0) { return; }
             _theme_autocomplete_variables.items = items;
