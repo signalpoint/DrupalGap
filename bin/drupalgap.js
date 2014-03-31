@@ -8098,6 +8098,7 @@ function search_menu() {
     items['search/%/%'] = {
       title: 'Search',
       'page_callback': 'drupalgap_get_form',
+      'pageshow': 'search_form_pageshow',
       'page_arguments': ['search_form'],
       'access_arguments': ['search content']
     };
@@ -8136,6 +8137,14 @@ function search_form(form, form_state, form_id) {
         }
       }
     };
+    form.suffix += theme('jqm_item_list', {
+        items: [],
+        options: {
+          attributes: {
+            id: 'search_form_results'
+          }
+        }
+    });
     return form;
   }
   catch (error) { console.log('search_form - ' + error); }
@@ -8154,8 +8163,12 @@ function search_form_submit(form, form_state) {
       case 'node':
         search_node(keys, {
             success: function(results) {
-              dpm(results);
-              alert('Searched!');
+              var items = [];
+              $.each(results, function(index, result) {
+                  var link = theme('search_result_node', result);
+                  items.push(link);
+              });
+              drupalgap_item_list_populate('#search_form_results', items);
             }
         });
         break;
@@ -8165,6 +8178,35 @@ function search_form_submit(form, form_state) {
     }
   }
   catch (error) { console.log('search_form_submit - ' + error); }
+}
+
+/**
+ * The pageshow callback for the search form page.
+ * @param {String} form_id
+ */
+function search_form_pageshow(form_id) {
+  try {
+    var type = arg(1);
+    var keys = arg(2);
+    switch (type) {
+      case 'node':
+        search_node(keys, {
+            success: function(results) {
+              var items = [];
+              $.each(results, function(index, result) {
+                  var link = theme('search_result_node', result);
+                  items.push(link);
+              });
+              drupalgap_item_list_populate('#search_form_results', items);
+            }
+        });
+        break;
+      default:
+        console.log('search_form_pageshow - unsupported type (' + type + ')');
+        break;
+    }
+  }
+  catch (error) { console.log('search_form_pageshow - ' + error); }
 }
 
 /**
@@ -8182,6 +8224,23 @@ function search_node(keys, options) {
   }
   catch (error) { console.log('search_node - ' + error); }
 }
+
+/**
+ * Themes a search result node.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_search_result_node(variables) {
+  try {
+    return l(
+      '<h2>' + variables.title + '</h2>' +
+        '<p>' + variables.snippet + '</p>',
+      'node/' + variables.node.nid
+    );
+  }
+  catch (error) { console.log('theme_search_result_node - ' + error); }
+}
+
 /**
  * Given an entity type, this will return its corresponding service resource, or
  * null if the resource doesn't exist.
