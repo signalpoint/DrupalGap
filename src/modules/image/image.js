@@ -216,7 +216,7 @@ function image_form_alter(form, form_state, form_id) {
 }
 
 /**
- * Given and image style name and image uri, this will return the absolute URL
+ * Given an image style name and image uri, this will return the absolute URL
  * that can be used as a src value for an img element.
  * @param {String} style_name
  * @param {String} path
