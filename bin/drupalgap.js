@@ -7117,7 +7117,7 @@ function image_form_alter(form, form_state, form_id) {
 }
 
 /**
- * Given and image style name and image uri, this will return the absolute URL
+ * Given an image style name and image uri, this will return the absolute URL
  * that can be used as a src value for an img element.
  * @param {String} style_name
  * @param {String} path
@@ -7126,11 +7126,11 @@ function image_form_alter(form, form_state, form_id) {
 function image_style_url(style_name, path) {
   try {
     var src =
-      drupalgap.settings.site_path + drupalgap.settings.base_path + path;
+      Drupal.settings.site_path + Drupal.settings.base_path + path;
     if (src.indexOf('public://') != -1) {
       src = src.replace(
         'public://',
-        drupalgap.settings.file_public_path +
+        Drupal.settings.file_public_path +
           '/styles/' +
           style_name +
           '/public/'
