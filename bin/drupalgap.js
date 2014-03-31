@@ -4726,6 +4726,14 @@ function _theme_autocomplete_click(id, item) {
       $('#' + list_id + ' li').addClass('ui-screen-hidden');
       $('#' + list_id).listview('refresh');
     }
+    // Now fire the item onclick handler, if one was provided.
+    if (
+      _theme_autocomplete_variables.item_onclick &&
+      drupalgap_function_exists(_theme_autocomplete_variables.item_onclick)
+    ) {
+      var fn = window[_theme_autocomplete_variables.item_onclick];
+      fn(id, $(item));
+    }
   }
   catch (error) { console.log('_theme_autocomplete_click - ' + error); }
 }
