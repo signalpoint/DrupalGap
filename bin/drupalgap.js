@@ -3180,16 +3180,10 @@ function _drupalgap_form_render_element(form, element) {
     variables.field_info_field = element.field_info_field;
     variables.field_info_instance = element.field_info_instance;
 
-    // Open the element container.
-    var container_attributes = {
-      'class': drupalgap_form_get_element_container_class(name)
-    };
-    if (element.type != 'hidden') {
-      html += '<div ' + drupalgap_attributes(container_attributes) + '>';
-    }
-
     // Render the element item(s). Remember the final delta value for later.
     var delta = 0;
+    var item_html = '';
+    var item_label = '';
     $.each(items, function(delta, item) {
         // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
@@ -3201,16 +3195,10 @@ function _drupalgap_form_render_element(form, element) {
         // This is used by field widget forms to extend form elements.
         if (!items[delta].children) { items[delta].children = []; }
 
-        // Add a label to the element, except submit and hidden elements.
-        if (delta == 0 && element.type != 'submit' &&
-          element.type != 'hidden') {
-          var theme_variables = null;
-          if (element.is_field) {
-            item.title = element.title;
-            theme_variables = {'element': item};
-          }
-          else { theme_variables = {'element': element}; }
-          html += theme('form_element_label', theme_variables);
+        // Generate the label for field items on delta zero only.
+        if (element.is_field && delta == 0) {
+          item.title = element.title;
+          item_label = theme('form_element_label', {'element': item});
         }
 
         // If there wasn't a default value provided, set one. Then set the
@@ -3241,10 +3229,12 @@ function _drupalgap_form_render_element(form, element) {
           ]);
           // @todo - sometimes an item gets merged without a type here, why?
           $.extend(item, items[delta]);
+          // If the item type got lost, replace it.
+          if (!item.type && element.type) { item.type = element.type; }
         }
 
         // Render the element item.
-        html += _drupalgap_form_render_element_item(
+        item_html = _drupalgap_form_render_element_item(
           form,
           element,
           variables,
@@ -3269,6 +3259,27 @@ function _drupalgap_form_render_element(form, element) {
       };
       html += theme('button', add_another_item_variables);
     }*/
+
+    // Open the element container.
+    var container_attributes = {
+      'class': drupalgap_form_get_element_container_class(name)
+    };
+    if (element.type != 'hidden') {
+      html += '<div ' + drupalgap_attributes(container_attributes) + '>';
+    }
+
+    // Add a label to the element, except submit and hidden elements. Any field
+    // labels have already been rendered, other element labels must be manually
+    // rendered here.
+    if (element.type != 'submit' && element.type != 'hidden') {
+      if (element.is_field) { html += item_label; }
+      else {
+        html += theme('form_element_label', {'element': element});
+      }
+    }
+
+    // Add the item html if it isn't empty.
+    if (item_html != '') { html += item_html; }
 
     // Add element description.
     if (element.description && element.type != 'hidden') {
@@ -3316,8 +3327,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     if (element.disabled) { variables.attributes.disabled = ''; }
 
     // Make any preprocess modifications to the elements so they will map
-    // cleanly to their theme function. A hook_field_widget_form() should be
-    // used instead here.
+    // cleanly to their theme function.
+    // @todo A hook_field_widget_form() should be used instead here.
     if (item.type == 'submit') {
       // @todo - convert this to a field widget form hook?
       variables.attributes.onclick =
@@ -3351,9 +3362,12 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       else {
         // @todo - the reason for this warning sometimes happens because the
         // item.type is lost with $.extend in _drupalgap_form_render_element().
+        // @update - if an item doesn't have a type, it gets set by the parent
+        // element, so we should now always have a type available here.
         var msg = 'Field ' + item.type + ' not supported.';
         html += '<div><em>' + msg + '</em></div>';
         console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
+        dpm(item);
       }
     }
 
@@ -5313,7 +5327,10 @@ function theme_comment(variables) {
       '<h3>' + comment.subject + '<h3/>' +
       '<p>' + comment.content + '</p>' +
       '<p class="ui-li-aside">' + created + '</p>';
-    html += l(comment_content, 'user/' + comment.uid);
+    // Comments will link to the user's profile, unless they are anonymous.
+    var comment_link_path = 'user/' + comment.uid;
+    if (comment.uid == 0) { comment_link_path = null; }
+    html += l(comment_content, comment_link_path);
     if (user_access('administer comments')) {
       html += l('Edit', 'comment/' + comment.cid + '/edit', {
           attributes: {
