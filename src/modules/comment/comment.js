@@ -270,7 +270,10 @@ function theme_comment(variables) {
       '<h3>' + comment.subject + '<h3/>' +
       '<p>' + comment.content + '</p>' +
       '<p class="ui-li-aside">' + created + '</p>';
-    html += l(comment_content, 'user/' + comment.uid);
+    // Comments will link to the user's profile, unless they are anonymous.
+    var comment_link_path = 'user/' + comment.uid;
+    if (comment.uid == 0) { comment_link_path = null; }
+    html += l(comment_content, comment_link_path);
     if (user_access('administer comments')) {
       html += l('Edit', 'comment/' + comment.cid + '/edit', {
           attributes: {
