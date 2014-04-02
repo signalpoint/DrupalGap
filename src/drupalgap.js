@@ -798,32 +798,29 @@ function drupalgap_item_list_populate(list_css_selector, items) {
 }
 
 /**
- * Given an html table element id and an array of items, this will clear the
- * table, populate it with the items, and then refresh the list.
+ * Given an html table element id and an array of rows, this will clear the
+ * table, populate it with the rows, and then refresh the table.
  * @param {String} table_css_selector
- * @param {Array} items
- * items follow the.
+ * @param {Array} rows
+ * rows follow the.
  */
-function drupalgap_table_populate(table_css_selector, items) {
+function drupalgap_table_populate(table_css_selector, rows) {
   try {
-    // @todo - This could use some validation and alerts for improper input.
     // Select only the body. Other things are already setup
-      table_css_selector = table_css_selector + '> tbody ';
-      $(table_css_selector).html('');
-      for (var i = 0; i < items.length; i++) {
-          var row = items[i];
-          var rowhtml = '';
-          for (var j = 0; j < row.length; j++) {
-              rowhtml = rowhtml + '<td>' + row[j] + '</td>';
-          }
-          $('<tr>').html(rowhtml).appendTo($(table_css_selector));
+    table_css_selector = table_css_selector + '> tbody ';
+    $(table_css_selector).html('');
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var rowhtml = '';
+      for (var j = 0; j < row.length; j++) {
+          rowhtml = rowhtml + '<td>' + row[j] + '</td>';
       }
-      $(table_css_selector).rebuild();
-      console.log('drupalgap_table_populate - ' + $(table_css_selector).html());
-      }
-      catch (error) { console.log('drupalgap_table_populate - ' + error); }
+      $('<tr>').html(rowhtml).appendTo($(table_css_selector));
+    }
+    $(table_css_selector).rebuild();
+  }
+  catch (error) { console.log('drupalgap_table_populate - ' + error); }
 }
-
 
 /**
  * Given a jQM page event, and the corresponding callback function name that
