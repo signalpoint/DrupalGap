@@ -1456,6 +1456,9 @@ function variable_get(name, default_value) {
  */
 function dpm(data) {
   try {
+    // Show the caller name.
+    //var caller = arguments.callee.caller.name + '()';
+    //console.log(caller);
     if (data) {
       // If we're in ripple we can output it directly to the console and it will
       // have pretty printing, otherwise we'll stringify it first.
