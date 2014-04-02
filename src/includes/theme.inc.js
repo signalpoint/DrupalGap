@@ -610,6 +610,19 @@ function theme_table(variables) {
 }
 
 /**
+ * Theme a jQueryMobile table.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_jqm_table(variables) {
+  try {
+    variables.attributes['data-role'] = 'table';
+    return theme_table(variables);
+  }
+  catch (error) { console.log('theme_jqm_table - ' + error); }
+}
+
+/**
  * Implementation of template_preprocess_page().
  * @param {Object} variables
  */
