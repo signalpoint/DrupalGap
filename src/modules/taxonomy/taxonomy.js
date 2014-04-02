@@ -36,13 +36,16 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     // If items is a string, convert it into a single item JSON object.
-    if (typeof items === 'string') {
-      items = {0: {tid: items}};
+    if (typeof items === 'string') { items = {0: {tid: items}}; }
+    // It's possible the term items are wrapped in a language code, if they are,
+    // pull them out.
+    if (typeof items[language_default()] !== 'undefined') {
+      items = items[language_default()];
     }
     if (!empty(items)) {
       $.each(items, function(delta, item) {
           element[delta] = {
-            theme: 'link',
+            theme: 'button_link',
             text: item.tid,
             path: 'taxonomy/term/' + item.tid
           };
