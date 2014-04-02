@@ -617,6 +617,7 @@ function theme_table(variables) {
 function theme_jqm_table(variables) {
   try {
     variables.attributes['data-role'] = 'table';
+    variables.attributes['data-mode'] = 'reflow';
     return theme_table(variables);
   }
   catch (error) { console.log('theme_jqm_table - ' + error); }
