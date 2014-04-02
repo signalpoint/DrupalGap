@@ -44,9 +44,11 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
     }
     if (!empty(items)) {
       $.each(items, function(delta, item) {
+          var text = item.tid;
+          if (item.name) { text = item.name; }
           element[delta] = {
             theme: 'button_link',
-            text: item.tid,
+            text: text,
             path: 'taxonomy/term/' + item.tid
           };
       });
