@@ -193,7 +193,19 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
     var content = '';
     // Determine module that implements the hook_field_formatter_view,
     // then determine the hook's function name, then render the field content.
+    // If there wasn't a module specified in the display, look to the module
+    // specified in the field widget. If we still don't find it, then just
+    // return.
     var module = display['module'];
+    if (!module) {
+      if (!field.widget.module) {
+        var msg = 'drupalgap_entity_render_field - ' +
+          'unable to locate the module for the field (' + field_name + ')';
+        console.log(msg);
+        return content;
+      }
+      else { module = field.widget.module; }
+    }
     var function_name = module + '_field_formatter_view';
     if (drupalgap_function_exists(function_name)) {
       // Grab the field formatter function, then grab the field items
