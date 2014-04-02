@@ -584,14 +584,15 @@ function theme_table(variables) {
   try {
     var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
     if (variables.header) {
-      html += '<tr>';
+      html += '<thead><tr>';
       $.each(variables.header, function(index, column) {
           if (column.data) {
-            html += '<th>' + column.data + '</th>';
+            html += '<td>' + column.data + '</td>';
           }
       });
-      html += '</tr>';
+      html += '</tr></thead>';
     }
+    html += '<tbody>';
     if (variables.rows) {
       $.each(variables.rows, function(row_index, row) {
           html += '<tr>';
@@ -603,9 +604,23 @@ function theme_table(variables) {
           html += '</tr>';
       });
     }
-    return html + '</table>';
+    return html + '</tbody></table>';
   }
   catch (error) { console.log('theme_table - ' + error); }
+}
+
+/**
+ * Theme a jQueryMobile table.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_jqm_table(variables) {
+  try {
+    variables.attributes['data-role'] = 'table';
+    variables.attributes['data-mode'] = 'reflow';
+    return theme_table(variables);
+  }
+  catch (error) { console.log('theme_jqm_table - ' + error); }
 }
 
 /**

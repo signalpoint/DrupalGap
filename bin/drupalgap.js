@@ -798,6 +798,31 @@ function drupalgap_item_list_populate(list_css_selector, items) {
 }
 
 /**
+ * Given an html table element id and an array of rows, this will clear the
+ * table, populate it with the rows, and then refresh the table.
+ * @param {String} table_css_selector
+ * @param {Array} rows
+ * rows follow the.
+ */
+function drupalgap_table_populate(table_css_selector, rows) {
+  try {
+    // Select only the body. Other things are already setup
+    table_css_selector = table_css_selector + '> tbody ';
+    $(table_css_selector).html('');
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var rowhtml = '';
+      for (var j = 0; j < row.length; j++) {
+          rowhtml = rowhtml + '<td>' + row[j] + '</td>';
+      }
+      $('<tr>').html(rowhtml).appendTo($(table_css_selector));
+    }
+    $(table_css_selector).rebuild();
+  }
+  catch (error) { console.log('drupalgap_table_populate - ' + error); }
+}
+
+/**
  * Given a jQM page event, and the corresponding callback function name that
  * handles the event, this function will call the callback function, if it has
  * not already been called on the current page. This really is only used by
@@ -4957,14 +4982,15 @@ function theme_table(variables) {
   try {
     var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
     if (variables.header) {
-      html += '<tr>';
+      html += '<thead><tr>';
       $.each(variables.header, function(index, column) {
           if (column.data) {
-            html += '<th>' + column.data + '</th>';
+            html += '<td>' + column.data + '</td>';
           }
       });
-      html += '</tr>';
+      html += '</tr></thead>';
     }
+    html += '<tbody>';
     if (variables.rows) {
       $.each(variables.rows, function(row_index, row) {
           html += '<tr>';
@@ -4976,9 +5002,23 @@ function theme_table(variables) {
           html += '</tr>';
       });
     }
-    return html + '</table>';
+    return html + '</tbody></table>';
   }
   catch (error) { console.log('theme_table - ' + error); }
+}
+
+/**
+ * Theme a jQueryMobile table.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_jqm_table(variables) {
+  try {
+    variables.attributes['data-role'] = 'table';
+    variables.attributes['data-mode'] = 'reflow';
+    return theme_table(variables);
+  }
+  catch (error) { console.log('theme_jqm_table - ' + error); }
 }
 
 /**
