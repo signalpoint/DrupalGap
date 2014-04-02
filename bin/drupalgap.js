@@ -5929,7 +5929,19 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
     var content = '';
     // Determine module that implements the hook_field_formatter_view,
     // then determine the hook's function name, then render the field content.
+    // If there wasn't a module specified in the display, look to the module
+    // specified in the field widget. If we still don't find it, then just
+    // return.
     var module = display['module'];
+    if (!module) {
+      if (!field.widget.module) {
+        var msg = 'drupalgap_entity_render_field - ' +
+          'unable to locate the module for the field (' + field_name + ')';
+        console.log(msg);
+        return content;
+      }
+      else { module = field.widget.module; }
+    }
     var function_name = module + '_field_formatter_view';
     if (drupalgap_function_exists(function_name)) {
       // Grab the field formatter function, then grab the field items
@@ -9415,13 +9427,16 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     // If items is a string, convert it into a single item JSON object.
-    if (typeof items === 'string') {
-      items = {0: {tid: items}};
+    if (typeof items === 'string') { items = {0: {tid: items}}; }
+    // It's possible the term items are wrapped in a language code, if they are,
+    // pull them out.
+    if (typeof items[language_default()] !== 'undefined') {
+      items = items[language_default()];
     }
     if (!empty(items)) {
       $.each(items, function(delta, item) {
           element[delta] = {
-            theme: 'link',
+            theme: 'button_link',
             text: item.tid,
             path: 'taxonomy/term/' + item.tid
           };
