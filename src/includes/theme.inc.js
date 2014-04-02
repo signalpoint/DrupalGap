@@ -581,32 +581,32 @@ function theme_submit(variables) {
  * @return {String}
  */
 function theme_table(variables) {
-	 try {
-		    var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
-		    if (variables.header) {
-		      html += '<thead><tr>';
-		      $.each(variables.header, function(index, column) {
-		          if (column.data) {
-		            html += '<td>' + column.data + '</td>';
-		          }
-		      });
-		      html += '</tr></thead>';
-		    }
-		    html += '<tbody>';
-		    if (variables.rows) {
-		      $.each(variables.rows, function(row_index, row) {
-		          html += '<tr>';
-		          if (row) {
-		            $.each(row, function(column_index, column) {
-		                html += '<td>' + column + '</td>';
-		            });
-		          }
-		          html += '</tr>';
-		      });
-		    }
-		    return html + '</tbody></table>';
-		  }
-		  catch (error) { console.log('theme_table - ' + error); }
+  try {
+    var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
+    if (variables.header) {
+      html += '<thead><tr>';
+      $.each(variables.header, function(index, column) {
+          if (column.data) {
+            html += '<td>' + column.data + '</td>';
+          }
+      });
+      html += '</tr></thead>';
+    }
+    html += '<tbody>';
+    if (variables.rows) {
+      $.each(variables.rows, function(row_index, row) {
+          html += '<tr>';
+          if (row) {
+            $.each(row, function(column_index, column) {
+                html += '<td>' + column + '</td>';
+            });
+          }
+          html += '</tr>';
+      });
+    }
+    return html + '</tbody></table>';
+  }
+  catch (error) { console.log('theme_table - ' + error); }
 }
 
 /**
