@@ -195,6 +195,13 @@ function theme_views_view(variables) {
     // Extract the root and child object name.
     var root = results.view.root;
     var child = results.view.child;
+    // Is there a title to display?
+    if (variables.title) {
+      var title_attributes = variables.title_attributes ?
+        drupalgap_attributes(variables.title_attributes) : '';
+      html +=
+        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>';
+    }
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
