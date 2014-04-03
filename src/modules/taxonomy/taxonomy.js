@@ -412,7 +412,6 @@ function taxonomy_term_page(tid) {
         ),
         taxonomy_term_node_listing: {
           theme: 'jqm_item_list',
-          title: 'Content',
           items: [],
           attributes: {
             id: 'taxonomy_term_node_listing_items_' + tid
@@ -434,12 +433,13 @@ function taxonomy_term_pageshow(tid) {
   try {
     taxonomy_term_load(tid, {
         success: function(term) {
+          var description = term.description ? term.description : '';
           var content = {
             'name': {
               'markup': '<h2>' + term.name + '</h2>'
             },
             'description': {
-              'markup': '<p>' + term.description + '</p>'
+              'markup': '<p>' + description + '</p>'
             }
           };
           _drupalgap_entity_page_container_inject(
@@ -448,24 +448,41 @@ function taxonomy_term_pageshow(tid) {
             'view',
             content
           );
-          drupalgap.services.taxonomy_term.selectNodes.call({
-            'tid': term.tid,
-            'success': function(data) {
-              // Extract the nodes into items, then drop them in the list.
-              var items = [];
-              $.each(data, function(index, node) {
-                  items.push(l(node.title, 'node/' + node.nid));
-              });
-              drupalgap_item_list_populate(
-                '#taxonomy_term_node_listing_items_' + tid,
-                items
-              );
-            }
+          taxonomy_term_selectNodes(term.tid, {
+              success: function(results) {
+                // Extract the nodes into items, then drop them in the list.
+                var items = [];
+                $.each(results, function(index, node) {
+                    items.push(l(node.title, 'node/' + node.nid));
+                });
+                drupalgap_item_list_populate(
+                  '#taxonomy_term_node_listing_items_' + term.tid,
+                  items
+                );
+              }
           });
         }
     });
   }
   catch (error) { console.log('taxonomy_term_pageshow - ' + error); }
+}
+
+/**
+ * The selectNodes resource from the Taxonomy Term service.
+ * @param {Number} tid The taxonomy term id.
+ * @param {Object} options
+ */
+function taxonomy_term_selectNodes(tid, options) {
+  try {
+    // @TODO - move this function to jDrupal.
+    options.method = 'POST';
+    options.path = 'taxonomy_term/selectNodes.json';
+    options.service = 'taxonomy_term';
+    options.resource = 'selectNodes';
+    options.data = JSON.stringify({ tid: tid});
+    Drupal.services.call(options);
+  }
+  catch (error) { console.log('taxonomy_term_selectNodes - ' + error); }
 }
 
 /**
