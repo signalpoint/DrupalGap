@@ -250,14 +250,29 @@ function drupalgap_api_default_options() {
  * @param {Object} instance
  * @param {String} langcode
  * @param {Number} delta
- * @param {Object} field_key
- * @return {Object}
+ * @param {Object} field_key Set the 'value' string property on this object to
+ *                           use a custom property name on the field value.
+ *                           Defaults to 'value'.
+ *                           Set the 'use_key' boolean property on this object
+ *                           to false to not use a key when assembling the
+ *                           result into the field. Defaults to true.
+ *                           Set the 'use_wrapper' boolean property on this
+ *                           object to false to not use the default wrapper
+ *                           placed around the result object. Defaults to true.
+ *                           Set the 'use_delta' boolean property to false when
+ *                           a delta value is not needed.
+ *
+ * @return {*}
  */
 function hook_assemble_form_state_into_field(entity_type, bundle,
   form_state_value, field, instance, langcode, delta, field_key) {
   try {
+    var result = {};
+    return result;
   }
-  catch (error) { console.log(' - ' + error); }
+  catch (error) {
+    console.log('hook_assemble_form_state_into_field - ' + error);
+  }
 }
 
 /**
