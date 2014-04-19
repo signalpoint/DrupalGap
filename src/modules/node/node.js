@@ -253,7 +253,7 @@ function node_page_view_pageshow(nid) {
               id: comment_list_id(node.nid)
             }
           };
-          // If the comments are closed or open, show the comments.
+          // If the comments are closed (1) or open (2), show the comments.
           if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
               // Render the comment form, so we can add it to the content later.
@@ -305,8 +305,8 @@ function node_page_view_pageshow(nid) {
               else {
                 // There weren't any comments, show the comment form if comments
                 // are open, then inject the page.
-                build.content.markup += theme('jqm_item_list', comments);
                 if (node.comment == 2) {
+                  build.content.markup += theme('jqm_item_list', comments);
                   build.content.markup += comment_form;
                 }
                 _drupalgap_entity_page_container_inject(
@@ -316,9 +316,8 @@ function node_page_view_pageshow(nid) {
             }
           }
           else {
-            // Comments are disabled, so let's render an empty list, then inject
-            // the content into the page.
-            build.content.markup += theme('jqm_item_list', comments);
+            // Comments are hidden (0), so let's render an empty list, then
+            // inject the content into the page.
             _drupalgap_entity_page_container_inject(
               'node', node.nid, 'view', build
             );
