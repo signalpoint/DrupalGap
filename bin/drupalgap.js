@@ -6083,7 +6083,8 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               var field_key = {
                 value: 'value',
                 use_key: true,
-                use_wrapper: true
+                use_wrapper: true,
+                use_delta: use_delta
               };
 
               // If this element is a field, give the field's module an
@@ -6105,7 +6106,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // If we don't need a delta value, place the field value using the
               // key. If we're using a delta value, push the key and value onto
               // the field to indicate the delta.
-              if (!use_delta) {
+              if (!field_key.use_delta) {
                 if (!field_key.use_wrapper) {
                   entity[name][language] = field_value;
                 }
