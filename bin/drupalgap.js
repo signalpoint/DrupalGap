@@ -3001,7 +3001,7 @@ function drupalgap_form_load(form_id) {
                 form.elements[name][language][delta] = item;
               }
               else {
-                $.extend(form.elements[name][language][delta], item);
+                $.extend(true, form.elements[name][language][delta], item);
               }
             }
           }
