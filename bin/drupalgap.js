@@ -3255,8 +3255,9 @@ function _drupalgap_form_render_element(form, element) {
               delta,
               element
           ]);
-          // @todo - sometimes an item gets merged without a type here, why?
-          $.extend(item, items[delta]);
+          // @TODO - sometimes an item gets merged without a type here, why?
+          // @UPDATE - did the recursive extend fix this?
+          item = $.extend(true, item, items[delta]);
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
         }
@@ -6865,6 +6866,10 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
         // check for a default value, and set it if necessary.
         if (field.settings.allowed_values) {
           $.each(field.settings.allowed_values, function(key, value) {
+              // Don't place values that are objects onto the options (i.e.
+              // commerce taxonomy term reference fields).
+              if (typeof value === 'object') { return; }
+              // Set the key and value for the option.
               items[delta].options[key] = value;
           });
           if (instance.default_value &&
