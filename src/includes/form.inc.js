@@ -721,8 +721,9 @@ function _drupalgap_form_render_element(form, element) {
               delta,
               element
           ]);
-          // @todo - sometimes an item gets merged without a type here, why?
-          $.extend(item, items[delta]);
+          // @TODO - sometimes an item gets merged without a type here, why?
+          // @UPDATE - did the recursive extend fix this?
+          item = $.extend(true, item, items[delta]);
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
         }
