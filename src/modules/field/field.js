@@ -290,6 +290,10 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
         // check for a default value, and set it if necessary.
         if (field.settings.allowed_values) {
           $.each(field.settings.allowed_values, function(key, value) {
+              // Don't place values that are objects onto the options (i.e.
+              // commerce taxonomy term reference fields).
+              if (typeof value === 'object') { return; }
+              // Set the key and value for the option.
               items[delta].options[key] = value;
           });
           if (instance.default_value &&
