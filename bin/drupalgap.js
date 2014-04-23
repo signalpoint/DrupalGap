@@ -6550,6 +6550,34 @@ function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
 }
 
 /**
+ * Returns an entity type's primary title key.
+ * @param {String} entity_type
+ * @return {String}
+ */
+function entity_primary_key_title(entity_type) {
+  try {
+    var key;
+    switch (entity_type) {
+      case 'comment': key = 'subject'; break;
+      case 'file': key = 'filename'; break;
+      case 'node': key = 'title'; break;
+      case 'taxonomy_term': key = 'name'; break;
+      case 'taxonomy_vocabulary': key = 'name'; break;
+      case 'user': key = 'name'; break;
+      default:
+        console.log(
+          'entity_primary_key_title - unsupported entity type (' +
+            entity_type +
+          ')'
+        );
+        break;
+    }
+    return key;
+  }
+  catch (error) { console.log('entity_primary_key_title - ' + error); }
+}
+
+/**
  * Implements hook_services_request_pre_postprocess_alter().
  * @param {Object} options
  * @param {*} result
