@@ -328,7 +328,18 @@ function hook_field_data_string(entity_type, bundle, entity, field, instance, la
 /**
  * Used by fields to render their items when being displayed on an entity.
  */
-function hook_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) { }
+function hook_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
+  try {
+    var element = {};
+    $.each(items, function(delta, item) {
+        element[delta] = {
+          markup: '<p>Hello!</p>'
+        };
+    });
+    return element;
+  }
+  catch (error) { console.log('hook_field_formatter_view - ' + error); }
+}
 
 /**
  * Implements hook_field_widget_form().
