@@ -170,7 +170,20 @@ function drupalgap_entity_render_content(entity_type, entity) {
         });
     });
     // Give modules a chance to alter the content.
-    module_invoke_all('entity_post_render_content', entity);
+    module_invoke_all(
+      'entity_post_render_content',
+      entity,
+      entity_type,
+      bundle
+    );
+    // @TODO - I think we need to update this entity in local storage so this
+    // content property sticks.
+    // @UPDATE - I don't think this is working...
+    /*_entity_local_storage_save(
+      entity_type,
+      entity[entity_primary_key(entity_type)],
+      entity
+    );*/
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
@@ -847,14 +860,21 @@ function entity_primary_key_title(entity_type) {
  */
 function entity_services_request_pre_postprocess_alter(options, result) {
   try {
-    // If we're retrieving an entity, render the entity's content.
+    // If we're retrieving an entity, render the entity's content, if it isn't
+    // already set.
     if (
       options.resource == 'retrieve' &&
       in_array(options.service, entity_types()
-    )) { drupalgap_entity_render_content(options.service, result); }
-    // If we're indexing comments, render its content.
+    )) {
+      // @TODO - does this condition ever evaluate to true?
+      if (typeof result.content !== 'undefined') { return; }
+      drupalgap_entity_render_content(options.service, result);
+    }
+    // If we're indexing comments, render its content, if it isn't already set.
     else if (options.service == 'comment' && options.resource == 'index') {
       $.each(result, function(index, object) {
+          // @TODO - does this condition ever evaluate to true?
+          if (typeof object.content !== 'undefined') { return; }
           drupalgap_entity_render_content(options.service, result[index]);
       });
     }
