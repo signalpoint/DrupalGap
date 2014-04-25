@@ -94,8 +94,11 @@ function theme_view(variables) {
   try {
     // Throw a warning if no id is provided.
     if (!variables.attributes.id) {
-      console.log('WARNING: theme_view() - No id specified on attributes!');
-      return '';
+      console.log(
+        'WARNING: theme_view() - No id specified on attributes! ' +
+        'A random id will be generated instead.'
+      );
+      variables.attributes.id = 'views-view--' + user_password();
     }
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
@@ -188,7 +191,13 @@ function views_embed_view(path, options) {
  */
 function theme_views_view(variables) {
   try {
-    var html = '';
+    // If an id hasn't been provided, generate a random one. We need an id for
+    // the div container.
+    var id = null;
+    if (variables.attributes.id) { id = variables.attributes.id; }
+    else { id = 'views-view--' + user_password(); }
+    // Open the container.
+    var html = '<div id="' + id + '">';
     // Extract the results.
     var results = _views_embed_view_results;
     if (!results) { return html; }
@@ -210,8 +219,7 @@ function theme_views_view(variables) {
       function_exists(variables.empty_callback)
     ) {
       var empty_callback = window[variables.empty_callback];
-      var selector = '#' + drupalgap_get_page_id() +
-        " div[data-role$='content']";
+      var selector = '#' + drupalgap_get_page_id() + ' #' + id;
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
@@ -279,13 +287,14 @@ function theme_views_view(variables) {
     html += rows;
     // Since the views content is injected dynamically after the page is loaded,
     // we need to have jQM refresh the page to add its styling.
-    var selector = '#' + drupalgap_get_page_id() +
-      " div[data-role$='content']";
+    var selector = '#' + drupalgap_get_page_id() + ' #' + id;
     $(selector).hide();
     setTimeout(function() {
         $(selector).trigger('create').show('fast');
     }, 100);
     // @TODO - Are we rendering the pager below the results?
+    // Close the container.
+    html += '</div>';
     return html;
   }
   catch (error) { console.log('theme_views_view - ' + error); }
