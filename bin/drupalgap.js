@@ -827,7 +827,8 @@ function drupalgap_table_populate(table_css_selector, rows) {
  * handles the event, this function will call the callback function, if it has
  * not already been called on the current page. This really is only used by
  * menu_execute_active_handler() to prevent jQM from firing inline page event
- * handlers more than once.
+ * handlers more than once. You may optionally pass in a 4th argument, a string,
+ * to append to the suffix of the unique key of recorded fired page events.
  * @param {String} event
  * @param {String} callback
  * @param {*} page_arguments
@@ -837,6 +838,10 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
     // Concatenate the event name and the callback name together into a unique
     // key so multiple callbacks can handle the same event.
     var key = event + '-' + callback;
+    // Is there an optional 4th argument coming in (the suffix)?
+    if (typeof arguments[3] !== 'undefined') {
+      if (arguments[3]) { key += '-' + arguments[3]; }
+    }
     if ($.inArray(key, drupalgap.page.jqm_events) == -1 &&
       drupalgap_function_exists(callback)) {
       drupalgap.page.jqm_events.push(key);
@@ -884,18 +889,23 @@ function drupalgap_jqm_page_events() {
  * Given a JSON object with a page id, a jQM page event name, a callback
  * function to handle the jQM page event and any page arguments (as a JSON
  * string), this function will return the inline JS code needed to handle the
- * event.
+ * event. You may optionally pass in a unique second argument (string) to
+ * allow the same page event handler to be fired more than once on a page.
  * @param {Object} options
  * @return {String}
  */
 function drupalgap_jqm_page_event_script_code(options) {
   try {
+    // Build the arguments to send to the event fire handler.
+    var event_fire_args = '"' + options.jqm_page_event + '", "' +
+      options.jqm_page_event_callback + '", ' +
+      options.jqm_page_event_args;
+    if (arguments[1]) { event_fire_args += ', "' + arguments[1] + '"'; }
+    // Build the inline JS and return it.
     var script_code = '<script type="text/javascript">' +
       '$("#' + options.page_id + '").on("' +
-        options.jqm_page_event + '", drupalgap_jqm_page_event_fire("' +
-          options.jqm_page_event + '", "' +
-          options.jqm_page_event_callback + '", ' +
-          options.jqm_page_event_args +
+        options.jqm_page_event + '", drupalgap_jqm_page_event_fire(' +
+          event_fire_args +
         '));' +
     '</script>';
     return script_code;
@@ -5907,7 +5917,20 @@ function drupalgap_entity_render_content(entity_type, entity) {
         });
     });
     // Give modules a chance to alter the content.
-    module_invoke_all('entity_post_render_content', entity);
+    module_invoke_all(
+      'entity_post_render_content',
+      entity,
+      entity_type,
+      bundle
+    );
+    // @TODO - I think we need to update this entity in local storage so this
+    // content property sticks.
+    // @UPDATE - I don't think this is working...
+    /*_entity_local_storage_save(
+      entity_type,
+      entity[entity_primary_key(entity_type)],
+      entity
+    );*/
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
@@ -6584,14 +6607,21 @@ function entity_primary_key_title(entity_type) {
  */
 function entity_services_request_pre_postprocess_alter(options, result) {
   try {
-    // If we're retrieving an entity, render the entity's content.
+    // If we're retrieving an entity, render the entity's content, if it isn't
+    // already set.
     if (
       options.resource == 'retrieve' &&
       in_array(options.service, entity_types()
-    )) { drupalgap_entity_render_content(options.service, result); }
-    // If we're indexing comments, render its content.
+    )) {
+      // @TODO - does this condition ever evaluate to true?
+      if (typeof result.content !== 'undefined') { return; }
+      drupalgap_entity_render_content(options.service, result);
+    }
+    // If we're indexing comments, render its content, if it isn't already set.
     else if (options.service == 'comment' && options.resource == 'index') {
       $.each(result, function(index, object) {
+          // @TODO - does this condition ever evaluate to true?
+          if (typeof object.content !== 'undefined') { return; }
           drupalgap_entity_render_content(options.service, result[index]);
       });
     }
@@ -6947,9 +6977,14 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
                 'widget_id': widget_id
             })
           };
-          items[delta].children.push(
-            { markup: drupalgap_jqm_page_event_script_code(options) }
-          );
+          // Pass the field name so the page event handler can be called for
+          // each item.
+          items[delta].children.push({
+              markup: drupalgap_jqm_page_event_script_code(
+                  options,
+                  field.field_name
+              )
+          });
         break;
     }
   }
