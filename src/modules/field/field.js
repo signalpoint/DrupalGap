@@ -343,9 +343,14 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
                 'widget_id': widget_id
             })
           };
-          items[delta].children.push(
-            { markup: drupalgap_jqm_page_event_script_code(options) }
-          );
+          // Pass the field name so the page event handler can be called for
+          // each item.
+          items[delta].children.push({
+              markup: drupalgap_jqm_page_event_script_code(
+                  options,
+                  field.field_name
+              )
+          });
         break;
     }
   }
