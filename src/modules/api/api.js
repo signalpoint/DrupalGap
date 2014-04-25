@@ -316,7 +316,16 @@ function hook_404(router_path) {}
  * string. Use this to make modifications to the HTML output of the entity's
  * content before it is displayed.
  */
-function hook_entity_post_render_content(entity) { }
+function hook_entity_post_render_content(entity, entity_type, bundle) {
+  try {
+    if (entity.type == 'article') {
+      entity.content += '<p>Example text on every article!</p>';
+    }
+  }
+  catch (error) {
+    console.log('hook_entity_post_render_content - ' + error);
+  }
+}
 
 /**
  * Used by fields to assemble the data string used with entity create and
