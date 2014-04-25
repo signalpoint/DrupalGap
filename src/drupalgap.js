@@ -836,7 +836,7 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
   try {
     // Concatenate the event name and the callback name together into a unique
     // key so multiple callbacks can handle the same event.
-    var key = event + '-' + callback;
+    var key = event + '-' + callback + '-' + JSON.stringify(page_arguments);
     if ($.inArray(key, drupalgap.page.jqm_events) == -1 &&
       drupalgap_function_exists(callback)) {
       drupalgap.page.jqm_events.push(key);
