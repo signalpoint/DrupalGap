@@ -222,18 +222,27 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
     var function_name = module + '_field_formatter_view';
     if (drupalgap_function_exists(function_name)) {
       // Grab the field formatter function, then grab the field items
-      // from the entity, then call the formatter function it and append
-      // its result to the entity's content.
+      // from the entity, then call the formatter function and append its result
+      // to the entity's content.
       var fn = window[function_name];
       var items = null;
+      // Determine the language code. Note, multi lingual sites may have a
+      // language code on the entity, but still have 'und' on the field, so
+      // fall back to 'und' if the field's language code doesn't match the
+      // entity's language code.
+      var language = entity.language;
       if (entity[field_name]) {
-        if (entity[field_name][entity.language]) {
-          items = entity[field_name][entity.language];
+        if (entity[field_name][language]) {
+          items = entity[field_name][language];
+        }
+        else if (entity[field_name]['und']) {
+          items = entity[field_name]['und'];
+          language = 'und';
         }
         else { items = entity[field_name]; }
       }
       var elements = fn(
-        entity_type, entity, field, null, entity.language, items, display
+        entity_type, entity, field, null, language, items, display
       );
       $.each(elements, function(delta, element) {
           // If the element has markup, render it as is, if it is
