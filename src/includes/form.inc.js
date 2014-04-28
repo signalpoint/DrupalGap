@@ -578,14 +578,26 @@ function drupalgap_form_id_local_storage_key(form_id) {
 function _drupalgap_form_render_elements(form) {
   try {
     var content = '';
+    var content_weighted = [];
     // For each form element, if the element objects name property isn't set,
     // set it, then render the element if access is permitted.
     $.each(form.elements, function(name, element) {
-        if (!element.name) { element.name = name; }
-        if (drupalgap_form_element_access(element)) {
+      if (!element.name) { element.name = name; }
+      if (drupalgap_form_element_access(element)) {
+        if (!empty(element.field_info_instance) &&
+            !empty(element.field_info_instance.widget) &&
+            !empty(element.field_info_instance.widget.weight)) {
+              content_weighted[element.field_info_instance.widget.weight] =
+                _drupalgap_form_render_element(form, element);
+        } else {
           content += _drupalgap_form_render_element(form, element);
         }
-    });
+      }
+     });
+    // add the weighted fields to the mix
+    if (!empty(content_weighted)) {
+      content = content_weighted.join('\n') + content;
+    }
     // Add any form buttons to the form elements html, if access to the button
     // is permitted.
     if (form.buttons && form.buttons.length != 0) {
