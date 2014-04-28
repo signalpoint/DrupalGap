@@ -299,6 +299,10 @@ function user_register_form(form, form_state) {
       'user_mail_register_email_verification_body':
         'Registration complete, check your e-mail inbox to verify the account.'
     };
+    // Set the auto login boolean. This only happens when the site's account
+    // settings require no e-mail verification. Others can stop this from
+    // happening via hook_form_alter().
+    form.auto_user_login = true;
     // Add submit button.
     form.elements.submit = {
       'type': 'submit',
@@ -355,11 +359,16 @@ function user_register_form_submit(form, form_state) {
             drupalgap_alert(
               form.user_register.user_mail_register_no_approval_required_body
             );
-            user_login(account.name, account.pass, {
-                success: function(result) {
-                  drupalgap_goto('');
-                }
-            });
+            // If we're automatically logging in do it, otherwise just go to
+            // the front page.
+            if (form.auto_user_login) {
+              user_login(account.name, account.pass, {
+                  success: function(result) {
+                    drupalgap_goto('');
+                  }
+              });
+            }
+            else { drupalgap_goto(''); }
           }
         }
         else {
