@@ -60,6 +60,7 @@ function drupalgap_init() {
       entity_info: {},
       field_info_fields: {},
       field_info_instances: {},
+      field_info_extra_fields: {},
       form_errors: {},
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
@@ -1312,6 +1313,7 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
       drupalgap.entity_info = result.entity_info;
       drupalgap.field_info_instances = result.field_info_instances;
       drupalgap.field_info_fields = result.field_info_fields;
+      drupalgap.field_info_extra_fields = result.field_info_extra_fields;
       drupalgap.taxonomy_vocabularies =
         drupalgap_taxonomy_vocabularies_extract(
           result.taxonomy_vocabularies
@@ -3122,14 +3124,42 @@ function drupalgap_form_id_local_storage_key(form_id) {
 function _drupalgap_form_render_elements(form) {
   try {
     var content = '';
+    var content_weighted = [];
     // For each form element, if the element objects name property isn't set,
-    // set it, then render the element if access is permitted.
+    // set it, then render the element if access is permitted. While rendering
+    // the elements, set them aside according to their widget weight so they
+    // can be appended to the content string in the correct order later.
     $.each(form.elements, function(name, element) {
-        if (!element.name) { element.name = name; }
-        if (drupalgap_form_element_access(element)) {
-          content += _drupalgap_form_render_element(form, element);
+      if (!element.name) { element.name = name; }
+      if (drupalgap_form_element_access(element)) {
+        if (element.is_field && element.field_info_instance.widget.weight) {
+          content_weighted[element.field_info_instance.widget.weight] =
+            _drupalgap_form_render_element(form, element);
         }
-    });
+        else {
+          // This is not a field, if it has a weight in field_info_extra_fields
+          // use it, otherwise just append it to the content.
+          if (
+            form.entity_type && form.bundle &&
+            typeof drupalgap.field_info_extra_fields[form.bundle][name] !==
+              'undefined' &&
+            typeof
+              drupalgap.field_info_extra_fields[form.bundle][name].weight !==
+              'undefined'
+          ) {
+            var weight =
+              drupalgap.field_info_extra_fields[form.bundle][name].weight;
+            content_weighted[weight] =
+            _drupalgap_form_render_element(form, element);
+          }
+          else { content += _drupalgap_form_render_element(form, element); }
+        }
+      }
+     });
+    // Prepend the weighted elements to the content.
+    if (!empty(content_weighted)) {
+      content = content_weighted.join('\n') + content;
+    }
     // Add any form buttons to the form elements html, if access to the button
     // is permitted.
     if (form.buttons && form.buttons.length != 0) {
