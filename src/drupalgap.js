@@ -60,6 +60,7 @@ function drupalgap_init() {
       entity_info: {},
       field_info_fields: {},
       field_info_instances: {},
+      field_info_extra_fields: {},
       form_errors: {},
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
@@ -1312,6 +1313,7 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
       drupalgap.entity_info = result.entity_info;
       drupalgap.field_info_instances = result.field_info_instances;
       drupalgap.field_info_fields = result.field_info_fields;
+      drupalgap.field_info_extra_fields = result.field_info_extra_fields;
       drupalgap.taxonomy_vocabularies =
         drupalgap_taxonomy_vocabularies_extract(
           result.taxonomy_vocabularies
