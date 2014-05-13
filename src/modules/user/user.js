@@ -552,6 +552,10 @@ function user_view_pageshow(uid) {
                   (new Date(parseInt(account.created) * 1000)).toDateString()
               }
             };
+            // Any content?
+            if (typeof account.content !== 'undefined') {
+              build.content = { markup: account.content };
+            }
             // Any picture?
             if (account.picture && account.picture.fid) {
               build.picture = {
