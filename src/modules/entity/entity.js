@@ -138,9 +138,17 @@ function drupalgap_entity_render_content(entity_type, entity) {
         // if the drupalgap display mode is not present.
         if (!field.display) { return false; }
         var display = field.display['default'];
-        if (field.display['drupalgap'] && field.display['drupalgap'].module) {
+        if (field.display['drupalgap']) {
           display = field.display['drupalgap'];
+          // If a module isn't listed on the drupalgap display, use the default
+          // display's module.
+          if (
+            typeof display.module === 'undefined' &&
+            typeof field.display['default'].module !== 'undefined'
+          ) { display.module = field.display['default'].module; }
         }
+        // Skip hidden fields.
+        if (display.type == 'hidden') { return; }
         // Save the field name and weight.
         field_weights[field_name] = display.weight;
         // Save the field content.
