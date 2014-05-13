@@ -9,12 +9,20 @@ version of DrupalGap to another.
   then replace it with the default.settings.js file. Then you must re-add any
   modifications you made to your settings.js file (i.e. site_path, etc).
 
+|============|
+| index.html |
+|============|
+
+  Whenever updating DrupalGap, be sure to make a backup of your index.html file
+  then replace it with the default.index.html file. Then you must re-add any
+  modifications you made to your index.html file.
+
 |===========================|
 | Clear Local Storage Cache |
 |===========================|
 
   It is important to clear your device (or browser) local storage cache. On a
-  device this can typically be accomplished by uninstalling the App completely,
+  device, this can typically be accomplished by uninstalling the App completely,
   then re-installing it. If you're using Ripple in Chrome, then clear the
   Chrome web browser cache.
 
@@ -33,6 +41,11 @@ version of DrupalGap to another.
 
 7.x-1.7-alpha => 7.x-1.8-alpha
 
+  The user-profile.tpl.html file now contains a {:content:} placeholder to
+  properly render a user account's content. If you have a custom theme, update
+  your user-profile.tpl.html file to include this placeholder. See the
+  core easystreet3 theme's user-profile.tpl.html file for example usage. 
+
   The page.tpl.html files for themes now should include a class name placeholder
   on their page's container div. For example, the easystreet3 theme's
   page.tpl.html file now contains this class attribute placeholder:
@@ -40,10 +53,14 @@ version of DrupalGap to another.
     class="{:drupalgap_page_class:}"
 
   jQueryMobile has been updated to 1.4.2, be sure to update any custom theme's
-  to use this new version.
+  index.html files to use this new version. See default.index.html file for an
+  example.
+  
+  jDrupal has been updated to 1.0-rc3, be sure to update any custom theme's
+  index.html files to use this new version. See default.index.html file for an
+  example.
 
 7.x-1.6-alpha => 7.x-1.7-alpha
-
 
   Now that we've upgraded to jQueryMobile 1.4, there are only two (instead of 5)
   data themes available. All apps will look different (but better and cleaner)
