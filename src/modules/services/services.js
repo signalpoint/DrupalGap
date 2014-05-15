@@ -73,6 +73,13 @@ function drupalgap_service_resource_extract_results(options) {
         options.data.content_types_user_permissions;
       // Pull out the site settings.
       drupalgap.site_settings = options.data.site_settings;
+      // Pull out the date formats and types.
+      if (typeof options.data.date_formats !== 'undefined') {
+        drupalgap.date_formats = options.data.date_formats;
+      }
+      if (typeof options.data.date_types !== 'undefined') {
+        drupalgap.date_types = options.data.date_types;
+      }
     }
   }
   catch (error) {
