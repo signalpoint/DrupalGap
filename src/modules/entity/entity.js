@@ -249,8 +249,19 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
         }
         else { items = entity[field_name]; }
       }
+      // @TODO - We've been sending 'field' as the instance
+      // (drupalgap_field_info_instance), and the 'instance' as the field
+      // (drupalgap_field_info_field). This is backwards, and should be
+      // reversed. All contrib modules with field support will need to be
+      // udpated to reflect this. Lame.
       var elements = fn(
-        entity_type, entity, field, null, language, items, display
+        entity_type,
+        entity,
+        field, /* This is actually the instance, doh! (I think) */
+        drupalgap_field_info_field(field_name),
+        language,
+        items,
+        display
       );
       $.each(elements, function(delta, element) {
           // If the element has markup, render it as is, if it is
