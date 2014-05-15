@@ -184,6 +184,38 @@ function drupalgap_check_visibility(type, data) {
 }
 
 /**
+ * Given an entity type and entity, this will return the bundle name as a
+ * string for the given entity, or null if the bundle is N/A.
+ * @param {String} entity_type The entity type.
+ * @param {Object} entity The entity JSON object.
+ * @return {*}
+ */
+function drupalgap_get_bundle(entity_type, entity) {
+  try {
+    var bundle = null;
+    switch (entity_type) {
+      case 'node': bundle = entity.type; break;
+      case 'comment':
+      case 'file':
+      case 'user':
+      case 'taxonomy_vocabulary':
+      case 'taxonomy_term':
+        // These entity types don't have a bundle.
+        break;
+      default:
+        console.log(
+          'WARNING: drupalgap_get_bundle - unsupported entity type (' +
+            entity_type +
+          ')'
+        );
+        break;
+    }
+    return bundle;
+  }
+  catch (error) { console.log('drupalgap_get_bundle - ' + error); }
+}
+
+/**
  * Given a path, this will return the id for the page's div element.
  * For example, a string path of 'foo/bar' would result in an id of 'foo_bar'.
  * If no path is provided, it will return the current page's id.
