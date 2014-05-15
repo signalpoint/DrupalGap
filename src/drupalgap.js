@@ -57,6 +57,8 @@ function drupalgap_init() {
       back_path: '', /* the path to move back to */
       blocks: [],
       content_types_list: {}, /* holds info about each content type */
+      date_formats: { }, /* @see system_get_date_formats() in Drupal core */
+      date_types: { }, /* @see system_get_date_types() in Drupal core */
       entity_info: {},
       field_info_fields: {},
       field_info_instances: {},
@@ -637,6 +639,49 @@ function drupalgap_file_get_contents(path, options) {
   catch (error) { console.log('drupalgap_file_get_contents - ' + error); }
 }
 
+/**
+ * @see https://api.drupal.org/api/drupal/includes!common.inc/function/format_interval/7
+ * @param {Number} interval The length of the interval in seconds.
+ * @return {String}
+ */
+function drupalgap_format_interval(interval) {
+  try {
+    // @TODO - deprecate this and move it to jDrupal as format_interval().
+    var granularity = 2; if (arguments[1]) { granularity = arguments[1]; }
+    var langcode = null; if (arguments[2]) { langcode = langcode[2]; }
+    var units = {
+      '1 year|@count years': 31536000,
+      '1 month|@count months': 2592000,
+      '1 week|@count weeks': 604800,
+      '1 day|@count days': 86400,
+      '1 hour|@count hours': 3600,
+      '1 min|@count min': 60,
+      '1 sec|@count sec': 1
+    };
+    var output = '';
+    $.each(units, function(key, value) {
+      var key = key.split('|');
+      if (interval >= value) {
+        var count = Math.floor(interval / value);
+        output +=
+          (output ? ' ' : '') +
+          drupalgap_format_plural(
+            count,
+            key[0],
+            key[1]
+          );
+        if (output.indexOf('@count') != -1) {
+          output = output.replace('@count', count);
+        }
+        interval %= value;
+        granularity--;
+      }
+      if (granularity == 0) { return false; }
+    });
+    return output ? output : '0 sec';
+  }
+  catch (error) { console.log('drupalgap_format_interval - ' + error); }
+}
 
 /**
  * @see http://api.drupal.org/api/drupal/includes%21common.inc/function/format_plural/7
@@ -647,6 +692,7 @@ function drupalgap_file_get_contents(path, options) {
  */
 function drupalgap_format_plural(count, singular, plural) {
   try {
+    // @TODO - deprecate this and move it to jDrupal as format_plural().
     if (count == 1) { return singular; }
     return plural;
   }
@@ -1458,42 +1504,6 @@ function variable_get(name, default_value) {
     return value;
   }
   catch (error) { drupalgap_error(error); }
-}
-
-/**
- * Given an JSON object, this will output it to the console. It accepts an
- * optional boolean as second argument, if it is false the output sent to the
- * console will not use pretty printing in a Chrome/Ripple environment.
- * @param {*} data
- */
-function dpm(data) {
-  try {
-    // Show the caller name.
-    //var caller = arguments.callee.caller.name + '()';
-    //console.log(caller);
-    if (data) {
-      // If we're in ripple we can output it directly to the console and it will
-      // have pretty printing, otherwise we'll stringify it first.
-      // TODO - be careful, when just using console.log() with ripple, it will
-      // always print out the final value of data (because of pass by reference)
-      // this can be very misleading for debugging things.
-      if (typeof parent.window.ripple === 'function') {
-        if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
-          console.log(JSON.stringify(data));
-        }
-        else {
-          console.log(data);
-        }
-      }
-      else {
-        console.log(JSON.stringify(data));
-      }
-    }
-    else {
-      console.log('<null>');
-    }
-  }
-  catch (error) { console.log('dpm - ' + error); }
 }
 
 /**
