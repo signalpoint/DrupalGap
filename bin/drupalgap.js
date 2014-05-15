@@ -6097,7 +6097,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
     else {
       console.log(
         'WARNING: drupalgap_entity_render_field - ' + function_name + '() ' +
-        'does not exist!'
+        'does not exist! (' + field_name + ')'
       );
     }
     // Render the field label, if necessary.
@@ -6911,6 +6911,37 @@ function drupalgap_field_key(field_name) {
     return key;
   }
   catch (error) { console.log('drupalgap_field_key - ' + error); }
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ * @param {String} entity_type
+ * @param {Object} entity
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {*} display
+ * @return {Object}
+ */
+function list_field_formatter_view(entity_type, entity, field, instance,
+  langcode, items, display) {
+  try {
+    var element = {};
+    if (!empty(items)) {
+      $.each(items, function(delta, item) {
+          var markup = '';
+          // list_default or list_key
+          if (display.type == 'list_default') {
+            markup = instance.settings.allowed_values[item.value];
+          }
+          else { markup = item.value; }
+          element[delta] = { markup: markup };
+      });
+    }
+    return element;
+  }
+  catch (error) { console.log('list_field_formatter_view - ' + error); }
 }
 
 /**
