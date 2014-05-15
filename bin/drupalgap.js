@@ -57,6 +57,8 @@ function drupalgap_init() {
       back_path: '', /* the path to move back to */
       blocks: [],
       content_types_list: {}, /* holds info about each content type */
+      date_formats: { }, /* @see system_get_date_formats() in Drupal core */
+      date_types: { }, /* @see system_get_date_types() in Drupal core */
       entity_info: {},
       field_info_fields: {},
       field_info_instances: {},
@@ -637,6 +639,49 @@ function drupalgap_file_get_contents(path, options) {
   catch (error) { console.log('drupalgap_file_get_contents - ' + error); }
 }
 
+/**
+ * @see https://api.drupal.org/api/drupal/includes!common.inc/function/format_interval/7
+ * @param {Number} interval The length of the interval in seconds.
+ * @return {String}
+ */
+function drupalgap_format_interval(interval) {
+  try {
+    // @TODO - deprecate this and move it to jDrupal as format_interval().
+    var granularity = 2; if (arguments[1]) { granularity = arguments[1]; }
+    var langcode = null; if (arguments[2]) { langcode = langcode[2]; }
+    var units = {
+      '1 year|@count years': 31536000,
+      '1 month|@count months': 2592000,
+      '1 week|@count weeks': 604800,
+      '1 day|@count days': 86400,
+      '1 hour|@count hours': 3600,
+      '1 min|@count min': 60,
+      '1 sec|@count sec': 1
+    };
+    var output = '';
+    $.each(units, function(key, value) {
+      var key = key.split('|');
+      if (interval >= value) {
+        var count = Math.floor(interval / value);
+        output +=
+          (output ? ' ' : '') +
+          drupalgap_format_plural(
+            count,
+            key[0],
+            key[1]
+          );
+        if (output.indexOf('@count') != -1) {
+          output = output.replace('@count', count);
+        }
+        interval %= value;
+        granularity--;
+      }
+      if (granularity == 0) { return false; }
+    });
+    return output ? output : '0 sec';
+  }
+  catch (error) { console.log('drupalgap_format_interval - ' + error); }
+}
 
 /**
  * @see http://api.drupal.org/api/drupal/includes%21common.inc/function/format_plural/7
@@ -647,6 +692,7 @@ function drupalgap_file_get_contents(path, options) {
  */
 function drupalgap_format_plural(count, singular, plural) {
   try {
+    // @TODO - deprecate this and move it to jDrupal as format_plural().
     if (count == 1) { return singular; }
     return plural;
   }
@@ -1461,42 +1507,6 @@ function variable_get(name, default_value) {
 }
 
 /**
- * Given an JSON object, this will output it to the console. It accepts an
- * optional boolean as second argument, if it is false the output sent to the
- * console will not use pretty printing in a Chrome/Ripple environment.
- * @param {*} data
- */
-function dpm(data) {
-  try {
-    // Show the caller name.
-    //var caller = arguments.callee.caller.name + '()';
-    //console.log(caller);
-    if (data) {
-      // If we're in ripple we can output it directly to the console and it will
-      // have pretty printing, otherwise we'll stringify it first.
-      // TODO - be careful, when just using console.log() with ripple, it will
-      // always print out the final value of data (because of pass by reference)
-      // this can be very misleading for debugging things.
-      if (typeof parent.window.ripple === 'function') {
-        if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
-          console.log(JSON.stringify(data));
-        }
-        else {
-          console.log(data);
-        }
-      }
-      else {
-        console.log(JSON.stringify(data));
-      }
-    }
-    else {
-      console.log('<null>');
-    }
-  }
-  catch (error) { console.log('dpm - ' + error); }
-}
-
-/**
  * Returns the current time as a string with the format: "yyyy-mm-dd hh:mm:ss".
  * @return {String}
  */
@@ -1760,6 +1770,38 @@ function drupalgap_check_visibility(type, data) {
     return visible;
   }
   catch (error) { console.log('drupalgap_check_visibility - ' + error); }
+}
+
+/**
+ * Given an entity type and entity, this will return the bundle name as a
+ * string for the given entity, or null if the bundle is N/A.
+ * @param {String} entity_type The entity type.
+ * @param {Object} entity The entity JSON object.
+ * @return {*}
+ */
+function drupalgap_get_bundle(entity_type, entity) {
+  try {
+    var bundle = null;
+    switch (entity_type) {
+      case 'node': bundle = entity.type; break;
+      case 'comment':
+      case 'file':
+      case 'user':
+      case 'taxonomy_vocabulary':
+      case 'taxonomy_term':
+        // These entity types don't have a bundle.
+        break;
+      default:
+        console.log(
+          'WARNING: drupalgap_get_bundle - unsupported entity type (' +
+            entity_type +
+          ')'
+        );
+        break;
+    }
+    return bundle;
+  }
+  catch (error) { console.log('drupalgap_get_bundle - ' + error); }
 }
 
 /**
@@ -6026,8 +6068,19 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
         }
         else { items = entity[field_name]; }
       }
+      // @TODO - We've been sending 'field' as the instance
+      // (drupalgap_field_info_instance), and the 'instance' as the field
+      // (drupalgap_field_info_field). This is backwards, and should be
+      // reversed. All contrib modules with field support will need to be
+      // udpated to reflect this. Lame.
       var elements = fn(
-        entity_type, entity, field, null, language, items, display
+        entity_type,
+        entity,
+        field, /* This is actually the instance, doh! (I think) */
+        drupalgap_field_info_field(field_name),
+        language,
+        items,
+        display
       );
       $.each(elements, function(delta, element) {
           // If the element has markup, render it as is, if it is
@@ -8511,6 +8564,13 @@ function drupalgap_service_resource_extract_results(options) {
         options.data.content_types_user_permissions;
       // Pull out the site settings.
       drupalgap.site_settings = options.data.site_settings;
+      // Pull out the date formats and types.
+      if (typeof options.data.date_formats !== 'undefined') {
+        drupalgap.date_formats = options.data.date_formats;
+      }
+      if (typeof options.data.date_types !== 'undefined') {
+        drupalgap.date_types = options.data.date_types;
+      }
     }
   }
   catch (error) {
