@@ -727,9 +727,18 @@ function entity_primary_key(entity_type) {
       case 'taxonomy_vocabulary': key = 'vid'; break;
       case 'user': key = 'uid'; break;
       default:
-        console.log(
-          'entity_primary_key - unsupported entity type (' + entity_type + ')'
-        );
+        // Is anyone declaring the primary key for this entity type?
+        var function_name = entity_type + '_primary_key';
+        if (drupalgap_function_exists(function_name)) {
+          var fn = window[function_name];
+          key = fn(entity_type);
+        }
+        else {
+          var msg = 'entity_primary_key - unsupported entity type (' +
+            entity_type + ') - to add support, declare ' + function_name +
+            '() and have it return the primary key column name as a string';
+          console.log(msg);
+        }
         break;
     }
     return key;
@@ -1537,11 +1546,11 @@ function entity_index_build_query_string(query) {
  */
 function _entity_wrap(entity_type, entity) {
   try {
-    // We don't wrap taxonomy or users.
+    // We don't wrap taxonomy, users or commerce entities.
     var entity_wrapper = {};
     if (entity_type == 'taxonomy_term' ||
       entity_type == 'taxonomy_vocabulary' ||
-      entity_type == 'user') {
+      entity_type == 'user' || entity_type.indexOf('commerce') != -1) {
       entity_wrapper = entity;
     }
     else { entity_wrapper[entity_type] = entity; }
