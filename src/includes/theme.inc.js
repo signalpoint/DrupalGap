@@ -30,9 +30,6 @@ $(document).on('pagebeforechange', function(e, data) {
           // Pre process, then process the page.
           template_preprocess_page(drupalgap.page.variables);
           template_process_page(drupalgap.page.variables);
-          if (drupalgap.settings.debug) {
-            console.log('pagebeforechange() - processed');
-          }
         }
       }
     }
