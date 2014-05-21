@@ -1,6 +1,7 @@
 /**
  * Implements hook_block_view().
  * @param {String} delta
+ * @param {Object} region
  * @return {String}
  */
 function menu_block_view(delta, region) {
@@ -63,9 +64,9 @@ function menu_block_view_pageshow(options) {
         drupalgap.menu_links[router_path] &&
         drupalgap.menu_links[router_path].children
       ) {
-      
+
         var args = arg();
-      
+
         // Define a success callback that will be called later on...
         var _success = function(result) {
           var menu_items = [];
@@ -73,10 +74,10 @@ function menu_block_view_pageshow(options) {
           $.each(
             drupalgap.menu_links[router_path].children,
             function(index, child) {
-              if (drupalgap.menu_links[child] &&
-                (drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
-                 drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK')
-              ) {
+              if (drupalgap.menu_links[child] && (
+                drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
+                drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK'
+              )) {
                 if (drupalgap_menu_access(child, null, result)) {
                   menu_items.push(drupalgap.menu_links[child]);
                 }
@@ -107,8 +108,8 @@ function menu_block_view_pageshow(options) {
           if (options['data-role'] && options['data-role'] == 'navbar') {
             $('#' + options.container_id).navbar();
           }
-        }
-        
+        };
+
         // First, determine if any child has an entity arg in the path, and/or
         // an access_callback handler.
         var has_entity_arg = false;
@@ -130,7 +131,7 @@ function menu_block_view_pageshow(options) {
             }
           }
         );
-        
+
         // If we have an entity arg, and an access_callback, let's load up the
         // entity asynchronously.
         if (has_entity_arg && has_access_callback) {
@@ -138,7 +139,8 @@ function menu_block_view_pageshow(options) {
           var int_arg_index = null;
           for (var i = 0; i < args.length; i++) {
             if (is_int(parseInt(args[i]))) {
-              int_arg_index = i; // Save the arg index so we can replace it later.
+              // Save the arg index so we can replace it later.
+              int_arg_index = i;
               found_int_arg = true;
               break;
             }
@@ -174,7 +176,7 @@ function menu_block_view_pageshow(options) {
             }
           }
           else {
-            console.log('menu_block_view_pageshow - load function not ' + 
+            console.log('menu_block_view_pageshow - load function not ' +
               'implemented! ' + load_function
             );
           }

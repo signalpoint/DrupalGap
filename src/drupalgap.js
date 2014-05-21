@@ -1048,7 +1048,7 @@ function drupalgap_max_width() {
  */
 function drupalgap_menu_access(path) {
   try {
-    
+
     // User #1 is allowed to do anything, I mean anything.
     if (Drupal.user.uid == 1) { return true; }
     // Everybody else will not have access unless we prove otherwise.
