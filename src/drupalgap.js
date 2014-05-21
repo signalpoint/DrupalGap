@@ -1041,11 +1041,14 @@ function drupalgap_max_width() {
  * Checks to see if the current user has access to the given path. Returns true
  * if the user has access, false otherwise. You may optionally pass in a user
  * account object as the second argument to check access on a specific user.
+ * Also, you may optionally pass in an entity object as the third argument, if
+ * that entity needs to be passed along to an 'access_callback' handler.
  * @param {String} path
  * @return {Boolean}
  */
 function drupalgap_menu_access(path) {
   try {
+    
     // User #1 is allowed to do anything, I mean anything.
     if (Drupal.user.uid == 1) { return true; }
     // Everybody else will not have access unless we prove otherwise.
@@ -1078,7 +1081,6 @@ function drupalgap_menu_access(path) {
         // An access callback function is specified for this path...
 
         // START HERE: https://github.com/signalpoint/DrupalGap/issues/191
-
         var function_name = drupalgap.menu_links[path].access_callback;
         if (drupalgap_function_exists(function_name)) {
           // Grab the access callback function. If there are any access args
@@ -1088,8 +1090,17 @@ function drupalgap_menu_access(path) {
           if (drupalgap.menu_links[path].access_arguments) {
             var access_arguments =
               drupalgap.menu_links[path].access_arguments.slice(0);
-            var args = arg();
-            drupalgap_prepare_argument_entities(access_arguments, args);
+            // If we have an entity loaded, replace the first integer we find
+            // in the page arguments with the loaded entity.
+            if (arguments[2]) {
+              var entity = arguments[2];
+              $.each(access_arguments, function(index, page_argument) {
+                  if (is_int(parseInt(page_argument))) {
+                    access_arguments[index] = entity;
+                    return false;
+                  }
+              });
+            }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
           }
           else { return fn(); }
@@ -1191,23 +1202,14 @@ function drupalgap_place_args_in_path(input_path) {
  * page paths, converts the integer into an MVC item.
  * @param {Array} page_arguments
  * @param {Array} args
+ * @param {Object} options
  */
-function drupalgap_prepare_argument_entities(page_arguments, args) {
+function drupalgap_prepare_argument_entities(page_arguments, args, options) {
   try {
     // If argument zero is an entity type (or base type, e.g. taxonomy), and we
     // have at least one integer argument, replace the page call back's integer
     // argument index with the loaded entity.
-    if (args.length > 1 &&
-          (
-            args[0] == 'comment' ||
-            args[0] == 'node' ||
-            (args[0] == 'taxonomy' &&
-              (args[1] == 'vocabulary' || args[1] == 'term')
-            ) ||
-            args[0] == 'user' ||
-            args[0] == 'item'
-          )
-    ) {
+    if (drupalgap_path_has_entity_arg()) {
       var found_int_arg = false;
       var int_arg_index = null;
       for (var i = 0; i < args.length; i++) {
@@ -1230,30 +1232,32 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
       if (drupalgap_function_exists(load_function)) {
         var entity_fn = window[load_function];
         var entity = null;
+        // Prepare the success handler.
+        var _success = function(entity) {
+          // Now that we have the entity loaded, replace the first integer we find
+          // in the page arguments with the loaded entity.
+          $.each(page_arguments, function(index, page_argument) {
+              if (is_int(parseInt(page_argument))) {
+                page_arguments[index] = entity;
+                options.success();
+                return false;
+              }
+          });
+        }
         // Load the entity. MVC items need to pass along the module name and
         // model type to its load function. All other entity load functions just
         // need the entity id.
+        var entity_id = parseInt(args[int_arg_index]);
         if (args[0] == 'item') {
-          entity = entity_fn(args[1], args[2], parseInt(args[int_arg_index]));
+          entity = entity_fn(args[1], args[2], entity_id);
         }
         else {
-          // Force a reload (reset) when we load the entity if we are editing
-          // the entity.
-          if (arg(2) == 'edit') {
-            entity = entity_fn(parseInt(args[int_arg_index]), { reset: true });
-          }
-          else {
-             entity = entity_fn(parseInt(args[int_arg_index]));
-          }
+          // Force a reset if we are editing the entity.
+          var reset = false;
+          if (arg(2) == 'edit') { reset = true; }
+          // Load the entity asynchronously.
+          entity_fn(entity_id, { reset: reset, success: _success });
         }
-        // Now that we have the entity loaded, replace the first integer we find
-        // in the page arguments with the loaded entity.
-        $.each(page_arguments, function(index, page_argument) {
-            if (is_int(parseInt(page_argument))) {
-              page_arguments[index] = entity;
-              return false;
-            }
-        });
       }
       else {
         console.log(
@@ -1266,6 +1270,31 @@ function drupalgap_prepare_argument_entities(page_arguments, args) {
   catch (error) {
     console.log('drupalgap_prepare_argument_entities - ' + error);
   }
+}
+
+/**
+ * Given an args array, this returns true if the path in the array will have an
+ * entity (id) present in it.
+ * @param {Array} args
+ * @return {Boolean}
+ */
+function drupalgap_path_has_entity_arg(args) {
+  try {
+    if (args.length > 1 &&
+        (
+          args[0] == 'comment' ||
+          args[0] == 'file' ||
+          args[0] == 'node' ||
+          (args[0] == 'taxonomy' &&
+            (args[1] == 'vocabulary' || args[1] == 'term')
+          ) ||
+          args[0] == 'user' ||
+          args[0] == 'item'
+        )
+    ) { return true; }
+    return false;
+  }
+  catch (error) { console.log('drupalgap_path_has_entity_arg - ' + error); }
 }
 
 /**
