@@ -1,5 +1,5 @@
 /**
- * Implements hook_block_view
+ * Implements hook_block_view().
  * @param {String} delta
  * @return {String}
  */
@@ -10,15 +10,40 @@ function menu_block_view(delta) {
   // So we must check to make sure we have any items before rendering the
   // menu since our theme_item_list implementation returns empty lists
   // for jQM pageshow async list item data retrieval and display.
+  try {
+    // Since menu link paths may have an 'access_callback' handler that needs
+    // to make an async call to the server (e.g. local tasks), we'll utilize a
+    // pageshow handler to render the menu, so for now just render an empty
+    // placeholder and pageshow handler.
+    var page_id = drupalgap_get_page_id();
+    var container_id = menu_container_id(delta, page_id);
+    return '<div id="' + container_id + '"></div>' +
+      drupalgap_jqm_page_event_script_code({
+          page_id: page_id,
+          jqm_page_event: 'pageshow',
+          jqm_page_event_callback: 'menu_block_view_pageshow',
+          jqm_page_event_args: JSON.stringify({
+              menu_name: delta,
+              container_id: container_id
+          })
+      }, delta);
+  }
+  catch (error) { console.log('menu_block_view - ' + error); }
+}
 
+/**
+ * The pageshow handler for menu blocks.
+ * @param {Object} options
+ */
+function menu_block_view_pageshow(options) {
   try {
     var html = '';
 
-    // Grab the current path so we can watch out for any menu links that match
-    // it.
+    // Grab current path so we can watch out for any menu links that match it.
     var path = drupalgap_path_get();
 
     // Are we about to view a normal menu, or the local task menu?
+    var delta = options.menu_name;
     if (delta == 'primary_local_tasks') {
 
       // LOCAL TASKS MENU LINKS
@@ -105,9 +130,9 @@ function menu_block_view(delta) {
         }
       }
     }
-    return html;
+    $('#' + options.container_id).html(html).trigger('create');
   }
-  catch (error) { console.log('menu_block_view - ' + error); }
+  catch (error) { console.log('menu_block_view_pageshow - ' + error); }
 }
 
 /**
@@ -131,8 +156,22 @@ function menu_install() {
  */
 function menu_save(menu) {
   try {
-    eval('drupalgap.menus.' + menu.menu_name + ' =  menu;');
+    drupalgap.menus[menu.menu_name] = menu;
   }
   catch (error) { console.log('menu_save - ' + error); }
+}
+
+/**
+ * Given a menu name and page id, this will return its container id for that
+ * page.
+ * @param {String} menu_name
+ * @param {String} page_id
+ * @return {String}
+ */
+function menu_container_id(menu_name, page_id) {
+  try {
+    return page_id + '_menu_' + menu_name;
+  }
+  catch (error) { console.log('menu_container_id - ' + error); }
 }
 
