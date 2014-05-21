@@ -368,7 +368,17 @@ function drupalgap_goto(path) {
 
     // Make sure the user has access to this router path, if they don't send
     // them to the 401 page.
-    if (!drupalgap_menu_access(router_path)) {
+    // @TODO - for now we're going to skip access checks on local tasks, since
+    // they are covered by menu_block_view(), but if someone were to navigate
+    // directly to e.g. a node's edit page, they would be able to see the page.
+    // Of course Drupal would actually prevent them from updating the node on
+    // the live site, but nonetheless this needs to be fixed. It's a tough issue
+    // though and related to https://github.com/signalpoint/DrupalGap/issues/257
+    if (
+      drupalgap.menu_links[router_path].type != 'MENU_DEFAULT_LOCAL_TASK' &&
+      drupalgap.menu_links[router_path].type != 'MENU_LOCAL_TASK' &&
+      !drupalgap_menu_access(router_path)
+    ) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
     }
