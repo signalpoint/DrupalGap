@@ -46,7 +46,6 @@ function menu_execute_active_handler() {
               else { page_arguments.push(object); }
             }
           );
-          //drupalgap_prepare_argument_entities(page_arguments, args);
 
           // Call the page callback function with the page arguments.
           content = fn.apply(null, Array.prototype.slice.call(page_arguments));
