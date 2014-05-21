@@ -785,7 +785,7 @@ function drupalgap_render_page() {
 function drupalgap_render_region(region) {
   try {
     // Make sure there are blocks specified for this theme in settings.js.
-    if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
+    if (!drupalgap.settings.blocks[drupalgap.settings.theme]) {
       var msg = 'drupalgap_render_region - there are no blocks for the "' +
         drupalgap.settings.theme + '" theme in the settings.js file!';
       drupalgap_alert(msg);
@@ -796,9 +796,7 @@ function drupalgap_render_region(region) {
     // Let's render the region...
     var region_html = '';
     // If the region has blocks specified for it in the theme in settings.js...
-    if (eval(
-      'drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name
-    )) {
+    if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
       if (!region.attributes['class']) { region.attributes['class'] = ''; }
@@ -858,7 +856,8 @@ function drupalgap_render_region(region) {
               region_html += module_invoke(
                 block.module,
                 'block_view',
-                block_delta
+                block_delta,
+                region
               );
             }
           }
