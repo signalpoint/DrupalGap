@@ -1041,11 +1041,14 @@ function drupalgap_max_width() {
  * Checks to see if the current user has access to the given path. Returns true
  * if the user has access, false otherwise. You may optionally pass in a user
  * account object as the second argument to check access on a specific user.
+ * Also, you may optionally pass in an entity object as the third argument, if
+ * that entity needs to be passed along to an 'access_callback' handler.
  * @param {String} path
  * @return {Boolean}
  */
 function drupalgap_menu_access(path) {
   try {
+
     // User #1 is allowed to do anything, I mean anything.
     if (Drupal.user.uid == 1) { return true; }
     // Everybody else will not have access unless we prove otherwise.
@@ -1078,7 +1081,6 @@ function drupalgap_menu_access(path) {
         // An access callback function is specified for this path...
 
         // START HERE: https://github.com/signalpoint/DrupalGap/issues/191
-
         var function_name = drupalgap.menu_links[path].access_callback;
         if (drupalgap_function_exists(function_name)) {
           // Grab the access callback function. If there are any access args
@@ -1088,8 +1090,17 @@ function drupalgap_menu_access(path) {
           if (drupalgap.menu_links[path].access_arguments) {
             var access_arguments =
               drupalgap.menu_links[path].access_arguments.slice(0);
-            var args = arg();
-            drupalgap_prepare_argument_entities(access_arguments, args);
+            // If we have an entity loaded, replace the first integer we find
+            // in the page arguments with the loaded entity.
+            if (arguments[2]) {
+              var entity = arguments[2];
+              $.each(access_arguments, function(index, page_argument) {
+                  if (is_int(parseInt(page_argument))) {
+                    access_arguments[index] = entity;
+                    return false;
+                  }
+              });
+            }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
           }
           else { return fn(); }
@@ -1185,87 +1196,30 @@ function drupalgap_place_args_in_path(input_path) {
     console.log('drupalgap_place_args_in_path - ' + error);
   }
 }
+
 /**
- * Converts a hook_menu items page_arguments path like node/123 so arg zero
- * would be 'node' and arg 1 would be the loaded entity node. Also works for MVC
- * page paths, converts the integer into an MVC item.
- * @param {Array} page_arguments
+ * Given an args array, this returns true if the path in the array will have an
+ * entity (id) present in it.
  * @param {Array} args
+ * @return {Boolean}
  */
-function drupalgap_prepare_argument_entities(page_arguments, args) {
+function drupalgap_path_has_entity_arg(args) {
   try {
-    // If argument zero is an entity type (or base type, e.g. taxonomy), and we
-    // have at least one integer argument, replace the page call back's integer
-    // argument index with the loaded entity.
     if (args.length > 1 &&
-          (
-            args[0] == 'comment' ||
-            args[0] == 'node' ||
-            (args[0] == 'taxonomy' &&
-              (args[1] == 'vocabulary' || args[1] == 'term')
-            ) ||
-            args[0] == 'user' ||
-            args[0] == 'item'
-          )
-    ) {
-      var found_int_arg = false;
-      var int_arg_index = null;
-      for (var i = 0; i < args.length; i++) {
-        if (is_int(parseInt(args[i]))) {
-          int_arg_index = i; // Save the arg index so we can replace it later.
-          found_int_arg = true;
-          break;
-        }
-      }
-      if (!found_int_arg) { return; }
-      // Determine the naming convention for the entity load function.
-      var load_function_prefix = args[0]; // default
-      if (args[0] == 'taxonomy') {
-        if (args[1] == 'vocabulary' || args[1] == 'term') {
-          load_function_prefix = args[0] + '_' + args[1];
-        }
-      }
-      var load_function = load_function_prefix + '_load';
-      // If the load function exists, load the entity.
-      if (drupalgap_function_exists(load_function)) {
-        var entity_fn = window[load_function];
-        var entity = null;
-        // Load the entity. MVC items need to pass along the module name and
-        // model type to its load function. All other entity load functions just
-        // need the entity id.
-        if (args[0] == 'item') {
-          entity = entity_fn(args[1], args[2], parseInt(args[int_arg_index]));
-        }
-        else {
-          // Force a reload (reset) when we load the entity if we are editing
-          // the entity.
-          if (arg(2) == 'edit') {
-            entity = entity_fn(parseInt(args[int_arg_index]), { reset: true });
-          }
-          else {
-             entity = entity_fn(parseInt(args[int_arg_index]));
-          }
-        }
-        // Now that we have the entity loaded, replace the first integer we find
-        // in the page arguments with the loaded entity.
-        $.each(page_arguments, function(index, page_argument) {
-            if (is_int(parseInt(page_argument))) {
-              page_arguments[index] = entity;
-              return false;
-            }
-        });
-      }
-      else {
-        console.log(
-          'drupalgap_prepare_argument_entities - ' +
-          'load function not implemented! ' + load_function
-        );
-      }
-    }
+        (
+          args[0] == 'comment' ||
+          args[0] == 'file' ||
+          args[0] == 'node' ||
+          (args[0] == 'taxonomy' &&
+            (args[1] == 'vocabulary' || args[1] == 'term')
+          ) ||
+          args[0] == 'user' ||
+          args[0] == 'item'
+        )
+    ) { return true; }
+    return false;
   }
-  catch (error) {
-    console.log('drupalgap_prepare_argument_entities - ' + error);
-  }
+  catch (error) { console.log('drupalgap_path_has_entity_arg - ' + error); }
 }
 
 /**
@@ -1957,7 +1911,17 @@ function drupalgap_goto(path) {
 
     // Make sure the user has access to this router path, if they don't send
     // them to the 401 page.
-    if (!drupalgap_menu_access(router_path)) {
+    // @TODO - for now we're going to skip access checks on local tasks, since
+    // they are covered by menu_block_view(), but if someone were to navigate
+    // directly to e.g. a node's edit page, they would be able to see the page.
+    // Of course Drupal would actually prevent them from updating the node on
+    // the live site, but nonetheless this needs to be fixed. It's a tough issue
+    // though and related to https://github.com/signalpoint/DrupalGap/issues/257
+    if (
+      drupalgap.menu_links[router_path].type != 'MENU_DEFAULT_LOCAL_TASK' &&
+      drupalgap.menu_links[router_path].type != 'MENU_LOCAL_TASK' &&
+      !drupalgap_menu_access(router_path)
+    ) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
     }
@@ -2374,7 +2338,7 @@ function drupalgap_render_page() {
 function drupalgap_render_region(region) {
   try {
     // Make sure there are blocks specified for this theme in settings.js.
-    if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
+    if (!drupalgap.settings.blocks[drupalgap.settings.theme]) {
       var msg = 'drupalgap_render_region - there are no blocks for the "' +
         drupalgap.settings.theme + '" theme in the settings.js file!';
       drupalgap_alert(msg);
@@ -2385,9 +2349,7 @@ function drupalgap_render_region(region) {
     // Let's render the region...
     var region_html = '';
     // If the region has blocks specified for it in the theme in settings.js...
-    if (eval(
-      'drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name
-    )) {
+    if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
       if (!region.attributes['class']) { region.attributes['class'] = ''; }
@@ -2447,7 +2409,8 @@ function drupalgap_render_region(region) {
               region_html += module_invoke(
                 block.module,
                 'block_view',
-                block_delta
+                block_delta,
+                region
               );
             }
           }
@@ -3986,7 +3949,6 @@ function menu_execute_active_handler() {
               else { page_arguments.push(object); }
             }
           );
-          //drupalgap_prepare_argument_entities(page_arguments, args);
 
           // Call the page callback function with the page arguments.
           content = fn.apply(null, Array.prototype.slice.call(page_arguments));
@@ -7510,26 +7472,57 @@ function _image_field_form_process(form, form_state, options) {
 }
 
 /**
- * Implements hook_block_view
+ * Implements hook_block_view().
  * @param {String} delta
+ * @param {Object} region
  * @return {String}
  */
-function menu_block_view(delta) {
+function menu_block_view(delta, region) {
   // NOTE: When rendering a jQM data-role="navbar" you can't place an
   // empty list (<ul></ul>) in it, this will cause an error:
   // https://github.com/jquery/jquery-mobile/issues/5141
   // So we must check to make sure we have any items before rendering the
   // menu since our theme_item_list implementation returns empty lists
   // for jQM pageshow async list item data retrieval and display.
+  try {
+    // Since menu link paths may have an 'access_callback' handler that needs
+    // to make an async call to the server (e.g. local tasks), we'll utilize a
+    // pageshow handler to render the menu, so for now just render an empty
+    // placeholder and pageshow handler.
+    var page_id = drupalgap_get_page_id();
+    var container_id = menu_container_id(delta, page_id);
+    var data_role = null;
+    if (region.attributes && region.attributes['data-role']) {
+      data_role = region.attributes['data-role'];
+    }
+    return '<div id="' + container_id + '"></div>' +
+      drupalgap_jqm_page_event_script_code({
+          page_id: page_id,
+          jqm_page_event: 'pageshow',
+          jqm_page_event_callback: 'menu_block_view_pageshow',
+          jqm_page_event_args: JSON.stringify({
+              menu_name: delta,
+              container_id: container_id,
+              'data-role': data_role
+          })
+      }, delta);
+  }
+  catch (error) { console.log('menu_block_view - ' + error); }
+}
 
+/**
+ * The pageshow handler for menu blocks.
+ * @param {Object} options
+ */
+function menu_block_view_pageshow(options) {
   try {
     var html = '';
 
-    // Grab the current path so we can watch out for any menu links that match
-    // it.
+    // Grab current path so we can watch out for any menu links that match it.
     var path = drupalgap_path_get();
 
     // Are we about to view a normal menu, or the local task menu?
+    var delta = options.menu_name;
     if (delta == 'primary_local_tasks') {
 
       // LOCAL TASKS MENU LINKS
@@ -7539,15 +7532,61 @@ function menu_block_view(delta) {
       // children, if there are any. Local tasks typically have argument
       // wildcards in them, so we'll replace their wildcards with the current
       // args.
-      //var router_path =
-        //drupalgap_get_menu_link_router_path(drupalgap_get_current_path());
       var router_path = drupalgap_router_path_get();
       if (
         drupalgap.menu_links[router_path] &&
         drupalgap.menu_links[router_path].children
       ) {
-        var menu_items = [];
-        var link_path = '';
+
+        var args = arg();
+
+        // Define a success callback that will be called later on...
+        var _success = function(result) {
+          var menu_items = [];
+          var link_path = '';
+          $.each(
+            drupalgap.menu_links[router_path].children,
+            function(index, child) {
+              if (drupalgap.menu_links[child] && (
+                drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
+                drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK'
+              )) {
+                if (drupalgap_menu_access(child, null, result)) {
+                  menu_items.push(drupalgap.menu_links[child]);
+                }
+              }
+            }
+          );
+          // If there was only one local task menu item, and it is the default
+          // local task, don't render the menu, otherwise render the menu as an
+          // item list as long as there are items to render.
+          if (
+            menu_items.length == 1 &&
+            menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK'
+          ) { html = ''; }
+          else {
+            var items = [];
+            $.each(menu_items, function(index, item) {
+                items.push(
+                  l(item.title, drupalgap_place_args_in_path(item.path))
+                );
+            });
+            if (items.length > 0) {
+              html = theme('item_list', {'items': items});
+            }
+          }
+          // Inject the html.
+          $('#' + options.container_id).html(html).trigger('create');
+          // If the block's region is a jQM navbar, refresh the navbar.
+          if (options['data-role'] && options['data-role'] == 'navbar') {
+            $('#' + options.container_id).navbar();
+          }
+        };
+
+        // First, determine if any child has an entity arg in the path, and/or
+        // an access_callback handler.
+        var has_entity_arg = false;
+        var has_access_callback = false;
         $.each(
           drupalgap.menu_links[router_path].children,
           function(index, child) {
@@ -7555,30 +7594,67 @@ function menu_block_view(delta) {
               (drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
                drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK')
             ) {
-              if (drupalgap_menu_access(child)) {
-                menu_items.push(drupalgap.menu_links[child]);
+              if (drupalgap_path_has_entity_arg(arg(null, child))) {
+                has_entity_arg = true;
               }
+              if (
+                typeof
+                  drupalgap.menu_links[child].access_callback !== 'undefined'
+              ) { has_access_callback = true; }
             }
           }
         );
-        // If there was only one local task menu item, and it is the default
-        // local task, don't render the menu, otherwise render the menu as an
-        // item list as long as there are items to render.
-        if (
-          menu_items.length == 1 &&
-          menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK'
-        ) { html = ''; }
-        else {
-          var items = [];
-          $.each(menu_items, function(index, item) {
-              items.push(
-                l(item.title, drupalgap_place_args_in_path(item.path))
-              );
-          });
-          if (items.length > 0) {
-            html = theme('item_list', {'items': items});
+
+        // If we have an entity arg, and an access_callback, let's load up the
+        // entity asynchronously.
+        if (has_entity_arg && has_access_callback) {
+          var found_int_arg = false;
+          var int_arg_index = null;
+          for (var i = 0; i < args.length; i++) {
+            if (is_int(parseInt(args[i]))) {
+              // Save the arg index so we can replace it later.
+              int_arg_index = i;
+              found_int_arg = true;
+              break;
+            }
+          }
+          if (!found_int_arg) { _success(null); return; }
+
+          // Determine the naming convention for the entity load function.
+          var load_function_prefix = args[0]; // default
+          if (args[0] == 'taxonomy') {
+            if (args[1] == 'vocabulary' || args[1] == 'term') {
+              load_function_prefix = args[0] + '_' + args[1];
+            }
+          }
+          var load_function = load_function_prefix + '_load';
+
+          // If the load function exists, load the entity.
+          if (drupalgap_function_exists(load_function)) {
+            var entity_fn = window[load_function];
+            // Load the entity. MVC items need to pass along the module name and
+            // model type to its load function. All other entity load functions
+            // just need the entity id.
+            var entity_id = parseInt(args[int_arg_index]);
+            if (args[0] == 'item') {
+              entity = entity_fn(args[1], args[2], entity_id);
+              _success(entity);
+            }
+            else {
+              // Force a reset if we are editing the entity.
+              var reset = false;
+              if (arg(2) == 'edit') { reset = true; }
+              // Load the entity asynchronously.
+              entity_fn(entity_id, { reset: reset, success: _success });
+            }
+          }
+          else {
+            console.log('menu_block_view_pageshow - load function not ' +
+              'implemented! ' + load_function
+            );
           }
         }
+        else { _success(null); }
       }
     }
     else {
@@ -7615,10 +7691,10 @@ function menu_block_view(delta) {
           html = theme('item_list', {'items': items, 'attributes': attributes});
         }
       }
+      $('#' + options.container_id).html(html).trigger('create');
     }
-    return html;
   }
-  catch (error) { console.log('menu_block_view - ' + error); }
+  catch (error) { console.log('menu_block_view_pageshow - ' + error); }
 }
 
 /**
@@ -7642,9 +7718,23 @@ function menu_install() {
  */
 function menu_save(menu) {
   try {
-    eval('drupalgap.menus.' + menu.menu_name + ' =  menu;');
+    drupalgap.menus[menu.menu_name] = menu;
   }
   catch (error) { console.log('menu_save - ' + error); }
+}
+
+/**
+ * Given a menu name and page id, this will return its container id for that
+ * page.
+ * @param {String} menu_name
+ * @param {String} page_id
+ * @return {String}
+ */
+function menu_container_id(menu_name, page_id) {
+  try {
+    return page_id + '_menu_' + menu_name;
+  }
+  catch (error) { console.log('menu_container_id - ' + error); }
 }
 
 /**
