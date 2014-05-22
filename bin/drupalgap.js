@@ -1811,8 +1811,8 @@ function drupalgap_get_path(type, name) {
       });
     }
     else if (type == 'theme') {
-      // @todo Add support for custom themes.
-      path = 'themes/' + name;
+      if (name == 'easystreet3') { path = 'themes/' + name; }
+      else { path = 'app/themes/' + name; }
     }
     else {
       console.log(
