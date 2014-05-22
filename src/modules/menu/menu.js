@@ -218,8 +218,10 @@ function menu_block_view_pageshow(options) {
           html = theme('item_list', {'items': items, 'attributes': attributes});
         }
       }
-      // Add the themed item list, trigger JQM create, remove the placeholder container.
-      $('#' + options.container_id).html(html).trigger('create').children().unwrap();
+      // Add the themed item list, trigger JQM create and
+      // remove the placeholder container.
+      $('#' + options.container_id).html(html).trigger('create')
+        .children().unwrap();
     }
   }
   catch (error) { console.log('menu_block_view_pageshow - ' + error); }
