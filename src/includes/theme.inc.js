@@ -550,7 +550,10 @@ function theme_link(variables) {
     }
     else {
       // The link has no path, so just render the text and attributes.
-      return '<a href="#" ' + drupalgap_attributes(variables.attributes) + '>' +
+      if (typeof variables.attributes.href === 'undefined') {
+        variables.attributes.href = '#';
+      }
+      return '<a ' + drupalgap_attributes(variables.attributes) + '>' +
         text +
       '</a>';
     }
