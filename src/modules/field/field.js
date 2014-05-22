@@ -405,9 +405,12 @@ function text_field_formatter_view(entity_type, entity, field, instance,
     var element = {};
     if (!empty(items)) {
       $.each(items, function(delta, item) {
-          element[delta] = {
-            markup: item.value
-          };
+          // Grab the field value, but use the safe_value if we have it.
+          var value = item.value;
+          if (typeof item.safe_value !== 'undefined') {
+            value = item.safe_value;
+          }
+          element[delta] = { markup: value };
       });
     }
     return element;
