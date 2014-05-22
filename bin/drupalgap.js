@@ -340,17 +340,15 @@ function drupalgap_load_theme() {
     else {
       // Pull the theme name from the settings.js file.
       var theme_name = drupalgap.settings.theme;
-      // Let's try to load to theme's js file first by looking in the core
-      // themes directory, then in the app/themes directory.
       var theme_path = 'themes/' + theme_name + '/' + theme_name + '.js';
-      if (!drupalgap_file_exists(theme_path)) {
+      if (theme_name != 'easystreet3') {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
-        if (!drupalgap_file_exists(theme_path)) {
-          var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
-            'The theme\'s JS file does not exist: ' + theme_path;
-          drupalgap_alert(error_msg);
-          return false;
-        }
+      }
+      if (!drupalgap_file_exists(theme_path)) {
+        var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
+          'The theme\'s JS file does not exist: ' + theme_path;
+        drupalgap_alert(error_msg);
+        return false;
       }
       // We found the theme's js file, add it to the page.
       drupalgap_add_js(theme_path);
