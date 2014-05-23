@@ -110,7 +110,7 @@ function menu_block_view_pageshow(options) {
           }
           // Optionally remove the placeholder wrapper.
           var menu = drupalgap.menus[options.menu_name];
-          if (menu.options.unwrap !== 'undefined' && menu.options.unwrap) {
+          if (menu.options.wrap === 'undefined' || !menu.options.wrap) {
             $('#' + options.container_id).children().unwrap();
           }
 
@@ -227,7 +227,7 @@ function menu_block_view_pageshow(options) {
       // Inject the html.
       $('#' + options.container_id).html(html).trigger('create');
       // Optionally remove the placeholder wrapper.
-      if (menu.options.unwrap !== 'undefined' && menu.options.unwrap) {
+      if (menu.options.wrap === 'undefined' || !menu.options.wrap) {
         $('#' + options.container_id).children().unwrap();
       }
     }
