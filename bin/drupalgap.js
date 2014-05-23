@@ -4918,23 +4918,22 @@ function theme_item_list(variables) {
     // theme them too.
     var type = 'ul';
     if (variables.type) { type = variables.type; }
-    var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
-        variables.attributes['data-role'] == 'listview';
     var html = '';
     if (variables.title) { html += '<h2>' + variables.title + '</h2>'; }
     html += '<' + type + ' ' +
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
+      var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
+          variables.attributes['data-role'] == 'listview';
       $.each(variables.items, function(index, item) {
           var icon;
+          html += '<li';
           if (listview && (icon = $(item).attr('data-icon'))) {
             // If we're in a listview and the item specifies an icon,
-            // add the icon attribute to the item wrapper.
-            html += '<li data-icon="' + icon + '">' + item + '</li>';
+            // add the icon attribute to the list item element.
+            html += ' data-icon="' + icon + '"';
           }
-          else {
-            html += '<li>' + item + '</li>';
-          }
+          html += '>' + item + '</li>';
       });
     }
     html += '</' + type + '>';
