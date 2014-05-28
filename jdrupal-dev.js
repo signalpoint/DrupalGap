@@ -61,7 +61,7 @@ function drupal_init() {
  */
 function date(format) {
   try {
-    // @TODO - move this function to jDrupal and create a github gist for it.
+    // @TODO - create a github repo for this function.
     // Let's figure out the timestamp and date.
     var d = null;
     var timestamp = null;
@@ -101,9 +101,46 @@ function date(format) {
           }
           break;
 
+        // Day of the month without leading zeros: 1 to 31
+        case 'j': result += d.getDate(); break;
+
+        // A full textual representation of the day of the week: Sunday through
+        // Saturday
+        case 'l':
+          var day = d.getDay();
+          switch (day) {
+            case 0: result += 'Sunday'; break;
+            case 1: result += 'Monday'; break;
+            case 2: result += 'Tuesday'; break;
+            case 3: result += 'Wednesday'; break;
+            case 4: result += 'Thursday'; break;
+            case 5: result += 'Friday'; break;
+            case 6: result += 'Saturday'; break;
+          }
+          break;
+
         /* WEEK */
 
         /* MONTH */
+
+        // A full textual representation of a month, such as January or March:
+        // January through December
+        case 'F':
+          switch (d.getMonth()) {
+            case 0: result += 'January'; break;
+            case 1: result += 'February'; break;
+            case 2: result += 'March'; break;
+            case 3: result += 'April'; break;
+            case 4: result += 'May'; break;
+            case 5: result += 'June'; break;
+            case 6: result += 'July'; break;
+            case 7: result += 'August'; break;
+            case 8: result += 'September'; break;
+            case 9: result += 'October'; break;
+            case 10: result += 'November'; break;
+            case 11: result += 'December'; break;
+          }
+          break;
 
         // Numeric representation of a month, with leading zeros: 01 through 12
         case 'm':
