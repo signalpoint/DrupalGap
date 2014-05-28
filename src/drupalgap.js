@@ -179,7 +179,7 @@ function _drupalgap_deviceready() {
       var proceed = true;
       var invocation_results = module_invoke_all('deviceready');
       if (invocation_results && invocation_results.length > 0) {
-        for (var i = 0; i < invocation_results; i++) {
+        for (var i = 0; i < invocation_results.length; i++) {
           if (!invocation_results[i]) {
             proceed = false;
             break;
