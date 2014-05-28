@@ -4518,7 +4518,13 @@ function theme(hook, variables) {
     if (!function_exists(theme_function)) {
       theme_function = 'theme_' + hook;
       if (!function_exists(theme_function)) {
-        console.log('WARNING: ' + theme_function + '() does not exist');
+        var caller = null;
+        if (arguments.callee.caller) {
+          caller = arguments.callee.caller.name;
+        }
+        var msg = 'WARNING: ' + theme_function + '() does not exist.';
+        if (caller) { msg += ' Called by: ' + caller + '().' }
+        console.log(msg);
         return content;
       }
     }
