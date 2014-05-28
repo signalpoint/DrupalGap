@@ -604,8 +604,9 @@ function _drupalgap_form_render_elements(form) {
                 bundle = form.bundle.replace('comment_node_', '');
               }
             }
-            // This is not a field, if it has a weight in field_info_extra_fields
-            // use it, otherwise just append it to the content.
+            // This is not a field, if it has a weight in
+            // field_info_extra_fields use it, otherwise just append it to the
+            // content.
             if (
               form.entity_type && bundle &&
               typeof drupalgap.field_info_extra_fields[bundle][name] !==
