@@ -543,10 +543,10 @@ function drupalgap_check_connection() {
   try {
     // We'll assume that Ripple emulation always has a connection, for now.
     // http://stackoverflow.com/q/15950382/763010
-    if (typeof parent.window.ripple === 'function') {
-      drupalgap.online = true;
-      return 'Ethernet connection';
-    }
+    // if (typeof parent.window.ripple === 'function') {
+      // drupalgap.online = true;
+      // return 'Ethernet connection';
+    // }
 
     var networkState = navigator.connection.type;
     var states = {};
