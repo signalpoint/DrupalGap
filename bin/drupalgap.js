@@ -1459,6 +1459,18 @@ function variable_get(name, default_value) {
 }
 
 /**
+ * Given a variable name, this will remove the value from local storage.
+ * @param {String} name
+ * @return {*}
+ */
+function variable_del(name) {
+  try {
+    return window.localStorage.removeItem(name);
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
  * Returns the current time as a string with the format: "yyyy-mm-dd hh:mm:ss".
  * @return {String}
  */
