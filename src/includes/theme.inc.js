@@ -477,8 +477,17 @@ function theme_item_list(variables) {
     html += '<' + type + ' ' +
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
+      var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
+          variables.attributes['data-role'] == 'listview';
       $.each(variables.items, function(index, item) {
-          html += '<li>' + item + '</li>';
+          var icon;
+          html += '<li';
+          if (listview && (icon = $(item).attr('data-icon'))) {
+            // If we're in a listview and the item specifies an icon,
+            // add the icon attribute to the list item element.
+            html += ' data-icon="' + icon + '"';
+          }
+          html += '>' + item + '</li>';
       });
     }
     html += '</' + type + '>';
