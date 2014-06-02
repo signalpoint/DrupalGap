@@ -268,8 +268,8 @@ function drupalgap_get_path(type, name) {
       });
     }
     else if (type == 'theme') {
-      // @todo Add support for custom themes.
-      path = 'themes/' + name;
+      if (name == 'easystreet3') { path = 'themes/' + name; }
+      else { path = 'app/themes/' + name; }
     }
     else {
       console.log(
@@ -368,7 +368,17 @@ function drupalgap_goto(path) {
 
     // Make sure the user has access to this router path, if they don't send
     // them to the 401 page.
-    if (!drupalgap_menu_access(router_path)) {
+    // @TODO - for now we're going to skip access checks on local tasks, since
+    // they are covered by menu_block_view(), but if someone were to navigate
+    // directly to e.g. a node's edit page, they would be able to see the page.
+    // Of course Drupal would actually prevent them from updating the node on
+    // the live site, but nonetheless this needs to be fixed. It's a tough issue
+    // though and related to https://github.com/signalpoint/DrupalGap/issues/257
+    if (
+      drupalgap.menu_links[router_path].type != 'MENU_DEFAULT_LOCAL_TASK' &&
+      drupalgap.menu_links[router_path].type != 'MENU_LOCAL_TASK' &&
+      !drupalgap_menu_access(router_path)
+    ) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
     }
@@ -785,7 +795,7 @@ function drupalgap_render_page() {
 function drupalgap_render_region(region) {
   try {
     // Make sure there are blocks specified for this theme in settings.js.
-    if (!eval('drupalgap.settings.blocks[drupalgap.settings.theme]')) {
+    if (!drupalgap.settings.blocks[drupalgap.settings.theme]) {
       var msg = 'drupalgap_render_region - there are no blocks for the "' +
         drupalgap.settings.theme + '" theme in the settings.js file!';
       drupalgap_alert(msg);
@@ -796,9 +806,7 @@ function drupalgap_render_region(region) {
     // Let's render the region...
     var region_html = '';
     // If the region has blocks specified for it in the theme in settings.js...
-    if (eval(
-      'drupalgap.settings.blocks[drupalgap.settings.theme].' + region.name
-    )) {
+    if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
       if (!region.attributes['class']) { region.attributes['class'] = ''; }
@@ -858,7 +866,8 @@ function drupalgap_render_region(region) {
               region_html += module_invoke(
                 block.module,
                 'block_view',
-                block_delta
+                block_delta,
+                region
               );
             }
           }

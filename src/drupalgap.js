@@ -340,17 +340,15 @@ function drupalgap_load_theme() {
     else {
       // Pull the theme name from the settings.js file.
       var theme_name = drupalgap.settings.theme;
-      // Let's try to load to theme's js file first by looking in the core
-      // themes directory, then in the app/themes directory.
       var theme_path = 'themes/' + theme_name + '/' + theme_name + '.js';
-      if (!drupalgap_file_exists(theme_path)) {
+      if (theme_name != 'easystreet3') {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
-        if (!drupalgap_file_exists(theme_path)) {
-          var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
-            'The theme\'s JS file does not exist: ' + theme_path;
-          drupalgap_alert(error_msg);
-          return false;
-        }
+      }
+      if (!drupalgap_file_exists(theme_path)) {
+        var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
+          'The theme\'s JS file does not exist: ' + theme_path;
+        drupalgap_alert(error_msg);
+        return false;
       }
       // We found the theme's js file, add it to the page.
       drupalgap_add_js(theme_path);
@@ -1041,11 +1039,14 @@ function drupalgap_max_width() {
  * Checks to see if the current user has access to the given path. Returns true
  * if the user has access, false otherwise. You may optionally pass in a user
  * account object as the second argument to check access on a specific user.
+ * Also, you may optionally pass in an entity object as the third argument, if
+ * that entity needs to be passed along to an 'access_callback' handler.
  * @param {String} path
  * @return {Boolean}
  */
 function drupalgap_menu_access(path) {
   try {
+
     // User #1 is allowed to do anything, I mean anything.
     if (Drupal.user.uid == 1) { return true; }
     // Everybody else will not have access unless we prove otherwise.
@@ -1078,7 +1079,6 @@ function drupalgap_menu_access(path) {
         // An access callback function is specified for this path...
 
         // START HERE: https://github.com/signalpoint/DrupalGap/issues/191
-
         var function_name = drupalgap.menu_links[path].access_callback;
         if (drupalgap_function_exists(function_name)) {
           // Grab the access callback function. If there are any access args
@@ -1088,8 +1088,17 @@ function drupalgap_menu_access(path) {
           if (drupalgap.menu_links[path].access_arguments) {
             var access_arguments =
               drupalgap.menu_links[path].access_arguments.slice(0);
-            var args = arg();
-            drupalgap_prepare_argument_entities(access_arguments, args);
+            // If we have an entity loaded, replace the first integer we find
+            // in the page arguments with the loaded entity.
+            if (arguments[2]) {
+              var entity = arguments[2];
+              $.each(access_arguments, function(index, page_argument) {
+                  if (is_int(parseInt(page_argument))) {
+                    access_arguments[index] = entity;
+                    return false;
+                  }
+              });
+            }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
           }
           else { return fn(); }
@@ -1185,87 +1194,30 @@ function drupalgap_place_args_in_path(input_path) {
     console.log('drupalgap_place_args_in_path - ' + error);
   }
 }
+
 /**
- * Converts a hook_menu items page_arguments path like node/123 so arg zero
- * would be 'node' and arg 1 would be the loaded entity node. Also works for MVC
- * page paths, converts the integer into an MVC item.
- * @param {Array} page_arguments
+ * Given an args array, this returns true if the path in the array will have an
+ * entity (id) present in it.
  * @param {Array} args
+ * @return {Boolean}
  */
-function drupalgap_prepare_argument_entities(page_arguments, args) {
+function drupalgap_path_has_entity_arg(args) {
   try {
-    // If argument zero is an entity type (or base type, e.g. taxonomy), and we
-    // have at least one integer argument, replace the page call back's integer
-    // argument index with the loaded entity.
     if (args.length > 1 &&
-          (
-            args[0] == 'comment' ||
-            args[0] == 'node' ||
-            (args[0] == 'taxonomy' &&
-              (args[1] == 'vocabulary' || args[1] == 'term')
-            ) ||
-            args[0] == 'user' ||
-            args[0] == 'item'
-          )
-    ) {
-      var found_int_arg = false;
-      var int_arg_index = null;
-      for (var i = 0; i < args.length; i++) {
-        if (is_int(parseInt(args[i]))) {
-          int_arg_index = i; // Save the arg index so we can replace it later.
-          found_int_arg = true;
-          break;
-        }
-      }
-      if (!found_int_arg) { return; }
-      // Determine the naming convention for the entity load function.
-      var load_function_prefix = args[0]; // default
-      if (args[0] == 'taxonomy') {
-        if (args[1] == 'vocabulary' || args[1] == 'term') {
-          load_function_prefix = args[0] + '_' + args[1];
-        }
-      }
-      var load_function = load_function_prefix + '_load';
-      // If the load function exists, load the entity.
-      if (drupalgap_function_exists(load_function)) {
-        var entity_fn = window[load_function];
-        var entity = null;
-        // Load the entity. MVC items need to pass along the module name and
-        // model type to its load function. All other entity load functions just
-        // need the entity id.
-        if (args[0] == 'item') {
-          entity = entity_fn(args[1], args[2], parseInt(args[int_arg_index]));
-        }
-        else {
-          // Force a reload (reset) when we load the entity if we are editing
-          // the entity.
-          if (arg(2) == 'edit') {
-            entity = entity_fn(parseInt(args[int_arg_index]), { reset: true });
-          }
-          else {
-             entity = entity_fn(parseInt(args[int_arg_index]));
-          }
-        }
-        // Now that we have the entity loaded, replace the first integer we find
-        // in the page arguments with the loaded entity.
-        $.each(page_arguments, function(index, page_argument) {
-            if (is_int(parseInt(page_argument))) {
-              page_arguments[index] = entity;
-              return false;
-            }
-        });
-      }
-      else {
-        console.log(
-          'drupalgap_prepare_argument_entities - ' +
-          'load function not implemented! ' + load_function
-        );
-      }
-    }
+        (
+          args[0] == 'comment' ||
+          args[0] == 'file' ||
+          args[0] == 'node' ||
+          (args[0] == 'taxonomy' &&
+            (args[1] == 'vocabulary' || args[1] == 'term')
+          ) ||
+          args[0] == 'user' ||
+          args[0] == 'item'
+        )
+    ) { return true; }
+    return false;
   }
-  catch (error) {
-    console.log('drupalgap_prepare_argument_entities - ' + error);
-  }
+  catch (error) { console.log('drupalgap_path_has_entity_arg - ' + error); }
 }
 
 /**
@@ -1502,6 +1454,18 @@ function variable_get(name, default_value) {
     if (!value) { value = default_value; }
     if (value == ' ') { value = ''; } // Convert single spaces to empty strings.
     return value;
+  }
+  catch (error) { drupalgap_error(error); }
+}
+
+/**
+ * Given a variable name, this will remove the value from local storage.
+ * @param {String} name
+ * @return {*}
+ */
+function variable_del(name) {
+  try {
+    return window.localStorage.removeItem(name);
   }
   catch (error) { drupalgap_error(error); }
 }

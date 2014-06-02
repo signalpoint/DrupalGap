@@ -304,7 +304,8 @@ function hook_block_info() {}
 /**
  * A hook used to render custom blocks.
  */
-function hook_block_view() {}
+function hook_block_view(delta, region) {
+}
 
 /**
  * A hook used to handle a 404 in the app.

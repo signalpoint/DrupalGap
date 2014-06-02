@@ -584,32 +584,46 @@ function _drupalgap_form_render_elements(form) {
     // the elements, set them aside according to their widget weight so they
     // can be appended to the content string in the correct order later.
     $.each(form.elements, function(name, element) {
-      if (!element.name) { element.name = name; }
-      if (drupalgap_form_element_access(element)) {
-        if (element.is_field && element.field_info_instance.widget.weight) {
-          content_weighted[element.field_info_instance.widget.weight] =
-            _drupalgap_form_render_element(form, element);
-        }
-        else {
-          // This is not a field, if it has a weight in field_info_extra_fields
-          // use it, otherwise just append it to the content.
-          if (
-            form.entity_type && form.bundle &&
-            typeof drupalgap.field_info_extra_fields[form.bundle][name] !==
-              'undefined' &&
-            typeof
-              drupalgap.field_info_extra_fields[form.bundle][name].weight !==
-              'undefined'
-          ) {
-            var weight =
-              drupalgap.field_info_extra_fields[form.bundle][name].weight;
-            content_weighted[weight] =
-            _drupalgap_form_render_element(form, element);
+        if (!element.name) { element.name = name; }
+        if (drupalgap_form_element_access(element)) {
+          if (element.is_field && element.field_info_instance.widget.weight) {
+            content_weighted[element.field_info_instance.widget.weight] =
+              _drupalgap_form_render_element(form, element);
           }
-          else { content += _drupalgap_form_render_element(form, element); }
+          else {
+            // Extract the bundle. Note, on comments the bundle is prefixed with
+            // 'comment_node_' so we need to remove that to correctly map to the
+            // potential extra fields data.
+            var bundle = null;
+            if (form.bundle) {
+              bundle = form.bundle;
+              if (
+                form.entity_type == 'comment' &&
+                form.bundle.indexOf('comment_node_') != -1
+              ) {
+                bundle = form.bundle.replace('comment_node_', '');
+              }
+            }
+            // This is not a field, if it has a weight in
+            // field_info_extra_fields use it, otherwise just append it to the
+            // content.
+            if (
+              form.entity_type && bundle &&
+              typeof drupalgap.field_info_extra_fields[bundle][name] !==
+                'undefined' &&
+              typeof
+                drupalgap.field_info_extra_fields[bundle][name].weight !==
+                'undefined'
+            ) {
+              var weight =
+                drupalgap.field_info_extra_fields[bundle][name].weight;
+              content_weighted[weight] =
+              _drupalgap_form_render_element(form, element);
+            }
+            else { content += _drupalgap_form_render_element(form, element); }
+          }
         }
-      }
-     });
+    });
     // Prepend the weighted elements to the content.
     if (!empty(content_weighted)) {
       content = content_weighted.join('\n') + content;

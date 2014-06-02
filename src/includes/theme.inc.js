@@ -74,7 +74,13 @@ function theme(hook, variables) {
     if (!function_exists(theme_function)) {
       theme_function = 'theme_' + hook;
       if (!function_exists(theme_function)) {
-        console.log('WARNING: ' + theme_function + '() does not exist');
+        var caller = null;
+        if (arguments.callee.caller) {
+          caller = arguments.callee.caller.name;
+        }
+        var msg = 'WARNING: ' + theme_function + '() does not exist.';
+        if (caller) { msg += ' Called by: ' + caller + '().' }
+        console.log(msg);
         return content;
       }
     }
@@ -477,8 +483,17 @@ function theme_item_list(variables) {
     html += '<' + type + ' ' +
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
+      var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
+          variables.attributes['data-role'] == 'listview';
       $.each(variables.items, function(index, item) {
-          html += '<li>' + item + '</li>';
+          var icon;
+          html += '<li';
+          if (listview && (icon = $(item).attr('data-icon'))) {
+            // If we're in a listview and the item specifies an icon,
+            // add the icon attribute to the list item element.
+            html += ' data-icon="' + icon + '"';
+          }
+          html += '>' + item + '</li>';
       });
     }
     html += '</' + type + '>';
@@ -550,7 +565,10 @@ function theme_link(variables) {
     }
     else {
       // The link has no path, so just render the text and attributes.
-      return '<a href="#" ' + drupalgap_attributes(variables.attributes) + '>' +
+      if (typeof variables.attributes.href === 'undefined') {
+        variables.attributes.href = '#';
+      }
+      return '<a ' + drupalgap_attributes(variables.attributes) + '>' +
         text +
       '</a>';
     }
