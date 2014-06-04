@@ -8174,7 +8174,8 @@ function node_add_page() {
       Drupal.user.content_types_user_permissions,
       function(type, permissions) {
         if (permissions.create) {
-          items.push(l(type, 'node/add/' + type));
+          items.push(l(drupalgap.content_types_list[type].name,
+          'node/add/' + type));
         }
       }
     );
