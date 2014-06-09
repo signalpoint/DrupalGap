@@ -3282,6 +3282,7 @@ function _drupalgap_form_render_element(form, element) {
     var item_html = '';
     var item_label = '';
     $.each(items, function(delta, item) {
+
         // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
 
@@ -3303,13 +3304,6 @@ function _drupalgap_form_render_element(form, element) {
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
 
-        // Merge element attributes into the variables object.
-        variables.attributes = $.extend(
-          {},
-          variables.attributes,
-          item.options.attributes
-        );
-
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
         if (field_widget_form_function) {
@@ -3330,6 +3324,13 @@ function _drupalgap_form_render_element(form, element) {
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
         }
+
+        // Merge element attributes into the variables object.
+        variables.attributes = $.extend(
+          true,
+          variables.attributes,
+          item.options.attributes
+        );
 
         // Render the element item.
         item_html = _drupalgap_form_render_element_item(
@@ -3792,6 +3793,20 @@ function theme_form_element_label(variables) {
     return html;
   }
   catch (error) { console.log('theme_form_element_label - ' + error); }
+}
+
+/**
+ * Themes a number input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_number(variables) {
+  try {
+    variables.attributes.type = 'number';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_number - ' + error); }
 }
 
 /**
@@ -6964,15 +6979,58 @@ function number_field_formatter_view(entity_type, entity, field, instance,
       items = {0: {value: items}};
     }
     if (!empty(items)) {
+      var prefix = '';
+      if (!empty(field.settings.prefix)) { prefix = field.settings.prefix; }
+      var suffix = '';
+      if (!empty(field.settings.suffix)) { suffix = field.settings.suffix; }
       $.each(items, function(delta, item) {
           element[delta] = {
-            markup: item.value
+            markup: prefix + item.value + suffix
           };
       });
     }
     return element;
   }
   catch (error) { console.log('number_field_formatter_view - ' + error); }
+}
+
+/**
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
+ */
+function number_field_widget_form(form, form_state, field, instance, langcode,
+  items, delta, element) {
+  try {
+    switch (element.type) {
+      case 'number_integer':
+        // Change the form element into a number, and then set its min/max
+        // attributes along with the step.
+        items[delta].type = 'number';
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['min'] = instance.settings.min;
+        }
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['max'] = instance.settings.max;
+        }
+        items[delta].options.attributes['step'] = 1;
+        break;
+      default:
+        console.log(
+          'number_field_widget_form - element type not supported (' +
+            element.type +
+          ')'
+        );
+        break;
+    }
+  }
+  catch (error) { console.log('number_field_widget_form - ' + error); }
 }
 
 /**
