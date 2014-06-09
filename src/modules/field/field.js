@@ -230,15 +230,58 @@ function number_field_formatter_view(entity_type, entity, field, instance,
       items = {0: {value: items}};
     }
     if (!empty(items)) {
+      var prefix = '';
+      if (!empty(field.settings.prefix)) { prefix = field.settings.prefix; }
+      var suffix = '';
+      if (!empty(field.settings.suffix)) { suffix = field.settings.suffix; }
       $.each(items, function(delta, item) {
           element[delta] = {
-            markup: item.value
+            markup: prefix + item.value + suffix
           };
       });
     }
     return element;
   }
   catch (error) { console.log('number_field_formatter_view - ' + error); }
+}
+
+/**
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
+ */
+function number_field_widget_form(form, form_state, field, instance, langcode,
+  items, delta, element) {
+  try {
+    switch (element.type) {
+      case 'number_integer':
+        // Change the form element into a number, and then set its min/max
+        // attributes along with the step.
+        items[delta].type = 'number';
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['min'] = instance.settings.min;
+        }
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['max'] = instance.settings.max;
+        }
+        items[delta].options.attributes['step'] = 1;
+        break;
+      default:
+        console.log(
+          'number_field_widget_form - element type not supported (' +
+            element.type +
+          ')'
+        );
+        break;
+    }
+  }
+  catch (error) { console.log('number_field_widget_form - ' + error); }
 }
 
 /**
