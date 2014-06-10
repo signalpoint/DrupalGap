@@ -6180,7 +6180,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
 
           // Make sure there is at least one value before creating the form
           // element on the entity.
-          if (empty(value[language][0])) { return; }
+          if (typeof value[language][0] === 'undefined') { return; }
 
           // Create an empty object to house the field on the entity.
           entity[name] = {};
@@ -6205,7 +6205,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
-            if (!empty(value[language][delta])) {
+            if (typeof value[language][delta] !== 'undefined') {
 
               // Extract the value.
               var field_value = value[language][delta];
@@ -6266,7 +6266,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             }
           }
         }
-        else if (!empty(value)) { entity[name] = value; }
+        else if (typeof value !== 'undefined') { entity[name] = value; }
     });
     return entity;
   }
