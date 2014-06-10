@@ -10743,7 +10743,8 @@ function theme_views_view(variables) {
       var title_attributes = variables.title_attributes ?
         drupalgap_attributes(variables.title_attributes) : '';
       html +=
-        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>';
+        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>' +
+        theme('views_spacer', null);
     }
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
@@ -10759,13 +10760,6 @@ function theme_views_view(variables) {
           $(selector).trigger('create').show('fast');
       }, 100);
       return empty_callback(results.view);
-    }
-    // If we have any pages, render the pager.
-    if (results.view.pages) {
-      html += theme('pager', variables);
-      // Place an empty header on the page so the results won't overlap the
-      // pager.
-      html += '<h2 class="dg_empty_list_header">&nbsp;</h2>';
     }
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
@@ -10818,7 +10812,27 @@ function theme_views_view(variables) {
         rows += open_row + row_content + close_row;
     });
     rows += close;
-    html += rows;
+    // If we have any pages, render the pager above or below the results
+    // according to the pager_pos setting.
+    var pager = '';
+    if (results.view.pages) { pager = theme('pager', variables); }
+    var pager_pos = 'top';
+    if (typeof variables.pager_pos !== 'undefined') {
+      pager_pos = variables.pager_pos;
+    }
+    // Append the rendered rows and the pager to the html string according to
+    // the pager position.
+    if (pager_pos == 'top') {
+      html += pager + theme('views_spacer', null) + rows;
+    }
+    else if (pager_pos == 'bottom') {
+      html += rows + theme('views_spacer', null) + pager;
+    }
+    else {
+      console.log('WARNING: theme_views_view - unsupported pager_pos (' +
+        pager_pos +
+      ')');
+    }
     // Since the views content is injected dynamically after the page is loaded,
     // we need to have jQM refresh the page to add its styling.
     var selector = '#' + drupalgap_get_page_id() + ' #' + id;
@@ -10826,12 +10840,23 @@ function theme_views_view(variables) {
     setTimeout(function() {
         $(selector).trigger('create').show('fast');
     }, 100);
-    // @TODO - Are we rendering the pager below the results?
     // Close the container.
     html += '</div>';
     return html;
   }
   catch (error) { console.log('theme_views_view - ' + error); }
+}
+
+/**
+ * Themes a spacer that can be placed between displayed components of the view.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_views_spacer(variables) {
+  try {
+    return '<h2 class="dg_empty_list_header">&nbsp;</h2>';
+  }
+  catch (error) { console.log('theme_views_spacer - ' + error); }
 }
 
 /**
