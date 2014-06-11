@@ -3282,6 +3282,7 @@ function _drupalgap_form_render_element(form, element) {
     var item_html = '';
     var item_label = '';
     $.each(items, function(delta, item) {
+
         // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
 
@@ -3303,13 +3304,6 @@ function _drupalgap_form_render_element(form, element) {
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
 
-        // Merge element attributes into the variables object.
-        variables.attributes = $.extend(
-          {},
-          variables.attributes,
-          item.options.attributes
-        );
-
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
         if (field_widget_form_function) {
@@ -3330,6 +3324,13 @@ function _drupalgap_form_render_element(form, element) {
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
         }
+
+        // Merge element attributes into the variables object.
+        variables.attributes = $.extend(
+          true,
+          variables.attributes,
+          item.options.attributes
+        );
 
         // Render the element item.
         item_html = _drupalgap_form_render_element_item(
@@ -3584,8 +3585,6 @@ function _drupalgap_form_submit(form_id) {
     // Build the form validation wrapper function.
     var form_validation = function() {
       try {
-        // Call drupalgap form's api validate.
-        _drupalgap_form_validate(form, form_state);
 
         // Call the form's validate function(s), if any.
         $.each(form.validate, function(index, function_name) {
@@ -3593,6 +3592,9 @@ function _drupalgap_form_submit(form_id) {
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
         });
+
+        // Call drupalgap form's api validate.
+        _drupalgap_form_validate(form, form_state);
 
         // If there were validation errors, show the form errors and stop the
         // form submission. Otherwise submit the form.
@@ -3714,9 +3716,7 @@ function _drupalgap_form_validate(form, form_state) {
           }
           else { value = form_state.values[name]; }
           // Check for empty values.
-          if (empty(value)) {
-            valid = false;
-          }
+          if (empty(value)) { valid = false; }
           // Check for a -1 value on a select list.
           else if (element.type == 'select' && value == -1) {
             // @todo - this approach to select list validation will not allow
@@ -3793,6 +3793,20 @@ function theme_form_element_label(variables) {
     return html;
   }
   catch (error) { console.log('theme_form_element_label - ' + error); }
+}
+
+/**
+ * Themes a number input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_number(variables) {
+  try {
+    variables.attributes.type = 'number';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_number - ' + error); }
 }
 
 /**
@@ -6166,7 +6180,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
 
           // Make sure there is at least one value before creating the form
           // element on the entity.
-          if (empty(value[language][0])) { return; }
+          if (typeof value[language][0] === 'undefined') { return; }
 
           // Create an empty object to house the field on the entity.
           entity[name] = {};
@@ -6191,7 +6205,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
-            if (!empty(value[language][delta])) {
+            if (typeof value[language][delta] !== 'undefined') {
 
               // Extract the value.
               var field_value = value[language][delta];
@@ -6252,7 +6266,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             }
           }
         }
-        else if (!empty(value)) { entity[name] = value; }
+        else if (typeof value !== 'undefined') { entity[name] = value; }
     });
     return entity;
   }
@@ -6965,15 +6979,58 @@ function number_field_formatter_view(entity_type, entity, field, instance,
       items = {0: {value: items}};
     }
     if (!empty(items)) {
+      var prefix = '';
+      if (!empty(field.settings.prefix)) { prefix = field.settings.prefix; }
+      var suffix = '';
+      if (!empty(field.settings.suffix)) { suffix = field.settings.suffix; }
       $.each(items, function(delta, item) {
           element[delta] = {
-            markup: item.value
+            markup: prefix + item.value + suffix
           };
       });
     }
     return element;
   }
   catch (error) { console.log('number_field_formatter_view - ' + error); }
+}
+
+/**
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
+ */
+function number_field_widget_form(form, form_state, field, instance, langcode,
+  items, delta, element) {
+  try {
+    switch (element.type) {
+      case 'number_integer':
+        // Change the form element into a number, and then set its min/max
+        // attributes along with the step.
+        items[delta].type = 'number';
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['min'] = instance.settings.min;
+        }
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['max'] = instance.settings.max;
+        }
+        items[delta].options.attributes['step'] = 1;
+        break;
+      default:
+        console.log(
+          'number_field_widget_form - element type not supported (' +
+            element.type +
+          ')'
+        );
+        break;
+    }
+  }
+  catch (error) { console.log('number_field_widget_form - ' + error); }
 }
 
 /**
@@ -8175,7 +8232,8 @@ function node_add_page() {
       Drupal.user.content_types_user_permissions,
       function(type, permissions) {
         if (permissions.create) {
-          items.push(l(type, 'node/add/' + type));
+          items.push(l(drupalgap.content_types_list[type].name,
+          'node/add/' + type));
         }
       }
     );
@@ -10685,7 +10743,8 @@ function theme_views_view(variables) {
       var title_attributes = variables.title_attributes ?
         drupalgap_attributes(variables.title_attributes) : '';
       html +=
-        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>';
+        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>' +
+        theme('views_spacer', null);
     }
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
@@ -10701,13 +10760,6 @@ function theme_views_view(variables) {
           $(selector).trigger('create').show('fast');
       }, 100);
       return empty_callback(results.view);
-    }
-    // If we have any pages, render the pager.
-    if (results.view.pages) {
-      html += theme('pager', variables);
-      // Place an empty header on the page so the results won't overlap the
-      // pager.
-      html += '<h2 class="dg_empty_list_header">&nbsp;</h2>';
     }
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
@@ -10760,7 +10812,27 @@ function theme_views_view(variables) {
         rows += open_row + row_content + close_row;
     });
     rows += close;
-    html += rows;
+    // If we have any pages, render the pager above or below the results
+    // according to the pager_pos setting.
+    var pager = '';
+    if (results.view.pages) { pager = theme('pager', variables); }
+    var pager_pos = 'top';
+    if (typeof variables.pager_pos !== 'undefined') {
+      pager_pos = variables.pager_pos;
+    }
+    // Append the rendered rows and the pager to the html string according to
+    // the pager position.
+    if (pager_pos == 'top') {
+      html += pager + theme('views_spacer', null) + rows;
+    }
+    else if (pager_pos == 'bottom') {
+      html += rows + theme('views_spacer', null) + pager;
+    }
+    else {
+      console.log('WARNING: theme_views_view - unsupported pager_pos (' +
+        pager_pos +
+      ')');
+    }
     // Since the views content is injected dynamically after the page is loaded,
     // we need to have jQM refresh the page to add its styling.
     var selector = '#' + drupalgap_get_page_id() + ' #' + id;
@@ -10768,12 +10840,23 @@ function theme_views_view(variables) {
     setTimeout(function() {
         $(selector).trigger('create').show('fast');
     }, 100);
-    // @TODO - Are we rendering the pager below the results?
     // Close the container.
     html += '</div>';
     return html;
   }
   catch (error) { console.log('theme_views_view - ' + error); }
+}
+
+/**
+ * Themes a spacer that can be placed between displayed components of the view.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_views_spacer(variables) {
+  try {
+    return '<h2 class="dg_empty_list_header">&nbsp;</h2>';
+  }
+  catch (error) { console.log('theme_views_spacer - ' + error); }
 }
 
 /**

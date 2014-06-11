@@ -721,6 +721,7 @@ function _drupalgap_form_render_element(form, element) {
     var item_html = '';
     var item_label = '';
     $.each(items, function(delta, item) {
+
         // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
 
@@ -742,13 +743,6 @@ function _drupalgap_form_render_element(form, element) {
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
 
-        // Merge element attributes into the variables object.
-        variables.attributes = $.extend(
-          {},
-          variables.attributes,
-          item.options.attributes
-        );
-
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
         if (field_widget_form_function) {
@@ -769,6 +763,13 @@ function _drupalgap_form_render_element(form, element) {
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
         }
+
+        // Merge element attributes into the variables object.
+        variables.attributes = $.extend(
+          true,
+          variables.attributes,
+          item.options.attributes
+        );
 
         // Render the element item.
         item_html = _drupalgap_form_render_element_item(
@@ -1023,8 +1024,6 @@ function _drupalgap_form_submit(form_id) {
     // Build the form validation wrapper function.
     var form_validation = function() {
       try {
-        // Call drupalgap form's api validate.
-        _drupalgap_form_validate(form, form_state);
 
         // Call the form's validate function(s), if any.
         $.each(form.validate, function(index, function_name) {
@@ -1032,6 +1031,9 @@ function _drupalgap_form_submit(form_id) {
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
         });
+
+        // Call drupalgap form's api validate.
+        _drupalgap_form_validate(form, form_state);
 
         // If there were validation errors, show the form errors and stop the
         // form submission. Otherwise submit the form.
@@ -1153,9 +1155,7 @@ function _drupalgap_form_validate(form, form_state) {
           }
           else { value = form_state.values[name]; }
           // Check for empty values.
-          if (empty(value)) {
-            valid = false;
-          }
+          if (empty(value)) { valid = false; }
           // Check for a -1 value on a select list.
           else if (element.type == 'select' && value == -1) {
             // @todo - this approach to select list validation will not allow
@@ -1232,6 +1232,20 @@ function theme_form_element_label(variables) {
     return html;
   }
   catch (error) { console.log('theme_form_element_label - ' + error); }
+}
+
+/**
+ * Themes a number input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_number(variables) {
+  try {
+    variables.attributes.type = 'number';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_number - ' + error); }
 }
 
 /**
