@@ -44,6 +44,9 @@ drupalgap.settings.title = 'DrupalGap';
 // App Front Page
 drupalgap.settings.front = 'dashboard';
 
+// Offline warning message
+drupalgap.settings.offline_message = 'No connection found!';
+
 // Theme
 drupalgap.settings.theme = 'easystreet3';
 
