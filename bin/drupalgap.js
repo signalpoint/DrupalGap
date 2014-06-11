@@ -86,6 +86,7 @@ function drupalgap_init() {
       },
       pages: [], /* Collection of page ids that are loaded into the DOM. */
       path: '', /* The current menu path. */
+      remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
       router_path: '', /* The current menu router path. */
       services: {},
       sessid: null,
@@ -740,6 +741,18 @@ function drupalgap_get_title() {
 }
 
 /**
+ * Returns the IP Address of the current user as reported by PHP via the last
+ * System Connect call's $_SERVER['REMOTE_ADDR'] value.
+ * @return {String|Null}
+ */
+function drupalgap_get_ip() {
+  try {
+    return drupalgap.remote_addr;
+  }
+  catch (error) { console.log('drupalgap_get_ip - ' + error); }
+}
+
+/**
  * Given a router path, this will return an array containing the indexes of
  * where the wildcards (%) are present in the router path. Returns false if
  * there are no wildcards present.
@@ -1308,6 +1321,7 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
   try {
     // Extract drupalgap system connect service resource results.
     if (options.service == 'system' && options.resource == 'connect') {
+      drupalgap.remote_addr = result.remote_addr;
       drupalgap.entity_info = result.entity_info;
       drupalgap.field_info_instances = result.field_info_instances;
       drupalgap.field_info_fields = result.field_info_fields;
