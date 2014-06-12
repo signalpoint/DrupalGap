@@ -165,10 +165,15 @@ function _drupalgap_deviceready() {
     drupalgap_check_connection();
     if (!drupalgap.online) {
       module_invoke_all('device_offline');
-      drupalgap_alert('No connection found!', {
-          title: 'Offline',
-          alertCallback: function() { drupalgap_goto('offline'); }
-      });
+      if (drupalgap.settings.offline_message) {
+        drupalgap_alert(drupalgap.settings.offline_message, {
+            title: 'Offline',
+            alertCallback: function() { drupalgap_goto('offline'); }
+        });
+      }
+      else {
+        drupalgap_goto('offline');
+      }
       return;
     }
     else {
