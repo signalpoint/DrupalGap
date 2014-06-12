@@ -373,6 +373,15 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           for (var delta = 0; delta < allowed_values; delta++) {
             if (typeof value[language][delta] !== 'undefined') {
 
+              // @TODO - the way values are determined here is turning into
+              // spaghetti code. Every form element needs its own
+              // value_callback, just like Drupal's FAPI. Right now DG has
+              // something similar going on with the use of
+              // hook_assemble_form_state_into_field(). So replace any spaghetti
+              // below with a value_callback. Provide a deprecated hook warning
+              // for any fields not haven't caught up yet, and fallback to the
+              // hook for a while.
+
               // Extract the value.
               var field_value = value[language][delta];
 
@@ -438,6 +447,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               if (field_value === null && typeof entity[name] !== 'undefined') {
                 delete entity[name];
               }
+
+              // If we had an optional select list, and no options were
+              // selected, delete the empty field from the assembled entity.
+              // @TODO - will this cause multi value issues?
+              if (
+                is_field && !use_delta &&
+                form.elements[name].field_info_instance.widget.type ==
+                  'options_select' && !form.elements[name].required &&
+                field_value === '' && typeof entity[name] !== 'undefined'
+              ) { delete entity[name]; }
 
             }
           }
