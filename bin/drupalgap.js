@@ -6226,6 +6226,15 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           for (var delta = 0; delta < allowed_values; delta++) {
             if (typeof value[language][delta] !== 'undefined') {
 
+              // @TODO - the way values are determined here is turning into
+              // spaghetti code. Every form element needs its own
+              // value_callback, just like Drupal's FAPI. Right now DG has
+              // something similar going on with the use of
+              // hook_assemble_form_state_into_field(). So replace any spaghetti
+              // below with a value_callback. Provide a deprecated hook warning
+              // for any fields not haven't caught up yet, and fallback to the
+              // hook for a while.
+
               // Extract the value.
               var field_value = value[language][delta];
 
@@ -6291,6 +6300,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               if (field_value === null && typeof entity[name] !== 'undefined') {
                 delete entity[name];
               }
+
+              // If we had an optional select list, and no options were
+              // selected, delete the empty field from the assembled entity.
+              // @TODO - will this cause multi value issues?
+              if (
+                is_field && !use_delta &&
+                form.elements[name].field_info_instance.widget.type ==
+                  'options_select' && !form.elements[name].required &&
+                field_value === '' && typeof entity[name] !== 'undefined'
+              ) { delete entity[name]; }
 
             }
           }
@@ -7133,15 +7152,15 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           items[delta].type = 'select';
         }
         // If the select list is required, add a 'Select' option and set it as
-        // the default.
+        // the default.  If it is optional, place a "none" option for the user
+        // to choose from.
         if (items[delta].required) {
           items[delta].options[-1] = 'Select';
           items[delta].value = -1;
-        } else if (instance.widget.type == 'options_select') {
-          items[delta].options[''] = 'None';
-          if (empty(items[delta].value)) {
-            items[delta].value = '';
-          }
+        }
+        else {
+          items[delta].options[''] = '- None -';
+          items[delta].value = '';
         }
         // If there are any allowed values, place them on the options list. Then
         // check for a default value, and set it if necessary.
