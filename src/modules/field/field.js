@@ -355,15 +355,15 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           items[delta].type = 'select';
         }
         // If the select list is required, add a 'Select' option and set it as
-        // the default.
+        // the default.  If it is optional, place a "none" option for the user
+        // to choose from.
         if (items[delta].required) {
           items[delta].options[-1] = 'Select';
           items[delta].value = -1;
-        } else if (instance.widget.type == 'options_select') {
-          items[delta].options[''] = 'None';
-          if (empty(items[delta].value)) {
-            items[delta].value = '';
-          }
+        }
+        else {
+          items[delta].options[''] = '- None -';
+          items[delta].value = '';
         }
         // If there are any allowed values, place them on the options list. Then
         // check for a default value, and set it if necessary.
