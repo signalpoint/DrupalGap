@@ -44,14 +44,14 @@ drupalgap.settings.title = 'DrupalGap';
 // App Front Page
 drupalgap.settings.front = 'dashboard';
 
-// Offline warning message
-drupalgap.settings.offline_message = 'No connection found!';
-
 // Theme
 drupalgap.settings.theme = 'easystreet3';
 
 // Logo
 drupalgap.settings.logo = 'themes/easystreet3/images/drupalgap.jpg';
+
+// Offline Warning Message
+drupalgap.settings.offline_message = 'No connection found!';
 
 // Loader Animations - http://demos.jquerymobile.com/1.4.0/loader/
 drupalgap.settings.loader = {
