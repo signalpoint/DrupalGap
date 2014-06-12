@@ -429,6 +429,13 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   entity[name][language].push(field_value);
                 }
               }
+
+              // If the field value was null, we won't send along the field, so
+              // just remove it.
+              if (field_value === null && typeof entity[name] !== 'undefined') {
+                delete entity[name];
+              }
+
             }
           }
         }
