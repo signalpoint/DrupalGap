@@ -549,10 +549,10 @@ function drupalgap_check_connection() {
   try {
     // We'll assume that Ripple emulation always has a connection, for now.
     // http://stackoverflow.com/q/15950382/763010
-    // if (typeof parent.window.ripple === 'function') {
-      // drupalgap.online = true;
-      // return 'Ethernet connection';
-    // }
+    if (typeof parent.window.ripple === 'function') {
+      drupalgap.online = true;
+      return 'Ethernet connection';
+    }
 
     var networkState = navigator.connection.type;
     var states = {};
@@ -6285,6 +6285,9 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
 
               // If the field value was null, we won't send along the field, so
               // just remove it.
+              // @TODO - will this cause issues with multi value fields? i.e. if
+              // delta zero is null, but delta one isn't, this will probably
+              // destroy the field, derp.
               if (field_value === null && typeof entity[name] !== 'undefined') {
                 delete entity[name];
               }
