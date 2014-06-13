@@ -1,21 +1,6 @@
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
-// Setup the jQueryMobile loader to show/hide itself while navigating between
-// pages in the app.
-/*$(document).on('pagebeforecreate', '[data-role="page"]', function() {
-    setTimeout(function() {
-        drupalgap.loading = true;
-        $.mobile.loading('show', drupalgap_loader_options());
-    }, 1);
-});
-$(document).on('pageshow', '[data-role="page"]', function() {
-    setTimeout(function() {
-        drupalgap.loading = false;
-        $.mobile.loading('hide');
-    }, 100);
-});*/
-
 /**
  * Initializes the drupalgap json object.
  * @return {Object}
@@ -25,7 +10,6 @@ function drupalgap_init() {
     var dg = {
       modules: {
         core: [
-           { name: 'api' },
            { name: 'block' },
            { name: 'comment' },
            { name: 'contact' },
@@ -2897,11 +2881,19 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
       selector = 'input:radio[name="' + id + '"]:checked';
     }
     else { selector = '#' + id; }
-    if (element.type == 'checkbox') {
-      if ($(selector).is(':checked')) { value = 1; }
-      else { value = 0; }
+    switch (element.type) {
+      case 'checkbox':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = 1; }
+        else { value = 0; }
+        break;
+      case 'list_boolean':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
+        else { value = $(_checkbox).attr('off'); }
+        break;
     }
-    if (value == null) { value = $(selector).val(); }
+    if (value === null) { value = $(selector).val(); }
     if (typeof value === 'undefined') { value = null; }
     return value;
   }
@@ -3319,9 +3311,13 @@ function _drupalgap_form_render_element(form, element) {
         }
 
         // If there wasn't a default value provided, set one. Then set the
-        // default value into the variables' attributes.
+        // default value into the variables' attributes. Although, if we have an
+        // item value, just use that.
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
+        if (typeof item.value !== 'undefined') {
+          variables.attributes.value = item.value;
+        }
 
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
@@ -3429,6 +3425,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
+    // @TODO - this block of code should be moved into their respective
+    // implementations of hook_field_widget_form().
     switch (item.type) {
       case 'text':
         item.type = 'textfield';
@@ -3439,6 +3437,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         item.type = 'select';
         break;
     }
+
+    // Set the theme function.
     var theme_function = item.type;
 
     // If the element is disabled, add the 'disabled' attribute.
@@ -6234,6 +6234,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // below with a value_callback. Provide a deprecated hook warning
               // for any fields not haven't caught up yet, and fallback to the
               // hook for a while.
+              // @UPDATE - Actually, the DG FAPI
+              // hook_assemble_form_state_into_field() is a good idea, and
+              // should be used by all field form elements, then in
+              // drupalgap_field_info_instances_add_to_form(), that function
+              // should use the value_callback idea to properly map entity data
+              // to the form element's value.
 
               // Extract the value.
               var field_value = value[language][delta];
@@ -6270,15 +6276,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 );
               }
 
+              // If someone updated the key, use it.
+              if (key != field_key.value) { key = field_key.value; }
+
               // If we don't need a delta value, place the field value using the
-              // key. If we're using a delta value, push the key and value onto
-              // the field to indicate the delta.
+              // key, if posible. If we're using a delta value, push the key
+              // and value onto the field to indicate the delta.
               if (!field_key.use_delta) {
                 if (!field_key.use_wrapper) {
                   entity[name][language] = field_value;
                 }
                 else {
-                  entity[name][language][key] = field_value;
+                  if ($.isArray(entity[name][language])) {
+                    console.log(
+                      'WARNING: drupalgap_entity_build_from_form_state - ' +
+                      'cannot use key (' + key + ') on field (' + name + ') ' +
+                      'language code array, key will be ignored.'
+                    );
+                    entity[name][language].push(field_value);
+                  }
+                  else { entity[name][language][key] = field_value; }
                 }
               }
               else {
@@ -6293,13 +6310,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               }
 
               // If the field value was null, we won't send along the field, so
-              // just remove it.
+              // just remove it. Except for list_boolean fields, they need a
+              // null value to set the field value to false.
               // @TODO - will this cause issues with multi value fields? i.e. if
               // delta zero is null, but delta one isn't, this will probably
               // destroy the field, derp.
-              if (field_value === null && typeof entity[name] !== 'undefined') {
-                delete entity[name];
-              }
+              if (
+                field_value === null &&
+                typeof entity[name] !== 'undefined' &&
+                form.elements[name].type != 'list_boolean'
+              ) { delete entity[name]; }
 
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
@@ -6925,6 +6945,10 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
           }
           if (entity && entity[name] && entity[name].length != 0) {
             for (var delta = 0; delta < cardinality; delta++) {
+              // @TODO - is this where we need to use the idea of the
+              // value_callback property present in Drupal's FAPI, that way
+              // each element knows how to map the entity data to its element
+              // value property.
               if (
                 entity[name][language][delta] &&
                 typeof entity[name][language][delta].value !== 'undefined'
@@ -6997,6 +7021,12 @@ function list_field_formatter_view(entity_type, entity, field, instance,
           // list_default or list_key
           if (display.type == 'list_default') {
             markup = instance.settings.allowed_values[item.value];
+            // Single on/off checkboxes need an empty space as their markup so
+            // just the label gets rendered.
+            if (
+              instance.type == 'list_boolean' &&
+              field.widget.type == 'options_onoff'
+            ) { markup = '&nbsp;'; }
           }
           else { markup = item.value; }
           element[delta] = { markup: markup };
@@ -7005,6 +7035,68 @@ function list_field_formatter_view(entity_type, entity, field, instance,
     return element;
   }
   catch (error) { console.log('list_field_formatter_view - ' + error); }
+}
+
+/**
+ * Implements hook_assemble_form_state_into_field().
+ * @param {Object} entity_type
+ * @param {String} bundle
+ * @param {String} form_state_value
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Number} delta
+ * @param {Object} field_key
+ *
+ * @return {*}
+ */
+function list_assemble_form_state_into_field(entity_type, bundle,
+  form_state_value, field, instance, langcode, delta, field_key) {
+  try {
+    var result = form_state_value;
+    switch (field.type) {
+      case 'list_boolean':
+        // For single on/off checkboxes, if the checkbox is unchecked, then we
+        // send a null value on the language code. We know the checkbox is
+        // unchecked if the form_state_value is equal to the first allowed value
+        // on the field.
+        if (instance.widget.type == 'options_onoff') {
+          var index = 0;
+          var on = true;
+          $.each(field.settings.allowed_values, function(value, label) {
+              if (form_state_value == value && index == 0) {
+                on = false;
+                return false;
+              }
+              index++;
+          });
+          if (!on) {
+            field_key.use_delta = false;
+            field_key.use_wrapper = false;
+            result = null;
+          }
+        }
+        else {
+          console.log(
+            'WARNING: list_assemble_form_state_into_field - unknown widget (' +
+              field.type +
+            ') on list_boolean'
+          );
+        }
+        break;
+      default:
+        console.log(
+          'WARNING: list_assemble_form_state_into_field - unknown type (' +
+            field.type +
+          ')'
+        );
+        break;
+    }
+    return result;
+  }
+  catch (error) {
+    console.log('list_assemble_form_state_into_field - ' + error);
+  }
 }
 
 /**
@@ -7082,47 +7174,6 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
 }
 
 /**
- * Implements hook_field_data_string().
- * @param {String} entity_type
- * @param {String} bundle
- * @param {Object} entity
- * @param {Object} info
- * @param {Object} instance
- * @param {String} langcode
- * @param {Number} delta
- * @param {Object} options
- * @return {String}
- */
-function options_field_data_string(entity_type, bundle, entity, info, instance,
-  langcode, delta, options) {
-  try {
-    console.log('WARNING: options_field_data_string() is deprecated! ' +
-      'Data strings are no longer used, instead call e.g. node_save().');
-    return '';
-
-    var field_name = instance.field_name;
-    var key = drupalgap_field_key(field_name);
-    var value = entity[instance.field_name][langcode][delta][key];
-    var data = '';
-    if (value == '') { return data; }
-    // Note, select does not work with [und][0][value] but works with
-    // [und][value]. Otherwise, use the default data string.
-    if (instance.widget.type == 'options_select') {
-      data =
-        entity_type + '[' + field_name + '][' + langcode + '][' + key + ']=' +
-        encodeURIComponent(value);
-    }
-    else {
-      data =
-        entity_type + '[' + field_name + '][' + langcode + '][' + delta + ']' +
-        '[' + key + ']=' + encodeURIComponent(value);
-    }
-    return data;
-  }
-  catch (error) { console.log('options_field_data_string - ' + error); }
-}
-
-/**
  * Implements hook_field_widget_form().
  * @param {Object} form
  * @param {Object} form_state
@@ -7143,6 +7194,43 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
         if (items[delta].default_value == 1) { items[delta].checked = true; }
         break;
       case 'radios':
+        break;
+      case 'list_boolean':
+        switch (instance.widget.type) {
+          case 'options_onoff':
+            // Switch an on/off boolean to a checkbox and place its on/off
+            // values as attributes. Depending on the allowed values, we may
+            // have to iterate over an array, or an object to get the on/off
+            // values.
+            items[delta].type = 'checkbox';
+            var off = null;
+            var on = null;
+            if ($.isArray(field.settings.allowed_values)) {
+              for (var key in field.settings.allowed_values) {
+                if (off === null) { off = key; }
+                else { on = key; }
+              }
+            }
+            else {
+              $.each(field.settings.allowed_values, function(value, label) {
+                  if (off === null) { off = value; }
+                  else { on = value; }
+              });
+            }
+            items[delta].options.attributes.off = off;
+            items[delta].options.attributes.on = on;
+            // If the value equals the on value, then check the box.
+            if (items[delta].value == on) {
+              items[delta].options.attributes.checked = 'checked';
+            }
+            break;
+          default:
+            console.log(
+              'WARNING: options_field_widget_form list_boolean with ' +
+              'unsupported type (' + instance.widget.type + ')'
+            );
+            break;
+        }
         break;
       case 'select':
       case 'list_text':
@@ -8851,35 +8939,6 @@ function drupalgap_service_resource_extract_results(options) {
     console.log('drupalgap_service_resource_extract_results - ' + error);
   }
 }
-
-/**
- * RSS Services
- */
-drupalgap.services.rss = {
-  'retrieve': {
-    'options': {
-      'type': 'get',
-      'dataType': 'xml'
-    },
-    'call': function(options) {
-      try {
-        if (!options.url) {
-          drupalgap_alert('drupalgap.services.rss.retrieve.call - missing url');
-          return false;
-        }
-        var api_options =
-          drupalgap_chain_callbacks(
-            drupalgap.services.rss.retrieve.options,
-            options
-          );
-        drupalgap.api.call(api_options);
-      }
-      catch (error) {
-        console.log('RSS Retrieve Error - ' + error);
-      }
-    }
-  } // <!-- get_variable -->
-};
 
 /**
  * Given the result of a drupalgap.services.rss.retrieve.call, this will iterate
