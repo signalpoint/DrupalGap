@@ -1,21 +1,6 @@
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
-// Setup the jQueryMobile loader to show/hide itself while navigating between
-// pages in the app.
-/*$(document).on('pagebeforecreate', '[data-role="page"]', function() {
-    setTimeout(function() {
-        drupalgap.loading = true;
-        $.mobile.loading('show', drupalgap_loader_options());
-    }, 1);
-});
-$(document).on('pageshow', '[data-role="page"]', function() {
-    setTimeout(function() {
-        drupalgap.loading = false;
-        $.mobile.loading('hide');
-    }, 100);
-});*/
-
 /**
  * Initializes the drupalgap json object.
  * @return {Object}
@@ -25,7 +10,6 @@ function drupalgap_init() {
     var dg = {
       modules: {
         core: [
-           { name: 'api' },
            { name: 'block' },
            { name: 'comment' },
            { name: 'contact' },
