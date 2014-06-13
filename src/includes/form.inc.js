@@ -317,11 +317,19 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
       selector = 'input:radio[name="' + id + '"]:checked';
     }
     else { selector = '#' + id; }
-    if (element.type == 'checkbox') {
-      if ($(selector).is(':checked')) { value = 1; }
-      else { value = 0; }
+    switch (element.type) {
+      case 'checkbox':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = 1; }
+        else { value = 0; }
+        break;
+      case 'list_boolean':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
+        else { value = $(_checkbox).attr('off'); }
+        break;
     }
-    if (value == null) { value = $(selector).val(); }
+    if (value === null) { value = $(selector).val(); }
     if (typeof value === 'undefined') { value = null; }
     return value;
   }
@@ -739,9 +747,13 @@ function _drupalgap_form_render_element(form, element) {
         }
 
         // If there wasn't a default value provided, set one. Then set the
-        // default value into the variables' attributes.
+        // default value into the variables' attributes. Although, if we have an
+        // item value, just use that.
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
+        if (typeof item.value !== 'undefined') {
+          variables.attributes.value = item.value;
+        }
 
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
@@ -849,6 +861,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
+    // @TODO - this block of code should be moved into their respective
+    // implementations of hook_field_widget_form().
     switch (item.type) {
       case 'text':
         item.type = 'textfield';
@@ -859,6 +873,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         item.type = 'select';
         break;
     }
+
+    // Set the theme function.
     var theme_function = item.type;
 
     // If the element is disabled, add the 'disabled' attribute.
