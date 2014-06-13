@@ -50,7 +50,7 @@ drupalgap.settings.theme = 'easystreet3';
 // Logo
 drupalgap.settings.logo = 'themes/easystreet3/images/drupalgap.jpg';
 
-// Offline Warning Message
+// Offline Warning Message. Set to false to hide message.
 drupalgap.settings.offline_message = 'No connection found!';
 
 // Loader Animations - http://demos.jquerymobile.com/1.4.0/loader/
