@@ -381,6 +381,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // below with a value_callback. Provide a deprecated hook warning
               // for any fields not haven't caught up yet, and fallback to the
               // hook for a while.
+              // @UPDATE - Actually, the DG FAPI
+              // hook_assemble_form_state_into_field() is a good idea, and
+              // should be used by all field form elements, then in
+              // drupalgap_field_info_instances_add_to_form(), that function
+              // should use the value_callback idea to properly map entity data
+              // to the form element's value.
 
               // Extract the value.
               var field_value = value[language][delta];
@@ -417,15 +423,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 );
               }
 
+              // If someone updated the key, use it.
+              if (key != field_key.value) { key = field_key.value; }
+
               // If we don't need a delta value, place the field value using the
-              // key. If we're using a delta value, push the key and value onto
-              // the field to indicate the delta.
+              // key, if posible. If we're using a delta value, push the key
+              // and value onto the field to indicate the delta.
               if (!field_key.use_delta) {
                 if (!field_key.use_wrapper) {
                   entity[name][language] = field_value;
                 }
                 else {
-                  entity[name][language][key] = field_value;
+                  if ($.isArray(entity[name][language])) {
+                    console.log(
+                      'WARNING: drupalgap_entity_build_from_form_state - ' +
+                      'cannot use key (' + key + ') on field (' + name + ') ' +
+                      'language code array, key will be ignored.'
+                    );
+                    entity[name][language].push(field_value);
+                  }
+                  else { entity[name][language][key] = field_value; }
                 }
               }
               else {
@@ -440,13 +457,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               }
 
               // If the field value was null, we won't send along the field, so
-              // just remove it.
+              // just remove it. Except for list_boolean fields, they need a
+              // null value to set the field value to false.
               // @TODO - will this cause issues with multi value fields? i.e. if
               // delta zero is null, but delta one isn't, this will probably
               // destroy the field, derp.
-              if (field_value === null && typeof entity[name] !== 'undefined') {
-                delete entity[name];
-              }
+              if (
+                field_value === null &&
+                typeof entity[name] !== 'undefined' &&
+                form.elements[name].type != 'list_boolean'
+              ) { delete entity[name]; }
 
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
