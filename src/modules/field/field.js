@@ -132,17 +132,38 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
               // value_callback property present in Drupal's FAPI, that way
               // each element knows how to map the entity data to its element
               // value property.
-              if (
-                entity[name][language][delta] &&
-                typeof entity[name][language][delta].value !== 'undefined'
-              ) { default_value = entity[name][language][delta].value; }
-              // If the default_value is null, set it to an empty string.
-              if (default_value == null) { default_value = ''; }
-              // @todo - It appears not all fields have a language code to use
-              // here, for example taxonomy term reference fields don't!
-              form.elements[name][language][delta] = {
-                'value': default_value
-              };
+
+              var hook = true;
+
+              module = field_info.module;
+              hook = module + '_assemble_form_value_into_field';
+
+              if (!function_exists(hook)) { hook = false; }
+
+              if (hook) {
+                var fn = window[hook];
+                field_value = fn(form.entity_type,
+                  form.bundle,
+                  entity[name],
+                  field_info,
+                  fields[name],
+                  language,
+                  delta
+                );
+                form.elements[name][language][delta] = field_value;
+              } else {
+                if (
+                  entity[name][language][delta] &&
+                  typeof entity[name][language][delta].value !== 'undefined'
+                ) { default_value = entity[name][language][delta].value; }
+                // If the default_value is null, set it to an empty string.
+                if (default_value == null) { default_value = ''; }
+                // @todo - It appears not all fields have a language code to use
+                // here, for example taxonomy term reference fields don't!
+                form.elements[name][language][delta] = {
+                  'value': default_value
+                };
+              }
             }
           }
         }
