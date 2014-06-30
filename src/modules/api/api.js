@@ -113,6 +113,40 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
 function hook_deviceready() {}
 
 /**
+ * Each time a page is navigated to within the app, drupalgap_goto() is called.
+ * Use this hook to do some preprocessing before drupalgap_goto() gets started.
+ * @param {String} path The current page path.
+ */
+function hook_drupalgap_goto_preprocess(path) {
+  try {
+  }
+  catch (error) {
+    console.log('hook_drupalgap_goto_preprocess - ' + error);
+  }
+  // Pre process the front page.
+  if (path == drupalgap.settings.front) {
+    drupalgap_alert('Preprocessing the front page!');
+  }
+}
+
+/**
+ * Each time a page is navigated to within the app, drupalgap_goto() is called.
+ * Use this hook to do some post processing after drupalgap_goto() has finished.
+ * @param {String} path The current page path.
+ */
+function hook_analytics_drupalgap_goto_post_process(path) {
+  try {
+    // Post process the front page.
+    if (path == drupalgap.settings.front) {
+      drupalgap_alert('Post processing the front page!');
+    }
+  }
+  catch (error) {
+    console.log('hook_analytics_drupalgap_goto_post_process - ' + error);
+  }
+}
+
+/**
  * Called after a successful services API call to a Drupal site. Do not call
  * any services from within your implementation, you may run into an infinite
  * loop in your code. See http://drupalgap.org/project/force_authentication for
