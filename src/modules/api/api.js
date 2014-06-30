@@ -134,7 +134,7 @@ function hook_drupalgap_goto_preprocess(path) {
  * Use this hook to do some post processing after drupalgap_goto() has finished.
  * @param {String} path The current page path.
  */
-function hook_analytics_drupalgap_goto_post_process(path) {
+function hook_drupalgap_goto_post_process(path) {
   try {
     // Post process the front page.
     if (path == drupalgap.settings.front) {
@@ -142,7 +142,7 @@ function hook_analytics_drupalgap_goto_post_process(path) {
     }
   }
   catch (error) {
-    console.log('hook_analytics_drupalgap_goto_post_process - ' + error);
+    console.log('hook_drupalgap_goto_post_process - ' + error);
   }
 }
 
