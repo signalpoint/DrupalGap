@@ -440,6 +440,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // Don't place values that are objects onto the options (i.e.
               // commerce taxonomy term reference fields).
               if (typeof value === 'object') { return; }
+              // If the value already exists in the options, then someone else
+              // has populated the list (e.g. commerce), so don't do any
+              // processing.
+              if (typeof items[delta].options[key] !== 'undefined') {
+                return false;
+              }
               // Set the key and value for the option.
               items[delta].options[key] = value;
           });
