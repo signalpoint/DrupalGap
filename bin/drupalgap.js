@@ -5279,6 +5279,44 @@ function comment_access(comment) {
 }
 
 /**
+ * Given a node id, this will return the id to use on the comments wrapper.
+ * @param {Number} nid
+ * @return {String}
+ */
+function comments_container_id(nid) {
+  try {
+    return 'comments_container_' + nid;
+  }
+  catch (error) { console.log('comments_container_id - ' + error); }
+}
+
+/**
+ * Given a comment id, this will return the id to use on the comment wrapper.
+ * @param {Number} cid
+ * @return {String}
+ */
+function comment_container_id(cid) {
+  try {
+    return 'comment_container_' + cid;
+  }
+  catch (error) { console.log('comment_container_id - ' + error); }
+}
+
+/**
+ * Given a node id, this will return the id to use on the html list for the
+ * comments.
+ * @param {Number} nid
+ * @return {String}
+ * @deprecated Use comments_container_id() instead.
+ */
+function comment_list_id(nid) {
+  try {
+    return comments_container_id(nid);
+  }
+  catch (error) { console.log('comment_list_id - ' + error); }
+}
+
+/**
  * Page callback for comment/%.
  * @param {Number} cid
  * @return {Object}
@@ -5420,19 +5458,6 @@ function comment_edit_submit(form, form_state) {
 }
 
 /**
- * Given a node id, this will return the id to use on the html list for the
- * comments.
- * @param {Number} nid
- * @return {String}
- */
-function comment_list_id(nid) {
-  try {
-    return 'comment_listing_items_' + nid;
-  }
-  catch (error) { console.log('comment_list_id - ' + error); }
-}
-
-/**
  * Implements hook_services_postprocess().
  * @param {Object} options
  * @param {Object} result
@@ -5451,13 +5476,11 @@ function comment_services_postprocess(options, result) {
             success: function(node) {
               comment_load(result.cid, {
                   success: function(comment) {
-                    var list_id = comment_list_id(node.nid);
-                    $('#' + list_id).append(
-                      '<li>' + theme('comment', {
-                          comment: comment
-                      }) + '</li>'
-                    ).listview('refresh');
-                    scrollToElement('#' + list_id + ' li:last-child', 500);
+                    var container_id = comments_container_id(node.nid);
+                    $('#' + container_id).append(
+                      theme('comment', { comment: comment })
+                    ).trigger('create');
+                    scrollToElement('#' + container_id + ' :last-child', 500);
                     var form_selector = '#' + drupalgap_get_page_id() +
                       ' #comment_edit';
                     drupalgap_form_clear(form_selector);
@@ -5472,6 +5495,30 @@ function comment_services_postprocess(options, result) {
 }
 
 /**
+ * Theme's a comment container.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_comments(variables) {
+  try {
+    // Set the container id and append default attributes.
+    variables.attributes.id = comments_container_id(variables.node.nid);
+    variables.attributes['class'] += 'comments ';
+    variables.attributes['data-role'] = 'collapsible-set';
+    // Open the container.
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
+    // Show a comments title if there are any comments.
+    if (variables.node.comment_count > 0) { html += '<h2>Comments</h2>'; }
+    // If the comments are already rendered, show them.
+    if (variables.comments) { html += variables.comments; }
+    // Close the container and return the html.
+    html += '</div>';
+    return html;
+  }
+  catch (error) { console.log('theme_comments - ' + error); }
+}
+
+/**
  * Theme's a comment.
  * @param {Object} variables
  * @return {String}
@@ -5479,34 +5526,50 @@ function comment_services_postprocess(options, result) {
 function theme_comment(variables) {
   try {
     var comment = variables.comment;
-    var html = '';
+    // Set the container id and append default attributes.
+    variables.attributes.id = comment_container_id(comment.cid);
+    variables.attributes['class'] += 'comment ';
+    variables.attributes['data-role'] = 'collapsible';
+    variables.attributes['data-collapsed'] = 'false';
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
     var comment_content = '';
+    // Any user picture?
+    // @TODO - the user picture doesn't use an image style here, it uses the
+    // original picture uploaded by the user, which can be varying sizes.
     var picture = '';
     if (comment.picture_uri) {
-      comment_content += theme(
-        'image',
-        { path: drupalgap_image_path(comment.picture_uri) }
+      picture += theme(
+        'image', { path: drupalgap_image_path(comment.picture_uri) }
       );
     }
+    // Comment date.
     var created = new Date(comment.created * 1000);
     created = created.toLocaleDateString() + ' at ' +
       created.toLocaleTimeString();
+    // Append comment extra fields and content. The user info will be rendered
+    // as a list item link.
+    var author = picture +
+        '<h3>' + comment.name + '</h3>' +
+        '<p>' + created + '</p>';
+    author = l(author, 'user/' + comment.uid);
     comment_content +=
-      '<h2>' + comment.name + '</h2>' +
-      '<h3>' + comment.subject + '<h3/>' +
-      '<p>' + comment.content + '</p>' +
-      '<p class="ui-li-aside">' + created + '</p>';
-    // Comments will link to the user's profile, unless they are anonymous.
-    var comment_link_path = 'user/' + comment.uid;
-    if (comment.uid == 0) { comment_link_path = null; }
-    html += l(comment_content, comment_link_path);
+      '<h2>' + comment.subject + '</h2>' +
+      '<ul data-role="listview" data-inset="true">' +
+        '<li>' + author + '</li>' +
+      '</ul>' + comment.content;
+    html += comment_content;
+    // Add an edit link if necessary.
     if (user_access('administer comments')) {
-      html += l('Edit', 'comment/' + comment.cid + '/edit', {
+      html += theme('button_link', {
+          text: 'Edit',
+          path: 'comment/' + comment.cid + '/edit',
           attributes: {
             'data-icon': 'gear'
           }
       });
     }
+    // Close the container and return the html.
+    html += '</div>';
     return html;
   }
   catch (error) { console.log('theme_comment - ' + error); }
@@ -7266,6 +7329,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // Don't place values that are objects onto the options (i.e.
               // commerce taxonomy term reference fields).
               if (typeof value === 'object') { return; }
+              // If the value already exists in the options, then someone else
+              // has populated the list (e.g. commerce), so don't do any
+              // processing.
+              if (typeof items[delta].options[key] !== 'undefined') {
+                return false;
+              }
               // Set the key and value for the option.
               items[delta].options[key] = value;
           });
@@ -8590,14 +8659,6 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node.title},
             'content': {'markup': node.content}
           };
-          // Build an empty list for the comments.
-          var comments = {
-            title: 'Comments',
-            items: [],
-            attributes: {
-              id: comment_list_id(node.nid)
-            }
-          };
           // If the comments are closed (1) or open (2), show the comments.
           if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
@@ -8620,16 +8681,15 @@ function node_page_view_pageshow(nid) {
                 comment_index(query, {
                     success: function(results) {
                       try {
+                        // Render the comments.
+                        var comments = '';
                         $.each(results, function(index, comment) {
-                            comments.items.push(theme('comment', {
-                                comment: comment
-                            }));
+                            comments += theme('comment', { comment: comment });
                         });
-                        // Render the comment list.
-                        build.content.markup += theme(
-                          'jqm_item_list',
-                          comments
-                        );
+                        build.content.markup += theme('comments', {
+                            node: node,
+                            comments: comments
+                        });
                         // If the comments are open, show the comment form.
                         if (node.comment == 2) {
                           build.content.markup += comment_form;
@@ -8648,10 +8708,11 @@ function node_page_view_pageshow(nid) {
                 });
               }
               else {
-                // There weren't any comments, show the comment form if comments
-                // are open, then inject the page.
+                // There weren't any comments, append an empty comments wrapper
+                // and show the comment form if comments are open, then inject
+                // the page.
                 if (node.comment == 2) {
-                  build.content.markup += theme('jqm_item_list', comments);
+                  build.content.markup += theme('comments', { node: node });
                   build.content.markup += comment_form;
                 }
                 _drupalgap_entity_page_container_inject(
@@ -8661,8 +8722,9 @@ function node_page_view_pageshow(nid) {
             }
           }
           else {
-            // Comments are hidden (0), so let's render an empty list, then
-            // inject the content into the page.
+            // Comments are hidden (0), append an empty comments wrapper to the
+            // content and inject the content into the page.
+            build.content.markup += theme('comments', { node: node });
             _drupalgap_entity_page_container_inject(
               'node', node.nid, 'view', build
             );
