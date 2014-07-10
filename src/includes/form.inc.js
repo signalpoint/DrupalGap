@@ -608,9 +608,7 @@ function _drupalgap_form_render_elements(form) {
               if (
                 form.entity_type == 'comment' &&
                 form.bundle.indexOf('comment_node_') != -1
-              ) {
-                bundle = form.bundle.replace('comment_node_', '');
-              }
+              ) { bundle = form.bundle.replace('comment_node_', ''); }
             }
             // This is not a field, if it has a weight in
             // field_info_extra_fields use it, otherwise just append it to the
