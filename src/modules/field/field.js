@@ -129,7 +129,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
           if (entity && entity[name] && entity[name].length != 0) {
             for (var delta = 0; delta < cardinality; delta++) {
               // @TODO - is this where we need to use the idea of the
-              // value_callback property present in Drupal's FAPI, that way
+              // value_callback property present in Drupal's FAPI? That way
               // each element knows how to map the entity data to its element
               // value property.
               if (
@@ -141,8 +141,13 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
               // @todo - It appears not all fields have a language code to use
               // here, for example taxonomy term reference fields don't!
               form.elements[name][language][delta] = {
-                'value': default_value
+                value: default_value
               };
+              // Place the field item onto the element.
+              if (entity[name][language][delta]) {
+                form.elements[name][language][delta].item =
+                  entity[name][language][delta];
+              }
             }
           }
         }
