@@ -55,12 +55,40 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
     // Change the item type to a hidden input to hold the file id.
     items[delta].type = 'hidden';
 
+    // If we already have an image for this item, show it.
+    if (items[delta].item.fid) {
+      // Set the hidden input's value equal to the file id.
+      items[delta].value = items[delta].item.fid;
+      // Show the image on the form, the file name as a link to the actual file,
+      // the file size, and a remove button.
+      var path = drupalgap_image_path(items[delta].item.uri);
+      // @TODO - show the filesize.
+      // @TODO - show the remove button.
+      var html = theme('image', { path: path }) +
+        '<div class="filename">' +
+          l(items[delta].item.filename, path, { InAppBrowser: true }) +
+        '</div>';
+        /*theme('button_link', {
+            text: 'Remove',
+            path: null,
+            attributes: {
+              onclick: "_image_field_widget_form_remove_image()",
+              'data-icon': 'delete',
+              'data-iconpos': 'right'
+            }
+        });*/
+        //'<div class="filesize">(' + items[delta].item.filesize + ')</div>';
+      // Add html to the item's children.
+      items[delta].children.push({markup: html});
+      return; // No further processing required.
+    }
+
     // Set the default button text, and if a value was provided,
     // overwrite the button text.
     var button_text = 'Take Photo';
-    if (items[delta].value) { button_text = item.value; }
+    if (items[delta].value) { button_text = items[delta].value; }
     var browse_button_text = 'Browse';
-    if (items[delta].value2) { browse_button_text = item.value2; }
+    if (items[delta].value2) { browse_button_text = items[delta].value2; }
 
     // Place variables into document for PhoneGap image processing.
     var item_id_base = items[delta].id.replace(/-/g, '_');
@@ -157,6 +185,19 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
     items[delta].children.push({markup: html});
   }
   catch (error) { console.log('image_field_widget_form - ' + error); }
+}
+
+/**
+ * On an entity edit form, this removes an image file from the server, then from
+ * the form elements and user interface.
+ */
+function _image_field_widget_form_remove_image() {
+  try {
+    alert('_image_field_widget_form_remove_image');
+  }
+  catch (error) {
+    console.log('_image_field_widget_form_remove_image - ' + error);
+  }
 }
 
 /**
@@ -329,3 +370,25 @@ function _image_field_form_process(form, form_state, options) {
   catch (error) { console.log('_image_field_form_validate - ' + error); }
 }
 
+/**
+ * Implements hook_assemble_form_state_into_field().
+ * @param {Object} entity_type
+ * @param {String} bundle
+ * @param {String} form_state_value
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Number} delta
+ * @param {Object} field_key
+ * @return {*}
+ */
+function image_assemble_form_state_into_field(entity_type, bundle,
+  form_state_value, field, instance, langcode, delta, field_key) {
+  try {
+    field_key.value = 'fid';
+    return form_state_value;
+  }
+  catch (error) {
+    console.log('image_assemble_form_state_into_field - ' + error);
+  }
+}
