@@ -458,12 +458,13 @@ function drupalgap_alert(message) {
  * execute while the confirmation is displayed to the user.
  * You may optionally pass in a second argument as a JSON object with the
  * following properties:
- *   confirmCallback - the function to call after the user presses a button. The
- *               button label is passed to the function.
- *   title - the title to use on the alert box, defaults to 'Alert'
+ *   confirmCallback - the function to call after the user presses a button, the
+ *               button's label is passed to this function.
+ *   title - the title to use on the alert box, defaults to 'Confirm'
  *   buttonLabels - the text to place on the OK, and Cancel buttons, separated
  *                  by comma.
  * @param {String} message
+ * @return {Boolean}
  */
 function drupalgap_confirm(message) {
   try {
@@ -479,12 +480,20 @@ function drupalgap_confirm(message) {
       if (options.title) { title = options.title; }
       if (options.buttonLabels) { buttonLabels = options.buttonLabels; }
     }
-    navigator.notification.confirm(
-        message,
-        confirmCallback,
-        title,
-        buttonLabels
-    );
+    // The phonegap confirm dialog doesn't seem to work in Ripple, so just use
+    // the default one. Otherwise just use the normal confirm.
+    if (typeof parent.window.ripple === 'function') {
+      if (confirm(message)) { confirmCallback(); }
+    }
+    else {
+      navigator.notification.confirm(
+          message,
+          confirmCallback,
+          title,
+          buttonLabels
+      );
+    }
+    return false;
   }
   catch (error) { console.log('drupalgap_confirm - ' + error); }
 }
