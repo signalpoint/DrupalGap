@@ -286,13 +286,36 @@ function drupalgap_get_path(type, name) {
  */
 function drupalgap_back() {
   try {
-    if (drupalgap_path_get() != drupalgap.settings.front) {
-      drupalgap.back = true;
-      history.back();
-      drupalgap_path_set(drupalgap.back_path);
+    if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
+      drupalgap_confirm('Exit ' + drupalgap.settings.title + '?', {
+          confirmCallback: _drupalgap_back_exit
+      });
     }
+    else { _drupalgap_back(); }
   }
   catch (error) { console.log('drupalgap_back' + error); }
+}
+
+/**
+ * Change the page to the previous page.
+ */
+function _drupalgap_back() {
+  try {
+    drupalgap.back = true;
+    history.back();
+    drupalgap_path_set(drupalgap.back_path);
+  }
+  catch (error) { console.log('drupalgap_back' + error); }
+}
+
+/**
+ *
+ */
+function _drupalgap_back_exit() {
+  try {
+    navigator.app.exitApp();
+  }
+  catch (error) { console.log('_drupalgap_back_exit - ' + error); }
 }
 
 /**
