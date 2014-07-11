@@ -7550,7 +7550,7 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
     items[delta].type = 'hidden';
 
     // If we already have an image for this item, show it.
-    if (items[delta].item.fid) {
+    if (typeof items[delta].item !== 'undefined' && items[delta].item.fid) {
       // Set the hidden input's value equal to the file id.
       items[delta].value = items[delta].item.fid;
       // Show the image on the form, the file name as a link to the actual file,
