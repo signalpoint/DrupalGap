@@ -10913,15 +10913,16 @@ function theme_view(variables) {
     }
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
-    var html = '<div id="' + variables.attributes.id + '" class="view"></div>';
+    variables.attributes['class'] += 'view ';
+    var html =
+      '<div ' + drupalgap_attributes(variables.attributes) + ' ></div>';
     var options = {
       page_id: drupalgap_get_page_id(),
       jqm_page_event: 'pageshow',
       jqm_page_event_callback: '_theme_view',
       jqm_page_event_args: JSON.stringify(variables)
     };
-    html += drupalgap_jqm_page_event_script_code(options);
-    return html;
+    return html += drupalgap_jqm_page_event_script_code(options);
   }
   catch (error) { console.log('theme_view - ' + error); }
 }
@@ -11002,13 +11003,7 @@ function views_embed_view(path, options) {
  */
 function theme_views_view(variables) {
   try {
-    // If an id hasn't been provided, generate a random one. We need an id for
-    // the div container.
-    var id = null;
-    if (variables.attributes.id) { id = variables.attributes.id; }
-    else { id = 'views-view--' + user_password(); }
-    // Open the container.
-    var html = '<div id="' + id + '">';
+    var html = '';
     // Extract the results.
     var results = _views_embed_view_results;
     if (!results) { return html; }
@@ -11112,13 +11107,13 @@ function theme_views_view(variables) {
     }
     // Since the views content is injected dynamically after the page is loaded,
     // we need to have jQM refresh the page to add its styling.
-    var selector = '#' + drupalgap_get_page_id() + ' #' + id;
+    var selector =
+      '#' + drupalgap_get_page_id() +
+      ' #' + variables.attributes.id;
     $(selector).hide();
     setTimeout(function() {
         $(selector).trigger('create').show('fast');
     }, 100);
-    // Close the container.
-    html += '</div>';
     return html;
   }
   catch (error) { console.log('theme_views_view - ' + error); }
