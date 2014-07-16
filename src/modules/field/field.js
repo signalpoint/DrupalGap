@@ -432,11 +432,11 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
         // to choose from.
         if (items[delta].required) {
           items[delta].options[-1] = 'Select';
-          items[delta].value = -1;
+          if (empty(items[delta].value)) { items[delta].value = -1; }
         }
         else {
           items[delta].options[''] = '- None -';
-          items[delta].value = '';
+          if (empty(items[delta].value)) { items[delta].value = ''; }
         }
         // If there are any allowed values, place them on the options list. Then
         // check for a default value, and set it if necessary.
