@@ -76,3 +76,15 @@ div.messages ul li {
   margin: 0em 0em 1.3em 0em;
 }
 
+/**
+ * Images
+ */
+
+/* Don't let images stretch out of their parent container in the main content div */ 
+div[role="main"] img {
+  width: auto !important; 
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+

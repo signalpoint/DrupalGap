@@ -317,11 +317,19 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
       selector = 'input:radio[name="' + id + '"]:checked';
     }
     else { selector = '#' + id; }
-    if (element.type == 'checkbox') {
-      if ($(selector).is(':checked')) { value = 1; }
-      else { value = 0; }
+    switch (element.type) {
+      case 'checkbox':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = 1; }
+        else { value = 0; }
+        break;
+      case 'list_boolean':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
+        else { value = $(_checkbox).attr('off'); }
+        break;
     }
-    if (value == null) { value = $(selector).val(); }
+    if (value === null) { value = $(selector).val(); }
     if (typeof value === 'undefined') { value = null; }
     return value;
   }
@@ -600,9 +608,7 @@ function _drupalgap_form_render_elements(form) {
               if (
                 form.entity_type == 'comment' &&
                 form.bundle.indexOf('comment_node_') != -1
-              ) {
-                bundle = form.bundle.replace('comment_node_', '');
-              }
+              ) { bundle = form.bundle.replace('comment_node_', ''); }
             }
             // This is not a field, if it has a weight in
             // field_info_extra_fields use it, otherwise just append it to the
@@ -721,6 +727,7 @@ function _drupalgap_form_render_element(form, element) {
     var item_html = '';
     var item_label = '';
     $.each(items, function(delta, item) {
+
         // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
 
@@ -738,16 +745,13 @@ function _drupalgap_form_render_element(form, element) {
         }
 
         // If there wasn't a default value provided, set one. Then set the
-        // default value into the variables' attributes.
+        // default value into the variables' attributes. Although, if we have an
+        // item value, just use that.
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
-
-        // Merge element attributes into the variables object.
-        variables.attributes = $.extend(
-          {},
-          variables.attributes,
-          item.options.attributes
-        );
+        if (typeof item.value !== 'undefined') {
+          variables.attributes.value = item.value;
+        }
 
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
@@ -769,6 +773,13 @@ function _drupalgap_form_render_element(form, element) {
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
         }
+
+        // Merge element attributes into the variables object.
+        variables.attributes = $.extend(
+          true,
+          variables.attributes,
+          item.options.attributes
+        );
 
         // Render the element item.
         item_html = _drupalgap_form_render_element_item(
@@ -848,6 +859,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
     // function.
+    // @TODO - this block of code should be moved into their respective
+    // implementations of hook_field_widget_form().
     switch (item.type) {
       case 'text':
         item.type = 'textfield';
@@ -858,6 +871,8 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         item.type = 'select';
         break;
     }
+
+    // Set the theme function.
     var theme_function = item.type;
 
     // If the element is disabled, add the 'disabled' attribute.
@@ -1231,6 +1246,20 @@ function theme_form_element_label(variables) {
     return html;
   }
   catch (error) { console.log('theme_form_element_label - ' + error); }
+}
+
+/**
+ * Themes a number input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_number(variables) {
+  try {
+    variables.attributes.type = 'number';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_number - ' + error); }
 }
 
 /**

@@ -246,14 +246,6 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node.title},
             'content': {'markup': node.content}
           };
-          // Build an empty list for the comments.
-          var comments = {
-            title: 'Comments',
-            items: [],
-            attributes: {
-              id: comment_list_id(node.nid)
-            }
-          };
           // If the comments are closed (1) or open (2), show the comments.
           if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
@@ -276,16 +268,15 @@ function node_page_view_pageshow(nid) {
                 comment_index(query, {
                     success: function(results) {
                       try {
+                        // Render the comments.
+                        var comments = '';
                         $.each(results, function(index, comment) {
-                            comments.items.push(theme('comment', {
-                                comment: comment
-                            }));
+                            comments += theme('comment', { comment: comment });
                         });
-                        // Render the comment list.
-                        build.content.markup += theme(
-                          'jqm_item_list',
-                          comments
-                        );
+                        build.content.markup += theme('comments', {
+                            node: node,
+                            comments: comments
+                        });
                         // If the comments are open, show the comment form.
                         if (node.comment == 2) {
                           build.content.markup += comment_form;
@@ -304,10 +295,11 @@ function node_page_view_pageshow(nid) {
                 });
               }
               else {
-                // There weren't any comments, show the comment form if comments
-                // are open, then inject the page.
+                // There weren't any comments, append an empty comments wrapper
+                // and show the comment form if comments are open, then inject
+                // the page.
                 if (node.comment == 2) {
-                  build.content.markup += theme('jqm_item_list', comments);
+                  build.content.markup += theme('comments', { node: node });
                   build.content.markup += comment_form;
                 }
                 _drupalgap_entity_page_container_inject(
@@ -317,8 +309,9 @@ function node_page_view_pageshow(nid) {
             }
           }
           else {
-            // Comments are hidden (0), so let's render an empty list, then
-            // inject the content into the page.
+            // Comments are hidden (0), append an empty comments wrapper to the
+            // content and inject the content into the page.
+            build.content.markup += theme('comments', { node: node });
             _drupalgap_entity_page_container_inject(
               'node', node.nid, 'view', build
             );

@@ -1,0 +1,92 @@
+# To run this makefile, you must have all the necessary tools installed.
+#
+# To install all the necessary tools, simply run the following...
+#
+#									sudo make -B tools
+#
+
+# Create the list of files
+lintfiles = src/drupalgap.js\
+				src/includes/common.inc.js\
+				src/includes/form.inc.js\
+				src/includes/menu.inc.js\
+				src/includes/theme.inc.js\
+				src/modules/block/block.js\
+				src/modules/comment/comment.js\
+				src/modules/contact/contact.js\
+				src/modules/entity/entity.js\
+				src/modules/field/field.js\
+				src/modules/file/file.js\
+				src/modules/image/image.js\
+				src/modules/menu/menu.js\
+				src/modules/mvc/mvc.js\
+				src/modules/node/node.js\
+				src/modules/search/search.js\
+				src/modules/services/services.js\
+				src/modules/system/system.js\
+				src/modules/user/user.js\
+				src/modules/taxonomy/taxonomy.js\
+				src/modules/views/views.js\
+
+files =	src/drupalgap.js\
+				src/includes/common.inc.js\
+				src/includes/form.inc.js\
+				src/includes/menu.inc.js\
+				src/includes/theme.inc.js\
+				src/modules/block/block.js\
+				src/modules/comment/comment.js\
+				src/modules/contact/contact.js\
+				src/modules/entity/entity.js\
+				src/modules/field/field.js\
+				src/modules/file/file.js\
+				src/modules/image/image.js\
+				src/modules/menu/menu.js\
+				src/modules/mvc/mvc.js\
+				src/modules/node/node.js\
+				src/modules/search/search.js\
+				src/modules/services/services.js\
+				src/modules/system/system.js\
+				src/modules/user/user.js\
+				src/modules/taxonomy/taxonomy.js\
+				src/modules/views/views.js\
+
+#.DEFAULT_GOAL := all
+
+#all: jslint js
+
+# Perform a jsLint on all the files.
+#jslint: ${lintfiles}
+#																gjslint $^
+
+# Create an aggregated js file and a compressed js file.
+js: ${files}
+				@echo "Generating aggregated bin/drupalgap.js file"
+				@cat > bin/drupalgap.js $^
+#				@echo "Generating compressed bin/drupalgap.min.js file"
+#				curl -s \
+#					-d compilation_level=SIMPLE_OPTIMIZATIONS \
+#					-d output_format=text \
+#					-d output_info=compiled_code \
+#					--data-urlencode "js_code@bin/drupalgap.js" \
+#					http://closure-compiler.appspot.com/compile \
+#					> bin/drupalgap.min.js
+
+# Create the documentation from source code.
+jsdoc: ${files}
+																@echo "Generating documetation."
+																@java -jar tools/jsdoc-toolkit/jsrun.jar tools/jsdoc-toolkit/app/run.js -a -t=tools/jsdoc-toolkit/templates/jsdoc -d=doc $^
+
+# Fix the js style on all the files.
+fixjsstyle: ${files}
+																fixjsstyle $^
+
+# Install the necessary tools.
+tools:
+																apt-get install python-setuptools
+																apt-get install unzip
+																easy_install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz
+																wget http://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.4.0.zip -P tools
+																unzip tools/jsdoc_toolkit-2.4.0.zip -d tools
+																mv tools/jsdoc_toolkit-2.4.0/jsdoc-toolkit tools/jsdoc-toolkit
+																rm -rd tools/jsdoc_toolkit-2.4.0
+																rm tools/jsdoc_toolkit-2.4.0.zip

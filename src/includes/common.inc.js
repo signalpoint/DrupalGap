@@ -286,13 +286,36 @@ function drupalgap_get_path(type, name) {
  */
 function drupalgap_back() {
   try {
-    if (drupalgap_path_get() != drupalgap.settings.front) {
-      drupalgap.back = true;
-      history.back();
-      drupalgap_path_set(drupalgap.back_path);
+    if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
+      drupalgap_confirm('Exit ' + drupalgap.settings.title + '?', {
+          confirmCallback: _drupalgap_back_exit
+      });
     }
+    else { _drupalgap_back(); }
   }
   catch (error) { console.log('drupalgap_back' + error); }
+}
+
+/**
+ * Change the page to the previous page.
+ */
+function _drupalgap_back() {
+  try {
+    drupalgap.back = true;
+    history.back();
+    drupalgap_path_set(drupalgap.back_path);
+  }
+  catch (error) { console.log('drupalgap_back' + error); }
+}
+
+/**
+ *
+ */
+function _drupalgap_back_exit() {
+  try {
+    navigator.app.exitApp();
+  }
+  catch (error) { console.log('_drupalgap_back_exit - ' + error); }
 }
 
 /**
@@ -326,6 +349,7 @@ function drupalgap_error(message) {
  */
 function drupalgap_goto(path) {
   try {
+
     // Extract any incoming options, set any defaults that weren't provided,
     // then populate the global page options variable.
     var options = {};
@@ -340,6 +364,9 @@ function drupalgap_goto(path) {
     // Prepare the path.
     path = drupalgap_goto_prepare_path(path);
     if (!path) { return false; }
+
+    // Invoke all implementations of hook_drupalgap_goto_preprocess().
+    module_invoke_all('drupalgap_goto_preprocess', path);
 
     // Determine the router path.
     var router_path = drupalgap_get_menu_link_router_path(path);
@@ -447,6 +474,8 @@ function drupalgap_goto(path) {
         drupalgap_clear_messages();
         drupalgap.page.process = false;
         $.mobile.changePage('#' + page_id, options);
+        // Invoke all implementations of hook_drupalgap_goto_post_process().
+        module_invoke_all('drupalgap_goto_post_process', path);
         return;
       }
     }
@@ -517,6 +546,9 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
           // Default change page.
           $.mobile.changePage('index.html#' + page_id, options);
         }
+
+        // Invoke all implementations of hook_drupalgap_goto_post_process().
+        module_invoke_all('drupalgap_goto_post_process', path);
       }
       else {
         drupalgap_alert(

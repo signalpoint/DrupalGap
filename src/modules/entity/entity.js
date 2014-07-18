@@ -346,7 +346,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
 
           // Make sure there is at least one value before creating the form
           // element on the entity.
-          if (empty(value[language][0])) { return; }
+          if (typeof value[language][0] === 'undefined') { return; }
 
           // Create an empty object to house the field on the entity.
           entity[name] = {};
@@ -371,7 +371,22 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
-            if (!empty(value[language][delta])) {
+            if (typeof value[language][delta] !== 'undefined') {
+
+              // @TODO - the way values are determined here is turning into
+              // spaghetti code. Every form element needs its own
+              // value_callback, just like Drupal's FAPI. Right now DG has
+              // something similar going on with the use of
+              // hook_assemble_form_state_into_field(). So replace any spaghetti
+              // below with a value_callback. Provide a deprecated hook warning
+              // for any fields not haven't caught up yet, and fallback to the
+              // hook for a while.
+              // @UPDATE - Actually, the DG FAPI
+              // hook_assemble_form_state_into_field() is a good idea, and
+              // should be used by all field form elements, then in
+              // drupalgap_field_info_instances_add_to_form(), that function
+              // should use the value_callback idea to properly map entity data
+              // to the form element's value.
 
               // Extract the value.
               var field_value = value[language][delta];
@@ -408,15 +423,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 );
               }
 
+              // If someone updated the key, use it.
+              if (key != field_key.value) { key = field_key.value; }
+
               // If we don't need a delta value, place the field value using the
-              // key. If we're using a delta value, push the key and value onto
-              // the field to indicate the delta.
+              // key, if posible. If we're using a delta value, push the key
+              // and value onto the field to indicate the delta.
               if (!field_key.use_delta) {
                 if (!field_key.use_wrapper) {
                   entity[name][language] = field_value;
                 }
                 else {
-                  entity[name][language][key] = field_value;
+                  if ($.isArray(entity[name][language])) {
+                    console.log(
+                      'WARNING: drupalgap_entity_build_from_form_state - ' +
+                      'cannot use key (' + key + ') on field (' + name + ') ' +
+                      'language code array, key will be ignored.'
+                    );
+                    entity[name][language].push(field_value);
+                  }
+                  else { entity[name][language][key] = field_value; }
                 }
               }
               else {
@@ -429,10 +455,33 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   entity[name][language].push(field_value);
                 }
               }
+
+              // If the field value was null, we won't send along the field, so
+              // just remove it. Except for list_boolean fields, they need a
+              // null value to set the field value to false.
+              // @TODO - will this cause issues with multi value fields? i.e. if
+              // delta zero is null, but delta one isn't, this will probably
+              // destroy the field, derp.
+              if (
+                field_value === null &&
+                typeof entity[name] !== 'undefined' &&
+                form.elements[name].type != 'list_boolean'
+              ) { delete entity[name]; }
+
+              // If we had an optional select list, and no options were
+              // selected, delete the empty field from the assembled entity.
+              // @TODO - will this cause multi value issues?
+              if (
+                is_field && !use_delta &&
+                form.elements[name].field_info_instance.widget.type ==
+                  'options_select' && !form.elements[name].required &&
+                field_value === '' && typeof entity[name] !== 'undefined'
+              ) { delete entity[name]; }
+
             }
           }
         }
-        else if (!empty(value)) { entity[name] = value; }
+        else if (typeof value !== 'undefined') { entity[name] = value; }
     });
     return entity;
   }

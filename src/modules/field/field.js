@@ -128,6 +128,10 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
           }
           if (entity && entity[name] && entity[name].length != 0) {
             for (var delta = 0; delta < cardinality; delta++) {
+              // @TODO - is this where we need to use the idea of the
+              // value_callback property present in Drupal's FAPI? That way
+              // each element knows how to map the entity data to its element
+              // value property.
               if (
                 entity[name][language][delta] &&
                 typeof entity[name][language][delta].value !== 'undefined'
@@ -137,8 +141,13 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
               // @todo - It appears not all fields have a language code to use
               // here, for example taxonomy term reference fields don't!
               form.elements[name][language][delta] = {
-                'value': default_value
+                value: default_value
               };
+              // Place the field item onto the element.
+              if (entity[name][language][delta]) {
+                form.elements[name][language][delta].item =
+                  entity[name][language][delta];
+              }
             }
           }
         }
@@ -200,6 +209,12 @@ function list_field_formatter_view(entity_type, entity, field, instance,
           // list_default or list_key
           if (display.type == 'list_default') {
             markup = instance.settings.allowed_values[item.value];
+            // Single on/off checkboxes need an empty space as their markup so
+            // just the label gets rendered.
+            if (
+              instance.type == 'list_boolean' &&
+              field.widget.type == 'options_onoff'
+            ) { markup = '&nbsp;'; }
           }
           else { markup = item.value; }
           element[delta] = { markup: markup };
@@ -208,6 +223,68 @@ function list_field_formatter_view(entity_type, entity, field, instance,
     return element;
   }
   catch (error) { console.log('list_field_formatter_view - ' + error); }
+}
+
+/**
+ * Implements hook_assemble_form_state_into_field().
+ * @param {Object} entity_type
+ * @param {String} bundle
+ * @param {String} form_state_value
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Number} delta
+ * @param {Object} field_key
+ *
+ * @return {*}
+ */
+function list_assemble_form_state_into_field(entity_type, bundle,
+  form_state_value, field, instance, langcode, delta, field_key) {
+  try {
+    var result = form_state_value;
+    switch (field.type) {
+      case 'list_boolean':
+        // For single on/off checkboxes, if the checkbox is unchecked, then we
+        // send a null value on the language code. We know the checkbox is
+        // unchecked if the form_state_value is equal to the first allowed value
+        // on the field.
+        if (instance.widget.type == 'options_onoff') {
+          var index = 0;
+          var on = true;
+          $.each(field.settings.allowed_values, function(value, label) {
+              if (form_state_value == value && index == 0) {
+                on = false;
+                return false;
+              }
+              index++;
+          });
+          if (!on) {
+            field_key.use_delta = false;
+            field_key.use_wrapper = false;
+            result = null;
+          }
+        }
+        else {
+          console.log(
+            'WARNING: list_assemble_form_state_into_field - unknown widget (' +
+              field.type +
+            ') on list_boolean'
+          );
+        }
+        break;
+      default:
+        console.log(
+          'WARNING: list_assemble_form_state_into_field - unknown type (' +
+            field.type +
+          ')'
+        );
+        break;
+    }
+    return result;
+  }
+  catch (error) {
+    console.log('list_assemble_form_state_into_field - ' + error);
+  }
 }
 
 /**
@@ -230,9 +307,13 @@ function number_field_formatter_view(entity_type, entity, field, instance,
       items = {0: {value: items}};
     }
     if (!empty(items)) {
+      var prefix = '';
+      if (!empty(field.settings.prefix)) { prefix = field.settings.prefix; }
+      var suffix = '';
+      if (!empty(field.settings.suffix)) { suffix = field.settings.suffix; }
       $.each(items, function(delta, item) {
           element[delta] = {
-            markup: item.value
+            markup: prefix + item.value + suffix
           };
       });
     }
@@ -242,44 +323,42 @@ function number_field_formatter_view(entity_type, entity, field, instance,
 }
 
 /**
- * Implements hook_field_data_string().
- * @param {String} entity_type
- * @param {String} bundle
- * @param {Object} entity
- * @param {Object} info
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
  * @param {Object} instance
  * @param {String} langcode
+ * @param {Object} items
  * @param {Number} delta
- * @param {Object} options
- * @return {String}
+ * @param {Object} element
  */
-function options_field_data_string(entity_type, bundle, entity, info, instance,
-  langcode, delta, options) {
+function number_field_widget_form(form, form_state, field, instance, langcode,
+  items, delta, element) {
   try {
-    console.log('WARNING: options_field_data_string() is deprecated! ' +
-      'Data strings are no longer used, instead call e.g. node_save().');
-    return '';
-
-    var field_name = instance.field_name;
-    var key = drupalgap_field_key(field_name);
-    var value = entity[instance.field_name][langcode][delta][key];
-    var data = '';
-    if (value == '') { return data; }
-    // Note, select does not work with [und][0][value] but works with
-    // [und][value]. Otherwise, use the default data string.
-    if (instance.widget.type == 'options_select') {
-      data =
-        entity_type + '[' + field_name + '][' + langcode + '][' + key + ']=' +
-        encodeURIComponent(value);
+    switch (element.type) {
+      case 'number_integer':
+        // Change the form element into a number, and then set its min/max
+        // attributes along with the step.
+        items[delta].type = 'number';
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['min'] = instance.settings.min;
+        }
+        if (!empty(instance.settings.max)) {
+          items[delta].options.attributes['max'] = instance.settings.max;
+        }
+        items[delta].options.attributes['step'] = 1;
+        break;
+      default:
+        console.log(
+          'number_field_widget_form - element type not supported (' +
+            element.type +
+          ')'
+        );
+        break;
     }
-    else {
-      data =
-        entity_type + '[' + field_name + '][' + langcode + '][' + delta + ']' +
-        '[' + key + ']=' + encodeURIComponent(value);
-    }
-    return data;
   }
-  catch (error) { console.log('options_field_data_string - ' + error); }
+  catch (error) { console.log('number_field_widget_form - ' + error); }
 }
 
 /**
@@ -304,6 +383,43 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
         break;
       case 'radios':
         break;
+      case 'list_boolean':
+        switch (instance.widget.type) {
+          case 'options_onoff':
+            // Switch an on/off boolean to a checkbox and place its on/off
+            // values as attributes. Depending on the allowed values, we may
+            // have to iterate over an array, or an object to get the on/off
+            // values.
+            items[delta].type = 'checkbox';
+            var off = null;
+            var on = null;
+            if ($.isArray(field.settings.allowed_values)) {
+              for (var key in field.settings.allowed_values) {
+                if (off === null) { off = key; }
+                else { on = key; }
+              }
+            }
+            else {
+              $.each(field.settings.allowed_values, function(value, label) {
+                  if (off === null) { off = value; }
+                  else { on = value; }
+              });
+            }
+            items[delta].options.attributes.off = off;
+            items[delta].options.attributes.on = on;
+            // If the value equals the on value, then check the box.
+            if (items[delta].value == on) {
+              items[delta].options.attributes.checked = 'checked';
+            }
+            break;
+          default:
+            console.log(
+              'WARNING: options_field_widget_form list_boolean with ' +
+              'unsupported type (' + instance.widget.type + ')'
+            );
+            break;
+        }
+        break;
       case 'select':
       case 'list_text':
       case 'list_float':
@@ -312,10 +428,15 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           items[delta].type = 'select';
         }
         // If the select list is required, add a 'Select' option and set it as
-        // the default.
+        // the default.  If it is optional, place a "none" option for the user
+        // to choose from.
         if (items[delta].required) {
           items[delta].options[-1] = 'Select';
-          items[delta].value = -1;
+          if (empty(items[delta].value)) { items[delta].value = -1; }
+        }
+        else {
+          items[delta].options[''] = '- None -';
+          if (empty(items[delta].value)) { items[delta].value = ''; }
         }
         // If there are any allowed values, place them on the options list. Then
         // check for a default value, and set it if necessary.
@@ -324,6 +445,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // Don't place values that are objects onto the options (i.e.
               // commerce taxonomy term reference fields).
               if (typeof value === 'object') { return; }
+              // If the value already exists in the options, then someone else
+              // has populated the list (e.g. commerce), so don't do any
+              // processing.
+              if (typeof items[delta].options[key] !== 'undefined') {
+                return false;
+              }
               // Set the key and value for the option.
               items[delta].options[key] = value;
           });

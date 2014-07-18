@@ -88,35 +88,6 @@ function drupalgap_service_resource_extract_results(options) {
 }
 
 /**
- * RSS Services
- */
-drupalgap.services.rss = {
-  'retrieve': {
-    'options': {
-      'type': 'get',
-      'dataType': 'xml'
-    },
-    'call': function(options) {
-      try {
-        if (!options.url) {
-          drupalgap_alert('drupalgap.services.rss.retrieve.call - missing url');
-          return false;
-        }
-        var api_options =
-          drupalgap_chain_callbacks(
-            drupalgap.services.rss.retrieve.options,
-            options
-          );
-        drupalgap.api.call(api_options);
-      }
-      catch (error) {
-        console.log('RSS Retrieve Error - ' + error);
-      }
-    }
-  } // <!-- get_variable -->
-};
-
-/**
  * Given the result of a drupalgap.services.rss.retrieve.call, this will iterate
  * over the RSS items and assemble them into a nice array of JSON objects and
  * return them. Returns null if it fails.
