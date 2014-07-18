@@ -108,6 +108,12 @@ function menu_block_view_pageshow(options) {
           if (options['data-role'] && options['data-role'] == 'navbar') {
             $('#' + options.container_id).navbar();
           }
+          // Optionally remove the placeholder wrapper.
+          var menu = drupalgap.menus[options.menu_name];
+          if (menu.options.wrap === 'undefined' || !menu.options.wrap) {
+            $('#' + options.container_id).children().unwrap();
+          }
+
         };
 
         // First, determine if any child has an entity arg in the path, and/or
@@ -191,8 +197,9 @@ function menu_block_view_pageshow(options) {
       // If the block's corresponding menu exists, and it has links, iterate
       // over each link, add it to an items array, then theme an item list.
       if (drupalgap.menus[delta] && drupalgap.menus[delta].links) {
-        var items = [];
-        $.each(drupalgap.menus[delta].links, function(index, menu_link) {
+        var menu = drupalgap.menus[delta],
+          items = [];
+        $.each(menu.links, function(index, menu_link) {
             // Make a deep copy of the menu link so we don't modify it.
             var link = jQuery.extend(true, {}, menu_link);
             // If there are no link options, set up defaults.
@@ -211,14 +218,18 @@ function menu_block_view_pageshow(options) {
         if (items.length > 0) {
           // Pass along any menu attributes.
           var attributes = null;
-          if (
-            drupalgap.menus[delta].options &&
-            drupalgap.menus[delta].options.attributes
-          ) { attributes = drupalgap.menus[delta].options.attributes; }
+          if (menu.options && menu.options.attributes) {
+            attributes = drupalgap.menus[delta].options.attributes;
+          }
           html = theme('item_list', {'items': items, 'attributes': attributes});
         }
       }
+      // Inject the html.
       $('#' + options.container_id).html(html).trigger('create');
+      // Optionally remove the placeholder wrapper.
+      if (menu.options.wrap === 'undefined' || !menu.options.wrap) {
+        $('#' + options.container_id).children().unwrap();
+      }
     }
   }
   catch (error) { console.log('menu_block_view_pageshow - ' + error); }
