@@ -870,11 +870,33 @@ function drupalgap_render_region(region) {
               render_link = false;
             }
             if (render_link) {
-              region_html += l(
-                region.links[i].title,
-                region.links[i].path,
-                data.options
-              );
+              // If this is a popup region link, set the jQM attributes to make
+              // this link function as a popup (dropdown) menu. Set the default
+              // link icon, if it isn't set.
+              var link_text = region.links[i].title;
+              var link_path = region.links[i].path;
+              if (data.options.popup) {
+                // If the link text isn't set, and the data icon pos isn't set,
+                // set it the data icon pos so the button and icon are rendered
+                // properly.
+                if (
+                  (!link_text || empty(link_text)) &&
+                  typeof data.options.attributes['data-iconpos'] === 'undefined'
+                ) { data.options.attributes['data-iconpos'] = 'notext'; }
+                // If data-rel and data-icon aren't set, set them.
+                if (
+                  typeof data.options.attributes['data-rel'] === 'undefined'
+                ) { data.options.attributes['data-rel'] = 'popup'; }
+                if (
+                  typeof data.options.attributes['data-icon'] === 'undefined'
+                ) { data.options.attributes['data-icon'] = 'bars'; }
+                // Popup menus need a dynamic href value on the link, so we
+                // always overwrite it.
+                link_path = null;
+                data.options.attributes['href'] =
+                  '#' + menu_container_id(data.options.popup_delta);
+              }
+              region_html += l(link_text, link_path, data.options);
             }
           }
         }
