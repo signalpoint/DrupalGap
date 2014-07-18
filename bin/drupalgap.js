@@ -8099,7 +8099,7 @@ function menu_block_view_pageshow(options) {
                 link.options.attributes['class'] = '';
               }
               link.options.attributes['class'] +=
-                ' ui-btn-active ui-state-persist ';
+                ' ui-btn ui-btn-active ui-state-persist ';
             }
             items.push(l(link.title, link.path, link.options));
         });
