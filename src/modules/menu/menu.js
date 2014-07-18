@@ -268,6 +268,27 @@ function menu_install() {
 }
 
 /**
+ * Returns a JSON object that can be used as default options for a menu object.
+ * @return {Object}
+ */
+function menu_popup_get_default_options() {
+  try {
+    return {
+      attributes: {
+        'data-role': 'listview'
+      },
+      wrap: true,
+      wrap_options: {
+        attributes: {
+          'data-role': 'popup'
+        }
+      }
+    };
+  }
+  catch (error) { console.log('menu_popup_get_default_options - ' + error); }
+}
+
+/**
  * Given a menu, this adds it to drupalgap.menus. See menu_list_system_menus
  * for examples of a menu JSON object.
  * @param {Object} menu
