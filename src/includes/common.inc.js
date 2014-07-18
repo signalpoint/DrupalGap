@@ -847,19 +847,24 @@ function drupalgap_render_region(region) {
       region_html += '<div ' + drupalgap_attributes(region.attributes) + '>';
       // If there are any links attached to this region, render them first.
       if (region.links && region.links.length > 0) {
+        // Keep a running tally of the ui-btn-left and ui-btn-right link
+        // attribute classes. This allows us to wrap multiple region links in a
+        // horizontal control group.
+        var region_link_html = '';
         for (var i = 0; i < region.links.length; i++) {
+          var region_link = region.links[i];
           // Extract the data associated with this link. If it has a 'region'
           // property then it is coming from a hook_menu, if it doesn't then it
           // is coming from settings.js.
           var data = null;
-          if (typeof region.links[i].region === 'undefined') {
-            data = region.links[i]; // link defined in settings.js
+          if (typeof region_link.region === 'undefined') {
+            data = region_link; // link defined in settings.js
             // TODO - we need to warn people that they can't make a custom menu
             // with a machine name of 'regions' now that this machine name is a
             // "system" name for rendering links in regions.
           }
           else {
-            data = region.links[i].region; // link defined via hook_menu()
+            data = region_link.region; // link defined via hook_menu()
           }
           // Check link's region visiblity settings. Links will not be rendered
           // on the system 'offline' or 'error' pages.
@@ -873,8 +878,8 @@ function drupalgap_render_region(region) {
               // If this is a popup region link, set the jQM attributes to make
               // this link function as a popup (dropdown) menu. Set the default
               // link icon, if it isn't set.
-              var link_text = region.links[i].title;
-              var link_path = region.links[i].path;
+              var link_text = region_link.title;
+              var link_path = region_link.path;
               if (data.options.popup) {
                 // If the link text isn't set, and the data icon pos isn't set,
                 // set it the data icon pos so the button and icon are rendered
@@ -896,10 +901,11 @@ function drupalgap_render_region(region) {
                 data.options.attributes['href'] =
                   '#' + menu_container_id(data.options.popup_delta);
               }
-              region_html += l(link_text, link_path, data.options);
+              region_link_html += l(link_text, link_path, data.options);
             }
           }
         }
+        region_html += region_link_html;
       }
       // Render each block in the region.
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
