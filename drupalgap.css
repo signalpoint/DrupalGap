@@ -88,3 +88,10 @@ div[role="main"] img {
   max-height: 100%;
 }
 
+/**
+ * Menus
+ */
+div[data-role="header"] div[data-role="controlgroup"] .ui-controlgroup-controls .ui-btn-icon-notext {
+  padding: .5em 1em;
+}
+
