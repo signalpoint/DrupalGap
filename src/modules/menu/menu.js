@@ -289,6 +289,47 @@ function menu_popup_get_default_options() {
 }
 
 /**
+ * Given a menu region link, this will return its data JSON object, or null if
+ * no data exists.
+ * @param {Object} region_link
+ * @return {*)
+ */
+function menu_region_link_get_data(region_link) {
+  try {
+    // Extract the data associated with this link. If it has a 'region'
+    // property then it is coming from a hook_menu, if it doesn't then it
+    // is coming from settings.js.
+    var data = null;
+    if (typeof region_link.region === 'undefined') {
+      data = region_link; // link defined in settings.js
+      // @TODO - we need to warn people that they can't make a custom menu
+      // with a machine name of 'regions' now that this machine name is a
+      // "system" name for rendering links in regions.
+    }
+    // link defined via hook_menu()
+    else { data = region_link.region; }
+    return data;
+  }
+  catch (error) { console.log('menu_region_link_get_data - ' + error); }
+}
+
+/**
+ * Given a menu region link's class name, this will return what side of the ui
+ * it is on, returns left by default, unless it specifically contains the
+ * ui-btn-right class.
+ * @param {String} class_name
+ * @return {String)
+ */
+function menu_region_link_get_side(class_name) {
+  try {
+    var side = 'left';
+    if (class_name.indexOf('ui-btn-right') != -1) { side = 'right'; }
+    return side;
+  }
+  catch (error) { console.log('menu_region_link_get_side - ' + error); }
+}
+
+/**
  * Given a menu, this adds it to drupalgap.menus. See menu_list_system_menus
  * for examples of a menu JSON object.
  * @param {Object} menu
