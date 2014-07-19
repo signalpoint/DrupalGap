@@ -601,6 +601,25 @@ function drupalgap_goto_prepare_path(path) {
 }
 
 /**
+ * Given a link JSON object, this will return its attribute class value, or null
+ * if it isn't set.
+ * @param {Object} link
+ * @return {String}
+ */
+function drupalgap_link_get_class(link) {
+  try {
+    var css_class = null;
+    if (
+      link.options && link.options.attributes &&
+      link.options.attributes['class'] &&
+      !empty(link.options.attributes['class'])
+    ) { css_class = link.options.attributes['class']; }
+    return css_class;
+  }
+  catch (error) { console.log('drupalgap_link_get_class - ' + error); }
+}
+
+/**
  * Given a router path, this will return the CSS class name that can be used for
  * the page container.
  * @param {String} router_path The page router path.
@@ -847,66 +866,126 @@ function drupalgap_render_region(region) {
       region_html += '<div ' + drupalgap_attributes(region.attributes) + '>';
       // If there are any links attached to this region, render them first.
       if (region.links && region.links.length > 0) {
-        // Keep a running tally of the ui-btn-left and ui-btn-right link
-        // attribute classes. This allows us to wrap multiple region links in a
-        // horizontal control group.
+
+        // Let's first iterate over all of the region links and keep counts of
+        // any links that use the ui-btn-left and ui-btn-right class attribute.
+        // This will allow us to properly wrap region links in a control group.
+        var ui_btn_left_count = 0;
+        var ui_btn_right_count = 0;
+        $.each(region.links, function(index, link) {
+            var data = menu_region_link_get_data(link);
+            if (!drupalgap_check_visibility('region', data)) { return; }
+            var css_class = drupalgap_link_get_class(link);
+            if (css_class) {
+              var side = menu_region_link_get_side(css_class);
+              if (side == 'left') { ui_btn_left_count++; }
+              else if (side == 'right') { ui_btn_right_count++; }
+            }
+        });
+
+        // We need to separately render each side of the header (left, right).
+        // That allows us to properly wrap the links with a control group if
+        // it is needed.
         var region_link_html = '';
+        var ui_btn_left_html = '';
+        var ui_btn_right_html = '';
         for (var i = 0; i < region.links.length; i++) {
+          // Grab the link and its data.
           var region_link = region.links[i];
-          // Extract the data associated with this link. If it has a 'region'
-          // property then it is coming from a hook_menu, if it doesn't then it
-          // is coming from settings.js.
-          var data = null;
-          if (typeof region_link.region === 'undefined') {
-            data = region_link; // link defined in settings.js
-            // TODO - we need to warn people that they can't make a custom menu
-            // with a machine name of 'regions' now that this machine name is a
-            // "system" name for rendering links in regions.
-          }
-          else {
-            data = region_link.region; // link defined via hook_menu()
-          }
+          var data = menu_region_link_get_data(region_link);
           // Check link's region visiblity settings. Links will not be rendered
           // on the system 'offline' or 'error' pages.
           var render_link = false;
+          // @TODO - this additional call to drupalgap_check_visibility() here
+          // may be expensive, consider setting aside the results from the call
+          // above, and using them here.
           if (drupalgap_check_visibility('region', data)) {
+
+            // Don't render the link on the offline or error pages.
             render_link = true;
-            if (current_path == 'offline' || current_path == 'error') {
-              render_link = false;
+            if (
+              current_path == 'offline' || current_path == 'error'
+            ) { render_link = false; }
+            if (!render_link) { continue; }
+
+            // If this is a popup region link, set the jQM attributes to make
+            // this link function as a popup (dropdown) menu. Set the default
+            // link icon, if it isn't set.
+            var link_text = region_link.title;
+            var link_path = region_link.path;
+            if (data.options.popup) {
+              // If the link text isn't set, and the data icon pos isn't set,
+              // set it the data icon pos so the button and icon are rendered
+              // properly.
+              if (
+                (!link_text || empty(link_text)) &&
+                typeof data.options.attributes['data-iconpos'] === 'undefined'
+              ) { data.options.attributes['data-iconpos'] = 'notext'; }
+              // If data-rel, data-icon, data-role aren't set, set them.
+              if (
+                typeof data.options.attributes['data-rel'] === 'undefined'
+              ) { data.options.attributes['data-rel'] = 'popup'; }
+              if (
+                typeof data.options.attributes['data-icon'] === 'undefined'
+              ) { data.options.attributes['data-icon'] = 'bars'; }
+              if (
+                typeof data.options.attributes['data-role'] === 'undefined'
+              ) { data.options.attributes['data-role'] = 'button'; }
+              // Popup menus need a dynamic href value on the link, so we
+              // always overwrite it.
+              link_path = null;
+              data.options.attributes['href'] =
+                '#' + menu_container_id(data.options.popup_delta);
             }
-            if (render_link) {
-              // If this is a popup region link, set the jQM attributes to make
-              // this link function as a popup (dropdown) menu. Set the default
-              // link icon, if it isn't set.
-              var link_text = region_link.title;
-              var link_path = region_link.path;
-              if (data.options.popup) {
-                // If the link text isn't set, and the data icon pos isn't set,
-                // set it the data icon pos so the button and icon are rendered
-                // properly.
-                if (
-                  (!link_text || empty(link_text)) &&
-                  typeof data.options.attributes['data-iconpos'] === 'undefined'
-                ) { data.options.attributes['data-iconpos'] = 'notext'; }
-                // If data-rel and data-icon aren't set, set them.
-                if (
-                  typeof data.options.attributes['data-rel'] === 'undefined'
-                ) { data.options.attributes['data-rel'] = 'popup'; }
-                if (
-                  typeof data.options.attributes['data-icon'] === 'undefined'
-                ) { data.options.attributes['data-icon'] = 'bars'; }
-                // Popup menus need a dynamic href value on the link, so we
-                // always overwrite it.
-                link_path = null;
-                data.options.attributes['href'] =
-                  '#' + menu_container_id(data.options.popup_delta);
+            else {
+              // Set the data-role to a button, if one isn't already set.
+              if (typeof data.options.attributes['data-role'] === 'undefined') {
+                data.options.attributes['data-role'] = 'button';
               }
-              region_link_html += l(link_text, link_path, data.options);
             }
+            // If it has notext for the icon position, force the text to be
+            // an nbsp.
+            if (data.options.attributes['data-iconpos'] == 'notext') {
+              link_text = '&nbsp;';
+            }
+
+            // Render the link on the proper side.
+            var css_class = drupalgap_link_get_class(region_link);
+            var side = menu_region_link_get_side(css_class);
+            var link_html = l(link_text, link_path, data.options);
+            if (side == 'left') { ui_btn_left_html += link_html; }
+            else if (side == 'right') { ui_btn_right_html += link_html; }
+
           }
         }
-        region_html += region_link_html;
+
+        // If there was more than one link on a side, wrap it in a control
+        // group, and remove the ui-btn class from the links.
+        if (ui_btn_left_count > 1) {
+          var attrs = {
+            'data-type': 'horizontal',
+            'data-role': 'controlgroup',
+            'class': 'ui-btn-left'
+          };
+          ui_btn_left_html = '<div ' + drupalgap_attributes(attrs) + '>' +
+            ui_btn_left_html.replace(/ui-btn-left/g, '') +
+          '</div>';
+        }
+        if (ui_btn_right_count > 1) {
+          var attrs = {
+            'data-type': 'horizontal',
+            'data-role': 'controlgroup',
+            'class': 'ui-btn-right'
+          };
+          ui_btn_right_html = '<div ' + drupalgap_attributes(attrs) + '>' +
+            ui_btn_right_html.replace(/ui-btn-right/g, '') +
+          '</div>';
+        }
+
+        // Finally render the ui sides on the region.
+        region_html += ui_btn_left_html + ui_btn_right_html;
       }
+
       // Render each block in the region.
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
