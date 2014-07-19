@@ -447,7 +447,13 @@ function drupalgap_alert(message) {
       if (options.title) { title = options.title; }
       if (options.buttonName) { buttonName = options.buttonName; }
     }
-    navigator.notification.alert(message, alertCallback, title, buttonName);
+    if (typeof navigator.notification === 'undefined') {
+      alert(message);
+      alertCallback();
+    }
+    else {
+      navigator.notification.alert(message, alertCallback, title, buttonName);
+    }
   }
   catch (error) { console.log('drupalgap_alert - ' + error); }
 }
