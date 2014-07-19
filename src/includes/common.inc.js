@@ -894,19 +894,16 @@ function drupalgap_render_region(region) {
           var region_link = region.links[i];
           var data = menu_region_link_get_data(region_link);
           // Check link's region visiblity settings. Links will not be rendered
-          // on the system 'offline' or 'error' pages.
-          var render_link = false;
+          // on certain system pages.
           // @TODO - this additional call to drupalgap_check_visibility() here
           // may be expensive, consider setting aside the results from the call
           // above, and using them here.
           if (drupalgap_check_visibility('region', data)) {
 
-            // Don't render the link on the offline or error pages.
-            render_link = true;
-            if (
-              current_path == 'offline' || current_path == 'error'
-            ) { render_link = false; }
-            if (!render_link) { continue; }
+            // Don't render the link on certain system pages.
+            if (in_array(current_path, ['offline', 'error', 'user/logout'])) {
+              continue;
+            }
 
             // If this is a popup region link, set the jQM attributes to make
             // this link function as a popup (dropdown) menu. Set the default
