@@ -2416,6 +2416,9 @@ function drupalgap_render_page() {
  */
 function drupalgap_render_region(region) {
   try {
+    // @TODO - this function is getting huge. Break it up into many more
+    // manageable functions.
+
     // Make sure there are blocks specified for this theme in settings.js.
     if (!drupalgap.settings.blocks[drupalgap.settings.theme]) {
       var msg = 'drupalgap_render_region - there are no blocks for the "' +
@@ -2429,6 +2432,18 @@ function drupalgap_render_region(region) {
     var region_html = '';
     // If the region has blocks specified for it in the theme in settings.js...
     if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
+
+      // Determine how many blocks are in the region.
+      /*var block_count = 0;
+      $.each(
+        drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
+        function(block_delta, block_settings) {
+          block_count++;
+        }
+      );*/
+      // If there are no blocks in the region, skip the region.
+      //if (block_count == 0) { return region_html; }
+
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
       if (!region.attributes['class']) { region.attributes['class'] = ''; }
@@ -3453,10 +3468,28 @@ function _drupalgap_form_render_element(form, element) {
         // This is used by field widget forms to extend form elements.
         if (!items[delta].children) { items[delta].children = []; }
 
-        // Generate the label for field items on delta zero only.
+        // Generate the label for field items on delta zero only. Keep in mind
+        // rendered labels, with an element title_placeholder set to true,
+        // will not be appended to the result html later.
         if (element.is_field && delta == 0) {
           item.title = element.title;
           item_label = theme('form_element_label', {'element': item});
+        }
+
+        // If the element's title is set to be a placeholder, set the
+        // placeholder attribute equal to the title on the current item, unless
+        // someone already set it. If it is a required element, mark it as such.
+        if (
+          delta == 0 && typeof element.title_placeholder !== 'undefined' &&
+          element.title_placeholder &&
+          typeof variables.attributes['placeholder'] === 'undefined'
+        ) {
+          var placeholder = element.title;
+          // @TODO show a better required marker for placeholders.
+          /*if (element.required) {
+            placeholder += ' ' + theme('form_required_marker', { });
+          }*/
+          variables.attributes['placeholder'] = placeholder;
         }
 
         // If there wasn't a default value provided, set one. Then set the
@@ -3533,11 +3566,18 @@ function _drupalgap_form_render_element(form, element) {
 
     // Add a label to the element, except submit and hidden elements. Any field
     // labels have already been rendered, other element labels must be manually
-    // rendered here.
+    // rendered here. Don't attach the label if the element's title_placeholder
+    // is set to true.
     if (element.type != 'submit' && element.type != 'hidden') {
-      if (element.is_field) { html += item_label; }
+      if (
+        typeof element.title_placeholder !== 'undefined' &&
+        element.title_placeholder
+      ) { /* Skip label for placeholders. */ }
       else {
-        html += theme('form_element_label', {'element': element});
+        if (element.is_field) { html += item_label; }
+        else {
+          html += theme('form_element_label', {'element': element});
+        }
       }
     }
 
@@ -3945,6 +3985,7 @@ function theme_email(variables) {
 function theme_form_element_label(variables) {
   try {
     var element = variables.element;
+    // Any elements with a title_placeholder set to true
     // By default, use the element id as the label for, unless the element is
     // a radio, then use the name.
     var label_for = '';
@@ -3956,11 +3997,23 @@ function theme_form_element_label(variables) {
     // Render the label.
     var html =
       '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
-    if (element.required) { html += '*'; }
+    if (element.required) { html += theme('form_required_marker', { }); }
     html += '</label>';
     return html;
   }
   catch (error) { console.log('theme_form_element_label - ' + error); }
+}
+
+/**
+ * Themes a marker for a required form element label.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_form_required_marker(variables) {
+  try {
+    return '*';
+  }
+  catch (error) { console.log('theme_form_required_marker - ' + error); }
 }
 
 /**
@@ -9774,18 +9827,20 @@ function user_login_form(form, form_state) {
     form.entity_type = 'user';
     form.bundle = null;
     form.elements.name = {
-      'type': 'textfield',
-      'title': 'Username',
-      'required': true
+      type: 'textfield',
+      title: 'Username',
+      title_placeholder: true,
+      required: true
     };
     form.elements.pass = {
-      'type': 'password',
-      'title': 'Password',
-      'required': true
+      type: 'password',
+      title: 'Password',
+      title_placeholder: true,
+      required: true
     };
     form.elements.submit = {
-      'type': 'submit',
-      'value': 'Login'
+      type: 'submit',
+      value: 'Login'
     };
     return form;
   }
@@ -9939,16 +9994,18 @@ function user_register_form(form, form_state) {
     form.entity_type = 'user';
     form.bundle = null;
     form.elements.name = {
-      'type': 'textfield',
-      'title': 'Username',
-      'required': true,
-      'description': 'Spaces are allowed; punctuation is not allowed except ' +
+      type: 'textfield',
+      title: 'Username',
+      title_placeholder: true,
+      required: true,
+      description: 'Spaces are allowed; punctuation is not allowed except ' +
         'for periods, hyphens, apostrophes, and underscores.'
     };
     form.elements.mail = {
-      'type': 'email',
-      'title': 'E-mail address',
-      'required': true
+      type: 'email',
+      title: 'E-mail address',
+      title_placeholder: true,
+      required: true
     };
     // If e-mail verification is not requred, provide password fields and
     // the confirm e-mail address field.
@@ -9956,16 +10013,19 @@ function user_register_form(form, form_state) {
       form.elements.conf_mail = {
         type: 'email',
         title: 'Confirm e-mail address',
+        title_placeholder: true,
         required: true
       };
       form.elements.pass = {
         type: 'password',
         title: 'Password',
+        title_placeholder: true,
         required: true
       };
       form.elements.pass2 = {
         type: 'password',
         title: 'Confirm password',
+        title_placeholder: true,
         required: true
       };
     }
