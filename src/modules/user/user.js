@@ -93,18 +93,20 @@ function user_login_form(form, form_state) {
     form.entity_type = 'user';
     form.bundle = null;
     form.elements.name = {
-      'type': 'textfield',
-      'title': 'Username',
-      'required': true
+      type: 'textfield',
+      title: 'Username',
+      title_placeholder: true,
+      required: true
     };
     form.elements.pass = {
-      'type': 'password',
-      'title': 'Password',
-      'required': true
+      type: 'password',
+      title: 'Password',
+      title_placeholder: true,
+      required: true
     };
     form.elements.submit = {
-      'type': 'submit',
-      'value': 'Login'
+      type: 'submit',
+      value: 'Login'
     };
     return form;
   }
@@ -258,16 +260,18 @@ function user_register_form(form, form_state) {
     form.entity_type = 'user';
     form.bundle = null;
     form.elements.name = {
-      'type': 'textfield',
-      'title': 'Username',
-      'required': true,
-      'description': 'Spaces are allowed; punctuation is not allowed except ' +
+      type: 'textfield',
+      title: 'Username',
+      title_placeholder: true,
+      required: true,
+      description: 'Spaces are allowed; punctuation is not allowed except ' +
         'for periods, hyphens, apostrophes, and underscores.'
     };
     form.elements.mail = {
-      'type': 'email',
-      'title': 'E-mail address',
-      'required': true
+      type: 'email',
+      title: 'E-mail address',
+      title_placeholder: true,
+      required: true
     };
     // If e-mail verification is not requred, provide password fields and
     // the confirm e-mail address field.
@@ -275,16 +279,19 @@ function user_register_form(form, form_state) {
       form.elements.conf_mail = {
         type: 'email',
         title: 'Confirm e-mail address',
+        title_placeholder: true,
         required: true
       };
       form.elements.pass = {
         type: 'password',
         title: 'Password',
+        title_placeholder: true,
         required: true
       };
       form.elements.pass2 = {
         type: 'password',
         title: 'Confirm password',
+        title_placeholder: true,
         required: true
       };
     }
