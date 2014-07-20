@@ -738,10 +738,28 @@ function _drupalgap_form_render_element(form, element) {
         // This is used by field widget forms to extend form elements.
         if (!items[delta].children) { items[delta].children = []; }
 
-        // Generate the label for field items on delta zero only.
+        // Generate the label for field items on delta zero only. Keep in mind
+        // rendered labels, with an element title_placeholder set to true,
+        // will not be appended to the result html later.
         if (element.is_field && delta == 0) {
           item.title = element.title;
           item_label = theme('form_element_label', {'element': item});
+        }
+
+        // If the element's title is set to be a placeholder, set the
+        // placeholder attribute equal to the title on the current item, unless
+        // someone already set it. If it is a required element, mark it as such.
+        if (
+          delta == 0 && typeof element.title_placeholder !== 'undefined' &&
+          element.title_placeholder &&
+          typeof variables.attributes['placeholder'] === 'undefined'
+        ) {
+          var placeholder = element.title;
+          // @TODO show a better required marker for placeholders.
+          /*if (element.required) {
+            placeholder += ' ' + theme('form_required_marker', { });
+          }*/
+          variables.attributes['placeholder'] = placeholder;
         }
 
         // If there wasn't a default value provided, set one. Then set the
@@ -818,11 +836,18 @@ function _drupalgap_form_render_element(form, element) {
 
     // Add a label to the element, except submit and hidden elements. Any field
     // labels have already been rendered, other element labels must be manually
-    // rendered here.
+    // rendered here. Don't attach the label if the element's title_placeholder
+    // is set to true.
     if (element.type != 'submit' && element.type != 'hidden') {
-      if (element.is_field) { html += item_label; }
+      if (
+        typeof element.title_placeholder !== 'undefined' &&
+        element.title_placeholder
+      ) { /* Skip label for placeholders. */ }
       else {
-        html += theme('form_element_label', {'element': element});
+        if (element.is_field) { html += item_label; }
+        else {
+          html += theme('form_element_label', {'element': element});
+        }
       }
     }
 
@@ -1230,6 +1255,7 @@ function theme_email(variables) {
 function theme_form_element_label(variables) {
   try {
     var element = variables.element;
+    // Any elements with a title_placeholder set to true
     // By default, use the element id as the label for, unless the element is
     // a radio, then use the name.
     var label_for = '';
@@ -1241,11 +1267,23 @@ function theme_form_element_label(variables) {
     // Render the label.
     var html =
       '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
-    if (element.required) { html += '*'; }
+    if (element.required) { html += theme('form_required_marker', { }); }
     html += '</label>';
     return html;
   }
   catch (error) { console.log('theme_form_element_label - ' + error); }
+}
+
+/**
+ * Themes a marker for a required form element label.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_form_required_marker(variables) {
+  try {
+    return '*';
+  }
+  catch (error) { console.log('theme_form_required_marker - ' + error); }
 }
 
 /**
