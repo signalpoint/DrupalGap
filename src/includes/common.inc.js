@@ -845,6 +845,9 @@ function drupalgap_render_page() {
  */
 function drupalgap_render_region(region) {
   try {
+    // @TODO - this function is getting huge. Break it up into many more
+    // manageable functions.
+
     // Make sure there are blocks specified for this theme in settings.js.
     if (!drupalgap.settings.blocks[drupalgap.settings.theme]) {
       var msg = 'drupalgap_render_region - there are no blocks for the "' +
@@ -858,6 +861,18 @@ function drupalgap_render_region(region) {
     var region_html = '';
     // If the region has blocks specified for it in the theme in settings.js...
     if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
+
+      // Determine how many blocks are in the region.
+      /*var block_count = 0;
+      $.each(
+        drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
+        function(block_delta, block_settings) {
+          block_count++;
+        }
+      );*/
+      // If there are no blocks in the region, skip the region.
+      //if (block_count == 0) { return region_html; }
+
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
       if (!region.attributes['class']) { region.attributes['class'] = ''; }
