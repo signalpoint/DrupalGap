@@ -243,7 +243,18 @@ function theme_views_view(variables) {
         close_row = '</li>';
         break;
       case 'table':
-        open = '<table>';
+      case 'jqm_table':
+        var table_attributes = '';
+        if (variables.format == 'jqm_table') {
+          table_attributes = drupalgap_attributes({
+            'data-role': 'table',
+            'data-mode': 'reflow'
+          });
+          console.log(
+            'WARNING: theme_views_view() - jqm_table not supported, yet'
+          );
+        }
+        open = '<table ' + table_attributes + '>';
         close = '</table>';
         open_row = '<tr>';
         close_row = '</tr>';
