@@ -862,17 +862,6 @@ function drupalgap_render_region(region) {
     // If the region has blocks specified for it in the theme in settings.js...
     if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
 
-      // Determine how many blocks are in the region.
-      /*var block_count = 0;
-      $.each(
-        drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
-        function(block_delta, block_settings) {
-          block_count++;
-        }
-      );*/
-      // If there are no blocks in the region, skip the region.
-      //if (block_count == 0) { return region_html; }
-
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
       if (!region.attributes['class']) { region.attributes['class'] = ''; }
@@ -880,8 +869,9 @@ function drupalgap_render_region(region) {
       // Open the region container.
       region_html += '<div ' + drupalgap_attributes(region.attributes) + '>';
       // If there are any links attached to this region, render them first.
+      var region_link_count = 0;
+      var region_link_popup_count = 0;
       if (region.links && region.links.length > 0) {
-
         // Let's first iterate over all of the region links and keep counts of
         // any links that use the ui-btn-left and ui-btn-right class attribute.
         // This will allow us to properly wrap region links in a control group.
@@ -890,6 +880,7 @@ function drupalgap_render_region(region) {
         $.each(region.links, function(index, link) {
             var data = menu_region_link_get_data(link);
             if (!drupalgap_check_visibility('region', data)) { return; }
+            region_link_count++;
             var css_class = drupalgap_link_get_class(link);
             if (css_class) {
               var side = menu_region_link_get_side(css_class);
@@ -926,6 +917,7 @@ function drupalgap_render_region(region) {
             var link_text = region_link.title;
             var link_path = region_link.path;
             if (data.options.popup) {
+              region_link_popup_count++;
               // If the link text isn't set, and the data icon pos isn't set,
               // set it the data icon pos so the button and icon are rendered
               // properly.
@@ -998,7 +990,10 @@ function drupalgap_render_region(region) {
         region_html += ui_btn_left_html + ui_btn_right_html;
       }
 
-      // Render each block in the region.
+      // Render each block in the region. Determine how many visible blocks are
+      // in the region.
+      var block_count = 0;
+      var block_menu_count = 0;
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
           // Check the block's visibility settings.
@@ -1013,6 +1008,8 @@ function drupalgap_render_region(region) {
           }
           if (render_block) {
             var block = drupalgap_block_load(block_delta);
+            block_count++;
+            if (menu_load(block_delta)) { block_menu_count++; }
             if (block) {
               region_html += module_invoke(
                 block.module,
@@ -1023,6 +1020,21 @@ function drupalgap_render_region(region) {
             }
           }
       });
+      // If this was a header or footer, and there were only region links
+      // rendered, place an empty header in the region.
+      if (
+        in_array(region.attributes['data-role'], ['header', 'footer']) &&
+        (
+          block_count == 0 && region_link_count > 0 ||
+          block_count - block_menu_count == 0
+        ) ||
+        (
+          region_link_count > 0 &&
+          region_link_popup_count >= block_menu_count &&
+          block_count == 0
+        )
+      ) { region_html += '<h2>&nbsp;</h2>'; }
+
       // Close the region container.
       region_html += '</div><!-- ' + region.name + ' -->';
     }
