@@ -4,32 +4,33 @@
 function easystreet3_info() {
   try {
     var theme = {
-      "name":"easystreet3",
-      "regions":{
-        "header":{
-          "attributes":{
-            "data-role":"header",
+      name: 'easystreet3',
+      regions: {
+        header: {
+          attributes: {
+            'data-role': 'header',
             'data-theme': 'b',
+            'data-position': 'fixed'
           }
         },
-        "navigation":{
-          "attributes":{
-            "data-role":"navbar"
+        sub_header: {
+          attributes: {
+            'data-role': 'header'
           }
         },
-        "sub_navigation":{
-          "attributes":{
-            "data-role":"navbar"
+        navigation: {
+          attributes: {
+            'data-role': 'navbar'
           }
         },
-        "content":{
-          "attributes":{
-            "data-role":"content"
+        content: {
+          attributes: {
+            'data-role': 'content'
           }
         },
-        "footer":{
-          "attributes":{
-            "data-role":"footer",
+        footer: {
+          attributes: {
+            'data-role': 'footer',
             'data-theme': 'b',
             'data-position': 'fixed'
           }
