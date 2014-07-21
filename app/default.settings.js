@@ -91,22 +91,23 @@ drupalgap.settings.menus = {}; // Do not remove this line.
 
 // User Menu Anonymous
 drupalgap.settings.menus['user_menu_anonymous'] = {
-  links:[
+  options: menu_popup_get_default_options(),
+  links: [
     {
       title: 'Login',
       path: 'user/login',
       options: {
         attributes: {
-          'data-theme': 'b'
+          'data-icon': 'lock'
         }
       }
     },
     {
-      title: 'Register',
+      title: 'Create new account',
       path: 'user/register',
       options: {
         attributes: {
-          'data-theme': 'b'
+          'data-icon': 'plus'
         }
       }
     }
@@ -115,13 +116,14 @@ drupalgap.settings.menus['user_menu_anonymous'] = {
 
 // User Menu Authenticated
 drupalgap.settings.menus['user_menu_authenticated'] = {
-  links:[
+  options: menu_popup_get_default_options(),
+  links: [
     {
       title: 'My Account',
       path: 'user',
       options: {
         attributes: {
-          'data-theme': 'b'
+          'data-icon': 'user'
         }
       }
     },
@@ -130,7 +132,7 @@ drupalgap.settings.menus['user_menu_authenticated'] = {
       path: 'user/logout',
       options: {
         attributes: {
-          'data-theme': 'b'
+          'data-icon': 'delete'
         }
       }
     }
@@ -139,7 +141,8 @@ drupalgap.settings.menus['user_menu_authenticated'] = {
 
 // Main Menu
 drupalgap.settings.menus['main_menu'] = {
-  links:[
+  options: menu_popup_get_default_options(),
+  links: [
     {
       title:'Content',
       path:'node',
@@ -177,38 +180,33 @@ drupalgap.settings.blocks = {}; // Do not remove this line.
 
 // Easy Street 3 Theme Blocks
 drupalgap.settings.blocks.easystreet3 = {
-  header:{
-    title:{}
-  },
-  navigation:{
-    user_menu_anonymous:{
-      roles:{
-        value:['anonymous user'],
-        mode:'include',
+  header: {
+    user_menu_anonymous: {
+      roles: {
+        value: ['anonymous user'],
+        mode: 'include',
       }
     },
-    user_menu_authenticated:{
-      roles:{
-        value:['authenticated user'],
-        mode:'include',
-      }
-    }
-  },
-  sub_navigation:{
-    main_menu:{
-      roles:{
-        value:['administrator'],
-        mode:'include',
+    user_menu_authenticated: {
+      roles: {
+        value: ['authenticated user'],
+        mode: 'include',
       }
     },
-    primary_local_tasks:{},
+    main_menu: { }
   },
-  content:{
-    messages: {},
-    main:{}
+  sub_header: {
+    title: { }
   },
-  footer:{
-    powered_by:{}
+  navigation: {
+    primary_local_tasks: { }
+  },
+  content: {
+    messages: { },
+    main: { }
+  },
+  footer: {
+    powered_by: { }
   }
 };
 
@@ -222,32 +220,79 @@ drupalgap.settings.menus.regions['header'] = {
   links:[
     /* Home Button */
     {
-      title:'Home',
-      path:'',
-      options:{
-        attributes:{
-          "data-icon":"home",
-          "class":"ui-btn-left"
+      path: '',
+      options: {
+        attributes: {
+          'data-icon': 'home',
+          'data-iconpos': 'notext',
+          'class': 'ui-btn-left'
         }
       },
-      pages:{
-        value:[''],
-        mode:"exclude"
+      pages: {
+        value: [''],
+        mode: 'exclude'
       }
     },
-    /* Back Button */
+    /* Main Menu Popup Menu Button */
     {
-      title:'Back',
-      options:{
-        attributes:{
-          "data-icon":"back",
-          "class":"ui-btn-right",
-          "onclick":"javascript:drupalgap_back();"
+      options: {
+        popup: true,
+        popup_delta: 'main_menu',
+        attributes: {
+          'class': 'ui-btn-left',
+          'data-icon': 'bars'
+        }
+      }
+    },
+    /* Anonymous User Popup Menu Button */
+    {
+      options: {
+        popup: true,
+        popup_delta: 'user_menu_anonymous',
+        attributes: {
+          'class': 'ui-btn-right',
+          'data-icon': 'user'
         }
       },
-      pages:{
-        value:[''],
-        mode:"exclude"
+      roles: {
+        value: ['anonymous user'],
+        mode: 'include',
+      }
+    },
+    /* Authenticated User Popup Menu Button */
+    {
+      options: {
+        popup: true,
+        popup_delta: 'user_menu_authenticated',
+        attributes: {
+          'class': 'ui-btn-right',
+          'data-icon': 'user'
+        }
+      },
+      roles: {
+        value: ['authenticated user'],
+        mode: 'include',
+      }
+    }
+  ]
+};
+
+// Footer Region Links
+drupalgap.settings.menus.regions['footer'] = {
+  links: [
+    /* Back Button */
+    {
+      options: {
+        attributes: {
+          'data-icon': 'back',
+          'data-iconpos': 'notext',
+          'class': 'ui-btn-right',
+          'onclick': 'javascript:drupalgap_back();'
+        }
+      },
+      pages: {
+        value: [''],
+        mode: 'exclude'
       }
     }
   ]
