@@ -342,6 +342,22 @@ function menu_save(menu) {
 }
 
 /**
+ * Given a menu name, this will return it from drupalgap.menus, or return null
+ * if it doesn't exist.
+ * @param {String} name
+ * @return {*}
+ */
+function menu_load(name) {
+  try {
+    if (typeof drupalgap.menus[name] !== 'undefined') {
+      return drupalgap.menus[name];
+    }
+    return null;
+  }
+  catch (error) { console.log('menu_load - ' + error); }
+}
+
+/**
  * Given a menu name, this will return its container id for that page. You may
  * optionally pass in a page id as the second argument, otherwise it will use
  * the current page id.
