@@ -25,7 +25,8 @@ function easystreet3_info() {
         },
         content: {
           attributes: {
-            'data-role': 'content'
+            'class': 'ui-content',
+            'role': 'main'
           }
         },
         footer: {
