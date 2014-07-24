@@ -89,8 +89,10 @@ function menu_block_view_pageshow(options) {
               drupalgap.menu_links[router_path].children,
               function(index, child) {
                 if (drupalgap.menu_links[child] && (
-                  drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
-                  drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK'
+                  drupalgap.menu_links[child].type ==
+                    'MENU_DEFAULT_LOCAL_TASK' ||
+                  drupalgap.menu_links[child].type ==
+                    'MENU_LOCAL_TASK'
                 )) {
                   if (drupalgap_menu_access(child, null, result)) {
                     menu_items.push(drupalgap.menu_links[child]);
@@ -99,8 +101,8 @@ function menu_block_view_pageshow(options) {
               }
             );
             // If there was only one local task menu item, and it is the default
-            // local task, don't render the menu, otherwise render the menu as an
-            // item list as long as there are items to render.
+            // local task, don't render the menu, otherwise render the menu as
+            // an item list as long as there are items to render.
             if (
               menu_items.length == 1 &&
               menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK'
