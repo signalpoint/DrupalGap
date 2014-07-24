@@ -184,14 +184,12 @@ function drupalgap_entity_render_content(entity_type, entity) {
       entity_type,
       bundle
     );
-    // @TODO - I think we need to update this entity in local storage so this
-    // content property sticks.
-    // @UPDATE - I don't think this is working...
-    /*_entity_local_storage_save(
+    // Update this entity in local storage so the content property sticks.
+    _entity_local_storage_save(
       entity_type,
       entity[entity_primary_key(entity_type)],
       entity
-    );*/
+    );
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
