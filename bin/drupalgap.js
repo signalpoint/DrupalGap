@@ -6310,14 +6310,12 @@ function drupalgap_entity_render_content(entity_type, entity) {
       entity_type,
       bundle
     );
-    // @TODO - I think we need to update this entity in local storage so this
-    // content property sticks.
-    // @UPDATE - I don't think this is working...
-    /*_entity_local_storage_save(
+    // Update this entity in local storage so the content property sticks.
+    _entity_local_storage_save(
       entity_type,
       entity[entity_primary_key(entity_type)],
       entity
-    );*/
+    );
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
@@ -8145,52 +8143,58 @@ function menu_block_view_pageshow(options) {
 
         // Define a success callback that will be called later on...
         var _success = function(result) {
-          var menu_items = [];
-          var link_path = '';
-          $.each(
-            drupalgap.menu_links[router_path].children,
-            function(index, child) {
-              if (drupalgap.menu_links[child] && (
-                drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
-                drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK'
-              )) {
-                if (drupalgap_menu_access(child, null, result)) {
-                  menu_items.push(drupalgap.menu_links[child]);
+          try {
+            var menu_items = [];
+            var link_path = '';
+            $.each(
+              drupalgap.menu_links[router_path].children,
+              function(index, child) {
+                if (drupalgap.menu_links[child] && (
+                  drupalgap.menu_links[child].type ==
+                    'MENU_DEFAULT_LOCAL_TASK' ||
+                  drupalgap.menu_links[child].type ==
+                    'MENU_LOCAL_TASK'
+                )) {
+                  if (drupalgap_menu_access(child, null, result)) {
+                    menu_items.push(drupalgap.menu_links[child]);
+                  }
                 }
               }
+            );
+            // If there was only one local task menu item, and it is the default
+            // local task, don't render the menu, otherwise render the menu as
+            // an item list as long as there are items to render.
+            if (
+              menu_items.length == 1 &&
+              menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK'
+            ) { html = ''; }
+            else {
+              var items = [];
+              $.each(menu_items, function(index, item) {
+                  items.push(
+                    l(item.title, drupalgap_place_args_in_path(item.path))
+                  );
+              });
+              if (items.length > 0) {
+                html = theme('item_list', {'items': items});
+              }
             }
-          );
-          // If there was only one local task menu item, and it is the default
-          // local task, don't render the menu, otherwise render the menu as an
-          // item list as long as there are items to render.
-          if (
-            menu_items.length == 1 &&
-            menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK'
-          ) { html = ''; }
-          else {
-            var items = [];
-            $.each(menu_items, function(index, item) {
-                items.push(
-                  l(item.title, drupalgap_place_args_in_path(item.path))
-                );
-            });
-            if (items.length > 0) {
-              html = theme('item_list', {'items': items});
+            // Inject the html.
+            $('#' + options.container_id).html(html).trigger('create');
+            // If the block's region is a jQM navbar, refresh the navbar.
+            if (options['data-role'] && options['data-role'] == 'navbar') {
+              $('#' + options.container_id).navbar();
             }
+            // Optionally remove the placeholder wrapper.
+            var menu = drupalgap.menus[options.menu_name];
+            if (
+              typeof menu.options !== 'undefined' &&
+              (typeof menu.options.wrap === 'undefined' || !menu.options.wrap)
+            ) { $('#' + options.container_id).children().unwrap(); }
           }
-          // Inject the html.
-          $('#' + options.container_id).html(html).trigger('create');
-          // If the block's region is a jQM navbar, refresh the navbar.
-          if (options['data-role'] && options['data-role'] == 'navbar') {
-            $('#' + options.container_id).navbar();
+          catch (error) {
+            console.log('menu_block_view_pageshow - success - ' + error);
           }
-          // Optionally remove the placeholder wrapper.
-          var menu = drupalgap.menus[options.menu_name];
-          if (
-            typeof menu.options !== 'undefined' &&
-            typeof menu.options.wrap === 'undefined' || !menu.options.wrap
-          ) { $('#' + options.container_id).children().unwrap(); }
-
         };
 
         // First, determine if any child has an entity arg in the path, and/or
