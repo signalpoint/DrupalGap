@@ -1196,9 +1196,9 @@ function _drupalgap_form_validate(form, form_state) {
           // Check for empty values.
           if (empty(value)) { valid = false; }
           // Validate a required select list.
-          else if (element.type == 'select' && element.required && value == '') {
-            valid = false;
-          }
+          else if (
+            element.type == 'select' && element.required && value == ''
+          ) { valid = false; }
           if (!valid) {
             var field_title = name;
             if (element.title) { field_title = element.title; }
