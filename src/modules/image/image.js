@@ -211,6 +211,7 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
   try {
     var results = [];
     var fields = drupalgap_field_info_instances(entity_type, bundle);
+    if (!fields) { return false; }
     $.each(fields, function(name, field) {
         if (field.widget &&
           field.widget.type &&
