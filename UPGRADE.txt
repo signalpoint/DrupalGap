@@ -39,6 +39,12 @@ version of DrupalGap to another.
 | Version Change Notes for Developers |
 |=====================================|
 
+7.x-1.0-rc1 => 7.x-1.0-rc2
+
+  Required select lists now use an empty string value instead of -1 for the
+  placeholder option. Any custom form validation you may have used that
+  depended on this -1 value, needs to check for an empty string now instead.
+
 7.x-1.7-alpha => 7.x-1.8-alpha
 
   The user-profile.tpl.html file now contains a {:content:} placeholder to
