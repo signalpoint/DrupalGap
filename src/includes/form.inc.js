@@ -1195,10 +1195,8 @@ function _drupalgap_form_validate(form, form_state) {
           else { value = form_state.values[name]; }
           // Check for empty values.
           if (empty(value)) { valid = false; }
-          // Check for a -1 value on a select list.
-          else if (element.type == 'select' && value == -1) {
-            // @todo - this approach to select list validation will not allow
-            // a developer to have a select list option with a -1 value.
+          // Validate a required select list.
+          else if (element.type == 'select' && element.required && value == '') {
             valid = false;
           }
           if (!valid) {
