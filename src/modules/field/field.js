@@ -424,23 +424,18 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
       case 'list_text':
       case 'list_float':
       case 'list_integer':
-        if (instance.widget.type == 'options_select') {
+        if (instance && instance.widget.type == 'options_select') {
           items[delta].type = 'select';
         }
         // If the select list is required, add a 'Select' option and set it as
         // the default.  If it is optional, place a "none" option for the user
         // to choose from.
-        if (items[delta].required) {
-          items[delta].options[-1] = 'Select';
-          if (empty(items[delta].value)) { items[delta].value = -1; }
-        }
-        else {
-          items[delta].options[''] = '- None -';
-          if (empty(items[delta].value)) { items[delta].value = ''; }
-        }
+        if (items[delta].required) { items[delta].options[''] = 'Select'; }
+        else { items[delta].options[''] = '- None -'; }
+        if (empty(items[delta].value)) { items[delta].value = ''; }
         // If there are any allowed values, place them on the options list. Then
         // check for a default value, and set it if necessary.
-        if (field.settings.allowed_values) {
+        if (field && field.settings.allowed_values) {
           $.each(field.settings.allowed_values, function(key, value) {
               // Don't place values that are objects onto the options (i.e.
               // commerce taxonomy term reference fields).
