@@ -7878,6 +7878,7 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
   try {
     var results = [];
     var fields = drupalgap_field_info_instances(entity_type, bundle);
+    if (!fields) { return false; }
     $.each(fields, function(name, field) {
         if (field.widget &&
           field.widget.type &&
@@ -11336,6 +11337,9 @@ function theme_views_view(variables) {
     var close = '';
     var open_row = '';
     var close_row = '';
+    // @TODO - we should have a format_attributes property that can be set
+    // so these containers are more flexible, because the incoming attributes
+    // are probably too populated with the parent container's stuff.
     switch (variables.format) {
       case 'ul':
         open = '<ul data-role="listview">';
