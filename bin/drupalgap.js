@@ -3065,6 +3065,18 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
         if ($(_checkbox).is(':checked')) { value = 1; }
         else { value = 0; }
         break;
+      case 'checkboxes':
+        // Iterate over each option, and see if it is checked, then pop it onto
+        // the value array.
+        value = {};
+        $.each(element.options, function(_value, _label) {
+            if (_value == 'attributes') { return; } // Skip attributes.
+            if (empty(_label)) { _label = _value; }
+            selector = 'input[name="' + element.name + '[' + _value + ']"]';
+            if (!$(selector).is(':checked')) { value[_value] = 0; }
+            else { value[_value] = _value; }
+        });
+        break;
       case 'list_boolean':
         var _checkbox = $(selector);
         if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
@@ -3941,6 +3953,13 @@ function _drupalgap_form_validate(form, form_state) {
           else if (
             element.type == 'select' && element.required && value == ''
           ) { valid = false; }
+          else if (element.type == 'checkboxes' && element.required) {
+            var has_value = false;
+            $.each(form_state.values[name], function(key, value) {
+                if (value) { has_value = true; return false; }
+            });
+            if (!has_value) { valid = false; }
+          }
           if (!valid) {
             var field_title = name;
             if (element.title) { field_title = element.title; }
@@ -3969,6 +3988,35 @@ function theme_checkbox(variables) {
     }
     var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
     return output;
+  }
+  catch (error) { console.log('theme_checkbox - ' + error); }
+}
+
+/**
+ * Themes checkboxes input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_checkboxes(variables) {
+  try {
+    var html = '';
+    variables.attributes.type = 'checkboxes';
+    $.each(variables.options, function(value, label) {
+        if (value == 'attributes') { return; } // Skip attributes.
+        var _label = value;
+        if (!empty(label)) { _label = label; }
+        html += '<label>' + theme('checkbox', {
+            value: value,
+            attributes: {
+              name: variables.name + '[' + value + ']'
+            }
+        }) + '&nbsp;' + label + '</label>';
+    });
+    // Check the box?
+    /*if (variables.checked) {
+      variables.attributes.checked = 'checked';
+    }*/
+    return html;
   }
   catch (error) { console.log('theme_checkbox - ' + error); }
 }
