@@ -3717,7 +3717,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
             });
           }
           // Render the child with the theme system.
+          if (item.children[i].prefix) { html += item.children[i].prefix; }
           html += theme(theme_type, item.children[i]);
+          if (item.children[i].suffix) { html += item.children[i].suffix; }
         }
         else {
           console.log(
@@ -7539,12 +7541,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
                   else { on = value; }
               });
             }
-            items[delta].options.attributes.off = off;
-            items[delta].options.attributes.on = on;
+            items[delta].options.attributes['off'] = off;
+            items[delta].options.attributes['on'] = on;
             // If the value equals the on value, then check the box.
-            if (items[delta].value == on) {
-              items[delta].options.attributes.checked = 'checked';
-            }
+            if (
+              typeof items[delta] !== 'undefined' && items[delta].value == on
+            ) { items[delta].options.attributes['checked'] = 'checked'; }
             break;
           default:
             console.log(
@@ -7558,34 +7560,59 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
       case 'list_text':
       case 'list_float':
       case 'list_integer':
-        if (instance && instance.widget.type == 'options_select') {
-          items[delta].type = 'select';
-        }
-        // If the select list is required, add a 'Select' option and set it as
-        // the default.  If it is optional, place a "none" option for the user
-        // to choose from.
-        if (items[delta].required) { items[delta].options[''] = 'Select'; }
-        else { items[delta].options[''] = '- None -'; }
-        if (empty(items[delta].value)) { items[delta].value = ''; }
-        // If there are any allowed values, place them on the options list. Then
-        // check for a default value, and set it if necessary.
-        if (field && field.settings.allowed_values) {
-          $.each(field.settings.allowed_values, function(key, value) {
-              // Don't place values that are objects onto the options (i.e.
-              // commerce taxonomy term reference fields).
-              if (typeof value === 'object') { return; }
-              // If the value already exists in the options, then someone else
-              // has populated the list (e.g. commerce), so don't do any
-              // processing.
-              if (typeof items[delta].options[key] !== 'undefined') {
-                return false;
+        if (instance) {
+          switch (instance.widget.type) {
+            case 'options_select':
+              items[delta].type = 'select';
+              // If the select list is required, add a 'Select' option and set
+              // it as the default.  If it is optional, place a "none" option
+              // for the user to choose from.
+              var text = '- None -';
+              if (items[delta].required) { text = 'Select'; }
+              items[delta].options[''] = text;
+              if (empty(items[delta].value)) { items[delta].value = ''; }
+              // If more than one value is allowed, turn it into a multiple
+              // select list.
+              if (field.cardinality != 1) {
+                items[delta].options.attributes['data-native-menu'] = 'false';
+                items[delta].options.attributes['multiple'] = 'multiple';
               }
-              // Set the key and value for the option.
-              items[delta].options[key] = value;
-          });
-          if (instance.default_value &&
-            typeof instance.default_value[delta].value !== 'undefined') {
-              items[delta].value = instance.default_value[delta].value;
+              break;
+            case 'options_buttons':
+              // If there is one value allowed, we turn this into radio
+              // button(s), otherwise they will become checkboxes.
+              var type = 'checkboxes';
+              if (field.cardinality == 1) { type = 'radios'; }
+              items[delta].type = type;
+              break;
+            default:
+              console.log(
+                'WARNING: options_field_widget_form - unsupported widget (' +
+                instance.widget.type + ')'
+              );
+              return false;
+              break;
+          }
+          // If there are any allowed values, place them on the options
+          // list. Then check for a default value, and set it if necessary.
+          if (field && field.settings.allowed_values) {
+            $.each(field.settings.allowed_values, function(key, value) {
+                // Don't place values that are objects onto the options
+                // (i.e. commerce taxonomy term reference fields).
+                if (typeof value === 'object') { return; }
+                // If the value already exists in the options, then someone
+                // else has populated the list (e.g. commerce), so don't do
+                // any processing.
+                if (typeof items[delta].options[key] !== 'undefined') {
+                  return false;
+                }
+                // Set the key and value for the option.
+                items[delta].options[key] = value;
+            });
+            if (instance.default_value && instance.default_value[delta] &&
+              typeof instance.default_value[delta].value !== 'undefined') {
+                items[delta].value = instance.default_value[delta].value;
+            }
           }
         }
         break;
