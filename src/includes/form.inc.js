@@ -311,6 +311,14 @@ function drupalgap_form_state_values_assemble(form) {
  */
 function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
   try {
+    // If a value_callback is specified on the element, call that function to
+    // retrieve the element's value. Ohterwise, we'll use the default techniques
+    // implemented to extract a value for the form state.
+    if (element.value_callback && function_exists(element.value_callback)) {
+      var fn = window[element.value_callback];
+      return fn(id, element);
+    }
+    // Figure out the value, depending on the element type.
     var value = null;
     var selector = '';
     if (element.type == 'radios') {
