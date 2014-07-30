@@ -975,7 +975,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
             });
           }
           // Render the child with the theme system.
+          if (item.children[i].prefix) { html += item.children[i].prefix; }
           html += theme(theme_type, item.children[i]);
+          if (item.children[i].suffix) { html += item.children[i].suffix; }
         }
         else {
           console.log(
