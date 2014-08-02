@@ -88,10 +88,13 @@ function drupalgap_form_clear(form_selector) {
 function drupalgap_form_defaults(form_id) {
   try {
     var form = {};
-    // Set the form id, elements and buttons.
+    // Set the form id, elements, buttons, options and attributes.
     form.id = form_id;
     form.elements = {};
     form.buttons = {};
+    form.options = {
+      attributes: {}
+    };
     // Create a prefix and suffix.
     form.prefix = '';
     form.suffix = '';
@@ -206,7 +209,7 @@ function drupalgap_form_get_element_container_class(name) {
  */
 function drupalgap_form_render(form) {
   try {
-    // @todo - we may possibly colliding html element ids!!! For example, I
+    // @TODO - we may possibly colliding html element ids!!! For example, I
     // think the node edit page gets an id of "node_edit" and possibly so does
     // the node edit form, which also may get an id of "node_edit". We may want
     // to prefix both the template page and form ids with prefixes, e.g.
@@ -231,12 +234,14 @@ function drupalgap_form_render(form) {
     }
     // Render the form's input elements.
     var form_elements = _drupalgap_form_render_elements(form);
+    var form_attributes = drupalgap_attributes(form.options.attributes);
     // Return the form html.
-    var form_html =
-    '<form id="' + form.id + '">' + prefix + '<div>' +
+    var form_html = '<form id="' + form.id + '" ' + form_attributes + '>' +
+      prefix +
       '<div id="drupalgap_form_errors"></div>' +
       form_elements +
-    '</div>' + suffix + '</form>';
+      suffix +
+    '</form>';
     return form_html;
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
@@ -846,11 +851,25 @@ function _drupalgap_form_render_element(form, element) {
       html += theme('button', add_another_item_variables);
     }*/
 
+    // Is this element wrapped? We won't wrap hidden inputs by default, unless
+    // someone is overriding it.
+    var wrapped = true;
+    if (typeof element.wrapped !== 'undefined' && !element.wrapped) {
+      wrapped = false;
+    }
+    if (element.type == 'hidden') {
+      wrapped = false;
+      if (element.wrapped) { wrapped = true; }
+    }
+
+    // If there is an element prefix, place it in the html.
+    if (element.prefix) { html += element.prefix; }
+
     // Open the element container.
     var container_attributes = {
       'class': drupalgap_form_get_element_container_class(name)
     };
-    if (element.type != 'hidden') {
+    if (wrapped) {
       html += '<div ' + drupalgap_attributes(container_attributes) + '>';
     }
 
@@ -880,7 +899,10 @@ function _drupalgap_form_render_element(form, element) {
     }
 
     // Close the element container.
-    if (element.type != 'hidden') { html += '</div>'; }
+    if (wrapped) { html += '</div>'; }
+
+    // If there is an element suffix, place it in the html.
+    if (element.suffix) { html += element.suffix; }
 
     // Return the element html.
     return html;
@@ -1427,6 +1449,20 @@ function theme_radios(variables) {
     return radios;
   }
   catch (error) { console.log('theme_radios - ' + error); }
+}
+
+/**
+ * Themes a search input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_search(variables) {
+  try {
+    variables.attributes.type = 'search';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_search - ' + error); }
 }
 
 /**
