@@ -850,9 +850,10 @@ function drupalgap_render_region(region) {
 
     // Make sure there are blocks specified for this theme in settings.js.
     if (!drupalgap.settings.blocks[drupalgap.settings.theme]) {
-      var msg = 'drupalgap_render_region - there are no blocks for the "' +
-        drupalgap.settings.theme + '" theme in the settings.js file!';
-      drupalgap_alert(msg);
+      var msg = 'WARNING: drupalgap_render_region() - there are no blocks ' +
+        'for the "' + drupalgap.settings.theme + '" theme in the settings.js ' +
+        'file!';
+      console.log(msg);
       return '';
     }
     // Grab the current path.
