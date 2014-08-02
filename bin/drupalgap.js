@@ -2421,9 +2421,10 @@ function drupalgap_render_region(region) {
 
     // Make sure there are blocks specified for this theme in settings.js.
     if (!drupalgap.settings.blocks[drupalgap.settings.theme]) {
-      var msg = 'drupalgap_render_region - there are no blocks for the "' +
-        drupalgap.settings.theme + '" theme in the settings.js file!';
-      drupalgap_alert(msg);
+      var msg = 'WARNING: drupalgap_render_region() - there are no blocks ' +
+        'for the "' + drupalgap.settings.theme + '" theme in the settings.js ' +
+        'file!';
+      console.log(msg);
       return '';
     }
     // Grab the current path.
@@ -2830,10 +2831,13 @@ function drupalgap_form_clear(form_selector) {
 function drupalgap_form_defaults(form_id) {
   try {
     var form = {};
-    // Set the form id, elements and buttons.
+    // Set the form id, elements, buttons, options and attributes.
     form.id = form_id;
     form.elements = {};
     form.buttons = {};
+    form.options = {
+      attributes: {}
+    };
     // Create a prefix and suffix.
     form.prefix = '';
     form.suffix = '';
@@ -2948,7 +2952,7 @@ function drupalgap_form_get_element_container_class(name) {
  */
 function drupalgap_form_render(form) {
   try {
-    // @todo - we may possibly colliding html element ids!!! For example, I
+    // @TODO - we may possibly colliding html element ids!!! For example, I
     // think the node edit page gets an id of "node_edit" and possibly so does
     // the node edit form, which also may get an id of "node_edit". We may want
     // to prefix both the template page and form ids with prefixes, e.g.
@@ -2973,12 +2977,14 @@ function drupalgap_form_render(form) {
     }
     // Render the form's input elements.
     var form_elements = _drupalgap_form_render_elements(form);
+    var form_attributes = drupalgap_attributes(form.options.attributes);
     // Return the form html.
-    var form_html =
-    '<form id="' + form.id + '">' + prefix + '<div>' +
+    var form_html = '<form id="' + form.id + '" ' + form_attributes + '>' +
+      prefix +
       '<div id="drupalgap_form_errors"></div>' +
       form_elements +
-    '</div>' + suffix + '</form>';
+      suffix +
+    '</form>';
     return form_html;
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
@@ -3588,11 +3594,25 @@ function _drupalgap_form_render_element(form, element) {
       html += theme('button', add_another_item_variables);
     }*/
 
+    // Is this element wrapped? We won't wrap hidden inputs by default, unless
+    // someone is overriding it.
+    var wrapped = true;
+    if (typeof element.wrapped !== 'undefined' && !element.wrapped) {
+      wrapped = false;
+    }
+    if (element.type == 'hidden') {
+      wrapped = false;
+      if (element.wrapped) { wrapped = true; }
+    }
+
+    // If there is an element prefix, place it in the html.
+    if (element.prefix) { html += element.prefix; }
+
     // Open the element container.
     var container_attributes = {
       'class': drupalgap_form_get_element_container_class(name)
     };
-    if (element.type != 'hidden') {
+    if (wrapped) {
       html += '<div ' + drupalgap_attributes(container_attributes) + '>';
     }
 
@@ -3622,7 +3642,10 @@ function _drupalgap_form_render_element(form, element) {
     }
 
     // Close the element container.
-    if (element.type != 'hidden') { html += '</div>'; }
+    if (wrapped) { html += '</div>'; }
+
+    // If there is an element suffix, place it in the html.
+    if (element.suffix) { html += element.suffix; }
 
     // Return the element html.
     return html;
@@ -4169,6 +4192,20 @@ function theme_radios(variables) {
     return radios;
   }
   catch (error) { console.log('theme_radios - ' + error); }
+}
+
+/**
+ * Themes a search input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_search(variables) {
+  try {
+    variables.attributes.type = 'search';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_search - ' + error); }
 }
 
 /**
@@ -7726,9 +7763,8 @@ function text_field_widget_form(form, form_state, field, instance, langcode,
     // Determine the widget type, then set the delta item's type property.
     var type = null;
     switch (element.type) {
-      case 'text':
-        type = 'textfield';
-        break;
+      case 'search': type = 'search'; break;
+      case 'text': type = 'textfield'; break;
       case 'textarea':
       case 'text_long':
       case 'text_with_summary':
@@ -9230,6 +9266,41 @@ function node_theme() {
 }
 
 /**
+ * Implements hook_block_info().
+ * @return {Object}
+ */
+function search_block_info() {
+  try {
+    var blocks = {};
+    blocks['search'] = {
+      delta: 'search',
+      module: 'search'
+    };
+    return blocks;
+  }
+  catch (error) { console.log('search_block_info - ' + error); }
+}
+
+/**
+ * Implements hook_block_view().
+ * @param {String} delta
+ * @param {String} region
+ * @return {String}
+ */
+function search_block_view(delta, region) {
+  try {
+    var content = '';
+    if (delta == 'search') {
+      if (user_access('search content')) {
+        content = drupalgap_get_form('search_block_form');
+      }
+    }
+    return content;
+  }
+  catch (error) { console.log('search_block_view - ' + error); }
+}
+
+/**
  * Implements hook_menu().
  * @return {Object}
  */
@@ -9248,14 +9319,56 @@ function search_menu() {
   catch (error) { console.log('search_menu - ' + error); }
 }
 
+
+/**
+ * The search block form.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @return {Object}
+ */
+function search_block_form(form, form_state) {
+  try {
+    form.elements['type'] = {
+      type: 'hidden',
+      default_value: 'node'
+    };
+    form.elements['keys'] = {
+      type: 'search',
+      title: '',
+      title_placeholder: true,
+      required: true,
+      default_value: ''
+    };
+    // Since there is no submit button on the form, we'll catch the onsubmit
+    // action and the trigger the form submission.
+    form.options.attributes['onsubmit'] =
+      "_drupalgap_form_submit('" + form.id + "'); return false;";
+    return form;
+  }
+  catch (error) { console.log('search_block_form - ' + error); }
+}
+
+/**
+ * The search block form submit handler.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function search_block_form_submit(form, form_state) {
+  try {
+    var type = form_state.values['type'];
+    var keys = form_state.values['keys'];
+    drupalgap_goto('search/' + type + '/' + keys);
+  }
+  catch (error) { console.log('search_block_form_submit - ' + error); }
+}
+
 /**
  * The search form.
  * @param {Object} form
  * @param {Object} form_state
- * @param {String} form_id
  * @return {Object}
  */
-function search_form(form, form_state, form_id) {
+function search_form(form, form_state) {
   try {
     var type = arg(1);
     var keys = arg(2);
@@ -9279,6 +9392,7 @@ function search_form(form, form_state, form_id) {
       }
     };
     form.suffix += theme('jqm_item_list', {
+        title: 'Search results',
         items: [],
         options: {
           attributes: {
@@ -9298,8 +9412,8 @@ function search_form(form, form_state, form_id) {
  */
 function search_form_submit(form, form_state) {
   try {
-    var type = form_state.values.type;
-    var keys = form_state.values.keys;
+    var type = form_state.values['type'];
+    var keys = form_state.values['keys'];
     switch (type) {
       case 'node':
         search_node(keys, {
