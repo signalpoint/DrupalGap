@@ -1,4 +1,39 @@
 /**
+ * Implements hook_block_info().
+ * @return {Object}
+ */
+function search_block_info() {
+  try {
+    var blocks = {};
+    blocks['search'] = {
+      delta: 'search',
+      module: 'search'
+    };
+    return blocks;
+  }
+  catch (error) { console.log('search_block_info - ' + error); }
+}
+
+/**
+ * Implements hook_block_view().
+ * @param {String} delta
+ * @param {String} region
+ * @return {String}
+ */
+function search_block_view(delta, region) {
+  try {
+    var content = '';
+    if (delta == 'search') {
+      if (user_access('search content')) {
+        content = drupalgap_get_form('search_block_form');
+      }
+    }
+    return content;
+  }
+  catch (error) { console.log('search_block_view - ' + error); }
+}
+
+/**
  * Implements hook_menu().
  * @return {Object}
  */
@@ -17,14 +52,56 @@ function search_menu() {
   catch (error) { console.log('search_menu - ' + error); }
 }
 
+
+/**
+ * The search block form.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @return {Object}
+ */
+function search_block_form(form, form_state) {
+  try {
+    form.elements['type'] = {
+      type: 'hidden',
+      default_value: 'node'
+    };
+    form.elements['keys'] = {
+      type: 'search',
+      title: '',
+      title_placeholder: true,
+      required: true,
+      default_value: ''
+    };
+    // Since there is no submit button on the form, we'll catch the onsubmit
+    // action and the trigger the form submission.
+    form.options.attributes['onsubmit'] =
+      "_drupalgap_form_submit('" + form.id + "'); return false;";
+    return form;
+  }
+  catch (error) { console.log('search_block_form - ' + error); }
+}
+
+/**
+ * The search block form submit handler.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function search_block_form_submit(form, form_state) {
+  try {
+    var type = form_state.values['type'];
+    var keys = form_state.values['keys'];
+    drupalgap_goto('search/' + type + '/' + keys);
+  }
+  catch (error) { console.log('search_block_form_submit - ' + error); }
+}
+
 /**
  * The search form.
  * @param {Object} form
  * @param {Object} form_state
- * @param {String} form_id
  * @return {Object}
  */
-function search_form(form, form_state, form_id) {
+function search_form(form, form_state) {
   try {
     var type = arg(1);
     var keys = arg(2);
@@ -48,6 +125,7 @@ function search_form(form, form_state, form_id) {
       }
     };
     form.suffix += theme('jqm_item_list', {
+        title: 'Search results',
         items: [],
         options: {
           attributes: {
@@ -67,8 +145,8 @@ function search_form(form, form_state, form_id) {
  */
 function search_form_submit(form, form_state) {
   try {
-    var type = form_state.values.type;
-    var keys = form_state.values.keys;
+    var type = form_state.values['type'];
+    var keys = form_state.values['keys'];
     switch (type) {
       case 'node':
         search_node(keys, {
