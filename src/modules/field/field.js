@@ -582,9 +582,8 @@ function text_field_widget_form(form, form_state, field, instance, langcode,
     // Determine the widget type, then set the delta item's type property.
     var type = null;
     switch (element.type) {
-      case 'text':
-        type = 'textfield';
-        break;
+      case 'search': type = 'search'; break;
+      case 'text': type = 'textfield'; break;
       case 'textarea':
       case 'text_long':
       case 'text_with_summary':
