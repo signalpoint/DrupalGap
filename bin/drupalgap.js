@@ -2836,7 +2836,9 @@ function drupalgap_form_defaults(form_id) {
     form.elements = {};
     form.buttons = {};
     form.options = {
-      attributes: {}
+      attributes: {
+        'class': ''
+      }
     };
     // Create a prefix and suffix.
     form.prefix = '';
