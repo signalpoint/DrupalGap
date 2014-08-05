@@ -309,7 +309,7 @@ function _drupalgap_back() {
 }
 
 /**
- *
+ * An internal function used to exit the app when the back button is clicked.
  */
 function _drupalgap_back_exit() {
   try {
