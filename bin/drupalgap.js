@@ -11515,7 +11515,7 @@ function theme_views_view(variables) {
       function_exists(variables.empty_callback)
     ) {
       var empty_callback = window[variables.empty_callback];
-      var selector = '#' + drupalgap_get_page_id() + ' #' + id;
+      var selector = '#' + drupalgap_get_page_id() + ' #' + variables.attributes.id;
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
