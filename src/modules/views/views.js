@@ -215,7 +215,7 @@ function theme_views_view(variables) {
       function_exists(variables.empty_callback)
     ) {
       var empty_callback = window[variables.empty_callback];
-      var selector = '#' + drupalgap_get_page_id() + ' #' + id;
+      var selector = '#' + drupalgap_get_page_id() + ' #' + variables.attributes.id;
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
@@ -229,6 +229,9 @@ function theme_views_view(variables) {
     var close = '';
     var open_row = '';
     var close_row = '';
+    // @TODO - we should have a format_attributes property that can be set
+    // so these containers are more flexible, because the incoming attributes
+    // are probably too populated with the parent container's stuff.
     switch (variables.format) {
       case 'ul':
         open = '<ul data-role="listview">';
