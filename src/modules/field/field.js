@@ -338,6 +338,7 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
   try {
     switch (element.type) {
       case 'number_integer':
+      case 'number_float':
         // Change the form element into a number, and then set its min/max
         // attributes along with the step.
         items[delta].type = 'number';
@@ -347,7 +348,9 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
         if (!empty(instance.settings.max)) {
           items[delta].options.attributes['max'] = instance.settings.max;
         }
-        items[delta].options.attributes['step'] = 1;
+        var step = 1;
+        if (element.type == 'number_float') { step = 0.01; }
+        items[delta].options.attributes['step'] = step;
         break;
       default:
         console.log(
