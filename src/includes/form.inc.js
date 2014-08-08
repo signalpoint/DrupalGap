@@ -951,7 +951,6 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // cleanly to their theme function.
     // @todo A hook_field_widget_form() should be used instead here.
     if (item.type == 'submit') {
-      // @todo - convert this to a field widget form hook?
       variables.attributes.onclick =
         '_drupalgap_form_submit(\'' + form.id + '\');';
       if (!variables.attributes['data-theme']) {
@@ -963,7 +962,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     }
 
     // Merge the item into variables.
-    $.extend(variables, item);
+    $.extend(true, variables, item);
 
     // If a value isn't set on variables, try to set it with the default value
     // on the item.
