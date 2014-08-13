@@ -3563,11 +3563,13 @@ function _drupalgap_form_render_element(form, element) {
         }
 
         // Merge element attributes into the variables object.
-        variables.attributes = $.extend(
-          true,
-          variables.attributes,
-          item.options.attributes
-        );
+        if (item.options && item.options.attributes) {
+          variables.attributes = $.extend(
+            true,
+            variables.attributes,
+            item.options.attributes
+          );
+        }
 
         // Render the element item.
         item_html = _drupalgap_form_render_element_item(
@@ -4077,6 +4079,7 @@ function theme_email(variables) {
 function theme_form_element_label(variables) {
   try {
     var element = variables.element;
+    if (empty(element.title)) { return ''; }
     // Any elements with a title_placeholder set to true
     // By default, use the element id as the label for, unless the element is
     // a radio, then use the name.
