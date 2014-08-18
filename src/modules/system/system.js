@@ -76,7 +76,7 @@ function system_block_view(delta) {
         break;
       case 'logo':
         if (drupalgap.settings.logo) {
-          return '<div>' +
+          return '<div class="logo">' +
             l(theme('image', {'path': drupalgap.settings.logo}), '') +
           '</div>';
         }

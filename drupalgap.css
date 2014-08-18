@@ -1,5 +1,12 @@
 /**
- * Styles for forms.
+ * Logo
+ */
+.logo {
+  text-align: center;
+}
+
+/**
+ * Forms
  */
 
 div.form-item {
@@ -7,7 +14,7 @@ div.form-item {
 }
 
 /**
- * Styles for system messages.
+ * System Messages
  */
 
 div.messages {
