@@ -11534,42 +11534,59 @@ function theme_views_view(variables) {
     var close = '';
     var open_row = '';
     var close_row = '';
-    // @TODO - we should have a format_attributes property that can be set
-    // so these containers are more flexible, because the incoming attributes
-    // are probably too populated with the parent container's stuff.
+    // Prepare the format's container attributes.
+    var format_attributes = {};
+    if (typeof variables.format_attributes !== 'undefined') {
+      format_attributes = $.extend(
+        true,
+        format_attributes,
+        variables.format_attributes
+      );
+    }
     switch (variables.format) {
       case 'ul':
-        open = '<ul data-role="listview">';
+        if (typeof format_attributes['data-role'] === 'undefined') {
+          format_attributes['data-role'] = 'listview';
+        }
+        open = '<ul ' + drupalgap_attributes(format_attributes) + '>';
         close = '</ul>';
         open_row = '<li>';
         close_row = '</li>';
         break;
       case 'ol':
-        open = '<ol data-role="listview">';
+        if (typeof format_attributes['data-role'] === 'undefined') {
+          format_attributes['data-role'] = 'listview';
+        }
+        open = '<ol ' + drupalgap_attributes(format_attributes) + '>';
         close = '</ol>';
         open_row = '<li>';
         close_row = '</li>';
         break;
       case 'table':
       case 'jqm_table':
-        var table_attributes = '';
         if (variables.format == 'jqm_table') {
-          table_attributes = drupalgap_attributes({
-            'data-role': 'table',
-            'data-mode': 'reflow'
-          });
+          if (typeof format_attributes['data-role'] === 'undefined') {
+            format_attributes['data-role'] = 'table';
+          }
+          if (typeof format_attributes['data-mode'] === 'undefined') {
+            format_attributes['data-mode'] = 'reflow';
+          }
           console.log(
             'WARNING: theme_views_view() - jqm_table not supported, yet'
           );
         }
-        open = '<table ' + table_attributes + '>';
+        open = '<table ' + drupalgap_attributes(format_attributes) + '>';
         close = '</table>';
         open_row = '<tr>';
         close_row = '</tr>';
         break;
       case 'unformatted_list':
       default:
-        open = '<div class="views-rows">';
+        if (typeof format_attributes['class'] === 'undefined') {
+          format_attributes['class'] = '';
+        }
+        format_attributes['class'] += ' views-rows';
+        open = '<div ' + drupalgap_attributes(format_attributes) + '>';
         close = '</div>';
         open_row = '<div>';
         close_row = '</div>';
