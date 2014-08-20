@@ -2717,7 +2717,7 @@ function arg() {
 }
 
 /**
- * Implemtation of l().
+ * Returns a link.
  * @return {String}
  */
 function l() {
@@ -2739,6 +2739,28 @@ function l() {
     return theme('link', link);
   }
   catch (error) { console.log('l - ' + error); }
+}
+
+/**
+ * Returns a button link.
+ * @return {String}
+ */
+function bl() {
+  try {
+    // Grab the text and the path.
+    var text = arguments[0];
+    var path = arguments[1];
+    // Build the default options and attributes, if necessary.
+    var options = null;
+    if (arguments[2]) {
+      options = arguments[2];
+    }
+    else { options = {}; }
+    if (!options.attributes) { options.attributes = { }; }
+    options.attributes['data-role'] = 'button';
+    return l(text, path, options);
+  }
+  catch (error) { console.log('bl - ' + error); }
 }
 
 /**
@@ -5225,6 +5247,21 @@ function theme_button_link(variables) {
   catch (error) { console.log('theme_button_link - ' + error); }
 }
 
+/**
+ * Themes a button link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_controlgroup(variables) {
+  try {
+    variables.attributes['data-role'] = 'controlgroup';
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
+    $.each(variables.items, function(index, item) { html += item; });
+    html += '</div>';
+    return html;
+  }
+  catch (error) { console.log('theme_controlgroup - ' + error); }
+}
 
 /**
  * Implementation of theme_image().
