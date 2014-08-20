@@ -1146,7 +1146,7 @@ function arg() {
 }
 
 /**
- * Implemtation of l().
+ * Returns a link.
  * @return {String}
  */
 function l() {
@@ -1168,5 +1168,27 @@ function l() {
     return theme('link', link);
   }
   catch (error) { console.log('l - ' + error); }
+}
+
+/**
+ * Returns a button link.
+ * @return {String}
+ */
+function bl() {
+  try {
+    // Grab the text and the path.
+    var text = arguments[0];
+    var path = arguments[1];
+    // Build the default options and attributes, if necessary.
+    var options = null;
+    if (arguments[2]) {
+      options = arguments[2];
+    }
+    else { options = {}; }
+    if (!options.attributes) { options.attributes = { }; }
+    options.attributes['data-role'] = 'button';
+    return l(text, path, options);
+  }
+  catch (error) { console.log('bl - ' + error); }
 }
 
