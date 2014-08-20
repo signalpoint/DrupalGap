@@ -628,6 +628,28 @@ function theme_link(variables) {
 }
 
 /**
+ * Themes a popup widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_popup(variables) {
+  try {
+    variables.attributes['data-role'] = 'popup';
+    var html = bl(variables.text, null, {
+        attributes: {
+          href: '#' + variables.attributes.id,
+          'data-rel': 'popup'
+        }
+    }) +
+    '<div ' + drupalgap_attributes(variables.attributes) + '>' +
+      variables.content +
+    '</div>';
+    return html;
+  }
+  catch (error) { console.log('theme_popup - ' + error); }
+}
+
+/**
  * Implementation of theme_submit().
  * @param {Object} variables
  * @return {String}
