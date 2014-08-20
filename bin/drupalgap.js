@@ -5271,6 +5271,24 @@ function theme_collapsible(variables) {
 }
 
 /**
+ * Themes a collapsibleset widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_collapsibleset(variables) {
+  try {
+    variables.attributes['data-role'] = 'collapsible-set';
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
+    $.each(variables.items, function(index, item) {
+        html += theme('collapsible', item);
+    });
+    html += '</div>';
+    return html;
+  }
+  catch (error) { console.log('theme_collapsibleset - ' + error); }
+}
+
+/**
  * Themes a controlgroup widget.
  * @param {Object} variables
  * @return {String}
