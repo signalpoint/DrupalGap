@@ -635,11 +635,14 @@ function theme_link(variables) {
 function theme_popup(variables) {
   try {
     variables.attributes['data-role'] = 'popup';
-    var html = bl(variables.text, null, {
-        attributes: {
-          href: '#' + variables.attributes.id,
-          'data-rel': 'popup'
-        }
+    var button_attributes = {};
+    if (variables.button_attributes) {
+      button_attributes = variables.button_attributes;
+    }
+    button_attributes.href = '#' + variables.attributes.id;
+    button_attributes['data-rel'] = 'popup';
+    var html = bl(variables.button_text, null, {
+        attributes: button_attributes
     }) +
     '<div ' + drupalgap_attributes(variables.attributes) + '>' +
       variables.content +
