@@ -412,7 +412,30 @@ function theme_button_link(variables) {
 }
 
 /**
- * Themes a button link.
+ * Themes a collapsible widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_collapsible(variables) {
+  try {
+    variables.attributes['data-role'] = 'collapsible';
+    var header_type = 'h2';
+    if (variables.header_type) { header_type = variables.header_type; }
+    var header_attributes = {};
+    if (variables.header_attributes) {
+      header_attributes = variables.header_attributes;
+    }
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>' +
+      '<' + header_type + ' ' + drupalgap_attributes(header_attributes) + '>' +
+        variables.header +
+      '</' + header_type + '>' + variables.content + '</div>';
+    return html;
+  }
+  catch (error) { console.log('theme_collapsible - ' + error); }
+}
+
+/**
+ * Themes a controlgroup widget.
  * @param {Object} variables
  * @return {String}
  */
@@ -474,7 +497,6 @@ function theme_item(variables) {
     return html;
   }
   catch (error) { console.log('theme_item - ' + error); }
-
 }
 
 /**
