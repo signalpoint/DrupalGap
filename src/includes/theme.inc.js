@@ -411,6 +411,21 @@ function theme_button_link(variables) {
   catch (error) { console.log('theme_button_link - ' + error); }
 }
 
+/**
+ * Themes a button link.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_controlgroup(variables) {
+  try {
+    variables.attributes['data-role'] = 'controlgroup';
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
+    $.each(variables.items, function(index, item) { html += item; });
+    html += '</div>';
+    return html;
+  }
+  catch (error) { console.log('theme_controlgroup - ' + error); }
+}
 
 /**
  * Implementation of theme_image().
