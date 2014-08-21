@@ -188,17 +188,38 @@ function hook_entity_post_render_content(entity, entity_type, bundle) {
 }
 
 /**
- * Used by fields to render their items when being displayed on an entity.
+ * Implements hook_field_formatter_view().
+ * @param {String} entity_type
+ * @param {Object} entity
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Object} display
  */
 function hook_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
   try {
-    var element = {};
+    
+    // Use this hook to render a field's content on an entity. Use dpm() to
+    // inspect the incoming arguments. The arguments contain field display
+    // settings from Drupal.
+    
+    /*dpm(entity_type);
+    dpm(entity);
+    dpm(field);
+    dpm(instance);
+    dpm(langcode);
+    dpm(items);
+    dpm(display);*/
+    
+    // Iterate over each item, and place a widget onto the render array.
+    var content = {};
     $.each(items, function(delta, item) {
-        element[delta] = {
+        content[delta] = {
           markup: '<p>Hello!</p>'
         };
     });
-    return element;
+    return content;
   }
   catch (error) { console.log('hook_field_formatter_view - ' + error); }
 }
@@ -216,7 +237,7 @@ function hook_field_formatter_view(entity_type, entity, field, instance, langcod
  */
 function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
-    // Used by modules to provide field widgets for form element items.
+    // Use this hook provide field widgets for form element items...
   }
   catch (error) { console.log('hook_field_widget_form - ' + error); }
 }
