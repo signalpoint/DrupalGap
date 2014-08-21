@@ -4262,6 +4262,20 @@ function theme_select(variables) {
 }
 
 /**
+ * Themes a telephone input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_tel(variables) {
+  try {
+    variables.attributes['type'] = 'tel';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_tel - ' + error); }
+}
+
+/**
  * Themes a text input.
  * @param {Object} variables
  * @return {String}
