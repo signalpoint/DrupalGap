@@ -1094,8 +1094,6 @@ function drupalgap_menu_access(path) {
       else {
 
         // An access callback function is specified for this path...
-
-        // START HERE: https://github.com/signalpoint/DrupalGap/issues/191
         var function_name = drupalgap.menu_links[path].access_callback;
         if (drupalgap_function_exists(function_name)) {
           // Grab the access callback function. If there are any access args
