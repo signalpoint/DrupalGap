@@ -67,16 +67,34 @@ function menu_block_view_pageshow(options) {
 
       // LOCAL TASKS MENU LINKS
 
-      // For the current page's router path, grab any local tasks menu links add
+      // For the current page's router path, grab any local task menu links add
       // them into the menu. Note, local tasks are located in a menu link item's
-      // children, if there are any. Local tasks typically have argument
-      // wildcards in them, so we'll replace their wildcards with the current
-      // args.
+      // children, or its parent's children (including itself), if there are
+      // any. Local tasks typically have argument wildcards in them, so we'll
+      // replace their wildcards with the current args.
       var router_path = drupalgap_router_path_get();
-      if (
-        drupalgap.menu_links[router_path] &&
-        drupalgap.menu_links[router_path].children
-      ) {
+      if (drupalgap.menu_links[router_path]) {
+        // Determine the parent path, if any.
+        var parent = null;
+        if (drupalgap.menu_links[router_path].parent) {
+          parent = drupalgap.menu_links[router_path].parent;
+        }
+        // Then extract the local tasks paths array.
+        var local_tasks = null;
+        if (drupalgap.menu_links[router_path].children) {
+          local_tasks = drupalgap.menu_links[router_path].children;
+        }
+        else if (
+          parent && drupalgap.menu_links[parent] &&
+          drupalgap.menu_links[parent].children
+        ) { local_tasks = drupalgap.menu_links[parent].children; }
+        else {
+          console.log(
+            'menu_block_view_pageshow - failed to find local tasks (' +
+              router_path +
+            ')'
+          );
+        }
 
         var args = arg();
 
@@ -85,21 +103,18 @@ function menu_block_view_pageshow(options) {
           try {
             var menu_items = [];
             var link_path = '';
-            $.each(
-              drupalgap.menu_links[router_path].children,
-              function(index, child) {
-                if (drupalgap.menu_links[child] && (
-                  drupalgap.menu_links[child].type ==
+            $.each(local_tasks, function(index, local_task) {
+                if (drupalgap.menu_links[local_task] && (
+                  drupalgap.menu_links[local_task].type ==
                     'MENU_DEFAULT_LOCAL_TASK' ||
-                  drupalgap.menu_links[child].type ==
+                  drupalgap.menu_links[local_task].type ==
                     'MENU_LOCAL_TASK'
                 )) {
-                  if (drupalgap_menu_access(child, null, result)) {
-                    menu_items.push(drupalgap.menu_links[child]);
+                  if (drupalgap_menu_access(local_task, null, result)) {
+                    menu_items.push(drupalgap.menu_links[local_task]);
                   }
                 }
-              }
-            );
+            });
             // If there was only one local task menu item, and it is the default
             // local task, don't render the menu, otherwise render the menu as
             // an item list as long as there are items to render.
@@ -140,23 +155,20 @@ function menu_block_view_pageshow(options) {
         // an access_callback handler.
         var has_entity_arg = false;
         var has_access_callback = false;
-        $.each(
-          drupalgap.menu_links[router_path].children,
-          function(index, child) {
-            if (drupalgap.menu_links[child] &&
-              (drupalgap.menu_links[child].type == 'MENU_DEFAULT_LOCAL_TASK' ||
-               drupalgap.menu_links[child].type == 'MENU_LOCAL_TASK')
+        $.each(local_tasks, function(index, local_task) {
+            if (drupalgap.menu_links[local_task] &&
+              (drupalgap.menu_links[local_task].type == 'MENU_DEFAULT_LOCAL_TASK' ||
+               drupalgap.menu_links[local_task].type == 'MENU_LOCAL_TASK')
             ) {
-              if (drupalgap_path_has_entity_arg(arg(null, child))) {
+              if (drupalgap_path_has_entity_arg(arg(null, local_task))) {
                 has_entity_arg = true;
               }
               if (
                 typeof
-                  drupalgap.menu_links[child].access_callback !== 'undefined'
+                  drupalgap.menu_links[local_task].access_callback !== 'undefined'
               ) { has_access_callback = true; }
             }
-          }
-        );
+        });
 
         // If we have an entity arg, and an access_callback, let's load up the
         // entity asynchronously.
