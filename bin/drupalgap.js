@@ -4461,6 +4461,29 @@ function menu_get_item() {
   catch (error) { console.log('menu_get_item - ' + error); }
 }
 
+/**
+ * Returns default menu item options.
+ * @return {Object}
+ */
+function menu_item_default_options() {
+  try {
+    return { attributes: menu_item_default_attributes() };
+  }
+  catch (error) { console.log('menu_item_default_options - ' + error); }
+}
+
+/**
+ * Returns default menu item attributes.
+ * @return {Object}
+ */
+function menu_item_default_attributes() {
+  try {
+    return {
+      'class': ''
+    }
+  }
+  catch (error) { console.log('menu_item_default_attributes - ' + error); }
+}
 
 /**
  * Returns an array containing the names of system-defined (default) menus.
@@ -4517,6 +4540,16 @@ function menu_router_build() {
             // Set a default type for the item if one isn't provided.
             if (typeof menu_item.type === 'undefined') {
               menu_item.type = 'MENU_NORMAL_ITEM';
+            }
+            // Set default options and attributes if none have been provided.
+            // @TODO - Now that we are doing this here, there may be a few
+            // places throughout the code that were checking for these
+            // undefined objects that will no longer need to be checked.
+            if (typeof menu_item.options === 'undefined') {
+              menu_item.options = menu_item_default_options();
+            }
+            else if (typeof menu_item.options.attributes === 'undefined') {
+              menu_item.options.attributes = menu_item_default_attributes();
             }
             // Make the path available as a property in the menu link.
             menu_item.path = path;
