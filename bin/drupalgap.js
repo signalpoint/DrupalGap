@@ -8422,8 +8422,34 @@ function menu_block_view_pageshow(options) {
             else {
               var items = [];
               $.each(menu_items, function(index, item) {
+                  // Make a deep copy of the menu link so we don't modify it.
+                  var link = jQuery.extend(true, {}, item);
+                  // If there are no link options, set up defaults.
+                  if (!link.options) { link.options = { attributes: { } }; }
+                  else if (!link.options.attributes) { link.options.attributes = { }; }
+                  
+                  // If the link points to the current path, set it as active.
+                  // We first need to figure out which path to check, by default
+                  // use the link path, but if its a default local task, use its
+                  // parent path.
+                  var path_to_check = link.path;
+                  if (link.type == 'MENU_DEFAULT_LOCAL_TASK' && link.parent) {
+                    path_to_check = link.parent;
+                    link.path = arg(null, link.parent).join('/');
+                  }
+                  if (path_to_check == router_path) {
+                    if (!link.options.attributes['class']) {
+                      link.options.attributes['class'] = '';
+                    }
+                    link.options.attributes['class'] +=
+                      ' ui-btn ui-btn-active ui-state-persist ';
+                  }
                   items.push(
-                    l(item.title, drupalgap_place_args_in_path(item.path))
+                    l(
+                      link.title,
+                      drupalgap_place_args_in_path(link.path),
+                      link.options
+                    )
                   );
               });
               if (items.length > 0) {
