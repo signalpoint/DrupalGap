@@ -80,6 +80,9 @@ function drupalgap_init() {
       theme_path: '',
       themes: [],
       theme_registry: {},
+      views: {
+        ids: []
+      },
       views_datasource: {}
     };
     //if (drupalgap) { dg = $.extend({}, dg, drupalgap); }
@@ -298,11 +301,15 @@ function drupalgap_load_modules() {
                     url: modules_paths_object,
                     data: null,
                     success: function() {
-                        //console.log('Loaded module: ' + modules_paths_object);
+                      if (Drupal.settings.debug) { dpm(modules_paths_object); }
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
                       var msg = 'Failed to load module! (' + module.name + ')';
+                      dpm(msg);
+                      dpm(modules_paths_object);
+                      dpm(textStatus);
+                      dpm(errorThrown);
                       drupalgap_alert(msg);
                     }
                 });
