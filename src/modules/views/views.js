@@ -100,6 +100,33 @@ function theme_view(variables) {
       );
       variables.attributes.id = 'views-view--' + user_password();
     }
+    // Since multiple pages can stack up in the DOM, warn the developer if they
+    // re-use a Views ID that is already in the DOM. If the ID hasn't been used
+    // yet, add it to the drupalgap.views.ids array.
+    if (in_array(variables.attributes.id, drupalgap.views.ids)) {
+      // Double check to make sure it is actually in the DOM. If it wasn't
+      // really in the DOM, remove the id from drupalgap.views.ids and continue
+      // onward.
+      if (!$('#' + variables.attributes.id)) {
+        // @see http://stackoverflow.com/a/3596141/763010
+        drupalgap.views.ids.splice(
+          $.inArray(variables.attributes.id, drupalgap.views.ids),
+          1
+        );
+      }
+      else {
+        dpm(
+          'WARNING: theme_view() - this id already exists in the DOM: #' +
+          variables.attributes.id +
+          ' - the view will be rendered into the first container that is ' +
+          'located in the DOM - if you are re-using this same view, it is ' +
+          'recommended to append a unique identifier (e.g. an entity id) to ' +
+          'your views id, that way you can re-use the same view across ' +
+          'multiple pages'
+        );
+      }
+    }
+    else { drupalgap.views.ids.push(variables.attributes.id); }
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
     variables.attributes['class'] += 'view ';
@@ -291,8 +318,8 @@ function theme_views_view(variables) {
     $.each(results[root], function(count, object) {
         // Extract the row.
         var row = object[child];
-        // Mark the row count.
-        row.count = count;
+        // Mark the row position.
+        row._position = count;
         // If a row_callback function exists, call it to render the row,
         // otherwise use the default row render mechanism.
         var row_content = '';
