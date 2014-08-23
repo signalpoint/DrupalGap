@@ -88,13 +88,6 @@ function menu_block_view_pageshow(options) {
           parent && drupalgap.menu_links[parent] &&
           drupalgap.menu_links[parent].children
         ) { local_tasks = drupalgap.menu_links[parent].children; }
-        else {
-          console.log(
-            'menu_block_view_pageshow - failed to find local tasks (' +
-              router_path +
-            ')'
-          );
-        }
 
         var args = arg();
 
@@ -103,23 +96,24 @@ function menu_block_view_pageshow(options) {
           try {
             var menu_items = [];
             var link_path = '';
-            $.each(local_tasks, function(index, local_task) {
-                if (drupalgap.menu_links[local_task] && (
-                  drupalgap.menu_links[local_task].type ==
-                    'MENU_DEFAULT_LOCAL_TASK' ||
-                  drupalgap.menu_links[local_task].type ==
-                    'MENU_LOCAL_TASK'
-                )) {
-                  if (drupalgap_menu_access(local_task, null, result)) {
-                    menu_items.push(drupalgap.menu_links[local_task]);
+            if (local_tasks && !empty(local_tasks)) {
+              $.each(local_tasks, function(index, local_task) {
+                  if (drupalgap.menu_links[local_task] && (
+                    drupalgap.menu_links[local_task].type ==
+                      'MENU_DEFAULT_LOCAL_TASK' ||
+                    drupalgap.menu_links[local_task].type ==
+                      'MENU_LOCAL_TASK'
+                  )) {
+                    if (drupalgap_menu_access(local_task, null, result)) {
+                      menu_items.push(drupalgap.menu_links[local_task]);
+                    }
                   }
-                }
-            });
+              });
+            }
             // If there was only one local task menu item, and it is the default
             // local task, don't render the menu, otherwise render the menu as
             // an item list as long as there are items to render.
-            if (
-              menu_items.length == 1 &&
+            if (menu_items.length == 1 &&
               menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK'
             ) { html = ''; }
             else {
@@ -181,20 +175,26 @@ function menu_block_view_pageshow(options) {
         // an access_callback handler.
         var has_entity_arg = false;
         var has_access_callback = false;
-        $.each(local_tasks, function(index, local_task) {
-            if (drupalgap.menu_links[local_task] &&
-              (drupalgap.menu_links[local_task].type == 'MENU_DEFAULT_LOCAL_TASK' ||
-               drupalgap.menu_links[local_task].type == 'MENU_LOCAL_TASK')
-            ) {
-              if (drupalgap_path_has_entity_arg(arg(null, local_task))) {
-                has_entity_arg = true;
+        if (local_tasks) {
+          $.each(local_tasks, function(index, local_task) {
+              if (drupalgap.menu_links[local_task] &&
+                (
+                  drupalgap.menu_links[local_task].type ==
+                    'MENU_DEFAULT_LOCAL_TASK' ||
+                  drupalgap.menu_links[local_task].type ==
+                    'MENU_LOCAL_TASK'
+                )
+              ) {
+                if (drupalgap_path_has_entity_arg(arg(null, local_task))) {
+                  has_entity_arg = true;
+                }
+                if (
+                  typeof
+                    drupalgap.menu_links[local_task].access_callback !== 'undefined'
+                ) { has_access_callback = true; }
               }
-              if (
-                typeof
-                  drupalgap.menu_links[local_task].access_callback !== 'undefined'
-              ) { has_access_callback = true; }
-            }
-        });
+          });
+        }
 
         // If we have an entity arg, and an access_callback, let's load up the
         // entity asynchronously.
