@@ -391,7 +391,7 @@ function drupalgap_add_js() {
       url: data,
       data: null,
       success: function() {
-        if (drupalgap.settings.debug) {
+        if (Drupal.settings.debug) {
           // Print the js path to the console.
           console.log(data);
         }
@@ -531,9 +531,6 @@ function drupalgap_load_blocks() {
       });
     }*/
     drupalgap.blocks = module_invoke_all('block_info');
-    if (drupalgap.settings.debug) {
-      console.log(JSON.stringify(drupalgap.blocks));
-    }
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
 }
@@ -825,9 +822,9 @@ function drupalgap_includes_load() {
               url: include_path,
               data: null,
               success: function() {
-                if (drupalgap.settings.debug) {
+                if (Drupal.settings.debug) {
                   // Print the include path to the console.
-                  console.log(include_path);
+                  dpm(include_path);
                 }
               },
               dataType: 'script',
