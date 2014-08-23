@@ -320,7 +320,7 @@ function _drupalgap_back_exit() {
 
 /**
  * Given an error message, this will log the message to the console and goto
- * the error page, if it isn't there already. If drupalgap.settings.debug is set
+ * the error page, if it isn't there already. If Drupal.settings.debug is set
  * to true, this function will also alert the error. You may optionally send in
  * a second message that will be displayed to the user via an alert dialog box.
  * @param {String} message
@@ -332,8 +332,8 @@ function drupalgap_error(message) {
     var error_message = 'drupalgap_error() - ' +
                         arguments.callee.caller.name + ' - ' +
                         message;
-    console.log(error_message);
-    if (drupalgap.settings.debug) { drupalgap_alert(error_message); }
+    dpm(error_message);
+    if (Drupal.settings.debug) { drupalgap_alert(error_message); }
     // If a message for the user was passed in, display it to the user.
     if (arguments[1]) { drupalgap_alert(arguments[1]); }
     // Goto the error page if we are not already there.
