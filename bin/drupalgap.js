@@ -11805,8 +11805,8 @@ function theme_views_view(variables) {
         format_attributes['class'] += ' views-rows';
         open = '<div ' + drupalgap_attributes(format_attributes) + '>';
         close = '</div>';
-        open_row = '<div>';
-        close_row = '</div>';
+        open_row = '';
+        close_row = '';
         break;
     }
     var rows = '' + open;
