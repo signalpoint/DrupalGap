@@ -320,11 +320,9 @@ function drupalgap_get_menu_link_router_path(path) {
           }
           break;
         default:
-          if (drupalgap.settings.debug) {
-            console.log(
-              'drupalgap_get_menu_link_router_path - ' +
-              'default case, will try round two (' + path + ')'
-            );
+          if (args_size > 1 && is_int(parseInt(args[1]))) {
+            args[1] = '%';
+            router_path = args.join('/');
           }
           break;
       }
