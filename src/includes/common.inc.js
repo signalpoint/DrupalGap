@@ -56,6 +56,8 @@ function drupalgap_remove_pages_from_dom() {
     });
     // Reset drupalgap.pages to only contain the current page id.
     drupalgap.pages = [current_page_id];
+    // Reset the drupalgap.views.ids array.
+    drupalgap.views.ids = [];
   }
   catch (error) { console.log('drupalgap_remove_pages_from_dom - ' + error); }
 }
