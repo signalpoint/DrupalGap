@@ -39,6 +39,25 @@ version of DrupalGap to another.
 | Version Change Notes for Developers |
 |=====================================|
 
+7.x-1.0-rc2 => 7.x-1.0-rc3
+
+The "row_callback" function is now passed the row position in a different within
+a different variable:
+
+OLD WAY:
+
+function my_module_articles_list_row(view, row) {
+  return 'The position for this row is: ' + row.count;
+}
+
+NEW WAY:
+
+function my_module_articles_list_row(view, row) {
+  return 'The position for this row is: ' + row._position;
+}
+
+For more info, see: http://www.drupalgap.org/node/219
+
 7.x-1.0-rc1 => 7.x-1.0-rc2
 
   Required select lists now use an empty string value instead of -1 for the
