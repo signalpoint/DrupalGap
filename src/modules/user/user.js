@@ -67,17 +67,19 @@ function user_listing() {
 function user_listing_pageshow() {
   try {
     // Grab some users and display them.
-    drupalgap.views_datasource.call({
-      'path': 'drupalgap/views_datasource/drupalgap_users',
-      'success': function(data) {
-        // Extract the users into items, then drop them in the list.
-        var items = [];
-        $.each(data.users, function(index, object) {
-            items.push(l(object.user.name, 'user/' + object.user.uid));
-        });
-        drupalgap_item_list_populate('#user_listing_items', items);
+    views_datasource_get_view_result(
+      'drupalgap/views_datasource/drupalgap_users',
+      {
+        success: function(data) {
+          // Extract the users into items, then drop them in the list.
+          var items = [];
+          $.each(data.users, function(index, object) {
+              items.push(l(object.user.name, 'user/' + object.user.uid));
+          });
+          drupalgap_item_list_populate('#user_listing_items', items);
+        }
       }
-    });
+    );
   }
   catch (error) { console.log('user_listing_pageshow - ' + error); }
 }
