@@ -1113,7 +1113,6 @@ function _drupalgap_form_submit(form_id) {
 
         // Call the form's validate function(s), if any.
         $.each(form.validate, function(index, function_name) {
-            if (drupalgap.settings.debug) { console.log(function_name + '()'); }
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
         });
