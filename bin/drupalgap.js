@@ -80,6 +80,9 @@ function drupalgap_init() {
       theme_path: '',
       themes: [],
       theme_registry: {},
+      views: {
+        ids: []
+      },
       views_datasource: {}
     };
     //if (drupalgap) { dg = $.extend({}, dg, drupalgap); }
@@ -298,11 +301,15 @@ function drupalgap_load_modules() {
                     url: modules_paths_object,
                     data: null,
                     success: function() {
-                        //console.log('Loaded module: ' + modules_paths_object);
+                      if (Drupal.settings.debug) { dpm(modules_paths_object); }
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
                       var msg = 'Failed to load module! (' + module.name + ')';
+                      dpm(msg);
+                      dpm(modules_paths_object);
+                      dpm(textStatus);
+                      dpm(errorThrown);
                       drupalgap_alert(msg);
                     }
                 });
@@ -1622,6 +1629,8 @@ function drupalgap_remove_pages_from_dom() {
     });
     // Reset drupalgap.pages to only contain the current page id.
     drupalgap.pages = [current_page_id];
+    // Reset the drupalgap.views.ids array.
+    drupalgap.views.ids = [];
   }
   catch (error) { console.log('drupalgap_remove_pages_from_dom - ' + error); }
 }
@@ -8410,13 +8419,6 @@ function menu_block_view_pageshow(options) {
           parent && drupalgap.menu_links[parent] &&
           drupalgap.menu_links[parent].children
         ) { local_tasks = drupalgap.menu_links[parent].children; }
-        else {
-          console.log(
-            'menu_block_view_pageshow - failed to find local tasks (' +
-              router_path +
-            ')'
-          );
-        }
 
         var args = arg();
 
@@ -8425,23 +8427,24 @@ function menu_block_view_pageshow(options) {
           try {
             var menu_items = [];
             var link_path = '';
-            $.each(local_tasks, function(index, local_task) {
-                if (drupalgap.menu_links[local_task] && (
-                  drupalgap.menu_links[local_task].type ==
-                    'MENU_DEFAULT_LOCAL_TASK' ||
-                  drupalgap.menu_links[local_task].type ==
-                    'MENU_LOCAL_TASK'
-                )) {
-                  if (drupalgap_menu_access(local_task, null, result)) {
-                    menu_items.push(drupalgap.menu_links[local_task]);
+            if (local_tasks && !empty(local_tasks)) {
+              $.each(local_tasks, function(index, local_task) {
+                  if (drupalgap.menu_links[local_task] && (
+                    drupalgap.menu_links[local_task].type ==
+                      'MENU_DEFAULT_LOCAL_TASK' ||
+                    drupalgap.menu_links[local_task].type ==
+                      'MENU_LOCAL_TASK'
+                  )) {
+                    if (drupalgap_menu_access(local_task, null, result)) {
+                      menu_items.push(drupalgap.menu_links[local_task]);
+                    }
                   }
-                }
-            });
+              });
+            }
             // If there was only one local task menu item, and it is the default
             // local task, don't render the menu, otherwise render the menu as
             // an item list as long as there are items to render.
-            if (
-              menu_items.length == 1 &&
+            if (menu_items.length == 1 &&
               menu_items[0].type == 'MENU_DEFAULT_LOCAL_TASK'
             ) { html = ''; }
             else {
@@ -8503,20 +8506,26 @@ function menu_block_view_pageshow(options) {
         // an access_callback handler.
         var has_entity_arg = false;
         var has_access_callback = false;
-        $.each(local_tasks, function(index, local_task) {
-            if (drupalgap.menu_links[local_task] &&
-              (drupalgap.menu_links[local_task].type == 'MENU_DEFAULT_LOCAL_TASK' ||
-               drupalgap.menu_links[local_task].type == 'MENU_LOCAL_TASK')
-            ) {
-              if (drupalgap_path_has_entity_arg(arg(null, local_task))) {
-                has_entity_arg = true;
+        if (local_tasks) {
+          $.each(local_tasks, function(index, local_task) {
+              if (drupalgap.menu_links[local_task] &&
+                (
+                  drupalgap.menu_links[local_task].type ==
+                    'MENU_DEFAULT_LOCAL_TASK' ||
+                  drupalgap.menu_links[local_task].type ==
+                    'MENU_LOCAL_TASK'
+                )
+              ) {
+                if (drupalgap_path_has_entity_arg(arg(null, local_task))) {
+                  has_entity_arg = true;
+                }
+                if (
+                  typeof
+                    drupalgap.menu_links[local_task].access_callback !== 'undefined'
+                ) { has_access_callback = true; }
               }
-              if (
-                typeof
-                  drupalgap.menu_links[local_task].access_callback !== 'undefined'
-              ) { has_access_callback = true; }
-            }
-        });
+          });
+        }
 
         // If we have an entity arg, and an access_callback, let's load up the
         // entity asynchronously.
@@ -10210,17 +10219,19 @@ function user_listing() {
 function user_listing_pageshow() {
   try {
     // Grab some users and display them.
-    drupalgap.views_datasource.call({
-      'path': 'drupalgap/views_datasource/drupalgap_users',
-      'success': function(data) {
-        // Extract the users into items, then drop them in the list.
-        var items = [];
-        $.each(data.users, function(index, object) {
-            items.push(l(object.user.name, 'user/' + object.user.uid));
-        });
-        drupalgap_item_list_populate('#user_listing_items', items);
+    views_datasource_get_view_result(
+      'drupalgap/views_datasource/drupalgap_users',
+      {
+        success: function(data) {
+          // Extract the users into items, then drop them in the list.
+          var items = [];
+          $.each(data.users, function(index, object) {
+              items.push(l(object.user.name, 'user/' + object.user.uid));
+          });
+          drupalgap_item_list_populate('#user_listing_items', items);
+        }
       }
-    });
+    );
   }
   catch (error) { console.log('user_listing_pageshow - ' + error); }
 }
@@ -11584,6 +11595,33 @@ function theme_view(variables) {
       );
       variables.attributes.id = 'views-view--' + user_password();
     }
+    // Since multiple pages can stack up in the DOM, warn the developer if they
+    // re-use a Views ID that is already in the DOM. If the ID hasn't been used
+    // yet, add it to the drupalgap.views.ids array.
+    if (in_array(variables.attributes.id, drupalgap.views.ids)) {
+      // Double check to make sure it is actually in the DOM. If it wasn't
+      // really in the DOM, remove the id from drupalgap.views.ids and continue
+      // onward.
+      if (!$('#' + variables.attributes.id)) {
+        // @see http://stackoverflow.com/a/3596141/763010
+        drupalgap.views.ids.splice(
+          $.inArray(variables.attributes.id, drupalgap.views.ids),
+          1
+        );
+      }
+      else {
+        dpm(
+          'WARNING: theme_view() - this id already exists in the DOM: #' +
+          variables.attributes.id +
+          ' - the view will be rendered into the first container that is ' +
+          'located in the DOM - if you are re-using this same view, it is ' +
+          'recommended to append a unique identifier (e.g. an entity id) to ' +
+          'your views id, that way you can re-use the same view across ' +
+          'multiple pages'
+        );
+      }
+    }
+    else { drupalgap.views.ids.push(variables.attributes.id); }
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
     variables.attributes['class'] += 'view ';
@@ -11775,8 +11813,8 @@ function theme_views_view(variables) {
     $.each(results[root], function(count, object) {
         // Extract the row.
         var row = object[child];
-        // Mark the row count.
-        row.count = count;
+        // Mark the row position.
+        row._position = count;
         // If a row_callback function exists, call it to render the row,
         // otherwise use the default row render mechanism.
         var row_content = '';
