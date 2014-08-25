@@ -469,6 +469,22 @@ function theme_controlgroup(variables) {
 }
 
 /**
+ * Themes a header widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_header(variables) {
+  try {
+    variables.attributes['data-role'] = 'header';
+    if (typeof variables.type === 'undefined') { type = 'h2'; }
+    return '<div ' + drupalgap_attributes(variables.attributes) + '><' + type + '>' +
+      variables.text +
+    '</' + type + '></div>';
+  }
+  catch (error) { console.log('theme_header - ' + error); }
+}
+
+/**
  * Implementation of theme_image().
  * @param {Object} variables
  * @return {String}
