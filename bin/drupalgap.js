@@ -11743,8 +11743,11 @@ function theme_views_view(variables) {
       var title_attributes = variables.title_attributes ?
         drupalgap_attributes(variables.title_attributes) : '';
       html +=
-        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>' +
-        theme('views_spacer', null);
+        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>';
+      // Place spacers after the header for each format, except unformatted.
+      if (variables.format != 'unformatted') {
+        html += theme('views_spacer', null);
+      }
     }
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
