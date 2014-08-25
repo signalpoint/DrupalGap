@@ -11735,6 +11735,8 @@ function theme_views_view(variables) {
     // Extract the results.
     var results = _views_embed_view_results;
     if (!results) { return html; }
+    // Figure out the format.
+    if (!variables.format) { variables.format = 'unformatted_list'; }
     // Extract the root and child object name.
     var root = results.view.root;
     var child = results.view.child;
@@ -11742,8 +11744,7 @@ function theme_views_view(variables) {
     if (variables.title) {
       var title_attributes = variables.title_attributes ?
         drupalgap_attributes(variables.title_attributes) : '';
-      html +=
-        '<div ' + title_attributes + '><h2>' + variables.title + '</h2></div>';
+      html += theme('header', { text: variables.title, attributes: title_attributes });
       // Place spacers after the header for each format, except unformatted.
       if (variables.format != 'unformatted') {
         html += theme('views_spacer', null);
