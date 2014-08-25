@@ -309,7 +309,7 @@ function drupalgap_load_modules() {
                       dpm(msg);
                       dpm(modules_paths_object);
                       dpm(textStatus);
-                      dpm(errorThrown);
+                      dpm(errorThrown.message);
                       drupalgap_alert(msg);
                     }
                 });
