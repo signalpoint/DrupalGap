@@ -345,10 +345,14 @@ function theme_views_view(variables) {
     // Append the rendered rows and the pager to the html string according to
     // the pager position.
     if (pager_pos == 'top') {
-      html += pager + theme('views_spacer', null) + rows;
+      html += pager;
+      if (!empty(pager)) { html += theme('views_spacer', null); }
+      html += rows;
     }
     else if (pager_pos == 'bottom') {
-      html += rows + theme('views_spacer', null) + pager;
+      html += rows;
+      if (!empty(pager)) { html += theme('views_spacer', null); }
+      html += pager;
     }
     else {
       console.log('WARNING: theme_views_view - unsupported pager_pos (' +
