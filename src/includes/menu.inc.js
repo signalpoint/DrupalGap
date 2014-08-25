@@ -102,18 +102,19 @@ function menu_execute_active_handler() {
         }
 
         // Add a pageshow handler for the page title.
-        var options = {
-          'page_id': page_id,
-          'jqm_page_event': 'pageshow',
-          'jqm_page_event_callback': '_drupalgap_page_title_pageshow',
-          'jqm_page_event_args': jqm_page_event_args
-        };
-        content['drupalgap_page_title_pageshow'] = {
-          markup: drupalgap_jqm_page_event_script_code(options)
-        };
+        if (typeof content === 'object') {
+          var options = {
+            'page_id': page_id,
+            'jqm_page_event': 'pageshow',
+            'jqm_page_event_callback': '_drupalgap_page_title_pageshow',
+            'jqm_page_event_args': jqm_page_event_args
+          };
+          content['drupalgap_page_title_pageshow'] = {
+            markup: drupalgap_jqm_page_event_script_code(options)
+          };
+        }
 
         // And finally return the content.
-        if (drupalgap.settings.debug) { dpm(content); }
         return content;
       }
       else {
