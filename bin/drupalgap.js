@@ -309,7 +309,7 @@ function drupalgap_load_modules() {
                       dpm(msg);
                       dpm(modules_paths_object);
                       dpm(textStatus);
-                      dpm(errorThrown);
+                      dpm(errorThrown.message);
                       drupalgap_alert(msg);
                     }
                 });
@@ -4412,18 +4412,19 @@ function menu_execute_active_handler() {
         }
 
         // Add a pageshow handler for the page title.
-        var options = {
-          'page_id': page_id,
-          'jqm_page_event': 'pageshow',
-          'jqm_page_event_callback': '_drupalgap_page_title_pageshow',
-          'jqm_page_event_args': jqm_page_event_args
-        };
-        content['drupalgap_page_title_pageshow'] = {
-          markup: drupalgap_jqm_page_event_script_code(options)
-        };
+        if (typeof content === 'object') {
+          var options = {
+            'page_id': page_id,
+            'jqm_page_event': 'pageshow',
+            'jqm_page_event_callback': '_drupalgap_page_title_pageshow',
+            'jqm_page_event_args': jqm_page_event_args
+          };
+          content['drupalgap_page_title_pageshow'] = {
+            markup: drupalgap_jqm_page_event_script_code(options)
+          };
+        }
 
         // And finally return the content.
-        if (drupalgap.settings.debug) { dpm(content); }
         return content;
       }
       else {
@@ -5350,6 +5351,22 @@ function theme_controlgroup(variables) {
     return html;
   }
   catch (error) { console.log('theme_controlgroup - ' + error); }
+}
+
+/**
+ * Themes a header widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_header(variables) {
+  try {
+    variables.attributes['data-role'] = 'header';
+    if (typeof variables.type === 'undefined') { type = 'h2'; }
+    return '<div ' + drupalgap_attributes(variables.attributes) + '><' + type + '>' +
+      variables.text +
+    '</' + type + '></div>';
+  }
+  catch (error) { console.log('theme_header - ' + error); }
 }
 
 /**
