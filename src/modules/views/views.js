@@ -86,6 +86,46 @@ function views_datasource_get_view_result(path, options) {
 }
 
 /**
+ *
+ */
+function views_exposed_form(form, form_state, exposed_data, exposed_raw_input) {
+  try {
+    dpm('views_exposed_form');
+    dpm(arguments);
+    form.elements['name'] = {
+      type: 'textfield',
+      title: 'Your name',
+      required: true
+    };
+    form.elements['submit'] = {
+      type: 'submit',
+      value: exposed_data.submit
+    };
+    return form;
+  }
+  catch (error) { console.log('views_exposed_form - ' + error); }
+}
+
+/**
+ *
+ */
+/*function views_exposed_form_validate(form, form_state) {
+  try {
+  }
+  catch (error) { console.log('views_exposed_form_validate - ' + error); }
+}*/
+
+/**
+ *
+ */
+function views_exposed_form_submit(form, form_state) {
+  try {
+    drupalgap_alert('Hello ' + form_state.values['name'] + '!');
+  }
+  catch (error) { console.log('views_exposed_form_submit - ' + error); }
+}
+
+/**
  * Themes a view.
  * @param {Object} variables
  * @return {String}
@@ -191,6 +231,11 @@ function views_embed_view(path, options) {
             _views_embed_view_results = results;
             if (!options.success) { return; }
             options.results = results;
+            // If there are any exposed filters, attach their settings.
+            if (typeof results.view.exposed_data !== 'undefined') {
+              options.exposed_data = results.view.exposed_data;
+              options.exposed_raw_input = results.view.exposed_raw_input;
+            }
             var html = theme('views_view', options);
             options.success(html);
           }
@@ -219,6 +264,8 @@ function views_embed_view(path, options) {
  */
 function theme_views_view(variables) {
   try {
+    dpm('theme_views_view');
+    dpm(variables);
     var html = '';
     // Extract the results.
     var results = _views_embed_view_results;
@@ -252,6 +299,14 @@ function theme_views_view(variables) {
           $(selector).trigger('create').show('fast');
       }, 100);
       return empty_callback(results.view);
+    }
+    // We have some results, do we need to render the exposed filter(s)?
+    if (typeof variables.exposed_data !== 'undefined') {
+      html += drupalgap_get_form(
+        'views_exposed_form',
+        variables.exposed_data,
+        variables.exposed_raw_input
+      );
     }
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
