@@ -277,7 +277,7 @@ function image_style_url(style_name, path) {
           '/public/'
       );
     }
-    if (src.indexOf('private://') != -1) {
+    else if (src.indexOf('private://') != -1) {
       src = src.replace(
         'private://',
         Drupal.settings.file_private_path +
@@ -348,19 +348,17 @@ function _image_field_form_process(form, form_state, options) {
         // Create a unique file name using the UTC integer value.
         var d = new Date();
         var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
-        // Build the data for the file create resource.
+        // Build the data for the file create resource. If it's private, adjust
+        // the filepath.
+        var file = {
+          file: {
+            file: image_phonegap_camera_options[name][0].image,
+            filename: image_file_name,
+            filepath: 'public://' + image_file_name
+          }
+        };
         if (!empty(Drupal.settings.file_private_path)) {
-          var file = {'file': {
-            'file': image_phonegap_camera_options[name][0].image,
-            'filename': image_file_name,
-            'filepath': 'private://' + image_file_name
-          }};
-        } else {
-          var file = {'file': {
-            'file': image_phonegap_camera_options[name][0].image,
-            'filename': image_file_name,
-            'filepath': 'public://' + image_file_name
-          }};
+          file.file.filepath = 'private://' + image_file_name;
         }
         // Change the loader mode to saving, and save the file.
         drupalgap.loader = 'saving';
