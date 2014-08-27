@@ -807,7 +807,7 @@ function drupalgap_image_path(uri) {
       if (src.indexOf('public://') != -1) {
         src = src.replace('public://', Drupal.settings.file_public_path + '/');
       }
-      if (src.indexOf('private://') != -1) {
+      else if (src.indexOf('private://') != -1) {
         src = src.replace('private://', Drupal.settings.file_private_path + '/');
       }
       return src;
