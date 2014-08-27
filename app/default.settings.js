@@ -12,8 +12,10 @@ Drupal.settings.site_path = ''; // e.g. http://www.example.com
 // Default Services Endpoint Path
 Drupal.settings.endpoint = 'drupalgap';
 
-// Public Files Directory Path
+// Files directory paths
+// Please choose one or the other
 Drupal.settings.file_public_path = 'sites/default/files';
+//Drupal.settings.file_private_path = 'system/files';
 
 // The Default Language Code
 Drupal.settings.language_default = 'und';
