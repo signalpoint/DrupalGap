@@ -88,19 +88,45 @@ function views_datasource_get_view_result(path, options) {
 /**
  *
  */
-function views_exposed_form(form, form_state, exposed_data, exposed_raw_input) {
+function views_exposed_form(form, form_state, options) {
   try {
     dpm('views_exposed_form');
-    dpm(arguments);
-    form.elements['name'] = {
-      type: 'textfield',
-      title: 'Your name',
-      required: true
-    };
+    dpm(options);
+    var title = form.title ? form.title : 'Filter';
+    //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
+    $.each(options.filter, function(field, filter) {
+        dpm('field');
+        dpm(filter);
+        // Determine the handler.
+        var handler = filter.definition.handler;
+        var element_id = null;
+        var element = null;
+        if (drupalgap_function_exists(handler)) {
+          // Before implementing this, there will be common properties of an
+          // element that should get defined before shipping the element off to
+          // the handler, or using the element for the default assembly below.
+        }
+        else {
+          /*dpm('WARNING: views_exposed_form - handler does not exist (' +
+            handler +
+          ') - trying to manually assemble the exposed filter...');*/
+          // @TODO - Is this element id assignment unique enough in that it
+          // won't cause collisions with other typical ids developers may be
+          // placing on the page.
+          element_id = filter.options.expose.identifier;
+          element = {
+            type: filter.options.group_info.widget,
+            title: filter.options.expose.label,
+            required: filter.options.expose.required
+          };
+        }
+        if (element_id) { form.elements[element_id] = element; }
+    });
     form.elements['submit'] = {
       type: 'submit',
-      value: exposed_data.submit
+      value: options.exposed_data.submit
     };
+    //form.suffix += '</div>';
     return form;
   }
   catch (error) { console.log('views_exposed_form - ' + error); }
@@ -231,11 +257,6 @@ function views_embed_view(path, options) {
             _views_embed_view_results = results;
             if (!options.success) { return; }
             options.results = results;
-            // If there are any exposed filters, attach their settings.
-            if (typeof results.view.exposed_data !== 'undefined') {
-              options.exposed_data = results.view.exposed_data;
-              options.exposed_raw_input = results.view.exposed_raw_input;
-            }
             var html = theme('views_view', options);
             options.success(html);
           }
@@ -264,8 +285,6 @@ function views_embed_view(path, options) {
  */
 function theme_views_view(variables) {
   try {
-    dpm('theme_views_view');
-    dpm(variables);
     var html = '';
     // Extract the results.
     var results = _views_embed_view_results;
@@ -301,11 +320,13 @@ function theme_views_view(variables) {
       return empty_callback(results.view);
     }
     // We have some results, do we need to render the exposed filter(s)?
-    if (typeof variables.exposed_data !== 'undefined') {
+    if (typeof results.view.exposed_data !== 'undefined') {
       html += drupalgap_get_form(
-        'views_exposed_form',
-        variables.exposed_data,
-        variables.exposed_raw_input
+        'views_exposed_form', {
+          exposed_data: results.view.exposed_data,
+          exposed_raw_input: results.view.exposed_raw_input,
+          filter: results.view.filter
+        }
       );
     }
     // Depending on the format, let's render the container opening and closing,
