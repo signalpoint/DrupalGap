@@ -94,39 +94,73 @@ function views_exposed_form(form, form_state, options) {
     dpm(options);
     var title = form.title ? form.title : 'Filter';
     //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
-    $.each(options.filter, function(field, filter) {
-        dpm('field');
-        dpm(filter);
-        // Determine the handler.
-        var handler = filter.definition.handler;
+    $.each(options.filter, function(views_field, filter) {
+        
+        //dpm(filter.field);
+        //dpm(filter);
+        
+        // Prep the element basics.
         var element_id = null;
         var element = null;
-        if (drupalgap_function_exists(handler)) {
-          // Before implementing this, there will be common properties of an
-          // element that should get defined before shipping the element off to
-          // the handler, or using the element for the default assembly below.
+        // @TODO - Is this element id assignment unique enough in that it
+        // won't cause collisions with other typical ids developers may be
+        // placing on the page?
+        element_id = filter.options.expose.identifier;
+        element = {
+          type: filter.options.group_info.widget,
+          title: filter.options.expose.label,
+          required: filter.options.expose.required
+        };
+
+        // Grab the field name and figure out which module is in charge of it.
+        var field_name = filter.definition.field_name;
+        if (field_name) {
+          
+          // This is an entity field...
+          //dpm(field_name);
+          
+          // Grab the field info, and determine the module that will handle it.
+          // Then see if hook_views_exposed_filter() has been implemented by
+          // that module. That module will be used to assemble the element. If
+          // we don't have a handler then just skip the filter.
+          var field = drupalgap_field_info_field(field_name);
+          var module = field.module;
+          var handler = module + '_views_exposed_filter';
+          if (!drupalgap_function_exists(handler)) {
+            dpm(
+              'WARNING: views_exposed_form() - the ' + handler + '() ' +
+              'function does not exist to assemble the ' + field.type +
+              ' filter used with ' + field_name
+            );
+            return;
+          }
+          
+          // We have a handler, let's call it so the element can be assembled.
+          window[handler](form, form_state, element, filter, field);
+
         }
         else {
-          /*dpm('WARNING: views_exposed_form - handler does not exist (' +
-            handler +
-          ') - trying to manually assemble the exposed filter...');*/
-          // @TODO - Is this element id assignment unique enough in that it
-          // won't cause collisions with other typical ids developers may be
-          // placing on the page.
-          element_id = filter.options.expose.identifier;
-          element = {
-            type: filter.options.group_info.widget,
-            title: filter.options.expose.label,
-            required: filter.options.expose.required
-          };
+          // This is NOT an entity field...
+          dpm(
+            'WARNING: views_exposed_form() - I do not know how to handle the ' +
+            'base field ' + field
+          );
+          return;
         }
+
+        // Finally attach the assembled element to the form.
         if (element_id) { form.elements[element_id] = element; }
+
     });
+
+    // Add the submit button.
     form.elements['submit'] = {
       type: 'submit',
       value: options.exposed_data.submit
     };
+
     //form.suffix += '</div>';
+
     return form;
   }
   catch (error) { console.log('views_exposed_form - ' + error); }
