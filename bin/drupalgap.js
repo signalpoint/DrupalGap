@@ -7643,6 +7643,29 @@ function list_assemble_form_state_into_field(entity_type, bundle,
 }
 
 /**
+ * Implements hook_views_exposed_filter().
+ */
+function list_views_exposed_filter(form, form_state, element, filter, field) {
+  try {
+    dpm('list_views_exposed_filter');
+    dpm(arguments);
+    var widget = filter.options.group_info.widget;
+    if (widget == 'select') {
+      element.options = filter.value_options;
+    }
+    else {
+      dpm(
+        'WARNING: list_views_exposed_filter - unsupported widget (' +
+          widget +
+        ')'
+      );
+    }
+    
+  }
+  catch (error) { console.log('list_views_exposed_filter - ' + error); }
+}
+
+/**
  * Implements hook_field_formatter_view().
  * @param {String} entity_type
  * @param {Object} entity
@@ -11616,6 +11639,106 @@ function views_datasource_get_view_result(path, options) {
 }
 
 /**
+ *
+ */
+function views_exposed_form(form, form_state, options) {
+  try {
+    dpm('views_exposed_form');
+    dpm(options);
+    var title = form.title ? form.title : 'Filter';
+    //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
+    $.each(options.filter, function(views_field, filter) {
+        
+        //dpm(filter.field);
+        //dpm(filter);
+        
+        // Prep the element basics.
+        var element_id = null;
+        var element = null;
+        // @TODO - Is this element id assignment unique enough in that it
+        // won't cause collisions with other typical ids developers may be
+        // placing on the page?
+        element_id = filter.options.expose.identifier;
+        element = {
+          type: filter.options.group_info.widget,
+          title: filter.options.expose.label,
+          required: filter.options.expose.required
+        };
+
+        // Grab the field name and figure out which module is in charge of it.
+        var field_name = filter.definition.field_name;
+        if (field_name) {
+          
+          // This is an entity field...
+          //dpm(field_name);
+          
+          // Grab the field info, and determine the module that will handle it.
+          // Then see if hook_views_exposed_filter() has been implemented by
+          // that module. That module will be used to assemble the element. If
+          // we don't have a handler then just skip the filter.
+          var field = drupalgap_field_info_field(field_name);
+          var module = field.module;
+          var handler = module + '_views_exposed_filter';
+          if (!drupalgap_function_exists(handler)) {
+            dpm(
+              'WARNING: views_exposed_form() - the ' + handler + '() ' +
+              'function does not exist to assemble the ' + field.type +
+              ' filter used with ' + field_name
+            );
+            return;
+          }
+          
+          // We have a handler, let's call it so the element can be assembled.
+          window[handler](form, form_state, element, filter, field);
+
+        }
+        else {
+          // This is NOT an entity field...
+          dpm(
+            'WARNING: views_exposed_form() - I do not know how to handle the ' +
+            'base field ' + field
+          );
+          return;
+        }
+
+        // Finally attach the assembled element to the form.
+        if (element_id) { form.elements[element_id] = element; }
+
+    });
+
+    // Add the submit button.
+    form.elements['submit'] = {
+      type: 'submit',
+      value: options.exposed_data.submit
+    };
+
+    //form.suffix += '</div>';
+
+    return form;
+  }
+  catch (error) { console.log('views_exposed_form - ' + error); }
+}
+
+/**
+ *
+ */
+/*function views_exposed_form_validate(form, form_state) {
+  try {
+  }
+  catch (error) { console.log('views_exposed_form_validate - ' + error); }
+}*/
+
+/**
+ *
+ */
+function views_exposed_form_submit(form, form_state) {
+  try {
+    drupalgap_alert('Hello ' + form_state.values['name'] + '!');
+  }
+  catch (error) { console.log('views_exposed_form_submit - ' + error); }
+}
+
+/**
  * Themes a view.
  * @param {Object} variables
  * @return {String}
@@ -11782,6 +11905,16 @@ function theme_views_view(variables) {
           $(selector).trigger('create').show('fast');
       }, 100);
       return empty_callback(results.view);
+    }
+    // We have some results, do we need to render the exposed filter(s)?
+    if (typeof results.view.exposed_data !== 'undefined') {
+      html += drupalgap_get_form(
+        'views_exposed_form', {
+          exposed_data: results.view.exposed_data,
+          exposed_raw_input: results.view.exposed_raw_input,
+          filter: results.view.filter
+        }
+      );
     }
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
