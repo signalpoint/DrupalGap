@@ -288,6 +288,26 @@ function list_assemble_form_state_into_field(entity_type, bundle,
 }
 
 /**
+ * Implements hook_views_exposed_filter().
+ */
+function list_views_exposed_filter(form, form_state, element, filter, field) {
+  try {
+    //dpm('list_views_exposed_filter');
+    //dpm(arguments);
+    var widget = filter.options.group_info.widget;
+    if (widget == 'select') { element.options = filter.value_options; }
+    else {
+      dpm(
+        'WARNING: list_views_exposed_filter - unsupported widget (' +
+          widget +
+        ')'
+      );
+    }
+  }
+  catch (error) { console.log('list_views_exposed_filter - ' + error); }
+}
+
+/**
  * Implements hook_field_formatter_view().
  * @param {String} entity_type
  * @param {Object} entity
