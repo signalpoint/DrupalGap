@@ -11561,6 +11561,9 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
   }
 }
 
+// Used to hold onto the current views exposed filter query string.
+var _views_exposed_filter_query = null;
+
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
  * results and pass them along to the provided success callback.
@@ -11653,8 +11656,8 @@ function views_datasource_get_view_result(path, options) {
  */
 function views_exposed_form(form, form_state, options) {
   try {
-    dpm('views_exposed_form');
-    dpm(options);
+    //dpm('views_exposed_form');
+    //dpm(options);
 
     //var title = form.title ? form.title : 'Filter';
     //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
@@ -11749,32 +11752,31 @@ function views_exposed_form(form, form_state, options) {
 /**
  *
  */
-/*function views_exposed_form_validate(form, form_state) {
-  try {
-  }
-  catch (error) { console.log('views_exposed_form_validate - ' + error); }
-}*/
-
-/**
- *
- */
 function views_exposed_form_submit(form, form_state) {
   try {
-    dpm('views_exposed_form_submit');
-    dpm(arguments);
+    // Assemble the query string from the form state values.
     var query = '';
     $.each(form_state.values, function(key, value) {
         if (empty(value)) { return; }
         query += key + '=' + encodeURIComponent(value) + '&';
     });
-    if (!empty(query)) {
-      query = query.substr(0, query.length - 1);
-      form.query = query;
+    if (!empty(query)) { query = query.substr(0, query.length - 1); }
+    // If there is a query set aside from previous requests, and it is equal to
+    // the submitted query, then stop the submission. Otherwise remove it from
+    // the path.
+    if (_views_exposed_filter_query) {
+      if (_views_exposed_filter_query == query) { return; }
+      if (form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1) {
+        form.variables.path =
+        form.variables.path.replace('&' + _views_exposed_filter_query, '');
+      }
     }
-    if (form.variables.path.indexOf('&' + query) != -1) {
-      form.variables.path = form.variables.path.replace('&' + form.query, '');
-    }
+    // Set aside a copy of the query string, so it can be removed from the path
+    // upon subsequent submissions of the form.
+    _views_exposed_filter_query = query;
+    // Update the path for the view, reset the pager, then theme the view.
     form.variables.path += '&' + query;
+    form.variables.page = 0;
     _theme_view(form.variables);
   }
   catch (error) { console.log('views_exposed_form_submit - ' + error); }
