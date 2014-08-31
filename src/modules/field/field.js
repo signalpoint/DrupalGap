@@ -110,10 +110,10 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
           form.elements[name] = {
-            'type': field_info.type,
-            'title': field.label,
-            'required': field.required,
-            'description': field.description
+            type: field_info.type,
+            title: field.label,
+            required: field.required,
+            description: field.description
           };
           if (!form.elements[name][language]) {
             form.elements[name][language] = {};
@@ -295,7 +295,17 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
     //dpm('list_views_exposed_filter');
     //dpm(arguments);
     var widget = filter.options.group_info.widget;
-    if (widget == 'select') { element.options = filter.value_options; }
+    if (widget == 'select') {
+      // Set the options, then depending on whether or not it is required, set
+      // the default value accordingly.
+      element.options = filter.value_options;
+      if (element.required) { element.value = filter.value; }
+      else {
+        element.options[''] = '- Any -';
+        element.value = filter.value;
+        if (typeof element.value === 'undefined') { element.value = ''; }
+      }
+    }
     else {
       dpm(
         'WARNING: list_views_exposed_filter - unsupported widget (' +
