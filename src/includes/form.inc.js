@@ -1479,10 +1479,13 @@ function theme_select(variables) {
     if (variables.options) {
       $.each(variables.options, function(value, label) {
           if (value == 'attributes') { return; } // Skip the attributes.
+          // Is the option selected?
           var selected = '';
-          if (variables.value && variables.value == value) {
-            selected = ' selected ';
-          }
+          if (
+            typeof variables.value !== 'undefined' &&
+            variables.value == value
+          ) { selected = ' selected '; }
+          // Render the option.
           options += '<option value="' + value + '" ' + selected + '>' +
             label +
           '</option>';
