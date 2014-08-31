@@ -4251,10 +4251,13 @@ function theme_select(variables) {
     if (variables.options) {
       $.each(variables.options, function(value, label) {
           if (value == 'attributes') { return; } // Skip the attributes.
+          // Is the option selected?
           var selected = '';
-          if (variables.value && variables.value == value) {
-            selected = ' selected ';
-          }
+          if (
+            typeof variables.value !== 'undefined' &&
+            variables.value == value
+          ) { selected = ' selected '; }
+          // Render the option.
           options += '<option value="' + value + '" ' + selected + '>' +
             label +
           '</option>';
@@ -7465,10 +7468,10 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
           form.elements[name] = {
-            'type': field_info.type,
-            'title': field.label,
-            'required': field.required,
-            'description': field.description
+            type: field_info.type,
+            title: field.label,
+            required: field.required,
+            description: field.description
           };
           if (!form.elements[name][language]) {
             form.elements[name][language] = {};
@@ -7647,11 +7650,19 @@ function list_assemble_form_state_into_field(entity_type, bundle,
  */
 function list_views_exposed_filter(form, form_state, element, filter, field) {
   try {
-    dpm('list_views_exposed_filter');
-    dpm(arguments);
+    //dpm('list_views_exposed_filter');
+    //dpm(arguments);
     var widget = filter.options.group_info.widget;
     if (widget == 'select') {
+      // Set the options, then depending on whether or not it is required, set
+      // the default value accordingly.
       element.options = filter.value_options;
+      if (element.required) { element.value = filter.value; }
+      else {
+        element.options[''] = '- Any -';
+        element.value = filter.value;
+        if (typeof element.value === 'undefined') { element.value = ''; }
+      }
     }
     else {
       dpm(
@@ -7660,7 +7671,6 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
         ')'
       );
     }
-    
   }
   catch (error) { console.log('list_views_exposed_filter - ' + error); }
 }
@@ -11645,8 +11655,13 @@ function views_exposed_form(form, form_state, options) {
   try {
     dpm('views_exposed_form');
     dpm(options);
-    var title = form.title ? form.title : 'Filter';
+
+    //var title = form.title ? form.title : 'Filter';
     //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
+    
+    // Attach the variables to the form so it can be used later.
+    form.variables = options.variables;
+
     $.each(options.filter, function(views_field, filter) {
         
         //dpm(filter.field);
@@ -11662,7 +11677,9 @@ function views_exposed_form(form, form_state, options) {
         element = {
           type: filter.options.group_info.widget,
           title: filter.options.expose.label,
-          required: filter.options.expose.required
+          required: filter.options.expose.required,
+          views_field: views_field,
+          filter: filter
         };
 
         // Grab the field name and figure out which module is in charge of it.
@@ -11681,10 +11698,12 @@ function views_exposed_form(form, form_state, options) {
           var handler = module + '_views_exposed_filter';
           if (!drupalgap_function_exists(handler)) {
             dpm(
-              'WARNING: views_exposed_form() - the ' + handler + '() ' +
-              'function does not exist to assemble the ' + field.type +
-              ' filter used with ' + field_name
+              'WARNING: views_exposed_form() - ' + handler + '() must be ' +
+              'created to assemble the ' + field.type + ' filter used with ' +
+              field_name
             );
+            //dpm(filter);
+            //dpm(field);
             return;
           }
           
@@ -11693,12 +11712,20 @@ function views_exposed_form(form, form_state, options) {
 
         }
         else {
-          // This is NOT an entity field...
-          dpm(
-            'WARNING: views_exposed_form() - I do not know how to handle the ' +
-            'base field ' + field
-          );
-          return;
+          // This is NOT an entity field, so it is probably a core field. Let's
+          // assemble the element. In some cases we may just be able to forward
+          // it to a pre-existing handler.
+          if (element.type == 'select') {
+            list_views_exposed_filter(form, form_state, element, filter, null);
+          }
+          else {
+            dpm(
+              'WARNING: views_exposed_form() - I do not know how to handle ' +
+              'the exposed filter for the "'  + views_field + '" field'
+            );
+            dp//m(filter);
+            return;
+          }
         }
 
         // Finally attach the assembled element to the form.
@@ -11733,7 +11760,22 @@ function views_exposed_form(form, form_state, options) {
  */
 function views_exposed_form_submit(form, form_state) {
   try {
-    drupalgap_alert('Hello ' + form_state.values['name'] + '!');
+    dpm('views_exposed_form_submit');
+    dpm(arguments);
+    var query = '';
+    $.each(form_state.values, function(key, value) {
+        if (empty(value)) { return; }
+        query += key + '=' + encodeURIComponent(value) + '&';
+    });
+    if (!empty(query)) {
+      query = query.substr(0, query.length - 1);
+      form.query = query;
+    }
+    if (form.variables.path.indexOf('&' + query) != -1) {
+      form.variables.path = form.variables.path.replace('&' + form.query, '');
+    }
+    form.variables.path += '&' + query;
+    _theme_view(form.variables);
   }
   catch (error) { console.log('views_exposed_form_submit - ' + error); }
 }
@@ -11891,31 +11933,40 @@ function theme_views_view(variables) {
         html += theme('views_spacer', null);
       }
     }
+    // Render the exposed filters, if there are any.
+    var views_exposed_form_html = '';
+    if (typeof results.view.exposed_data !== 'undefined') {
+      views_exposed_form_html = drupalgap_get_form(
+        'views_exposed_form', {
+          exposed_data: results.view.exposed_data,
+          exposed_raw_input: results.view.exposed_raw_input,
+          filter: results.view.filter,
+          variables: variables
+        }
+      );
+    }
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
     // the creation of the content area.
-    if (results.view.count == 0 && variables.empty_callback &&
-      function_exists(variables.empty_callback)
-    ) {
-      var empty_callback = window[variables.empty_callback];
-      var selector = '#' + drupalgap_get_page_id() + ' #' + variables.attributes.id;
+    if (results.view.count == 0) {
+      var selector = '#' + drupalgap_get_page_id() +
+        ' #' + variables.attributes.id;
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
       }, 100);
-      return empty_callback(results.view);
+      if (
+        variables.empty_callback &&
+        function_exists(variables.empty_callback)
+      ) {
+        var empty_callback = window[variables.empty_callback];
+        return views_exposed_form_html + empty_callback(results.view);
+      }
+      return html + views_exposed_form_html;
     }
-    // We have some results, do we need to render the exposed filter(s)?
-    if (typeof results.view.exposed_data !== 'undefined') {
-      html += drupalgap_get_form(
-        'views_exposed_form', {
-          exposed_data: results.view.exposed_data,
-          exposed_raw_input: results.view.exposed_raw_input,
-          filter: results.view.filter
-        }
-      );
-    }
+    // Append the exposed filter html.
+    html += views_exposed_form_html;
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
     if (!variables.format) { variables.format = 'unformatted_list'; }
