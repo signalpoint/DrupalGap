@@ -435,7 +435,7 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // it as the default.  If it is optional, place a "none" option
               // for the user to choose from.
               var text = '- None -';
-              if (items[delta].required) { text = 'Select'; }
+              if (items[delta].required) { text = '- Select a value -'; }
               items[delta].options[''] = text;
               if (empty(items[delta].value)) { items[delta].value = ''; }
               // If more than one value is allowed, turn it into a multiple
@@ -503,6 +503,11 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
             return false;
           }
           var widget_id = items[delta].id + '-' + widget_type;
+          // If the select list is required, add a 'Select' option and set
+          // it as the default.  If it is optional, place a "none" option
+          // for the user to choose from.
+          var text = '- None -';
+          if (items[delta].required) { text = '- Select a value -'; }
           items[delta].children.push({
               type: widget_type,
               attributes: {
@@ -510,7 +515,8 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
                 onchange: "_theme_taxonomy_term_reference_onchange(this, '" +
                   items[delta].id +
                 "');"
-              }
+              },
+              options: { '': text }
           });
           // Attach a pageshow handler to the current page that will load the
           // terms into the widget.

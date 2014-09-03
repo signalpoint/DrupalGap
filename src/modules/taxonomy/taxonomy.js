@@ -702,14 +702,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
     taxonomy_term_index(query, {
         success: function(terms) {
           if (terms.length == 0) { return; }
-          $('#' + options.widget_id).append('<option value="">Select</option>');
           $.each(terms, function(index, term) {
               var option = '<option value="' + term.tid + '">' +
                 term.name +
               '</option>';
               $('#' + options.widget_id).append(option);
           });
-          $('#' + options.widget_id).val('');
           $('#' + options.widget_id).selectmenu('refresh', true);
         }
     });
