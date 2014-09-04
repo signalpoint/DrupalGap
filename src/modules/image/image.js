@@ -367,7 +367,6 @@ function _image_field_form_process(form, form_state, options) {
           async: false,
           success: function(result) {
             try {
-              alert(name);
               // Set the hidden input and form state values with the file id.
               var element_id = drupalgap_form_get_element_id(name, form.id);
               $('#' + element_id).val(result.fid);
