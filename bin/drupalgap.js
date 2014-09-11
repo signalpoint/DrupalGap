@@ -6687,6 +6687,9 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
           break;
       }
     }
+    // Finally, wrap the rendered field in a div, and set the field name as the
+    // class name on the wrapper.
+    content = '<div class="' + field_name + '">' + content + '</div>';
     // Give modules a chance to alter the field content.
     var reference = {'content': content};
     module_invoke_all(
