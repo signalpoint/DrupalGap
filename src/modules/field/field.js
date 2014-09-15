@@ -62,9 +62,19 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
     var field_info_instances;
     // If there is no bundle, pull the fields out of the wrapper.
+    // @TODO there appears to be a special case with commerce_products, in that
+    // they aren't wrapped like normal entities (see the else statement when a
+    // bundle name isn't present). Or do we have a bug here, and we shouldn't
+    // be expecting the wrapper in the first place?
     if (!bundle_name) {
-      field_info_instances =
-        drupalgap.field_info_instances[entity_type][entity_type];
+      if (entity_type == 'commerce_product') {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type];
+      }
+      else {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type][entity_type];
+      }
     }
     else {
       if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
