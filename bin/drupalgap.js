@@ -11561,8 +11561,14 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
   }
 }
 
-// Used to hold onto the current views exposed filter query string.
+// Used to hold onto the current views' exposed filter query string.
 var _views_exposed_filter_query = null;
+
+// Used to mark if the exposed filter's reset button is shown or not.
+var _views_exposed_filter_reset = false;
+
+// Used to hold onto the current views' exposed filter submit's theme variables.
+var _views_exposed_filter_submit_variables = null;
 
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
@@ -11715,9 +11721,9 @@ function views_exposed_form(form, form_state, options) {
 
         }
         else {
-          // This is NOT an entity field, so it is probably a core field. Let's
-          // assemble the element. In some cases we may just be able to forward
-          // it to a pre-existing handler.
+          // This is NOT an entity field, so it is probably a core field (e.g.
+          // nid, status, etc). Let's assemble the element. In some cases we may
+          // just be able to forward it to a pre-existing handler.
           if (element.type == 'select') {
             list_views_exposed_filter(form, form_state, element, filter, null);
           }
@@ -11726,7 +11732,7 @@ function views_exposed_form(form, form_state, options) {
               'WARNING: views_exposed_form() - I do not know how to handle ' +
               'the exposed filter for the "'  + views_field + '" field'
             );
-            dp//m(filter);
+            dpm(filter);
             return;
           }
         }
@@ -11741,6 +11747,18 @@ function views_exposed_form(form, form_state, options) {
       type: 'submit',
       value: options.exposed_data.submit
     };
+    
+    // Add the reset button, if necessary. It'll be hidden by default, until
+    // a filter is submitted by the user.
+    if (options.exposed_data.reset && _views_exposed_filter_reset) {
+      form.buttons['reset'] = {
+        title: options.exposed_data.reset,
+        attributes: {
+          id: form.id + '-reset',
+          onclick: "views_exposed_form_reset()",
+        }
+      };
+    }
 
     //form.suffix += '</div>';
 
@@ -11774,12 +11792,38 @@ function views_exposed_form_submit(form, form_state) {
     // Set aside a copy of the query string, so it can be removed from the path
     // upon subsequent submissions of the form.
     _views_exposed_filter_query = query;
-    // Update the path for the view, reset the pager, then theme the view.
+    // Indicate that we have an exposed filter, so the reset button can easily
+    // be shown/hidden.
+    _views_exposed_filter_reset = true;
+    // Update the path for the view, reset the pager, hold onto the variables,
+    // then theme the view.
     form.variables.path += '&' + query;
     form.variables.page = 0;
+    _views_exposed_filter_submit_variables = form.variables;
     _theme_view(form.variables);
   }
   catch (error) { console.log('views_exposed_form_submit - ' + error); }
+}
+
+/**
+ * Handles clicks on the views exposed filter form's reset button.
+ */
+function views_exposed_form_reset() {
+  try {
+    // Reset the path to the view, the page, and the global vars, then re-theme
+    // the view.
+    _views_exposed_filter_submit_variables.path =
+      _views_exposed_filter_submit_variables.path.replace(
+        '&' + _views_exposed_filter_query,
+        ''
+      )
+    ;
+    _views_exposed_filter_submit_variables.page = 0;
+    _views_exposed_filter_reset = false;
+    _views_exposed_filter_query = null;
+    _theme_view(_views_exposed_filter_submit_variables);
+  }
+  catch (error) { console.log('views_exposed_form_reset - ' + error); }
 }
 
 /**
@@ -11819,7 +11863,7 @@ function theme_view(variables) {
           'located in the DOM - if you are re-using this same view, it is ' +
           'recommended to append a unique identifier (e.g. an entity id) to ' +
           'your views id, that way you can re-use the same view across ' +
-          'multiple pages'
+          'multiple pages.'
         );
       }
     }
