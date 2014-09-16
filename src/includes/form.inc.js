@@ -613,6 +613,7 @@ function drupalgap_form_id_local_storage_key(form_id) {
 function _drupalgap_form_render_elements(form) {
   try {
     var content = '';
+    var content_sorted = '';
     var content_weighted = [];
     // For each form element, if the element objects name property isn't set,
     // set it, then render the element if access is permitted. While rendering
@@ -659,7 +660,12 @@ function _drupalgap_form_render_elements(form) {
     });
     // Prepend the weighted elements to the content.
     if (!empty(content_weighted)) {
-      content = content_weighted.join('\n') + content;
+      content_weighted.reverse();
+      for (var weight in content_weighted) {
+        content_sorted += content_weighted[weight] + '\n';
+      }
+      // Attach sorted content.
+      content = content_sorted + '\n' + content;
     }
     // Add any form buttons to the form elements html, if access to the button
     // is permitted.
