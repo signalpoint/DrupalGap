@@ -3432,7 +3432,6 @@ function _drupalgap_form_render_elements(form) {
     });
     // Prepend the weighted elements to the content.
     if (!empty(content_weighted)) {
-      content_weighted.reverse();
       for (var weight in content_weighted) {
         content_sorted += content_weighted[weight] + '\n';
       }
