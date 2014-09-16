@@ -185,8 +185,7 @@ function views_exposed_form(form, form_state, options) {
       value: options.exposed_data.submit
     };
     
-    // Add the reset button, if necessary. It'll be hidden by default, until
-    // a filter is submitted by the user.
+    // Add the reset button, if necessary.
     if (options.exposed_data.reset && _views_exposed_filter_reset) {
       form.buttons['reset'] = {
         title: options.exposed_data.reset,
