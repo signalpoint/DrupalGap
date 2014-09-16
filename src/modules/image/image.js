@@ -23,7 +23,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
     var element = {};
     if (!empty(items)) {
       $.each(items, function(delta, item) {
-          // TODO - add support for image_style
+          // @TODO - add support for image_style
           element[delta] = {
             theme: 'image',
             alt: item.alt,
