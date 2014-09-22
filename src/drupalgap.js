@@ -149,6 +149,7 @@ function drupalgap_onload() {
  * Implements PhoneGap's deviceready().
  */
 function _drupalgap_deviceready() {
+  try {
     
     // PhoneGap is loaded and it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
