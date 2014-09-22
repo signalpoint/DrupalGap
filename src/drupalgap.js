@@ -470,7 +470,7 @@ function drupalgap_alert(message) {
       if (options.title) { title = options.title; }
       if (options.buttonName) { buttonName = options.buttonName; }
     }
-    if (typeof navigator.notification === 'undefined') {
+    if (!drupalgap.phonegap || typeof navigator.notification === 'undefined') {
       alert(message);
       alertCallback();
     }
