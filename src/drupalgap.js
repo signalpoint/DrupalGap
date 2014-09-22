@@ -70,6 +70,7 @@ function drupalgap_init() {
       },
       pages: [], /* Collection of page ids that are loaded into the DOM. */
       path: '', /* The current menu path. */
+      phonegap: false, /* Indicates if we are running in PhoneGap, or not */
       remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
       router_path: '', /* The current menu router path. */
       services: {},
@@ -96,6 +97,7 @@ function drupalgap_init() {
  */
 function drupalgap_onload() {
   try {
+
     // At this point, the Drupal object has been initialized by jDrupal and has
     // loaded the app/settings.js into the <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
@@ -124,8 +126,21 @@ function drupalgap_onload() {
       var module = modules[i];
       Drupal.modules.core[module] = module_object_template(module);
     }
-    // Add PhoneGap's deviceready listener.
-    document.addEventListener('deviceready', _drupalgap_deviceready, false);
+
+    // If we're running in PhoneGap attach the deviceready listener, otherwise
+    // we're running as a web app, somove directly to deviceready.
+    if (
+      window.location.protocol === "file:" ||
+      typeof parent.window.ripple === 'function'
+    ) {
+      drupalgap.phonegap = true;
+      document.addEventListener('deviceready', _drupalgap_deviceready, false);
+    }
+    else {
+      drupalgap.phonegap = false;
+      _drupalgap_deviceready();
+    }
+    
   }
   catch (error) { console.log('drupalgap_onload - ' + error); }
 }
@@ -134,7 +149,7 @@ function drupalgap_onload() {
  * Implements PhoneGap's deviceready().
  */
 function _drupalgap_deviceready() {
-  try {
+    
     // PhoneGap is loaded and it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
 
@@ -550,9 +565,12 @@ function drupalgap_load_blocks() {
  */
 function drupalgap_check_connection() {
   try {
+    
+    // If we're not in PhoneGap (i.e. a web app environment), we'll assume we
+    // have a connection. Is this a terrible assumption? Anybody out there know?
     // We'll assume that Ripple emulation always has a connection, for now.
     // http://stackoverflow.com/q/15950382/763010
-    if (typeof parent.window.ripple === 'function') {
+    if (!drupalgap.phonegap || typeof parent.window.ripple === 'function') {
       drupalgap.online = true;
       return 'Ethernet connection';
     }
