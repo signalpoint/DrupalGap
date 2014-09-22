@@ -470,7 +470,7 @@ function drupalgap_alert(message) {
       if (options.title) { title = options.title; }
       if (options.buttonName) { buttonName = options.buttonName; }
     }
-    if (typeof navigator.notification === 'undefined') {
+    if (!drupalgap.phonegap || typeof navigator.notification === 'undefined') {
       alert(message);
       alertCallback();
     }
@@ -2133,16 +2133,13 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
           options.allowSamePageTransition = true;
         }
 
-        // Let's change to the page.
-        if (typeof parent.window.ripple === 'function') {
-          // The Ripple emulator seems to not like the 'index.html' prefix,
-          // so we'll remove that.
-          $.mobile.changePage('#' + page_id, options);
+        // Let's change to the page. Web apps and the ripple emulator seem to
+        // not like the 'index.html' prefix, so we'll remove that.
+        var destination = 'index.html#' + page_id;
+        if (!drupalgap.phonegap || typeof parent.window.ripple === 'function') {
+          destination = '#' + page_id;
         }
-        else {
-          // Default change page.
-          $.mobile.changePage('index.html#' + page_id, options);
-        }
+        $.mobile.changePage(destination, options);
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
@@ -4943,6 +4940,7 @@ $(document).on('pagebeforechange', function(e, data) {
           template_preprocess_page(drupalgap.page.variables);
           template_process_page(drupalgap.page.variables);
         }
+
       }
     }
     catch (error) { console.log('pagebeforechange - ' + error); }
@@ -5680,11 +5678,10 @@ function template_process_page(variables) {
     var page_id = drupalgap_get_page_id(drupalgap_path);
     $.each(drupalgap.theme.regions, function(index, region) {
         var page_html = $('#' + page_id).html();
-        eval(
-          'page_html = page_html.replace(/{:' + region.name + ':}/g,' +
-          'drupalgap_render_region(region));'
-        );
-        $('#' + page_id).html(page_html);
+        $('#' + page_id).html(page_html.replace(
+          '{:' + region.name + ':}',
+          drupalgap_render_region(region)
+        ));
     });
   }
   catch (error) { console.log('template_process_page - ' + error); }
