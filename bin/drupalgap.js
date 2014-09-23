@@ -7,6 +7,7 @@ var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
  */
 function drupalgap_init() {
   try {
+console.log('drupalgap_init()');
     var dg = {
       modules: {
         core: [
@@ -70,7 +71,6 @@ function drupalgap_init() {
       },
       pages: [], /* Collection of page ids that are loaded into the DOM. */
       path: '', /* The current menu path. */
-      phonegap: false, /* Indicates if we are running in PhoneGap, or not */
       remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
       router_path: '', /* The current menu router path. */
       services: {},
@@ -97,7 +97,7 @@ function drupalgap_init() {
  */
 function drupalgap_onload() {
   try {
-
+console.log('drupalgap_onload()');
     // At this point, the Drupal object has been initialized by jDrupal and has
     // loaded the app/settings.js into the <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
@@ -129,15 +129,20 @@ function drupalgap_onload() {
 
     // If we're running in PhoneGap attach the deviceready listener, otherwise
     // we're running as a web app, somove directly to deviceready.
-    if (
-      window.location.protocol === "file:" ||
+    if (typeof drupalgap.settings.phonegap !== 'undefined') {
+      if (drupalgap.settings.phonegap) {
+        document.addEventListener('deviceready', _drupalgap_deviceready, false);
+      }
+      else {
+        _drupalgap_deviceready();
+      }
+    }
+    else if (window.location.protocol === "file:" ||
       typeof parent.window.ripple === 'function'
     ) {
-      drupalgap.phonegap = true;
       document.addEventListener('deviceready', _drupalgap_deviceready, false);
     }
     else {
-      drupalgap.phonegap = false;
       _drupalgap_deviceready();
     }
     
@@ -150,7 +155,7 @@ function drupalgap_onload() {
  */
 function _drupalgap_deviceready() {
   try {
-    
+    console.log('_drupalgap_deviceready()');
     // PhoneGap is loaded and it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
 
@@ -470,7 +475,13 @@ function drupalgap_alert(message) {
       if (options.title) { title = options.title; }
       if (options.buttonName) { buttonName = options.buttonName; }
     }
-    if (!drupalgap.phonegap || typeof navigator.notification === 'undefined') {
+    if (
+      (
+        typeof drupalgap.settings.phonegap !== 'undefined' &&
+        !drupalgap.settings.phonegap
+      ) ||
+      typeof navigator.notification === 'undefined'
+    ) {
       alert(message);
       alertCallback();
     }
@@ -571,7 +582,12 @@ function drupalgap_check_connection() {
     // have a connection. Is this a terrible assumption? Anybody out there know?
     // We'll assume that Ripple emulation always has a connection, for now.
     // http://stackoverflow.com/q/15950382/763010
-    if (!drupalgap.phonegap || typeof parent.window.ripple === 'function') {
+    if ((
+        typeof drupalgap.settings.phonegap !== 'undefined' &&
+        !drupalgap.settings.phonegap
+      ) ||
+      typeof parent.window.ripple === 'function'
+    ) {
       drupalgap.online = true;
       return 'Ethernet connection';
     }
@@ -2136,9 +2152,13 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
         // Let's change to the page. Web apps and the ripple emulator seem to
         // not like the 'index.html' prefix, so we'll remove that.
         var destination = 'index.html#' + page_id;
-        if (!drupalgap.phonegap || typeof parent.window.ripple === 'function') {
-          destination = '#' + page_id;
-        }
+        if (
+          (
+            typeof drupalgap.settings.phonegap !== 'undefined' &&
+            !drupalgap.settings.phonegap
+          ) ||
+          typeof parent.window.ripple === 'function'
+        ) { destination = '#' + page_id; }
         $.mobile.changePage(destination, options);
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
