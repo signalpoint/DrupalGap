@@ -1575,23 +1575,32 @@ function scrollToElement(selector, time, verticalOffset) {
 }
 
 /**
- * Given a page id, and the theme's page.tpl.html string, this takes the page
- * template html and adds it to the DOM. It doesn't actually render the page,
- * that is taken care of by pagebeforechange when it calls the template system.
- * @param {String} page_id
- * @param {String} html
+ * Given a page id, the theme's page.tpl.html string, and the menu link object
+ * (all bundled in options) this takes the page template html and adds it to the
+ * DOM. It doesn't actually render the page, that is taken care of by the
+ * pagebeforechange handler.
+ * @param {Object} options
  */
-function drupalgap_add_page_to_dom(page_id, html) {
+function drupalgap_add_page_to_dom(options) {
   try {
-    // Set the page id, the page class name and add the page to the dom body.
-    html = html.replace(/{:drupalgap_page_id:}/g, page_id);
-    html = html.replace(
-      /{:drupalgap_page_class:}/g,
-      drupalgap_page_class_get(drupalgap.router_path)
+    // Prepare the default page attributes, then merge in any customizations
+    // from the hook_menu() item, then inject the attributes into the
+    // placeholder. We have to manually add our default class name after the
+    // extend until this issue is resolved:
+    // https://github.com/signalpoint/DrupalGap/issues/321
+    var attributes = {
+      id: options.page_id,
+      'data-role': 'page'
+    };
+    attributes = $.extend(true, attributes, options.menu_link.options.attributes);
+    attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    options.html = options.html.replace(
+      /{:drupalgap_page_attributes:}/g,
+      drupalgap_attributes(attributes)
     );
-    $('body').append(html);
-    // Add the page id to drupalgap.pages.
-    drupalgap.pages.push(page_id);
+    // Add the html to the page and the page id to drupalgap.pages.
+    $('body').append(options.html);
+    drupalgap.pages.push(options.page_id);
   }
   catch (error) { console.log('drupalgap_add_page_to_dom - ' + error); }
 }
@@ -2064,7 +2073,12 @@ function drupalgap_goto(path) {
     }
 
     // Generate the page.
-    drupalgap_goto_generate_page_and_go(path, page_id, options);
+    drupalgap_goto_generate_page_and_go(
+      path,
+      page_id,
+      options,
+      drupalgap.menu_links[router_path]
+    );
 
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
@@ -2079,8 +2093,9 @@ function drupalgap_goto(path) {
  * @param {String} path
  * @param {String} page_id
  * @param {Object} options
+ * @param {Object} menu_link The menu link object from drupalgap.menu_links.
  */
-function drupalgap_goto_generate_page_and_go(path, page_id, options) {
+function drupalgap_goto_generate_page_and_go(path, page_id, options, menu_link) {
   try {
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
@@ -2107,7 +2122,11 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
       if (html) {
 
         // Add page to DOM.
-        drupalgap_add_page_to_dom(page_id, html);
+        drupalgap_add_page_to_dom({
+            page_id: page_id,
+            html: html,
+            menu_link: menu_link
+        });
 
         // Setup change page options if necessary.
         if (drupalgap_path_get() == path && options.form_submission) {
@@ -3385,6 +3404,7 @@ function drupalgap_form_id_local_storage_key(form_id) {
 function _drupalgap_form_render_elements(form) {
   try {
     var content = '';
+    var content_sorted = '';
     var content_weighted = [];
     // For each form element, if the element objects name property isn't set,
     // set it, then render the element if access is permitted. While rendering
@@ -3431,7 +3451,11 @@ function _drupalgap_form_render_elements(form) {
     });
     // Prepend the weighted elements to the content.
     if (!empty(content_weighted)) {
-      content = content_weighted.join('\n') + content;
+      for (var weight in content_weighted) {
+        content_sorted += content_weighted[weight] + '\n';
+      }
+      // Attach sorted content.
+      content = content_sorted + '\n' + content;
     }
     // Add any form buttons to the form elements html, if access to the button
     // is permitted.
@@ -6690,6 +6714,9 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
           break;
       }
     }
+    // Finally, wrap the rendered field in a div, and set the field name as the
+    // class name on the wrapper.
+    content = '<div class="' + field_name + '">' + content + '</div>';
     // Give modules a chance to alter the field content.
     var reference = {'content': content};
     module_invoke_all(
@@ -7420,9 +7447,19 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
     var field_info_instances;
     // If there is no bundle, pull the fields out of the wrapper.
+    // @TODO there appears to be a special case with commerce_products, in that
+    // they aren't wrapped like normal entities (see the else statement when a
+    // bundle name isn't present). Or do we have a bug here, and we shouldn't
+    // be expecting the wrapper in the first place?
     if (!bundle_name) {
-      field_info_instances =
-        drupalgap.field_info_instances[entity_type][entity_type];
+      if (entity_type == 'commerce_product') {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type];
+      }
+      else {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type][entity_type];
+      }
     }
     else {
       if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
@@ -7823,7 +7860,7 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // it as the default.  If it is optional, place a "none" option
               // for the user to choose from.
               var text = '- None -';
-              if (items[delta].required) { text = 'Select'; }
+              if (items[delta].required) { text = '- Select a value -'; }
               items[delta].options[''] = text;
               if (empty(items[delta].value)) { items[delta].value = ''; }
               // If more than one value is allowed, turn it into a multiple
@@ -7891,6 +7928,11 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
             return false;
           }
           var widget_id = items[delta].id + '-' + widget_type;
+          // If the select list is required, add a 'Select' option and set
+          // it as the default.  If it is optional, place a "none" option
+          // for the user to choose from.
+          var text = '- None -';
+          if (items[delta].required) { text = '- Select a value -'; }
           items[delta].children.push({
               type: widget_type,
               attributes: {
@@ -7898,7 +7940,8 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
                 onchange: "_theme_taxonomy_term_reference_onchange(this, '" +
                   items[delta].id +
                 "');"
-              }
+              },
+              options: { '': text }
           });
           // Attach a pageshow handler to the current page that will load the
           // terms into the widget.
@@ -8012,7 +8055,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
     var element = {};
     if (!empty(items)) {
       $.each(items, function(delta, item) {
-          // TODO - add support for image_style
+          // @TODO - add support for image_style
           element[delta] = {
             theme: 'image',
             alt: item.alt,
@@ -8330,44 +8373,43 @@ function _image_field_form_process(form, form_state, options) {
     var lng = language_default();
     var processed_an_image = false;
     $.each(form.image_fields, function(index, name) {
-        // Skip empty images.
-        if (!image_phonegap_camera_options[name][0]) { return false; }
-        // Skip image fields that already have their file id set.
-        if (form_state.values[name][lng][0] != '') { return false; }
-        // Create a unique file name using the UTC integer value.
-        var d = new Date();
-        var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
-        // Build the data for the file create resource. If it's private, adjust
-        // the filepath.
-        var file = {
-          file: {
-            file: image_phonegap_camera_options[name][0].image,
-            filename: image_file_name,
-            filepath: 'public://' + image_file_name
-          }
-        };
-        if (!empty(Drupal.settings.file_private_path)) {
-          file.file.filepath = 'private://' + image_file_name;
+      // Skip empty images.
+      if (!image_phonegap_camera_options[name][0]) { return false; }
+      // Skip image fields that already have their file id set.
+      if (form_state.values[name][lng][0] != '') { return false; }
+      // Create a unique file name using the UTC integer value.
+      var d = new Date();
+      var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
+      // Build the data for the file create resource. If it's private, adjust
+      // the filepath.
+      var file = {
+        file: {
+          file: image_phonegap_camera_options[name][0].image,
+          filename: image_file_name,
+          filepath: 'public://' + image_file_name
         }
-        // Change the loader mode to saving, and save the file.
-        drupalgap.loader = 'saving';
-        processed_an_image = true;
-        file_save(file, {
-            success: function(result) {
-              try {
-                // Set the hidden input and form state values with the file id.
-                var element_id = drupalgap_form_get_element_id(name, form.id);
-                $('#' + element_id).val(result.fid);
-                form_state.values[name][lng][0] = result.fid;
-                if (options.success) { options.success(); }
-              }
-              catch (error) {
-                console.log('_image_field_form_process - success - ' + error);
-              }
+      };
+      if (!empty(Drupal.settings.file_private_path)) {
+        file.file.filepath = 'private://' + image_file_name;
+      }
+      // Change the loader mode to saving, and save the file.
+      drupalgap.loader = 'saving';
+      processed_an_image = true;
+      file_save(file, {
+          async: false,
+          success: function(result) {
+            try {
+              // Set the hidden input and form state values with the file id.
+              var element_id = drupalgap_form_get_element_id(name, form.id);
+              $('#' + element_id).val(result.fid);
+              form_state.values[name][lng][0] = result.fid;
+              if (options.success) { options.success(); }
             }
-        });
-        // @todo - for now we only support the first image field on the form.
-        return false;
+            catch (error) {
+              console.log('_image_field_form_process - success - ' + error);
+            }
+          }
+      });
     });
     // If no images were processed, we need to continue onward anyway.
     if (!processed_an_image && options.success) { options.success(); }
@@ -11537,6 +11579,7 @@ function _theme_taxonomy_term_reference_load_items(options) {
               '</option>';
               $('#' + options.widget_id).append(option);
           });
+          $('#' + options.widget_id).selectmenu('refresh', true);
         }
     });
   }

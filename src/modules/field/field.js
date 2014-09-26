@@ -62,9 +62,19 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
     var field_info_instances;
     // If there is no bundle, pull the fields out of the wrapper.
+    // @TODO there appears to be a special case with commerce_products, in that
+    // they aren't wrapped like normal entities (see the else statement when a
+    // bundle name isn't present). Or do we have a bug here, and we shouldn't
+    // be expecting the wrapper in the first place?
     if (!bundle_name) {
-      field_info_instances =
-        drupalgap.field_info_instances[entity_type][entity_type];
+      if (entity_type == 'commerce_product') {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type];
+      }
+      else {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type][entity_type];
+      }
     }
     else {
       if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
@@ -465,7 +475,7 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // it as the default.  If it is optional, place a "none" option
               // for the user to choose from.
               var text = '- None -';
-              if (items[delta].required) { text = 'Select'; }
+              if (items[delta].required) { text = '- Select a value -'; }
               items[delta].options[''] = text;
               if (empty(items[delta].value)) { items[delta].value = ''; }
               // If more than one value is allowed, turn it into a multiple
@@ -533,6 +543,11 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
             return false;
           }
           var widget_id = items[delta].id + '-' + widget_type;
+          // If the select list is required, add a 'Select' option and set
+          // it as the default.  If it is optional, place a "none" option
+          // for the user to choose from.
+          var text = '- None -';
+          if (items[delta].required) { text = '- Select a value -'; }
           items[delta].children.push({
               type: widget_type,
               attributes: {
@@ -540,7 +555,8 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
                 onchange: "_theme_taxonomy_term_reference_onchange(this, '" +
                   items[delta].id +
                 "');"
-              }
+              },
+              options: { '': text }
           });
           // Attach a pageshow handler to the current page that will load the
           // terms into the widget.

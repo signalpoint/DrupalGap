@@ -708,6 +708,7 @@ function _theme_taxonomy_term_reference_load_items(options) {
               '</option>';
               $('#' + options.widget_id).append(option);
           });
+          $('#' + options.widget_id).selectmenu('refresh', true);
         }
     });
   }
