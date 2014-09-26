@@ -36,6 +36,17 @@ Drupal.settings.cache.views.expiration = 3600;
  * DrupalGap Settings |
  *********************/
 
+/**
+ * Specify a PhoneGap or Web Application Environment
+ *
+ * By default DrupalGap tries to detect what environment your app is
+ * running in. However, you may force it to run in a certain environment
+ * by using this boolean setting. Set to true to force your app to run
+ * in a PhoneGap (or Ripple) environment. Set to false to run your app as
+ * a web application in your browser.
+ */
+//drupalgap.settings.phonegap = true;
+
 /*************|
  * Appearance |
  *************/
