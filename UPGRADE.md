@@ -1,93 +1,83 @@
 This document describes how to update your mobile application from one minor
 version of DrupalGap to another.
 
-|=============|
-| settings.js |
-|=============|
+# settings.js
 
   Whenever updating DrupalGap, be sure to make a backup of your settings.js file
   then replace it with the default.settings.js file. Then you must re-add any
   modifications you made to your settings.js file (i.e. site_path, etc).
 
-|============|
-| index.html |
-|============|
+# index.html
 
   Whenever updating DrupalGap, be sure to make a backup of your index.html file
   then replace it with the default.index.html file. Then you must re-add any
   modifications you made to your index.html file.
 
-|===========================|
-| Clear Local Storage Cache |
-|===========================|
+# Clear Local Storage Cache
 
   It is important to clear your device (or browser) local storage cache. On a
   device, this can typically be accomplished by uninstalling the App completely,
   then re-installing it. If you're using Ripple in Chrome, then clear the
   Chrome web browser cache.
 
-|==================|
-| DrupalGap Module |
-|==================|
+# DrupalGap Module
 
   Be sure you are running the latest recommended version of the DrupalGap module
   on your Drupal site. If you are using development snapshots of the DrupalGap
   mobile application development kit, you may need to use the dev version of the
   DrupalGap module alongside it.
 
-|=====================================|
-| Version Change Notes for Developers |
-|=====================================|
+# Version Change Notes for Developers
 
-# 7.x-1.0-rc3 => 7.x-1.0-rc4
+## 7.x-1.0-rc3 => 7.x-1.0-rc4
 
-## New page.tpl.html placeholder token required
+### New page.tpl.html placeholder token required
 
 All themes must update their page.tpl.html file to include a single placeholder
 for the div container attributes.
 
-*OLD WAY*
+**OLD WAY**
 ```
 <div id="{:drupalgap_page_id:}" data-role="page" class="{:drupalgap_page_class:}">
   <!-- ... -->
 </div>
 ```
 
-*NEW WAY*
+**NEW WAY**
 ```
 <div {:drupalgap_page_attributes:}>
   <!-- ... -->
 </div>
 ```
 
-# 7.x-1.0-rc2 => 7.x-1.0-rc3
+## 7.x-1.0-rc2 => 7.x-1.0-rc3
 
-## Views row_callback row position has moved
+### Views row_callback row position has moved
 
-The "row_callback" function is now passed the row position in a different within
+The `row_callback` function is now passed the row position in a different within
 a different variable (@see http://www.drupalgap.org/node/219):
 
-*OLD WAY*
+**OLD WAY**
 ```
 function my_module_articles_list_row(view, row) {
   return 'The position for this row is: ' + row.count;
 }
 ```
 
-*NEW WAY*
+**NEW WAY**
 ```
 function my_module_articles_list_row(view, row) {
   return 'The position for this row is: ' + row._position;
 }
 ```
 
-# 7.x-1.0-rc1 => 7.x-1.0-rc2
+## 7.x-1.0-rc1 => 7.x-1.0-rc2
 
   Required select lists now use an empty string value instead of -1 for the
   placeholder option. Any custom form validation you may have used that
   depended on this -1 value, needs to check for an empty string now instead.
 
-# 7.x-1.7-alpha => 7.x-1.8-alpha
+## 7.x-1.7-alpha => 7.x-1.8-alpha
 
   The user-profile.tpl.html file now contains a {:content:} placeholder to
   properly render a user account's content. If you have a custom theme, update
