@@ -1600,17 +1600,40 @@ function scrollToElement(selector, time, verticalOffset) {
  * @param {String} page_id
  * @param {String} html
  */
-function drupalgap_add_page_to_dom(page_id, html) {
+function drupalgap_add_page_to_dom(options) {
   try {
+    dpm(options.menu_link);
+    // Prepare the default page attributes, then merge in any customizations
+    // from the hook_menu() item, then inject the attributes into the
+    // placeholder. We have to manually add our default class name after the
+    // extend until this issue is resolved:
+    // https://github.com/signalpoint/DrupalGap/issues/321
+    var attributes = {
+      id: options.page_id,
+      'data-role': 'page'
+    };
+    attributes = $.extend(true, attributes, options.menu_link.options.attributes);
+    attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    dpm(attributes);
+    options.html = options.html.replace(
+      /{:drupalgap_page_attributes:}/g,
+      drupalgap_attributes(attributes)
+    );
+    
     // Set the page id, the page class name and add the page to the dom body.
-    html = html.replace(/{:drupalgap_page_id:}/g, page_id);
-    html = html.replace(
+    /*options.html = options.html.replace(
+      /{:drupalgap_page_id:}/g,
+      options.page_id
+    );*/
+    // Set the default page class name and append any custom class
+    /*options.html = options.html.replace(
       /{:drupalgap_page_class:}/g,
       drupalgap_page_class_get(drupalgap.router_path)
-    );
-    $('body').append(html);
-    // Add the page id to drupalgap.pages.
-    drupalgap.pages.push(page_id);
+    );*/
+    
+    // Add the html to the page and the page id to drupalgap.pages.
+    $('body').append(options.html);
+    drupalgap.pages.push(options.page_id);
   }
   catch (error) { console.log('drupalgap_add_page_to_dom - ' + error); }
 }
@@ -2083,7 +2106,12 @@ function drupalgap_goto(path) {
     }
 
     // Generate the page.
-    drupalgap_goto_generate_page_and_go(path, page_id, options);
+    drupalgap_goto_generate_page_and_go(
+      path,
+      page_id,
+      options,
+      drupalgap.menu_links[router_path]
+    );
 
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
@@ -2098,9 +2126,11 @@ function drupalgap_goto(path) {
  * @param {String} path
  * @param {String} page_id
  * @param {Object} options
+ * @param {Object} menu_link The menu link object from drupalgap.menu_links.
  */
-function drupalgap_goto_generate_page_and_go(path, page_id, options) {
+function drupalgap_goto_generate_page_and_go(path, page_id, options, menu_link) {
   try {
+    dpm(menu_link);
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
       console.log(
@@ -2126,7 +2156,11 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
       if (html) {
 
         // Add page to DOM.
-        drupalgap_add_page_to_dom(page_id, html);
+        drupalgap_add_page_to_dom({
+            page_id: page_id,
+            html: html,
+            menu_link: menu_link
+        });
 
         // Setup change page options if necessary.
         if (drupalgap_path_get() == path && options.form_submission) {
