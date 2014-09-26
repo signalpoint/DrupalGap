@@ -116,16 +116,17 @@ function views_exposed_form(form, form_state, options) {
         // Prep the element basics.
         var element_id = null;
         var element = null;
-        // @TODO - Is this element id assignment unique enough in that it
-        // won't cause collisions with other typical ids developers may be
-        // placing on the page?
+        // @TODO - This ID is NOT unique enough, it will cause DOM collisions if
+        // the same exposed filter gets used twice...
         element_id = filter.options.expose.identifier;
         element = {
+          id: element_id,
           type: filter.options.group_info.widget,
           title: filter.options.expose.label,
           required: filter.options.expose.required,
           views_field: views_field,
-          filter: filter
+          filter: filter,
+          children: []
         };
 
         // Grab the field name and figure out which module is in charge of it.
@@ -133,7 +134,6 @@ function views_exposed_form(form, form_state, options) {
         if (field_name) {
           
           // This is an entity field...
-          //dpm(field_name);
           
           // Grab the field info, and determine the module that will handle it.
           // Then see if hook_views_exposed_filter() has been implemented by
@@ -145,11 +145,9 @@ function views_exposed_form(form, form_state, options) {
           if (!drupalgap_function_exists(handler)) {
             dpm(
               'WARNING: views_exposed_form() - ' + handler + '() must be ' +
-              'created to assemble the ' + field.type + ' filter used with ' +
+              'created to assemble the ' + field.type + ' filter used by ' +
               field_name
             );
-            //dpm(filter);
-            //dpm(field);
             return;
           }
           
@@ -208,6 +206,7 @@ function views_exposed_form(form, form_state, options) {
  */
 function views_exposed_form_submit(form, form_state) {
   try {
+    dpm(form_state.values);
     // Assemble the query string from the form state values.
     var query = '';
     $.each(form_state.values, function(key, value) {

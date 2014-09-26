@@ -608,6 +608,22 @@ function taxonomy_vocabulary_pageshow(vid) {
 }
 
 /**
+ * Given a vocabulary machine name this will return the vocabulary id or false.
+ * @param {String} name
+ * @return {Number|Boolean}
+ */
+function taxonomy_vocabulary_get_vid_from_name(name) {
+  try {
+    var vocabulary = taxonomy_vocabulary_machine_name_load(name);
+    if (vocabulary) { return vocabulary.vid; }
+    return false;
+  }
+  catch (error) {
+    console.log('taxonomy_vocabulary_get_vid_from_name - ' + error);
+  }
+}
+
+/**
  * Given a vocabulary machine name this will return the JSON
  * object for the vocabulary that is attached to the
  * drupalgap.taxonomy_vocabularies object, or false if it doesn't exist.
@@ -731,5 +747,43 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
   catch (error) {
     console.log('_theme_taxonomy_term_reference_onchange - ' + error);
   }
+}
+
+/**
+ * Implements hook_views_exposed_filter().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} element
+ * @param {Object} filter
+ * @param {Object} field
+ */
+function taxonomy_views_exposed_filter(form, form_state, element, filter, field) {
+  try {
+    // @TODO - the value isn't being picked up in the form state so it can't be
+    // used in the submit handler, yet.
+    // @TODO - changing pages breaks the filter.
+    // @TODO - Need the "- Any -" option. This is currently implemented in
+    // list_views_exposed_filter(), so extract if from there so it can be
+    // reused.
+    element.type = 'hidden';
+    // For each vocabulary that is allowed...
+    $.each(field.settings.allowed_values, function(index, object) {
+        // We'll just use a taxonomy_term_reference field and fake the instance.
+        element.children.push({
+          markup: theme('taxonomy_term_reference', {
+              attributes: {
+                id: element.id + '-' + index
+              },
+              field_info_field: field,
+              field_info_instance: {
+                widget: {
+                  type: 'options_select'
+                }
+              }
+          })
+        });
+    });
+  }
+  catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
 }
 
