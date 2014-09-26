@@ -1610,15 +1610,14 @@ function scrollToElement(selector, time, verticalOffset) {
 }
 
 /**
- * Given a page id, and the theme's page.tpl.html string, this takes the page
- * template html and adds it to the DOM. It doesn't actually render the page,
- * that is taken care of by pagebeforechange when it calls the template system.
- * @param {String} page_id
- * @param {String} html
+ * Given a page id, the theme's page.tpl.html string, and the menu link object
+ * (all bundled in options) this takes the page template html and adds it to the
+ * DOM. It doesn't actually render the page, that is taken care of by the
+ * pagebeforechange handler.
+ * @param {Object} options
  */
 function drupalgap_add_page_to_dom(options) {
   try {
-    dpm(options.menu_link);
     // Prepare the default page attributes, then merge in any customizations
     // from the hook_menu() item, then inject the attributes into the
     // placeholder. We have to manually add our default class name after the
@@ -1630,22 +1629,10 @@ function drupalgap_add_page_to_dom(options) {
     };
     attributes = $.extend(true, attributes, options.menu_link.options.attributes);
     attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
-    dpm(attributes);
     options.html = options.html.replace(
       /{:drupalgap_page_attributes:}/g,
       drupalgap_attributes(attributes)
     );
-    
-    // Set the page id, the page class name and add the page to the dom body.
-    /*options.html = options.html.replace(
-      /{:drupalgap_page_id:}/g,
-      options.page_id
-    );*/
-    // Set the default page class name and append any custom class
-    /*options.html = options.html.replace(
-      /{:drupalgap_page_class:}/g,
-      drupalgap_page_class_get(drupalgap.router_path)
-    );*/
     
     // Add the html to the page and the page id to drupalgap.pages.
     $('body').append(options.html);
