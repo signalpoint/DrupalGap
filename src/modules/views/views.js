@@ -95,13 +95,13 @@ function views_datasource_get_view_result(path, options) {
 }
 
 /**
- *
+ * The exposed filter form builder.
  */
 function views_exposed_form(form, form_state, options) {
   try {
-    //dpm('views_exposed_form');
-    //dpm(options);
 
+    // @TODO we tried to make the filters collapsible, but jQM doesn't seem to
+    // like collapsibles with form inputs in them... weird.
     //var title = form.title ? form.title : 'Filter';
     //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
     
@@ -109,9 +109,6 @@ function views_exposed_form(form, form_state, options) {
     form.variables = options.variables;
 
     $.each(options.filter, function(views_field, filter) {
-        
-        //dpm(filter.field);
-        //dpm(filter);
         
         // Prep the element basics.
         var element_id = null;
@@ -124,6 +121,11 @@ function views_exposed_form(form, form_state, options) {
           type: filter.options.group_info.widget,
           title: filter.options.expose.label,
           required: filter.options.expose.required,
+          options: {
+            attributes: {
+              id: drupalgap_form_get_element_id(element_id, form.id)
+            }
+          },
           views_field: views_field,
           filter: filter,
           children: []
@@ -202,11 +204,11 @@ function views_exposed_form(form, form_state, options) {
 }
 
 /**
- *
+ * The exposed filter submission handler.
  */
 function views_exposed_form_submit(form, form_state) {
   try {
-    dpm(form_state.values);
+
     // Assemble the query string from the form state values.
     var query = '';
     $.each(form_state.values, function(key, value) {
@@ -214,6 +216,7 @@ function views_exposed_form_submit(form, form_state) {
         query += key + '=' + encodeURIComponent(value) + '&';
     });
     if (!empty(query)) { query = query.substr(0, query.length - 1); }
+
     // If there is a query set aside from previous requests, and it is equal to
     // the submitted query, then stop the submission. Otherwise remove it from
     // the path.
@@ -224,18 +227,22 @@ function views_exposed_form_submit(form, form_state) {
         form.variables.path.replace('&' + _views_exposed_filter_query, '');
       }
     }
+
     // Set aside a copy of the query string, so it can be removed from the path
     // upon subsequent submissions of the form.
     _views_exposed_filter_query = query;
+
     // Indicate that we have an exposed filter, so the reset button can easily
     // be shown/hidden.
     _views_exposed_filter_reset = true;
+
     // Update the path for the view, reset the pager, hold onto the variables,
     // then theme the view.
     form.variables.path += '&' + query;
     form.variables.page = 0;
     _views_exposed_filter_submit_variables = form.variables;
     _theme_view(form.variables);
+
   }
   catch (error) { console.log('views_exposed_form_submit - ' + error); }
 }
