@@ -1,3 +1,8 @@
+// Used to hold onto the terms once they've been loaded into a widget, keyed by
+// the form element's id, this allows (views exposed filters particularly) forms
+// to easily retrieve the terms after they've been fetch from the server.
+var _taxonomy_term_reference_terms = {};
+
 /**
  * Extracts the taxonomy vocabularies JSON objects bundled by the Drupal module
  * into the system connect's resource results.
@@ -652,9 +657,28 @@ function theme_taxonomy_term_reference(variables) {
   try {
     var html = '';
 
-    // Make this a hidden field since the widget will just populate a value.
-    variables.attributes.type = 'hidden';
-    html += '<input ' + drupalgap_attributes(variables.attributes) + '/>';
+    // Make this a hidden field since the widget will just populate a value. If
+    // somone wants to skip the input element html generation (e.g. taxonomy
+    // term reference views exposed filter), let them do it, but by default
+    // we'll render the input for them.
+    var render_input_element = true;
+    if (typeof variables.render_input_element !== 'undefined') {
+      render_input_element = variables.render_input_element;
+    }
+    if (render_input_element) {
+      variables.attributes.type = 'hidden';
+      html += '<input ' + drupalgap_attributes(variables.attributes) + '/>';
+    }
+    
+    // Is anyone flagging this as required? i.e. is it a views exposed filter?
+    // @TODO - the field system that assembles the elements onto a form, when it
+    // is a taxonomy term reference field, we need to pass along the required
+    // option so when we load the items into the select list, we know whether or
+    // not to include the "empty string" option. This is probably in field.js.
+    var required = false;
+    if (typeof variables.required !== 'undefined') {
+      required = variables.required;
+    }
 
     // What vocabulary are we using?
     var machine_name =
@@ -669,26 +693,58 @@ function theme_taxonomy_term_reference(variables) {
     var widget_function = 'theme_' + widget_type;
     var widget_id = variables.attributes.id + '-' + widget_type;
     if (drupalgap_function_exists(widget_function)) {
+
+      // Grab the function in charge of themeing this widget.
       var fn = window[widget_function];
-      html += fn.call(null, {
+      // Build the variables for the widget.
+      var widget_variables = {
         attributes: {
           id: widget_id,
           onchange: "_theme_taxonomy_term_reference_onchange(this, '" +
             variables.attributes.id + "');"
         }
-      });
-      // Attach a pageshow handler to the current page that will load the terms
-      // into the widget.
-       var options = {
-         'page_id': drupalgap_get_page_id(drupalgap_path_get()),
-         'jqm_page_event': 'pageshow',
-         'jqm_page_event_callback': '_theme_taxonomy_term_reference_load_items',
-         'jqm_page_event_args': JSON.stringify({
-             'taxonomy_vocabulary': taxonomy_vocabulary,
-             'widget_id': widget_id
-         })
-       };
-       html += drupalgap_jqm_page_event_script_code(options);
+      };
+      
+      // If the options were previously set aside for this widget, use them.
+      var options_available = false;
+      if (_taxonomy_term_reference_terms[variables.attributes.id]) {
+        options_available = true;
+        widget_variables.options =
+          _taxonomy_term_reference_terms[variables.attributes.id];
+      }
+      
+      // Was their a value present to include as the default value for the
+      // widget, if so include it. If not, and this filter is not required, set
+      // the default value to an empty string so the widget renders the default
+      // option correctly.
+      if (typeof variables.value !== 'undefined') {
+        widget_variables.value = variables.value; 
+      }
+      else if (!required) { widget_variables.value = ''; }
+      
+      // Render the widget.
+      html += fn.call(null, widget_variables);
+      
+      // If the options weren't available, attach a pageshow handler to the
+      // current page that will load the terms into the widget. Keep in mind,
+      // this inline pageshow handler only gets called once when the first view
+      // is loaded. That's why we later set aside the options so they can be
+      // used again without having to fire the pageshow event.
+      if (!options_available) {
+        var options = {
+          page_id: drupalgap_get_page_id(drupalgap_path_get()),
+          jqm_page_event: 'pageshow',
+          jqm_page_event_callback: '_theme_taxonomy_term_reference_load_items',
+          jqm_page_event_args: JSON.stringify({
+              taxonomy_vocabulary: taxonomy_vocabulary,
+              element_id: variables.attributes.id,
+              widget_id: widget_id,
+              required: required
+          })
+        };
+        html += drupalgap_jqm_page_event_script_code(options);
+      }
+
     }
     else {
       console.log(
@@ -710,6 +766,8 @@ function theme_taxonomy_term_reference(variables) {
  */
 function _theme_taxonomy_term_reference_load_items(options) {
   try {
+    
+    // Build the index query, then make the call to the server.
     var query = {
       parameters: {
         vid: options.taxonomy_vocabulary.vid
@@ -718,13 +776,34 @@ function _theme_taxonomy_term_reference_load_items(options) {
     taxonomy_term_index(query, {
         success: function(terms) {
           if (terms.length == 0) { return; }
+
+          // As we iterate over the terms, we'll set them aside in a JSON
+          // object so they can be used later.
+          _taxonomy_term_reference_terms[options.element_id] = { };
+
+          // Grab the widget.
+          var widget = $('#' + options.widget_id);
+
+          // If it's not required, place an empty option on the widget and set
+          // it aside.
+          if (!options.required) {
+            var option = '<option value="">- Any -</option>';
+            $(widget).append(option);
+            _taxonomy_term_reference_terms[options.element_id][''] = '- Any -';
+          }
+
+          // Place each term in the widget as an option, and set the option
+          // aside.
           $.each(terms, function(index, term) {
               var option = '<option value="' + term.tid + '">' +
                 term.name +
               '</option>';
-              $('#' + options.widget_id).append(option);
+              $(widget).append(option);
+              _taxonomy_term_reference_terms[options.element_id][term.tid] = term.name;
           });
-          $('#' + options.widget_id).selectmenu('refresh', true);
+
+          // Refresh the select list.
+          $(widget).selectmenu('refresh', true);
         }
     });
   }
@@ -759,29 +838,43 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
  */
 function taxonomy_views_exposed_filter(form, form_state, element, filter, field) {
   try {
-    // @TODO - the value isn't being picked up in the form state so it can't be
-    // used in the submit handler, yet.
-    // @TODO - changing pages breaks the filter.
-    // @TODO - Need the "- Any -" option. This is currently implemented in
-    // list_views_exposed_filter(), so extract if from there so it can be
-    // reused.
+    /*dpm('taxonomy_views_exposed_filter');
+    dpm(element);
+    dpm(filter);
+    dpm(field);*/
+
+    // Change the input to hidden, then iterate over each vocabulary and inject
+    // them into the widget. We'll just use a taxonomy term reference field and
+    // fake its instance.
     element.type = 'hidden';
-    // For each vocabulary that is allowed...
     $.each(field.settings.allowed_values, function(index, object) {
-        // We'll just use a taxonomy_term_reference field and fake the instance.
+        
+        // Build the variables for the widget.
+        var variables = {
+          required: element.required,
+          render_input_element: false,
+          attributes: {
+            id: element.options.attributes.id
+          },
+          field_info_field: field,
+          field_info_instance: {
+            widget: {
+              type: 'options_select'
+            }
+          }
+        };
+        
+        // If we have a default value, send it along.
+        // @TODO add support for multiple values.
+        if (!empty(filter.value)) {
+          variables.value = parseInt(filter.value[0]);
+        }
+        
+        // Add the widget as a child to the form element.
         element.children.push({
-          markup: theme('taxonomy_term_reference', {
-              attributes: {
-                id: element.id + '-' + index
-              },
-              field_info_field: field,
-              field_info_instance: {
-                widget: {
-                  type: 'options_select'
-                }
-              }
-          })
+          markup: theme('taxonomy_term_reference', variables)
         });
+
     });
   }
   catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
