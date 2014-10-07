@@ -306,14 +306,14 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
     //dpm(arguments);
     var widget = filter.options.group_info.widget;
     if (widget == 'select') {
+      // Set the element value if we have one in the filter.
+      if (!empty(filter.value)) { element.value = filter.value[0]; }
       // Set the options, then depending on whether or not it is required, set
       // the default value accordingly.
       element.options = filter.value_options;
-      if (element.required) { element.value = filter.value; }
-      else {
-        element.options[''] = '- Any -';
-        element.value = filter.value;
-        if (typeof element.value === 'undefined') { element.value = ''; }
+      if (!element.required) {
+        element.options['All'] = '- Any -';
+        if (typeof element.value === 'undefined') { element.value = 'All'; }
       }
     }
     else {
