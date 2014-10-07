@@ -7691,14 +7691,14 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
     //dpm(arguments);
     var widget = filter.options.group_info.widget;
     if (widget == 'select') {
+      // Set the element value if we have one in the filter.
+      if (!empty(filter.value)) { element.value = filter.value[0]; }
       // Set the options, then depending on whether or not it is required, set
       // the default value accordingly.
       element.options = filter.value_options;
-      if (element.required) { element.value = filter.value; }
-      else {
-        element.options[''] = '- Any -';
-        element.value = filter.value;
-        if (typeof element.value === 'undefined') { element.value = ''; }
+      if (!element.required) {
+        element.options['All'] = '- Any -';
+        if (typeof element.value === 'undefined') { element.value = 'All'; }
       }
     }
     else {
@@ -11550,6 +11550,12 @@ function theme_taxonomy_term_reference(variables) {
     if (typeof variables.required !== 'undefined') {
       required = variables.required;
     }
+    
+    // Is this widget exposed (aka views exposed filter)?
+    var exposed = false;
+    if (typeof variables.exposed !== 'undefined') {
+      exposed = variables.exposed;
+    }
 
     // What vocabulary are we using?
     var machine_name =
@@ -11587,11 +11593,15 @@ function theme_taxonomy_term_reference(variables) {
       // Was their a value present to include as the default value for the
       // widget, if so include it. If not, and this filter is not required, set
       // the default value to an empty string so the widget renders the default
-      // option correctly.
+      // option correctly. A views exposed filter uses 'All' instead of an
+      // empty string.
       if (typeof variables.value !== 'undefined') {
         widget_variables.value = variables.value; 
       }
-      else if (!required) { widget_variables.value = ''; }
+      else if (!required) {
+        if (exposed) { widget_variables.value = 'All'; }
+        else { widget_variables.value = ''; }
+      }
       
       // Render the widget.
       html += fn.call(null, widget_variables);
@@ -11610,7 +11620,8 @@ function theme_taxonomy_term_reference(variables) {
               taxonomy_vocabulary: taxonomy_vocabulary,
               element_id: variables.attributes.id,
               widget_id: widget_id,
-              required: required
+              required: required,
+              exposed: exposed
           })
         };
         html += drupalgap_jqm_page_event_script_code(options);
@@ -11637,7 +11648,6 @@ function theme_taxonomy_term_reference(variables) {
  */
 function _theme_taxonomy_term_reference_load_items(options) {
   try {
-    
     // Build the index query, then make the call to the server.
     var query = {
       parameters: {
@@ -11658,9 +11668,18 @@ function _theme_taxonomy_term_reference_load_items(options) {
           // If it's not required, place an empty option on the widget and set
           // it aside.
           if (!options.required) {
-            var option = '<option value="">- Any -</option>';
+            var option = null;
+            if (options.exposed) {
+              option = '<option value="All">- Any -</option>';
+              _taxonomy_term_reference_terms[options.element_id]['All'] =
+                '- Any -';
+            }
+            else {
+              option = '<option value="">- None -</option>';
+              _taxonomy_term_reference_terms[options.element_id][''] =
+                '- None -';
+            }
             $(widget).append(option);
-            _taxonomy_term_reference_terms[options.element_id][''] = '- Any -';
           }
 
           // Place each term in the widget as an option, and set the option
@@ -11713,6 +11732,10 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
     dpm(element);
     dpm(filter);
     dpm(field);*/
+    
+    // @TODO this filter loses its value after one submission, aka the next
+    // submission will submit it as 'All' eventhough we have a term selected in
+    // the widget from the previous submission.
 
     // Change the input to hidden, then iterate over each vocabulary and inject
     // them into the widget. We'll just use a taxonomy term reference field and
@@ -11732,13 +11755,15 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
             widget: {
               type: 'options_select'
             }
-          }
+          },
+          exposed: true
         };
         
         // If we have a default value, send it along.
         // @TODO add support for multiple values.
         if (!empty(filter.value)) {
           variables.value = parseInt(filter.value[0]);
+          variables.attributes.value = variables.value;
         }
         
         // Add the widget as a child to the form element.
@@ -11868,6 +11893,10 @@ function views_exposed_form(form, form_state, options) {
         var element = null;
         // @TODO - This ID is NOT unique enough, it will cause DOM collisions if
         // the same exposed filter gets used twice...
+        // @TODO - we should be attaching the value right here, so filter
+        // implementors don't need to extract it on their own. Once this is
+        // implemented. Then update *_views_exposed_filter() to use this value
+        // instead.
         element_id = filter.options.expose.identifier;
         element = {
           id: element_id,
@@ -11883,6 +11912,9 @@ function views_exposed_form(form, form_state, options) {
           filter: filter,
           children: []
         };
+        // Attach the value to the element, if there is one.
+        // @TODO Add multi value support.
+        //if (!empty(filter.value)) { element.value = filter.value[0]; }
 
         // Grab the field name and figure out which module is in charge of it.
         var field_name = filter.definition.field_name;
