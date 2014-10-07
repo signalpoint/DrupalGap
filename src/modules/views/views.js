@@ -115,6 +115,10 @@ function views_exposed_form(form, form_state, options) {
         var element = null;
         // @TODO - This ID is NOT unique enough, it will cause DOM collisions if
         // the same exposed filter gets used twice...
+        // @TODO - we should be attaching the value right here, so filter
+        // implementors don't need to extract it on their own. Once this is
+        // implemented. Then update *_views_exposed_filter() to use this value
+        // instead.
         element_id = filter.options.expose.identifier;
         element = {
           id: element_id,
@@ -130,6 +134,9 @@ function views_exposed_form(form, form_state, options) {
           filter: filter,
           children: []
         };
+        // Attach the value to the element, if there is one.
+        // @TODO Add multi value support.
+        //if (!empty(filter.value)) { element.value = filter.value[0]; }
 
         // Grab the field name and figure out which module is in charge of it.
         var field_name = filter.definition.field_name;
