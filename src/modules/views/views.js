@@ -421,7 +421,7 @@ function theme_views_view(variables) {
     // Is there a title to display?
     if (variables.title) {
       var title_attributes = variables.title_attributes ?
-        drupalgap_attributes(variables.title_attributes) : '';
+        variables.title_attributes : null;
       html += theme('header', { text: variables.title, attributes: title_attributes });
       // Place spacers after the header for each format, except unformatted.
       if (variables.format != 'unformatted') {
