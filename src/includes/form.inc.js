@@ -758,7 +758,11 @@ function _drupalgap_form_render_element(form, element) {
     var delta = 0;
     var item_html = '';
     var item_label = '';
+    var render_item = null;
     $.each(items, function(delta, item) {
+        
+        // We'll render the item, unless we prove otherwise.
+        render_item = true;
 
         // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
@@ -833,14 +837,21 @@ function _drupalgap_form_render_element(form, element) {
           );
         }
 
-        // Render the element item.
+        // Render the element item, unless it wasn't supported.
         item_html = _drupalgap_form_render_element_item(
           form,
           element,
           variables,
           item
         );
+        if (!item_html) {
+          render_item = false;
+          return false;
+        }
     });
+    
+    // Are we skipping the render of the item?
+    if (!render_item) { return ''; }
 
     // Show the 'Add another item' button on unlimited value fields.
     /*if (element.field_info_field &&
@@ -927,7 +938,7 @@ function _drupalgap_form_render_element(form, element) {
  * @param {Object} element
  * @param {Object} variables
  * @param {Object} item
- * @return {String}
+ * @return {*}
  */
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
@@ -992,9 +1003,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         // @update - if an item doesn't have a type, it gets set by the parent
         // element, so we should now always have a type available here.
         var msg = 'Field ' + item.type + ' not supported.';
-        html += '<div><em>' + msg + '</em></div>';
         console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
         dpm(item);
+        return null;
       }
     }
 
