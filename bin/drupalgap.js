@@ -6,7 +6,6 @@ var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
  * @return {Object}
  */
 function drupalgap_init() {
-  try {
     var dg = {
       modules: {
         core: [
@@ -87,8 +86,6 @@ function drupalgap_init() {
     };
     //if (drupalgap) { dg = $.extend({}, dg, drupalgap); }
     return dg;
-  }
-  catch (error) { console.log('drupalgap_init - ' + error); }
 }
 
 /**
@@ -678,12 +675,9 @@ function drupalgap_format_interval(interval) {
  * @return {String}
  */
 function drupalgap_format_plural(count, singular, plural) {
-  try {
     // @TODO - deprecate this and move it to jDrupal as format_plural().
     if (count == 1) { return singular; }
     return plural;
-  }
-  catch (error) { console.log('drupalgap_format_plural - ' + error); }
 }
 
 /**
@@ -748,14 +742,9 @@ function drupalgap_get_ip() {
  * @return {Boolean}
  */
 function drupalgap_get_wildcards_from_router_path(router_path) {
-  try {
     // @todo - Is this function even used? Doesn't look like it.
     var wildcards = false;
     return wildcards;
-  }
-  catch (error) {
-    console.log('drupalgap_get_wildcards_from_router_path - ' + error);
-  }
 }
 
 
@@ -913,7 +902,6 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
  * @see http://api.jquerymobile.com/category/events/
  */
 function drupalgap_jqm_page_events() {
-  try {
     return [
       'pagebeforechange',
       'pagebeforecreate',
@@ -930,8 +918,6 @@ function drupalgap_jqm_page_events() {
       'pageremove',
       'pageshow'
     ];
-  }
-  catch (error) { console.log('drupalgap_jqm_page_events - ' + error); }
 }
 
 /**
@@ -2819,15 +2805,12 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
  * @return {Object}
  */
 function drupalgap_form_cancel_button() {
-  try {
     return {
       'title': 'Cancel',
       attributes: {
         onclick: 'javascript:drupalgap_back();'
       }
     };
-  }
-  catch (error) { console.log('drupalgap_form_cancel_button - ' + error); }
 }
 
 /**
@@ -3363,12 +3346,7 @@ function drupalgap_form_local_storage_save(form) {
  * @return {String}
  */
 function drupalgap_form_id_local_storage_key(form_id) {
-  try {
     return 'drupalgap_form_' + form_id;
-  }
-  catch (error) {
-    console.log('drupalgap_form_id_local_storage_key - ' + error);
-  }
 }
 
 /**
@@ -4143,10 +4121,7 @@ function theme_form_element_label(variables) {
  * @return {String}
  */
 function theme_form_required_marker(variables) {
-  try {
     return '*';
-  }
-  catch (error) { console.log('theme_form_required_marker - ' + error); }
 }
 
 /**
@@ -4486,10 +4461,7 @@ function menu_get_item() {
  * @return {Object}
  */
 function menu_item_default_options() {
-  try {
     return { attributes: menu_item_default_attributes() };
-  }
-  catch (error) { console.log('menu_item_default_options - ' + error); }
 }
 
 /**
@@ -4497,12 +4469,7 @@ function menu_item_default_options() {
  * @return {Object}
  */
 function menu_item_default_attributes() {
-  try {
-    return {
-      'class': ''
-    }
-  }
-  catch (error) { console.log('menu_item_default_attributes - ' + error); }
+    return { 'class': '' };
 }
 
 /**
@@ -4998,8 +4965,8 @@ function theme(hook, variables) {
       }
     }
     // If there is no class name, set an empty one.
-    if (!variables.attributes.class) {
-      variables.attributes.class = '';
+    if (!variables.attributes['class']) {
+      variables.attributes['class'] = '';
     }
     var fn = window[theme_function];
     content = fn.call(null, variables);
@@ -5708,7 +5675,6 @@ function drupalgap_block_load(delta) {
  * @return {Object}
  */
 function comment_menu() {
-  try {
     var items = {
       'comment/%': {
         title: 'Comment',
@@ -5736,8 +5702,6 @@ function comment_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('comment_menu - ' + error); }
 }
 
 /**
@@ -5763,10 +5727,7 @@ function comment_access(comment) {
  * @return {String}
  */
 function comments_container_id(nid) {
-  try {
     return 'comments_container_' + nid;
-  }
-  catch (error) { console.log('comments_container_id - ' + error); }
 }
 
 /**
@@ -5775,10 +5736,7 @@ function comments_container_id(nid) {
  * @return {String}
  */
 function comment_container_id(cid) {
-  try {
     return 'comment_container_' + cid;
-  }
-  catch (error) { console.log('comment_container_id - ' + error); }
 }
 
 /**
@@ -6394,12 +6352,7 @@ function contact_personal_form_submit(form, form_state) {
  * @return {String}
  */
 function contact_personal_form_to_container_id(recipient) {
-  try {
     return 'contact_personal_form_user_' + recipient;
-  }
-  catch (error) {
-    console.log('contact_personal_form_to_container_id - ' + error);
-  }
 }
 
 /**
@@ -6455,19 +6408,14 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
  * @return {Object}
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
-  try {
     return {
-      'title': 'Delete',
+      title: 'Delete',
       attributes: {
         onclick: "javascript:drupalgap_entity_edit_form_delete_confirmation('" +
           entity_type + "', " + entity_id +
         ');'
       }
     };
-  }
-  catch (error) {
-    console.log('drupalgap_entity_edit_form_delete_button - ' + error);
-  }
 }
 
 /**
@@ -7233,12 +7181,7 @@ function _drupalgap_entity_page_container(entity_type, entity_id, mode) {
  * @return {String}
  */
 function _drupalgap_entity_page_container_id(entity_type, entity_id, mode) {
-  try {
     return entity_type + '_' + entity_id + '_' + mode + '_container';
-  }
-  catch (error) {
-    console.log('_drupalgap_entity_page_container_id - ' + error);
-  }
 }
 
 /**
@@ -8740,7 +8683,6 @@ function menu_install() {
  * @return {Object}
  */
 function menu_popup_get_default_options() {
-  try {
     return {
       attributes: {
         'data-role': 'listview'
@@ -8752,8 +8694,6 @@ function menu_popup_get_default_options() {
         }
       }
     };
-  }
-  catch (error) { console.log('menu_popup_get_default_options - ' + error); }
 }
 
 /**
@@ -8915,10 +8855,7 @@ function collection_save(module, type, collection) {
  * @return {String}
  */
 function mvc_get_collection_key(bucket, module, model_type) {
-  try {
     return 'mvc_' + bucket + '_' + module + '_' + model_type;
-  }
-  catch (error) { console.log('mvc_get_collection_key - ' + error); }
 }
 
 /**
@@ -8999,7 +8936,6 @@ function mvc_install() {
  * @return {Object}
  */
 function mvc_menu() {
-  try {
     var items = {
       'mvc/collection/list/%/%': {
         'page_callback': 'collection_list_page',
@@ -9016,8 +8952,6 @@ function mvc_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('mvc_menu - ' + error); }
 }
 
 /**
@@ -9026,10 +8960,7 @@ function mvc_menu() {
  * @return {Array}
  */
 function mvc_model_system_fields() {
-  try {
     return ['id', 'module', 'type'];
-  }
-  catch (error) { console.log('mvc_model_system_fields - ' + error); }
 }
 
 // We'll need developer friendly front end functions, e.g.
@@ -9328,7 +9259,6 @@ function node_edit_submit(form, form_state) {
  * @return {Object}
  */
 function node_menu() {
-  try {
     var items = {
       'node': {
         'title': 'Content',
@@ -9373,8 +9303,6 @@ function node_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('node_menu - ' + error); }
 }
 
 /**
@@ -9382,7 +9310,6 @@ function node_menu() {
  * @return {Object}
  */
 function node_page() {
-  try {
     var content = {
       'create_content': {
         'theme': 'button_link',
@@ -9397,8 +9324,6 @@ function node_page() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('node_page - ' + error); }
 }
 
 /**
@@ -9558,14 +9483,7 @@ function node_page_title(callback, nid) {
  * @return {Object}
  */
 function node_theme() {
-  try {
-    return {
-      'node': {
-        'template': 'node'
-      }
-    };
-  }
-  catch (error) { console.log('node_theme - ' + error); }
+    return { node: { template: 'node' } };
 }
 
 /**
@@ -9831,7 +9749,6 @@ function drupalgap_services_get_entity_resource(entity_type) {
  * @return {String}
  */
 function services_get_resource_function_for_entity(entity_type, crud) {
-  try {
     var name = entity_type + '_';
     switch (crud) {
       case 'create': name += 'save'; break;
@@ -9841,10 +9758,6 @@ function services_get_resource_function_for_entity(entity_type, crud) {
       default: name += 'load'; break;
     }
     return name;
-  }
-  catch (error) {
-    console.log('services_get_resource_function_for_entity - ' + error);
-  }
 }
 
 
@@ -9925,7 +9838,6 @@ function drupalgap_services_rss_extract_items(data) {
  * @return {Object}
  */
 function system_block_info() {
-  try {
     // System blocks.
     var blocks = {
       'main': {
@@ -9964,8 +9876,6 @@ function system_block_info() {
         };
     });
     return blocks;
-  }
-  catch (error) { console.log('system_block_info - ' + error); }
 }
 
 /**
@@ -10029,7 +9939,6 @@ function system_block_view(delta) {
  * @return {Object}
  */
 function system_menu() {
-  try {
     var items = {
       'dashboard': {
         'title': 'Dashboard',
@@ -10053,8 +9962,6 @@ function system_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('system_menu - ' + error); }
 }
 
 /**
@@ -10063,8 +9970,7 @@ function system_menu() {
  * @return {String}
  */
 function system_401_page(path) {
-  try { return 'Sorry, you are not authorized to view this page.'; }
-  catch (error) { console.log('system_401_page - ' + error); }
+  return 'Sorry, you are not authorized to view this page.';
 }
 
 /**
@@ -10073,8 +9979,7 @@ function system_401_page(path) {
  * @return {String}
  */
 function system_404_page(path) {
-  try { return 'Sorry, the page you requested was not found.'; }
-  catch (error) { console.log('system_404_page - ' + error); }
+  return 'Sorry, the page you requested was not found.';
 }
 
 /**
@@ -10122,15 +10027,12 @@ function system_dashboard_page() {
  * @return {Object}
  */
 function system_error_page() {
-  try {
     var content = {
       info: {
         markup: '<p>An unexpected error has occurred!</p>'
       }
     };
     return content;
-  }
-  catch (error) { console.log('system_error_page - ' + error); }
 }
 
 /**
@@ -10194,11 +10096,8 @@ function offline_try_again() {
  * @return {Array}
  */
 function system_regions_list() {
-  try {
     var regions = ['header', 'content', 'footer'];
     return regions;
-  }
-  catch (error) { console.log('system_regions_list - ' + error); }
 }
 
 /**
@@ -10306,7 +10205,6 @@ function user_edit_access(account) {
  * @return {Object}
  */
 function user_listing() {
-  try {
     // Place an empty item list that will hold a list of users.
     var content = {
       'user_listing': {
@@ -10317,8 +10215,6 @@ function user_listing() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('user_listing - ' + error); }
 }
 
 /**
@@ -10396,8 +10292,7 @@ function user_login_form_submit(form, form_state) {
  * @return {String}
  */
 function user_logout_callback() {
-  try { return '<p>Logging out...</p>'; }
-  catch (error) { console.log('user_logout_callback - ' + error); }
+  return '<p>Logging out...</p>';
 }
 
 /**
@@ -10420,7 +10315,6 @@ function user_logout_pagechange() {
  * @return {Object}
  */
 function user_menu() {
-  try {
     var items = {
       'user': {
         'page_callback': 'user_page'
@@ -10476,8 +10370,6 @@ function user_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('user_menu - ' + error); }
 }
 
 /**
@@ -10485,13 +10377,10 @@ function user_menu() {
  * @return {String}
  */
 function user_page() {
-  try {
     // NOTE, this page call back isn't actually used, because the 'user' path
     // in DrupalGap is redirected to either 'user/login' or e.g.
-    // 'user/123/view'.
+    // 'user/123'.
     return 'user_page()';
-  }
-  catch (error) { console.log('user_page - ' + error); }
 }
 
 /**
@@ -10766,17 +10655,14 @@ function user_services_postprocess(options, result) {
  * @return {Object}
  */
 function user_theme() {
-  try {
     return {
-      'user_picture': {
-        'template': 'user-picture'
+      user_picture: {
+        template: 'user-picture'
       },
-      'user_profile': {
-        'template': 'user-profile'
+      user_profile: {
+        template: 'user-profile'
       }
     };
-  }
-  catch (error) { console.log('user_theme - ' + error); }
 }
 
 /**
@@ -11116,7 +11002,6 @@ function taxonomy_assemble_form_state_into_field(entity_type, bundle,
  * @return {Object}
  */
 function taxonomy_menu() {
-  try {
     var items = {
       'taxonomy/vocabularies': {
         'title': 'Taxonomy',
@@ -11171,8 +11056,6 @@ function taxonomy_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('taxonomy_menu - ' + error); }
 }
 
 /**
@@ -11381,7 +11264,6 @@ function taxonomy_term_selectNodes(tid, options) {
  * @return {Object}
  */
 function taxonomy_vocabularies_page() {
-  try {
     // Place an empty item list that will hold a list of users.
     var content = {
       'vocabulary_listing': {
@@ -11392,8 +11274,6 @@ function taxonomy_vocabularies_page() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('taxonomy_vocabularies_page - ' + error); }
 }
 
 /**
@@ -11990,7 +11870,7 @@ function views_exposed_form(form, form_state, options) {
         title: options.exposed_data.reset,
         attributes: {
           id: form.id + '-reset',
-          onclick: "views_exposed_form_reset()",
+          onclick: "views_exposed_form_reset()"
         }
       };
     }
@@ -12381,10 +12261,7 @@ function theme_views_view(variables) {
  * @return {String}
  */
 function theme_views_spacer(variables) {
-  try {
     return '<h2 class="dg_empty_list_header">&nbsp;</h2>';
-  }
-  catch (error) { console.log('theme_views_spacer - ' + error); }
 }
 
 /**
