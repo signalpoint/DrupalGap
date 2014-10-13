@@ -768,9 +768,9 @@ function template_process_page(variables) {
     var page_id = drupalgap_get_page_id(drupalgap_path);
     $.each(drupalgap.theme.regions, function(index, region) {
         var page_html = $('#' + page_id).html();
-        eval(
-          'page_html = page_html.replace(/{:' + region.name + ':}/g,' +
-          'drupalgap_render_region(region));'
+        page_html = page_html.replace(
+          '{:' + region.name + ':}',
+          drupalgap_render_region(region)
         );
         $('#' + page_id).html(page_html);
     });
