@@ -2182,15 +2182,11 @@ function drupalgap_goto_prepare_path(path) {
       }
       else { path = drupalgap.settings.front; }
     }
-    // Change 'user' to 'user/login' for anonymous users, or change it to
-    // e.g. 'user/123/view' for authenticated users.
+    // Change 'user' to 'user/login' for anonymous users, or change it to e.g.
+    // 'user/123' for authenticated users.
     else if (path == 'user') {
-      if (Drupal.user.uid != 0) {
-        path = 'user/' + Drupal.user.uid + '/view';
-      }
-      else {
-        path = 'user/login';
-      }
+      if (Drupal.user.uid != 0) { path = 'user/' + Drupal.user.uid; }
+      else { path = 'user/login'; }
     }
     return path;
   }
