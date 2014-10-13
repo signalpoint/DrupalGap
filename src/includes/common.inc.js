@@ -805,10 +805,9 @@ function drupalgap_render_page() {
                   }
                   // Now replace the placeholder with the html, even if it was
                   // empty.
-                  eval(
-                    'template_file_html = template_file_html.replace(/{:' +
-                      placeholder +
-                    ':}/g,html);'
+                  template_file_html = template_file_html.replace(
+                    '{:' + placeholder + ':}',
+                    html
                   );
               });
             }
