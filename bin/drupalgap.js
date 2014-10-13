@@ -517,26 +517,6 @@ function drupalgap_confirm(message) {
  */
 function drupalgap_load_blocks() {
   try {
-    /*drupalgap.blocks[0] = {};
-    var modules = module_implements('block_info');
-    if (modules) {
-      $.each(modules, function(index, module){
-          var blocks = module_invoke(module, 'block_info');
-          if (blocks) {
-            $.each(blocks, function(delta, block){
-              // Assign the delta as the name of the block, set the delta of the
-              // block as well, and set the module name on the block for
-              // reference.
-              block.name = delta;
-              block.delta = delta;
-              block.module = module;
-              // Add the block to drupalgap.blocks.
-              eval("drupalgap.blocks[0]." + delta + " = block;");
-              //drupalgap.blocks[delta] = block;
-            });
-          }
-      });
-    }*/
     drupalgap.blocks = module_invoke_all('block_info');
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
@@ -2381,10 +2361,9 @@ function drupalgap_render_page() {
                   }
                   // Now replace the placeholder with the html, even if it was
                   // empty.
-                  eval(
-                    'template_file_html = template_file_html.replace(/{:' +
-                      placeholder +
-                    ':}/g,html);'
+                  template_file_html = template_file_html.replace(
+                    '{:' + placeholder + ':}',
+                    html
                   );
               });
             }
@@ -3194,7 +3173,7 @@ function drupalgap_form_load(form_id) {
 
     // The form's call back function will be equal to the form id.
     var function_name = form_id;
-    if (eval('typeof ' + function_name) == 'function') {
+    if (drupalgap_function_exists(function_name)) {
 
       // Grab the form's function.
       var fn = window[function_name];
@@ -4495,7 +4474,7 @@ function menu_get_item() {
     if (arguments[0]) { path = arguments[0]; }
     if (arguments[1]) { router_item = arguments[1]; }
     if (path && drupalgap.menu_links[path]) {
-      return eval('drupalgap.menu_links.' + path + ';');
+      return drupalgap.menu_links[path];
     }
     else { return null; }
   }
@@ -4745,7 +4724,7 @@ function drupalgap_menus_load() {
       $.each(drupalgap.settings.menus, function(menu_name, menu) {
           // If the menu does not already exist, it is a custom menu, so create
           // the menu and its corresponding block.
-          if (!eval('drupalgap.menus.' + menu_name)) {
+          if (!drupalgap.menus[menu_name]) {
             // If the custom menu doesn't have its machine name set, set it.
             if (!menu.menu_name) { menu.menu_name = menu_name; }
             // Save the custom menu, as long is its name isn't 'regions',
@@ -4766,7 +4745,7 @@ function drupalgap_menus_load() {
           else {
             // The menu is a system defined menu, merge it together with any
             // custom settings.
-            $.extend(true, eval('drupalgap.menus.' + menu_name), menu);
+            $.extend(true, drupalgap.menus[menu_name], menu);
           }
       });
       // Now that we have all of the menus loaded up, and the menu router is
@@ -4776,10 +4755,10 @@ function drupalgap_menus_load() {
           // Let's grab any links from the router that have a menu specified,
           // and add the link to the router.
           if (menu_link.menu_name) {
-            if (eval('drupalgap.menus.' + menu_link.menu_name)) {
+            if (drupalgap.menus[menu_link.menu_name]) {
               // Create a links array for the menu if one doesn't exist already.
-              if (!eval('drupalgap.menus.' + menu_link.menu_name + '.links')) {
-                eval('drupalgap.menus.' + menu_link.menu_name + '.links = [];');
+              if (!drupalgap.menus[menu_link.menu_name].links) {
+                drupalgap.menus[menu_link.menu_name].links = [];
               }
               // Add the path to the menu link inside the menu.
               menu_link.path = path;
@@ -4788,9 +4767,7 @@ function drupalgap_menus_load() {
               // menu link data can be retrieved from drupalgap.menu_links.
               var link =
                 drupalgap_menus_load_convert_menu_link_to_link_json(menu_link);
-              eval(
-                'drupalgap.menus.' + menu_link.menu_name + '.links.push(link);'
-              );
+              drupalgap.menus[menu_link.menu_name].links.push(link);
             }
             else {
               console.log(
@@ -5690,9 +5667,9 @@ function template_process_page(variables) {
     var page_id = drupalgap_get_page_id(drupalgap_path);
     $.each(drupalgap.theme.regions, function(index, region) {
         var page_html = $('#' + page_id).html();
-        eval(
-          'page_html = page_html.replace(/{:' + region.name + ':}/g,' +
-          'drupalgap_render_region(region));'
+        page_html = page_html.replace(
+          '{:' + region.name + ':}',
+          drupalgap_render_region(region)
         );
         $('#' + page_id).html(page_html);
     });
@@ -7024,7 +7001,6 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
               'title': ucfirst(name)
             };
             fields[name] = field;
-            //eval('fields.' + name + ' = field;');
           }
         );
         // Make the node id required.
@@ -9981,11 +9957,11 @@ function system_block_info() {
     var system_menus = menu_list_system_menus();
     $.each(system_menus, function(menu_name, menu) {
         var block_delta = menu.menu_name;
-        eval(
-          'blocks.' + block_delta + ' = ' +
-            '{"name":"' + block_delta + '", "delta":"' + block_delta + '", ' +
-            '"module":"menu"};'
-        );
+        blocks[block_delta] = {
+          name: block_delta,
+          delta: block_delta,
+          module: 'menu'
+        };
     });
     return blocks;
   }
@@ -10924,7 +10900,7 @@ function drupalgap_taxonomy_vocabularies_extract(taxonomy_vocabularies) {
     if (taxonomy_vocabularies && taxonomy_vocabularies.length > 0) {
       results = {};
       $.each(taxonomy_vocabularies, function(index, vocabulary) {
-          eval('results.' + vocabulary.machine_name + ' = vocabulary;');
+          results[vocabulary.machine_name] = vocabulary;
       });
     }
     return results;
