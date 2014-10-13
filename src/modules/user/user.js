@@ -185,10 +185,12 @@ function user_menu() {
         options: {reloadPage: true}
       },
       'user/%': {
-        'title': 'My account',
-        'page_callback': 'user_view',
-        'pageshow': 'user_view_pageshow',
-        'page_arguments': [1]
+        title: 'My account',
+        title_callback: 'user_view_title',
+        title_arguments: [1],
+        page_callback: 'user_view',
+        pageshow: 'user_view_pageshow',
+        page_arguments: [1]
       },
       'user/%/view': {
         'title': 'View',
@@ -580,6 +582,20 @@ function user_view_pageshow(uid) {
     });
   }
   catch (error) { console.log('user_view_pageshow - ' + error); }
+}
+
+/**
+ * Title callback for the user profile view page.
+ */
+function user_view_title(callback, uid) {
+  try {
+    user_load(uid, {
+        success: function(account) {
+          callback.call(null, account.name);
+        }
+    });
+  }
+  catch (error) { console.log('user_view_title - ' + error); }
 }
 
 /**
