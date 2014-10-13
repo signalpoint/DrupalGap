@@ -517,26 +517,6 @@ function drupalgap_confirm(message) {
  */
 function drupalgap_load_blocks() {
   try {
-    /*drupalgap.blocks[0] = {};
-    var modules = module_implements('block_info');
-    if (modules) {
-      $.each(modules, function(index, module){
-          var blocks = module_invoke(module, 'block_info');
-          if (blocks) {
-            $.each(blocks, function(delta, block){
-              // Assign the delta as the name of the block, set the delta of the
-              // block as well, and set the module name on the block for
-              // reference.
-              block.name = delta;
-              block.delta = delta;
-              block.module = module;
-              // Add the block to drupalgap.blocks.
-              eval("drupalgap.blocks[0]." + delta + " = block;");
-              //drupalgap.blocks[delta] = block;
-            });
-          }
-      });
-    }*/
     drupalgap.blocks = module_invoke_all('block_info');
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
