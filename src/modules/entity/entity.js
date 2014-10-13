@@ -597,7 +597,6 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
               'title': ucfirst(name)
             };
             fields[name] = field;
-            //eval('fields.' + name + ' = field;');
           }
         );
         // Make the node id required.
