@@ -3,7 +3,6 @@
  * @return {Object}
  */
 function comment_menu() {
-  try {
     var items = {
       'comment/%': {
         title: 'Comment',
@@ -31,8 +30,6 @@ function comment_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('comment_menu - ' + error); }
 }
 
 /**
@@ -58,10 +55,7 @@ function comment_access(comment) {
  * @return {String}
  */
 function comments_container_id(nid) {
-  try {
     return 'comments_container_' + nid;
-  }
-  catch (error) { console.log('comments_container_id - ' + error); }
 }
 
 /**
@@ -70,10 +64,7 @@ function comments_container_id(nid) {
  * @return {String}
  */
 function comment_container_id(cid) {
-  try {
     return 'comment_container_' + cid;
-  }
-  catch (error) { console.log('comment_container_id - ' + error); }
 }
 
 /**

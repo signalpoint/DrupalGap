@@ -131,7 +131,6 @@ function node_edit_submit(form, form_state) {
  * @return {Object}
  */
 function node_menu() {
-  try {
     var items = {
       'node': {
         'title': 'Content',
@@ -176,8 +175,6 @@ function node_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('node_menu - ' + error); }
 }
 
 /**
@@ -185,7 +182,6 @@ function node_menu() {
  * @return {Object}
  */
 function node_page() {
-  try {
     var content = {
       'create_content': {
         'theme': 'button_link',
@@ -200,8 +196,6 @@ function node_page() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('node_page - ' + error); }
 }
 
 /**
@@ -361,13 +355,6 @@ function node_page_title(callback, nid) {
  * @return {Object}
  */
 function node_theme() {
-  try {
-    return {
-      'node': {
-        'template': 'node'
-      }
-    };
-  }
-  catch (error) { console.log('node_theme - ' + error); }
+    return { node: { template: 'node' } };
 }
 

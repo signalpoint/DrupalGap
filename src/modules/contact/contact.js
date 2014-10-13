@@ -338,11 +338,6 @@ function contact_personal_form_submit(form, form_state) {
  * @return {String}
  */
 function contact_personal_form_to_container_id(recipient) {
-  try {
     return 'contact_personal_form_user_' + recipient;
-  }
-  catch (error) {
-    console.log('contact_personal_form_to_container_id - ' + error);
-  }
 }
 

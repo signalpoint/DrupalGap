@@ -30,7 +30,6 @@ function drupalgap_services_get_entity_resource(entity_type) {
  * @return {String}
  */
 function services_get_resource_function_for_entity(entity_type, crud) {
-  try {
     var name = entity_type + '_';
     switch (crud) {
       case 'create': name += 'save'; break;
@@ -40,10 +39,6 @@ function services_get_resource_function_for_entity(entity_type, crud) {
       default: name += 'load'; break;
     }
     return name;
-  }
-  catch (error) {
-    console.log('services_get_resource_function_for_entity - ' + error);
-  }
 }
 
 

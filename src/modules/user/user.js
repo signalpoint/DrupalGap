@@ -46,7 +46,6 @@ function user_edit_access(account) {
  * @return {Object}
  */
 function user_listing() {
-  try {
     // Place an empty item list that will hold a list of users.
     var content = {
       'user_listing': {
@@ -57,8 +56,6 @@ function user_listing() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('user_listing - ' + error); }
 }
 
 /**
@@ -136,8 +133,7 @@ function user_login_form_submit(form, form_state) {
  * @return {String}
  */
 function user_logout_callback() {
-  try { return '<p>Logging out...</p>'; }
-  catch (error) { console.log('user_logout_callback - ' + error); }
+  return '<p>Logging out...</p>';
 }
 
 /**
@@ -160,7 +156,6 @@ function user_logout_pagechange() {
  * @return {Object}
  */
 function user_menu() {
-  try {
     var items = {
       'user': {
         'page_callback': 'user_page'
@@ -216,8 +211,6 @@ function user_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('user_menu - ' + error); }
 }
 
 /**
@@ -225,13 +218,10 @@ function user_menu() {
  * @return {String}
  */
 function user_page() {
-  try {
     // NOTE, this page call back isn't actually used, because the 'user' path
     // in DrupalGap is redirected to either 'user/login' or e.g.
-    // 'user/123/view'.
+    // 'user/123'.
     return 'user_page()';
-  }
-  catch (error) { console.log('user_page - ' + error); }
 }
 
 /**
@@ -506,17 +496,14 @@ function user_services_postprocess(options, result) {
  * @return {Object}
  */
 function user_theme() {
-  try {
     return {
-      'user_picture': {
-        'template': 'user-picture'
+      user_picture: {
+        template: 'user-picture'
       },
-      'user_profile': {
-        'template': 'user-profile'
+      user_profile: {
+        template: 'user-profile'
       }
     };
-  }
-  catch (error) { console.log('user_theme - ' + error); }
 }
 
 /**

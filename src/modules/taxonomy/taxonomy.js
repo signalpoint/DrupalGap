@@ -231,7 +231,6 @@ function taxonomy_assemble_form_state_into_field(entity_type, bundle,
  * @return {Object}
  */
 function taxonomy_menu() {
-  try {
     var items = {
       'taxonomy/vocabularies': {
         'title': 'Taxonomy',
@@ -286,8 +285,6 @@ function taxonomy_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('taxonomy_menu - ' + error); }
 }
 
 /**
@@ -496,7 +493,6 @@ function taxonomy_term_selectNodes(tid, options) {
  * @return {Object}
  */
 function taxonomy_vocabularies_page() {
-  try {
     // Place an empty item list that will hold a list of users.
     var content = {
       'vocabulary_listing': {
@@ -507,8 +503,6 @@ function taxonomy_vocabularies_page() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('taxonomy_vocabularies_page - ' + error); }
 }
 
 /**

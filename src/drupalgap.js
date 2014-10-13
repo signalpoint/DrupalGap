@@ -6,7 +6,6 @@ var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
  * @return {Object}
  */
 function drupalgap_init() {
-  try {
     var dg = {
       modules: {
         core: [
@@ -87,8 +86,6 @@ function drupalgap_init() {
     };
     //if (drupalgap) { dg = $.extend({}, dg, drupalgap); }
     return dg;
-  }
-  catch (error) { console.log('drupalgap_init - ' + error); }
 }
 
 /**
@@ -678,12 +675,9 @@ function drupalgap_format_interval(interval) {
  * @return {String}
  */
 function drupalgap_format_plural(count, singular, plural) {
-  try {
     // @TODO - deprecate this and move it to jDrupal as format_plural().
     if (count == 1) { return singular; }
     return plural;
-  }
-  catch (error) { console.log('drupalgap_format_plural - ' + error); }
 }
 
 /**
@@ -748,14 +742,9 @@ function drupalgap_get_ip() {
  * @return {Boolean}
  */
 function drupalgap_get_wildcards_from_router_path(router_path) {
-  try {
     // @todo - Is this function even used? Doesn't look like it.
     var wildcards = false;
     return wildcards;
-  }
-  catch (error) {
-    console.log('drupalgap_get_wildcards_from_router_path - ' + error);
-  }
 }
 
 
@@ -913,7 +902,6 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
  * @see http://api.jquerymobile.com/category/events/
  */
 function drupalgap_jqm_page_events() {
-  try {
     return [
       'pagebeforechange',
       'pagebeforecreate',
@@ -930,8 +918,6 @@ function drupalgap_jqm_page_events() {
       'pageremove',
       'pageshow'
     ];
-  }
-  catch (error) { console.log('drupalgap_jqm_page_events - ' + error); }
 }
 
 /**

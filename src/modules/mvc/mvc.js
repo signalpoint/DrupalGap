@@ -71,10 +71,7 @@ function collection_save(module, type, collection) {
  * @return {String}
  */
 function mvc_get_collection_key(bucket, module, model_type) {
-  try {
     return 'mvc_' + bucket + '_' + module + '_' + model_type;
-  }
-  catch (error) { console.log('mvc_get_collection_key - ' + error); }
 }
 
 /**
@@ -155,7 +152,6 @@ function mvc_install() {
  * @return {Object}
  */
 function mvc_menu() {
-  try {
     var items = {
       'mvc/collection/list/%/%': {
         'page_callback': 'collection_list_page',
@@ -172,8 +168,6 @@ function mvc_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('mvc_menu - ' + error); }
 }
 
 /**
@@ -182,10 +176,7 @@ function mvc_menu() {
  * @return {Array}
  */
 function mvc_model_system_fields() {
-  try {
     return ['id', 'module', 'type'];
-  }
-  catch (error) { console.log('mvc_model_system_fields - ' + error); }
 }
 
 // We'll need developer friendly front end functions, e.g.

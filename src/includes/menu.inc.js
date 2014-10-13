@@ -160,10 +160,7 @@ function menu_get_item() {
  * @return {Object}
  */
 function menu_item_default_options() {
-  try {
     return { attributes: menu_item_default_attributes() };
-  }
-  catch (error) { console.log('menu_item_default_options - ' + error); }
 }
 
 /**
@@ -171,12 +168,7 @@ function menu_item_default_options() {
  * @return {Object}
  */
 function menu_item_default_attributes() {
-  try {
-    return {
-      'class': ''
-    }
-  }
-  catch (error) { console.log('menu_item_default_attributes - ' + error); }
+    return { 'class': '' };
 }
 
 /**

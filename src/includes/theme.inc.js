@@ -99,8 +99,8 @@ function theme(hook, variables) {
       }
     }
     // If there is no class name, set an empty one.
-    if (!variables.attributes.class) {
-      variables.attributes.class = '';
+    if (!variables.attributes['class']) {
+      variables.attributes['class'] = '';
     }
     var fn = window[theme_function];
     content = fn.call(null, variables);

@@ -53,15 +53,12 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
  * @return {Object}
  */
 function drupalgap_form_cancel_button() {
-  try {
     return {
       'title': 'Cancel',
       attributes: {
         onclick: 'javascript:drupalgap_back();'
       }
     };
-  }
-  catch (error) { console.log('drupalgap_form_cancel_button - ' + error); }
 }
 
 /**
@@ -597,12 +594,7 @@ function drupalgap_form_local_storage_save(form) {
  * @return {String}
  */
 function drupalgap_form_id_local_storage_key(form_id) {
-  try {
     return 'drupalgap_form_' + form_id;
-  }
-  catch (error) {
-    console.log('drupalgap_form_id_local_storage_key - ' + error);
-  }
 }
 
 /**
@@ -1377,10 +1369,7 @@ function theme_form_element_label(variables) {
  * @return {String}
  */
 function theme_form_required_marker(variables) {
-  try {
     return '*';
-  }
-  catch (error) { console.log('theme_form_required_marker - ' + error); }
 }
 
 /**

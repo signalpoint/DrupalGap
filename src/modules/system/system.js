@@ -3,7 +3,6 @@
  * @return {Object}
  */
 function system_block_info() {
-  try {
     // System blocks.
     var blocks = {
       'main': {
@@ -42,8 +41,6 @@ function system_block_info() {
         };
     });
     return blocks;
-  }
-  catch (error) { console.log('system_block_info - ' + error); }
 }
 
 /**
@@ -107,7 +104,6 @@ function system_block_view(delta) {
  * @return {Object}
  */
 function system_menu() {
-  try {
     var items = {
       'dashboard': {
         'title': 'Dashboard',
@@ -131,8 +127,6 @@ function system_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('system_menu - ' + error); }
 }
 
 /**
@@ -141,8 +135,7 @@ function system_menu() {
  * @return {String}
  */
 function system_401_page(path) {
-  try { return 'Sorry, you are not authorized to view this page.'; }
-  catch (error) { console.log('system_401_page - ' + error); }
+  return 'Sorry, you are not authorized to view this page.';
 }
 
 /**
@@ -151,8 +144,7 @@ function system_401_page(path) {
  * @return {String}
  */
 function system_404_page(path) {
-  try { return 'Sorry, the page you requested was not found.'; }
-  catch (error) { console.log('system_404_page - ' + error); }
+  return 'Sorry, the page you requested was not found.';
 }
 
 /**
@@ -200,15 +192,12 @@ function system_dashboard_page() {
  * @return {Object}
  */
 function system_error_page() {
-  try {
     var content = {
       info: {
         markup: '<p>An unexpected error has occurred!</p>'
       }
     };
     return content;
-  }
-  catch (error) { console.log('system_error_page - ' + error); }
 }
 
 /**
@@ -272,11 +261,8 @@ function offline_try_again() {
  * @return {Array}
  */
 function system_regions_list() {
-  try {
     var regions = ['header', 'content', 'footer'];
     return regions;
-  }
-  catch (error) { console.log('system_regions_list - ' + error); }
 }
 
 /**

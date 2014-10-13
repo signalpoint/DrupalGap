@@ -198,7 +198,7 @@ function views_exposed_form(form, form_state, options) {
         title: options.exposed_data.reset,
         attributes: {
           id: form.id + '-reset',
-          onclick: "views_exposed_form_reset()",
+          onclick: "views_exposed_form_reset()"
         }
       };
     }
@@ -589,10 +589,7 @@ function theme_views_view(variables) {
  * @return {String}
  */
 function theme_views_spacer(variables) {
-  try {
     return '<h2 class="dg_empty_list_header">&nbsp;</h2>';
-  }
-  catch (error) { console.log('theme_views_spacer - ' + error); }
 }
 
 /**
