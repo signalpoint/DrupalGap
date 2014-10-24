@@ -638,8 +638,13 @@ function theme_pager(variables) {
  */
 function theme_pager_link(variables, link_vars) {
   try {
-    var onclick = _theme_pager_link_onclick(variables);
-    return "<a href='#' onclick='" + onclick + "'>" + link_vars.text + '</a>';
+    if (!link_vars.attributes) { link_vars.attributes = {}; }
+    link_vars.attributes.href = '#';
+    var attributes = drupalgap_attributes(link_vars.attributes);
+    return "<a onclick='" + _theme_pager_link_onclick(variables) + "' " +
+      attributes + ">" +
+      link_vars.text +
+    '</a>';
   }
   catch (error) { console.log('theme_pager_link - ' + error); }
 }
