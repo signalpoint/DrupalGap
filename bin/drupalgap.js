@@ -4212,6 +4212,23 @@ function theme_radios(variables) {
 }
 
 /**
+ * Themes a range input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_range(variables) {
+  try {
+    variables.attributes.type = 'range';
+    if (typeof variables.attributes.value === 'undefined') {
+      variables.attributes.value = variables.value;
+    }
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_range - ' + error); }
+}
+
+/**
  * Themes a search input.
  * @param {Object} variables
  * @return {String}
