@@ -644,6 +644,27 @@ function theme_link(variables) {
 }
 
 /**
+ * Themes the logout button.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_logout(variables) {
+  try {
+    return bl(
+      'Logout',
+      'user/logout',
+      {
+        attributes: {
+          'data-icon': 'action',
+          'data-iconpos': 'right'
+        }
+      }
+    );
+  }
+  catch (error) { console.log('theme_logout - ' + error); }
+}
+
+/**
  * Themes a popup widget.
  * @param {Object} variables
  * @return {String}
