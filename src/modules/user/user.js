@@ -108,7 +108,12 @@ function user_login_form(form, form_state) {
       value: 'Login'
     };
     if (user_register_access()) {
-      form.suffix = bl('Create new account', 'user/register');
+      form.buttons['create_new_account'] = {
+        title: 'Create new account',
+        attributes: {
+          onclick: "drupalgap_goto('user/register')"
+        }
+      };
     }
     return form;
   }
