@@ -107,6 +107,9 @@ function user_login_form(form, form_state) {
       type: 'submit',
       value: 'Login'
     };
+    if (user_register_access()) {
+      form.suffix = bl('Create new account', 'user/register');
+    }
     return form;
   }
   catch (error) { console.log('user_login_form - ' + error); }
