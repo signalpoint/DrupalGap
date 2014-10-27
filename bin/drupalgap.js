@@ -2555,9 +2555,25 @@ function drupalgap_render_region(region) {
       var block_menu_count = 0;
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
-          // Check the block's visibility settings.
+          // Check the block's visibility settings. If an access_callback
+          // function is specified on the block's settings, we'll call that
+          // to determine the visibility, otherwise we'll fall back to the
+          // default visibility determination mechanism.
           var render_block = false;
-          if (drupalgap_check_visibility('block', block_settings)) {
+          if (
+            block_settings.access_callback &&
+            drupalgap_function_exists(block_settings.access_callback)
+          ) {
+            var fn = window[block_settings.access_callback];
+            render_block = fn({
+                path: current_path,
+                delta: block_delta,
+                region: region.name,
+                theme: drupalgap.settings.theme,
+                settings: block_settings
+            });
+          }
+          else if (drupalgap_check_visibility('block', block_settings)) {
             render_block = true;
             // The 'offline' and 'error' pages only have the 'main' system
             // block visible.
@@ -5524,6 +5540,27 @@ function theme_link(variables) {
     }
   }
   catch (error) { console.log('theme_link - ' + error); }
+}
+
+/**
+ * Themes the logout button.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_logout(variables) {
+  try {
+    return bl(
+      'Logout',
+      'user/logout',
+      {
+        attributes: {
+          'data-icon': 'action',
+          'data-iconpos': 'right'
+        }
+      }
+    );
+  }
+  catch (error) { console.log('theme_logout - ' + error); }
 }
 
 /**
@@ -9869,6 +9906,10 @@ function system_block_info() {
         'delta': 'logo',
         'module': 'system'
       },
+      logout: {
+        delta: 'logout',
+        module: 'system'
+      },
       'title': {
         'delta': 'title',
         'module': 'system'
@@ -9929,6 +9970,10 @@ function system_block_view(delta) {
             l(theme('image', {'path': drupalgap.settings.logo}), '') +
           '</div>';
         }
+        return '';
+        break;
+      case 'logout':
+        if (Drupal.user.uid) { return theme('logout'); }
         return '';
         break;
       case 'title':
@@ -10174,6 +10219,23 @@ function system_title_block_id(path) {
   catch (error) { console.log('system_title_block_id - ' + error); }
 }
 
+/**
+ * The default access callback function for the logout block. Allows the block
+ * to only be shown when a user is viewing their own profile.
+ */
+function system_logout_block_access_callback(options) {
+  try {
+    var args = arg(null, options.path);
+    if (
+      args &&
+      args.length == 2 &&
+      args[0] == 'user' &&
+      args[1] == Drupal.user.uid
+    ) { return true; }
+    return false;
+  }
+  catch (error) { console.log('system_logout_block_access_callback - ' + error); }
+}
 /**
  * Determine whether the user has a given privilege. Optionally pass in a user
  * account JSON object for the second paramater to check that particular
