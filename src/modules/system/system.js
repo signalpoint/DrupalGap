@@ -17,6 +17,10 @@ function system_block_info() {
         'delta': 'logo',
         'module': 'system'
       },
+      logout: {
+        delta: 'logout',
+        module: 'system'
+      },
       'title': {
         'delta': 'title',
         'module': 'system'
@@ -77,6 +81,10 @@ function system_block_view(delta) {
             l(theme('image', {'path': drupalgap.settings.logo}), '') +
           '</div>';
         }
+        return '';
+        break;
+      case 'logout':
+        if (Drupal.user.uid) { return theme('logout'); }
         return '';
         break;
       case 'title':
@@ -322,3 +330,20 @@ function system_title_block_id(path) {
   catch (error) { console.log('system_title_block_id - ' + error); }
 }
 
+/**
+ * The default access callback function for the logout block. Allows the block
+ * to only be shown when a user is viewing their own profile.
+ */
+function system_logout_block_access_callback(options) {
+  try {
+    var args = arg(null, options.path);
+    if (
+      args &&
+      args.length == 2 &&
+      args[0] == 'user' &&
+      args[1] == Drupal.user.uid
+    ) { return true; }
+    return false;
+  }
+  catch (error) { console.log('system_logout_block_access_callback - ' + error); }
+}
