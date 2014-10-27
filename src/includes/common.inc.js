@@ -1013,9 +1013,25 @@ function drupalgap_render_region(region) {
       var block_menu_count = 0;
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
-          // Check the block's visibility settings.
+          // Check the block's visibility settings. If an access_callback
+          // function is specified on the block's settings, we'll call that
+          // to determine the visibility, otherwise we'll fall back to the
+          // default visibility determination mechanism.
           var render_block = false;
-          if (drupalgap_check_visibility('block', block_settings)) {
+          if (
+            block_settings.access_callback &&
+            drupalgap_function_exists(block_settings.access_callback)
+          ) {
+            var fn = window[block_settings.access_callback];
+            render_block = fn({
+                path: current_path,
+                delta: block_delta,
+                region: region.name,
+                theme: drupalgap.settings.theme,
+                settings: block_settings
+            });
+          }
+          else if (drupalgap_check_visibility('block', block_settings)) {
             render_block = true;
             // The 'offline' and 'error' pages only have the 'main' system
             // block visible.
