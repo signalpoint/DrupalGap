@@ -889,10 +889,15 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
           variables.attributes.value = variables.value;
         }
         
-        // Add the widget as a child to the form element.
-        element.children.push({
-          markup: theme('taxonomy_term_reference', variables)
-        });
+        // Add the widget as a child to the form element, including a label if
+        // necessary (since the original label is lost because it was turned
+        // into a hidden element).
+        var child = '';
+        if (!empty(element.title)) {
+          child += theme('form_element_label', { element: element });
+        }
+        child += theme('taxonomy_term_reference', variables);
+        element.children.push({ markup: child });
 
     });
   }
