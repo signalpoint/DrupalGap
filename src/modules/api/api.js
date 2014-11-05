@@ -254,7 +254,11 @@ function hook_field_widget_form(form, form_state, field, instance, langcode, ite
  * reference.content, so to make modifications, change reference.content. For
  * more info: http://stackoverflow.com/questions/518000/is-javascript-a-pass-by-reference-or-pass-by-value-language
  */
-function hook_entity_post_render_field(entity, field_name, field, reference) {}
+function hook_entity_post_render_field(entity, field_name, field, reference) {
+  if (field_name == 'field_my_image') {
+    reference.content += '<h2>' + entity.title + '</h2>';
+  }
+}
 
 /**
  * This hook is used to make alterations to existing forms.
