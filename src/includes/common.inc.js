@@ -538,12 +538,13 @@ function drupalgap_goto_generate_page_and_go(path, page_id, options) {
           options.allowSamePageTransition = true;
         }
 
-        // Let's change to the page. Web apps and the ripple emulator seem to
-        // not like the 'index.html' prefix, so we'll remove that.
+        // Let's change to the page. Web apps and the ripple emulator do not
+        // seem to like the 'index.html' prefix, so we'll remove that.
         var destination = 'index.html#' + page_id;
-        if (!drupalgap.phonegap || typeof parent.window.ripple === 'function') {
-          destination = '#' + page_id;
-        }
+        if (
+          drupalgap.settings.mode != 'phonegap' ||
+          typeof parent.window.ripple === 'function'
+        ) { destination = '#' + page_id; }
         $.mobile.changePage(destination, options);
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
