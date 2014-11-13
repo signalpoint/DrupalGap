@@ -335,11 +335,12 @@ function _image_phonegap_camera_getPicture_success(options) {
  * @param {Object} form_state
  * @param {Object} options
  */
-function _image_field_form_process(form, form_state, options) {
+function _image_fields_form_process(form, form_state, form_id, options) {
   try {
     // @todo - this needs mutli value field support (delta)
     var lng = language_default();
-    var processed_an_image = false;
+    var files = new Array();
+    var fid, element_id;
     $.each(form.image_fields, function(index, name) {
       // Skip empty images.
       if (!image_phonegap_camera_options[name][0]) { return false; }
@@ -354,35 +355,54 @@ function _image_field_form_process(form, form_state, options) {
         file: {
           file: image_phonegap_camera_options[name][0].image,
           filename: image_file_name,
-          filepath: 'public://' + image_file_name
+          filepath: 'public://' + image_file_name,
+          name: name
         }
       };
       if (!empty(Drupal.settings.file_private_path)) {
         file.file.filepath = 'private://' + image_file_name;
       }
-      // Change the loader mode to saving, and save the file.
-      drupalgap.loader = 'saving';
-      processed_an_image = true;
-      file_save(file, {
-          async: false,
-          success: function(result) {
-            try {
-              // Set the hidden input and form state values with the file id.
-              var element_id = drupalgap_form_get_element_id(name, form.id);
-              $('#' + element_id).val(result.fid);
-              form_state.values[name][lng][0] = result.fid;
-              if (options.success) { options.success(); }
-            }
-            catch (error) {
-              console.log('_image_field_form_process - success - ' + error);
-            }
-          }
-      });
+      // Add file to deferred processing array
+      files.push(file);
     });
-    // If no images were processed, we need to continue onward anyway.
-    if (!processed_an_image && options.success) { options.success(); }
+
+    // Build deferred processing array of functions
+    var uploads = files.map(_image_upload_deferred);
+
+    // Special when gets array of deferred returns
+    $.whenall = function(arr) {
+      return $.when.apply($, arr).pipe(function() {
+        return Array.prototype.slice.call(arguments);
+      });
+    };
+
+    // When deferred images are done
+    $.whenall(uploads).done(function(arguments) {
+      for (var i = 0; i < arguments.length; i++) {
+        var element_id = drupalgap_form_get_element_id(arguments[i].name, form_id);
+        $('#' + element_id).val(arguments[i].fid);
+        form_state.values[arguments[i].name][lng][0] = arguments[i].fid;
+      }
+      // Call success now that all images are processed
+      // and the form has been updated
+      options.success();
+    });
   }
-  catch (error) { console.log('_image_field_form_validate - ' + error); }
+  catch (error) { console.log('_image_fields_form_validate - ' + error); }
+}
+
+/**
+ * Custom function for deferred image uploading
+ */
+function _image_upload_deferred(file) {
+  var deferred = new $.Deferred();
+  drupalgap.loader = 'saving';
+  file_save(file, {
+    success: function(result) {
+      deferred.resolve({fid: result.fid, name:file.file.name});
+    }
+  });
+  return deferred;
 }
 
 /**
