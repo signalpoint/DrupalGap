@@ -1173,15 +1173,15 @@ function _drupalgap_form_submit(form_id) {
       image_fields_present_on_entity_type(form.entity_type, form.bundle)
     ) {
       _image_field_form_process(form, form_state, {
-          success: form_validation
+          success: function() {
+            if (Drupal.settings.debug === true) {
+              console.log('_image_field_form_process - processed an image');
+            }
+          }
       });
     }
-    else {
-      // There were no image fields on the form, proceed normally with form
-      // validation, which will in turn process the submission if there are no
-      // validation errors.
-      form_validation();
-    }
+    // validate the form
+    form_validation();
   }
   catch (error) { console.log('_drupalgap_form_submit - ' + error); }
 }
