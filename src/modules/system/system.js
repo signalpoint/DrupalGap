@@ -3,7 +3,6 @@
  * @return {Object}
  */
 function system_block_info() {
-  try {
     // System blocks.
     var blocks = {
       'main': {
@@ -17,6 +16,10 @@ function system_block_info() {
       'logo': {
         'delta': 'logo',
         'module': 'system'
+      },
+      logout: {
+        delta: 'logout',
+        module: 'system'
       },
       'title': {
         'delta': 'title',
@@ -35,15 +38,13 @@ function system_block_info() {
     var system_menus = menu_list_system_menus();
     $.each(system_menus, function(menu_name, menu) {
         var block_delta = menu.menu_name;
-        eval(
-          'blocks.' + block_delta + ' = ' +
-            '{"name":"' + block_delta + '", "delta":"' + block_delta + '", ' +
-            '"module":"menu"};'
-        );
+        blocks[block_delta] = {
+          name: block_delta,
+          delta: block_delta,
+          module: 'menu'
+        };
     });
     return blocks;
-  }
-  catch (error) { console.log('system_block_info - ' + error); }
 }
 
 /**
@@ -82,6 +83,10 @@ function system_block_view(delta) {
         }
         return '';
         break;
+      case 'logout':
+        if (Drupal.user.uid) { return theme('logout'); }
+        return '';
+        break;
       case 'title':
         var title_id = system_title_block_id(drupalgap_path_get());
         return '<h1 id="' + title_id + '"></h1>';
@@ -107,7 +112,6 @@ function system_block_view(delta) {
  * @return {Object}
  */
 function system_menu() {
-  try {
     var items = {
       'dashboard': {
         'title': 'Dashboard',
@@ -131,8 +135,6 @@ function system_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('system_menu - ' + error); }
 }
 
 /**
@@ -141,8 +143,7 @@ function system_menu() {
  * @return {String}
  */
 function system_401_page(path) {
-  try { return 'Sorry, you are not authorized to view this page.'; }
-  catch (error) { console.log('system_401_page - ' + error); }
+  return 'Sorry, you are not authorized to view this page.';
 }
 
 /**
@@ -151,8 +152,7 @@ function system_401_page(path) {
  * @return {String}
  */
 function system_404_page(path) {
-  try { return 'Sorry, the page you requested was not found.'; }
-  catch (error) { console.log('system_404_page - ' + error); }
+  return 'Sorry, the page you requested was not found.';
 }
 
 /**
@@ -200,15 +200,12 @@ function system_dashboard_page() {
  * @return {Object}
  */
 function system_error_page() {
-  try {
     var content = {
       info: {
         markup: '<p>An unexpected error has occurred!</p>'
       }
     };
     return content;
-  }
-  catch (error) { console.log('system_error_page - ' + error); }
 }
 
 /**
@@ -272,11 +269,8 @@ function offline_try_again() {
  * @return {Array}
  */
 function system_regions_list() {
-  try {
     var regions = ['header', 'content', 'footer'];
     return regions;
-  }
-  catch (error) { console.log('system_regions_list - ' + error); }
 }
 
 /**
@@ -336,3 +330,20 @@ function system_title_block_id(path) {
   catch (error) { console.log('system_title_block_id - ' + error); }
 }
 
+/**
+ * The default access callback function for the logout block. Allows the block
+ * to only be shown when a user is viewing their own profile.
+ */
+function system_logout_block_access_callback(options) {
+  try {
+    var args = arg(null, options.path);
+    if (
+      args &&
+      args.length == 2 &&
+      args[0] == 'user' &&
+      args[1] == Drupal.user.uid
+    ) { return true; }
+    return false;
+  }
+  catch (error) { console.log('system_logout_block_access_callback - ' + error); }
+}

@@ -1,3 +1,12 @@
+// Used to hold onto the current views' exposed filter query string.
+var _views_exposed_filter_query = null;
+
+// Used to mark if the exposed filter's reset button is shown or not.
+var _views_exposed_filter_reset = false;
+
+// Used to hold onto the current views' exposed filter submit's theme variables.
+var _views_exposed_filter_submit_variables = null;
+
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
  * results and pass them along to the provided success callback.
@@ -86,6 +95,187 @@ function views_datasource_get_view_result(path, options) {
 }
 
 /**
+ * The exposed filter form builder.
+ */
+function views_exposed_form(form, form_state, options) {
+  try {
+
+    // @TODO we tried to make the filters collapsible, but jQM doesn't seem to
+    // like collapsibles with form inputs in them... weird.
+    //var title = form.title ? form.title : 'Filter';
+    //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
+    
+    // Attach the variables to the form so it can be used later.
+    form.variables = options.variables;
+
+    $.each(options.filter, function(views_field, filter) {
+        
+        // Prep the element basics.
+        var element_id = null;
+        var element = null;
+        // @TODO - This ID is NOT unique enough, it will cause DOM collisions if
+        // the same exposed filter gets used twice...
+        // @TODO - we should be attaching the value right here, so filter
+        // implementors don't need to extract it on their own. Once this is
+        // implemented. Then update *_views_exposed_filter() to use this value
+        // instead.
+        element_id = filter.options.expose.identifier;
+        element = {
+          id: element_id,
+          type: filter.options.group_info.widget,
+          title: filter.options.expose.label,
+          required: filter.options.expose.required,
+          options: {
+            attributes: {
+              id: drupalgap_form_get_element_id(element_id, form.id)
+            }
+          },
+          views_field: views_field,
+          filter: filter,
+          children: []
+        };
+        // Attach the value to the element, if there is one.
+        // @TODO Add multi value support.
+        //if (!empty(filter.value)) { element.value = filter.value[0]; }
+
+        // Grab the field name and figure out which module is in charge of it.
+        var field_name = filter.definition.field_name;
+        if (field_name) {
+          
+          // This is an entity field...
+          
+          // Grab the field info, and determine the module that will handle it.
+          // Then see if hook_views_exposed_filter() has been implemented by
+          // that module. That module will be used to assemble the element. If
+          // we don't have a handler then just skip the filter.
+          var field = drupalgap_field_info_field(field_name);
+          var module = field.module;
+          var handler = module + '_views_exposed_filter';
+          if (!drupalgap_function_exists(handler)) {
+            dpm(
+              'WARNING: views_exposed_form() - ' + handler + '() must be ' +
+              'created to assemble the ' + field.type + ' filter used by ' +
+              field_name
+            );
+            return;
+          }
+          
+          // We have a handler, let's call it so the element can be assembled.
+          window[handler](form, form_state, element, filter, field);
+
+        }
+        else {
+          // This is NOT an entity field, so it is probably a core field (e.g.
+          // nid, status, etc). Let's assemble the element. In some cases we may
+          // just be able to forward it to a pre-existing handler.
+          if (element.type == 'select') {
+            list_views_exposed_filter(form, form_state, element, filter, null);
+          }
+          else {
+            dpm(
+              'WARNING: views_exposed_form() - I do not know how to handle ' +
+              'the exposed filter for the "'  + views_field + '" field'
+            );
+            dpm(filter);
+            return;
+          }
+        }
+
+        // Finally attach the assembled element to the form.
+        if (element_id) { form.elements[element_id] = element; }
+
+    });
+
+    // Add the submit button.
+    form.elements['submit'] = {
+      type: 'submit',
+      value: options.exposed_data.submit
+    };
+    
+    // Add the reset button, if necessary.
+    if (options.exposed_data.reset && _views_exposed_filter_reset) {
+      form.buttons['reset'] = {
+        title: options.exposed_data.reset,
+        attributes: {
+          id: form.id + '-reset',
+          onclick: "views_exposed_form_reset()"
+        }
+      };
+    }
+
+    //form.suffix += '</div>';
+
+    return form;
+  }
+  catch (error) { console.log('views_exposed_form - ' + error); }
+}
+
+/**
+ * The exposed filter submission handler.
+ */
+function views_exposed_form_submit(form, form_state) {
+  try {
+
+    // Assemble the query string from the form state values.
+    var query = '';
+    $.each(form_state.values, function(key, value) {
+        if (empty(value)) { return; }
+        query += key + '=' + encodeURIComponent(value) + '&';
+    });
+    if (!empty(query)) { query = query.substr(0, query.length - 1); }
+
+    // If there is a query set aside from previous requests, and it is equal to
+    // the submitted query, then stop the submission. Otherwise remove it from
+    // the path.
+    if (_views_exposed_filter_query) {
+      if (_views_exposed_filter_query == query) { return; }
+      if (form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1) {
+        form.variables.path =
+        form.variables.path.replace('&' + _views_exposed_filter_query, '');
+      }
+    }
+
+    // Set aside a copy of the query string, so it can be removed from the path
+    // upon subsequent submissions of the form.
+    _views_exposed_filter_query = query;
+
+    // Indicate that we have an exposed filter, so the reset button can easily
+    // be shown/hidden.
+    _views_exposed_filter_reset = true;
+
+    // Update the path for the view, reset the pager, hold onto the variables,
+    // then theme the view.
+    form.variables.path += '&' + query;
+    form.variables.page = 0;
+    _views_exposed_filter_submit_variables = form.variables;
+    _theme_view(form.variables);
+
+  }
+  catch (error) { console.log('views_exposed_form_submit - ' + error); }
+}
+
+/**
+ * Handles clicks on the views exposed filter form's reset button.
+ */
+function views_exposed_form_reset() {
+  try {
+    // Reset the path to the view, the page, and the global vars, then re-theme
+    // the view.
+    _views_exposed_filter_submit_variables.path =
+      _views_exposed_filter_submit_variables.path.replace(
+        '&' + _views_exposed_filter_query,
+        ''
+      )
+    ;
+    _views_exposed_filter_submit_variables.page = 0;
+    _views_exposed_filter_reset = false;
+    _views_exposed_filter_query = null;
+    _theme_view(_views_exposed_filter_submit_variables);
+  }
+  catch (error) { console.log('views_exposed_form_reset - ' + error); }
+}
+
+/**
  * Themes a view.
  * @param {Object} variables
  * @return {String}
@@ -122,7 +312,7 @@ function theme_view(variables) {
           'located in the DOM - if you are re-using this same view, it is ' +
           'recommended to append a unique identifier (e.g. an entity id) to ' +
           'your views id, that way you can re-use the same view across ' +
-          'multiple pages'
+          'multiple pages.'
         );
       }
     }
@@ -231,28 +421,47 @@ function theme_views_view(variables) {
     // Is there a title to display?
     if (variables.title) {
       var title_attributes = variables.title_attributes ?
-        drupalgap_attributes(variables.title_attributes) : '';
+        variables.title_attributes : null;
       html += theme('header', { text: variables.title, attributes: title_attributes });
       // Place spacers after the header for each format, except unformatted.
       if (variables.format != 'unformatted') {
         html += theme('views_spacer', null);
       }
     }
+    // Render the exposed filters, if there are any.
+    var views_exposed_form_html = '';
+    if (typeof results.view.exposed_data !== 'undefined') {
+      views_exposed_form_html = drupalgap_get_form(
+        'views_exposed_form', {
+          exposed_data: results.view.exposed_data,
+          exposed_raw_input: results.view.exposed_raw_input,
+          filter: results.view.filter,
+          variables: variables
+        }
+      );
+    }
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
     // the creation of the content area.
-    if (results.view.count == 0 && variables.empty_callback &&
-      function_exists(variables.empty_callback)
-    ) {
-      var empty_callback = window[variables.empty_callback];
-      var selector = '#' + drupalgap_get_page_id() + ' #' + variables.attributes.id;
+    if (results.view.count == 0) {
+      var selector = '#' + drupalgap_get_page_id() +
+        ' #' + variables.attributes.id;
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
       }, 100);
-      return empty_callback(results.view);
+      if (
+        variables.empty_callback &&
+        function_exists(variables.empty_callback)
+      ) {
+        var empty_callback = window[variables.empty_callback];
+        return views_exposed_form_html + empty_callback(results.view);
+      }
+      return html + views_exposed_form_html;
     }
+    // Append the exposed filter html.
+    html += views_exposed_form_html;
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
     if (!variables.format) { variables.format = 'unformatted_list'; }
@@ -380,10 +589,7 @@ function theme_views_view(variables) {
  * @return {String}
  */
 function theme_views_spacer(variables) {
-  try {
     return '<h2 class="dg_empty_list_header">&nbsp;</h2>';
-  }
-  catch (error) { console.log('theme_views_spacer - ' + error); }
 }
 
 /**
@@ -432,8 +638,13 @@ function theme_pager(variables) {
  */
 function theme_pager_link(variables, link_vars) {
   try {
-    var onclick = _theme_pager_link_onclick(variables);
-    return "<a href='#' onclick='" + onclick + "'>" + link_vars.text + '</a>';
+    if (!link_vars.attributes) { link_vars.attributes = {}; }
+    link_vars.attributes.href = '#';
+    var attributes = drupalgap_attributes(link_vars.attributes);
+    return "<a onclick='" + _theme_pager_link_onclick(variables) + "' " +
+      attributes + ">" +
+      link_vars.text +
+    '</a>';
   }
   catch (error) { console.log('theme_pager_link - ' + error); }
 }

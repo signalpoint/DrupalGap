@@ -62,6 +62,19 @@ function node_add_page_by_type(type) {
 }
 
 /**
+ * Title call back function for node/add/[type].
+ * @param {String} type
+ * @return {Object}
+ */
+function node_add_page_by_type_title(callback, type) {
+  try {
+    var title = 'Create ' + drupalgap.content_types_list[type].name;
+    return callback.call(null, title);
+  }
+  catch (error) { console.log('node_add_page_by_type_title - ' + error); }
+}
+
+/**
  * The node edit form.
  * @param {Object} form
  * @param {Object} form_state
@@ -118,7 +131,6 @@ function node_edit_submit(form, form_state) {
  * @return {Object}
  */
 function node_menu() {
-  try {
     var items = {
       'node': {
         'title': 'Content',
@@ -130,10 +142,12 @@ function node_menu() {
         'page_callback': 'node_add_page'
       },
       'node/add/%': {
-        'title': 'Add content',
-        'page_callback': 'node_add_page_by_type',
-        'page_arguments': [2],
-        options: {reloadPage: true}
+        title: 'Add content',
+        title_callback: 'node_add_page_by_type_title',
+        title_arguments: [2],
+        page_callback: 'node_add_page_by_type',
+        page_arguments: [2],
+        options: { reloadPage: true }
       },
       'node/%': {
         'title': 'Node',
@@ -161,8 +175,6 @@ function node_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('node_menu - ' + error); }
 }
 
 /**
@@ -170,7 +182,6 @@ function node_menu() {
  * @return {Object}
  */
 function node_page() {
-  try {
     var content = {
       'create_content': {
         'theme': 'button_link',
@@ -185,8 +196,6 @@ function node_page() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('node_page - ' + error); }
 }
 
 /**
@@ -346,13 +355,6 @@ function node_page_title(callback, nid) {
  * @return {Object}
  */
 function node_theme() {
-  try {
-    return {
-      'node': {
-        'template': 'node'
-      }
-    };
-  }
-  catch (error) { console.log('node_theme - ' + error); }
+    return { node: { template: 'node' } };
 }
 

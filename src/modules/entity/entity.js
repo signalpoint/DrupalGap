@@ -51,19 +51,14 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
  * @return {Object}
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
-  try {
     return {
-      'title': 'Delete',
+      title: 'Delete',
       attributes: {
         onclick: "javascript:drupalgap_entity_edit_form_delete_confirmation('" +
           entity_type + "', " + entity_id +
         ');'
       }
     };
-  }
-  catch (error) {
-    console.log('drupalgap_entity_edit_form_delete_button - ' + error);
-  }
 }
 
 /**
@@ -597,7 +592,6 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
               'title': ucfirst(name)
             };
             fields[name] = field;
-            //eval('fields.' + name + ' = field;');
           }
         );
         // Make the node id required.
@@ -830,12 +824,7 @@ function _drupalgap_entity_page_container(entity_type, entity_id, mode) {
  * @return {String}
  */
 function _drupalgap_entity_page_container_id(entity_type, entity_id, mode) {
-  try {
     return entity_type + '_' + entity_id + '_' + mode + '_container';
-  }
-  catch (error) {
-    console.log('_drupalgap_entity_page_container_id - ' + error);
-  }
 }
 
 /**

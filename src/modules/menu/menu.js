@@ -316,7 +316,6 @@ function menu_install() {
  * @return {Object}
  */
 function menu_popup_get_default_options() {
-  try {
     return {
       attributes: {
         'data-role': 'listview'
@@ -328,8 +327,6 @@ function menu_popup_get_default_options() {
         }
       }
     };
-  }
-  catch (error) { console.log('menu_popup_get_default_options - ' + error); }
 }
 
 /**

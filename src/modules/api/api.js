@@ -254,7 +254,11 @@ function hook_field_widget_form(form, form_state, field, instance, langcode, ite
  * reference.content, so to make modifications, change reference.content. For
  * more info: http://stackoverflow.com/questions/518000/is-javascript-a-pass-by-reference-or-pass-by-value-language
  */
-function hook_entity_post_render_field(entity, field_name, field, reference) {}
+function hook_entity_post_render_field(entity, field_name, field, reference) {
+  if (field_name == 'field_my_image') {
+    reference.content += '<h2>' + entity.title + '</h2>';
+  }
+}
 
 /**
  * This hook is used to make alterations to existing forms.
@@ -286,4 +290,29 @@ function hook_mvc_model() {
 }
 function hook_mvc_view() {}
 function hook_mvc_controller() {}
+
+/**
+ * Implements hook_views_exposed_filter().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} element
+ * @param {Object} filter
+ * @param {Object} field
+ */
+function hook_views_exposed_filter(form, form_state, element, filter, field) {
+  try {
+    
+    // This hook is used to assemble the form element for an exposed filter.
+    // Make modifications to the element JSON object to control how it is used
+    // on the form. The element comes prepopulated with some basic values. The
+    // majority of the data you need to assemble the field should be contained
+    // within the filter and field JSON objects, so use dpm() to insepct them
+    // and assemble your filter's element.
+    
+    //dpm(filter);
+    //dpm(field);
+    
+  }
+  catch (error) { console.log('hook_views_exposed_filter - ' + error); }
+}
 

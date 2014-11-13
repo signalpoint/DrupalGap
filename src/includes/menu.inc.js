@@ -148,7 +148,7 @@ function menu_get_item() {
     if (arguments[0]) { path = arguments[0]; }
     if (arguments[1]) { router_item = arguments[1]; }
     if (path && drupalgap.menu_links[path]) {
-      return eval('drupalgap.menu_links.' + path + ';');
+      return drupalgap.menu_links[path];
     }
     else { return null; }
   }
@@ -160,10 +160,7 @@ function menu_get_item() {
  * @return {Object}
  */
 function menu_item_default_options() {
-  try {
     return { attributes: menu_item_default_attributes() };
-  }
-  catch (error) { console.log('menu_item_default_options - ' + error); }
 }
 
 /**
@@ -171,12 +168,7 @@ function menu_item_default_options() {
  * @return {Object}
  */
 function menu_item_default_attributes() {
-  try {
-    return {
-      'class': ''
-    }
-  }
-  catch (error) { console.log('menu_item_default_attributes - ' + error); }
+    return { 'class': '' };
 }
 
 /**
@@ -398,7 +390,7 @@ function drupalgap_menus_load() {
       $.each(drupalgap.settings.menus, function(menu_name, menu) {
           // If the menu does not already exist, it is a custom menu, so create
           // the menu and its corresponding block.
-          if (!eval('drupalgap.menus.' + menu_name)) {
+          if (!drupalgap.menus[menu_name]) {
             // If the custom menu doesn't have its machine name set, set it.
             if (!menu.menu_name) { menu.menu_name = menu_name; }
             // Save the custom menu, as long is its name isn't 'regions',
@@ -419,7 +411,7 @@ function drupalgap_menus_load() {
           else {
             // The menu is a system defined menu, merge it together with any
             // custom settings.
-            $.extend(true, eval('drupalgap.menus.' + menu_name), menu);
+            $.extend(true, drupalgap.menus[menu_name], menu);
           }
       });
       // Now that we have all of the menus loaded up, and the menu router is
@@ -429,10 +421,10 @@ function drupalgap_menus_load() {
           // Let's grab any links from the router that have a menu specified,
           // and add the link to the router.
           if (menu_link.menu_name) {
-            if (eval('drupalgap.menus.' + menu_link.menu_name)) {
+            if (drupalgap.menus[menu_link.menu_name]) {
               // Create a links array for the menu if one doesn't exist already.
-              if (!eval('drupalgap.menus.' + menu_link.menu_name + '.links')) {
-                eval('drupalgap.menus.' + menu_link.menu_name + '.links = [];');
+              if (!drupalgap.menus[menu_link.menu_name].links) {
+                drupalgap.menus[menu_link.menu_name].links = [];
               }
               // Add the path to the menu link inside the menu.
               menu_link.path = path;
@@ -441,9 +433,7 @@ function drupalgap_menus_load() {
               // menu link data can be retrieved from drupalgap.menu_links.
               var link =
                 drupalgap_menus_load_convert_menu_link_to_link_json(menu_link);
-              eval(
-                'drupalgap.menus.' + menu_link.menu_name + '.links.push(link);'
-              );
+              drupalgap.menus[menu_link.menu_name].links.push(link);
             }
             else {
               console.log(

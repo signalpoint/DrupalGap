@@ -100,8 +100,8 @@ function theme(hook, variables) {
       }
     }
     // If there is no class name, set an empty one.
-    if (!variables.attributes.class) {
-      variables.attributes.class = '';
+    if (!variables.attributes['class']) {
+      variables.attributes['class'] = '';
     }
     var fn = window[theme_function];
     content = fn.call(null, variables);
@@ -645,6 +645,27 @@ function theme_link(variables) {
 }
 
 /**
+ * Themes the logout button.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_logout(variables) {
+  try {
+    return bl(
+      'Logout',
+      'user/logout',
+      {
+        attributes: {
+          'data-icon': 'action',
+          'data-iconpos': 'right'
+        }
+      }
+    );
+  }
+  catch (error) { console.log('theme_logout - ' + error); }
+}
+
+/**
  * Themes a popup widget.
  * @param {Object} variables
  * @return {String}
@@ -769,10 +790,11 @@ function template_process_page(variables) {
     var page_id = drupalgap_get_page_id(drupalgap_path);
     $.each(drupalgap.theme.regions, function(index, region) {
         var page_html = $('#' + page_id).html();
-        $('#' + page_id).html(page_html.replace(
+        page_html = page_html.replace(
           '{:' + region.name + ':}',
           drupalgap_render_region(region)
-        ));
+        );
+        $('#' + page_id).html(page_html);
     });
   }
   catch (error) { console.log('template_process_page - ' + error); }

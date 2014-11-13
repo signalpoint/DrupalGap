@@ -46,7 +46,6 @@ function user_edit_access(account) {
  * @return {Object}
  */
 function user_listing() {
-  try {
     // Place an empty item list that will hold a list of users.
     var content = {
       'user_listing': {
@@ -57,8 +56,6 @@ function user_listing() {
       }
     };
     return content;
-  }
-  catch (error) { console.log('user_listing - ' + error); }
 }
 
 /**
@@ -110,6 +107,14 @@ function user_login_form(form, form_state) {
       type: 'submit',
       value: 'Login'
     };
+    if (user_register_access()) {
+      form.buttons['create_new_account'] = {
+        title: 'Create new account',
+        attributes: {
+          onclick: "drupalgap_goto('user/register')"
+        }
+      };
+    }
     return form;
   }
   catch (error) { console.log('user_login_form - ' + error); }
@@ -136,8 +141,7 @@ function user_login_form_submit(form, form_state) {
  * @return {String}
  */
 function user_logout_callback() {
-  try { return '<p>Logging out...</p>'; }
-  catch (error) { console.log('user_logout_callback - ' + error); }
+  return '<p>Logging out...</p>';
 }
 
 /**
@@ -160,7 +164,6 @@ function user_logout_pagechange() {
  * @return {Object}
  */
 function user_menu() {
-  try {
     var items = {
       'user': {
         'page_callback': 'user_page'
@@ -185,10 +188,12 @@ function user_menu() {
         options: {reloadPage: true}
       },
       'user/%': {
-        'title': 'My account',
-        'page_callback': 'user_view',
-        'pageshow': 'user_view_pageshow',
-        'page_arguments': [1]
+        title: 'My account',
+        title_callback: 'user_view_title',
+        title_arguments: [1],
+        page_callback: 'user_view',
+        pageshow: 'user_view_pageshow',
+        page_arguments: [1]
       },
       'user/%/view': {
         'title': 'View',
@@ -214,8 +219,6 @@ function user_menu() {
       }
     };
     return items;
-  }
-  catch (error) { console.log('user_menu - ' + error); }
 }
 
 /**
@@ -223,13 +226,10 @@ function user_menu() {
  * @return {String}
  */
 function user_page() {
-  try {
     // NOTE, this page call back isn't actually used, because the 'user' path
     // in DrupalGap is redirected to either 'user/login' or e.g.
-    // 'user/123/view'.
+    // 'user/123'.
     return 'user_page()';
-  }
-  catch (error) { console.log('user_page - ' + error); }
 }
 
 /**
@@ -504,17 +504,14 @@ function user_services_postprocess(options, result) {
  * @return {Object}
  */
 function user_theme() {
-  try {
     return {
-      'user_picture': {
-        'template': 'user-picture'
+      user_picture: {
+        template: 'user-picture'
       },
-      'user_profile': {
-        'template': 'user-profile'
+      user_profile: {
+        template: 'user-profile'
       }
     };
-  }
-  catch (error) { console.log('user_theme - ' + error); }
 }
 
 /**
@@ -580,6 +577,20 @@ function user_view_pageshow(uid) {
     });
   }
   catch (error) { console.log('user_view_pageshow - ' + error); }
+}
+
+/**
+ * Title callback for the user profile view page.
+ */
+function user_view_title(callback, uid) {
+  try {
+    user_load(uid, {
+        success: function(account) {
+          callback.call(null, account.name);
+        }
+    });
+  }
+  catch (error) { console.log('user_view_title - ' + error); }
 }
 
 /**

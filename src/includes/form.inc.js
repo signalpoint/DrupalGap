@@ -53,15 +53,12 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
  * @return {Object}
  */
 function drupalgap_form_cancel_button() {
-  try {
     return {
       'title': 'Cancel',
       attributes: {
         onclick: 'javascript:drupalgap_back();'
       }
     };
-  }
-  catch (error) { console.log('drupalgap_form_cancel_button - ' + error); }
 }
 
 /**
@@ -407,7 +404,7 @@ function drupalgap_form_load(form_id) {
 
     // The form's call back function will be equal to the form id.
     var function_name = form_id;
-    if (eval('typeof ' + function_name) == 'function') {
+    if (drupalgap_function_exists(function_name)) {
 
       // Grab the form's function.
       var fn = window[function_name];
@@ -597,12 +594,7 @@ function drupalgap_form_local_storage_save(form) {
  * @return {String}
  */
 function drupalgap_form_id_local_storage_key(form_id) {
-  try {
     return 'drupalgap_form_' + form_id;
-  }
-  catch (error) {
-    console.log('drupalgap_form_id_local_storage_key - ' + error);
-  }
 }
 
 /**
@@ -758,7 +750,11 @@ function _drupalgap_form_render_element(form, element) {
     var delta = 0;
     var item_html = '';
     var item_label = '';
+    var render_item = null;
     $.each(items, function(delta, item) {
+        
+        // We'll render the item, unless we prove otherwise.
+        render_item = true;
 
         // Overwrite the variable's attributes id with the item's id.
         variables.attributes.id = item.id;
@@ -833,14 +829,21 @@ function _drupalgap_form_render_element(form, element) {
           );
         }
 
-        // Render the element item.
+        // Render the element item, unless it wasn't supported.
         item_html = _drupalgap_form_render_element_item(
           form,
           element,
           variables,
           item
         );
+        if (!item_html) {
+          render_item = false;
+          return false;
+        }
     });
+    
+    // Are we skipping the render of the item?
+    if (!render_item) { return ''; }
 
     // Show the 'Add another item' button on unlimited value fields.
     /*if (element.field_info_field &&
@@ -927,7 +930,7 @@ function _drupalgap_form_render_element(form, element) {
  * @param {Object} element
  * @param {Object} variables
  * @param {Object} item
- * @return {String}
+ * @return {*}
  */
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
@@ -992,9 +995,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
         // @update - if an item doesn't have a type, it gets set by the parent
         // element, so we should now always have a type available here.
         var msg = 'Field ' + item.type + ' not supported.';
-        html += '<div><em>' + msg + '</em></div>';
         console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
         dpm(item);
+        return null;
       }
     }
 
@@ -1366,10 +1369,7 @@ function theme_form_element_label(variables) {
  * @return {String}
  */
 function theme_form_required_marker(variables) {
-  try {
     return '*';
-  }
-  catch (error) { console.log('theme_form_required_marker - ' + error); }
 }
 
 /**
@@ -1460,6 +1460,23 @@ function theme_radios(variables) {
 }
 
 /**
+ * Themes a range input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_range(variables) {
+  try {
+    variables.attributes.type = 'range';
+    if (typeof variables.attributes.value === 'undefined') {
+      variables.attributes.value = variables.value;
+    }
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_range - ' + error); }
+}
+
+/**
  * Themes a search input.
  * @param {Object} variables
  * @return {String}
@@ -1484,10 +1501,13 @@ function theme_select(variables) {
     if (variables.options) {
       $.each(variables.options, function(value, label) {
           if (value == 'attributes') { return; } // Skip the attributes.
+          // Is the option selected?
           var selected = '';
-          if (variables.value && variables.value == value) {
-            selected = ' selected ';
-          }
+          if (
+            typeof variables.value !== 'undefined' &&
+            variables.value == value
+          ) { selected = ' selected '; }
+          // Render the option.
           options += '<option value="' + value + '" ' + selected + '>' +
             label +
           '</option>';

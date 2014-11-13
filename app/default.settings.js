@@ -232,6 +232,17 @@ drupalgap.settings.menus.regions = {}; // Do not remove this line.
 // Header Region Links
 drupalgap.settings.menus.regions['header'] = {
   links:[
+    /* Main Menu Popup Menu Button */
+    {
+      options: {
+        popup: true,
+        popup_delta: 'main_menu',
+        attributes: {
+          'class': 'ui-btn-left',
+          'data-icon': 'bars'
+        }
+      }
+    },
     /* Home Button */
     {
       path: '',
@@ -245,17 +256,6 @@ drupalgap.settings.menus.regions['header'] = {
       pages: {
         value: [''],
         mode: 'exclude'
-      }
-    },
-    /* Main Menu Popup Menu Button */
-    {
-      options: {
-        popup: true,
-        popup_delta: 'main_menu',
-        attributes: {
-          'class': 'ui-btn-left',
-          'data-icon': 'bars'
-        }
       }
     },
     /* Anonymous User Popup Menu Button */

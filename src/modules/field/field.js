@@ -120,10 +120,10 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
           form.elements[name] = {
-            'type': field_info.type,
-            'title': field.label,
-            'required': field.required,
-            'description': field.description
+            type: field_info.type,
+            title: field.label,
+            required: field.required,
+            description: field.description
           };
           if (!form.elements[name][language]) {
             form.elements[name][language] = {};
@@ -295,6 +295,36 @@ function list_assemble_form_state_into_field(entity_type, bundle,
   catch (error) {
     console.log('list_assemble_form_state_into_field - ' + error);
   }
+}
+
+/**
+ * Implements hook_views_exposed_filter().
+ */
+function list_views_exposed_filter(form, form_state, element, filter, field) {
+  try {
+    //dpm('list_views_exposed_filter');
+    //dpm(arguments);
+    var widget = filter.options.group_info.widget;
+    if (widget == 'select') {
+      // Set the element value if we have one in the filter.
+      if (!empty(filter.value)) { element.value = filter.value[0]; }
+      // Set the options, then depending on whether or not it is required, set
+      // the default value accordingly.
+      element.options = filter.value_options;
+      if (!element.required) {
+        element.options['All'] = '- Any -';
+        if (typeof element.value === 'undefined') { element.value = 'All'; }
+      }
+    }
+    else {
+      dpm(
+        'WARNING: list_views_exposed_filter - unsupported widget (' +
+          widget +
+        ')'
+      );
+    }
+  }
+  catch (error) { console.log('list_views_exposed_filter - ' + error); }
 }
 
 /**
