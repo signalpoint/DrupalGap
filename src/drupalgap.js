@@ -126,21 +126,29 @@ function drupalgap_onload() {
       var module = modules[i];
       Drupal.modules.core[module] = module_object_template(module);
     }
-
-    // If we're running in PhoneGap attach the deviceready listener, otherwise
-    // we're running as a web app, somove directly to deviceready.
-    if (
-      window.location.protocol === "file:" ||
-      typeof parent.window.ripple === 'function'
-    ) {
-      drupalgap.phonegap = true;
-      document.addEventListener('deviceready', _drupalgap_deviceready, false);
-    }
-    else {
-      drupalgap.phonegap = false;
-      _drupalgap_deviceready();
-    }
     
+    // Depending on the mode, we'll move on to _drupalgap_deviceready()
+    // accordingly. By default we'll assume the mode is for phonegap, unless
+    // otherwise specified by the settings.js file. If it is for phonegap, we'll
+    // attach its device ready listener, otherwise we'll just move on.
+    if (typeof drupalgap.settings.mode === 'undefined') {
+      drupalgap.settings.mode = 'phonegap';
+    }
+    switch (drupalgap.settings.mode) {
+      case 'phonegap':
+        document.addEventListener('deviceready', _drupalgap_deviceready, false);
+        break;
+      case 'web-app':
+        _drupalgap_deviceready();
+        break;
+      default:
+        console.log(
+          'drupalgap_onload - unknown mode (' + drupalgap.settings.mode + ')'
+        );
+        return;
+        break;
+    }
+
   }
   catch (error) { console.log('drupalgap_onload - ' + error); }
 }
@@ -470,7 +478,10 @@ function drupalgap_alert(message) {
       if (options.title) { title = options.title; }
       if (options.buttonName) { buttonName = options.buttonName; }
     }
-    if (!drupalgap.phonegap || typeof navigator.notification === 'undefined') {
+    if (
+      drupalgap.settings.mode != 'phonegap' ||
+      typeof navigator.notification === 'undefined'
+    ) {
       alert(message);
       alertCallback();
     }
@@ -567,11 +578,14 @@ function drupalgap_load_blocks() {
 function drupalgap_check_connection() {
   try {
     
-    // If we're not in PhoneGap (i.e. a web app environment), we'll assume we
-    // have a connection. Is this a terrible assumption? Anybody out there know?
-    // We'll assume that Ripple emulation always has a connection, for now.
+    // If we're not in PhoneGap (i.e. a web app environment, or Ripple), we'll
+    // assume we have a connection. Is this a terrible assumption? Anybody out
+    // there know?
     // http://stackoverflow.com/q/15950382/763010
-    if (!drupalgap.phonegap || typeof parent.window.ripple === 'function') {
+    if (
+      drupalgap.settings.mode != 'phonegap' ||
+      typeof parent.window.ripple === 'function'
+    ) {
       drupalgap.online = true;
       return 'Ethernet connection';
     }
