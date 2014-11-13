@@ -5717,14 +5717,14 @@ function template_process_page(variables) {
     // For each region, render it, then replace the placeholder in the page's
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap_path);
+    var page_html = $('#' + page_id).html();
     $.each(drupalgap.theme.regions, function(index, region) {
-        var page_html = $('#' + page_id).html();
         page_html = page_html.replace(
           '{:' + region.name + ':}',
           drupalgap_render_region(region)
         );
-        $('#' + page_id).html(page_html);
     });
+    $('#' + page_id).html(page_html);
   }
   catch (error) { console.log('template_process_page - ' + error); }
 }
