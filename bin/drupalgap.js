@@ -70,7 +70,6 @@ function drupalgap_init() {
       },
       pages: [], /* Collection of page ids that are loaded into the DOM. */
       path: '', /* The current menu path. */
-      phonegap: false, /* Indicates if we are running in PhoneGap, or not */
       remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
       router_path: '', /* The current menu router path. */
       services: {},
