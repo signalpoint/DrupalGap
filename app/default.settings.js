@@ -1,4 +1,12 @@
-/* Specify DrupalGap Mobile Application Settings Here */
+/**************|
+ * Development |
+ **************/
+
+// Uncomment to clear the app's local storage cache each time the app loads.
+//window.localStorage.clear();
+
+// Set to true to see console.log() messages. Set to false when publishing app.
+Drupal.settings.debug = false;
 
 /****************************************|
  * Drupal Settings (provided by jDrupal) |
@@ -12,8 +20,7 @@ Drupal.settings.site_path = ''; // e.g. http://www.example.com
 // Default Services Endpoint Path
 Drupal.settings.endpoint = 'drupalgap';
 
-// Files directory paths
-// Please choose one or the other
+// Files Directory Paths (use one or the other)
 Drupal.settings.file_public_path = 'sites/default/files';
 //Drupal.settings.file_private_path = 'system/files';
 
@@ -35,6 +42,11 @@ Drupal.settings.cache.views.expiration = 3600;
 /*********************|
  * DrupalGap Settings |
  *********************/
+
+// DrupalGap Mode (defaults to 'phonegap')
+//  'phonegap' - use this mode to build a mobile application with phonegap
+//  'web-app' - use this mode to build a web application for a browser window
+drupalgap.settings.mode = 'phonegap';
 
 /*************|
  * Appearance |
@@ -306,18 +318,6 @@ drupalgap.settings.menus.regions['footer'] = {
 drupalgap.settings.camera = {
   quality: 50
 };
-
-/**************|
- * Development |
- **************/
-
-// Debug
-//   PhoneGap 3.0.0 and above note, you must install a plugin to see console
-//   log messages. See the 'Debug console' section here:
-//   http://docs.phonegap.com/en/edge/guide_cli_index.md.html#The%20Command-line%20Interface
-Drupal.settings.debug = false; /* Set to true to see console.log debug
-                                  information. Set to false when publishing
-                                  app! */
 
 /***********************|
  * Performance Settings |
