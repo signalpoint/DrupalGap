@@ -39,32 +39,55 @@ version of DrupalGap to another.
 | Version Change Notes for Developers |
 |=====================================|
 
-7.x-1.0-rc2 => 7.x-1.0-rc3
+# 7.x-1.0-rc3 => 7.x-1.0-rc4
+
+## New page.tpl.html placeholder token required
+
+All themes must update their page.tpl.html file to include a single placeholder
+for the div container attributes.
+
+*OLD WAY*
+```
+<div id="{:drupalgap_page_id:}" data-role="page" class="{:drupalgap_page_class:}">
+  <!-- ... -->
+</div>
+```
+
+*NEW WAY*
+```
+<div {:drupalgap_page_attributes:}>
+  <!-- ... -->
+</div>
+```
+
+# 7.x-1.0-rc2 => 7.x-1.0-rc3
+
+## Views row_callback row position has moved
 
 The "row_callback" function is now passed the row position in a different within
-a different variable:
+a different variable (@see http://www.drupalgap.org/node/219):
 
-OLD WAY:
-
+*OLD WAY*
+```
 function my_module_articles_list_row(view, row) {
   return 'The position for this row is: ' + row.count;
 }
+```
 
-NEW WAY:
-
+*NEW WAY*
+```
 function my_module_articles_list_row(view, row) {
   return 'The position for this row is: ' + row._position;
 }
+```
 
-For more info, see: http://www.drupalgap.org/node/219
-
-7.x-1.0-rc1 => 7.x-1.0-rc2
+# 7.x-1.0-rc1 => 7.x-1.0-rc2
 
   Required select lists now use an empty string value instead of -1 for the
   placeholder option. Any custom form validation you may have used that
   depended on this -1 value, needs to check for an empty string now instead.
 
-7.x-1.7-alpha => 7.x-1.8-alpha
+# 7.x-1.7-alpha => 7.x-1.8-alpha
 
   The user-profile.tpl.html file now contains a {:content:} placeholder to
   properly render a user account's content. If you have a custom theme, update
