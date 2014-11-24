@@ -122,7 +122,7 @@ function drupalgap_onload() {
       var module = modules[i];
       Drupal.modules.core[module] = module_object_template(module);
     }
-    
+
     // Depending on the mode, we'll move on to _drupalgap_deviceready()
     // accordingly. By default we'll assume the mode is for phonegap, unless
     // otherwise specified by the settings.js file. If it is for phonegap, we'll
@@ -154,7 +154,7 @@ function drupalgap_onload() {
  */
 function _drupalgap_deviceready() {
   try {
-    
+
     // PhoneGap is loaded and it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
 
@@ -553,7 +553,7 @@ function drupalgap_load_blocks() {
  */
 function drupalgap_check_connection() {
   try {
-    
+
     // If we're not in PhoneGap (i.e. a web app environment, or Ripple), we'll
     // assume we have a connection. Is this a terrible assumption? Anybody out
     // there know?

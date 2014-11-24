@@ -124,7 +124,7 @@ function menu_block_view_pageshow(options) {
                   // If there are no link options, set up defaults.
                   if (!link.options) { link.options = { attributes: { } }; }
                   else if (!link.options.attributes) { link.options.attributes = { }; }
-                  
+
                   // If the link points to the current path, set it as active.
                   // We first need to figure out which path to check, by default
                   // use the link path, but if its a default local task, use its

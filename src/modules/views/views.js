@@ -104,12 +104,12 @@ function views_exposed_form(form, form_state, options) {
     // like collapsibles with form inputs in them... weird.
     //var title = form.title ? form.title : 'Filter';
     //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
-    
+
     // Attach the variables to the form so it can be used later.
     form.variables = options.variables;
 
     $.each(options.filter, function(views_field, filter) {
-        
+
         // Prep the element basics.
         var element_id = null;
         var element = null;
@@ -141,9 +141,9 @@ function views_exposed_form(form, form_state, options) {
         // Grab the field name and figure out which module is in charge of it.
         var field_name = filter.definition.field_name;
         if (field_name) {
-          
+
           // This is an entity field...
-          
+
           // Grab the field info, and determine the module that will handle it.
           // Then see if hook_views_exposed_filter() has been implemented by
           // that module. That module will be used to assemble the element. If
@@ -159,7 +159,7 @@ function views_exposed_form(form, form_state, options) {
             );
             return;
           }
-          
+
           // We have a handler, let's call it so the element can be assembled.
           window[handler](form, form_state, element, filter, field);
 
@@ -174,7 +174,7 @@ function views_exposed_form(form, form_state, options) {
           else {
             dpm(
               'WARNING: views_exposed_form() - I do not know how to handle ' +
-              'the exposed filter for the "'  + views_field + '" field'
+              'the exposed filter for the "' + views_field + '" field'
             );
             dpm(filter);
             return;
@@ -191,14 +191,14 @@ function views_exposed_form(form, form_state, options) {
       type: 'submit',
       value: options.exposed_data.submit
     };
-    
+
     // Add the reset button, if necessary.
     if (options.exposed_data.reset && _views_exposed_filter_reset) {
       form.buttons['reset'] = {
         title: options.exposed_data.reset,
         attributes: {
           id: form.id + '-reset',
-          onclick: "views_exposed_form_reset()"
+          onclick: 'views_exposed_form_reset()'
         }
       };
     }
@@ -265,8 +265,8 @@ function views_exposed_form_reset() {
       _views_exposed_filter_submit_variables.path.replace(
         '&' + _views_exposed_filter_query,
         ''
-      )
-    ;
+      );
+
     _views_exposed_filter_submit_variables.page = 0;
     _views_exposed_filter_reset = false;
     _views_exposed_filter_query = null;
@@ -642,7 +642,7 @@ function theme_pager_link(variables, link_vars) {
     link_vars.attributes.href = '#';
     var attributes = drupalgap_attributes(link_vars.attributes);
     return "<a onclick='" + _theme_pager_link_onclick(variables) + "' " +
-      attributes + ">" +
+      attributes + '>' +
       link_vars.text +
     '</a>';
   }

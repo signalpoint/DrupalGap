@@ -752,7 +752,7 @@ function _drupalgap_form_render_element(form, element) {
     var item_label = '';
     var render_item = null;
     $.each(items, function(delta, item) {
-        
+
         // We'll render the item, unless we prove otherwise.
         render_item = true;
 
@@ -841,7 +841,7 @@ function _drupalgap_form_render_element(form, element) {
           return false;
         }
     });
-    
+
     // Are we skipping the render of the item?
     if (!render_item) { return ''; }
 

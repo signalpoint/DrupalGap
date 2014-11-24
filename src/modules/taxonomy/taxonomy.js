@@ -663,7 +663,7 @@ function theme_taxonomy_term_reference(variables) {
       variables.attributes.type = 'hidden';
       html += '<input ' + drupalgap_attributes(variables.attributes) + '/>';
     }
-    
+
     // Is anyone flagging this as required? i.e. is it a views exposed filter?
     // @TODO - the field system that assembles the elements onto a form, when it
     // is a taxonomy term reference field, we need to pass along the required
@@ -673,7 +673,7 @@ function theme_taxonomy_term_reference(variables) {
     if (typeof variables.required !== 'undefined') {
       required = variables.required;
     }
-    
+
     // Is this widget exposed (aka views exposed filter)?
     var exposed = false;
     if (typeof variables.exposed !== 'undefined') {
@@ -704,7 +704,7 @@ function theme_taxonomy_term_reference(variables) {
             variables.attributes.id + "');"
         }
       };
-      
+
       // If the options were previously set aside for this widget, use them.
       var options_available = false;
       if (_taxonomy_term_reference_terms[variables.attributes.id]) {
@@ -712,23 +712,23 @@ function theme_taxonomy_term_reference(variables) {
         widget_variables.options =
           _taxonomy_term_reference_terms[variables.attributes.id];
       }
-      
+
       // Was their a value present to include as the default value for the
       // widget, if so include it. If not, and this filter is not required, set
       // the default value to an empty string so the widget renders the default
       // option correctly. A views exposed filter uses 'All' instead of an
       // empty string.
       if (typeof variables.value !== 'undefined') {
-        widget_variables.value = variables.value; 
+        widget_variables.value = variables.value;
       }
       else if (!required) {
         if (exposed) { widget_variables.value = 'All'; }
         else { widget_variables.value = ''; }
       }
-      
+
       // Render the widget.
       html += fn.call(null, widget_variables);
-      
+
       // If the options weren't available, attach a pageshow handler to the
       // current page that will load the terms into the widget. Keep in mind,
       // this inline pageshow handler only gets called once when the first view
@@ -855,7 +855,7 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
     dpm(element);
     dpm(filter);
     dpm(field);*/
-    
+
     // @TODO this filter loses its value after one submission, aka the next
     // submission will submit it as 'All' eventhough we have a term selected in
     // the widget from the previous submission.
@@ -865,7 +865,7 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
     // fake its instance.
     element.type = 'hidden';
     $.each(field.settings.allowed_values, function(index, object) {
-        
+
         // Build the variables for the widget.
         var variables = {
           required: element.required,
@@ -881,14 +881,14 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
           },
           exposed: true
         };
-        
+
         // If we have a default value, send it along.
         // @TODO add support for multiple values.
         if (!empty(filter.value)) {
           variables.value = parseInt(filter.value[0]);
           variables.attributes.value = variables.value;
         }
-        
+
         // Add the widget as a child to the form element, including a label if
         // necessary (since the original label is lost because it was turned
         // into a hidden element).
