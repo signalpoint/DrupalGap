@@ -96,6 +96,10 @@ function views_datasource_get_view_result(path, options) {
 
 /**
  * The exposed filter form builder.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} options
+ * @return {Object}
  */
 function views_exposed_form(form, form_state, options) {
   try {
@@ -212,6 +216,8 @@ function views_exposed_form(form, form_state, options) {
 
 /**
  * The exposed filter submission handler.
+ * @param {Object} form
+ * @param {Object} form_state
  */
 function views_exposed_form_submit(form, form_state) {
   try {
@@ -229,7 +235,9 @@ function views_exposed_form_submit(form, form_state) {
     // the path.
     if (_views_exposed_filter_query) {
       if (_views_exposed_filter_query == query) { return; }
-      if (form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1) {
+      if (
+        form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1
+      ) {
         form.variables.path =
         form.variables.path.replace('&' + _views_exposed_filter_query, '');
       }
@@ -422,7 +430,10 @@ function theme_views_view(variables) {
     if (variables.title) {
       var title_attributes = variables.title_attributes ?
         variables.title_attributes : null;
-      html += theme('header', { text: variables.title, attributes: title_attributes });
+      html += theme(
+        'header',
+        { text: variables.title, attributes: title_attributes }
+      );
       // Place spacers after the header for each format, except unformatted.
       if (variables.format != 'unformatted') {
         html += theme('views_spacer', null);

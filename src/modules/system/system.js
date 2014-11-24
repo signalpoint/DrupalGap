@@ -333,6 +333,8 @@ function system_title_block_id(path) {
 /**
  * The default access callback function for the logout block. Allows the block
  * to only be shown when a user is viewing their own profile.
+ * @param {Object} options
+ * @return {Boolean}
  */
 function system_logout_block_access_callback(options) {
   try {
@@ -345,5 +347,7 @@ function system_logout_block_access_callback(options) {
     ) { return true; }
     return false;
   }
-  catch (error) { console.log('system_logout_block_access_callback - ' + error); }
+  catch (error) {
+    console.log('system_logout_block_access_callback - ' + error);
+  }
 }

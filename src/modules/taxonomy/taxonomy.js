@@ -812,7 +812,8 @@ function _theme_taxonomy_term_reference_load_items(options) {
                 term.name +
               '</option>';
               $(widget).append(option);
-              _taxonomy_term_reference_terms[options.element_id][term.tid] = term.name;
+              _taxonomy_term_reference_terms[options.element_id][term.tid] =
+                term.name;
           });
 
           // Refresh the select list.
@@ -849,7 +850,8 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
  * @param {Object} filter
  * @param {Object} field
  */
-function taxonomy_views_exposed_filter(form, form_state, element, filter, field) {
+function taxonomy_views_exposed_filter(
+  form, form_state, element, filter, field) {
   try {
     /*dpm('taxonomy_views_exposed_filter');
     dpm(element);

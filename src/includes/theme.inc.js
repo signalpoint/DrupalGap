@@ -478,9 +478,9 @@ function theme_header(variables) {
   try {
     variables.attributes['data-role'] = 'header';
     if (typeof variables.type === 'undefined') { type = 'h2'; }
-    return '<div ' + drupalgap_attributes(variables.attributes) + '><' + type + '>' +
-      variables.text +
-    '</' + type + '></div>';
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>' +
+      '<' + type + '>' + variables.text + '</' + type + '></div>';
+    return html;
   }
   catch (error) { console.log('theme_header - ' + error); }
 }

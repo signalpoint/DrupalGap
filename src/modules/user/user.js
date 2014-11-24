@@ -581,6 +581,8 @@ function user_view_pageshow(uid) {
 
 /**
  * Title callback for the user profile view page.
+ * @param {Function} callback
+ * @param {Number} uid
  */
 function user_view_title(callback, uid) {
   try {

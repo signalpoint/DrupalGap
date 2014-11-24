@@ -299,6 +299,11 @@ function list_assemble_form_state_into_field(entity_type, bundle,
 
 /**
  * Implements hook_views_exposed_filter().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} element
+ * @param {Object} filter
+ * @param {Object} field
  */
 function list_views_exposed_filter(form, form_state, element, filter, field) {
   try {

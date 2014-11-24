@@ -123,7 +123,9 @@ function menu_block_view_pageshow(options) {
                   var link = jQuery.extend(true, {}, item);
                   // If there are no link options, set up defaults.
                   if (!link.options) { link.options = { attributes: { } }; }
-                  else if (!link.options.attributes) { link.options.attributes = { }; }
+                  else if (!link.options.attributes) {
+                    link.options.attributes = { };
+                  }
 
                   // If the link points to the current path, set it as active.
                   // We first need to figure out which path to check, by default
@@ -190,7 +192,8 @@ function menu_block_view_pageshow(options) {
                 }
                 if (
                   typeof
-                    drupalgap.menu_links[local_task].access_callback !== 'undefined'
+                    drupalgap.menu_links[local_task].access_callback !==
+                    'undefined'
                 ) { has_access_callback = true; }
               }
           });

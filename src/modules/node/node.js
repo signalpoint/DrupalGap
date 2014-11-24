@@ -63,6 +63,7 @@ function node_add_page_by_type(type) {
 
 /**
  * Title call back function for node/add/[type].
+ * @param {Function} callback
  * @param {String} type
  * @return {Object}
  */

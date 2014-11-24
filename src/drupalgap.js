@@ -809,7 +809,10 @@ function drupalgap_image_path(uri) {
         src = src.replace('public://', Drupal.settings.file_public_path + '/');
       }
       else if (src.indexOf('private://') != -1) {
-        src = src.replace('private://', Drupal.settings.file_private_path + '/');
+        src = src.replace(
+          'private://',
+          Drupal.settings.file_private_path + '/'
+        );
       }
       return src;
     }

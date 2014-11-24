@@ -16,8 +16,10 @@ function drupalgap_add_page_to_dom(options) {
       id: options.page_id,
       'data-role': 'page'
     };
-    attributes = $.extend(true, attributes, options.menu_link.options.attributes);
-    attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    attributes =
+      $.extend(true, attributes, options.menu_link.options.attributes);
+    attributes['class'] +=
+      ' ' + drupalgap_page_class_get(drupalgap.router_path);
     options.html = options.html.replace(
       /{:drupalgap_page_attributes:}/g,
       drupalgap_attributes(attributes)
@@ -519,7 +521,8 @@ function drupalgap_goto(path) {
  * @param {Object} options
  * @param {Object} menu_link The menu link object from drupalgap.menu_links.
  */
-function drupalgap_goto_generate_page_and_go(path, page_id, options, menu_link) {
+function drupalgap_goto_generate_page_and_go(
+  path, page_id, options, menu_link) {
   try {
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
