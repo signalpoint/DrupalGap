@@ -21,7 +21,7 @@ then upload the contents of the 'out' directory to the server.
 # drupalgap.min.js
 
 When generating the drupalgap.min.js file, the web service based closure
-compiler has a file size limit that we are exceeding. Therefor we install
+compiler has a file size limit that we are exceeding. Therefore we install
 the closure compiler app locally:
 
 https://developers.google.com/closure/compiler/faq#size-restrictions
