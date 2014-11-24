@@ -122,7 +122,7 @@ function drupalgap_onload() {
       var module = modules[i];
       Drupal.modules.core[module] = module_object_template(module);
     }
-    
+
     // Depending on the mode, we'll move on to _drupalgap_deviceready()
     // accordingly. By default we'll assume the mode is for phonegap, unless
     // otherwise specified by the settings.js file. If it is for phonegap, we'll
@@ -154,7 +154,7 @@ function drupalgap_onload() {
  */
 function _drupalgap_deviceready() {
   try {
-    
+
     // PhoneGap is loaded and it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
 
@@ -553,7 +553,7 @@ function drupalgap_load_blocks() {
  */
 function drupalgap_check_connection() {
   try {
-    
+
     // If we're not in PhoneGap (i.e. a web app environment, or Ripple), we'll
     // assume we have a connection. Is this a terrible assumption? Anybody out
     // there know?
@@ -809,7 +809,10 @@ function drupalgap_image_path(uri) {
         src = src.replace('public://', Drupal.settings.file_public_path + '/');
       }
       else if (src.indexOf('private://') != -1) {
-        src = src.replace('private://', Drupal.settings.file_private_path + '/');
+        src = src.replace(
+          'private://',
+          Drupal.settings.file_private_path + '/'
+        );
       }
       return src;
     }
@@ -1590,8 +1593,10 @@ function drupalgap_add_page_to_dom(options) {
       id: options.page_id,
       'data-role': 'page'
     };
-    attributes = $.extend(true, attributes, options.menu_link.options.attributes);
-    attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    attributes =
+      $.extend(true, attributes, options.menu_link.options.attributes);
+    attributes['class'] +=
+      ' ' + drupalgap_page_class_get(drupalgap.router_path);
     options.html = options.html.replace(
       /{:drupalgap_page_attributes:}/g,
       drupalgap_attributes(attributes)
@@ -2093,7 +2098,8 @@ function drupalgap_goto(path) {
  * @param {Object} options
  * @param {Object} menu_link The menu link object from drupalgap.menu_links.
  */
-function drupalgap_goto_generate_page_and_go(path, page_id, options, menu_link) {
+function drupalgap_goto_generate_page_and_go(
+  path, page_id, options, menu_link) {
   try {
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
@@ -3550,7 +3556,7 @@ function _drupalgap_form_render_element(form, element) {
     var item_label = '';
     var render_item = null;
     $.each(items, function(delta, item) {
-        
+
         // We'll render the item, unless we prove otherwise.
         render_item = true;
 
@@ -3639,7 +3645,7 @@ function _drupalgap_form_render_element(form, element) {
           return false;
         }
     });
-    
+
     // Are we skipping the render of the item?
     if (!render_item) { return ''; }
 
@@ -5407,9 +5413,9 @@ function theme_header(variables) {
   try {
     variables.attributes['data-role'] = 'header';
     if (typeof variables.type === 'undefined') { type = 'h2'; }
-    return '<div ' + drupalgap_attributes(variables.attributes) + '><' + type + '>' +
-      variables.text +
-    '</' + type + '></div>';
+    var html = '<div ' + drupalgap_attributes(variables.attributes) + '>' +
+      '<' + type + '>' + variables.text + '</' + type + '></div>';
+    return html;
   }
   catch (error) { console.log('theme_header - ' + error); }
 }
@@ -7695,6 +7701,11 @@ function list_assemble_form_state_into_field(entity_type, bundle,
 
 /**
  * Implements hook_views_exposed_filter().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} element
+ * @param {Object} filter
+ * @param {Object} field
  */
 function list_views_exposed_filter(form, form_state, element, filter, field) {
   try {
@@ -8575,8 +8586,10 @@ function menu_block_view_pageshow(options) {
                   var link = jQuery.extend(true, {}, item);
                   // If there are no link options, set up defaults.
                   if (!link.options) { link.options = { attributes: { } }; }
-                  else if (!link.options.attributes) { link.options.attributes = { }; }
-                  
+                  else if (!link.options.attributes) {
+                    link.options.attributes = { };
+                  }
+
                   // If the link points to the current path, set it as active.
                   // We first need to figure out which path to check, by default
                   // use the link path, but if its a default local task, use its
@@ -8642,7 +8655,8 @@ function menu_block_view_pageshow(options) {
                 }
                 if (
                   typeof
-                    drupalgap.menu_links[local_task].access_callback !== 'undefined'
+                    drupalgap.menu_links[local_task].access_callback !==
+                    'undefined'
                 ) { has_access_callback = true; }
               }
           });
@@ -9276,6 +9290,7 @@ function node_add_page_by_type(type) {
 
 /**
  * Title call back function for node/add/[type].
+ * @param {Function} callback
  * @param {String} type
  * @return {Object}
  */
@@ -10253,6 +10268,8 @@ function system_title_block_id(path) {
 /**
  * The default access callback function for the logout block. Allows the block
  * to only be shown when a user is viewing their own profile.
+ * @param {Object} options
+ * @return {Boolean}
  */
 function system_logout_block_access_callback(options) {
   try {
@@ -10265,7 +10282,9 @@ function system_logout_block_access_callback(options) {
     ) { return true; }
     return false;
   }
-  catch (error) { console.log('system_logout_block_access_callback - ' + error); }
+  catch (error) {
+    console.log('system_logout_block_access_callback - ' + error);
+  }
 }
 /**
  * Determine whether the user has a given privilege. Optionally pass in a user
@@ -10850,6 +10869,8 @@ function user_view_pageshow(uid) {
 
 /**
  * Title callback for the user profile view page.
+ * @param {Function} callback
+ * @param {Number} uid
  */
 function user_view_title(callback, uid) {
   try {
@@ -11552,7 +11573,7 @@ function theme_taxonomy_term_reference(variables) {
       variables.attributes.type = 'hidden';
       html += '<input ' + drupalgap_attributes(variables.attributes) + '/>';
     }
-    
+
     // Is anyone flagging this as required? i.e. is it a views exposed filter?
     // @TODO - the field system that assembles the elements onto a form, when it
     // is a taxonomy term reference field, we need to pass along the required
@@ -11562,7 +11583,7 @@ function theme_taxonomy_term_reference(variables) {
     if (typeof variables.required !== 'undefined') {
       required = variables.required;
     }
-    
+
     // Is this widget exposed (aka views exposed filter)?
     var exposed = false;
     if (typeof variables.exposed !== 'undefined') {
@@ -11593,7 +11614,7 @@ function theme_taxonomy_term_reference(variables) {
             variables.attributes.id + "');"
         }
       };
-      
+
       // If the options were previously set aside for this widget, use them.
       var options_available = false;
       if (_taxonomy_term_reference_terms[variables.attributes.id]) {
@@ -11601,23 +11622,23 @@ function theme_taxonomy_term_reference(variables) {
         widget_variables.options =
           _taxonomy_term_reference_terms[variables.attributes.id];
       }
-      
+
       // Was their a value present to include as the default value for the
       // widget, if so include it. If not, and this filter is not required, set
       // the default value to an empty string so the widget renders the default
       // option correctly. A views exposed filter uses 'All' instead of an
       // empty string.
       if (typeof variables.value !== 'undefined') {
-        widget_variables.value = variables.value; 
+        widget_variables.value = variables.value;
       }
       else if (!required) {
         if (exposed) { widget_variables.value = 'All'; }
         else { widget_variables.value = ''; }
       }
-      
+
       // Render the widget.
       html += fn.call(null, widget_variables);
-      
+
       // If the options weren't available, attach a pageshow handler to the
       // current page that will load the terms into the widget. Keep in mind,
       // this inline pageshow handler only gets called once when the first view
@@ -11701,7 +11722,8 @@ function _theme_taxonomy_term_reference_load_items(options) {
                 term.name +
               '</option>';
               $(widget).append(option);
-              _taxonomy_term_reference_terms[options.element_id][term.tid] = term.name;
+              _taxonomy_term_reference_terms[options.element_id][term.tid] =
+                term.name;
           });
 
           // Refresh the select list.
@@ -11738,13 +11760,14 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
  * @param {Object} filter
  * @param {Object} field
  */
-function taxonomy_views_exposed_filter(form, form_state, element, filter, field) {
+function taxonomy_views_exposed_filter(
+  form, form_state, element, filter, field) {
   try {
     /*dpm('taxonomy_views_exposed_filter');
     dpm(element);
     dpm(filter);
     dpm(field);*/
-    
+
     // @TODO this filter loses its value after one submission, aka the next
     // submission will submit it as 'All' eventhough we have a term selected in
     // the widget from the previous submission.
@@ -11754,7 +11777,7 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
     // fake its instance.
     element.type = 'hidden';
     $.each(field.settings.allowed_values, function(index, object) {
-        
+
         // Build the variables for the widget.
         var variables = {
           required: element.required,
@@ -11770,14 +11793,14 @@ function taxonomy_views_exposed_filter(form, form_state, element, filter, field)
           },
           exposed: true
         };
-        
+
         // If we have a default value, send it along.
         // @TODO add support for multiple values.
         if (!empty(filter.value)) {
           variables.value = parseInt(filter.value[0]);
           variables.attributes.value = variables.value;
         }
-        
+
         // Add the widget as a child to the form element, including a label if
         // necessary (since the original label is lost because it was turned
         // into a hidden element).
@@ -11891,6 +11914,10 @@ function views_datasource_get_view_result(path, options) {
 
 /**
  * The exposed filter form builder.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} options
+ * @return {Object}
  */
 function views_exposed_form(form, form_state, options) {
   try {
@@ -11899,12 +11926,12 @@ function views_exposed_form(form, form_state, options) {
     // like collapsibles with form inputs in them... weird.
     //var title = form.title ? form.title : 'Filter';
     //form.prefix += '<div data-role="collapsible"><h2>' + title + '</h2>';
-    
+
     // Attach the variables to the form so it can be used later.
     form.variables = options.variables;
 
     $.each(options.filter, function(views_field, filter) {
-        
+
         // Prep the element basics.
         var element_id = null;
         var element = null;
@@ -11936,9 +11963,9 @@ function views_exposed_form(form, form_state, options) {
         // Grab the field name and figure out which module is in charge of it.
         var field_name = filter.definition.field_name;
         if (field_name) {
-          
+
           // This is an entity field...
-          
+
           // Grab the field info, and determine the module that will handle it.
           // Then see if hook_views_exposed_filter() has been implemented by
           // that module. That module will be used to assemble the element. If
@@ -11954,7 +11981,7 @@ function views_exposed_form(form, form_state, options) {
             );
             return;
           }
-          
+
           // We have a handler, let's call it so the element can be assembled.
           window[handler](form, form_state, element, filter, field);
 
@@ -11969,7 +11996,7 @@ function views_exposed_form(form, form_state, options) {
           else {
             dpm(
               'WARNING: views_exposed_form() - I do not know how to handle ' +
-              'the exposed filter for the "'  + views_field + '" field'
+              'the exposed filter for the "' + views_field + '" field'
             );
             dpm(filter);
             return;
@@ -11986,14 +12013,14 @@ function views_exposed_form(form, form_state, options) {
       type: 'submit',
       value: options.exposed_data.submit
     };
-    
+
     // Add the reset button, if necessary.
     if (options.exposed_data.reset && _views_exposed_filter_reset) {
       form.buttons['reset'] = {
         title: options.exposed_data.reset,
         attributes: {
           id: form.id + '-reset',
-          onclick: "views_exposed_form_reset()"
+          onclick: 'views_exposed_form_reset()'
         }
       };
     }
@@ -12007,6 +12034,8 @@ function views_exposed_form(form, form_state, options) {
 
 /**
  * The exposed filter submission handler.
+ * @param {Object} form
+ * @param {Object} form_state
  */
 function views_exposed_form_submit(form, form_state) {
   try {
@@ -12024,7 +12053,9 @@ function views_exposed_form_submit(form, form_state) {
     // the path.
     if (_views_exposed_filter_query) {
       if (_views_exposed_filter_query == query) { return; }
-      if (form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1) {
+      if (
+        form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1
+      ) {
         form.variables.path =
         form.variables.path.replace('&' + _views_exposed_filter_query, '');
       }
@@ -12060,8 +12091,8 @@ function views_exposed_form_reset() {
       _views_exposed_filter_submit_variables.path.replace(
         '&' + _views_exposed_filter_query,
         ''
-      )
-    ;
+      );
+
     _views_exposed_filter_submit_variables.page = 0;
     _views_exposed_filter_reset = false;
     _views_exposed_filter_query = null;
@@ -12217,7 +12248,10 @@ function theme_views_view(variables) {
     if (variables.title) {
       var title_attributes = variables.title_attributes ?
         variables.title_attributes : null;
-      html += theme('header', { text: variables.title, attributes: title_attributes });
+      html += theme(
+        'header',
+        { text: variables.title, attributes: title_attributes }
+      );
       // Place spacers after the header for each format, except unformatted.
       if (variables.format != 'unformatted') {
         html += theme('views_spacer', null);
@@ -12437,7 +12471,7 @@ function theme_pager_link(variables, link_vars) {
     link_vars.attributes.href = '#';
     var attributes = drupalgap_attributes(link_vars.attributes);
     return "<a onclick='" + _theme_pager_link_onclick(variables) + "' " +
-      attributes + ">" +
+      attributes + '>' +
       link_vars.text +
     '</a>';
   }
