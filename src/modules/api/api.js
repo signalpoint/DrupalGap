@@ -237,7 +237,14 @@ function hook_field_formatter_view(entity_type, entity, field, instance, langcod
  */
 function hook_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
-    // Use this hook provide field widgets for form element items...
+    // Use this hook to provide field widgets for form element items. This hook
+    // is called for each delta value on the field. Make modifications to the
+    // items collection using the provided delta value. The object contained
+    // within is a standard DrupalGap Forms API object, so you may assemble the
+    // field (and any children widgets) as needed.
+    
+    // Very simple example, make the widget for the field a text field.
+    items[delta].type = 'textfield';
   }
   catch (error) { console.log('hook_field_widget_form - ' + error); }
 }
