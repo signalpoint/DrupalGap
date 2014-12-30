@@ -502,6 +502,43 @@ function theme_image(variables) {
   catch (error) { console.log('theme_image - ' + error); }
 }
 
+
+/**
+ * Implementation of theme_audio().
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_audio(variables) {
+  try {
+    // Turn the path, alt and title into attributes if they are present.
+    if (variables.path) { variables.attributes.src = variables.path; }
+    if (variables.alt) { variables.attributes.alt = variables.alt; }
+    if (variables.title) { variables.attributes.title = variables.title; }
+    // Render the audio player.
+    return '<audio controls ' + drupalgap_attributes(variables.attributes) +
+    '></audio>';
+  }
+  catch (error) { console.log('theme_audio - ' + error); }
+}
+
+/**
+ * Implementation of theme_video().
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_video(variables) {
+  try {
+    // Turn the path, alt and title into attributes if they are present.
+    if (variables.path) { variables.attributes.src = variables.path; }
+    if (variables.alt) { variables.attributes.alt = variables.alt; }
+    if (variables.title) { variables.attributes.title = variables.title; }
+    // Render the video player.
+    return '<video controls ' + drupalgap_attributes(variables.attributes) +
+    ' width="80%"></video>';
+  }
+  catch (error) { console.log('theme_video - ' + error); }
+}
+
 /**
  * Implementation of theme_image_style().
  * @param {Object} variables
