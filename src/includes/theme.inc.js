@@ -534,7 +534,7 @@ function theme_video(variables) {
     if (variables.title) { variables.attributes.title = variables.title; }
     // Render the video player.
     return '<video controls ' + drupalgap_attributes(variables.attributes) +
-    ' width="80%"></video>';
+    '></video>';
   }
   catch (error) { console.log('theme_video - ' + error); }
 }
