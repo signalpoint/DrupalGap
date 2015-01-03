@@ -227,13 +227,20 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
       // to the entity's content.
       var fn = window[function_name];
       var items = null;
+      // Check to see if translated content based on app's language setting
+      // is present or not. If yes, then use that language as per setting.
       // Determine the language code. Note, multi lingual sites may have a
       // language code on the entity, but still have 'und' on the field, so
       // fall back to 'und' if the field's language code doesn't match the
       // entity's language code.
+
+      var default_lang = language_default();
       var language = entity.language;
       if (entity[field_name]) {
-        if (entity[field_name][language]) {
+        if (entity[field_name][default_lang]) {
+          items = entity[field_name][default_lang];
+        }
+        else if (entity[field_name][language]) {
           items = entity[field_name][language];
         }
         else if (entity[field_name]['und']) {
