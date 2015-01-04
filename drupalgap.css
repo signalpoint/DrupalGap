@@ -99,6 +99,7 @@ div.messages ul li {
 
 /* Don't let images stretch out of their parent container in the main content div */ 
 div[role="main"] img,
+div[role="banner"] img,
 #_drupalgap_splash_content img {
   width: auto !important; 
   width: 100%;
