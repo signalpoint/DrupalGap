@@ -123,6 +123,9 @@ var _theme_autocomplete_remote = {};
 // The theme autocomplete variables.
 var _theme_autocomplete_variables = {};
 
+// The theme autocomplete variables.
+var _theme_autocomplete_success_handlers = {};
+
 /**
  * Themes an autocomplete.
  * @param {Object} variables
@@ -236,6 +239,7 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
       );
       return;
     }
+
     // Make sure a value and/or label has been supplied so we know how to render
     // the items in the autocomplete list.
     var value_provided =
@@ -274,61 +278,119 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
         '<span class="ui-icon ui-icon-loading"></span>' +
         '</div></li>');
       $ul.listview('refresh');
-      // Prepare the path to the view.
-      var path = _theme_autocomplete_variables[autocomplete_id].path + '?' +
-        _theme_autocomplete_variables[autocomplete_id].filter + '=' + encodeURIComponent(value);
-      // Any extra params to send along?
-      if (_theme_autocomplete_variables[autocomplete_id].params) {
-        path += '&' + _theme_autocomplete_variables[autocomplete_id].params;
-      }
-      // Retrieve JSON results. Keep in mind, we use this for retrieving Views
-      // JSON results and custom hook_menu() path results in Drupal.
-      views_datasource_get_view_result(path, {
-          success: function(results) {
-            // If this was a custom path, don't use a wrapper around the
-            // results like the one used by Views Datasource.
-            var wrapped = true;
-            if (_theme_autocomplete_variables[autocomplete_id].custom) { wrapped = false; }
 
-            // Extract the result items based on the presence of the wrapper or
-            // not.
-            var result_items = null;
-            if (wrapped) { result_items = results[results.view.root]; }
-            else { result_items = results; }
+      // Let's first build the success handler that will place the items into
+      // the autocomplete list.
+      _theme_autocomplete_success_handlers[autocomplete_id] = function(_autocomplete_id, result_items, _wrapped, _child) {
+        try {
+          // If there are no results, just return.
+          if (result_items.length == 0) { return; }
 
-            // If there are no results, just return.
-            if (result_items.length == 0) { return; }
+          // Convert the result into an items array for a list. Each item will
+          // be a JSON object with a "value" and "label" properties.
+          var items = [];
+          var _value = _theme_autocomplete_variables[_autocomplete_id].value;
+          var _label = _theme_autocomplete_variables[_autocomplete_id].label;
+          $.each(result_items, function(index, object) {
+              var _item = null;
+              if (_wrapped) { _item = object[_child]; }
+              else { _item = object; }
+              var item = {
+                value: _item[_value],
+                label: _item[_label]
+              };
+              items.push(item);
+          });
 
-            // Convert the result into an items array for a list. Each item will
-            // be a JSON object with a "value" and "label" properties.
-            var items = [];
-            var _value = _theme_autocomplete_variables[autocomplete_id].value;
-            var _label = _theme_autocomplete_variables[autocomplete_id].label;
-            $.each(result_items, function(index, object) {
-                var _item = null;
-                if (wrapped) { _item = object[results.view.child]; }
-                else { _item = object; }
-                var item = {
-                  value: _item[_value],
-                  label: _item[_label]
-                };
-                items.push(item);
-            });
+          // Now render the items, add them to list and refresh the list.
+          if (items.length == 0) { return; }
+          _theme_autocomplete_variables[_autocomplete_id].items = items;
+          var _items = _theme_autocomplete_prepare_items(
+            _theme_autocomplete_variables[_autocomplete_id]
+          );
+          $.each(_items, function(index, item) {
+            html += '<li>' + item + '</li>';
+          });
+          $ul.html(html);
+          $ul.listview('refresh');
+          $ul.trigger('updatelayout');
+        }
+        catch (error) {
+          console.log('_theme_autocomplete_success_handlers[' + _autocomplete_id + '] - ' + error);
+        }
+      };
 
-            // Now render the items, add them to list and refresh the list.
-            if (items.length == 0) { return; }
-            _theme_autocomplete_variables[autocomplete_id].items = items;
-            var _items = _theme_autocomplete_prepare_items(
-              _theme_autocomplete_variables[autocomplete_id]
-            );
-            $.each(_items, function(index, item) {
-              html += '<li>' + item + '</li>';
-            });
-            $ul.html(html);
-            $ul.listview('refresh');
-            $ul.trigger('updatelayout');
+      // Depending on the handler, built the path and call the Drupal site for
+      // the data.
+      var handler = _theme_autocomplete_variables[autocomplete_id].field_info_field.settings.handler;
+      switch (handler) {
+
+        // Views (and Organic Groups)
+        case 'views':
+        case 'og':
+          // Prepare the path to the view.
+          var path = _theme_autocomplete_variables[autocomplete_id].path + '?' +
+            _theme_autocomplete_variables[autocomplete_id].filter + '=' + encodeURIComponent(value);
+          // Any extra params to send along?
+          if (_theme_autocomplete_variables[autocomplete_id].params) {
+            path += '&' + _theme_autocomplete_variables[autocomplete_id].params;
           }
-      });
+
+          // Retrieve JSON results. Keep in mind, we use this for retrieving Views
+          // JSON results and custom hook_menu() path results in Drupal.
+          views_datasource_get_view_result(path, {
+              success: function(results) {
+                // If this was a custom path, don't use a wrapper around the
+                // results like the one used by Views Datasource.
+                var wrapped = true;
+                if (_theme_autocomplete_variables[autocomplete_id].custom) { wrapped = false; }
+
+                // Extract the result items based on the presence of the wrapper or
+                // not.
+                var result_items = null;
+                if (wrapped) { result_items = results[results.view.root]; }
+                else { result_items = results; }
+
+                // Finally call the sucess handler.
+                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
+                fn(autocomplete_id, result_items, wrapped, results.view.child);
+              }
+          });
+          break;
+
+        // Simple entity selection mode, use the Index resource for the entity
+        // type.
+        case 'base':
+          var field_settings = _theme_autocomplete_variables[autocomplete_id].field_info_field.settings;
+          var index_resource = field_settings.target_type + '_index';
+          if (!drupalgap_function_exists(index_resource)) {
+            console.log('WARNING - _theme_autocomplete - ' + index_resource + '() does not exist!');
+            return;
+          }
+          var options = {
+            fields: ['nid', 'title'],
+            parameters: {
+              title: '%' + value + '%'
+            },
+            parameters_op: {
+              title: 'like'
+            }
+          };
+          $.each(field_settings.handler_settings.target_bundles, function(bundle, name) {
+              options.parameters.type = bundle;
+              // @TODO allow multiple bundles to be indexed.
+              return false;
+          });
+          var fn = window[index_resource];
+          fn(options, {
+              success: function(results) {
+                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
+                fn(autocomplete_id, results, false);
+              }
+          });
+          break;
+      }
+
     }
   }
   catch (error) { console.log('_theme_autocomplete - ' + error); }
