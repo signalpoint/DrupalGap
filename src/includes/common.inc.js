@@ -324,9 +324,9 @@ function _drupalgap_back() {
 /**
  * An internal function used to exit the app when the back button is clicked.
  */
-function _drupalgap_back_exit() {
+function _drupalgap_back_exit(button) {
   try {
-    navigator.app.exitApp();
+    button === 1 ? navigator.app.exitApp() : '';
   }
   catch (error) { console.log('_drupalgap_back_exit - ' + error); }
 }
