@@ -119,15 +119,15 @@ function drupalgap_entity_render_content(entity_type, entity) {
   try {
     entity.content = '';
     // Render each field on the entity, using the default display. The fields
-    // need to be appended accorind to their weight, so we'll keep track of
-    // the weights and rendered field content as we iterate through the fields,
-    // then at the end will append them in order onto the entity's content.
+    // need to be appended according to their weight, so we'll keep track of
+    // the weights and displays, then at the end we'll render them and append
+    // them in order onto the entity's content.
     var bundle = entity.type;
     if (entity_type == 'comment') { bundle = entity.bundle; }
     var field_info = drupalgap_field_info_instances(entity_type, bundle);
     if (!field_info) { return; }
-    var field_content = {};
     var field_weights = {};
+    var field_displays = {};
     $.each(field_info, function(field_name, field) {
         // Determine which display mode to use. The default mode will be used
         // if the drupalgap display mode is not present.
@@ -144,12 +144,9 @@ function drupalgap_entity_render_content(entity_type, entity) {
         }
         // Skip hidden fields.
         if (display.type == 'hidden') { return; }
-        // Save the field name and weight.
+        // Save the field display and weight.
+        field_displays[field_name] = display;
         field_weights[field_name] = display.weight;
-        // Save the field content.
-        field_content[field_name] = drupalgap_entity_render_field(
-          entity_type, entity, field_name, field, display
-        );
     });
     // Extract the field weights and sort them.
     var extracted_weights = [];
@@ -158,15 +155,20 @@ function drupalgap_entity_render_content(entity_type, entity) {
     });
     extracted_weights.sort(function(a, b) { return a - b; });
     // For each sorted weight, locate the field with the corresponding weight,
-    // then add that field's content to the entity, if it hasn't already been
-    // added.
+    // then render it's field content.
     var completed_fields = [];
     $.each(extracted_weights, function(weight_index, target_weight) {
         $.each(field_weights, function(field_name, weight) {
             if (target_weight == weight) {
               if (completed_fields.indexOf(field_name) == -1) {
                 completed_fields.push(field_name);
-                entity.content += field_content[field_name];
+                entity.content += drupalgap_entity_render_field(
+                  entity_type,
+                  entity,
+                  field_name,
+                  field_info[field_name],
+                  field_displays[field_name]
+                );
                 return false;
               }
             }
