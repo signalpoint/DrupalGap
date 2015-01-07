@@ -6829,6 +6829,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
     var language = language_default();
     $.each(form_state.values, function(name, value) {
 
+        // Skip elements with restricted access.
+        if (
+          typeof form.elements[name].access !== 'undefined' &&
+          !form.elements[name].access
+        ) { return; }
+
         // Determine wether or not this element is a field. If it is, determine
         // it's module and field assembly hook.
         var is_field = false;
