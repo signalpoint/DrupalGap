@@ -247,6 +247,11 @@ function node_page_view_pageshow(nid) {
   try {
     node_load(nid, {
         success: function(node) {
+          
+          // By this point the node's content has been assembled into an html
+          // string.
+          // @see entity_services_request_pre_postprocess_alter()
+          
           // Build the node display.
           //For title the translation must be taken into account
           var default_language = language_default();
