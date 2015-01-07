@@ -163,8 +163,13 @@ function theme_autocomplete(variables) {
       variables.attributes.id = id;
     }
 
-    // We need a hidden input to hold the value.
-    html += theme('hidden', { attributes: { id: id } });
+    // We need a hidden input to hold the value. If a default value
+    // was provided by a form element, use it.
+    var hidden_attributes = { id: id };
+    if (variables.element && typeof variables.element.default_value !== 'undefined') {
+      hidden_attributes.value = variables.element.default_value;
+    }
+    html += theme('hidden', { attributes: hidden_attributes });
 
     // Now we need an id for the list.
     var list_id = id + '-list';
