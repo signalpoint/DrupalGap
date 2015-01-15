@@ -101,7 +101,7 @@ div.messages ul li {
  * Don't let images stretch out of their parent container in the main content
  * div. Ignore google images.
  */ 
-div[role="main"] :not(img[src*="gstatic.com/"]),
+div[role="main"] img,
 div[role="banner"] img,
 #_drupalgap_splash_content img {
   width: auto !important; 
