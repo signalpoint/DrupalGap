@@ -94,8 +94,8 @@ function drupalgap_init() {
 function drupalgap_onload() {
   try {
 
-    // At this point, the Drupal object has been initialized by jDrupal and has
-    // loaded the app/settings.js into the <head>. Let's add DrupalGap's modules
+    // At this point, the Drupal object has been initialized by jDrupal and the
+    // app/settings.js file was loaded in <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
     // included via the makefile's bin generation. However, the core modules
     // hook_install() implementations haven't been called yet, so we add them to
@@ -155,7 +155,7 @@ function drupalgap_onload() {
 function _drupalgap_deviceready() {
   try {
 
-    // PhoneGap is loaded and it is now safe for DrupalGap to start...
+    // The device is now ready, it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
 
     // Verify site path is set.
