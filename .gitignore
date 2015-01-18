@@ -1,4 +1,4 @@
-cordova*
+cordova*js
 app/modules/*
 app/themes/*
 app/settings.js
