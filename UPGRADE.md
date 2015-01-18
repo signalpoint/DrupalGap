@@ -29,6 +29,15 @@ version of DrupalGap to another.
 
 # Version Change Notes for Developers
 
+## 7.x-1.0-rc4 => 7.x-1.0-rc5
+
+### Build Web Apps by Default
+
+The DrupalGap SDK default.settings.js file now defaults to using the `web-app`
+mode. This was done to make DrupalGap 99% easier to get started with, since it
+can now run in any modern browser. Simply switch the mode back to `phonegap` to
+run as a mobile application instead.
+
 ## 7.x-1.0-rc3 => 7.x-1.0-rc4
 
 ### New page.tpl.html placeholder token required
