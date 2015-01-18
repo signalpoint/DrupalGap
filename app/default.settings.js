@@ -43,10 +43,10 @@ Drupal.settings.cache.views.expiration = 3600;
  * DrupalGap Settings |
  *********************/
 
-// DrupalGap Mode (defaults to 'phonegap')
-//  'phonegap' - use this mode to build a mobile application with phonegap
+// DrupalGap Mode (defaults to 'web-app')
 //  'web-app' - use this mode to build a web application for a browser window
-drupalgap.settings.mode = 'phonegap';
+//  'phonegap' - use this mode to build a mobile application with phonegap
+drupalgap.settings.mode = 'web-app';
 
 /*************|
  * Appearance |
