@@ -169,7 +169,9 @@ function system_dashboard_page() {
     };
     content.welcome = {
       markup: '<h2 style="text-align: center;">Welcome to DrupalGap</h2>' +
-        '<p>The open source mobile application development kit for Drupal!</p>'
+        '<p style="text-align: center;">' +
+          'The open source application development kit for Drupal!' +
+        '</p>'
     };
     if (drupalgap.settings.logo) {
       content.logo = {
