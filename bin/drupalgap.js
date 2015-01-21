@@ -94,8 +94,8 @@ function drupalgap_init() {
 function drupalgap_onload() {
   try {
 
-    // At this point, the Drupal object has been initialized by jDrupal and has
-    // loaded the app/settings.js into the <head>. Let's add DrupalGap's modules
+    // At this point, the Drupal object has been initialized by jDrupal and the
+    // app/settings.js file was loaded in <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
     // included via the makefile's bin generation. However, the core modules
     // hook_install() implementations haven't been called yet, so we add them to
@@ -155,7 +155,7 @@ function drupalgap_onload() {
 function _drupalgap_deviceready() {
   try {
 
-    // PhoneGap is loaded and it is now safe for DrupalGap to start...
+    // The device is now ready, it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
 
     // Verify site path is set.
@@ -6981,12 +6981,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // The geofield module is an example of field that doesn't use a
               // key. The use_wrapper flag allows others to completely override
               // the use of a wrapper around the field value, e.g. taxonomy term
-              // reference autocomplete.
+              // reference autocomplete. We'll attach any other helpful
+              // variables here as well (element name, form id, etc).
               var field_key = {
                 value: 'value',
                 use_key: true,
                 use_wrapper: true,
-                use_delta: use_delta
+                use_delta: use_delta,
+                name: name,
+                form_id: form.id,
+                element_id: form.elements[name][language][delta].id
               };
 
               // If this element is a field, give the field's module an
@@ -10253,7 +10257,9 @@ function system_dashboard_page() {
     };
     content.welcome = {
       markup: '<h2 style="text-align: center;">Welcome to DrupalGap</h2>' +
-        '<p>The open source mobile application development kit for Drupal!</p>'
+        '<p style="text-align: center;">' +
+          'The open source application development kit for Drupal!' +
+        '</p>'
     };
     if (drupalgap.settings.logo) {
       content.logo = {
