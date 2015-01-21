@@ -33,6 +33,12 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
     // DrupalGap Forms API. We'll use a field machine name of 'field_my_field'
     // in all of the examples.
     
+    // Optional helpful values.
+    // Grab the form element's name, the form id, and the element's id.
+    // var element_name = field_key.name;
+    // var form_id = field_key.form_id;
+    // var element_id = field_key.element_id;
+
     // Example 1 - Here's a simple example using all the defaults.
     var result = {
       foo: 'bar'
