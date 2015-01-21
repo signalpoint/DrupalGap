@@ -410,12 +410,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // The geofield module is an example of field that doesn't use a
               // key. The use_wrapper flag allows others to completely override
               // the use of a wrapper around the field value, e.g. taxonomy term
-              // reference autocomplete.
+              // reference autocomplete. We'll attach any other helpful
+              // variables here as well (element name, form id, etc).
               var field_key = {
                 value: 'value',
                 use_key: true,
                 use_wrapper: true,
-                use_delta: use_delta
+                use_delta: use_delta,
+                name: name,
+                form_id: form.id,
+                element_id: form.elements[name][language][delta].id
               };
 
               // If this element is a field, give the field's module an
