@@ -1877,7 +1877,11 @@ function drupalgap_get_path(type, name) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      drupalgap_confirm(drupalgap.settings.exit_message, {
+      var msg = 'Exit ' + drupalgap.settings.title + '?';
+      if (drupalgap.settings.exit_message) {
+        msg = drupalgap.settings.exit_message;
+      }
+      drupalgap_confirm(msg, {
           confirmCallback: _drupalgap_back_exit
       });
     }
