@@ -9625,13 +9625,13 @@ function node_page_view_pageshow(nid) {
           // string.
           // @see entity_services_request_pre_postprocess_alter()
           
-          // Build the node display.
-          //For title the translation must be taken into account
+          // Figure out the title, and watch for translation.
           var default_language = language_default();
           var node_title = node.title;
           if (node.title_field && node.title_field[default_language]) {
-                node_title = node.title_field[default_language][0].safe_value;
+            node_title = node.title_field[default_language][0].safe_value;
           }
+          // Build the node display.
           var build = {
             'theme': 'node',
             // @todo - is this line of code doing anything?
@@ -9640,8 +9640,14 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node_title},
             'content': {'markup': node.content}
           };
+          // If comments are undefined, just inject the page.
+          if (typeof node.comment === 'undefined') {
+            _drupalgap_entity_page_container_inject(
+              'node', node.nid, 'view', build
+            );
+          }
           // If the comments are closed (1) or open (2), show the comments.
-          if (node.comment != 0) {
+          else if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
               // Render the comment form, so we can add it to the content later.
               var comment_form = '';
