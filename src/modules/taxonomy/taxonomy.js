@@ -145,30 +145,40 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
           '<span class="ui-icon ui-icon-loading"></span>' +
           '</div></li>');
         $ul.listview('refresh');
-        var path =
-          'drupalgap/taxonomy-term-autocomplete/' + vid + '&name=' +
-          encodeURIComponent(value);
-        views_datasource_get_view_result(path, {
-            success: function(results) {
-              if (results.terms.length == 0) { return; }
-              $.each(results.terms, function(index, object) {
-                  var attributes = {
-                    tid: object.term.tid,
-                    vid: vid,
-                    name: object.term.name,
-                    onclick: '_taxonomy_field_widget_form_click(' +
-                      "'" + id + "', " +
-                      "'" + $ul.attr('id') + "', " +
-                      'this' +
-                    ')'
-                  };
-                  html += '<li ' + drupalgap_attributes(attributes) + '>' +
-                    object.term.name +
-                  '</li>';
-              });
-              $ul.html(html);
-              $ul.listview('refresh');
-              $ul.trigger('updatelayout');
+        var query = {
+          fields: ['tid', 'name'],
+          parameters: {
+            vid: vid,
+            name: '%' + value + '%'
+          },
+          parameters_op: {
+            name: 'like'
+          }
+        };
+        taxonomy_term_index(query, {
+            success: function(terms) {
+              if (terms.length != 0) {
+                // Extract the terms into items, then drop them in the list.
+                var items = [];
+                $.each(terms, function(index, term) {
+                    var attributes = {
+                      tid: term.tid,
+                      vid: vid,
+                      name: term.name,
+                      onclick: '_taxonomy_field_widget_form_click(' +
+                        "'" + id + "', " +
+                        "'" + $ul.attr('id') + "', " +
+                        'this' +
+                      ')'
+                    };
+                    html += '<li ' + drupalgap_attributes(attributes) + '>' +
+                      term.name +
+                    '</li>';
+                });
+                $ul.html(html);
+                $ul.listview('refresh');
+                $ul.trigger('updatelayout');
+              }
             }
         });
     }
