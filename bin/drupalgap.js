@@ -9640,8 +9640,14 @@ function node_page_view_pageshow(nid) {
             'title': {'markup': node_title},
             'content': {'markup': node.content}
           };
+          // If comments undefined, inject the page.
+          if (typeof node.comment === 'undefined') {
+        	  _drupalgap_entity_page_container_inject(
+        	    'node', node.nid, 'view', build
+        	  );
+        	}
           // If the comments are closed (1) or open (2), show the comments.
-          if (node.comment != 0) {
+          else if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
               // Render the comment form, so we can add it to the content later.
               var comment_form = '';
