@@ -300,7 +300,7 @@ function drupalgap_get_path(type, name) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      drupalgap_confirm('Exit ' + drupalgap.settings.title + '?', {
+      drupalgap_confirm(drupalgap.settings.exit_message, {
           confirmCallback: _drupalgap_back_exit
       });
     }
