@@ -37,7 +37,7 @@ function drupalgap_init() {
       destination: '',
       api: {},
       back: false, /* moving backwards or not */
-      back_path: '', /* the path to move back to */
+      back_path: [], /* paths to move back to */
       blocks: [],
       content_types_list: {}, /* holds info about each content type */
       date_formats: { }, /* @see system_get_date_formats() in Drupal core */
@@ -1897,13 +1897,14 @@ function _drupalgap_back() {
   try {
     drupalgap.back = true;
     history.back();
-    drupalgap_path_set(drupalgap.back_path);
+    drupalgap_path_set(drupalgap.back_path.pop());
   }
   catch (error) { console.log('drupalgap_back' + error); }
 }
 
 /**
  * An internal function used to exit the app when the back button is clicked.
+ * @param {Number} button Which button was pressed.
  */
 function _drupalgap_back_exit(button) {
   try {
@@ -2029,7 +2030,7 @@ function drupalgap_goto(path) {
     }
 
     // Save the back path.
-    drupalgap.back_path = drupalgap_path_get();
+    drupalgap.back_path.push(drupalgap_path_get());
 
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
@@ -5087,7 +5088,7 @@ var _theme_autocomplete_success_handlers = {};
 function theme_autocomplete(variables) {
   try {
     var html = '';
-    
+
     // We need to have a unique identifier for this autocomplete. If it is a
     // field, use the field name. Otherwise use the id attribute if it is
     // provided or generate a random one. Then finally attach the autocomplete
@@ -5122,9 +5123,10 @@ function theme_autocomplete(variables) {
     // We need a hidden input to hold the value. If a default value
     // was provided by a form element, use it.
     var hidden_attributes = { id: id };
-    if (variables.element && typeof variables.element.default_value !== 'undefined') {
-      hidden_attributes.value = variables.element.default_value;
-    }
+    if (
+      variables.element &&
+      typeof variables.element.default_value !== 'undefined'
+    ) { hidden_attributes.value = variables.element.default_value; }
     html += theme('hidden', { attributes: hidden_attributes });
 
     // Now we need an id for the list.
@@ -5185,8 +5187,9 @@ function theme_autocomplete(variables) {
  */
 function _theme_autocomplete(list, e, data, autocomplete_id) {
   try {
+    var autocomplete = autocomplete;
     // Make sure a filter is present.
-    if (typeof _theme_autocomplete_variables[autocomplete_id].filter === 'undefined') {
+    if (typeof autocomplete.filter === 'undefined') {
       console.log(
         '_theme_autocomplete - A "filter" was not supplied.'
       );
@@ -5196,9 +5199,9 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
     // Make sure a value and/or label has been supplied so we know how to render
     // the items in the autocomplete list.
     var value_provided =
-      typeof _theme_autocomplete_variables[autocomplete_id].value !== 'undefined' ? true : false;
+      typeof autocomplete.value !== 'undefined' ? true : false;
     var label_provided =
-      typeof _theme_autocomplete_variables[autocomplete_id].label !== 'undefined' ? true : false;
+      typeof autocomplete.label !== 'undefined' ? true : false;
     if (!value_provided && !label_provided) {
       console.log(
         '_theme_autocomplete - A "value" and/or "label" was not supplied.'
@@ -5208,14 +5211,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
     else {
       // We have a value and/or label. If one isn't provided, set it equal to
       // the other.
-      if (!value_provided) {
-        _theme_autocomplete_variables[autocomplete_id].value =
-          _theme_autocomplete_variables[autocomplete_id].label;
-      }
-      else if (!label_provided) {
-        _theme_autocomplete_variables[autocomplete_id].label =
-          _theme_autocomplete_variables[autocomplete_id].value;
-      }
+      if (!value_provided) { autocomplete.value = autocomplete.label; }
+      else if (!label_provided) { autocomplete.label = autocomplete.value; }
     }
     // Setup the vars to handle this widget.
     var $ul = $(list),
@@ -5234,7 +5231,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
       // Let's first build the success handler that will place the items into
       // the autocomplete list.
-      _theme_autocomplete_success_handlers[autocomplete_id] = function(_autocomplete_id, result_items, _wrapped, _child) {
+      _theme_autocomplete_success_handlers[autocomplete_id] = function(
+        _autocomplete_id, result_items, _wrapped, _child) {
         try {
           // If there are no results, just return.
           if (result_items.length == 0) { return; }
@@ -5269,37 +5267,37 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           $ul.trigger('updatelayout');
         }
         catch (error) {
-          console.log('_theme_autocomplete_success_handlers[' + _autocomplete_id + '] - ' + error);
+          console.log('_theme_autocomplete_success_handlers[' +
+            _autocomplete_id +
+          '] - ' + error);
         }
       };
 
       // Depending on the handler, built the path and call the Drupal site for
       // the data.
-      var handler = _theme_autocomplete_variables[autocomplete_id].field_info_field.settings.handler;
+      var handler = autocomplete.field_info_field.settings.handler;
       switch (handler) {
 
         // Views (and Organic Groups)
         case 'views':
         case 'og':
           // Prepare the path to the view.
-          var path = _theme_autocomplete_variables[autocomplete_id].path + '?' +
-            _theme_autocomplete_variables[autocomplete_id].filter + '=' + encodeURIComponent(value);
+          var path = autocomplete.path + '?' + autocomplete.filter + '=' +
+            encodeURIComponent(value);
           // Any extra params to send along?
-          if (_theme_autocomplete_variables[autocomplete_id].params) {
-            path += '&' + _theme_autocomplete_variables[autocomplete_id].params;
-          }
+          if (autocomplete.params) { path += '&' + autocomplete.params; }
 
-          // Retrieve JSON results. Keep in mind, we use this for retrieving Views
-          // JSON results and custom hook_menu() path results in Drupal.
+          // Retrieve JSON results. Keep in mind, we use this for retrieving
+          // Views JSON results and custom hook_menu() path results in Drupal.
           views_datasource_get_view_result(path, {
               success: function(results) {
                 // If this was a custom path, don't use a wrapper around the
                 // results like the one used by Views Datasource.
                 var wrapped = true;
-                if (_theme_autocomplete_variables[autocomplete_id].custom) { wrapped = false; }
+                if (autocomplete.custom) { wrapped = false; }
 
-                // Extract the result items based on the presence of the wrapper or
-                // not.
+                // Extract the result items based on the presence of the wrapper
+                // or not.
                 var result_items = null;
                 if (wrapped) { result_items = results[results.view.root]; }
                 else { result_items = results; }
@@ -5314,10 +5312,13 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
         // Simple entity selection mode, use the Index resource for the entity
         // type.
         case 'base':
-          var field_settings = _theme_autocomplete_variables[autocomplete_id].field_info_field.settings;
+          var field_settings =
+            autocomplete.field_info_field.settings;
           var index_resource = field_settings.target_type + '_index';
           if (!drupalgap_function_exists(index_resource)) {
-            console.log('WARNING - _theme_autocomplete - ' + index_resource + '() does not exist!');
+            console.log('WARNING - _theme_autocomplete - ' +
+              index_resource + '() does not exist!'
+            );
             return;
           }
           var options = {
@@ -5329,7 +5330,9 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
               title: 'like'
             }
           };
-          $.each(field_settings.handler_settings.target_bundles, function(bundle, name) {
+          $.each(
+            field_settings.handler_settings.target_bundles,
+            function(bundle, name) {
               options.parameters.type = bundle;
               // @TODO allow multiple bundles to be indexed.
               return false;
@@ -5413,9 +5416,12 @@ function _theme_autocomplete_click(id, item, autocomplete_id) {
     // Now fire the item onclick handler, if one was provided.
     if (
       _theme_autocomplete_variables[autocomplete_id].item_onclick &&
-      drupalgap_function_exists(_theme_autocomplete_variables[autocomplete_id].item_onclick)
+      drupalgap_function_exists(
+        _theme_autocomplete_variables[autocomplete_id].item_onclick
+      )
     ) {
-      var fn = window[_theme_autocomplete_variables[autocomplete_id].item_onclick];
+      var fn =
+        window[_theme_autocomplete_variables[autocomplete_id].item_onclick];
       fn(id, $(item));
     }
   }
@@ -9634,11 +9640,11 @@ function node_page_view_pageshow(nid) {
   try {
     node_load(nid, {
         success: function(node) {
-          
+
           // By this point the node's content has been assembled into an html
           // string.
           // @see entity_services_request_pre_postprocess_alter()
-          
+
           // Figure out the title, and watch for translation.
           var default_language = language_default();
           var node_title = node.title;
