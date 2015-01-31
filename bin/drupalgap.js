@@ -4144,6 +4144,20 @@ function theme_email(variables) {
 }
 
 /**
+ * Themes a file input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_file(variables) {
+  try {
+    variables.attributes.type = 'file';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_file - ' + error); }
+}
+
+/**
  * Themes a form element label.
  * @param {Object} variables
  * @return {String}
