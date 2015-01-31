@@ -37,7 +37,7 @@ function drupalgap_init() {
       destination: '',
       api: {},
       back: false, /* moving backwards or not */
-      back_path: '', /* the path to move back to */
+      back_path: [], /* paths to move back to */
       blocks: [],
       content_types_list: {}, /* holds info about each content type */
       date_formats: { }, /* @see system_get_date_formats() in Drupal core */
