@@ -327,6 +327,7 @@ function _drupalgap_back() {
 
 /**
  * An internal function used to exit the app when the back button is clicked.
+ * @param {Number} button Which button was pressed.
  */
 function _drupalgap_back_exit(button) {
   try {
