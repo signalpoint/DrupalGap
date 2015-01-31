@@ -134,7 +134,7 @@ var _theme_autocomplete_success_handlers = {};
 function theme_autocomplete(variables) {
   try {
     var html = '';
-    
+
     // We need to have a unique identifier for this autocomplete. If it is a
     // field, use the field name. Otherwise use the id attribute if it is
     // provided or generate a random one. Then finally attach the autocomplete
