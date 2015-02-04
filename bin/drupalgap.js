@@ -11036,10 +11036,15 @@ function user_view_pageshow(uid) {
               build.content = { markup: account.content };
             }
             // Any picture?
+            console.log(drupalgap.site_settings);
+            console.log(account);
             if (account.picture && account.picture.fid) {
               build.picture = {
                 'theme': 'image',
-                'path': account.picture.url
+                'path': image_style_url(
+                  drupalgap.site_settings.user_picture_style,
+                  account.picture.uri
+                )
               };
             }
             _drupalgap_entity_page_container_inject(
