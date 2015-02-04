@@ -827,8 +827,12 @@ function drupalgap_entity_get_primary_key(entity_type) {
 function _drupalgap_entity_page_container(entity_type, entity_id, mode) {
   try {
     var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
+    var attrs = {
+      id: id,
+      'class': entity_type + ' ' + entity_type + '-' + mode
+    };
     return {
-      markup: '<div id="' + id + '"></div>'
+      markup: '<div ' + drupalgap_attributes(attrs) + '></div>'
     };
   }
   catch (error) { console.log('_drupalgap_entity_page_container - ' + error); }
