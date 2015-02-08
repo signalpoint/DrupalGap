@@ -324,7 +324,10 @@ function theme_comment(variables) {
       '</ul>' + comment.content;
     html += comment_content;
     // Add an edit link if necessary.
-    if (user_access('administer comments')) {
+    if (
+      user_access('administer comments') ||
+      (user_access('edit own comments') && comment.uid == Drupal.user.uid)
+    ) {
       html += theme('button_link', {
           text: 'Edit',
           path: 'comment/' + comment.cid + '/edit',
