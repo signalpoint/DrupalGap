@@ -268,12 +268,15 @@ function theme_comments(variables) {
   try {
     // Set the container id and append default attributes.
     variables.attributes.id = comments_container_id(variables.node.nid);
-    variables.attributes['class'] += 'comments ';
+    variables.attributes['class'] +=
+      'comments comments-node-' + variables.node.type;
     variables.attributes['data-role'] = 'collapsible-set';
     // Open the container.
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
     // Show a comments title if there are any comments.
-    if (variables.node.comment_count > 0) { html += '<h2>Comments</h2>'; }
+    if (variables.node.comment_count > 0) {
+      html += '<h2 class="comments-title">Comments</h2>';
+    }
     // If the comments are already rendered, show them.
     if (variables.comments) { html += variables.comments; }
     // Close the container and return the html.
