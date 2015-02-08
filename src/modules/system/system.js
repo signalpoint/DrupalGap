@@ -313,8 +313,6 @@ function system_settings_form_submit(form, form_state) {
           variable_set(variable, value);
       });
     }
-    // @todo - a nice spot to have a drupalgap_set_message function, eh?
-    drupalgap_alert('The configuration options have been saved.');
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
 }
