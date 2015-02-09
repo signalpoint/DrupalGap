@@ -517,10 +517,12 @@ function drupalgap_confirm(message) {
       if (options.buttonLabels) { buttonLabels = options.buttonLabels; }
     }
     // The phonegap confirm dialog doesn't seem to work in Ripple, so just use
-    // the default one. Otherwise just use the normal confirm.
-    if (typeof parent.window.ripple === 'function') {
-      if (confirm(message)) { confirmCallback(); }
-    }
+    // the default one, and it definitely doesn't work in a web app, so
+    // otherwise just use the default confirm.
+    if (
+      typeof parent.window.ripple === 'function' ||
+      drupalgap.settings.mode == 'web-app'
+    ) { if (confirm(message)) { confirmCallback(); } }
     else {
       navigator.notification.confirm(
           message,
