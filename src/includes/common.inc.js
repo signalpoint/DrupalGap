@@ -684,6 +684,7 @@ function drupalgap_page_in_dom(page_id) {
 
 /**
  * Returns true if the current page is the front page, false otherwise.
+ * @return {Boolean}
  */
 function drupalgap_is_front_page() {
   try {
