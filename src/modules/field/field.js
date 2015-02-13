@@ -384,9 +384,10 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
     switch (element.type) {
       case 'number_integer':
       case 'number_float':
-        // Change the form element into a number, and then set its min/max
-        // attributes along with the step.
-        items[delta].type = 'number';
+      case 'range':
+        // Change the form element into a number, unless we're using a range
+        // slider. Then set its min/max attributes along with the step.
+        if (element.type != 'range') { items[delta].type = 'number'; }
         if (!empty(instance.settings.max)) {
           items[delta].options.attributes['min'] = instance.settings.min;
         }

@@ -683,6 +683,16 @@ function drupalgap_page_in_dom(page_id) {
 }
 
 /**
+ * Returns true if the current page is the front page, false otherwise.
+ */
+function drupalgap_is_front_page() {
+  try {
+    return drupalgap_path_get() == drupalgap.settings.front;
+  }
+  catch (error) { console.log('drupalgap_is_front_page - ' + error); }
+}
+
+/**
  * Returns the URL of the active jQuery Mobile page.
  * @return {String}
  */
