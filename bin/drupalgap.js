@@ -517,10 +517,12 @@ function drupalgap_confirm(message) {
       if (options.buttonLabels) { buttonLabels = options.buttonLabels; }
     }
     // The phonegap confirm dialog doesn't seem to work in Ripple, so just use
-    // the default one. Otherwise just use the normal confirm.
-    if (typeof parent.window.ripple === 'function') {
-      if (confirm(message)) { confirmCallback(); }
-    }
+    // the default one, and it definitely doesn't work in a web app, so
+    // otherwise just use the default confirm.
+    if (
+      typeof parent.window.ripple === 'function' ||
+      drupalgap.settings.mode == 'web-app'
+    ) { if (confirm(message)) { confirmCallback(); } }
     else {
       navigator.notification.confirm(
           message,
@@ -2257,6 +2259,17 @@ function drupalgap_page_in_dom(page_id) {
     return page_in_dom;
   }
   catch (error) { console.log('drupalgap_page_in_dom - ' + error); }
+}
+
+/**
+ * Returns true if the current page is the front page, false otherwise.
+ * @return {Boolean}
+ */
+function drupalgap_is_front_page() {
+  try {
+    return drupalgap_path_get() == drupalgap.settings.front;
+  }
+  catch (error) { console.log('drupalgap_is_front_page - ' + error); }
 }
 
 /**
@@ -6178,12 +6191,15 @@ function theme_comments(variables) {
   try {
     // Set the container id and append default attributes.
     variables.attributes.id = comments_container_id(variables.node.nid);
-    variables.attributes['class'] += 'comments ';
+    variables.attributes['class'] +=
+      'comments comments-node-' + variables.node.type;
     variables.attributes['data-role'] = 'collapsible-set';
     // Open the container.
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
     // Show a comments title if there are any comments.
-    if (variables.node.comment_count > 0) { html += '<h2>Comments</h2>'; }
+    if (variables.node.comment_count > 0) {
+      html += '<h2 class="comments-title">Comments</h2>';
+    }
     // If the comments are already rendered, show them.
     if (variables.comments) { html += variables.comments; }
     // Close the container and return the html.
@@ -6234,7 +6250,10 @@ function theme_comment(variables) {
       '</ul>' + comment.content;
     html += comment_content;
     // Add an edit link if necessary.
-    if (user_access('administer comments')) {
+    if (
+      user_access('administer comments') ||
+      (user_access('edit own comments') && comment.uid == Drupal.user.uid)
+    ) {
       html += theme('button_link', {
           text: 'Edit',
           path: 'comment/' + comment.cid + '/edit',
@@ -7956,9 +7975,10 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
     switch (element.type) {
       case 'number_integer':
       case 'number_float':
-        // Change the form element into a number, and then set its min/max
-        // attributes along with the step.
-        items[delta].type = 'number';
+      case 'range':
+        // Change the form element into a number, unless we're using a range
+        // slider. Then set its min/max attributes along with the step.
+        if (element.type != 'range') { items[delta].type = 'number'; }
         if (!empty(instance.settings.max)) {
           items[delta].options.attributes['min'] = instance.settings.min;
         }
@@ -10435,8 +10455,6 @@ function system_settings_form_submit(form, form_state) {
           variable_set(variable, value);
       });
     }
-    // @todo - a nice spot to have a drupalgap_set_message function, eh?
-    drupalgap_alert('The configuration options have been saved.');
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
 }
