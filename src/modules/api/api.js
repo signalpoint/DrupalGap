@@ -293,9 +293,20 @@ function hook_image_path_alter(src) { }
 function hook_install() {}
 
 /**
+ * Implements hook_menu()
  * This hook is used to declare menu paths for custom pages.
  */
-function hook_menu() {}
+function hook_menu() {
+  try {
+    var items = {};
+    items['hello_world'] = {
+      title: 'Hello World',
+      page_callback: 'my_module_hello_world_page'
+    };
+    return items;
+  }
+  catch (error) { console.log('hook_menu - ' + error); }
+}
 
 function hook_mvc_model() {
   var models = {};
@@ -303,6 +314,34 @@ function hook_mvc_model() {
 }
 function hook_mvc_view() {}
 function hook_mvc_controller() {}
+
+/**
+ * Implements hook_node_page_view_alter_TYPE().
+ * @param {Object} node The fully loaded node object.
+ * @param {Object} options The options object, containing the success callback.
+ */
+function hook_node_page_view_alter_TYPE(node, options) {
+  try {
+
+    // Use this hook to completely take over the content that is shown when a
+    // user views a certain content type's page within the app. Pass your
+    // content (render array or html string) to the sucess callback provided in
+    // options to have it automatically injected in the page.
+
+    var content = {};
+    content['my_markup'] = {
+      markup: '<p>Click below to see the node!</p>'
+    };
+    content['my_collapsible'] = {
+      theme: 'collapsible',
+      header: node.title,
+      content: node.content
+    };
+    options.success(content);
+
+  }
+  catch (error) { console.log('hook_node_page_view_alter_TYPE() - ' + error); }
+}
 
 /**
  * Implements hook_views_exposed_filter().
