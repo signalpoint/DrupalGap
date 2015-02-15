@@ -249,8 +249,33 @@ function node_page_view_pageshow(nid) {
         success: function(node) {
 
           // By this point the node's content has been assembled into an html
-          // string.
+          // string. This is because when a node is retrieved from the server,
+          // we use a services post processor to render its content.
           // @see entity_services_request_pre_postprocess_alter()
+
+          // Does anyone want to take over the rendering of this content type?
+          // Any implementors of hook_node_page_view_alter_TYPE()?
+          // @TODO this should probably be moved up to the entity level.
+          var hook = 'node_page_view_alter_' + node.type;
+          var modules = module_implements(hook);
+          if (modules.length > 0) {
+            if (modules.length > 1) {
+              var msg = 'node_page_view_pageshow - WARNING - there is more ' +
+                'than one module implementing hook_' + hook + '(), we will ' +
+                'the first one: ' + modules[0];
+              console.log(msg);
+            }
+            var function_name = modules[0] + '_' + hook;
+            var fn = window[function_name];
+            fn(node, {
+                success: function(content) {
+                  _drupalgap_entity_page_container_inject(
+                    'node', node.nid, 'view', content
+                  );
+                }
+            });
+            return;
+          }
 
           // Figure out the title, and watch for translation.
           var default_language = language_default();
