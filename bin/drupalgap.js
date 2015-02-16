@@ -5381,6 +5381,10 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           var query = null;
           if (autocomplete.query) { query = autocomplete.query; }
           else {
+            query = {
+              parameters: { },
+              parameters_op: { }
+            };
             var fields = [];
             switch (autocomplete.entity_type) {
               case 'node':
@@ -5388,13 +5392,12 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 break;
               case 'taxonomy_term':
                 fields = ['tid', 'name'];
+                if (autocomplete.vid) {
+                  query.parameters['vid'] = autocomplete.vid;
+                }
                 break;
             }
-            query = {
-              fields: fields,
-              parameters: { },
-              parameters_op: { }
-            };
+            query.fields = fields;
             query.parameters[autocomplete.filter] = '%' + value + '%';
             query.parameters_op[autocomplete.filter] = 'like';
           }
