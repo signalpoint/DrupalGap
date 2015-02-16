@@ -262,7 +262,7 @@ function node_page_view_pageshow(nid) {
             if (modules.length > 1) {
               var msg = 'node_page_view_pageshow - WARNING - there is more ' +
                 'than one module implementing hook_' + hook + '(), we will ' +
-                'the first one: ' + modules[0];
+                'use the first one: ' + modules[0];
               console.log(msg);
             }
             var function_name = modules[0] + '_' + hook;
