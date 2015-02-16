@@ -5247,14 +5247,21 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
       _theme_autocomplete_success_handlers[autocomplete_id] = function(
         _autocomplete_id, result_items, _wrapped, _child) {
         try {
-          // If there are no results, just return.
-          if (result_items.length == 0) { return; }
+          // If there are no results, just return, unless they provided an
+          // empty callback handler, then call it and return.
+          if (result_items.length == 0) {
+            if (autocomplete.empty_callback) {
+              var fn = window[autocomplete.empty_callback];
+              fn(value);
+            }
+            return;
+          }
 
           // Convert the result into an items array for a list. Each item will
           // be a JSON object with a "value" and "label" properties.
           var items = [];
-          var _value = _theme_autocomplete_variables[_autocomplete_id].value;
-          var _label = _theme_autocomplete_variables[_autocomplete_id].label;
+          var _value = autocomplete.value;
+          var _label = autocomplete.label;
           $.each(result_items, function(index, object) {
               var _item = null;
               if (_wrapped) { _item = object[_child]; }
