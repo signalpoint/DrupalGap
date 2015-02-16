@@ -5286,9 +5286,17 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
         }
       };
 
-      // Depending on the handler, built the path and call the Drupal site for
-      // the data.
-      var handler = autocomplete.field_info_field.settings.handler;
+      // Depending on the handler, build the path and call the Drupal site for
+      // the data. If it's a custom path, see if a handler was provided,
+      // otherwise just default to views.
+      var handler = null;
+      if (autocomplete.custom) {
+        if (autocomplete.handler) { handler = autocomplete.handler; }
+        else { handler = 'views'; }
+      }
+      else {
+        handler = autocomplete.field_info_field.settings.handler;
+      }
       switch (handler) {
 
         // Views (and Organic Groups)
@@ -5358,6 +5366,58 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
               }
           });
           break;
+
+        // An entity index resource call. Figure out which entity type index
+        // to call, and build a default query if one wasn't provided.
+        case 'index':
+          if (!autocomplete.entity_type) {
+            console.log(
+              'WARNING - _theme_autocomplete - no entity_type provided'
+            );
+            return;
+          }
+          var function_name = autocomplete.entity_type + '_index';
+          var fn = window[function_name];
+          var query = null;
+          if (autocomplete.query) { query = autocomplete.query; }
+          else {
+            var fields = [];
+            switch (autocomplete.entity_type) {
+              case 'node':
+                fields = ['nid', 'title'];
+                break;
+              case 'taxonomy_term':
+                fields = ['tid', 'name'];
+                break;
+            }
+            query = {
+              fields: fields,
+              parameters: { },
+              parameters_op: { }
+            };
+            query.parameters[autocomplete.filter] = '%' + value + '%';
+            query.parameters_op[autocomplete.filter] = 'like';
+          }
+          fn.apply(null, [query, {
+              success: function(results) {
+                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
+                fn(autocomplete_id, results, false, null);
+              }
+          }]);
+          break;
+
+        // The default handler...
+        default:
+
+          // If we made it this far, and don't have a handler, then warn the
+          // developer.
+          if (!handler) {
+            console.log('WARNING - _theme_autocomplete - no handler provided');
+            return;
+          }
+
+          break;
+
       }
 
     }
