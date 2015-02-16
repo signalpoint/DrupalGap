@@ -425,7 +425,9 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 break;
               case 'taxonomy_term':
                 fields = ['tid', 'name'];
-                if (autocomplete.vid) { query.parameters['vid'] = autocomplete.vid; }
+                if (autocomplete.vid) {
+                  query.parameters['vid'] = autocomplete.vid;
+                }
                 break;
             }
             query.fields = fields;
