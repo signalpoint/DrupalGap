@@ -233,7 +233,7 @@ function theme_autocomplete(variables) {
  */
 function _theme_autocomplete(list, e, data, autocomplete_id) {
   try {
-    var autocomplete = autocomplete;
+    var autocomplete = _theme_autocomplete_variables[autocomplete_id];
     // Make sure a filter is present.
     if (typeof autocomplete.filter === 'undefined') {
       console.log(
