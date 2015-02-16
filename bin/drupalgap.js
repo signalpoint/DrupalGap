@@ -5247,44 +5247,53 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
       _theme_autocomplete_success_handlers[autocomplete_id] = function(
         _autocomplete_id, result_items, _wrapped, _child) {
         try {
-          // If there are no results, just return, unless they provided an
+
+          // If there are no results, and then if an empty callback handler was
+          // provided, call it.
           // empty callback handler, then call it and return.
           if (result_items.length == 0) {
             if (autocomplete.empty_callback) {
               var fn = window[autocomplete.empty_callback];
               fn(value);
             }
-            return;
+          }
+          else {
+
+            // Convert the result into an items array for a list. Each item will
+            // be a JSON object with a "value" and "label" properties.
+            var items = [];
+            var _value = autocomplete.value;
+            var _label = autocomplete.label;
+            $.each(result_items, function(index, object) {
+                var _item = null;
+                if (_wrapped) { _item = object[_child]; }
+                else { _item = object; }
+                var item = {
+                  value: _item[_value],
+                  label: _item[_label]
+                };
+                items.push(item);
+            });
+
+            // Now render the items, add them to list and refresh the list.
+            if (items.length != 0) {
+              autocomplete.items = items;
+              var _items = _theme_autocomplete_prepare_items(autocomplete);
+              $.each(_items, function(index, item) {
+                html += '<li>' + item + '</li>';
+              });
+              $ul.html(html);
+              $ul.listview('refresh');
+              $ul.trigger('updatelayout');
+            }
           }
 
-          // Convert the result into an items array for a list. Each item will
-          // be a JSON object with a "value" and "label" properties.
-          var items = [];
-          var _value = autocomplete.value;
-          var _label = autocomplete.label;
-          $.each(result_items, function(index, object) {
-              var _item = null;
-              if (_wrapped) { _item = object[_child]; }
-              else { _item = object; }
-              var item = {
-                value: _item[_value],
-                label: _item[_label]
-              };
-              items.push(item);
-          });
+          // Anybody want to act on the completion of the autocomplete?
+          if (autocomplete.finish_callback) {
+            var fn = window[autocomplete.finish_callback];
+            fn();
+          }
 
-          // Now render the items, add them to list and refresh the list.
-          if (items.length == 0) { return; }
-          _theme_autocomplete_variables[_autocomplete_id].items = items;
-          var _items = _theme_autocomplete_prepare_items(
-            _theme_autocomplete_variables[_autocomplete_id]
-          );
-          $.each(_items, function(index, item) {
-            html += '<li>' + item + '</li>';
-          });
-          $ul.html(html);
-          $ul.listview('refresh');
-          $ul.trigger('updatelayout');
         }
         catch (error) {
           console.log('_theme_autocomplete_success_handlers[' +
