@@ -5291,7 +5291,7 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           // Anybody want to act on the completion of the autocomplete?
           if (autocomplete.finish_callback) {
             var fn = window[autocomplete.finish_callback];
-            fn();
+            fn(value);
           }
 
         }
