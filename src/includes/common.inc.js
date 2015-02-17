@@ -1089,6 +1089,7 @@ function drupalgap_render_region(region) {
           typeof region.collapse_on_empty === 'undefined' ||
           region.collapse_on_empty === false
         ) { region_html += '<h2>&nbsp;</h2>'; }
+      }
 
       // Close the region container.
       region_html += '</div><!-- ' + region.name + ' -->';
