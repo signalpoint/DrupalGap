@@ -1305,12 +1305,18 @@ function theme_checkboxes(variables) {
         if (value == 'attributes') { return; } // Skip attributes.
         var _label = value;
         if (!empty(label)) { _label = label; }
-        html += '<label>' + theme('checkbox', {
-            value: value,
-            attributes: {
-              name: variables.name + '[' + value + ']'
-            }
-        }) + '&nbsp;' + label + '</label>';
+        var checkbox = {
+          value: value,
+          attributes: {
+            name: variables.name + '[' + value + ']'
+          }
+        };
+        if (variables.value && variables.value[value]) {
+          checkbox.checked = true;
+        }
+        html += '<label>' +
+          theme('checkbox', checkbox) + '&nbsp;' + label +
+        '</label>';
     });
     // Check the box?
     /*if (variables.checked) {
