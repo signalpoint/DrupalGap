@@ -1083,7 +1083,12 @@ function drupalgap_render_region(region) {
           region_link_popup_count >= block_menu_count &&
           block_count == 0
         )
-      ) { region_html += '<h2>&nbsp;</h2>'; }
+      ) {
+        // Show an empty header if we're not collapsing on an empty region.
+        if (
+          typeof region.collapse_on_empty === 'undefined' ||
+          region.collapse_on_empty === false
+        ) { region_html += '<h2>&nbsp;</h2>'; }
 
       // Close the region container.
       region_html += '</div><!-- ' + region.name + ' -->';
