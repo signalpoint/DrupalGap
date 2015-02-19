@@ -996,6 +996,7 @@ function template_process_page(variables) {
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap_path);
     var page_html = $('#' + page_id).html();
+    if (!page_html) { return; }
     $.each(drupalgap.theme.regions, function(index, region) {
         page_html = page_html.replace(
           '{:' + region.name + ':}',
