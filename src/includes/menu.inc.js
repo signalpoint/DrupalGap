@@ -17,119 +17,112 @@ function menu_execute_active_handler() {
     // Get the router path.
     var router_path = drupalgap_router_path_get();
 
-    if (router_path) {
+    if (!router_path) { return; }
 
-      // Call the page call back for this router path and send along any
-      // arguments.
-      var function_name = drupalgap.menu_links[router_path].page_callback;
-      var page_arguments = [];
-      if (drupalgap_function_exists(function_name)) {
+    // Call the page call back for this router path and send along any
+    // arguments.
+    var function_name = drupalgap.menu_links[router_path].page_callback;
+    var page_arguments = [];
+    if (drupalgap_function_exists(function_name)) {
 
-        // Grab the page callback function and get ready to build the html.
-        var fn = window[function_name];
-        var content = '';
+      // Grab the page callback function and get ready to build the html.
+      var fn = window[function_name];
+      var content = '';
 
-        // Are there any arguments to send to the page callback?
-        if (drupalgap.menu_links[router_path].page_arguments) {
-          // For each page argument, if the argument is an integer, grab the
-          // corresponding arg(#), otherwise just push the arg onto the page
-          // arguments. Then try to prepare any entity that may be present in
-          // the url so the entity is sent via the page arguments to the page
-          // callback, instead of just sending the integer.
-          var args = arg(null, path);
-          $.each(
-            drupalgap.menu_links[router_path].page_arguments,
-            function(index, object) {
-              if (is_int(object) && args[object]) {
-                page_arguments.push(args[object]);
-              }
-              else { page_arguments.push(object); }
+      // Are there any arguments to send to the page callback?
+      if (drupalgap.menu_links[router_path].page_arguments) {
+        // For each page argument, if the argument is an integer, grab the
+        // corresponding arg(#), otherwise just push the arg onto the page
+        // arguments. Then try to prepare any entity that may be present in
+        // the url so the entity is sent via the page arguments to the page
+        // callback, instead of just sending the integer.
+        var args = arg(null, path);
+        $.each(
+          drupalgap.menu_links[router_path].page_arguments,
+          function(index, object) {
+            if (is_int(object) && args[object]) {
+              page_arguments.push(args[object]);
             }
-          );
-
-          // Call the page callback function with the page arguments.
-          content = fn.apply(null, Array.prototype.slice.call(page_arguments));
-        }
-        else {
-          // There are no arguments, just return the page callback result.
-          content = fn();
-        }
-
-        // If the content came back as a string, convert it to a render object
-        // so any jQM page events can be attached to the content if necessary.
-        if (typeof content === 'string') {
-          content = {
-            content: {
-              markup: content
-            }
-          };
-        }
-
-        // Clear out any previous jQM page events, then if there are any jQM
-        // event callback functions attached to the menu link for this page, set
-        // each event up to be fired with inline JS on the page. We pass along
-        // any page arguments to the jQM event handler function.
-        drupalgap.page.jqm_events = [];
-        var jqm_page_events = drupalgap_jqm_page_events();
-        var jqm_page_event_args = null;
-        if (page_arguments.length > 0) {
-          jqm_page_event_args = JSON.stringify(page_arguments);
-        }
-        for (var i = 0; i < jqm_page_events.length; i++) {
-          if (drupalgap.menu_links[router_path][jqm_page_events[i]]) {
-            var jqm_page_event = jqm_page_events[i];
-            var jqm_page_event_callback =
-              drupalgap.menu_links[router_path][jqm_page_event];
-            if (drupalgap_function_exists(jqm_page_event_callback)) {
-              var options = {
-                'page_id': page_id,
-                'jqm_page_event': jqm_page_event,
-                'jqm_page_event_callback': jqm_page_event_callback,
-                'jqm_page_event_args': jqm_page_event_args
-              };
-              content[jqm_page_event] = {
-                markup: drupalgap_jqm_page_event_script_code(options)
-              };
-            }
-            else {
-              console.log(
-                'menu_execute_active_handler (' + path + ') - the jQM ' +
-                jqm_page_event + ' call back function ' +
-                jqm_page_event_callback + ' does not exist!'
-              );
-            }
+            else { page_arguments.push(object); }
           }
-        }
+        );
 
-        // Add a pageshow handler for the page title.
-        if (typeof content === 'object') {
-          var options = {
-            'page_id': page_id,
-            'jqm_page_event': 'pageshow',
-            'jqm_page_event_callback': '_drupalgap_page_title_pageshow',
-            'jqm_page_event_args': jqm_page_event_args
-          };
-          content['drupalgap_page_title_pageshow'] = {
-            markup: drupalgap_jqm_page_event_script_code(options)
-          };
-        }
-
-        // And finally return the content.
-        return content;
+        // Call the page callback function with the page arguments.
+        content = fn.apply(null, Array.prototype.slice.call(page_arguments));
       }
       else {
-        // No page call back specified.
-        console.log(
-          'menu_execute_active_handler - no page callback (' + router_path + ')'
-        );
-        console.log(JSON.stringify(drupalgap.menu_links[router_path]));
+        // There are no arguments, just return the page callback result.
+        content = fn();
       }
+
+      // If the content came back as a string, convert it to a render object
+      // so any jQM page events can be attached to the content if necessary.
+      if (typeof content === 'string') {
+        content = {
+          content: {
+            markup: content
+          }
+        };
+      }
+
+      // Clear out any previous jQM page events, then if there are any jQM
+      // event callback functions attached to the menu link for this page, set
+      // each event up to be fired with inline JS on the page. We pass along
+      // any page arguments to the jQM event handler function.
+      drupalgap.page.jqm_events = [];
+      var jqm_page_events = drupalgap_jqm_page_events();
+      var jqm_page_event_args = null;
+      if (page_arguments.length > 0) {
+        jqm_page_event_args = JSON.stringify(page_arguments);
+      }
+      for (var i = 0; i < jqm_page_events.length; i++) {
+        if (drupalgap.menu_links[router_path][jqm_page_events[i]]) {
+          var jqm_page_event = jqm_page_events[i];
+          var jqm_page_event_callback =
+            drupalgap.menu_links[router_path][jqm_page_event];
+          if (drupalgap_function_exists(jqm_page_event_callback)) {
+            var options = {
+              'page_id': page_id,
+              'jqm_page_event': jqm_page_event,
+              'jqm_page_event_callback': jqm_page_event_callback,
+              'jqm_page_event_args': jqm_page_event_args
+            };
+            content[jqm_page_event] = {
+              markup: drupalgap_jqm_page_event_script_code(options)
+            };
+          }
+          else {
+            console.log(
+              'menu_execute_active_handler (' + path + ') - the jQM ' +
+              jqm_page_event + ' call back function ' +
+              jqm_page_event_callback + ' does not exist!'
+            );
+          }
+        }
+      }
+
+      // Add a pageshow handler for the page title.
+      if (typeof content === 'object') {
+        var options = {
+          'page_id': page_id,
+          'jqm_page_event': 'pageshow',
+          'jqm_page_event_callback': '_drupalgap_page_title_pageshow',
+          'jqm_page_event_args': jqm_page_event_args
+        };
+        content['drupalgap_page_title_pageshow'] = {
+          markup: drupalgap_jqm_page_event_script_code(options)
+        };
+      }
+
+      // And finally return the content.
+      return content;
     }
     else {
-      // No router path.
+      // No page call back specified.
       console.log(
-        'menu_execute_active_handler - no router path (' + path + ')'
+        'menu_execute_active_handler - no page callback (' + router_path + ')'
       );
+      console.log(JSON.stringify(drupalgap.menu_links[router_path]));
     }
   }
   catch (error) {
