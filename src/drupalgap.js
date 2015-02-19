@@ -97,6 +97,9 @@ function drupalgap_init() {
 function drupalgap_onload() {
   try {
 
+    // Remove any hash in case the app is restarting.
+    window.location.hash = '';
+
     // At this point, the Drupal object has been initialized by jDrupal and the
     // app/settings.js file was loaded in <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
