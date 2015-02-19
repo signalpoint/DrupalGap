@@ -18,7 +18,7 @@ function drupalgap_goto(path) {
     drupalgap.page.options = options;
 
     // Prepare the path.
-    path = drupalgap_goto_prepare_path(path);
+    path = _drupalgap_goto_prepare_path(path);
     if (!path) { return false; }
 
     // Invoke all implementations of hook_drupalgap_goto_preprocess().
@@ -229,16 +229,13 @@ function drupalgap_goto_generate_page_and_go(
 }
 
 /**
- * Given a path, this function will do any necessary conversions to the path so
- * it is better understood by the menu system. For example, a path of "" in
- * Drupal is used to represent the front page, so this function would turn the
- * "" value into the App's actual front page (drupalgap.settings.front) path
- * value so the menu system routes it correctly.
+ * An internal function used to prepare the path for menu routing.
  * @param {String} path
  * @return {String}
  */
-function drupalgap_goto_prepare_path(path) {
+function _drupalgap_goto_prepare_path(path) {
   try {
+
     // If the path is an empty string, change it to the front page path.
     if (path == '') {
       if (!drupalgap.settings.front) {
@@ -250,13 +247,32 @@ function drupalgap_goto_prepare_path(path) {
       }
       else { path = drupalgap.settings.front; }
     }
+
+    // Pull out any query string parameters and populate them into _GET.
+    var pos = path.indexOf('?');
+    if (pos != -1 && pos != path.length - 1) {
+      var query = path.substr(pos + 1, path.length - pos);
+      path = path.substr(0, pos);
+      var parts = query.split('&');
+      for (var i = 0; i < parts.length; i++) {
+        pos = parts[i].indexOf('=');
+        if (pos == -1) { continue; }
+        query = parts[i].split('=');
+        if (query.length != 2) { continue; }
+        _GET[decodeURIComponent(query[0])] = decodeURIComponent(query[1]);
+      }
+    }
+
     // Change 'user' to 'user/login' for anonymous users, or change it to e.g.
     // 'user/123' for authenticated users.
     else if (path == 'user') {
       if (Drupal.user.uid != 0) { path = 'user/' + Drupal.user.uid; }
       else { path = 'user/login'; }
     }
+
+    // Finally return the path.
     return path;
+
   }
   catch (error) { console.log('drupalgap_goto_prepare_path - ' + error); }
 }
