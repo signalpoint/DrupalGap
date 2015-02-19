@@ -116,4 +116,10 @@ div[role="banner"] img,
 div[data-role="header"] div[data-role="controlgroup"] .ui-controlgroup-controls .ui-btn-icon-notext {
   padding: .45em 1em;
 }
+@-moz-document url-prefix() {
+    div[data-role="header"] div[data-role="controlgroup"] .ui-controlgroup-controls .ui-btn-icon-notext {
+      padding: .4em 1em;
+    }
+}
+
 
