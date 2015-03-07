@@ -2908,14 +2908,17 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
         break;
       case 'checkboxes':
         // Iterate over each option, and see if it is checked, then pop it onto
-        // the value array.
+        // the value array. It's possible for values to be updated dynamically
+        // by a developer (i.e. through a pageshow handler), so it isn't safe to
+        // look at the options in local storage. Instead we'll directly iterate
+        // over the element option(s) in the DOM.
         value = {};
-        $.each(element.options, function(_value, _label) {
-            if (_value == 'attributes') { return; } // Skip attributes.
-            if (empty(_label)) { _label = _value; }
-            selector = 'input[name="' + element.name + '[' + _value + ']"]';
-            if (!$(selector).is(':checked')) { value[_value] = 0; }
-            else { value[_value] = _value; }
+        var options = $('label[for="' + id + '"]').siblings('.ui-checkbox');
+        $.each(options, function(index, option) {
+            var checkbox = $(option).children('input');
+            var _value = $(checkbox).attr('value');
+            if ($(checkbox).is(':checked')) { value[_value] = _value; }
+            else { value[_value] = 0; }
         });
         break;
       case 'list_boolean':
@@ -3407,7 +3410,7 @@ function _drupalgap_form_render_element(form, element) {
           variables,
           item
         );
-        if (!item_html) {
+        if (typeof item_html === 'undefined') {
           render_item = false;
           return false;
         }
@@ -3879,7 +3882,9 @@ function theme_checkboxes(variables) {
         var checkbox = {
           value: value,
           attributes: {
-            name: variables.name + '[' + value + ']'
+            name: variables.name + '[' + value + ']',
+            'class': variables.name,
+            value: value
           }
         };
         if (variables.value && variables.value[value]) {
