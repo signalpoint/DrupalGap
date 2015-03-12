@@ -528,7 +528,10 @@ function drupalgap_confirm(message) {
     if (
       typeof parent.window.ripple === 'function' ||
       drupalgap.settings.mode == 'web-app'
-    ) { if (confirm(message)) { confirmCallback(); } }
+    ) {
+      var r = confirm(message);
+      if (r == true) { confirmCallback(); }
+    }
     else {
       navigator.notification.confirm(
           message,
