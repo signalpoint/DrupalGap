@@ -528,7 +528,10 @@ function drupalgap_confirm(message) {
     if (
       typeof parent.window.ripple === 'function' ||
       drupalgap.settings.mode == 'web-app'
-    ) { if (confirm(message)) { confirmCallback(); } }
+    ) {
+      var r = confirm(message);
+      if (r == true) { confirmCallback(); }
+    }
     else {
       navigator.notification.confirm(
           message,
@@ -6266,18 +6269,24 @@ function comment_services_postprocess(options, result) {
   try {
     if (options.service == 'comment' && options.resource == 'create') {
       // If we're on the node view page, inject the comment into the comment
-      // listing, then scroll the page to the newly inserted/rendered comment,
-      // then clear the form input.
+      // listing (if it is in the DOM), then scroll the page to the newly
+      // inserted/rendered comment, then clear the form input.
       var path = drupalgap_path_get();
       var router_path = drupalgap_get_menu_link_router_path(path);
       if (router_path == 'node/%') {
-        node_load(arg(1), {
+        var nid = arg(1);
+        var container_id = comments_container_id(nid);
+        var container = $('#' + container_id);
+        if (
+          typeof container.length !== 'undefined' &&
+          container.length == 0
+        ) { return; }
+        node_load(nid, {
             reset: true,
             success: function(node) {
               comment_load(result.cid, {
                   success: function(comment) {
-                    var container_id = comments_container_id(node.nid);
-                    $('#' + container_id).append(
+                    $(container).append(
                       theme('comment', { comment: comment })
                     ).trigger('create');
                     scrollToElement('#' + container_id + ' :last-child', 500);
