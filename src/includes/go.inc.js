@@ -278,7 +278,7 @@ function _drupalgap_goto_prepare_path(path) {
 }
 
 $(window).on("navigate", function (event, data) {
-    
+
     // In web-app mode, clicking the back button on your browser (or Android
     // device browser), the drupalgap path doesn't get updated for some
     // reason(s), so we'll update it manually.
