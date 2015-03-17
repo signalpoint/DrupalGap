@@ -4442,6 +4442,19 @@ function _drupalgap_goto_prepare_path(path) {
   catch (error) { console.log('drupalgap_goto_prepare_path - ' + error); }
 }
 
+$(window).on("navigate", function (event, data) {
+
+    // In web-app mode, clicking the back button on your browser (or Android
+    // device browser), the drupalgap path doesn't get updated for some
+    // reason(s), so we'll update it manually.
+    if (drupalgap.settings.mode == 'web-app') {
+      var direction = data.state.direction; // back or forward
+      if (direction == 'back' && drupalgap.back_path.length > 0) {
+        drupalgap.path = drupalgap.back_path[drupalgap.back_path.length - 1];
+      }
+    }
+
+});
 /**
  * Execute the page callback associated with the current path and return its
  * content.
