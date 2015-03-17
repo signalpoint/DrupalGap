@@ -125,13 +125,13 @@ function hook_deviceready() {}
  */
 function hook_drupalgap_goto_preprocess(path) {
   try {
+    // Pre process the front page.
+    if (path == drupalgap.settings.front) {
+      drupalgap_alert('Preprocessing the front page!');
+    }
   }
   catch (error) {
     console.log('hook_drupalgap_goto_preprocess - ' + error);
-  }
-  // Pre process the front page.
-  if (path == drupalgap.settings.front) {
-    drupalgap_alert('Preprocessing the front page!');
   }
 }
 
