@@ -4393,6 +4393,18 @@ function drupalgap_goto_generate_page_and_go(
   }
 }
 
+ /**
+ * @deprecated
+ */
+function drupalgap_goto_prepare_path(path) {
+  try {
+    console.log('WARNING - drupalgap_goto_prepare_path() is deprecated, ' +
+      'use _drupalgap_goto_prepare_path() instead!');
+    return _drupalgap_goto_prepare_path(path);
+  }
+  catch (error) { console.log('drupalgap_goto_prepare_path - ' + error); }
+}
+
 /**
  * An internal function used to prepare the path for menu routing.
  * @param {String} path
@@ -5836,6 +5848,8 @@ function theme_link(variables) {
             "window.open('" + variables.path + "', '_blank', 'location=yes');";
         }
         else {
+          // Prepare the path.
+          variables.path = _drupalgap_goto_prepare_path(variables.path);
           // All other options need to be extracted into a JSON string for the
           // onclick handler.
           var goto_options = '';
@@ -5850,6 +5864,11 @@ function theme_link(variables) {
               '{' + goto_options + '});';
         }
       }
+      // Is this link active?
+      if (variables.path == drupalgap_path_get()) {
+        variables.attributes['class'] += ' ui-btn-active '
+      }
+      // Finally, return the link.
       return '<a href="#" onclick="javascript:' + onclick + '"' +
         drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
     }
