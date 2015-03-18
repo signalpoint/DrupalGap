@@ -4232,12 +4232,30 @@ function drupalgap_goto(path) {
     }
 
     // If the new router path is the same as the current router path and the new
-    // path is the same as the current path, don't go anywhere, unless it is a
+    // path is the same as the current path, we may need to cancel the
+    // navigation attempt (i.e. don't go anywhere), unless...act on it...don't go anywhere, unless it is a
     // form submission, then continue.
-    if (router_path == drupalgap_router_path_get() &&
-        drupalgap_path_get() == path &&
-        !options.form_submission) {
-      return false;
+    if (
+      router_path == drupalgap_router_path_get() &&
+      drupalgap_path_get() == path
+    ) {
+
+      // If it's a form submission, we'll continue onward...
+      if (options.form_submission) { }
+
+      // If we're reloading the current page, we need to set aside this path
+      // and navigate to the system's _reload page, which will then handle the
+      // actual reloading of the page.
+      // @see system_drupalgap_goto_post_process()
+      else if (options.reloadPage) {
+        _system_reload_page = path;
+        path = '_reload';
+        router_path = drupalgap_get_menu_link_router_path(path);
+      }
+
+      // Otherwise, just stop the navigation attempt.
+      else { return false; }
+
     }
 
     // Grab the page id.
@@ -4303,6 +4321,7 @@ function drupalgap_goto(path) {
     else if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
       // The page is not in the DOM, and we're being asked to reload it, this
       // can't happen, so we'll just delete the reloadPage option.
+      console.log('WARNING - drupalgap_goto() asked to reload page not in DOM');
       delete options.reloadPage;
     }
 
@@ -10318,6 +10337,8 @@ function drupalgap_services_rss_extract_items(data) {
   }
 }
 
+var _system_reload_page = null;
+
 /**
  * Implements hook_block_info().
  * @return {Object}
@@ -10454,6 +10475,11 @@ function system_menu() {
         page_callback: 'system_404_page'
       }
     };
+    items['_reload'] = {
+      title: 'Reloading...',
+      page_callback: 'system_reload_page',
+      pageshow: 'system_reload_pageshow'
+    };
     return items;
 }
 
@@ -10473,6 +10499,49 @@ function system_401_page(path) {
  */
 function system_404_page(path) {
   return 'Sorry, the page you requested was not found.';
+}
+
+/**
+ *
+ */
+function system_reload_page() {
+  try {
+    return '';
+  }
+  catch (error) { console.log('system_reload_page - ' + error); }
+}
+
+/**
+ *
+ */
+function system_reload_pageshow() {
+  try {
+    drupalgap_loading_message_show();
+  }
+  catch (error) { console.log('system_reload_pageshow - ' + error); }
+}
+
+/**
+ * Implements hook_system_drupalgap_goto_post_process().
+ */
+function system_drupalgap_goto_post_process(path) {
+  try {
+
+    // To reload the "current" page, grab the path we have been requested to
+    // reload, clear out our global reference to it, then go!
+    // @see https://github.com/signalpoint/DrupalGap/issues/254
+    if (path == '_reload') {
+      if (!_system_reload_page) { return; }
+      var path = '' + _system_reload_page;
+      _system_reload_page = null;
+      drupalgap_loading_message_show();
+      drupalgap_goto(path, { reloadPage: true });
+    }
+
+  }
+  catch (error) {
+    console.log('system_drupalgap_goto_post_process - ' + error);
+  }
 }
 
 /**
