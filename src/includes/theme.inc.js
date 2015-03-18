@@ -821,6 +821,8 @@ function theme_link(variables) {
             "window.open('" + variables.path + "', '_blank', 'location=yes');";
         }
         else {
+          // Prepare the path.
+          variables.path = _drupalgap_goto_prepare_path(variables.path);
           // All other options need to be extracted into a JSON string for the
           // onclick handler.
           var goto_options = '';
@@ -835,6 +837,11 @@ function theme_link(variables) {
               '{' + goto_options + '});';
         }
       }
+      // Is this link active?
+      if (variables.path == drupalgap_path_get()) {
+        variables.attributes['class'] += ' ui-btn-active '
+      }
+      // Finally, return the link.
       return '<a href="#" onclick="javascript:' + onclick + '"' +
         drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
     }
