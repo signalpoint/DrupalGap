@@ -1,3 +1,5 @@
+var _system_reload_page = null;
+
 /**
  * Implements hook_block_info().
  * @return {Object}
@@ -134,6 +136,11 @@ function system_menu() {
         page_callback: 'system_404_page'
       }
     };
+    items['_reload'] = {
+      title: 'Reloading...',
+      page_callback: 'system_reload_page',
+      pageshow: 'system_reload_pageshow'
+    };
     return items;
 }
 
@@ -153,6 +160,49 @@ function system_401_page(path) {
  */
 function system_404_page(path) {
   return 'Sorry, the page you requested was not found.';
+}
+
+/**
+ *
+ */
+function system_reload_page() {
+  try {
+    return '';
+  }
+  catch (error) { console.log('system_reload_page - ' + error); }
+}
+
+/**
+ *
+ */
+function system_reload_pageshow() {
+  try {
+    drupalgap_loading_message_show();
+  }
+  catch (error) { console.log('system_reload_pageshow - ' + error); }
+}
+
+/**
+ * Implements hook_system_drupalgap_goto_post_process().
+ */
+function system_drupalgap_goto_post_process(path) {
+  try {
+
+    // To reload the "current" page, grab the path we have been requested to
+    // reload, clear out our global reference to it, then go!
+    // @see https://github.com/signalpoint/DrupalGap/issues/254
+    if (path == '_reload') {
+      if (!_system_reload_page) { return; }
+      var path = '' + _system_reload_page;
+      _system_reload_page = null;
+      drupalgap_loading_message_show();
+      drupalgap_goto(path, { reloadPage: true });
+    }
+
+  }
+  catch (error) {
+    console.log('system_drupalgap_goto_post_process - ' + error);
+  }
 }
 
 /**
