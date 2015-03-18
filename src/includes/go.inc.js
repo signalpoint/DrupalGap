@@ -228,6 +228,18 @@ function drupalgap_goto_generate_page_and_go(
   }
 }
 
+ /**
+ * @deprecated
+ */
+function drupalgap_goto_prepare_path(path) {
+  try {
+    console.log('WARNING - drupalgap_goto_prepare_path() is deprecated, ' +
+      'use _drupalgap_goto_prepare_path() instead!');
+    return _drupalgap_goto_prepare_path(path);
+  }
+  catch (error) { console.log('drupalgap_goto_prepare_path - ' + error); }
+}
+
 /**
  * An internal function used to prepare the path for menu routing.
  * @param {String} path
