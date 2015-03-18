@@ -11297,7 +11297,10 @@ function user_view_pageshow(uid) {
               'name': {'markup': account.name},
               'created': {
                 markup:
-                  (new Date(parseInt(account.created) * 1000)).toDateString()
+                '<div class="user_profile_history"><h3>History</h3>' +
+                '<dl><dt>Member since</td></dt><dd>' +
+                  (new Date(parseInt(account.created) * 1000)).toDateString() +
+                '</dd></div>'
               }
             };
             // Any content?
