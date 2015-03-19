@@ -7,12 +7,13 @@
 
 # Create the list of files
 lintfiles = src/drupalgap.js\
+				src/includes/block.inc.js\
 				src/includes/common.inc.js\
 				src/includes/form.inc.js\
 				src/includes/go.inc.js\
-				src/includes/menu.inc.js\
 				src/includes/page.inc.js\
 				src/includes/region.inc.js\
+				src/includes/menu.inc.js\
 				src/includes/theme.inc.js\
 				src/includes/title.inc.js\
 				src/modules/block/block.js\
@@ -33,6 +34,7 @@ lintfiles = src/drupalgap.js\
 				src/modules/views/views.js\
 
 files =	src/drupalgap.js\
+				src/includes/block.inc.js\
 				src/includes/common.inc.js\
 				src/includes/form.inc.js\
 				src/includes/go.inc.js\
