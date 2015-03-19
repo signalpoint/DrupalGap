@@ -25,6 +25,9 @@ function drupalgap_render_region(region) {
     // Let's render the region...
     var region_html = '';
 
+    region_html +=
+      _drupalgap_region_render_zone('_prefix', region, current_path);
+
     // If the region has blocks specified for it in the theme in settings.js...
     if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
 
@@ -171,50 +174,25 @@ function drupalgap_render_region(region) {
 
       // Render each block in the region. Determine how many visible blocks are
       // in the region.
-      var block_count = 0;
-      var block_menu_count = 0;
+      var block_counts = {
+        block_count: 0,
+        block_menu_count: 0
+      };
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
 
-          // Check the block's visibility settings. If an access_callback
-          // function is specified on the block's settings, we'll call that
-          // to determine the visibility, otherwise we'll fall back to the
-          // default visibility determination mechanism.
-          var render_block = false;
-          if (
-            block_settings.access_callback &&
-            drupalgap_function_exists(block_settings.access_callback)
-          ) {
-            var fn = window[block_settings.access_callback];
-            render_block = fn({
-                path: current_path,
-                delta: block_delta,
-                region: region.name,
-                theme: drupalgap.settings.theme,
-                settings: block_settings
-            });
-          }
-          else if (drupalgap_check_visibility('block', block_settings)) {
-            render_block = true;
-            // The 'offline' and 'error' pages only have the 'main' system
-            // block visible.
-            if (block_delta != 'main' && (
-              current_path == 'offline' || current_path == 'error')
-            ) { render_block = false; }
-          }
-          if (render_block) {
-            var block = drupalgap_block_load(block_delta);
-            block_count++;
-            if (menu_load(block_delta)) { block_menu_count++; }
-            if (block) {
-              region_html += module_invoke(
-                block.module,
-                'block_view',
-                block_delta,
-                region
-              );
-            }
-          }
+          // Ignore region _prefix and _suffix.
+          if (block_delta == '_prefix' || block_delta == '_suffix') { return; }
+
+          // Render the block.
+          region_html += drupalgap_block_render(
+            region,
+            current_path,
+            block_delta,
+            block_settings,
+            block_counts
+          );
+
       });
 
       // If this was a header or footer, and there were only region links
@@ -222,13 +200,13 @@ function drupalgap_render_region(region) {
       if (
         in_array(region.attributes['data-role'], ['header', 'footer']) &&
         (
-          block_count == 0 && region_link_count > 0 ||
-          block_count - block_menu_count == 0
+          block_counts.block_count == 0 && region_link_count > 0 ||
+          block_counts.block_count - block_counts.block_menu_count == 0
         ) ||
         (
           region_link_count > 0 &&
-          region_link_popup_count >= block_menu_count &&
-          block_count == 0
+          region_link_popup_count >= block_counts.block_menu_count &&
+          block_counts.block_count == 0
         )
       ) {
         // Show an empty header if we're not collapsing on an empty region.
@@ -242,8 +220,50 @@ function drupalgap_render_region(region) {
       region_html += '</div><!-- ' + region.name + ' -->';
 
     }
+
+    region_html +=
+      _drupalgap_region_render_zone('_suffix', region, current_path);
+
     return region_html;
   }
   catch (error) { console.log('drupalgap_render_region - ' + error); }
+}
+
+/**
+ * Renders the given zone (_prefix, _suffix) if any for a region.
+ * @param {String} zone
+ * @param {Object} region
+ * @param {String} current_path
+ * @return {String}
+ */
+function _drupalgap_region_render_zone(zone, region, current_path) {
+  try {
+    var html = '';
+    var region_settings =
+      drupalgap.settings.blocks[drupalgap.settings.theme][region.name];
+    if (typeof region_settings[zone] === 'undefined') { return html; }
+    var blocks = region_settings[zone];
+    $.each(blocks, function(block_delta, block_settings) {
+        html += drupalgap_block_render(
+          region,
+          current_path,
+          block_delta,
+          block_settings
+        );
+    });
+    return html;
+  }
+  catch (error) { console.log('_drupalgap_region_render_zone - ' + error); }
+}
+
+/**
+ * Given a key (typically a block delta), this will generate a unique ID that
+ * can be used for the panel. It will be fused with the current page id.
+ */
+function drupalgap_panel_id(key) {
+  try {
+    return key + '_' + drupalgap_get_page_id();
+  }
+  catch (error) { console.log('drupalgap_panel_id - ' + error); }
 }
 
