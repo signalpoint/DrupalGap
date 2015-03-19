@@ -12,7 +12,6 @@ function drupalgap_init() {
     var dg = {
       modules: {
         core: [
-           { name: 'block' },
            { name: 'comment' },
            { name: 'contact' },
            { name: 'entity' },
@@ -31,6 +30,7 @@ function drupalgap_init() {
       },
       module_paths: [],
       includes: [
+          { name: 'block' },
           { name: 'common' },
           { name: 'form' },
           { name: 'go' },
