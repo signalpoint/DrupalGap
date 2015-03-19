@@ -18,10 +18,13 @@ function drupalgap_render_region(region) {
       console.log(msg);
       return '';
     }
+
     // Grab the current path.
     var current_path = drupalgap_path_get();
+
     // Let's render the region...
     var region_html = '';
+
     // If the region has blocks specified for it in the theme in settings.js...
     if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
 
@@ -29,12 +32,15 @@ function drupalgap_render_region(region) {
       // append a system class name for the region onto its attributes array.
       if (!region.attributes['class']) { region.attributes['class'] = ''; }
       region.attributes['class'] += ' region_' + region.name + ' ';
+
       // Open the region container.
       region_html += '<div ' + drupalgap_attributes(region.attributes) + '>';
+
       // If there are any links attached to this region, render them first.
       var region_link_count = 0;
       var region_link_popup_count = 0;
       if (region.links && region.links.length > 0) {
+
         // Let's first iterate over all of the region links and keep counts of
         // any links that use the ui-btn-left and ui-btn-right class attribute.
         // This will allow us to properly wrap region links in a control group.
@@ -59,9 +65,11 @@ function drupalgap_render_region(region) {
         var ui_btn_left_html = '';
         var ui_btn_right_html = '';
         for (var i = 0; i < region.links.length; i++) {
+
           // Grab the link and its data.
           var region_link = region.links[i];
           var data = menu_region_link_get_data(region_link);
+
           // Check link's region visiblity settings. Links will not be rendered
           // on certain system pages.
           // @TODO - this additional call to drupalgap_check_visibility() here
@@ -80,7 +88,9 @@ function drupalgap_render_region(region) {
             var link_text = region_link.title;
             var link_path = region_link.path;
             if (data.options.popup) {
+
               region_link_popup_count++;
+
               // If the link text isn't set, and the data icon pos isn't set,
               // set it the data icon pos so the button and icon are rendered
               // properly.
@@ -88,6 +98,7 @@ function drupalgap_render_region(region) {
                 (!link_text || empty(link_text)) &&
                 typeof data.options.attributes['data-iconpos'] === 'undefined'
               ) { data.options.attributes['data-iconpos'] = 'notext'; }
+
               // If data-rel, data-icon, data-role aren't set, set them.
               if (
                 typeof data.options.attributes['data-rel'] === 'undefined'
@@ -98,6 +109,7 @@ function drupalgap_render_region(region) {
               if (
                 typeof data.options.attributes['data-role'] === 'undefined'
               ) { data.options.attributes['data-role'] = 'button'; }
+
               // Popup menus need a dynamic href value on the link, so we
               // always overwrite it.
               link_path = null;
@@ -105,11 +117,14 @@ function drupalgap_render_region(region) {
                 '#' + menu_container_id(data.options.popup_delta);
             }
             else {
+
               // Set the data-role to a button, if one isn't already set.
               if (typeof data.options.attributes['data-role'] === 'undefined') {
                 data.options.attributes['data-role'] = 'button';
               }
+
             }
+
             // If it has notext for the icon position, force the text to be
             // an nbsp.
             if (data.options.attributes['data-iconpos'] == 'notext') {
@@ -124,6 +139,7 @@ function drupalgap_render_region(region) {
             else if (side == 'right') { ui_btn_right_html += link_html; }
 
           }
+
         }
 
         // If there was more than one link on a side, wrap it in a control
@@ -159,6 +175,7 @@ function drupalgap_render_region(region) {
       var block_menu_count = 0;
       $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
         function(block_delta, block_settings) {
+
           // Check the block's visibility settings. If an access_callback
           // function is specified on the block's settings, we'll call that
           // to determine the visibility, otherwise we'll fall back to the
@@ -199,6 +216,7 @@ function drupalgap_render_region(region) {
             }
           }
       });
+
       // If this was a header or footer, and there were only region links
       // rendered, place an empty header in the region.
       if (
@@ -222,6 +240,7 @@ function drupalgap_render_region(region) {
 
       // Close the region container.
       region_html += '</div><!-- ' + region.name + ' -->';
+
     }
     return region_html;
   }
