@@ -772,20 +772,35 @@ function theme_link(variables) {
     var text = '';
     if (variables.text) { text = variables.text; }
     if (typeof variables.path !== 'undefined' && variables.path != null) {
+
+      // If the path begins with a hashtag, just render the link as is with the
+      // hashtag for the href.
+      if (variables.path.indexOf('#') == 0) {
+        variables.attributes['href'] = variables.path;
+        return '<a ' + drupalgap_attributes(variables.attributes) + '>' +
+          text +
+        '</a>';
+      }
+
       // By default our onclick will use a drupalgap_goto(). If we have any
       // incoming link options, then modify the link accordingly.
       var onclick = 'drupalgap_goto(\'' + variables.path + '\');';
       if (variables.options) {
+
         // Use an InAppBrowser?
         if (variables.options.InAppBrowser) {
           onclick =
             "window.open('" + variables.path + "', '_blank', 'location=yes');";
         }
+
         else {
+
           // Prepare the path.
           variables.path = _drupalgap_goto_prepare_path(variables.path);
+
           // All other options need to be extracted into a JSON string for the
           // onclick handler.
+
           var goto_options = '';
           $.each(variables.options, function(option, value) {
               if (option == 'attributes') { return; }
@@ -796,17 +811,22 @@ function theme_link(variables) {
             'drupalgap_goto(\'' +
               variables.path + '\', ' +
               '{' + goto_options + '});';
+
         }
       }
+
       // Is this link active?
       if (variables.path == drupalgap_path_get()) {
         variables.attributes['class'] += ' ui-btn-active '
       }
+
       // Finally, return the link.
       return '<a href="#" onclick="javascript:' + onclick + '"' +
         drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
+
     }
     else {
+
       // The link has no path, so just render the text and attributes.
       if (typeof variables.attributes.href === 'undefined') {
         variables.attributes.href = '#';
@@ -814,6 +834,7 @@ function theme_link(variables) {
       return '<a ' + drupalgap_attributes(variables.attributes) + '>' +
         text +
       '</a>';
+
     }
   }
   catch (error) { console.log('theme_link - ' + error); }
