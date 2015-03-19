@@ -31,10 +31,14 @@ function drupalgap_init() {
       },
       module_paths: [],
       includes: [
-          {name: 'common' },
-          {name: 'form' },
-          {name: 'menu' },
-          {name: 'theme' }
+          { name: 'common' },
+          { name: 'form' },
+          { name: 'go' },
+          { name: 'menu' },
+          { name: 'page' },
+          { name: 'region' },
+          { name: 'theme' },
+          { name: 'title' }
       ],
       online: false,
       destination: '',
