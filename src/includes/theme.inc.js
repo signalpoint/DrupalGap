@@ -1,43 +1,4 @@
 /**
- * Each time we use drupalgap_goto to change a page, this function is called on
- * the pagebeforehange event. If we're not moving backwards, or navigating to
- * the same page, this will preproccesses the page, then processes it.
- */
-$(document).on('pagebeforechange', function(e, data) {
-    try {
-      // If we're moving backwards, reset drupalgap.back and return.
-      if (drupalgap && drupalgap.back) {
-        drupalgap.back = false;
-        return;
-      }
-      // If the jqm active page url is the same as the page id of the current
-      // path, return.
-      if (
-        drupalgap_jqm_active_page_url() ==
-        drupalgap_get_page_id(drupalgap_path_get())
-      ) { return; }
-      // We only want to process the page we are going to, not the page we are
-      // coming from. When data.toPage is a string that is our destination page.
-      if (typeof data.toPage === 'string') {
-
-        // If drupalgap_goto() determined that it is necessary to prevent the
-        // default page from reloading, then we'll skip the page
-        // processing and reset the prevention boolean.
-        if (drupalgap && !drupalgap.page.process) {
-          drupalgap.page.process = true;
-        }
-        else if (drupalgap) {
-          // Pre process, then process the page.
-          template_preprocess_page(drupalgap.page.variables);
-          template_process_page(drupalgap.page.variables);
-        }
-
-      }
-    }
-    catch (error) { console.log('pagebeforechange - ' + error); }
-});
-
-/**
  * Returns the path to the current DrupalGap theme, false otherwise.
  * @return {String|Boolean}
  */
@@ -964,54 +925,5 @@ function theme_jqm_table(variables) {
     return theme_table(variables);
   }
   catch (error) { console.log('theme_jqm_table - ' + error); }
-}
-
-/**
- * Implementation of template_preprocess_page().
- * @param {Object} variables
- */
-function template_preprocess_page(variables) {
-  try {
-    // Set up default attribute's for the page's div container.
-    if (typeof variables.attributes === 'undefined') {
-      variables.attributes = {};
-    }
-
-    // @todo - is this needed?
-    variables.attributes['data-role'] = 'page';
-
-    // Call all hook_preprocess_page functions.
-    module_invoke_all('preprocess_page');
-
-    // Place the variables into drupalgap.page
-    drupalgap.page.variables = variables;
-  }
-  catch (error) { console.log('template_preprocess_page - ' + error); }
-}
-
-/**
- * Implementation of template_process_page().
- * @param {Object} variables
- */
-function template_process_page(variables) {
-  try {
-    var drupalgap_path = drupalgap_path_get();
-    // Execute the active menu handler to assemble the page output. We need to
-    // do this before we render the regions below.
-    drupalgap.output = menu_execute_active_handler();
-    // For each region, render it, then replace the placeholder in the page's
-    // html with the rendered region.
-    var page_id = drupalgap_get_page_id(drupalgap_path);
-    var page_html = $('#' + page_id).html();
-    if (!page_html) { return; }
-    $.each(drupalgap.theme.regions, function(index, region) {
-        page_html = page_html.replace(
-          '{:' + region.name + ':}',
-          drupalgap_render_region(region)
-        );
-    });
-    $('#' + page_id).html(page_html);
-  }
-  catch (error) { console.log('template_process_page - ' + error); }
 }
 

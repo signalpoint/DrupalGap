@@ -556,3 +556,4 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
     console.log('drupalgap_menu_router_build_relationships - ' + error);
   }
 }
+

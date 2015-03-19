@@ -308,6 +308,48 @@ function _drupalgap_goto_prepare_path(path) {
   catch (error) { console.log('drupalgap_goto_prepare_path - ' + error); }
 }
 
+/**
+ * Change the page to the previous page.
+ */
+function drupalgap_back() {
+  try {
+    if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
+      var msg = 'Exit ' + drupalgap.settings.title + '?';
+      if (drupalgap.settings.exit_message) {
+        msg = drupalgap.settings.exit_message;
+      }
+      drupalgap_confirm(msg, {
+          confirmCallback: _drupalgap_back_exit
+      });
+    }
+    else { _drupalgap_back(); }
+  }
+  catch (error) { console.log('drupalgap_back' + error); }
+}
+
+/**
+ * Change the page to the previous page.
+ */
+function _drupalgap_back() {
+  try {
+    drupalgap.back = true;
+    history.back();
+    drupalgap_path_set(drupalgap.back_path.pop());
+  }
+  catch (error) { console.log('drupalgap_back' + error); }
+}
+
+/**
+ * An internal function used to exit the app when the back button is clicked.
+ * @param {Number} button Which button was pressed.
+ */
+function _drupalgap_back_exit(button) {
+  try {
+    button === 1 ? navigator.app.exitApp() : '';
+  }
+  catch (error) { console.log('_drupalgap_back_exit - ' + error); }
+}
+
 $(window).on("navigate", function (event, data) {
 
     // In web-app mode, clicking the back button on your browser (or Android
