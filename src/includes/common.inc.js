@@ -281,7 +281,7 @@ function drupalgap_get_path(type, name) {
       });
     }
     else if (type == 'theme') {
-      if (name == 'easystreet3') { path = 'themes/' + name; }
+      if (name == 'easystreet3' || name == 'ava') { path = 'themes/' + name; }
       else { path = 'app/themes/' + name; }
     }
     else {

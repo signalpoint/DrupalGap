@@ -364,7 +364,7 @@ function drupalgap_load_theme() {
       // Pull the theme name from the settings.js file.
       var theme_name = drupalgap.settings.theme;
       var theme_path = 'themes/' + theme_name + '/' + theme_name + '.js';
-      if (theme_name != 'easystreet3') {
+      if (theme_name != 'easystreet3' && theme_name != 'ava') {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
       }
       if (!drupalgap_file_exists(theme_path)) {
