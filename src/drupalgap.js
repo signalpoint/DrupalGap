@@ -2,7 +2,7 @@
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
 // Init _GET for url path query strings.
-var _GET = _GET || {};
+var _dg_GET = _dg_GET || {};
 
 /**
  * Initializes the drupalgap json object.
