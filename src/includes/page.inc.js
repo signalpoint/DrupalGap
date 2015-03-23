@@ -1,4 +1,57 @@
 /**
+ *
+ */
+function _GET() {
+  try {
+
+    // Determine if we are getting or setting, then grab the key and value if
+    // they are present.
+    var get = false;
+    var set = false;
+    var key = null;
+    var value = null;
+    if (typeof arguments[1] !== 'undefined') {
+      set = true;
+      value = arguments[1];
+      if (typeof arguments[0] !== 'undefined') { key = arguments[0]; }
+      else {
+        console.log('WARNING: _GET - missing key for value (' + value + ')');
+        return null;
+      }
+    }
+    else if (typeof arguments[0] !== 'undefined') {
+      get = true;
+      key = arguments[0];
+    }
+    else { get = true; }
+
+    // Now perform the get or set.
+    if (get) {
+      var last_id = null;
+      if (drupalgap.back_path.length > 0) {
+        last_id = _drupalgap_goto_prepare_path(
+          drupalgap.back_path[drupalgap.back_path.length - 1]
+        );
+        if (typeof _dg_GET[last_id] !== 'undefined') {
+          if (!key) { return _dg_GET[last_id]; }
+          else if (typeof _dg_GET[last_id][key] !== 'undefined') {
+            return _dg_GET[last_id][key];
+          }
+          return null;
+        }
+      }
+    }
+    else if (set) {
+      var id = drupalgap_get_page_id();
+      if (typeof _dg_GET[id] === 'undefined') { _dg_GET[id] = {}; }
+      if (value) {  _dg_GET[id][key] = value; }
+    }
+    return null;
+  }
+  catch (error) { console.log('_GET - ' + error); }
+}
+
+/**
  * Each time we use drupalgap_goto to change a page, this function is called on
  * the pagebeforehange event. If we're not moving backwards, or navigating to
  * the same page, this will preproccesses the page, then processes it.
