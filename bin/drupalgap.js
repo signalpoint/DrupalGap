@@ -6004,7 +6004,12 @@ function theme_link(variables) {
 
       // Is this link active?
       if (variables.path == drupalgap_path_get()) {
-        variables.attributes['class'] += ' ui-btn-active '
+        if (variables.attributes['class'].indexOf('ui-btn-active') == -1) {
+          variables.attributes['class'] += ' ui-btn-active ';
+        }
+        if (variables.attributes['class'].indexOf('ui-state-persist') == -1) {
+          variables.attributes['class'] += ' ui-state-persist ';
+        }
       }
 
       // Finally, return the link.
