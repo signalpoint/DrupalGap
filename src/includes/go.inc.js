@@ -18,7 +18,7 @@ function drupalgap_goto(path) {
     drupalgap.page.options = options;
 
     // Prepare the path.
-    path = _drupalgap_goto_prepare_path(path);
+    path = _drupalgap_goto_prepare_path(path, true);
     if (!path) { return false; }
 
     // Invoke all implementations of hook_drupalgap_goto_preprocess().
@@ -260,12 +260,33 @@ function drupalgap_goto_prepare_path(path) {
 }
 
 /**
- * An internal function used to prepare the path for menu routing.
+ * An internal function used to prepare the path for menu routing. An optional
+ * second parameter (boolean) may be passed in, and if it is set to true it will
+ * process any _GET query string parameters.
  * @param {String} path
  * @return {String}
  */
 function _drupalgap_goto_prepare_path(path) {
   try {
+
+    // Pull out any query string parameters and populate them into _GET, if we
+    // were instructed to do so.
+    if (typeof arguments[1] !== 'undefined' && arguments[1]) {
+      var pos = path.indexOf('?');
+      if (pos != -1 && pos != path.length - 1) {
+        dpm('a ? is in the path! ' + path);
+        var query = path.substr(pos + 1, path.length - pos);
+        path = path.substr(0, pos);
+        var parts = query.split('&');
+        for (var i = 0; i < parts.length; i++) {
+          pos = parts[i].indexOf('=');
+          if (pos == -1) { continue; }
+          query = parts[i].split('=');
+          if (query.length != 2) { continue; }
+          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]));
+        }
+      }
+    }
 
     // If the path is an empty string, change it to the front page path.
     if (path == '') {
@@ -277,21 +298,6 @@ function _drupalgap_goto_prepare_path(path) {
         return false;
       }
       else { path = drupalgap.settings.front; }
-    }
-
-    // Pull out any query string parameters and populate them into _GET.
-    var pos = path.indexOf('?');
-    if (pos != -1 && pos != path.length - 1) {
-      var query = path.substr(pos + 1, path.length - pos);
-      path = path.substr(0, pos);
-      var parts = query.split('&');
-      for (var i = 0; i < parts.length; i++) {
-        pos = parts[i].indexOf('=');
-        if (pos == -1) { continue; }
-        query = parts[i].split('=');
-        if (query.length != 2) { continue; }
-        _GET[decodeURIComponent(query[0])] = decodeURIComponent(query[1]);
-      }
     }
 
     // Change 'user' to 'user/login' for anonymous users, or change it to e.g.
