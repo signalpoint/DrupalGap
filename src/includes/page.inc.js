@@ -226,6 +226,10 @@ function drupalgap_remove_pages_from_dom() {
     drupalgap.pages = [current_page_id];
     // Reset the drupalgap.views.ids array.
     drupalgap.views.ids = [];
+    // Reset the jQM page events.
+    drupalgap.page.jqm_events = [];
+    // Reset the back path.
+    drupalgap.back_path = [];
   }
   catch (error) { console.log('drupalgap_remove_pages_from_dom - ' + error); }
 }
