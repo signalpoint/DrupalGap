@@ -29,6 +29,7 @@ lintfiles = src/drupalgap.js\
 				src/modules/services/services.js\
 				src/modules/system/system.js\
 				src/modules/user/user.js\
+				src/modules/user/user.forms.js\
 				src/modules/taxonomy/taxonomy.js\
 				src/modules/views/views.js\
 
@@ -55,6 +56,7 @@ files =	src/drupalgap.js\
 				src/modules/services/services.js\
 				src/modules/system/system.js\
 				src/modules/user/user.js\
+				src/modules/user/user.forms.js\
 				src/modules/taxonomy/taxonomy.js\
 				src/modules/views/views.js\
 
