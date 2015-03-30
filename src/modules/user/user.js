@@ -115,6 +115,12 @@ function user_login_form(form, form_state) {
         }
       };
     }
+    form.buttons['forgot_password'] = {
+      title: 'Request new password',
+        attributes: {
+          onclick: "drupalgap_goto('user/password')"
+        }
+    };
     return form;
   }
   catch (error) { console.log('user_login_form - ' + error); }
@@ -217,6 +223,11 @@ function user_menu() {
         'access_arguments': ['access user profiles'],
         'pageshow': 'user_listing_pageshow'
       }
+    };
+    items['user/password'] = {
+      title: 'Request new password',
+      page_callback: 'drupalgap_get_form',
+      page_arguments: ['user_pass_form']
     };
     return items;
 }
