@@ -82,67 +82,6 @@ function user_listing_pageshow() {
 }
 
 /**
- * The user login form.
- * @param {Object} form
- * @param {Object} form_state
- * @return {Object}
- */
-function user_login_form(form, form_state) {
-  try {
-    form.entity_type = 'user';
-    form.bundle = null;
-    form.elements.name = {
-      type: 'textfield',
-      title: 'Username',
-      title_placeholder: true,
-      required: true
-    };
-    form.elements.pass = {
-      type: 'password',
-      title: 'Password',
-      title_placeholder: true,
-      required: true
-    };
-    form.elements.submit = {
-      type: 'submit',
-      value: 'Login'
-    };
-    if (user_register_access()) {
-      form.buttons['create_new_account'] = {
-        title: 'Create new account',
-        attributes: {
-          onclick: "drupalgap_goto('user/register')"
-        }
-      };
-    }
-    form.buttons['forgot_password'] = {
-      title: 'Request new password',
-        attributes: {
-          onclick: "drupalgap_goto('user/password')"
-        }
-    };
-    return form;
-  }
-  catch (error) { console.log('user_login_form - ' + error); }
-}
-
-/**
- * The user login form submit handler.
- * @param {Object} form
- * @param {Object} form_state
- */
-function user_login_form_submit(form, form_state) {
-  try {
-    user_login(form_state.values.name, form_state.values.pass, {
-      success: function(result) {
-        drupalgap_goto(drupalgap.settings.front);
-      }
-    });
-  }
-  catch (error) { console.log('user_login_form_submit - ' + error); }
-}
-
-/**
  * The user logout page callback.
  * @return {String}
  */
