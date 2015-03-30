@@ -93,7 +93,7 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
           entity_local_storage_key(entity_type, entity_id)
         );
         // Go to the front page.
-        drupalgap_goto('', {'form_submission': true});
+        drupalgap_goto('', { reloadPage: true, form_submission: true });
       };
       // Call the delete function.
       var name = services_get_resource_function_for_entity(
