@@ -3913,7 +3913,7 @@ function _drupalgap_goto_prepare_path(path) {
           if (pos == -1) { continue; }
           query = parts[i].split('=');
           if (query.length != 2) { continue; }
-          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]));
+          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]), path);
         }
       }
     }
@@ -4000,17 +4000,22 @@ $(window).on("navigate", function (event, data) {
 
 });
 /**
- *
+ * This will return the query string arguments for the page. You may optionally
+ * pass in a key to get its value, pass in a key then a value to set the key
+ * equal to the value, and you may optionally pass in a third argument to use
+ * a specific page id, otherwise DrupalGap will automatically use the
+ * appropriate page id.
  */
 function _GET() {
   try {
 
-    // Determine if we are getting or setting, then grab the key and value if
-    // they are present.
+    // Set up defaults.
     var get = false;
     var set = false;
     var key = null;
     var value = null;
+
+    // Are we setting? If so, grab the value and key to set.
     if (typeof arguments[1] !== 'undefined') {
       set = true;
       value = arguments[1];
@@ -4020,32 +4025,55 @@ function _GET() {
         return null;
       }
     }
+
+    // Are we getting a certain value? If so, grab the key to get.
     else if (typeof arguments[0] !== 'undefined') {
       get = true;
       key = arguments[0];
     }
+
+    // Otherwise we are getting the whole page.
     else { get = true; }
 
-    // Now perform the get or set.
+    // Now perform the get or set...
+
+    // Get.
     if (get) {
-      var last_id = null;
-      if (drupalgap.back_path.length > 0) {
-        last_id = _drupalgap_goto_prepare_path(
-          drupalgap.back_path[drupalgap.back_path.length - 1]
-        );
-        if (typeof _dg_GET[last_id] !== 'undefined') {
-          if (!key) { return _dg_GET[last_id]; }
-          else if (typeof _dg_GET[last_id][key] !== 'undefined') {
-            return _dg_GET[last_id][key];
-          }
-          return null;
+
+      // If a page id was provided use it, otherwise use the current page's id.
+      var id = null;
+      if (typeof arguments[2] !== 'undefined') { id = arguments[2]; }
+      else { id = drupalgap_get_page_id(); }
+
+      // Now that we know the page id, lets return the value if a key was
+      // provided, otherwise return the whole query string object for the page.
+      if (typeof _dg_GET[id] !== 'undefined') {
+        if (!key) { return _dg_GET[id]; }
+        else if (typeof _dg_GET[id][key] !== 'undefined') {
+          return _dg_GET[id][key];
         }
+        return null;
       }
+
     }
+
+    // Set.
     else if (set) {
-      var id = drupalgap_get_page_id();
+
+      // If we were given a path, use its page id as the property index, other
+      // wise we'll use the current page (which is different than the
+      // destination page!).
+      var id = null;
+      if (typeof arguments[2] !== 'undefined') {
+        id = drupalgap_get_page_id(arguments[2]);
+      }
+      else { id = drupalgap_get_page_id(); }
+
+      // If the id hasn't been instantiated, do so. Then set the key and value
+      // onto it.
       if (typeof _dg_GET[id] === 'undefined') { _dg_GET[id] = {}; }
       if (value) {  _dg_GET[id][key] = value; }
+
     }
     return null;
   }
@@ -4192,17 +4220,23 @@ function drupalgap_add_page_to_dom(options) {
 /**
  * Attempts to remove given page from the DOM, will not remove the current page.
  * You may force the removal by passing in a second argument as a JSON object
- * with a 'force' property set to true.
+ * with a 'force' property set to true. You may pass in a third argument to
+ * specify the current page, otherwise it will default to what DrupalGap thinks
+ * is the current page. No matter what, the current page (specified or not)
+ * can't be removed from the DOM, because jQM always needs one page in the DOM.
  * @param {String} page_id
  */
 function drupalgap_remove_page_from_dom(page_id) {
   try {
-    var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
+    var current_page_id = null;
+    if (typeof arguments[2] !== 'undefined') { current_page_id = arguments[2]; }
+    else { current_page_id = drupalgap_get_page_id(drupalgap_path_get()); }
     var options = {};
-    if (arguments[1]) { options = arguments[1]; }
+    if (typeof arguments[1] !== 'undefined') { options = arguments[1]; }
     if (current_page_id != page_id || options.force) {
       $('#' + page_id).empty().remove();
       delete drupalgap.pages[page_id];
+      if (typeof _dg_GET[page_id] !== 'undefined') { delete _dg_GET[page_id]; }
     }
     else {
       console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
@@ -4220,13 +4254,17 @@ function drupalgap_remove_pages_from_dom() {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
     $.each(drupalgap.pages, function(index, page_id) {
         if (current_page_id != page_id) {
-          $('#' + page_id).empty().remove();
+          drupalgap_remove_page_from_dom(page_id, null, current_page_id);
         }
     });
     // Reset drupalgap.pages to only contain the current page id.
     drupalgap.pages = [current_page_id];
     // Reset the drupalgap.views.ids array.
     drupalgap.views.ids = [];
+    // Reset the jQM page events.
+    drupalgap.page.jqm_events = [];
+    // Reset the back path.
+    drupalgap.back_path = [];
   }
   catch (error) { console.log('drupalgap_remove_pages_from_dom - ' + error); }
 }
@@ -7061,7 +7099,7 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
           entity_local_storage_key(entity_type, entity_id)
         );
         // Go to the front page.
-        drupalgap_goto('', {'form_submission': true});
+        drupalgap_goto('', { reloadPage: true, form_submission: true });
       };
       // Call the delete function.
       var name = services_get_resource_function_for_entity(
@@ -7511,7 +7549,8 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
           }
           destination = prefix + '/' + result[primary_key];
         }
-        drupalgap_goto(destination, {'form_submission': true});
+        if (_GET('destination')) { destination = _GET('destination'); }
+        drupalgap_goto(destination, { form_submission: true });
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - success - ' + error);
