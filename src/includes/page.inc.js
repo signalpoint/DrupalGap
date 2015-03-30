@@ -219,17 +219,23 @@ function drupalgap_add_page_to_dom(options) {
 /**
  * Attempts to remove given page from the DOM, will not remove the current page.
  * You may force the removal by passing in a second argument as a JSON object
- * with a 'force' property set to true.
+ * with a 'force' property set to true. You may pass in a third argument to
+ * specify the current page, otherwise it will default to what DrupalGap thinks
+ * is the current page. No matter what, the current page (specified or not)
+ * can't be removed from the DOM, because jQM always needs one page in the DOM.
  * @param {String} page_id
  */
 function drupalgap_remove_page_from_dom(page_id) {
   try {
-    var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
+    var current_page_id = null;
+    if (typeof arguments[2] !== 'undefined') { current_page_id = arguments[2]; }
+    else { current_page_id = drupalgap_get_page_id(drupalgap_path_get()); }
     var options = {};
-    if (arguments[1]) { options = arguments[1]; }
+    if (typeof arguments[1] !== 'undefined') { options = arguments[1]; }
     if (current_page_id != page_id || options.force) {
       $('#' + page_id).empty().remove();
       delete drupalgap.pages[page_id];
+      if (typeof _dg_GET[page_id] !== 'undefined') { delete _dg_GET[page_id]; }
     }
     else {
       console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
@@ -247,7 +253,7 @@ function drupalgap_remove_pages_from_dom() {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
     $.each(drupalgap.pages, function(index, page_id) {
         if (current_page_id != page_id) {
-          $('#' + page_id).empty().remove();
+          drupalgap_remove_page_from_dom(page_id, null, current_page_id);
         }
     });
     // Reset drupalgap.pages to only contain the current page id.
