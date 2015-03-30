@@ -18,7 +18,10 @@ function user_login_form(form, form_state) {
       type: 'password',
       title: 'Password',
       title_placeholder: true,
-      required: true
+      required: true,
+      attributes: {
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+      }
     };
     form.elements.submit = {
       type: 'submit',
@@ -69,7 +72,10 @@ function user_pass_form(form, form_state) {
     form.elements['name'] = {
       type: 'textfield',
       title: 'Username or e-mail address',
-      required: true
+      required: true,
+      attributes: {
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+      }
     };
     form.elements['submit'] = {
       type: 'submit',
