@@ -11078,6 +11078,12 @@ function user_login_form(form, form_state) {
         }
       };
     }
+    form.buttons['forgot_password'] = {
+      title: 'Request new password',
+        attributes: {
+          onclick: "drupalgap_goto('user/password')"
+        }
+    };
     return form;
   }
   catch (error) { console.log('user_login_form - ' + error); }
@@ -11180,6 +11186,11 @@ function user_menu() {
         'access_arguments': ['access user profiles'],
         'pageshow': 'user_listing_pageshow'
       }
+    };
+    items['user/password'] = {
+      title: 'Request new password',
+      page_callback: 'drupalgap_get_form',
+      page_arguments: ['user_pass_form']
     };
     return items;
 }
@@ -11587,6 +11598,46 @@ function drupalgap_user_has_role(role) {
     return has_role;
   }
   catch (error) { console.log('drupalgap_user_has_role - ' + error); }
+}
+
+/**
+ * The request new password form.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function user_pass_form(form, form_state) {
+  try {
+    form.elements['name'] = {
+      type: 'textfield',
+      title: 'Username or e-mail address',
+      required: true
+    };
+    form.elements['submit'] = {
+      type: 'submit',
+      value: 'E-mail new password'
+    };
+    return form;
+  }
+  catch (error) { console.log('user_pass_form - ' + error); }
+}
+
+/**
+ * The request new password form submission handler.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function user_pass_form_submit(form, form_state) {
+  try {
+    user_request_new_password(form_state.values['name'], {
+        success: function(result) {
+          if (result[0]) {
+            drupalgap_set_message('Further instructions have been sent to your e-mail address.');
+            drupalgap_goto('user/login');
+          }
+        }
+    });
+  }
+  catch (error) { console.log('user_pass_form_submit - ' + error); }
 }
 
 // Used to hold onto the terms once they've been loaded into a widget, keyed by
