@@ -3011,6 +3011,10 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       if (typeof variables.attributes.type === 'undefined') {
         variables.attributes.type = 'button';
       }
+      if (typeof variables.attributes['class'] === 'undefined') {
+        variables.attributes['class'] = '';
+      }
+      variables.attributes['class'] += ' dg_form_submit_button ';
     }
 
     // Merge the item into variables.
@@ -3314,6 +3318,23 @@ function _drupalgap_form_validate(form, form_state) {
     });
   }
   catch (error) { console.log('_drupalgap_form_validate - ' + error); }
+}
+
+/**
+ * Optionally use this function as an HTML DOM onkeypress handler, and it will
+ * attempt to listen for the enter key being pressed and submit the form at that
+ * time.
+ */
+function drupalgap_form_onkeypress(form_id) {
+  try {
+    var event = window.event;
+    var charCode = event.which || event.keyCode;
+    if (charCode != '13') { return; }
+    $('#' + form_id + ' button.dg_form_submit_button').click();
+    event.preventDefault();
+    return false;
+  }
+  catch (error) { console.log('drupalgap_form_onkeypress - ' + error); }
 }
 
 /**
@@ -11045,67 +11066,6 @@ function user_listing_pageshow() {
 }
 
 /**
- * The user login form.
- * @param {Object} form
- * @param {Object} form_state
- * @return {Object}
- */
-function user_login_form(form, form_state) {
-  try {
-    form.entity_type = 'user';
-    form.bundle = null;
-    form.elements.name = {
-      type: 'textfield',
-      title: 'Username',
-      title_placeholder: true,
-      required: true
-    };
-    form.elements.pass = {
-      type: 'password',
-      title: 'Password',
-      title_placeholder: true,
-      required: true
-    };
-    form.elements.submit = {
-      type: 'submit',
-      value: 'Login'
-    };
-    if (user_register_access()) {
-      form.buttons['create_new_account'] = {
-        title: 'Create new account',
-        attributes: {
-          onclick: "drupalgap_goto('user/register')"
-        }
-      };
-    }
-    form.buttons['forgot_password'] = {
-      title: 'Request new password',
-        attributes: {
-          onclick: "drupalgap_goto('user/password')"
-        }
-    };
-    return form;
-  }
-  catch (error) { console.log('user_login_form - ' + error); }
-}
-
-/**
- * The user login form submit handler.
- * @param {Object} form
- * @param {Object} form_state
- */
-function user_login_form_submit(form, form_state) {
-  try {
-    user_login(form_state.values.name, form_state.values.pass, {
-      success: function(result) {
-        drupalgap_goto(drupalgap.settings.front);
-      }
-    });
-  }
-  catch (error) { console.log('user_login_form_submit - ' + error); }
-}
-
-/**
  * The user logout page callback.
  * @return {String}
  */
@@ -11223,6 +11183,224 @@ function user_register_access() {
     }
   }
   catch (error) { console.log('user_register_access - ' + error); }
+}
+
+/**
+ * Implements hook_services_postprocess().
+ * @param {Object} options
+ * @param {Object} result
+ */
+function user_services_postprocess(options, result) {
+  try {
+    // Don't process any other services.
+    if (options.service != 'user') { return; }
+    // Only process login, logout and registration.
+    if (!in_array(options.resource, ['login', 'logout', 'register'])) {
+      return;
+    }
+    // If there were any form errors, alert them to the user.
+    if (!result.responseText) { return; }
+    var response = JSON.parse(result.responseText);
+    if ($.isArray(response)) {
+      var msg = '';
+      $.each(response, function(index, message) {
+          msg += message + '\n';
+      });
+      if (msg != '') { drupalgap_alert(msg); }
+    }
+  }
+  catch (error) { console.log('user_services_postprocess - ' + error); }
+}
+
+/**
+ * Implements hook_theme().
+ * @return {Object}
+ */
+function user_theme() {
+    return {
+      user_picture: {
+        template: 'user-picture'
+      },
+      user_profile: {
+        template: 'user-profile'
+      }
+    };
+}
+
+/**
+ * Page callback for user/%.
+ * @param {Number} uid
+ * @return {Object}
+ */
+function user_view(uid) {
+  try {
+    if (uid) {
+      var content = {
+        container: _drupalgap_entity_page_container('user', uid, 'view')
+      };
+      return content;
+    }
+    else { console.log('user_view - No user id provided!'); }
+  }
+  catch (error) { console.log('user_view - ' + error); }
+}
+
+/**
+ * jQM pageshow handler for node/% pages.
+ * @param {Number} uid
+ */
+function user_view_pageshow(uid) {
+  try {
+    user_load(uid, {
+        success: function(account) {
+          // Determine the incoming arguments, and set defaults if necessary.
+          var view_mode = 'full';
+          var langcode = null;
+          if (arguments[1]) { view_mode = arguments[1]; }
+          if (arguments[2]) { langcode = arguments[2]; }
+          if (!langcode) { langcode = language_default(); }
+          if (account) {
+            var build = {
+              'theme': 'user_profile',
+              'account': account,
+              'view_mode': view_mode,
+              'language': langcode,
+              'name': {'markup': account.name},
+              'created': {
+                markup:
+                '<div class="user_profile_history"><h3>History</h3>' +
+                '<dl><dt>Member since</td></dt><dd>' +
+                  (new Date(parseInt(account.created) * 1000)).toDateString() +
+                '</dd></div>'
+              }
+            };
+            // Any content?
+            if (typeof account.content !== 'undefined') {
+              build.content = { markup: account.content };
+            }
+            // Any picture?
+            if (account.picture && account.picture.fid) {
+              build.picture = {
+                'theme': 'image',
+                'path': image_style_url(
+                  drupalgap.site_settings.user_picture_style,
+                  account.picture.uri
+                )
+              };
+            }
+            _drupalgap_entity_page_container_inject(
+              'user', account.uid, 'view', build
+            );
+          }
+        }
+    });
+  }
+  catch (error) { console.log('user_view_pageshow - ' + error); }
+}
+
+/**
+ * Title callback for the user profile view page.
+ * @param {Function} callback
+ * @param {Number} uid
+ */
+function user_view_title(callback, uid) {
+  try {
+    user_load(uid, {
+        success: function(account) {
+          callback.call(null, account.name);
+        }
+    });
+  }
+  catch (error) { console.log('user_view_title - ' + error); }
+}
+
+/**
+ * Given a user role (string), this determines if the current user has the role.
+ * Returns true if the user has the role, false otherwise. You may pass in a
+ * user account object to check against a certain account, instead of the
+ * current user.
+ * @param {String} role
+ * @return {Boolean}
+ */
+function drupalgap_user_has_role(role) {
+  try {
+    var has_role = false;
+    var account = null;
+    if (arguments[1]) { account = arguments[1]; }
+    else { account = Drupal.user; }
+    $.each(account.roles, function(rid, value) {
+        if (role == value) {
+          has_role = true;
+          return false;
+        }
+    });
+    return has_role;
+  }
+  catch (error) { console.log('drupalgap_user_has_role - ' + error); }
+}
+
+/**
+ * The user login form.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @return {Object}
+ */
+function user_login_form(form, form_state) {
+  try {
+    form.entity_type = 'user';
+    form.bundle = null;
+    form.elements.name = {
+      type: 'textfield',
+      title: 'Username',
+      title_placeholder: true,
+      required: true
+    };
+    form.elements.pass = {
+      type: 'password',
+      title: 'Password',
+      title_placeholder: true,
+      required: true,
+      attributes: {
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+      }
+    };
+    form.elements.submit = {
+      type: 'submit',
+      value: 'Login'
+    };
+    if (user_register_access()) {
+      form.buttons['create_new_account'] = {
+        title: 'Create new account',
+        attributes: {
+          onclick: "drupalgap_goto('user/register')"
+        }
+      };
+    }
+    form.buttons['forgot_password'] = {
+      title: 'Request new password',
+        attributes: {
+          onclick: "drupalgap_goto('user/password')"
+        }
+    };
+    return form;
+  }
+  catch (error) { console.log('user_login_form - ' + error); }
+}
+
+/**
+ * The user login form submit handler.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function user_login_form_submit(form, form_state) {
+  try {
+    user_login(form_state.values.name, form_state.values.pass, {
+      success: function(result) {
+        drupalgap_goto(drupalgap.settings.front);
+      }
+    });
+  }
+  catch (error) { console.log('user_login_form_submit - ' + error); }
 }
 
 /**
@@ -11447,160 +11625,6 @@ function user_profile_form_submit(form, form_state) {
 }
 
 /**
- * Implements hook_services_postprocess().
- * @param {Object} options
- * @param {Object} result
- */
-function user_services_postprocess(options, result) {
-  try {
-    // Don't process any other services.
-    if (options.service != 'user') { return; }
-    // Only process login, logout and registration.
-    if (!in_array(options.resource, ['login', 'logout', 'register'])) {
-      return;
-    }
-    // If there were any form errors, alert them to the user.
-    if (!result.responseText) { return; }
-    var response = JSON.parse(result.responseText);
-    if ($.isArray(response)) {
-      var msg = '';
-      $.each(response, function(index, message) {
-          msg += message + '\n';
-      });
-      if (msg != '') { drupalgap_alert(msg); }
-    }
-  }
-  catch (error) { console.log('user_services_postprocess - ' + error); }
-}
-
-/**
- * Implements hook_theme().
- * @return {Object}
- */
-function user_theme() {
-    return {
-      user_picture: {
-        template: 'user-picture'
-      },
-      user_profile: {
-        template: 'user-profile'
-      }
-    };
-}
-
-/**
- * Page callback for user/%.
- * @param {Number} uid
- * @return {Object}
- */
-function user_view(uid) {
-  try {
-    if (uid) {
-      var content = {
-        container: _drupalgap_entity_page_container('user', uid, 'view')
-      };
-      return content;
-    }
-    else { console.log('user_view - No user id provided!'); }
-  }
-  catch (error) { console.log('user_view - ' + error); }
-}
-
-/**
- * jQM pageshow handler for node/% pages.
- * @param {Number} uid
- */
-function user_view_pageshow(uid) {
-  try {
-    user_load(uid, {
-        success: function(account) {
-          // Determine the incoming arguments, and set defaults if necessary.
-          var view_mode = 'full';
-          var langcode = null;
-          if (arguments[1]) { view_mode = arguments[1]; }
-          if (arguments[2]) { langcode = arguments[2]; }
-          if (!langcode) { langcode = language_default(); }
-          if (account) {
-            var build = {
-              'theme': 'user_profile',
-              'account': account,
-              'view_mode': view_mode,
-              'language': langcode,
-              'name': {'markup': account.name},
-              'created': {
-                markup:
-                '<div class="user_profile_history"><h3>History</h3>' +
-                '<dl><dt>Member since</td></dt><dd>' +
-                  (new Date(parseInt(account.created) * 1000)).toDateString() +
-                '</dd></div>'
-              }
-            };
-            // Any content?
-            if (typeof account.content !== 'undefined') {
-              build.content = { markup: account.content };
-            }
-            // Any picture?
-            if (account.picture && account.picture.fid) {
-              build.picture = {
-                'theme': 'image',
-                'path': image_style_url(
-                  drupalgap.site_settings.user_picture_style,
-                  account.picture.uri
-                )
-              };
-            }
-            _drupalgap_entity_page_container_inject(
-              'user', account.uid, 'view', build
-            );
-          }
-        }
-    });
-  }
-  catch (error) { console.log('user_view_pageshow - ' + error); }
-}
-
-/**
- * Title callback for the user profile view page.
- * @param {Function} callback
- * @param {Number} uid
- */
-function user_view_title(callback, uid) {
-  try {
-    user_load(uid, {
-        success: function(account) {
-          callback.call(null, account.name);
-        }
-    });
-  }
-  catch (error) { console.log('user_view_title - ' + error); }
-}
-
-/**
- * Given a user role (string), this determines if the current user has the role.
- * Returns true if the user has the role, false otherwise. You may pass in a
- * user account object to check against a certain account, instead of the
- * current user.
- * @param {String} role
- * @return {Boolean}
- */
-function drupalgap_user_has_role(role) {
-  try {
-    var has_role = false;
-    var account = null;
-    if (arguments[1]) { account = arguments[1]; }
-    else { account = Drupal.user; }
-    $.each(account.roles, function(rid, value) {
-        if (role == value) {
-          has_role = true;
-          return false;
-        }
-    });
-    return has_role;
-  }
-  catch (error) { console.log('drupalgap_user_has_role - ' + error); }
-}
-
-/**
  * The request new password form.
  * @param {Object} form
  * @param {Object} form_state
@@ -11610,7 +11634,10 @@ function user_pass_form(form, form_state) {
     form.elements['name'] = {
       type: 'textfield',
       title: 'Username or e-mail address',
-      required: true
+      required: true,
+      attributes: {
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+      }
     };
     form.elements['submit'] = {
       type: 'submit',
@@ -11631,9 +11658,15 @@ function user_pass_form_submit(form, form_state) {
     user_request_new_password(form_state.values['name'], {
         success: function(result) {
           if (result[0]) {
-            drupalgap_set_message('Further instructions have been sent to your e-mail address.');
-            drupalgap_goto('user/login');
+            var msg =
+              'Further instructions have been sent to your e-mail address.';
+            drupalgap_set_message(msg);
           }
+          else {
+            var msg = 'There was a problem sending an e-mail to your address.';
+            drupalgap_set_message(msg, 'warning');
+          }
+          drupalgap_goto('user/login');
         }
     });
   }
