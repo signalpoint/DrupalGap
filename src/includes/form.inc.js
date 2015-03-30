@@ -972,6 +972,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       if (typeof variables.attributes.type === 'undefined') {
         variables.attributes.type = 'button';
       }
+      variables.attributes['class'] += ' dg_form_submit_button ';
     }
 
     // Merge the item into variables.
@@ -1275,5 +1276,21 @@ function _drupalgap_form_validate(form, form_state) {
     });
   }
   catch (error) { console.log('_drupalgap_form_validate - ' + error); }
+}
+
+/**
+ * Optionally use this function as an HTML DOM onkeypress handler, and it will
+ * attempt to listen for the enter key being pressed and submit the form at that
+ * time.
+ */
+function drupalgap_form_onkeypress(form_id) {
+  try {
+    var event = window.event;
+    var charCode = event.which || event.keyCode;
+    if (charCode != '13') { return; }
+    $('#' + form_id + ' button.dg_form_submit_button').click();
+    return false;
+  }
+  catch (error) { console.log('drupalgap_form_onkeypress - ' + error); }
 }
 
