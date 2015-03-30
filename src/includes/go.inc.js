@@ -283,7 +283,7 @@ function _drupalgap_goto_prepare_path(path) {
           if (pos == -1) { continue; }
           query = parts[i].split('=');
           if (query.length != 2) { continue; }
-          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]));
+          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]), path);
         }
       }
     }
