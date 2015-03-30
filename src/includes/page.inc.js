@@ -1,15 +1,20 @@
 /**
- *
+ * This will return the query string arguments for the page. You may optionally
+ * pass in a key to get its value, pass in a key then a value to set the key
+ * equal to the value, and you may optionally pass in a third argument to use
+ * a specific page id, otherwise DrupalGap will automatically use the
+ * appropriate page id.
  */
 function _GET() {
   try {
 
-    // Determine if we are getting or setting, then grab the key and value if
-    // they are present.
+    // Set up defaults.
     var get = false;
     var set = false;
     var key = null;
     var value = null;
+
+    // Are we setting? If so, grab the value and key to set.
     if (typeof arguments[1] !== 'undefined') {
       set = true;
       value = arguments[1];
@@ -19,32 +24,55 @@ function _GET() {
         return null;
       }
     }
+
+    // Are we getting a certain value? If so, grab the key to get.
     else if (typeof arguments[0] !== 'undefined') {
       get = true;
       key = arguments[0];
     }
+
+    // Otherwise we are getting the whole page.
     else { get = true; }
 
-    // Now perform the get or set.
+    // Now perform the get or set...
+
+    // Get.
     if (get) {
-      var last_id = null;
-      if (drupalgap.back_path.length > 0) {
-        last_id = _drupalgap_goto_prepare_path(
-          drupalgap.back_path[drupalgap.back_path.length - 1]
-        );
-        if (typeof _dg_GET[last_id] !== 'undefined') {
-          if (!key) { return _dg_GET[last_id]; }
-          else if (typeof _dg_GET[last_id][key] !== 'undefined') {
-            return _dg_GET[last_id][key];
-          }
-          return null;
+
+      // If a page id was provided use it, otherwise use the current page's id.
+      var id = null;
+      if (typeof arguments[2] !== 'undefined') { id = arguments[2]; }
+      else { id = drupalgap_get_page_id(); }
+
+      // Now that we know the page id, lets return the value if a key was
+      // provided, otherwise return the whole query string object for the page.
+      if (typeof _dg_GET[id] !== 'undefined') {
+        if (!key) { return _dg_GET[id]; }
+        else if (typeof _dg_GET[id][key] !== 'undefined') {
+          return _dg_GET[id][key];
         }
+        return null;
       }
+
     }
+
+    // Set.
     else if (set) {
-      var id = drupalgap_get_page_id();
+
+      // If we were given a path, use its page id as the property index, other
+      // wise we'll use the current page (which is different than the
+      // destination page!).
+      var id = null;
+      if (typeof arguments[2] !== 'undefined') {
+        id = drupalgap_get_page_id(arguments[2]);
+      }
+      else { id = drupalgap_get_page_id(); }
+
+      // If the id hasn't been instantiated, do so. Then set the key and value
+      // onto it.
       if (typeof _dg_GET[id] === 'undefined') { _dg_GET[id] = {}; }
       if (value) {  _dg_GET[id][key] = value; }
+
     }
     return null;
   }
