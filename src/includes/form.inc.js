@@ -972,6 +972,9 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
       if (typeof variables.attributes.type === 'undefined') {
         variables.attributes.type = 'button';
       }
+      if (typeof variables.attributes['class'] === 'undefined') {
+        variables.attributes['class'] = '';
+      }
       variables.attributes['class'] += ' dg_form_submit_button ';
     }
 
@@ -1289,6 +1292,7 @@ function drupalgap_form_onkeypress(form_id) {
     var charCode = event.which || event.keyCode;
     if (charCode != '13') { return; }
     $('#' + form_id + ' button.dg_form_submit_button').click();
+    event.preventDefault();
     return false;
   }
   catch (error) { console.log('drupalgap_form_onkeypress - ' + error); }
