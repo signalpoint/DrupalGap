@@ -550,6 +550,33 @@ function drupalgap_confirm(message) {
 }
 
 /**
+ * Show a non intrusive alert message. You may optionally pass in an
+ * integer value as the second argument to specify how many milliseconds
+ * to wait before closing the message. Likewise, you can pass in a
+ * third argument to specify how long to wait before opening the
+ * message.
+ * @param {html} string - The html to display.
+ */
+function drupalgap_toast(html) {
+  try {
+    var open = arguments[1] ? arguments[1] : 1;
+    var close = arguments[2] ? arguments[2] : 420;
+    setInterval(function() {
+        $.mobile.loading('show', {
+            textVisible: true,
+            html: html
+        });
+        setInterval(function() {
+            $.mobile.loading().hide();
+        }, close);
+    }, open);
+  }
+  catch (error) {
+    console.log('drupalgap_toast - ' + error);
+  }
+}
+
+/**
  * Rounds up all blocks defined by hook_block_info and places them in the
  * drupalgap.blocks array.
  */
