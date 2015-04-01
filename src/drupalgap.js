@@ -559,8 +559,8 @@ function drupalgap_confirm(message) {
  */
 function drupalgap_toast(html) {
   try {
-    var open = arguments[1] ? arguments[1] : 1;
-    var close = arguments[2] ? arguments[2] : 420;
+    var open = arguments[2] ? arguments[2] : 1;
+    var close = arguments[1] ? arguments[1] : 420;
     setInterval(function() {
         $.mobile.loading('show', {
             textVisible: true,
