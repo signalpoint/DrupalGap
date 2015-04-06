@@ -51,11 +51,23 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
       $.each(items, function(delta, item) {
           var text = item.tid;
           if (item.name) { text = item.name; }
-          element[delta] = {
-            theme: 'button_link',
-            text: text,
-            path: 'taxonomy/term/' + item.tid
-          };
+          var content = null;
+          switch (display.type) {
+            case 'taxonomy_term_reference_link':
+              content = {
+                theme: 'button_link',
+                text: text,
+                path: 'taxonomy/term/' + item.tid
+              };
+              break;
+            case 'taxonomy_term_reference_plain':
+              content = { markup: text };
+              break;
+            default:
+              content = { markup: text };
+              break;
+          }
+          element[delta] = content;
       });
     }
     return element;
