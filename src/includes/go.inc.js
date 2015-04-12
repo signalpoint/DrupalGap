@@ -1,3 +1,6 @@
+// Holds onto any query string during the page go process.
+var _drupalgap_goto_query_string = null;
+
 /**
  * Given a path, this will change the current page in the app.
  * @param {String} path
@@ -108,6 +111,9 @@ function drupalgap_goto(path) {
       return false;
     }
 
+    // @TODO when drupalgap_goto() is called during the bootstrap, we shouldn't
+    // put the path onto the back_path array.
+
     // Save the back path.
     drupalgap.back_path.push(drupalgap_path_get());
 
@@ -139,16 +145,25 @@ function drupalgap_goto(path) {
       // remove it since it thinks we are already on the page, so it won't
       // remove it.
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        drupalgap_remove_page_from_dom(page_id, { force: true });
+        // @TODO we may need to leave the query ONLY if the above call to
+        // _drupalgap_goto_prepare_path() yielded a query string, otherwise we
+        // may be leaving unwanted queries in _GET()!
+        var leaveQuery = _drupalgap_goto_query_string ? true : false;
+        drupalgap_remove_page_from_dom(page_id, {
+          force: true,
+          leaveQuery: leaveQuery
+        });
         delete options.reloadPage;
         options.reloadingPage = true;
       }
       else if (!options.form_submission) {
-        // Clear any messages from the page.
         drupalgap_clear_messages();
+        _drupalgap_goto_query_string = null;
         drupalgap.page.process = false;
+        // @TODO changePage has been deprecated as of jQM 1.4.0 and will be
+        // removed in 1.50.
+        // @see https://api.jquerymobile.com/jQuery.mobile.changePage/
         $.mobile.changePage('#' + page_id, options);
-        // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
         return;
       }
@@ -194,6 +209,9 @@ function drupalgap_goto_generate_page_and_go(
       );
     }
     else {
+
+      // Reset the internal query string.
+      _drupalgap_goto_query_string = null;
 
       // If options wasn't set, set it as an empty JSON object.
       if (typeof options === 'undefined') { options = {}; }
@@ -270,12 +288,13 @@ function _drupalgap_goto_prepare_path(path) {
   try {
 
     // Pull out any query string parameters and populate them into _GET, if we
-    // were instructed to do so.
+    // were instructed to do so. Hold onto a global copy of the query string
+    // for page go processing.
     if (typeof arguments[1] !== 'undefined' && arguments[1]) {
       var pos = path.indexOf('?');
       if (pos != -1 && pos != path.length - 1) {
-        dpm('a ? is in the path! ' + path);
         var query = path.substr(pos + 1, path.length - pos);
+        _drupalgap_goto_query_string = query;
         path = path.substr(0, pos);
         var parts = query.split('&');
         for (var i = 0; i < parts.length; i++) {
@@ -359,11 +378,15 @@ function _drupalgap_back_exit(button) {
 $(window).on("navigate", function (event, data) {
 
     // In web-app mode, clicking the back button on your browser (or Android
-    // device browser), the drupalgap path doesn't get updated for some
-    // reason(s), so we'll update it manually.
+    // device browser), does not actually fire drupalgap_back(), so we mimic
+    // it here, but skip the history.back() call because that's already
+    // happened via the hardware button.
     if (drupalgap.settings.mode == 'web-app') {
-      var direction = data.state.direction; // back or forward
+      // Grab the direction we're travelling.
+      // back, forward (or undefined, aka moving from splash to front page)
+      var direction = data.state.direction;
       if (direction == 'back' && drupalgap.back_path.length > 0) {
+        drupalgap.back = true;
         drupalgap.path = drupalgap.back_path[drupalgap.back_path.length - 1];
       }
     }
