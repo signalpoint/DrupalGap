@@ -235,7 +235,11 @@ function drupalgap_remove_page_from_dom(page_id) {
     if (current_page_id != page_id || options.force) {
       $('#' + page_id).empty().remove();
       delete drupalgap.pages[page_id];
-      if (typeof _dg_GET[page_id] !== 'undefined') { delete _dg_GET[page_id]; }
+      // We'll remove the query string, unless we were instructed to leave it.
+      if (
+        typeof _dg_GET[page_id] !== 'undefined' &&
+        (typeof options.leaveQuery === 'undefined' || !options.leaveQuery) 
+      ) { delete _dg_GET[page_id]; }
     }
     else {
       console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
