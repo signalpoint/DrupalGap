@@ -71,13 +71,12 @@ function drupalgap_goto(path) {
 
     // If the new router path is the same as the current router path and the new
     // path is the same as the current path, we may need to cancel the
-    // navigation attempt (i.e. don't go anywhere), unless...act on it...don't go anywhere, unless it is a
+    // navigation attempt (i.e. don't go anywhere), unless it is a
     // form submission, then continue.
     if (
       router_path == drupalgap_router_path_get() &&
       drupalgap_path_get() == path
     ) {
-
       // If it's a form submission, we'll continue onward...
       if (options.form_submission) { }
 
@@ -357,9 +356,16 @@ function drupalgap_back() {
  */
 function _drupalgap_back() {
   try {
+    // @WARNING - any changes here (except the history.back() call) need to be
+    // reflected into the window "navigate" handler below
     drupalgap.back = true;
     history.back();
     drupalgap_path_set(drupalgap.back_path.pop());
+    drupalgap_router_path_set(
+      drupalgap_get_menu_link_router_path(
+        drupalgap_path_get()
+      )
+    );
   }
   catch (error) { console.log('drupalgap_back' + error); }
 }
@@ -386,9 +392,17 @@ $(window).on("navigate", function (event, data) {
       // back, forward (or undefined, aka moving from splash to front page)
       var direction = data.state.direction;
       if (direction == 'back' && drupalgap.back_path.length > 0) {
+        // @WARNING - any changes here should be reflected into
+        // _drupalgap_back().
         drupalgap.back = true;
-        drupalgap.path = drupalgap.back_path[drupalgap.back_path.length - 1];
+        drupalgap_path_set(drupalgap.back_path[drupalgap.back_path.length - 1]);
+        drupalgap_router_path_set(
+          drupalgap_get_menu_link_router_path(
+            drupalgap_path_get()
+          )
+        );
       }
     }
 
 });
+
