@@ -95,7 +95,10 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
         // Go to the front page, unless a form action path was specified.
         var form = drupalgap_form_local_storage_load('node_edit');
         var destination = form.action ? form.action : '';
-        drupalgap_goto('', { destination: true, form_submission: true });
+        drupalgap_goto(destination, {
+          reloadPage: true,
+          form_submission: true
+        });
       };
       // Call the delete function.
       var name = services_get_resource_function_for_entity(
