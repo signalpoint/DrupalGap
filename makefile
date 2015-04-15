@@ -7,6 +7,7 @@
 
 # Create the list of files
 lintfiles = src/drupalgap.js\
+				src/includes/autocomplete.inc.js\
 				src/includes/block.inc.js\
 				src/includes/common.inc.js\
 				src/includes/form.inc.js\
@@ -35,6 +36,7 @@ lintfiles = src/drupalgap.js\
 				src/modules/views/views.js\
 
 files =	src/drupalgap.js\
+				src/includes/autocomplete.inc.js\
 				src/includes/block.inc.js\
 				src/includes/common.inc.js\
 				src/includes/form.inc.js\
