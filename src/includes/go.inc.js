@@ -114,7 +114,7 @@ function drupalgap_goto(path) {
     // put the path onto the back_path array.
 
     // Save the back path.
-    drupalgap.back_path.push(drupalgap_path_get());
+    drupalgap.back_path.push(path);
 
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
