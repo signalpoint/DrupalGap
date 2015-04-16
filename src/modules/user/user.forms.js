@@ -271,6 +271,28 @@ function user_profile_form(form, form_state, account) {
 }
 
 /**
+ * The user profile form validate handler.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function user_profile_form_validate(form, form_state) {
+  try {
+    // If they entered their current password, and entered new passwords, make
+    // sure the new passwords match.
+    if (!empty(form_state.values['current_pass'])) {
+      if (
+        !empty(form_state.values['pass_pass1']) &&
+        !empty(form_state.values['pass_pass2']) &&
+        form_state.values['pass_pass1'] != form_state.values['pass_pass2']
+      ) {
+        drupalgap_form_set_error('pass_pass1', 'Passwords do not match.');
+      }
+    }
+  }
+  catch (error) { console.log('user_profile_form_validate - ' + error); }
+}
+
+/**
  * The user profile form submit handler.
  * @param {Object} form
  * @param {Object} form_state
@@ -278,6 +300,17 @@ function user_profile_form(form, form_state, account) {
 function user_profile_form_submit(form, form_state) {
   try {
     var account = drupalgap_entity_build_from_form_state(form, form_state);
+    // If they provided their current password, and their new password, prepare
+    // the account submission values.
+    if (
+      account.current_pass &&
+      !empty(account.pass_pass1) &&
+      !empty(account.pass_pass2)
+    ) {
+      account.pass = account.pass_pass1;
+      delete account.pass_pass1;
+      delete account.pass_pass2;
+    }
     drupalgap_entity_form_submit(form, form_state, account);
   }
   catch (error) { console.log('user_profile_form_submit - ' + error); }
