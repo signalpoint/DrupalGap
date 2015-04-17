@@ -4235,7 +4235,7 @@ function drupalgap_goto(path) {
     // put the path onto the back_path array.
 
     // Save the back path.
-    drupalgap.back_path.push(drupalgap_path_get());
+    drupalgap.back_path.push(path);
 
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
@@ -8793,6 +8793,14 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
   try {
     // Change the item type to a hidden input to hold the file id.
     items[delta].type = 'hidden';
+
+    // If we're dealing with the user profile 'picture' it isn't a real field,
+    // so we need to spoof some field settings to get the widget to render
+    // properly.
+    // @TODO the field label doesn't show up.
+    if (form.id == 'user_profile_form' && element.name == 'picture') {
+      field = { field_name: 'picture' };
+    }
 
     // If we already have an image for this item, show it.
     if (typeof items[delta].item !== 'undefined' && items[delta].item.fid) {
