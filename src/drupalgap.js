@@ -534,7 +534,8 @@ function drupalgap_confirm(message) {
       drupalgap.settings.mode == 'web-app'
     ) {
       var r = confirm(message);
-      if (r == true) { confirmCallback(); }
+      if (r == true) { confirmCallback(1); } // OK button.
+      else { confirmCallback(2); } // Cancel button.
     }
     else {
       navigator.notification.confirm(
