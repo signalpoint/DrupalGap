@@ -229,6 +229,11 @@ function user_profile_form(form, form_state, account) {
     // Add the fields for accounts to the form.
     drupalgap_field_info_instances_add_to_form('user', null, form, account);
 
+    // If profile pictures are disabled, remove the core field from the form.
+    if (drupalgap.site_settings.user_pictures == 0) {
+      delete form.elements.picture;
+    }
+
     // Add password fields to the form. We show the current password field only
     // if the user is editing their account. We show the password and confirm
     // password field no matter what.
