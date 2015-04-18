@@ -229,6 +229,12 @@ function user_profile_form(form, form_state, account) {
     // Add the fields for accounts to the form.
     drupalgap_field_info_instances_add_to_form('user', null, form, account);
 
+    // If the user can't change their user name, remove access to it.
+    if (!user_access('change own username')) {
+      form.elements['name'].access = false;
+      form.elements['name'].required = false;
+    }
+
     // If profile pictures are disabled, remove the core field from the form.
     if (drupalgap.site_settings.user_pictures == 0) {
       delete form.elements.picture;
