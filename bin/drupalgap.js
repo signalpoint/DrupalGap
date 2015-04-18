@@ -4196,7 +4196,7 @@ function drupalgap_goto(path) {
     // form submission, then continue.
     if (
       router_path == drupalgap_router_path_get() &&
-      drupalgap_path_get() == path
+      path == drupalgap_path_get()
     ) {
       // If it's a form submission, we'll continue onward...
       if (options.form_submission) { }
@@ -4235,7 +4235,10 @@ function drupalgap_goto(path) {
     // put the path onto the back_path array.
 
     // Save the back path.
-    drupalgap.back_path.push(path);
+    var back_paths_to_ignore = ['user/logout', '_reload'];
+    if (!in_array(drupalgap_path_get())) {
+      drupalgap.back_path.push(drupalgap_path_get());
+    }
 
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
@@ -4289,9 +4292,8 @@ function drupalgap_goto(path) {
       }
     }
     else if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-      // The page is not in the DOM, and we're being asked to reload it, this
-      // can't happen, so we'll just delete the reloadPage option.
-      console.log('WARNING - drupalgap_goto() asked to reload page not in DOM');
+      // The page is not in the DOM, and we're being asked to reload it, so
+      // we'll just delete the reloadPage option.
       delete options.reloadPage;
     }
 
