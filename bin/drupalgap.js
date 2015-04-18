@@ -11725,6 +11725,18 @@ function user_profile_form_validate(form, form_state) {
         drupalgap_form_set_error('pass_pass1', 'Passwords do not match.');
       }
     }
+    // If they didn't enter their current password and entered new passwords,
+    // tell them they need to enter their current password.
+    else if (
+      empty(form_state.values['current_pass']) &&
+      !empty(form_state.values['pass_pass1']) &&
+      !empty(form_state.values['pass_pass2'])
+    ) {
+      drupalgap_form_set_error(
+        'current_pass',
+        'You must enter your current password to change your password.'
+      );
+    }
   }
   catch (error) { console.log('user_profile_form_validate - ' + error); }
 }
