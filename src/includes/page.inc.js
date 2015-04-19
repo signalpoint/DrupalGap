@@ -71,7 +71,7 @@ function _GET() {
       // If the id hasn't been instantiated, do so. Then set the key and value
       // onto it.
       if (typeof _dg_GET[id] === 'undefined') { _dg_GET[id] = {}; }
-      if (value) {  _dg_GET[id][key] = value; }
+      if (value) { _dg_GET[id][key] = value; }
 
     }
     return null;
@@ -238,7 +238,7 @@ function drupalgap_remove_page_from_dom(page_id) {
       // We'll remove the query string, unless we were instructed to leave it.
       if (
         typeof _dg_GET[page_id] !== 'undefined' &&
-        (typeof options.leaveQuery === 'undefined' || !options.leaveQuery) 
+        (typeof options.leaveQuery === 'undefined' || !options.leaveQuery)
       ) { delete _dg_GET[page_id]; }
     }
     else {

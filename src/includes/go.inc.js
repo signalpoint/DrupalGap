@@ -383,7 +383,7 @@ function _drupalgap_back_exit(button) {
   catch (error) { console.log('_drupalgap_back_exit - ' + error); }
 }
 
-$(window).on("navigate", function (event, data) {
+$(window).on('navigate', function(event, data) {
 
     // In web-app mode, clicking the back button on your browser (or Android
     // device browser), does not actually fire drupalgap_back(), so we mimic
