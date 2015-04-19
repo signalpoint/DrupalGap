@@ -1,5 +1,5 @@
-This directory is used by the makefile to generate the drupalgap.js file from
-the src directory. To get the tools needed to run the makefile, type this
+This directory is used by the makefile_full to generate the drupalgap.js file
+from the src directory. To get the tools needed to run that makefile, type this
 terminal command from your mobile app's root directory:
 
 `sudo make -B tools`
