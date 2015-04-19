@@ -266,8 +266,11 @@ function drupalgap_goto_generate_page_and_go(
   }
 }
 
- /**
- * @deprecated
+/**
+ * Prepares a drupalgap page path.
+ * @deprecated Use _drupalgap_goto_prepare_path() instead.
+ * @param {String} path
+ * @return {String}
  */
 function drupalgap_goto_prepare_path(path) {
   try {
@@ -303,7 +306,11 @@ function _drupalgap_goto_prepare_path(path) {
           if (pos == -1) { continue; }
           query = parts[i].split('=');
           if (query.length != 2) { continue; }
-          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]), path);
+          _GET(
+            decodeURIComponent(query[0]),
+            decodeURIComponent(query[1]),
+            path
+          );
         }
       }
     }

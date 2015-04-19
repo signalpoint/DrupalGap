@@ -25,7 +25,13 @@ function drupalgap_block_load(delta) {
 }
 
 /**
- *
+ * Renders the html string for a block.
+ * @param {Object} region
+ * @param {String} current_path
+ * @param {String} block_delta
+ * @param {Object} block_settings
+ * @param {Object} block_counts
+ * @return {String}
  */
 function drupalgap_block_render(region, current_path, block_delta,
   block_settings, block_counts) {

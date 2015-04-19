@@ -163,7 +163,8 @@ function system_404_page(path) {
 }
 
 /**
- *
+ * The page callback for the reload page.
+ * @return {String}
  */
 function system_reload_page() {
   try {
@@ -173,7 +174,7 @@ function system_reload_page() {
 }
 
 /**
- *
+ * The pageshow callback for the reload page.
  */
 function system_reload_pageshow() {
   try {
@@ -184,6 +185,7 @@ function system_reload_pageshow() {
 
 /**
  * Implements hook_system_drupalgap_goto_post_process().
+ * @param {String} path
  */
 function system_drupalgap_goto_post_process(path) {
   try {

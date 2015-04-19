@@ -343,6 +343,7 @@ function user_profile_form_submit(form, form_state) {
  * The request new password form.
  * @param {Object} form
  * @param {Object} form_state
+ * @return {Object}
  */
 function user_pass_form(form, form_state) {
   try {

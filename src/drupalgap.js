@@ -556,7 +556,7 @@ function drupalgap_confirm(message) {
  * to wait before closing the message. Likewise, you can pass in a
  * third argument to specify how long to wait before opening the
  * message.
- * @param {html} string - The html to display.
+ * @param {string} html - The html to display.
  */
 function drupalgap_toast(html) {
   try {

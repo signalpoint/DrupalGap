@@ -1285,6 +1285,8 @@ function _drupalgap_form_validate(form, form_state) {
  * Optionally use this function as an HTML DOM onkeypress handler, and it will
  * attempt to listen for the enter key being pressed and submit the form at that
  * time.
+ * @param {String} form_id
+ * @return {Boolean}
  */
 function drupalgap_form_onkeypress(form_id) {
   try {

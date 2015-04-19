@@ -4,6 +4,7 @@
  * equal to the value, and you may optionally pass in a third argument to use
  * a specific page id, otherwise DrupalGap will automatically use the
  * appropriate page id.
+ * @return {String|NULL}
  */
 function _GET() {
   try {

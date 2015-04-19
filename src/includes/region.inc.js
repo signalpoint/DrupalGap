@@ -259,6 +259,8 @@ function _drupalgap_region_render_zone(zone, region, current_path) {
 /**
  * Given a key (typically a block delta), this will generate a unique ID that
  * can be used for the panel. It will be fused with the current page id.
+ * @param {String} key
+ * @return {String}
  */
 function drupalgap_panel_id(key) {
   try {
