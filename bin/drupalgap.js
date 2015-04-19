@@ -556,7 +556,7 @@ function drupalgap_confirm(message) {
  * to wait before closing the message. Likewise, you can pass in a
  * third argument to specify how long to wait before opening the
  * message.
- * @param {html} string - The html to display.
+ * @param {string} html - The html to display.
  */
 function drupalgap_toast(html) {
   try {
@@ -2088,7 +2088,13 @@ function drupalgap_block_load(delta) {
 }
 
 /**
- *
+ * Renders the html string for a block.
+ * @param {Object} region
+ * @param {String} current_path
+ * @param {String} block_delta
+ * @param {Object} block_settings
+ * @param {Object} block_counts
+ * @return {String}
  */
 function drupalgap_block_render(region, current_path, block_delta,
   block_settings, block_counts) {
@@ -3795,6 +3801,8 @@ function _drupalgap_form_validate(form, form_state) {
  * Optionally use this function as an HTML DOM onkeypress handler, and it will
  * attempt to listen for the enter key being pressed and submit the form at that
  * time.
+ * @param {String} form_id
+ * @return {Boolean}
  */
 function drupalgap_form_onkeypress(form_id) {
   try {
@@ -4388,8 +4396,11 @@ function drupalgap_goto_generate_page_and_go(
   }
 }
 
- /**
- * @deprecated
+/**
+ * Prepares a drupalgap page path.
+ * @deprecated Use _drupalgap_goto_prepare_path() instead.
+ * @param {String} path
+ * @return {String}
  */
 function drupalgap_goto_prepare_path(path) {
   try {
@@ -4425,7 +4436,11 @@ function _drupalgap_goto_prepare_path(path) {
           if (pos == -1) { continue; }
           query = parts[i].split('=');
           if (query.length != 2) { continue; }
-          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]), path);
+          _GET(
+            decodeURIComponent(query[0]),
+            decodeURIComponent(query[1]),
+            path
+          );
         }
       }
     }
@@ -4505,7 +4520,7 @@ function _drupalgap_back_exit(button) {
   catch (error) { console.log('_drupalgap_back_exit - ' + error); }
 }
 
-$(window).on("navigate", function (event, data) {
+$(window).on('navigate', function(event, data) {
 
     // In web-app mode, clicking the back button on your browser (or Android
     // device browser), does not actually fire drupalgap_back(), so we mimic
@@ -4536,6 +4551,7 @@ $(window).on("navigate", function (event, data) {
  * equal to the value, and you may optionally pass in a third argument to use
  * a specific page id, otherwise DrupalGap will automatically use the
  * appropriate page id.
+ * @return {String|NULL}
  */
 function _GET() {
   try {
@@ -4603,7 +4619,7 @@ function _GET() {
       // If the id hasn't been instantiated, do so. Then set the key and value
       // onto it.
       if (typeof _dg_GET[id] === 'undefined') { _dg_GET[id] = {}; }
-      if (value) {  _dg_GET[id][key] = value; }
+      if (value) { _dg_GET[id][key] = value; }
 
     }
     return null;
@@ -4770,7 +4786,7 @@ function drupalgap_remove_page_from_dom(page_id) {
       // We'll remove the query string, unless we were instructed to leave it.
       if (
         typeof _dg_GET[page_id] !== 'undefined' &&
-        (typeof options.leaveQuery === 'undefined' || !options.leaveQuery) 
+        (typeof options.leaveQuery === 'undefined' || !options.leaveQuery)
       ) { delete _dg_GET[page_id]; }
     }
     else {
@@ -5250,6 +5266,8 @@ function _drupalgap_region_render_zone(zone, region, current_path) {
 /**
  * Given a key (typically a block delta), this will generate a unique ID that
  * can be used for the panel. It will be fused with the current page id.
+ * @param {String} key
+ * @return {String}
  */
 function drupalgap_panel_id(key) {
   try {
@@ -10839,7 +10857,8 @@ function system_404_page(path) {
 }
 
 /**
- *
+ * The page callback for the reload page.
+ * @return {String}
  */
 function system_reload_page() {
   try {
@@ -10849,7 +10868,7 @@ function system_reload_page() {
 }
 
 /**
- *
+ * The pageshow callback for the reload page.
  */
 function system_reload_pageshow() {
   try {
@@ -10860,6 +10879,7 @@ function system_reload_pageshow() {
 
 /**
  * Implements hook_system_drupalgap_goto_post_process().
+ * @param {String} path
  */
 function system_drupalgap_goto_post_process(path) {
   try {
@@ -11779,6 +11799,7 @@ function user_profile_form_submit(form, form_state) {
  * The request new password form.
  * @param {Object} form
  * @param {Object} form_state
+ * @return {Object}
  */
 function user_pass_form(form, form_state) {
   try {
