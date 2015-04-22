@@ -32,7 +32,9 @@ https://developers.google.com/closure/compiler/docs/gettingstarted_app
 This app requires JDK7, and you can use the following terminal command to switch
 between java versions:
 
+```
 sudo update-alternatives --config java
+```
 
 FYI, we were running JDK6 in Ubuntu prior to this, so when using Eclipse for
 Android, we may have to switch back to 6 from 7.
