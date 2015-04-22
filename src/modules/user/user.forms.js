@@ -165,19 +165,25 @@ function user_register_form_submit(form, form_state) {
     var account = drupalgap_entity_build_from_form_state(form, form_state);
     user_register(account, {
       success: function(data) {
+        var config = form.user_register;
+        var options = {
+          title: 'Registered'
+        };
         // Check if e-mail verification is required or not..
         if (!drupalgap.site_settings.user_email_verification) {
           // E-mail verification not needed, if administrator approval is
           // needed, notify the user, otherwise log them in.
           if (drupalgap.site_settings.user_register == '2') {
             drupalgap_alert(
-            form.user_register.user_mail_register_pending_approval_required_body
+              config.user_mail_register_pending_approval_required_body,
+              options
             );
             drupalgap_goto('');
           }
           else {
             drupalgap_alert(
-              form.user_register.user_mail_register_no_approval_required_body
+              config.user_mail_register_no_approval_required_body,
+              options
             );
             // If we're automatically logging in do it, otherwise just go to
             // the front page.
@@ -194,7 +200,8 @@ function user_register_form_submit(form, form_state) {
         else {
           // E-mail verification needed... notify the user.
           drupalgap_alert(
-            form.user_register.user_mail_register_email_verification_body
+            config.user_mail_register_email_verification_body,
+            options
           );
           drupalgap_goto('');
         }
