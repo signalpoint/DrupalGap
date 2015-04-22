@@ -39,6 +39,7 @@ Android, we may have to switch back to 6 from 7.
 
 The following command can be used to make the minifed JS file:
 
+```
 cd ~/Desktop/github-code/closure-compiler/
 java -jar compiler.jar --js /var/www/drupal-7/mobile-application/bin/drupalgap.js --js_output_file /var/www/drupal-7/mobile-application/bin/drupalgap.min.js
-
+```
