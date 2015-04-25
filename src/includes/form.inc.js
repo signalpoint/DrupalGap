@@ -1179,11 +1179,10 @@ function _drupalgap_form_submit(form_id) {
     if (form.entity_type &&
       image_fields_present_on_entity_type(form.entity_type, form.bundle)
     ) {
-      _image_field_form_process(form, form_state, {
-          success: form_validation
+      _image_fields_form_process(form, form_state, form_id, {
+         success: form_validation
       });
-    }
-    else {
+    } else {
       // There were no image fields on the form, proceed normally with form
       // validation, which will in turn process the submission if there are no
       // validation errors.
