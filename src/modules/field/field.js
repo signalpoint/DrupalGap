@@ -282,6 +282,15 @@ function list_assemble_form_state_into_field(entity_type, bundle,
           );
         }
         break;
+      case 'list_text':
+        // For radio buttons on the user entity form, field values must be
+        // "flattened", i.e. this field_foo: { und: [ { value: 123 }]}, should be
+        // turned into field_foo: { und: 123 }
+        if (entity_type == 'user' && instance.widget.type == 'options_buttons') {
+          field_key.use_delta = false;
+          field_key.use_wrapper = false;
+        }
+        break;
       default:
         console.log(
           'WARNING: list_assemble_form_state_into_field - unknown type (' +
