@@ -194,6 +194,28 @@ function hook_entity_post_render_content(entity, entity_type, bundle) {
 }
 
 /**
+ * Implements hook_field_info_instance_add_to_form().
+ * Used by modules that provide custom fields to operate on a form or its
+ * elements before the form gets saved to local storage. This allows extra
+ * data be attached to the form that way things like hook_field_widget_form(),
+ * which takes place at render time, can have access to any extra data it may
+ * need.
+ * @param {String} entity_type
+ * @param {String} bundle
+ * @param {Object} form
+ * @param {Object} entity
+ * @param {Object} element
+ */
+function hook_field_info_instance_add_to_form(entity_type, bundle, form, entity, element) {
+  try {
+    // Attach a value_callback to the element so we can manually build its form
+    // state value.
+    element.value_callback = 'example_field_value_callback';
+  }
+  catch (error) { console.log('hook_field_info_instance_add_to_form - ' + error); }
+}
+
+/**
  * Implements hook_field_formatter_view().
  * @param {String} entity_type
  * @param {Object} entity
