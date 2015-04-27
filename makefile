@@ -3,7 +3,9 @@ files = src/drupalgap.js\
                                 src/includes/autocomplete.inc.js\
                                 src/includes/block.inc.js\
                                 src/includes/common.inc.js\
+                                src/includes/form.elements.inc.js\
                                 src/includes/form.inc.js\
+                                src/includes/form.submission.inc.js\
                                 src/includes/form.theme.inc.js\
                                 src/includes/go.inc.js\
                                 src/includes/page.inc.js\
