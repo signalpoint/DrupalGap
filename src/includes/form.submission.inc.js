@@ -249,6 +249,15 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
         if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
         else { value = $(_checkbox).attr('off'); }
         break;
+      case 'list_text':
+        // Radio buttons.
+        if (
+          element.field_info_instance &&
+          element.field_info_instance.widget.type == 'options_buttons'
+        ) {
+          selector = 'input:radio[name="' + id + '"]:checked';
+        }
+        break;
     }
     if (value === null) { value = $(selector).val(); }
     if (typeof value === 'undefined') { value = null; }
