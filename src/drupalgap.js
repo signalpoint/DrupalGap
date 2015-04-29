@@ -1325,6 +1325,28 @@ function drupalgap_set_message(message) {
 }
 
 /**
+ * Sets the current messages.
+ * @param {Array}
+ */
+function drupalgap_set_messages(messages) {
+  try {
+    drupalgap.messages = messages;
+  }
+  catch (error) { console.log('drupalgap_set_messages - ' + error); }
+}
+
+/**
+ * Returns the current messages.
+ * @return {Array}
+ */
+function drupalgap_get_messages() {
+  try {
+    return drupalgap.messages;
+  }
+  catch (error) { console.log('drupalgap_get_messages - ' + error); }
+}
+
+/**
  * Clears the messages from the current page. Optionally pass in a page id to
  * clear messages from a particular page.
  */
