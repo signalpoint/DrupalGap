@@ -1325,6 +1325,28 @@ function drupalgap_set_message(message) {
 }
 
 /**
+ * Sets the current messages.
+ * @param {Array}
+ */
+function drupalgap_set_messages(messages) {
+  try {
+    drupalgap.messages = messages;
+  }
+  catch (error) { console.log('drupalgap_set_messages - ' + error); }
+}
+
+/**
+ * Returns the current messages.
+ * @return {Array}
+ */
+function drupalgap_get_messages() {
+  try {
+    return drupalgap.messages;
+  }
+  catch (error) { console.log('drupalgap_get_messages - ' + error); }
+}
+
+/**
  * Clears the messages from the current page. Optionally pass in a page id to
  * clear messages from a particular page.
  */
@@ -10729,6 +10751,7 @@ function drupalgap_services_rss_extract_items(data) {
 }
 
 var _system_reload_page = null;
+var _system_reload_messages = null;
 
 /**
  * Implements hook_block_info().
@@ -10898,6 +10921,12 @@ function system_404_page(path) {
  */
 function system_reload_page() {
   try {
+    // Set aside any messages, then return an empty page.
+    var messages = drupalgap_get_messages();
+    if (!empty(messages)) {
+      _system_reload_messages = messages.slice();
+      drupalgap_set_messages([]);
+    }
     return '';
   }
   catch (error) { console.log('system_reload_page - ' + error); }
@@ -10908,6 +10937,16 @@ function system_reload_page() {
  */
 function system_reload_pageshow() {
   try {
+    // Set any messages that were set aside.
+    if (_system_reload_messages && !empty(_system_reload_messages)) {
+      for (var i = 0; i < _system_reload_messages.length; i++) {
+        drupalgap_set_message(
+          _system_reload_messages[i].message,
+          _system_reload_messages[i].type
+        );
+      }
+      _system_reload_messages = null;
+    }
     drupalgap_loading_message_show();
   }
   catch (error) { console.log('system_reload_pageshow - ' + error); }
