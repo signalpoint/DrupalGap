@@ -2545,6 +2545,13 @@ function bl() {
 }
 
 /**
+ * Returns translated text.
+ * @return {String}
+ */
+function t(str) {
+	return str;
+}
+/**
  * Given a form element, this will return true if access to the element is
  * permitted, false otherwise.
  * @param {Object} element
