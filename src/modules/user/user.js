@@ -50,7 +50,7 @@ function user_listing() {
     var content = {
       'user_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Users',
+        'title': t('Users'),
         'items': [],
         'attributes': {'id': 'user_listing_items'}
       }
@@ -86,7 +86,7 @@ function user_listing_pageshow() {
  * @return {String}
  */
 function user_logout_callback() {
-  return '<p>Logging out...</p>';
+  return '<p>'+t('Logging out')+'...</p>';
 }
 
 /**
@@ -114,26 +114,26 @@ function user_menu() {
         'page_callback': 'user_page'
       },
       'user/login': {
-        'title': 'Login',
+        'title': t('Login'),
         'page_callback': 'drupalgap_get_form',
         'page_arguments': ['user_login_form'],
         options: {reloadPage: true}
       },
       'user/logout': {
-        'title': 'Logout',
+        'title': t('Logout'),
         'page_callback': 'user_logout_callback',
         'pagechange': 'user_logout_pagechange',
         options: {reloadPage: true}
       },
       'user/register': {
-        'title': 'Register',
+        'title': t('Register'),
         'page_callback': 'drupalgap_get_form',
         'page_arguments': ['user_register_form'],
         'access_callback': 'user_register_access',
         options: {reloadPage: true}
       },
       'user/%': {
-        title: 'My account',
+        title: t('My account'),
         title_callback: 'user_view_title',
         title_arguments: [1],
         page_callback: 'user_view',
@@ -141,12 +141,12 @@ function user_menu() {
         page_arguments: [1]
       },
       'user/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'user/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['user_profile_form', 'user', 1],
@@ -157,14 +157,14 @@ function user_menu() {
         options: {reloadPage: true}
       },
       'user-listing': {
-        'title': 'Users',
+        'title': t('Users'),
         'page_callback': 'user_listing',
         'access_arguments': ['access user profiles'],
         'pageshow': 'user_listing_pageshow'
       }
     };
     items['user/password'] = {
-      title: 'Request new password',
+      title: t('Request new password'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['user_pass_form']
     };
@@ -284,8 +284,8 @@ function user_view_pageshow(uid) {
               'name': {'markup': account.name},
               'created': {
                 markup:
-                '<div class="user_profile_history"><h3>History</h3>' +
-                '<dl><dt>Member since</td></dt><dd>' +
+                '<div class="user_profile_history"><h3>'+t('History')+'</h3>' +
+                '<dl><dt>'+t('Member since')+'</td></dt><dd>' +
                   (new Date(parseInt(account.created) * 1000)).toDateString() +
                 '</dd></div>'
               }

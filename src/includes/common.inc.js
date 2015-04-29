@@ -371,5 +371,5 @@ function bl() {
  * @return {String}
  */
 function t(str) {
-	return str;
+  return str;
 }
