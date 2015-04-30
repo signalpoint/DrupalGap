@@ -170,9 +170,9 @@ function _drupalgap_deviceready() {
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      var msg = 'No site_path to Drupal set in the app/settings.js file!';
+      var msg = t('No site_path to Drupal set in the app/settings.js file!');
       drupalgap_alert(msg, {
-          title: 'Error'
+          title: t('Error')
       });
       return;
     }
@@ -184,7 +184,7 @@ function _drupalgap_deviceready() {
       module_invoke_all('device_offline');
       if (drupalgap.settings.offline_message) {
         drupalgap_alert(drupalgap.settings.offline_message, {
-            title: 'Offline',
+            title: t('Offline'),
             alertCallback: function() { drupalgap_goto('offline'); }
         });
       }
@@ -238,12 +238,12 @@ function _drupalgap_deviceready_options() {
       },
       error: function(jqXHR, textStatus, errorThrown) {
         // Build an informative error message and display it.
-        var msg = 'Failed connection to ' + drupalgap.settings.site_path;
+        var msg = t('Failed connection to') + ' ' + drupalgap.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
-        msg += ' - Check your device\'s connection and check that ' +
-               Drupal.settings.site_path + ' is online.';
+        msg += ' - '+t('Check your device\'s connection and check that')+' ' +
+               Drupal.settings.site_path + ' '+t('is online.');
        drupalgap_alert(msg, {
-           title: 'Unable to Connect',
+           title: t('Unable to Connect'),
            alertCallback: function() { drupalgap_goto('offline'); }
        });
       }
@@ -343,7 +343,7 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = 'Failed to load module! (' + module.name + ')';
+                      var msg = t('Failed to load module!')+' (' + module.name + ')';
                       dpm(msg);
                       dpm(modules_paths_object);
                       dpm(textStatus);
@@ -369,7 +369,7 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      var msg = 'drupalgap_load_theme - no theme specified in settings.js';
+      var msg = 'drupalgap_load_theme - '+t('no theme specified in settings.js');
       drupalgap_alert(msg);
     }
     else {
@@ -380,8 +380,8 @@ function drupalgap_load_theme() {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
       }
       if (!drupalgap_file_exists(theme_path)) {
-        var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
-          'The theme\'s JS file does not exist: ' + theme_path;
+        var error_msg = 'drupalgap_theme_load - '+t('Failed to load theme!')+' ' +
+          t('The theme\'s JS file does not exist')+': ' + theme_path;
         drupalgap_alert(error_msg);
         return false;
       }
@@ -412,8 +412,8 @@ function drupalgap_load_theme() {
         return true;
       }
       else {
-        var error_msg = 'drupalgap_load_theme() - failed - ' +
-          template_info_function + '() does not exist!';
+        var error_msg = 'drupalgap_load_theme() - '+t('failed')+' - ' +
+          template_info_function + '() '+t('does not exist!');
         drupalgap_alert(error_msg);
       }
     }
@@ -485,8 +485,8 @@ function drupalgap_alert(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var alertCallback = function() { };
-    var title = 'Alert';
-    var buttonName = 'OK';
+    var title = t('Alert');
+    var buttonName = t('OK');
     if (options) {
       if (options.alertCallback) { alertCallback = options.alertCallback; }
       if (options.title) { title = options.title; }
@@ -525,8 +525,8 @@ function drupalgap_confirm(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var confirmCallback = function(button) { };
-    var title = 'Confirm';
-    var buttonLabels = ['OK', 'Cancel'];
+    var title = t('Confirm');
+    var buttonLabels = [t('OK'), t('Cancel')];
     if (options) {
       if (options.confirmCallback) {
         confirmCallback = options.confirmCallback;
@@ -1083,9 +1083,9 @@ function drupalgap_loading_message_hide() {
 function drupalgap_loader_options() {
   try {
     var mode = drupalgap.loader;
-    var text = 'Loading...';
+    var text = t('Loading')+'...';
     var textVisible = true;
-    if (mode == 'saving') { var text = 'Saving...'; }
+    if (mode == 'saving') { var text = t('Saving')+'...'; }
     var options = {
       text: text,
       textVisible: textVisible
@@ -2109,7 +2109,7 @@ function drupalgap_block_load(delta) {
       });
     }
     if (block == null) {
-      var msg = 'drupalgap_block_load - failed to load "' + delta + '" block!';
+      var msg = 'drupalgap_block_load - '+t('failed to load')+' "' + delta + '" '+t('block!');
       drupalgap_alert(msg);
     }
     return block;
@@ -3193,7 +3193,7 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
  */
 function drupalgap_form_cancel_button() {
     return {
-      'title': 'Cancel',
+      'title': t('Cancel'),
       attributes: {
         onclick: 'javascript:drupalgap_back();'
       }
@@ -3331,7 +3331,7 @@ function drupalgap_get_form(form_id) {
       html = drupalgap_form_render(form);
     }
     else {
-      var msg = 'drupalgap_get_form - failed to get form (' + form_id + ')';
+      var msg = 'drupalgap_get_form - '+t('failed to get form')+' (' + form_id + ')';
       drupalgap_alert(msg);
     }
     return html;
@@ -3474,8 +3474,8 @@ function drupalgap_form_load(form_id) {
       drupalgap_form_local_storage_save(form);
     }
     else {
-      var error_msg = 'drupalgap_form_load - no callback function (' +
-                       function_name + ') available for form (' + form_id + ')';
+      var error_msg = 'drupalgap_form_load - '+t('no callback function')+' (' +
+                       function_name + ') '+t('available for form')+' (' + form_id + ')';
       drupalgap_alert(error_msg);
     }
     return form;
@@ -3574,7 +3574,7 @@ function _drupalgap_form_submit(form_id) {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
     if (!form) {
-      var msg = '_drupalgap_form_submit - failed to load form: ' + form_id;
+      var msg = '_drupalgap_form_submit - '+t('failed to load form')+': ' + form_id;
       drupalgap_alert(msg);
       return false;
     }
@@ -3691,7 +3691,7 @@ function _drupalgap_form_validate(form, form_state) {
             if (element.title) { field_title = element.title; }
             drupalgap_form_set_error(
               name,
-              'The ' + field_title + ' field is required.'
+              t('The')+' ' + field_title + ' '+t('field is required')+'.'
             );
           }
         }
@@ -4432,7 +4432,7 @@ function drupalgap_goto_generate_page_and_go(
       else {
         drupalgap_alert(
           'drupalgap_goto_generate_page_and_go - ' +
-          'failed to load theme\'s page.tpl.html file'
+          t('failed to load theme\'s page.tpl.html file')
         );
       }
     }
@@ -4496,7 +4496,7 @@ function _drupalgap_goto_prepare_path(path) {
       if (!drupalgap.settings.front) {
         drupalgap_alert(
           'drupalgap_goto_prepare_path - ' +
-          'no front page specified in settings.js!'
+          t('no front page specified in settings.js!')
         );
         return false;
       }
@@ -4523,7 +4523,7 @@ function _drupalgap_goto_prepare_path(path) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      var msg = 'Exit ' + drupalgap.settings.title + '?';
+      var msg = t('Exit')+' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
       }
@@ -5496,16 +5496,16 @@ function menu_list_system_menus() {
   try {
     var system_menus = {
       'user_menu_anonymous': {
-        'title': 'User menu authenticated'
+        'title': t('User menu authenticated')
       },
       'user_menu_authenticated': {
-        'title': 'User menu authenticated'
+        'title': t('User menu authenticated')
       },
       'main_menu': {
-        'title': 'Main menu'
+        'title': t('Main menu')
       },
       'primary_local_tasks': {
-        'title': 'Primary Local Tasks'
+        'title': t('Primary Local Tasks')
       }
     };
     // Add the menu_name to each menu as a property.
@@ -6293,7 +6293,7 @@ function theme_link(variables) {
 function theme_logout(variables) {
   try {
     return bl(
-      'Logout',
+      t('Logout'),
       'user/logout',
       {
         attributes: {
@@ -6470,7 +6470,7 @@ function _drupalgap_page_title_pageshow_success(title) {
 function comment_menu() {
     var items = {
       'comment/%': {
-        title: 'Comment',
+        title: t('Comment'),
         page_callback: 'comment_page_view',
         page_arguments: [1],
         pageshow: 'comment_page_view_pageshow',
@@ -6478,12 +6478,12 @@ function comment_menu() {
         title_arguments: [1]
       },
       'comment/%/view': {
-        title: 'View',
+        title: t('View'),
         type: 'MENU_DEFAULT_LOCAL_TASK',
         weight: -10
       },
       'comment/%/edit': {
-        title: 'Edit',
+        title: t('Edit'),
         page_callback: 'entity_page_edit',
         pageshow: 'entity_page_edit_pageshow',
         page_arguments: ['comment_edit', 'comment', 1],
@@ -6559,7 +6559,7 @@ function comment_page_view(cid) {
       };
       return content;
     }
-    else { drupalgap_error('No comment id provided!'); }
+    else { drupalgap_error(t('No comment id provided!')); }
   }
   catch (error) { console.log('comment_page_view - ' + error); }
 }
@@ -6653,14 +6653,14 @@ function comment_edit(form, form_state, comment, node) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel and delete button to form if we're editing a comment. Also
     // figure out a form title to use in the prefix.
-    var form_title = 'Add comment';
+    var form_title = t('Add comment');
     if (comment && comment.cid) {
-      form_title = 'Edit comment';
+      form_title = t('Edit comment');
       form.buttons['cancel'] = drupalgap_form_cancel_button();
       form.buttons['delete'] =
         drupalgap_entity_edit_form_delete_button('comment', comment.cid);
@@ -6803,7 +6803,7 @@ function theme_comment(variables) {
       (user_access('edit own comments') && comment.uid == Drupal.user.uid)
     ) {
       html += theme('button_link', {
-          text: 'Edit',
+          text: t('Edit'),
           path: 'comment/' + comment.cid + '/edit',
           attributes: {
             'data-icon': 'gear'
@@ -6825,14 +6825,14 @@ function contact_menu() {
   try {
     var items = {};
     items['contact'] = {
-      title: 'Contact',
+      title: t('Contact'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['contact_site_form'],
       pageshow: 'contact_site_form_pageshow',
       access_arguments: ['access site-wide contact form']
     };
     items['user/%/contact'] = {
-      title: 'User contact',
+      title: t('User contact'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['contact_personal_form', 1],
       pageshow: 'contact_personal_form_pageshow',
@@ -6899,39 +6899,39 @@ function contact_personal(options) {
 function contact_site_form(form, form_state) {
   try {
     form.elements.name = {
-      title: 'Your name',
+      title: t('Your name'),
       type: 'textfield',
       required: true
     };
     form.elements.mail = {
-      title: 'Your e-mail address',
+      title: t('Your e-mail address'),
       type: 'email',
       required: true
     };
     form.elements.subject = {
-      title: 'Subject',
+      title: t('Subject'),
       type: 'textfield',
       required: true
     };
     form.elements.category = {
-      title: 'Category',
+      title: t('Category'),
       type: 'select',
       required: true
     };
     form.elements.message = {
-      title: 'Message',
+      title: t('Message'),
       type: 'textarea',
       required: true
     };
     form.elements.copy = {
-      title: 'Send yourself a copy?',
+      title: t('Send yourself a copy?'),
       type: 'checkbox',
       default_value: 0,
       access: false
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Send message'
+      value: t('Send message')
     };
     // If the user is logged in, set the default values.
     if (Drupal.user.uid != 0) {
@@ -6990,12 +6990,12 @@ function contact_site_form_submit(form, form_state) {
       data: JSON.stringify(data),
       success: function(result) {
         if (result[0]) {
-          drupalgap_alert('Your message has been sent!');
+          drupalgap_alert(t('Your message has been sent!'));
         }
         else {
           drupalgap_alert(
-            'There was a problem sending your message!',
-            { title: 'Error' }
+            t('There was a problem sending your message!'),
+            { title: t('Error') }
           );
         }
         drupalgap_form_clear();
@@ -7027,12 +7027,12 @@ function contact_personal_form(form, form_state, recipient) {
     // @TODO - when providing a personal contact form, make sure the user has
     // their personal contact form enabled.
     form.elements.name = {
-      title: 'Your name',
+      title: t('Your name'),
       type: 'textfield',
       required: true
     };
     form.elements.mail = {
-      title: 'Your e-mail address',
+      title: t('Your e-mail address'),
       type: 'email',
       required: true
     };
@@ -7046,24 +7046,24 @@ function contact_personal_form(form, form_state, recipient) {
       markup: '<div id="' + container_id + '"></div>'
     };
     form.elements.subject = {
-      title: 'Subject',
+      title: t('Subject'),
       type: 'textfield',
       required: true
     };
     form.elements.message = {
-      title: 'Message',
+      title: t('Message'),
       type: 'textarea',
       required: true
     };
     form.elements.copy = {
-      title: 'Send yourself a copy?',
+      title: t('Send yourself a copy?'),
       type: 'checkbox',
       default_value: 0,
       access: false
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Send message'
+      value: t('Send message')
     };
     // If the user is logged in, set the default values.
     if (Drupal.user.uid != 0) {
@@ -7091,7 +7091,7 @@ function contact_personal_form_pageshow(form, recipient) {
           if (!account.data.contact) {
             $('#' + drupalgap_get_page_id() + ' #drupalgap_form_errors').html(
               "<div class='messages warning'>" +
-                "Sorry, this user's contact form is disabled." +
+                t("Sorry, this user's contact form is disabled.") +
               '</div>'
             );
             return;
@@ -7126,11 +7126,11 @@ function contact_personal_form_submit(form, form_state) {
   contact_personal({
       data: JSON.stringify(data),
       success: function(result) {
-        if (result[0]) { drupalgap_alert('Your message has been sent!'); }
+        if (result[0]) { drupalgap_alert(t('Your message has been sent!')); }
         else {
           drupalgap_alert(
-            'There was a problem sending your message!',
-            { title: 'Error' }
+            t('There was a problem sending your message!'),
+            { title: t('Error') }
           );
         }
         drupalgap_form_clear();
@@ -7214,7 +7214,7 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
     return {
-      title: 'Delete',
+      title: t('Delete'),
       attributes: {
         onclick: "javascript:drupalgap_entity_edit_form_delete_confirmation('" +
           entity_type + "', " + entity_id +
@@ -7236,7 +7236,7 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
   entity_id) {
   try {
     var confirm_msg =
-      'Delete this content, are you sure? This action cannot be undone...';
+      t('Delete this content, are you sure? This action cannot be undone...');
     drupalgap_confirm(confirm_msg, {
         confirmCallback: function(button) {
           if (button == 2) { return; }
@@ -7845,7 +7845,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.title = {
           'type': 'textfield',
-          'title': 'Title',
+          'title': t('Title'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -7869,14 +7869,14 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.name = {
           'type': 'textfield',
-          'title': 'Username',
+          'title': t('Username'),
           'required': true,
           'default_value': '',
           'description': ''
         };
         fields.mail = {
           'type': 'email',
-          'title': 'E-mail address',
+          'title': t('E-mail address'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -7884,7 +7884,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         fields.picture = {
           'type': 'image',
           'widget_type': 'imagefield_widget',
-          'title': 'Picture',
+          'title': t('Picture'),
           'required': false,
           'value': 'Add Picture'
         };
@@ -7903,13 +7903,13 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }
@@ -7924,19 +7924,19 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'machine_name': {
             'type': 'textfield',
-            'title': 'Machine Name',
+            'title': t('Machine Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }
@@ -8492,7 +8492,7 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
       // the default value accordingly.
       element.options = filter.value_options;
       if (!element.required) {
-        element.options['All'] = '- Any -';
+        element.options['All'] = '- '+t('Any')+' -';
         if (typeof element.value === 'undefined') { element.value = 'All'; }
       }
     }
@@ -8656,7 +8656,7 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // it as the default.  If it is optional, place a "none" option
               // for the user to choose from.
               var text = '- None -';
-              if (items[delta].required) { text = '- Select a value -'; }
+              if (items[delta].required) { text = '- '+t('Select a value')+' -'; }
               items[delta].options[''] = text;
               if (empty(items[delta].value)) { items[delta].value = ''; }
               // If more than one value is allowed, turn it into a multiple
@@ -8727,8 +8727,8 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           // If the select list is required, add a 'Select' option and set
           // it as the default.  If it is optional, place a "none" option
           // for the user to choose from.
-          var text = '- None -';
-          if (items[delta].required) { text = '- Select a value -'; }
+          var text = '- '+t('None')+' -';
+          if (items[delta].required) { text = '- '+t('Select a value')+' -'; }
           items[delta].children.push({
               type: widget_type,
               attributes: {
@@ -8921,9 +8921,9 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
 
     // Set the default button text, and if a value was provided,
     // overwrite the button text.
-    var button_text = 'Take Photo';
+    var button_text = t('Take Photo');
     if (items[delta].value) { button_text = items[delta].value; }
-    var browse_button_text = 'Browse';
+    var browse_button_text = t('Browse');
     if (items[delta].value2) { browse_button_text = items[delta].value2; }
 
     // Place variables into document for PhoneGap image processing.
@@ -9674,7 +9674,7 @@ function collection_list_page(module, type) {
     var content = {
       'collection_list': {
         'theme': 'jqm_item_list',
-        'title': 'Collection'
+        'title': t('Collection')
       }
     };
     var items = [];
@@ -9764,18 +9764,18 @@ function mvc_install() {
             // on the model fields. These are the mvc_model_system_fields().
             model.fields.id = {
               'type': 'hidden',
-              'title': 'ID',
+              'title': t('ID'),
               'required': false
             };
             model.fields.module = {
               'type': 'hidden',
-              'title': 'Module',
+              'title': t('Module'),
               'required': true,
               'default_value': module
             };
             model.fields.type = {
               'type': 'hidden',
-              'title': 'Model Type',
+              'title': t('Model Type'),
               'required': true,
               'default_value': model_type
             };
@@ -9827,7 +9827,7 @@ function mvc_menu() {
         'page_arguments': [2, 3, 4]
       },
       'mvc/item-add/%/%': {
-        title: 'Add',
+        title: t('Add'),
         page_callback: 'drupalgap_get_form',
         page_arguments: ['item_create_form', 2, 3]
       }
@@ -9892,7 +9892,7 @@ function item_create_form(form, form_state, module, type) {
       form.buttons.cancel = drupalgap_form_cancel_button();
       form.elements.submit = {
         type: 'submit',
-        value: 'Create'
+        value: t('Create')
       };
     }
     return form;
@@ -10035,10 +10035,10 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>Create Content</h2>'},
+      'header': {'markup': '<h2>'+t('Create Content')+'</h2>'},
       'node_type_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Content Types',
+        'title': t('Content Types'),
         'attributes': {'id': 'node_type_listing_items'}
       }
     };
@@ -10078,7 +10078,7 @@ function node_add_page_by_type(type) {
  */
 function node_add_page_by_type_title(callback, type) {
   try {
-    var title = 'Create ' + drupalgap.content_types_list[type].name;
+    var title = t('Create')+' ' + drupalgap.content_types_list[type].name;
     return callback.call(null, title);
   }
   catch (error) { console.log('node_add_page_by_type_title - ' + error); }
@@ -10106,7 +10106,7 @@ function node_edit(form, form_state, node) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -10143,16 +10143,16 @@ function node_edit_submit(form, form_state) {
 function node_menu() {
     var items = {
       'node': {
-        'title': 'Content',
+        'title': t('Content'),
         'page_callback': 'node_page',
         'pageshow': 'node_page_pageshow'
       },
       'node/add': {
-        'title': 'Add content',
+        'title': t('Add content'),
         'page_callback': 'node_add_page'
       },
       'node/add/%': {
-        title: 'Add content',
+        title: t('Add content'),
         title_callback: 'node_add_page_by_type_title',
         title_arguments: [2],
         page_callback: 'node_add_page_by_type',
@@ -10160,7 +10160,7 @@ function node_menu() {
         options: { reloadPage: true }
       },
       'node/%': {
-        'title': 'Node',
+        'title': t('Node'),
         'page_callback': 'node_page_view',
         'page_arguments': [1],
         'pageshow': 'node_page_view_pageshow',
@@ -10168,12 +10168,12 @@ function node_menu() {
         'title_arguments': [1]
       },
       'node/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'node/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['node_edit', 'node', 1],
@@ -10196,11 +10196,11 @@ function node_page() {
       'create_content': {
         'theme': 'button_link',
         'path': 'node/add',
-        'text': 'Create Content'
+        'text': t('Create Content')
       },
       'node_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Content List',
+        'title': t('Content List'),
         'items': [],
         'attributes': {'id': 'node_listing_items'}
       }
@@ -10243,7 +10243,7 @@ function node_page_view(nid) {
       };
       return content;
     }
-    else { drupalgap_error('No node id provided!'); }
+    else { drupalgap_error(t('No node id provided!')); }
   }
   catch (error) { console.log('node_page_view - ' + error); }
 }
@@ -10453,7 +10453,7 @@ function search_menu() {
   try {
     var items = {};
     items['search/%/%'] = {
-      title: 'Search',
+      title: t('Search'),
       'page_callback': 'drupalgap_get_form',
       'pageshow': 'search_form_pageshow',
       'page_arguments': ['search_form'],
@@ -10523,13 +10523,13 @@ function search_form(form, form_state) {
     };
     form.elements.keys = {
       type: 'textfield',
-      title: 'Enter your keywords',
+      title: t('Enter your keywords'),
       required: true,
       default_value: keys ? keys : ''
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Go',
+      value: t('Go'),
       options: {
         attributes: {
           'data-icon': 'search'
@@ -10537,7 +10537,7 @@ function search_form(form, form_state) {
       }
     };
     form.suffix += theme('jqm_item_list', {
-        title: 'Search results',
+        title: t('Search results'),
         items: [],
         options: {
           attributes: {
@@ -10854,7 +10854,7 @@ function system_block_view(delta) {
         return '<h1 id="' + title_id + '"></h1>';
         break;
       case 'powered_by':
-        return '<p style="text-align: center;">Powered by: ' +
+        return '<p style="text-align: center;">'+t('Powered by')+': ' +
           l('DrupalGap', 'http://www.drupalgap.org', {InAppBrowser: true}) +
         '</p>';
         break;
@@ -10876,28 +10876,28 @@ function system_block_view(delta) {
 function system_menu() {
     var items = {
       'dashboard': {
-        'title': 'Dashboard',
+        'title': t('Dashboard'),
         'page_callback': 'system_dashboard_page'
       },
       'error': {
-        'title': 'Error',
+        'title': t('Error'),
         'page_callback': 'system_error_page'
       },
       'offline': {
-        'title': 'Offline',
+        'title': t('Offline'),
         'page_callback': 'system_offline_page'
       },
       '401': {
-        title: '401 - Not Authorized',
+        title: '401 - '+t('Not Authorized'),
         page_callback: 'system_401_page'
       },
       '404': {
-        title: '404 - Not Found',
+        title: '404 - '+t('Not Found'),
         page_callback: 'system_404_page'
       }
     };
     items['_reload'] = {
-      title: 'Reloading...',
+      title: t('Reloading')+'...',
       page_callback: 'system_reload_page',
       pageshow: 'system_reload_pageshow'
     };
@@ -10910,7 +10910,7 @@ function system_menu() {
  * @return {String}
  */
 function system_401_page(path) {
-  return 'Sorry, you are not authorized to view this page.';
+  return t('Sorry, you are not authorized to view this page.');
 }
 
 /**
@@ -10919,7 +10919,7 @@ function system_401_page(path) {
  * @return {String}
  */
 function system_404_page(path) {
-  return 'Sorry, the page you requested was not found.';
+  return t('Sorry, the page you requested was not found.');
 }
 
 /**
@@ -10996,9 +10996,9 @@ function system_dashboard_page() {
       '</h4>'
     };
     content.welcome = {
-      markup: '<h2 style="text-align: center;">Welcome to DrupalGap</h2>' +
+      markup: '<h2 style="text-align: center;">'+t('Welcome to DrupalGap')+'</h2>' +
         '<p style="text-align: center;">' +
-          'The open source application development kit for Drupal!' +
+          t('The open source application development kit for Drupal!') +
         '</p>'
     };
     if (drupalgap.settings.logo) {
@@ -11010,13 +11010,13 @@ function system_dashboard_page() {
     }
     content.get_started = {
       theme: 'button_link',
-      text: 'Getting Started Guide',
+      text: t('Getting Started Guide'),
       path: 'http://www.drupalgap.org/get-started',
       options: {InAppBrowser: true}
     };
     content.support = {
       theme: 'button_link',
-      text: 'Support',
+      text: t('Support'),
       path: 'http://www.drupalgap.org/support',
       options: {InAppBrowser: true}
     };
@@ -11032,7 +11032,7 @@ function system_dashboard_page() {
 function system_error_page() {
     var content = {
       info: {
-        markup: '<p>An unexpected error has occurred!</p>'
+        markup: '<p>'+t('An unexpected error has occurred!')+'</p>'
       }
     };
     return content;
@@ -11046,19 +11046,19 @@ function system_offline_page() {
   try {
     var content = {
       'message': {
-        'markup': '<h2>Failed Connection</h2>' +
-          "<p>Oops! We couldn't connect to:</p>" +
+        'markup': '<h2>'+t('Failed Connection')+'</h2>' +
+          "<p>"+t("Oops! We couldn't connect to")+":</p>" +
           '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
         'theme': 'button',
-        'text': 'Try Again',
+        'text': t('Try Again'),
         'attributes': {
           'onclick': 'javascript:offline_try_again();'
         }
       },
       'footer': {
-        'markup': "<p>Check your device's network settings and try again.</p>"
+        'markup': "<p>"+t("Check your device's network settings and try again.")+"</p>"
       }
     };
     return content;
@@ -11083,7 +11083,7 @@ function offline_try_again() {
       });
     }
     else {
-      var msg = 'Sorry, no connection found! (' + connection + ')';
+      var msg = t('Sorry, no connection found!')+' (' + connection + ')';
       drupalgap_alert(msg, {
           title: 'Offline'
       });
@@ -11115,7 +11115,7 @@ function system_settings_form(form, form_state) {
     if (!form.elements.submit) {
       form.elements.submit = {
         type: 'submit',
-        value: 'Save configuration'
+        value: t('Save configuration')
       };
     }
     // Add cancel button to form if one isn't present.
@@ -12191,23 +12191,23 @@ function taxonomy_assemble_form_state_into_field(entity_type, bundle,
 function taxonomy_menu() {
     var items = {
       'taxonomy/vocabularies': {
-        'title': 'Taxonomy',
+        'title': t('Taxonomy'),
         'page_callback': 'taxonomy_vocabularies_page',
         'pageshow': 'taxonomy_vocabularies_pageshow'
       },
       'taxonomy/vocabulary/%': {
-        'title': 'Taxonomy vocabulary',
+        'title': t('Taxonomy vocabulary'),
         'page_callback': 'taxonomy_vocabulary_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_vocabulary_pageshow'
       },
       'taxonomy/vocabulary/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/vocabulary/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': [
@@ -12221,18 +12221,18 @@ function taxonomy_menu() {
         options: {reloadPage: true}
       },
       'taxonomy/term/%': {
-        'title': 'Taxonomy term',
+        'title': t('Taxonomy term'),
         'page_callback': 'taxonomy_term_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_term_pageshow'
       },
       'taxonomy/term/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/term/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['taxonomy_form_term', 'taxonomy_term', 2],
@@ -12271,7 +12271,7 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -12324,7 +12324,7 @@ function taxonomy_form_term(form, form_state, term) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -12455,7 +12455,7 @@ function taxonomy_vocabularies_page() {
     var content = {
       'vocabulary_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Vocabularies',
+        'title': t('Vocabularies'),
         'items': [],
         'attributes': {'id': 'vocabulary_listing_items'}
       }
@@ -12500,7 +12500,7 @@ function taxonomy_vocabulary_page(vid) {
         ),
         taxonomy_term_listing: {
           theme: 'jqm_item_list',
-          title: 'Terms',
+          title: t('Terms'),
           items: [],
           attributes: {
             id: 'taxonomy_term_listing_items_' + vid
@@ -12751,12 +12751,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
           if (!options.required) {
             var option = null;
             if (options.exposed) {
-              option = '<option value="All">- Any -</option>';
+              option = '<option value="All">- '+t('Any')+' -</option>';
               _taxonomy_term_reference_terms[options.element_id]['All'] =
                 '- Any -';
             }
             else {
-              option = '<option value="">- None -</option>';
+              option = '<option value="">- '+t('None')+' -</option>';
               _taxonomy_term_reference_terms[options.element_id][''] =
                 '- None -';
             }
