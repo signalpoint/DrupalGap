@@ -127,7 +127,7 @@ function hook_drupalgap_goto_preprocess(path) {
   try {
     // Pre process the front page.
     if (path == drupalgap.settings.front) {
-      drupalgap_alert('Preprocessing the front page!');
+      drupalgap_alert(t('Preprocessing the front page!'));
     }
   }
   catch (error) {
@@ -144,7 +144,7 @@ function hook_drupalgap_goto_post_process(path) {
   try {
     // Post process the front page.
     if (path == drupalgap.settings.front) {
-      drupalgap_alert('Post processing the front page!');
+      drupalgap_alert(t('Post processing the front page!'));
     }
   }
   catch (error) {
@@ -185,7 +185,7 @@ function hook_404(router_path) {}
 function hook_entity_post_render_content(entity, entity_type, bundle) {
   try {
     if (entity.type == 'article') {
-      entity.content += '<p>Example text on every article!</p>';
+      entity.content += '<p>'.t('Example text on every article!')+'</p>';
     }
   }
   catch (error) {
@@ -244,7 +244,7 @@ function hook_field_formatter_view(entity_type, entity, field, instance, langcod
     var content = {};
     $.each(items, function(delta, item) {
         content[delta] = {
-          markup: '<p>Hello!</p>'
+          markup: '<p>'+t('Hello!')+'</p>'
         };
     });
     return content;
@@ -322,7 +322,7 @@ function hook_menu() {
   try {
     var items = {};
     items['hello_world'] = {
-      title: 'Hello World',
+      title: t('Hello World'),
       page_callback: 'my_module_hello_world_page'
     };
     return items;
@@ -352,7 +352,7 @@ function hook_node_page_view_alter_TYPE(node, options) {
 
     var content = {};
     content['my_markup'] = {
-      markup: '<p>Click below to see the node!</p>'
+      markup: '<p>'+t('Click below to see the node!')+'</p>'
     };
     content['my_collapsible'] = {
       theme: 'collapsible',

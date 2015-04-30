@@ -52,7 +52,7 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
     return {
-      title: 'Delete',
+      title: t('Delete'),
       attributes: {
         onclick: "javascript:drupalgap_entity_edit_form_delete_confirmation('" +
           entity_type + "', " + entity_id +
@@ -74,7 +74,7 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
   entity_id) {
   try {
     var confirm_msg =
-      'Delete this content, are you sure? This action cannot be undone...';
+      t('Delete this content, are you sure? This action cannot be undone...');
     drupalgap_confirm(confirm_msg, {
         confirmCallback: function(button) {
           if (button == 2) { return; }
@@ -683,7 +683,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.title = {
           'type': 'textfield',
-          'title': 'Title',
+          'title': t('Title'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -707,14 +707,14 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.name = {
           'type': 'textfield',
-          'title': 'Username',
+          'title': t('Username'),
           'required': true,
           'default_value': '',
           'description': ''
         };
         fields.mail = {
           'type': 'email',
-          'title': 'E-mail address',
+          'title': t('E-mail address'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -722,7 +722,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         fields.picture = {
           'type': 'image',
           'widget_type': 'imagefield_widget',
-          'title': 'Picture',
+          'title': t('Picture'),
           'required': false,
           'value': 'Add Picture'
         };
@@ -741,13 +741,13 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }
@@ -762,19 +762,19 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'machine_name': {
             'type': 'textfield',
-            'title': 'Machine Name',
+            'title': t('Machine Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }

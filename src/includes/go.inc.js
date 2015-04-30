@@ -256,7 +256,7 @@ function drupalgap_goto_generate_page_and_go(
       else {
         drupalgap_alert(
           'drupalgap_goto_generate_page_and_go - ' +
-          'failed to load theme\'s page.tpl.html file'
+          t('failed to load theme\'s page.tpl.html file')
         );
       }
     }
@@ -320,7 +320,7 @@ function _drupalgap_goto_prepare_path(path) {
       if (!drupalgap.settings.front) {
         drupalgap_alert(
           'drupalgap_goto_prepare_path - ' +
-          'no front page specified in settings.js!'
+          t('no front page specified in settings.js!')
         );
         return false;
       }
@@ -347,7 +347,7 @@ function _drupalgap_goto_prepare_path(path) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      var msg = 'Exit ' + drupalgap.settings.title + '?';
+      var msg = t('Exit')+' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
       }
