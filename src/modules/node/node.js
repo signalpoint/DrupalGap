@@ -26,10 +26,10 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>Create Content</h2>'},
+      'header': {'markup': '<h2>'+t('Create Content')+'</h2>'},
       'node_type_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Content Types',
+        'title': t('Content Types'),
         'attributes': {'id': 'node_type_listing_items'}
       }
     };
@@ -69,7 +69,7 @@ function node_add_page_by_type(type) {
  */
 function node_add_page_by_type_title(callback, type) {
   try {
-    var title = 'Create ' + drupalgap.content_types_list[type].name;
+    var title = t('Create')+' ' + drupalgap.content_types_list[type].name;
     return callback.call(null, title);
   }
   catch (error) { console.log('node_add_page_by_type_title - ' + error); }
@@ -97,7 +97,7 @@ function node_edit(form, form_state, node) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -134,16 +134,16 @@ function node_edit_submit(form, form_state) {
 function node_menu() {
     var items = {
       'node': {
-        'title': 'Content',
+        'title': t('Content'),
         'page_callback': 'node_page',
         'pageshow': 'node_page_pageshow'
       },
       'node/add': {
-        'title': 'Add content',
+        'title': t('Add content'),
         'page_callback': 'node_add_page'
       },
       'node/add/%': {
-        title: 'Add content',
+        title: t('Add content'),
         title_callback: 'node_add_page_by_type_title',
         title_arguments: [2],
         page_callback: 'node_add_page_by_type',
@@ -151,7 +151,7 @@ function node_menu() {
         options: { reloadPage: true }
       },
       'node/%': {
-        'title': 'Node',
+        'title': t('Node'),
         'page_callback': 'node_page_view',
         'page_arguments': [1],
         'pageshow': 'node_page_view_pageshow',
@@ -159,12 +159,12 @@ function node_menu() {
         'title_arguments': [1]
       },
       'node/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'node/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['node_edit', 'node', 1],
@@ -187,11 +187,11 @@ function node_page() {
       'create_content': {
         'theme': 'button_link',
         'path': 'node/add',
-        'text': 'Create Content'
+        'text': t('Create Content')
       },
       'node_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Content List',
+        'title': t('Content List'),
         'items': [],
         'attributes': {'id': 'node_listing_items'}
       }
@@ -234,7 +234,7 @@ function node_page_view(nid) {
       };
       return content;
     }
-    else { drupalgap_error('No node id provided!'); }
+    else { drupalgap_error(t('No node id provided!')); }
   }
   catch (error) { console.log('node_page_view - ' + error); }
 }

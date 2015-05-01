@@ -170,9 +170,9 @@ function _drupalgap_deviceready() {
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      var msg = 'No site_path to Drupal set in the app/settings.js file!';
+      var msg = t('No site_path to Drupal set in the app/settings.js file!');
       drupalgap_alert(msg, {
-          title: 'Error'
+          title: t('Error')
       });
       return;
     }
@@ -184,7 +184,7 @@ function _drupalgap_deviceready() {
       module_invoke_all('device_offline');
       if (drupalgap.settings.offline_message) {
         drupalgap_alert(drupalgap.settings.offline_message, {
-            title: 'Offline',
+            title: t('Offline'),
             alertCallback: function() { drupalgap_goto('offline'); }
         });
       }
@@ -238,12 +238,12 @@ function _drupalgap_deviceready_options() {
       },
       error: function(jqXHR, textStatus, errorThrown) {
         // Build an informative error message and display it.
-        var msg = 'Failed connection to ' + drupalgap.settings.site_path;
+        var msg = t('Failed connection to') + ' ' + drupalgap.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
-        msg += ' - Check your device\'s connection and check that ' +
-               Drupal.settings.site_path + ' is online.';
+        msg += ' - '+t('Check your device\'s connection and check that')+' ' +
+               Drupal.settings.site_path + ' '+t('is online.');
        drupalgap_alert(msg, {
-           title: 'Unable to Connect',
+           title: t('Unable to Connect'),
            alertCallback: function() { drupalgap_goto('offline'); }
        });
       }
@@ -343,7 +343,7 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = 'Failed to load module! (' + module.name + ')';
+                      var msg = t('Failed to load module!')+' (' + module.name + ')';
                       dpm(msg);
                       dpm(modules_paths_object);
                       dpm(textStatus);
@@ -369,7 +369,7 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      var msg = 'drupalgap_load_theme - no theme specified in settings.js';
+      var msg = 'drupalgap_load_theme - '+t('no theme specified in settings.js');
       drupalgap_alert(msg);
     }
     else {
@@ -380,8 +380,8 @@ function drupalgap_load_theme() {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
       }
       if (!drupalgap_file_exists(theme_path)) {
-        var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
-          'The theme\'s JS file does not exist: ' + theme_path;
+        var error_msg = 'drupalgap_theme_load - '+t('Failed to load theme!')+' ' +
+          t('The theme\'s JS file does not exist')+': ' + theme_path;
         drupalgap_alert(error_msg);
         return false;
       }
@@ -412,8 +412,8 @@ function drupalgap_load_theme() {
         return true;
       }
       else {
-        var error_msg = 'drupalgap_load_theme() - failed - ' +
-          template_info_function + '() does not exist!';
+        var error_msg = 'drupalgap_load_theme() - '+t('failed')+' - ' +
+          template_info_function + '() '+t('does not exist!');
         drupalgap_alert(error_msg);
       }
     }
@@ -485,8 +485,8 @@ function drupalgap_alert(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var alertCallback = function() { };
-    var title = 'Alert';
-    var buttonName = 'OK';
+    var title = t('Alert');
+    var buttonName = t('OK');
     if (options) {
       if (options.alertCallback) { alertCallback = options.alertCallback; }
       if (options.title) { title = options.title; }
@@ -525,8 +525,8 @@ function drupalgap_confirm(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var confirmCallback = function(button) { };
-    var title = 'Confirm';
-    var buttonLabels = ['OK', 'Cancel'];
+    var title = t('Confirm');
+    var buttonLabels = [t('OK'), t('Cancel')];
     if (options) {
       if (options.confirmCallback) {
         confirmCallback = options.confirmCallback;
@@ -1083,9 +1083,9 @@ function drupalgap_loading_message_hide() {
 function drupalgap_loader_options() {
   try {
     var mode = drupalgap.loader;
-    var text = 'Loading...';
+    var text = t('Loading')+'...';
     var textVisible = true;
-    if (mode == 'saving') { var text = 'Saving...'; }
+    if (mode == 'saving') { var text = t('Saving')+'...'; }
     var options = {
       text: text,
       textVisible: textVisible

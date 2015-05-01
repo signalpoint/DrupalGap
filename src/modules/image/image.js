@@ -93,9 +93,9 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
 
     // Set the default button text, and if a value was provided,
     // overwrite the button text.
-    var button_text = 'Take Photo';
+    var button_text = t('Take Photo');
     if (items[delta].value) { button_text = items[delta].value; }
-    var browse_button_text = 'Browse';
+    var browse_button_text = t('Browse');
     if (items[delta].value2) { browse_button_text = items[delta].value2; }
 
     // Place variables into document for PhoneGap image processing.
