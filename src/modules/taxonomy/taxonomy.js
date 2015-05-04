@@ -255,23 +255,23 @@ function taxonomy_assemble_form_state_into_field(entity_type, bundle,
 function taxonomy_menu() {
     var items = {
       'taxonomy/vocabularies': {
-        'title': 'Taxonomy',
+        'title': t('Taxonomy'),
         'page_callback': 'taxonomy_vocabularies_page',
         'pageshow': 'taxonomy_vocabularies_pageshow'
       },
       'taxonomy/vocabulary/%': {
-        'title': 'Taxonomy vocabulary',
+        'title': t('Taxonomy vocabulary'),
         'page_callback': 'taxonomy_vocabulary_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_vocabulary_pageshow'
       },
       'taxonomy/vocabulary/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/vocabulary/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': [
@@ -285,18 +285,18 @@ function taxonomy_menu() {
         options: {reloadPage: true}
       },
       'taxonomy/term/%': {
-        'title': 'Taxonomy term',
+        'title': t('Taxonomy term'),
         'page_callback': 'taxonomy_term_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_term_pageshow'
       },
       'taxonomy/term/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/term/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['taxonomy_form_term', 'taxonomy_term', 2],
@@ -335,7 +335,7 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -388,7 +388,7 @@ function taxonomy_form_term(form, form_state, term) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -519,7 +519,7 @@ function taxonomy_vocabularies_page() {
     var content = {
       'vocabulary_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Vocabularies',
+        'title': t('Vocabularies'),
         'items': [],
         'attributes': {'id': 'vocabulary_listing_items'}
       }
@@ -564,7 +564,7 @@ function taxonomy_vocabulary_page(vid) {
         ),
         taxonomy_term_listing: {
           theme: 'jqm_item_list',
-          title: 'Terms',
+          title: t('Terms'),
           items: [],
           attributes: {
             id: 'taxonomy_term_listing_items_' + vid
@@ -815,12 +815,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
           if (!options.required) {
             var option = null;
             if (options.exposed) {
-              option = '<option value="All">- Any -</option>';
+              option = '<option value="All">- '+t('Any')+' -</option>';
               _taxonomy_term_reference_terms[options.element_id]['All'] =
                 '- Any -';
             }
             else {
-              option = '<option value="">- None -</option>';
+              option = '<option value="">- '+t('None')+' -</option>';
               _taxonomy_term_reference_terms[options.element_id][''] =
                 '- None -';
             }

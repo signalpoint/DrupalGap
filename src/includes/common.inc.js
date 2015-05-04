@@ -366,3 +366,10 @@ function bl() {
   catch (error) { console.log('bl - ' + error); }
 }
 
+/**
+ * Returns translated text.
+ * @return {String}
+ */
+function t(str) {
+  return str;
+}

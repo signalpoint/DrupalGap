@@ -172,16 +172,16 @@ function menu_list_system_menus() {
   try {
     var system_menus = {
       'user_menu_anonymous': {
-        'title': 'User menu authenticated'
+        'title': t('User menu authenticated')
       },
       'user_menu_authenticated': {
-        'title': 'User menu authenticated'
+        'title': t('User menu authenticated')
       },
       'main_menu': {
-        'title': 'Main menu'
+        'title': t('Main menu')
       },
       'primary_local_tasks': {
-        'title': 'Primary Local Tasks'
+        'title': t('Primary Local Tasks')
       }
     };
     // Add the menu_name to each menu as a property.

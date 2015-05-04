@@ -41,7 +41,7 @@ function search_menu() {
   try {
     var items = {};
     items['search/%/%'] = {
-      title: 'Search',
+      title: t('Search'),
       'page_callback': 'drupalgap_get_form',
       'pageshow': 'search_form_pageshow',
       'page_arguments': ['search_form'],
@@ -111,13 +111,13 @@ function search_form(form, form_state) {
     };
     form.elements.keys = {
       type: 'textfield',
-      title: 'Enter your keywords',
+      title: t('Enter your keywords'),
       required: true,
       default_value: keys ? keys : ''
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Go',
+      value: t('Go'),
       options: {
         attributes: {
           'data-icon': 'search'
@@ -125,7 +125,7 @@ function search_form(form, form_state) {
       }
     };
     form.suffix += theme('jqm_item_list', {
-        title: 'Search results',
+        title: t('Search results'),
         items: [],
         options: {
           attributes: {

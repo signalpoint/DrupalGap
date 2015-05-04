@@ -410,7 +410,7 @@ function theme_link(variables) {
 function theme_logout(variables) {
   try {
     return bl(
-      'Logout',
+      t('Logout'),
       'user/logout',
       {
         attributes: {
