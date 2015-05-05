@@ -275,7 +275,7 @@ function menu_block_view_pageshow(options) {
               link.options.attributes['class'] +=
                 ' ui-btn ui-btn-active ui-state-persist ';
             }
-            items.push(l(link.title, link.path, link.options));
+            items.push(l(t(link.title), link.path, link.options));
         });
         if (items.length > 0) {
           // Pass along any menu attributes.
