@@ -57,6 +57,7 @@ function drupalgap_init() {
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
+      locale: {}, /* holds onto language json objects, keyed by language code */
       messages: [],
       menus: {},
       menu_links: {},
@@ -263,6 +264,7 @@ function drupalgap_bootstrap() {
     drupalgap_load_modules();
     drupalgap_load_theme();
     drupalgap_load_blocks();
+    drupalgap_load_locales();
     menu_router_build();
     drupalgap_menus_load();
     drupalgap_theme_registry_build();
@@ -594,6 +596,25 @@ function drupalgap_load_blocks() {
     drupalgap.blocks = module_invoke_all('block_info');
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_load_locales() {
+  try {
+    if (typeof drupalgap.settings.locale === 'undefined') { return; }
+    for (var language_code in drupalgap.settings.locale) {
+      if (!drupalgap.settings.locale.hasOwnProperty(language_code)) { continue; }
+      var language = drupalgap.settings.locale[language_code];
+      var file_path = 'locale/' + language_code + '.json';
+      drupalgap.locale[language_code] = drupalgap_file_get_contents(
+        file_path,
+        { dataType: 'json' }
+      );
+    }
+  }
+  catch (error) { console.log('drupalgap_load_locales - ' + error); }
 }
 
 /**
