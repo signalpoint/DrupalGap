@@ -368,8 +368,16 @@ function bl() {
 
 /**
  * Returns translated text.
+ * @param {String} str The string to translate
  * @return {String}
  */
 function t(str) {
+  var lang = arguments[3] ? arguments[3] : Drupal.settings.language_default;
+  if (
+    lang != 'und' &&
+    typeof drupalgap.locale[lang] !== 'undefined' &&
+    drupalgap.locale[lang][str]
+  ) {  return drupalgap.locale[lang][str]; }
   return str;
 }
+
