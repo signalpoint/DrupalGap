@@ -89,6 +89,11 @@ drupalgap.settings.loader = {
   }
 };
 
+// Language Files - modules/locale/languages/[language-code].json
+drupalgap.settings.locale = {
+   /* es: { } */
+};
+
 /*****************************************|
  * Modules - http://drupalgap.org/node/74 |
  *****************************************/
