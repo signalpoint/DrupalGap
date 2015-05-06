@@ -1941,8 +1941,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           });
           break;
 
-        // Simple entity selection mode, use the Index resource for the entity
-        // type.
+        // Simple entity selection mode (provided by the entity reference
+        // module), use the Index resource for the entity type.
         case 'base':
           var field_settings =
             autocomplete.field_info_field.settings;
@@ -1954,14 +1954,12 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
             return;
           }
           var options = {
-            fields: ['nid', 'title'],
-            parameters: {
-              title: '%' + value + '%'
-            },
-            parameters_op: {
-              title: 'like'
-            }
+            fields: [autocomplete.value, autocomplete.filter],
+            parameters: { },
+            parameters_op: { }
           };
+          options.parameters[autocomplete.filter] = '%' + value + '%';
+          options.parameters_op[autocomplete.filter] = 'like';
           $.each(
             field_settings.handler_settings.target_bundles,
             function(bundle, name) {
@@ -1998,6 +1996,9 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
             };
             var fields = [];
             switch (autocomplete.entity_type) {
+              case 'comment':
+                fields = ['cid', 'subject'];
+                break;
               case 'node':
                 fields = ['nid', 'title'];
                 break;
@@ -2006,6 +2007,9 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 if (autocomplete.vid) {
                   query.parameters['vid'] = autocomplete.vid;
                 }
+                break;
+              case 'user':
+                fields = ['uid', 'name'];
                 break;
             }
             query.fields = fields;
