@@ -89,7 +89,7 @@ drupalgap.settings.loader = {
   }
 };
 
-// Language Files - modules/locale/languages/[language-code].json
+// Language Files - locale/[language-code].json
 drupalgap.settings.locale = {
    /* es: { } */
 };
