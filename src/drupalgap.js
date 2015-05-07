@@ -1104,19 +1104,20 @@ function drupalgap_loading_message_hide() {
 function drupalgap_loader_options() {
   try {
     var mode = drupalgap.loader;
-    var text = t('Loading')+'...';
+    var text = t('Loading') + '...';
     var textVisible = true;
-    if (mode == 'saving') { var text = t('Saving')+'...'; }
+    if (mode == 'saving') { var text = t('Saving') + '...'; }
     var options = {
       text: text,
       textVisible: textVisible
     };
     if (drupalgap.settings.loader && drupalgap.settings.loader[mode]) {
-      options = drupalgap.settings.loader[mode];
+      options = $.extend(true, options, drupalgap.settings.loader[mode]);
+      if (options.text) { options.text = t(options.text); }
     }
     return options;
   }
-  catch (error) { console.log(' - ' + error); }
+  catch (error) { console.log('drupalgap_loader_options - ' + error); }
 }
 
 /**
