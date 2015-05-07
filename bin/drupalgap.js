@@ -1104,19 +1104,20 @@ function drupalgap_loading_message_hide() {
 function drupalgap_loader_options() {
   try {
     var mode = drupalgap.loader;
-    var text = t('Loading')+'...';
+    var text = t('Loading') + '...';
     var textVisible = true;
-    if (mode == 'saving') { var text = t('Saving')+'...'; }
+    if (mode == 'saving') { var text = t('Saving') + '...'; }
     var options = {
       text: text,
       textVisible: textVisible
     };
     if (drupalgap.settings.loader && drupalgap.settings.loader[mode]) {
-      options = drupalgap.settings.loader[mode];
+      options = $.extend(true, options, drupalgap.settings.loader[mode]);
+      if (options.text) { options.text = t(options.text); }
     }
     return options;
   }
-  catch (error) { console.log(' - ' + error); }
+  catch (error) { console.log('drupalgap_loader_options - ' + error); }
 }
 
 /**
@@ -1994,23 +1995,14 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
               parameters: { },
               parameters_op: { }
             };
-            var fields = [];
-            switch (autocomplete.entity_type) {
-              case 'comment':
-                fields = ['cid', 'subject'];
-                break;
-              case 'node':
-                fields = ['nid', 'title'];
-                break;
-              case 'taxonomy_term':
-                fields = ['tid', 'name'];
-                if (autocomplete.vid) {
-                  query.parameters['vid'] = autocomplete.vid;
-                }
-                break;
-              case 'user':
-                fields = ['uid', 'name'];
-                break;
+            var fields = [
+              entity_primary_key(autocomplete.entity_type),
+              entity_primary_key_title(autocomplete.entity_type)
+            ];
+            if (autocomplete.entity_type == 'taxonomy_term') {
+              if (autocomplete.vid) {
+                query.parameters['vid'] = autocomplete.vid;
+              }
             }
             query.fields = fields;
             query.parameters[autocomplete.filter] = '%' + value + '%';
