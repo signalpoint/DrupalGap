@@ -323,23 +323,14 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
               parameters: { },
               parameters_op: { }
             };
-            var fields = [];
-            switch (autocomplete.entity_type) {
-              case 'comment':
-                fields = ['cid', 'subject'];
-                break;
-              case 'node':
-                fields = ['nid', 'title'];
-                break;
-              case 'taxonomy_term':
-                fields = ['tid', 'name'];
-                if (autocomplete.vid) {
-                  query.parameters['vid'] = autocomplete.vid;
-                }
-                break;
-              case 'user':
-                fields = ['uid', 'name'];
-                break;
+            var fields = [
+              entity_primary_key(autocomplete.entity_type),
+              entity_primary_key_title(autocomplete.entity_type)
+            ];
+            if (autocomplete.entity_type == 'taxonomy_term') {
+              if (autocomplete.vid) {
+                query.parameters['vid'] = autocomplete.vid;
+              }
             }
             query.fields = fields;
             query.parameters[autocomplete.filter] = '%' + value + '%';
