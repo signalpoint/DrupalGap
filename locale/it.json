@@ -2,9 +2,13 @@
   "Cancel": "Cancella",
   "Confirm": "Conferma",
   "Content": "Contenuto",
+  "Create Content": "Crea nuovo contenuto",
+  "Content List": "Lista dei contenuti",
   "Create new account": "Crea un nuovo account",
   "Dashboard": "Cruscotto",
+  "Edit": "Edita",
   "Getting Started Guide": "Guida introduttiva",
+  "History": "Storico",
   "Login": "Accedi",
   "Logout": "Esci",
   "Member since": "Membro da",
@@ -18,6 +22,8 @@
   "The open source application development kit for Drupal!": "Il kit open source per lo sviluppo di applicazioni per Drupal!",
   "Username": "Nome utente",
   "Users": "Utenti",
+  "View": "Vista",
+  "Vocabularies": "Vocabolari",
   "Welcome to DrupalGap": "Benvenuti in DrupalGap"
   
 }
