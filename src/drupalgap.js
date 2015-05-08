@@ -599,20 +599,53 @@ function drupalgap_load_blocks() {
 }
 
 /**
- *
+ * Loads language files.
  */
 function drupalgap_load_locales() {
   try {
+
+    // Load any drupalgap.settings.locale specified language files.
     if (typeof drupalgap.settings.locale === 'undefined') { return; }
     for (var language_code in drupalgap.settings.locale) {
       if (!drupalgap.settings.locale.hasOwnProperty(language_code)) { continue; }
       var language = drupalgap.settings.locale[language_code];
       var file_path = 'locale/' + language_code + '.json';
+      if (!drupalgap_file_exists(file_path)) { continue; }
       drupalgap.locale[language_code] = drupalgap_file_get_contents(
         file_path,
         { dataType: 'json' }
       );
     }
+
+    // Load any language files specified by modules, and merge them into the
+    // global language file (or create a new one if it doesn't exist).
+    var modules = module_implements('locale');
+    for (var i = 0; i < modules.length; i++) {
+      var module = modules[i];
+      var fn = window[module + '_locale'];
+      var languages = fn();
+      for (var j = 0; j < languages.length; j++) {
+        var language_code = languages[i];
+        var file_path =
+          drupalgap_get_path('module', module) +
+          '/locale/' + language_code + '.json';
+        var translations = drupalgap_file_get_contents(
+          file_path,
+          { dataType: 'json' }
+        );
+        if (typeof drupalgap.locale[language_code] === 'undefined') {
+          drupalgap.locale[language_code] = translations;
+        }
+        else {
+          $.extend(
+            drupalgap.locale[language_code],
+            drupalgap.locale[language_code],
+            translations
+          );
+        }
+      }
+    }
+
   }
   catch (error) { console.log('drupalgap_load_locales - ' + error); }
 }
