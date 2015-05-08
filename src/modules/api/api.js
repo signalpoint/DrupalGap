@@ -283,6 +283,7 @@ function hook_field_widget_form(form, form_state, field, instance, langcode, ite
 //function hook_form_element_alter(form, element, variables) { }
 
 /**
+ * Implements hook_image_path_alter().
  * Called after drupalgap_entity_render_field() assembles the field content
  * string. Use this to make modifications to the HTML output of the entity's
  * field before it is displayed. The field content will be inside of
@@ -296,11 +297,18 @@ function hook_entity_post_render_field(entity, field_name, field, reference) {
 }
 
 /**
+ * Implements hook_form_alter().
  * This hook is used to make alterations to existing forms.
  */
-function hook_form_alter(form, form_state, form_id) {}
+function hook_form_alter(form, form_state, form_id) {
+  // Change the description of the name element on the user login form
+  if (form_id == 'user_login_form') {
+    form.elements['name'].description = t('Enter your login name');
+  }
+}
 
 /**
+ * Implements hook_image_path_alter().
  * Called after drupalgap_image_path() assembles the image path. Use this hook
  * to make modifications to the image path. Return the modified path, or false
  * to allow the default path to be generated.
@@ -308,11 +316,25 @@ function hook_form_alter(form, form_state, form_id) {}
 function hook_image_path_alter(src) { }
 
 /**
+ * Implements hook_install().
  * This hook is used by modules that need to execute custom code when the module
  * is loaded. Note, the Drupal.user object is not initialized at this point, and
  * always appears to be an anonymous user.
  */
-function hook_install() {}
+function hook_install() { }
+
+/**
+ * Implements hook_locale().
+ * Used to declare language code .json files that should be loaded by DrupalGap.
+ * @see http://drupalgap.org/translate
+ */
+function hook_locale() {
+  // Tell DrupalGap to load our custom Spanish and Italian language files
+  // located here:
+  //   app/modules/custom/my_module/locale/es.json
+  //   app/modules/custom/my_module/locale/it.json
+  return ['es', 'it'];
+}
 
 /**
  * Implements hook_menu()
