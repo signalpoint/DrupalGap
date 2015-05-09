@@ -104,6 +104,20 @@ function theme_autocomplete(variables) {
       '\';' +
     '</script>';
 
+    // If there was a default value, set it's key title in the autocomplete's
+    // text field.
+    if (variables.default_value_label) {
+      js += drupalgap_jqm_page_event_script_code({
+          page_id: drupalgap_get_page_id(),
+          jqm_page_event: 'pageshow',
+          jqm_page_event_callback: '_theme_autocomplete_set_default_value_label',
+          jqm_page_event_args: JSON.stringify({
+              selector: selector,
+              default_value_label: variables.default_value_label
+          })
+      }, id);
+    }
+
     // Theme the list and add the js to it, then return the html.
     html += theme('item_list', widget);
     html += js;
@@ -437,5 +451,18 @@ function _theme_autocomplete_click(id, item, autocomplete_id) {
     }
   }
   catch (error) { console.log('_theme_autocomplete_click - ' + error); }
+}
+
+/**
+ * Used to set a default value in an autocomplete's text field.
+ * @param {Object} options
+ */
+function _theme_autocomplete_set_default_value_label(options) {
+  try {
+    setTimeout(function() {
+        $(options.selector).val(options.default_value_label).trigger('create');
+    }, 250);
+  }
+  catch (error) { console.log('_theme_autocomplete_set_default_value_label - ' + error); }
 }
 
