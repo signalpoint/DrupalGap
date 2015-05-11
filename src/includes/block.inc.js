@@ -16,7 +16,7 @@ function drupalgap_block_load(delta) {
       });
     }
     if (block == null) {
-      var msg = 'drupalgap_block_load - '+t('failed to load')+' "' + delta + '" '+t('block!');
+      var msg = 'drupalgap_block_load - ' + t('failed to load') + ' "' + delta + '" ' + t('block!');
       drupalgap_alert(msg);
     }
     return block;

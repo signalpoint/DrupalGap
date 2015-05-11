@@ -815,12 +815,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
           if (!options.required) {
             var option = null;
             if (options.exposed) {
-              option = '<option value="All">- '+t('Any')+' -</option>';
+              option = '<option value="All">- ' + t('Any') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id]['All'] =
                 '- Any -';
             }
             else {
-              option = '<option value="">- '+t('None')+' -</option>';
+              option = '<option value="">- ' + t('None') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id][''] =
                 '- None -';
             }

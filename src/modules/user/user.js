@@ -86,7 +86,7 @@ function user_listing_pageshow() {
  * @return {String}
  */
 function user_logout_callback() {
-  return '<p>'+t('Logging out')+'...</p>';
+  return '<p>' + t('Logging out') + '...</p>';
 }
 
 /**
@@ -284,8 +284,8 @@ function user_view_pageshow(uid) {
               'name': {'markup': account.name},
               'created': {
                 markup:
-                '<div class="user_profile_history"><h3>'+t('History')+'</h3>' +
-                '<dl><dt>'+t('Member since')+'</td></dt><dd>' +
+                '<div class="user_profile_history"><h3>' + t('History') + '</h3>' +
+                '<dl><dt>' + t('Member since') + '</td></dt><dd>' +
                   (new Date(parseInt(account.created) * 1000)).toDateString() +
                 '</dd></div>'
               }

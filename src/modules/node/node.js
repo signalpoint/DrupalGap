@@ -26,7 +26,7 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>'+t('Create Content')+'</h2>'},
+      'header': {'markup': '<h2>' + t('Create Content') + '</h2>'},
       'node_type_listing': {
         'theme': 'jqm_item_list',
         'title': t('Content Types'),
@@ -69,7 +69,7 @@ function node_add_page_by_type(type) {
  */
 function node_add_page_by_type_title(callback, type) {
   try {
-    var title = t('Create')+' ' + drupalgap.content_types_list[type].name;
+    var title = t('Create') + ' ' + drupalgap.content_types_list[type].name;
     return callback.call(null, title);
   }
   catch (error) { console.log('node_add_page_by_type_title - ' + error); }

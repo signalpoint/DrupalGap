@@ -95,7 +95,7 @@ function system_block_view(delta) {
         return '<h1 id="' + title_id + '"></h1>';
         break;
       case 'powered_by':
-        return '<p style="text-align: center;">'+t('Powered by')+': ' +
+        return '<p style="text-align: center;">' + t('Powered by') + ': ' +
           l('DrupalGap', 'http://www.drupalgap.org', {InAppBrowser: true}) +
         '</p>';
         break;
@@ -129,16 +129,16 @@ function system_menu() {
         'page_callback': 'system_offline_page'
       },
       '401': {
-        title: '401 - '+t('Not Authorized'),
+        title: '401 - ' + t('Not Authorized'),
         page_callback: 'system_401_page'
       },
       '404': {
-        title: '404 - '+t('Not Found'),
+        title: '404 - ' + t('Not Found'),
         page_callback: 'system_404_page'
       }
     };
     items['_reload'] = {
-      title: t('Reloading')+'...',
+      title: t('Reloading') + '...',
       page_callback: 'system_reload_page',
       pageshow: 'system_reload_pageshow'
     };
@@ -237,7 +237,7 @@ function system_dashboard_page() {
       '</h4>'
     };
     content.welcome = {
-      markup: '<h2 style="text-align: center;">'+t('Welcome to DrupalGap')+'</h2>' +
+      markup: '<h2 style="text-align: center;">' + t('Welcome to DrupalGap') + '</h2>' +
         '<p style="text-align: center;">' +
           t('The open source application development kit for Drupal!') +
         '</p>'
@@ -273,7 +273,7 @@ function system_dashboard_page() {
 function system_error_page() {
     var content = {
       info: {
-        markup: '<p>'+t('An unexpected error has occurred!')+'</p>'
+        markup: '<p>' + t('An unexpected error has occurred!') + '</p>'
       }
     };
     return content;
@@ -287,8 +287,8 @@ function system_offline_page() {
   try {
     var content = {
       'message': {
-        'markup': '<h2>'+t('Failed Connection')+'</h2>' +
-          "<p>"+t("Oops! We couldn't connect to")+":</p>" +
+        'markup': '<h2>' + t('Failed Connection') + '</h2>' +
+          '<p>'+ t("Oops! We couldn't connect to") + ':</p>' +
           '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
@@ -299,7 +299,7 @@ function system_offline_page() {
         }
       },
       'footer': {
-        'markup': "<p>"+t("Check your device's network settings and try again.")+"</p>"
+        'markup': '<p>'+ t("Check your device's network settings and try again.") + '</p>'
       }
     };
     return content;
@@ -324,7 +324,7 @@ function offline_try_again() {
       });
     }
     else {
-      var msg = t('Sorry, no connection found!')+' (' + connection + ')';
+      var msg = t('Sorry, no connection found!') + ' (' + connection + ')';
       drupalgap_alert(msg, {
           title: 'Offline'
       });

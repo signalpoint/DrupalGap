@@ -347,7 +347,7 @@ function _drupalgap_goto_prepare_path(path) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      var msg = t('Exit')+' ' + drupalgap.settings.title + '?';
+      var msg = t('Exit') + ' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
       }

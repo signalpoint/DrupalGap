@@ -377,7 +377,7 @@ function t(str) {
     lang != 'und' &&
     typeof drupalgap.locale[lang] !== 'undefined' &&
     drupalgap.locale[lang][str]
-  ) {  return drupalgap.locale[lang][str]; }
+  ) { return drupalgap.locale[lang][str]; }
   return str;
 }
 
