@@ -192,7 +192,8 @@ function drupalgap_get_form(form_id) {
       html = drupalgap_form_render(form);
     }
     else {
-      var msg = 'drupalgap_get_form - ' + t('failed to get form') + ' (' + form_id + ')';
+      var msg = 'drupalgap_get_form - ' + t('failed to get form') +
+        ' (' + form_id + ')';
       drupalgap_alert(msg);
     }
     return html;
@@ -335,8 +336,9 @@ function drupalgap_form_load(form_id) {
       drupalgap_form_local_storage_save(form);
     }
     else {
-      var error_msg = 'drupalgap_form_load - ' + t('no callback function') + ' (' +
-                       function_name + ') ' + t('available for form') + ' (' + form_id + ')';
+      var error_msg = 'drupalgap_form_load - ' + t('no callback function') +
+        ' (' + function_name + ') ' + t('available for form') +
+        ' (' + form_id + ')';
       drupalgap_alert(error_msg);
     }
     return form;

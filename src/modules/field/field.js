@@ -294,9 +294,12 @@ function list_assemble_form_state_into_field(entity_type, bundle,
         break;
       case 'list_text':
         // For radio buttons on the user entity form, field values must be
-        // "flattened", i.e. this field_foo: { und: [ { value: 123 }]}, should be
-        // turned into field_foo: { und: 123 }
-        if (entity_type == 'user' && instance.widget.type == 'options_buttons') {
+        // "flattened", i.e. this field_foo: { und: [ { value: 123 }]}, should
+        // be turned into field_foo: { und: 123 }
+        if (
+          entity_type == 'user' &&
+          instance.widget.type == 'options_buttons'
+        ) {
           field_key.use_delta = false;
           field_key.use_wrapper = false;
         }
@@ -500,7 +503,9 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // it as the default.  If it is optional, place a "none" option
               // for the user to choose from.
               var text = '- None -';
-              if (items[delta].required) { text = '- ' + t('Select a value') + ' -'; }
+              if (items[delta].required) {
+                text = '- ' + t('Select a value') + ' -';
+              }
               items[delta].options[''] = text;
               if (empty(items[delta].value)) { items[delta].value = ''; }
               // If more than one value is allowed, turn it into a multiple
@@ -572,7 +577,9 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           // it as the default.  If it is optional, place a "none" option
           // for the user to choose from.
           var text = '- ' + t('None') + ' -';
-          if (items[delta].required) { text = '- ' + t('Select a value') + ' -'; }
+          if (items[delta].required) {
+            text = '- ' + t('Select a value') + ' -';
+          }
           items[delta].children.push({
               type: widget_type,
               attributes: {

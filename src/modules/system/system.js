@@ -237,10 +237,12 @@ function system_dashboard_page() {
       '</h4>'
     };
     content.welcome = {
-      markup: '<h2 style="text-align: center;">' + t('Welcome to DrupalGap') + '</h2>' +
-        '<p style="text-align: center;">' +
-          t('The open source application development kit for Drupal!') +
-        '</p>'
+      markup: '<h2 style="text-align: center;">' +
+        t('Welcome to DrupalGap') +
+      '</h2>' +
+      '<p style="text-align: center;">' +
+        t('The open source application development kit for Drupal!') +
+      '</p>'
     };
     if (drupalgap.settings.logo) {
       content.logo = {
@@ -288,7 +290,7 @@ function system_offline_page() {
     var content = {
       'message': {
         'markup': '<h2>' + t('Failed Connection') + '</h2>' +
-          '<p>'+ t("Oops! We couldn't connect to") + ':</p>' +
+          '<p>' + t("Oops! We couldn't connect to") + ':</p>' +
           '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
@@ -299,7 +301,9 @@ function system_offline_page() {
         }
       },
       'footer': {
-        'markup': '<p>'+ t("Check your device's network settings and try again.") + '</p>'
+        'markup': '<p>' +
+          t("Check your device's network settings and try again.") +
+        '</p>'
       }
     };
     return content;

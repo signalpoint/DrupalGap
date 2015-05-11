@@ -27,7 +27,8 @@ function _drupalgap_form_submit(form_id) {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
     if (!form) {
-      var msg = '_drupalgap_form_submit - ' + t('failed to load form') + ': ' + form_id;
+      var msg = '_drupalgap_form_submit - ' + t('failed to load form') + ': ' +
+        form_id;
       drupalgap_alert(msg);
       return false;
     }

@@ -110,7 +110,8 @@ function theme_autocomplete(variables) {
       js += drupalgap_jqm_page_event_script_code({
           page_id: drupalgap_get_page_id(),
           jqm_page_event: 'pageshow',
-          jqm_page_event_callback: '_theme_autocomplete_set_default_value_label',
+          jqm_page_event_callback:
+            '_theme_autocomplete_set_default_value_label',
           jqm_page_event_args: JSON.stringify({
               selector: selector,
               default_value_label: variables.default_value_label
@@ -463,6 +464,8 @@ function _theme_autocomplete_set_default_value_label(options) {
         $(options.selector).val(options.default_value_label).trigger('create');
     }, 250);
   }
-  catch (error) { console.log('_theme_autocomplete_set_default_value_label - ' + error); }
+  catch (error) {
+    console.log('_theme_autocomplete_set_default_value_label - ' + error);
+  }
 }
 

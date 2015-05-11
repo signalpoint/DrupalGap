@@ -239,10 +239,11 @@ function _drupalgap_deviceready_options() {
       },
       error: function(jqXHR, textStatus, errorThrown) {
         // Build an informative error message and display it.
-        var msg = t('Failed connection to') + ' ' + drupalgap.settings.site_path;
+        var msg = t('Failed connection to') + ' ' +
+          drupalgap.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
-        msg += ' - ' + t('Check your device\'s connection and check that') + ' ' +
-               Drupal.settings.site_path + ' ' + t('is online.');
+        msg += ' - ' + t('Check your device\'s connection and check that') +
+          ' ' + Drupal.settings.site_path + ' ' + t('is online.');
        drupalgap_alert(msg, {
            title: t('Unable to Connect'),
            alertCallback: function() { drupalgap_goto('offline'); }
@@ -345,9 +346,10 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = t('Failed to load module!') + ' (' + module.name + ')';
+                      var msg = t('Failed to load module!') +
+                        ' (' + module.name + ')';
                       dpm(msg);
-                      dpm(modules_paths_object);
+                      console.log(modules_paths_object);
                       dpm(textStatus);
                       dpm(errorThrown.message);
                       drupalgap_alert(msg);
@@ -371,7 +373,8 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      var msg = 'drupalgap_load_theme - ' + t('no theme specified in settings.js');
+      var msg = 'drupalgap_load_theme - ' +
+        t('no theme specified in settings.js');
       drupalgap_alert(msg);
     }
     else {
@@ -382,8 +385,8 @@ function drupalgap_load_theme() {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
       }
       if (!drupalgap_file_exists(theme_path)) {
-        var error_msg = 'drupalgap_theme_load - ' + t('Failed to load theme!') + ' ' +
-          t('The theme\'s JS file does not exist') + ': ' + theme_path;
+        var error_msg = 'drupalgap_theme_load - ' + t('Failed to load theme!') +
+          ' ' + t('The theme\'s JS file does not exist') + ': ' + theme_path;
         drupalgap_alert(error_msg);
         return false;
       }
@@ -607,7 +610,9 @@ function drupalgap_load_locales() {
     // Load any drupalgap.settings.locale specified language files.
     if (typeof drupalgap.settings.locale === 'undefined') { return; }
     for (var language_code in drupalgap.settings.locale) {
-      if (!drupalgap.settings.locale.hasOwnProperty(language_code)) { continue; }
+      if (!drupalgap.settings.locale.hasOwnProperty(language_code)) {
+        continue;
+      }
       var language = drupalgap.settings.locale[language_code];
       var file_path = 'locale/' + language_code + '.json';
       if (!drupalgap_file_exists(file_path)) { continue; }
@@ -1381,7 +1386,7 @@ function drupalgap_set_message(message) {
 
 /**
  * Sets the current messages.
- * @param {Array}
+ * @param {Array} messages
  */
 function drupalgap_set_messages(messages) {
   try {
