@@ -239,10 +239,11 @@ function _drupalgap_deviceready_options() {
       },
       error: function(jqXHR, textStatus, errorThrown) {
         // Build an informative error message and display it.
-        var msg = t('Failed connection to') + ' ' + drupalgap.settings.site_path;
+        var msg = t('Failed connection to') + ' ' +
+          drupalgap.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
-        msg += ' - '+t('Check your device\'s connection and check that')+' ' +
-               Drupal.settings.site_path + ' '+t('is online.');
+        msg += ' - ' + t('Check your device\'s connection and check that') +
+          ' ' + Drupal.settings.site_path + ' ' + t('is online.');
        drupalgap_alert(msg, {
            title: t('Unable to Connect'),
            alertCallback: function() { drupalgap_goto('offline'); }
@@ -345,9 +346,10 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = t('Failed to load module!')+' (' + module.name + ')';
+                      var msg = t('Failed to load module!') +
+                        ' (' + module.name + ')';
                       dpm(msg);
-                      dpm(modules_paths_object);
+                      console.log(modules_paths_object);
                       dpm(textStatus);
                       dpm(errorThrown.message);
                       drupalgap_alert(msg);
@@ -371,7 +373,8 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      var msg = 'drupalgap_load_theme - '+t('no theme specified in settings.js');
+      var msg = 'drupalgap_load_theme - ' +
+        t('no theme specified in settings.js');
       drupalgap_alert(msg);
     }
     else {
@@ -382,8 +385,8 @@ function drupalgap_load_theme() {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
       }
       if (!drupalgap_file_exists(theme_path)) {
-        var error_msg = 'drupalgap_theme_load - '+t('Failed to load theme!')+' ' +
-          t('The theme\'s JS file does not exist')+': ' + theme_path;
+        var error_msg = 'drupalgap_theme_load - ' + t('Failed to load theme!') +
+          ' ' + t('The theme\'s JS file does not exist') + ': ' + theme_path;
         drupalgap_alert(error_msg);
         return false;
       }
@@ -414,8 +417,8 @@ function drupalgap_load_theme() {
         return true;
       }
       else {
-        var error_msg = 'drupalgap_load_theme() - '+t('failed')+' - ' +
-          template_info_function + '() '+t('does not exist!');
+        var error_msg = 'drupalgap_load_theme() - ' + t('failed') + ' - ' +
+          template_info_function + '() ' + t('does not exist!');
         drupalgap_alert(error_msg);
       }
     }
@@ -607,7 +610,9 @@ function drupalgap_load_locales() {
     // Load any drupalgap.settings.locale specified language files.
     if (typeof drupalgap.settings.locale === 'undefined') { return; }
     for (var language_code in drupalgap.settings.locale) {
-      if (!drupalgap.settings.locale.hasOwnProperty(language_code)) { continue; }
+      if (!drupalgap.settings.locale.hasOwnProperty(language_code)) {
+        continue;
+      }
       var language = drupalgap.settings.locale[language_code];
       var file_path = 'locale/' + language_code + '.json';
       if (!drupalgap_file_exists(file_path)) { continue; }
@@ -1381,7 +1386,7 @@ function drupalgap_set_message(message) {
 
 /**
  * Sets the current messages.
- * @param {Array}
+ * @param {Array} messages
  */
 function drupalgap_set_messages(messages) {
   try {
@@ -1815,7 +1820,8 @@ function theme_autocomplete(variables) {
       js += drupalgap_jqm_page_event_script_code({
           page_id: drupalgap_get_page_id(),
           jqm_page_event: 'pageshow',
-          jqm_page_event_callback: '_theme_autocomplete_set_default_value_label',
+          jqm_page_event_callback:
+            '_theme_autocomplete_set_default_value_label',
           jqm_page_event_args: JSON.stringify({
               selector: selector,
               default_value_label: variables.default_value_label
@@ -2168,7 +2174,9 @@ function _theme_autocomplete_set_default_value_label(options) {
         $(options.selector).val(options.default_value_label).trigger('create');
     }, 250);
   }
-  catch (error) { console.log('_theme_autocomplete_set_default_value_label - ' + error); }
+  catch (error) {
+    console.log('_theme_autocomplete_set_default_value_label - ' + error);
+  }
 }
 
 /**
@@ -2189,7 +2197,8 @@ function drupalgap_block_load(delta) {
       });
     }
     if (block == null) {
-      var msg = 'drupalgap_block_load - '+t('failed to load')+' "' + delta + '" '+t('block!');
+      var msg = 'drupalgap_block_load - ' + t('failed to load') + ' "' + delta +
+        '" ' + t('block!');
       drupalgap_alert(msg);
     }
     return block;
@@ -2635,7 +2644,7 @@ function t(str) {
     lang != 'und' &&
     typeof drupalgap.locale[lang] !== 'undefined' &&
     drupalgap.locale[lang][str]
-  ) {  return drupalgap.locale[lang][str]; }
+  ) { return drupalgap.locale[lang][str]; }
   return str;
 }
 
@@ -3419,7 +3428,8 @@ function drupalgap_get_form(form_id) {
       html = drupalgap_form_render(form);
     }
     else {
-      var msg = 'drupalgap_get_form - '+t('failed to get form')+' (' + form_id + ')';
+      var msg = 'drupalgap_get_form - ' + t('failed to get form') +
+        ' (' + form_id + ')';
       drupalgap_alert(msg);
     }
     return html;
@@ -3562,8 +3572,9 @@ function drupalgap_form_load(form_id) {
       drupalgap_form_local_storage_save(form);
     }
     else {
-      var error_msg = 'drupalgap_form_load - '+t('no callback function')+' (' +
-                       function_name + ') '+t('available for form')+' (' + form_id + ')';
+      var error_msg = 'drupalgap_form_load - ' + t('no callback function') +
+        ' (' + function_name + ') ' + t('available for form') +
+        ' (' + form_id + ')';
       drupalgap_alert(error_msg);
     }
     return form;
@@ -3662,7 +3673,8 @@ function _drupalgap_form_submit(form_id) {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
     if (!form) {
-      var msg = '_drupalgap_form_submit - '+t('failed to load form')+': ' + form_id;
+      var msg = '_drupalgap_form_submit - ' + t('failed to load form') + ': ' +
+        form_id;
       drupalgap_alert(msg);
       return false;
     }
@@ -3779,7 +3791,7 @@ function _drupalgap_form_validate(form, form_state) {
             if (element.title) { field_title = element.title; }
             drupalgap_form_set_error(
               name,
-              t('The')+' ' + field_title + ' '+t('field is required')+'.'
+              t('The') + ' ' + field_title + ' ' + t('field is required') + '.'
             );
           }
         }
@@ -4611,7 +4623,7 @@ function _drupalgap_goto_prepare_path(path) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      var msg = t('Exit')+' ' + drupalgap.settings.title + '?';
+      var msg = t('Exit') + ' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
       }
@@ -8538,9 +8550,12 @@ function list_assemble_form_state_into_field(entity_type, bundle,
         break;
       case 'list_text':
         // For radio buttons on the user entity form, field values must be
-        // "flattened", i.e. this field_foo: { und: [ { value: 123 }]}, should be
-        // turned into field_foo: { und: 123 }
-        if (entity_type == 'user' && instance.widget.type == 'options_buttons') {
+        // "flattened", i.e. this field_foo: { und: [ { value: 123 }]}, should
+        // be turned into field_foo: { und: 123 }
+        if (
+          entity_type == 'user' &&
+          instance.widget.type == 'options_buttons'
+        ) {
           field_key.use_delta = false;
           field_key.use_wrapper = false;
         }
@@ -8580,7 +8595,7 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
       // the default value accordingly.
       element.options = filter.value_options;
       if (!element.required) {
-        element.options['All'] = '- '+t('Any')+' -';
+        element.options['All'] = '- ' + t('Any') + ' -';
         if (typeof element.value === 'undefined') { element.value = 'All'; }
       }
     }
@@ -8744,7 +8759,9 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // it as the default.  If it is optional, place a "none" option
               // for the user to choose from.
               var text = '- None -';
-              if (items[delta].required) { text = '- '+t('Select a value')+' -'; }
+              if (items[delta].required) {
+                text = '- ' + t('Select a value') + ' -';
+              }
               items[delta].options[''] = text;
               if (empty(items[delta].value)) { items[delta].value = ''; }
               // If more than one value is allowed, turn it into a multiple
@@ -8815,8 +8832,10 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           // If the select list is required, add a 'Select' option and set
           // it as the default.  If it is optional, place a "none" option
           // for the user to choose from.
-          var text = '- '+t('None')+' -';
-          if (items[delta].required) { text = '- '+t('Select a value')+' -'; }
+          var text = '- ' + t('None') + ' -';
+          if (items[delta].required) {
+            text = '- ' + t('Select a value') + ' -';
+          }
           items[delta].children.push({
               type: widget_type,
               attributes: {
@@ -10123,7 +10142,7 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>'+t('Create Content')+'</h2>'},
+      'header': {'markup': '<h2>' + t('Create Content') + '</h2>'},
       'node_type_listing': {
         'theme': 'jqm_item_list',
         'title': t('Content Types'),
@@ -10166,7 +10185,7 @@ function node_add_page_by_type(type) {
  */
 function node_add_page_by_type_title(callback, type) {
   try {
-    var title = t('Create')+' ' + drupalgap.content_types_list[type].name;
+    var title = t('Create') + ' ' + drupalgap.content_types_list[type].name;
     return callback.call(null, title);
   }
   catch (error) { console.log('node_add_page_by_type_title - ' + error); }
@@ -10942,7 +10961,7 @@ function system_block_view(delta) {
         return '<h1 id="' + title_id + '"></h1>';
         break;
       case 'powered_by':
-        return '<p style="text-align: center;">'+t('Powered by')+': ' +
+        return '<p style="text-align: center;">' + t('Powered by') + ': ' +
           l('DrupalGap', 'http://www.drupalgap.org', {InAppBrowser: true}) +
         '</p>';
         break;
@@ -10976,16 +10995,16 @@ function system_menu() {
         'page_callback': 'system_offline_page'
       },
       '401': {
-        title: '401 - '+t('Not Authorized'),
+        title: '401 - ' + t('Not Authorized'),
         page_callback: 'system_401_page'
       },
       '404': {
-        title: '404 - '+t('Not Found'),
+        title: '404 - ' + t('Not Found'),
         page_callback: 'system_404_page'
       }
     };
     items['_reload'] = {
-      title: t('Reloading')+'...',
+      title: t('Reloading') + '...',
       page_callback: 'system_reload_page',
       pageshow: 'system_reload_pageshow'
     };
@@ -11084,10 +11103,12 @@ function system_dashboard_page() {
       '</h4>'
     };
     content.welcome = {
-      markup: '<h2 style="text-align: center;">'+t('Welcome to DrupalGap')+'</h2>' +
-        '<p style="text-align: center;">' +
-          t('The open source application development kit for Drupal!') +
-        '</p>'
+      markup: '<h2 style="text-align: center;">' +
+        t('Welcome to DrupalGap') +
+      '</h2>' +
+      '<p style="text-align: center;">' +
+        t('The open source application development kit for Drupal!') +
+      '</p>'
     };
     if (drupalgap.settings.logo) {
       content.logo = {
@@ -11120,7 +11141,7 @@ function system_dashboard_page() {
 function system_error_page() {
     var content = {
       info: {
-        markup: '<p>'+t('An unexpected error has occurred!')+'</p>'
+        markup: '<p>' + t('An unexpected error has occurred!') + '</p>'
       }
     };
     return content;
@@ -11134,8 +11155,8 @@ function system_offline_page() {
   try {
     var content = {
       'message': {
-        'markup': '<h2>'+t('Failed Connection')+'</h2>' +
-          "<p>"+t("Oops! We couldn't connect to")+":</p>" +
+        'markup': '<h2>' + t('Failed Connection') + '</h2>' +
+          '<p>' + t("Oops! We couldn't connect to") + ':</p>' +
           '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
@@ -11146,7 +11167,9 @@ function system_offline_page() {
         }
       },
       'footer': {
-        'markup': "<p>"+t("Check your device's network settings and try again.")+"</p>"
+        'markup': '<p>' +
+          t("Check your device's network settings and try again.") +
+        '</p>'
       }
     };
     return content;
@@ -11171,7 +11194,7 @@ function offline_try_again() {
       });
     }
     else {
-      var msg = t('Sorry, no connection found!')+' (' + connection + ')';
+      var msg = t('Sorry, no connection found!') + ' (' + connection + ')';
       drupalgap_alert(msg, {
           title: 'Offline'
       });
@@ -11355,7 +11378,7 @@ function user_listing_pageshow() {
  * @return {String}
  */
 function user_logout_callback() {
-  return '<p>'+t('Logging out')+'...</p>';
+  return '<p>' + t('Logging out') + '...</p>';
 }
 
 /**
@@ -11553,8 +11576,10 @@ function user_view_pageshow(uid) {
               'name': {'markup': account.name},
               'created': {
                 markup:
-                '<div class="user_profile_history"><h3>'+t('History')+'</h3>' +
-                '<dl><dt>'+t('Member since')+'</td></dt><dd>' +
+                '<div class="user_profile_history"><h3>' +
+                  t('History') +
+                '</h3>' +
+                '<dl><dt>' + t('Member since') + '</td></dt><dd>' +
                   (new Date(parseInt(account.created) * 1000)).toDateString() +
                 '</dd></div>'
               }
@@ -11739,11 +11764,13 @@ function user_register_form(form, form_state) {
     drupalgap_field_info_instances_add_to_form('user', null, form, null);
     // Add registration messages to form.
     form.user_register = {
-      'user_mail_register_no_approval_required_body': t('Registration complete!'),
+      'user_mail_register_no_approval_required_body':
+        t('Registration complete!'),
       'user_mail_register_pending_approval_required_body':
         t('Registration complete, waiting for administrator approval.'),
       'user_mail_register_email_verification_body':
-        t('Registration complete, check your e-mail inbox to verify the account.')
+        t('Registration complete, check your e-mail inbox to verify the ' +
+          'account.')
     };
     // Set the auto login boolean. This only happens when the site's account
     // settings require no e-mail verification. Others can stop this from
@@ -12012,7 +12039,8 @@ function user_pass_form_submit(form, form_state) {
             drupalgap_set_message(msg);
           }
           else {
-            var msg = t('There was a problem sending an e-mail to your address.');
+            var msg =
+              t('There was a problem sending an e-mail to your address.');
             drupalgap_set_message(msg, 'warning');
           }
           drupalgap_goto('user/login');
@@ -12839,12 +12867,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
           if (!options.required) {
             var option = null;
             if (options.exposed) {
-              option = '<option value="All">- '+t('Any')+' -</option>';
+              option = '<option value="All">- ' + t('Any') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id]['All'] =
                 '- Any -';
             }
             else {
-              option = '<option value="">- '+t('None')+' -</option>';
+              option = '<option value="">- ' + t('None') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id][''] =
                 '- None -';
             }
