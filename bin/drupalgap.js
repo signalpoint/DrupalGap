@@ -7974,7 +7974,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           'widget_type': 'imagefield_widget',
           'title': t('Picture'),
           'required': false,
-          'value': 'Add Picture'
+          'value': t('Add Picture')
         };
         break;
       case 'taxonomy_term':
