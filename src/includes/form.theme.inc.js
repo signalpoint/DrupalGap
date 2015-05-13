@@ -25,8 +25,10 @@ function theme_checkboxes(variables) {
   try {
     var html = '';
     variables.attributes.type = 'checkboxes';
-    $.each(variables.options, function(value, label) {
-        if (value == 'attributes') { return; } // Skip attributes.
+    for (var value in variables.options) {
+        if (!variables.options.hasOwnProperty(value)) { continue; }
+        var label = variables.options[value];
+        if (value == 'attributes') { continue; } // Skip attributes.
         var _label = value;
         if (!empty(label)) { _label = label; }
         var checkbox = {
@@ -43,7 +45,7 @@ function theme_checkboxes(variables) {
         html += '<label>' +
           theme('checkbox', checkbox) + '&nbsp;' + label +
         '</label>';
-    });
+    }
     // Check the box?
     /*if (variables.checked) {
       variables.attributes.checked = 'checked';
@@ -185,7 +187,9 @@ function theme_radios(variables) {
       }
       // Init a delta value so each radio button can have a unique id.
       var delta = 0;
-      $.each(variables.options, function(value, label) {
+      for (var value in variables.options) {
+          if (!variables.options.hasOwnProperty(value)) { continue; }
+          var label = variables.options[value];
           if (value == 'attributes') { return; } // Skip the attributes.
           var checked = '';
           if (variables.value && variables.value == value) {
@@ -198,7 +202,7 @@ function theme_radios(variables) {
                                  drupalgap_attributes(variables.attributes) +
                                  checked + ' />' + input_label;
           delta++;
-      });
+      }
     }
     return radios;
   }
@@ -245,8 +249,10 @@ function theme_select(variables) {
   try {
     var options = '';
     if (variables.options) {
-      $.each(variables.options, function(value, label) {
-          if (value == 'attributes') { return; } // Skip the attributes.
+      for (var value in variables.options) {
+          if (!variables.options.hasOwnProperty(value)) { continue; }
+          var label = variables.options[value];
+          if (value == 'attributes') { continue; } // Skip the attributes.
           // Is the option selected?
           var selected = '';
           if (
@@ -257,7 +263,7 @@ function theme_select(variables) {
           options += '<option value="' + value + '" ' + selected + '>' +
             label +
           '</option>';
-      });
+      }
     }
     return '<select ' + drupalgap_attributes(variables.attributes) + '>' +
       options +
