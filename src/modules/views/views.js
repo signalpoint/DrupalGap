@@ -112,7 +112,9 @@ function views_exposed_form(form, form_state, options) {
     // Attach the variables to the form so it can be used later.
     form.variables = options.variables;
 
-    $.each(options.filter, function(views_field, filter) {
+    for (var views_field in options.filter) {
+        if (!options.filter.hasOwnProperty(views_field)) { continue; }
+        var filter = options.filter[views_field];
 
         // Prep the element basics.
         var element_id = null;
@@ -161,14 +163,14 @@ function views_exposed_form(form, form_state, options) {
               'created to assemble the ' + field.type + ' filter used by ' +
               field_name
             );
-            return;
+            continue;
           }
 
           // We have a handler, let's call it so the element can be assembled.
           window[handler](form, form_state, element, filter, field);
 
-        }
-        else {
+      }
+      else {
           // This is NOT an entity field, so it is probably a core field (e.g.
           // nid, status, etc). Let's assemble the element. In some cases we may
           // just be able to forward it to a pre-existing handler.
@@ -180,15 +182,15 @@ function views_exposed_form(form, form_state, options) {
               'WARNING: views_exposed_form() - I do not know how to handle ' +
               'the exposed filter for the "' + views_field + '" field'
             );
-            dpm(filter);
-            return;
+            console.log(filter);
+            continue;
           }
-        }
+      }
 
-        // Finally attach the assembled element to the form.
-        if (element_id) { form.elements[element_id] = element; }
+      // Finally attach the assembled element to the form.
+      if (element_id) { form.elements[element_id] = element; }
 
-    });
+    }
 
     // Add the submit button.
     form.elements['submit'] = {
@@ -224,10 +226,12 @@ function views_exposed_form_submit(form, form_state) {
 
     // Assemble the query string from the form state values.
     var query = '';
-    $.each(form_state.values, function(key, value) {
-        if (empty(value)) { return; }
+    for (var key in form_state.values) {
+        if (!form_state.values.hasOwnProperty(key)) { continue; }
+        var value = form_state.values[key];
+        if (empty(value)) { continue; }
         query += key + '=' + encodeURIComponent(value) + '&';
-    });
+    }
     if (!empty(query)) { query = query.substr(0, query.length - 1); }
 
     // If there is a query set aside from previous requests, and it is equal to
@@ -539,7 +543,9 @@ function theme_views_view(variables) {
         break;
     }
     var rows = '' + open;
-    $.each(results[root], function(count, object) {
+    for (var count in results[root]) {
+        if (!results[root].hasOwnProperty(count)) { continue; }
+        var object = results[root][count];
         // Extract the row.
         var row = object[child];
         // Mark the row position.
@@ -553,7 +559,7 @@ function theme_views_view(variables) {
         }
         else { row_content = JSON.stringify(row); }
         rows += open_row + row_content + close_row;
-    });
+    }
     rows += close;
     // If we have any pages, render the pager above or below the results
     // according to the pager_pos setting.
