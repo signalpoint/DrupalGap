@@ -37,15 +37,14 @@ function menu_execute_active_handler() {
         // the url so the entity is sent via the page arguments to the page
         // callback, instead of just sending the integer.
         var args = arg(null, path);
-        $.each(
-          drupalgap.menu_links[router_path].page_arguments,
-          function(index, object) {
+        for (var index in drupalgap.menu_links[router_path].page_arguments) {
+            if (!drupalgap.menu_links[router_path].page_arguments.hasOwnProperty(index)) { continue; }
+            var object = drupalgap.menu_links[router_path].page_arguments[index];
             if (is_int(object) && args[object]) {
               page_arguments.push(args[object]);
             }
             else { page_arguments.push(object); }
-          }
-        );
+        }
 
         // Call the page callback function with the page arguments.
         content = fn.apply(null, Array.prototype.slice.call(page_arguments));
@@ -185,9 +184,11 @@ function menu_list_system_menus() {
       }
     };
     // Add the menu_name to each menu as a property.
-    $.each(system_menus, function(menu_name, menu) {
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
         menu.menu_name = menu_name;
-    });
+    }
     return system_menus;
   }
   catch (error) { console.log('menu_list_system_menus - ' + error); }
@@ -206,14 +207,18 @@ function menu_router_build() {
     var function_name;
     var fn;
     var menu_links;
-    $.each(modules, function(index, module) {
+    for (var index in modules) {
+        if (!modules.hasOwnProperty(index)) { continue; }
+        var module = modules[index];
         // Determine the hook function name, grab the function, and call it
         // to retrieve the hook's menu links.
         function_name = module + '_menu';
         fn = window[function_name];
         menu_links = fn();
         // Iterate over each item.
-        $.each(menu_links, function(path, menu_item) {
+        for (var path in menu_links) {
+            if (!menu_links.hasOwnProperty(path)) { continue; }
+            var menu_item = menu_links[path];
             // Attach module name to item.
             menu_item.module = module;
             // Set a default type for the item if one isn't provided.
@@ -239,8 +244,8 @@ function menu_router_build() {
             );
             // Attach item to menu links.
             drupalgap.menu_links[path] = menu_item;
-        });
-    });
+        }
+    }
   }
   catch (error) { console.log('menu_router_build - ' + error); }
 }
@@ -380,7 +385,9 @@ function drupalgap_menus_load() {
   try {
     if (drupalgap.settings.menus) {
       // Process each menu defined in the settings.
-      $.each(drupalgap.settings.menus, function(menu_name, menu) {
+      for (var menu_name in drupalgap.settings.menus) {
+          if (!drupalgap.settings.menus.hasOwnProperty(menu_name)) { continue; }
+          var menu = drupalgap.settings.menus[menu_name];
           // If the menu does not already exist, it is a custom menu, so create
           // the menu and its corresponding block.
           if (!drupalgap.menus[menu_name]) {
@@ -406,11 +413,13 @@ function drupalgap_menus_load() {
             // custom settings.
             $.extend(true, drupalgap.menus[menu_name], menu);
           }
-      });
+      }
       // Now that we have all of the menus loaded up, and the menu router is
       // built, let's iterate over all the menu links and perform various
       // operations on them.
-      $.each(drupalgap.menu_links, function(path, menu_link) {
+      for (var path in drupalgap.menu_links) {
+          if (!drupalgap.menu_links.hasOwnProperty(path)) { continue; }
+          var menu_link = drupalgap.menu_links[path];
           // Let's grab any links from the router that have a menu specified,
           // and add the link to the router.
           if (menu_link.menu_name) {
@@ -447,12 +456,14 @@ function drupalgap_menus_load() {
               menu_link
             );
           }
-      });
+      }
       // If there are any region menu links defined in settings.js, create a
       // links array for the region if one doesn't exist already, then add the
       // menu item to the links array as a link.
       if (typeof drupalgap.settings.menus.regions !== 'undefined') {
-        $.each(drupalgap.settings.menus.regions, function(region, menu) {
+        for (var region in drupalgap.settings.menus.regions) {
+            if (!drupalgap.settings.menus.regions.hasOwnProperty(region)) { continue; }
+            var menu = drupalgap.settings.menus.regions[region];
             if (
               typeof menu.links !== 'undefined' &&
               $.isArray(menu.links) &&
@@ -461,11 +472,13 @@ function drupalgap_menus_load() {
               if (!drupalgap.theme.regions[region].links) {
                 drupalgap.theme.regions[region].links = [];
               }
-              $.each(menu.links, function(index, link) {
+              for (var index in menu.links) {
+                  if (!menu.links.hasOwnProperty(index)) { continue; }
+                  var link = menu.links[index];
                   drupalgap.theme.regions[region].links.push(link);
-              });
+              }
             }
-        });
+        }
       }
     }
   }
@@ -538,7 +551,9 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
         if (typeof menu_item.siblings === 'undefined') {
           menu_item.siblings = [];
         }
-        $.each(drupalgap.menu_links[parent].children, function(index, sibling) {
+        for (var index in drupalgap.menu_links[parent].children) {
+            if (!drupalgap.menu_links[parent].children.hasOwnProperty(index)) { continue; }
+            var sibling = drupalgap.menu_links[parent].children[index];
             if (sibling != path && drupalgap.menu_links[sibling]) {
               if (
                 typeof drupalgap.menu_links[sibling].siblings === 'undefined'
@@ -548,7 +563,7 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
               drupalgap.menu_links[sibling].siblings.push(path);
               menu_item.siblings.push(sibling);
             }
-        });
+        }
       }
     }
   }
