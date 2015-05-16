@@ -242,11 +242,13 @@ function hook_field_formatter_view(entity_type, entity, field, instance, langcod
     
     // Iterate over each item, and place a widget onto the render array.
     var content = {};
-    $.each(items, function(delta, item) {
+    for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
         content[delta] = {
-          markup: '<p>'+t('Hello!')+'</p>'
+          markup: '<p>' + t('Hello!') + '</p>'
         };
-    });
+    }
     return content;
   }
   catch (error) { console.log('hook_field_formatter_view - ' + error); }
