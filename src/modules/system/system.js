@@ -39,14 +39,16 @@ function system_block_info() {
     };
     // Make additional blocks for each system menu.
     var system_menus = menu_list_system_menus();
-    $.each(system_menus, function(menu_name, menu) {
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
         var block_delta = menu.menu_name;
         blocks[block_delta] = {
           name: block_delta,
           delta: block_delta,
           module: 'menu'
         };
-    });
+    }
     return blocks;
 }
 
@@ -70,11 +72,13 @@ function system_block_view(delta) {
         // clear out the messages array.
         var html = '';
         if (drupalgap.messages.length == 0) { return html; }
-        $.each(drupalgap.messages, function(index, msg) {
+        for (var index in drupalgap.messages) {
+            if (!drupalgap.messages.hasOwnProperty(index)) { continue; }
+            var msg = drupalgap.messages[index];
             html += '<div class="messages ' + msg.type + '">' +
               msg.message +
             '</div>';
-        });
+        }
         drupalgap.messages = [];
         return html;
         break;
@@ -382,9 +386,11 @@ function system_settings_form(form, form_state) {
 function system_settings_form_submit(form, form_state) {
   try {
     if (form_state.values) {
-      $.each(form_state.values, function(variable, value) {
+      for (var variable in form_state.values) {
+          if (!form_state.values.hasOwnProperty(variable)) { continue; }
+          var value = form_state.values[variable];
           variable_set(variable, value);
-      });
+      }
     }
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
@@ -424,3 +430,4 @@ function system_logout_block_access_callback(options) {
     console.log('system_logout_block_access_callback - ' + error);
   }
 }
+
