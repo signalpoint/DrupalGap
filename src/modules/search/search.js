@@ -152,10 +152,12 @@ function search_form_submit(form, form_state) {
         search_node(keys, {
             success: function(results) {
               var items = [];
-              $.each(results, function(index, result) {
+              for (var index in results) {
+                  if (!results.hasOwnProperty(index)) { continue; }
+                  var result = results[index];
                   var link = theme('search_result_node', result);
                   items.push(link);
-              });
+              }
               drupalgap_item_list_populate('#search_form_results', items);
             }
         });
@@ -181,10 +183,12 @@ function search_form_pageshow(form_id) {
         search_node(keys, {
             success: function(results) {
               var items = [];
-              $.each(results, function(index, result) {
+              for (var index in results) {
+                  if (!results.hasOwnProperty(index)) { continue; }
+                  var result = results[index];
                   var link = theme('search_result_node', result);
                   items.push(link);
-              });
+              }
               drupalgap_item_list_populate('#search_form_results', items);
             }
         });
