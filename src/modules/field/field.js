@@ -109,13 +109,15 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
     // a value present in the entity, then set the field's form element default
     // value equal to the field value.
     if (fields) {
-      $.each(fields, function(name, field) {
+      for (var name in fields) {
+        if (!fields.hasOwnProperty(name)) { continue; }
+        var field = fields[name];
         // The user registration form is a special case, in that we only want
         // to place fields that are set to display on the user registration
         // form. Skip any fields not set to display.
         if (form.id == 'user_register_form' &&
           !field.settings.user_register_form) {
-          return;
+          continue;
         }
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
@@ -171,7 +173,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
           }
 
         }
-      });
+      }
     }
   }
   catch (error) {
@@ -224,7 +226,9 @@ function list_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           var markup = '';
           // list_default or list_key
           if (display.type == 'list_default') {
@@ -238,7 +242,7 @@ function list_field_formatter_view(entity_type, entity, field, instance,
           }
           else { markup = item.value; }
           element[delta] = { markup: markup };
-      });
+      }
     }
     return element;
   }
@@ -271,13 +275,15 @@ function list_assemble_form_state_into_field(entity_type, bundle,
         if (instance.widget.type == 'options_onoff') {
           var index = 0;
           var on = true;
-          $.each(field.settings.allowed_values, function(value, label) {
+          for (var value in field.settings.allowed_values) {
+              if (!field.settings.allowed_values.hasOwnProperty(value)) { continue; }
+              var label = field.settings.allowed_values[value];
               if (form_state_value == value && index == 0) {
                 on = false;
-                return false;
+                break;
               }
               index++;
-          });
+          }
           if (!on) {
             field_key.use_delta = false;
             field_key.use_wrapper = false;
@@ -378,11 +384,13 @@ function number_field_formatter_view(entity_type, entity, field, instance,
       if (!empty(field.settings.prefix)) { prefix = field.settings.prefix; }
       var suffix = '';
       if (!empty(field.settings.suffix)) { suffix = field.settings.suffix; }
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           element[delta] = {
             markup: prefix + item.value + suffix
           };
-      });
+      }
     }
     return element;
   }
@@ -471,10 +479,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               }
             }
             else {
-              $.each(field.settings.allowed_values, function(value, label) {
+              for (var value in field.settings.allowed_values) {
+                  if (!field.settings.allowed_values.hasOwnProperty(value)) { continue; }
+                  var label = field.settings.allowed_values[value];
                   if (off === null) { off = value; }
                   else { on = value; }
-              });
+              }
             }
             items[delta].options.attributes['off'] = off;
             items[delta].options.attributes['on'] = on;
@@ -533,19 +543,21 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           // If there are any allowed values, place them on the options
           // list. Then check for a default value, and set it if necessary.
           if (field && field.settings.allowed_values) {
-            $.each(field.settings.allowed_values, function(key, value) {
+            for (var key in field.settings.allowed_values) {
+                if (!field.settings.allowed_values.hasOwnProperty(key)) { continue; }
+                var value = field.settings.allowed_values[key];
                 // Don't place values that are objects onto the options
                 // (i.e. commerce taxonomy term reference fields).
-                if (typeof value === 'object') { return; }
+                if (typeof value === 'object') { continue; }
                 // If the value already exists in the options, then someone
                 // else has populated the list (e.g. commerce), so don't do
                 // any processing.
                 if (typeof items[delta].options[key] !== 'undefined') {
-                  return false;
+                  break;
                 }
                 // Set the key and value for the option.
                 items[delta].options[key] = value;
-            });
+            }
             if (instance.default_value && instance.default_value[delta] &&
               typeof instance.default_value[delta].value !== 'undefined') {
                 items[delta].value = instance.default_value[delta].value;
@@ -632,14 +644,16 @@ function text_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           // Grab the field value, but use the safe_value if we have it.
           var value = item.value;
           if (typeof item.safe_value !== 'undefined') {
             value = item.safe_value;
           }
           element[delta] = { markup: value };
-      });
+      }
     }
     return element;
   }
