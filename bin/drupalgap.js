@@ -285,7 +285,9 @@ function drupalgap_load_modules() {
     var module_types = ['contrib', 'custom'];
     // We only need to load contrib and custom modules because core modules are
     // already included in the binary.
-    $.each(module_types, function(index, bundle) {
+    for (var index in module_types) {
+        if (!module_types.hasOwnProperty(index)) { continue; }
+        var bundle = module_types[index];
         // Let's be nice and try to load any old drupalgap.modules declarations
         // in developers settings.js files for a while, but throw a warning to
         // encourage them to update. This code can be removed after a few
@@ -295,7 +297,9 @@ function drupalgap_load_modules() {
           drupalgap.modules[bundle] &&
           drupalgap.modules[bundle].length != 0
         ) {
-          $.each(drupalgap.modules[bundle], function(index, module) {
+          for (var index in drupalgap.modules[bundle]) {
+              if (!drupalgap.modules[bundle].hasOwnProperty(index)) { continue; }
+              var module = drupalgap.modules[bundle][index];
               if (module.name) {
                 var msg = 'WARNING: The module "' + module.name + '" defined ' +
                   'in settings.js needs to be added to ' +
@@ -304,9 +308,11 @@ function drupalgap_load_modules() {
                 console.log(msg);
                 Drupal.modules[bundle][module.name] = module;
               }
-          });
+          }
         }
-        $.each(Drupal.modules[bundle], function(module_name, module) {
+        for (var module_name in Drupal.modules[bundle]) {
+            if (!Drupal.modules[bundle].hasOwnProperty(module_name)) { continue; }
+            var module = Drupal.modules[bundle][module_name];
             // If the module object is empty, initialize a module object.
             if ($.isEmptyObject(module)) {
               Drupal.modules[bundle][module_name] =
@@ -327,15 +333,18 @@ function drupalgap_load_modules() {
             // If there are any includes with this module, add them to the
             // list of paths to include.
             if (module.includes != null && module.includes.length != 0) {
-              $.each(module.includes, function(include_index, include_object) {
+              for (var include_index in module.includes) {
+                if (!module.includes.hasOwnProperty(include_index)) { continue; }
+                var include_object = module.includes[include_index];
                 modules_paths.push(
                   module_base_path + '/' + include_object.name + '.js'
                 );
-              });
+              }
             }
             // Now load all the paths for this module.
-            $.each(modules_paths,
-              function(modules_paths_index, modules_paths_object) {
+            for (var modules_paths_index in modules_paths) {
+                if (!modules_paths.hasOwnProperty(modules_paths_index)) { continue; }
+                var modules_paths_object = modules_paths[modules_paths_index];
                 jQuery.ajax({
                     async: false,
                     type: 'GET',
@@ -355,10 +364,9 @@ function drupalgap_load_modules() {
                       drupalgap_alert(msg);
                     }
                 });
-              }
-            );
-      });
-    });
+            }
+        }
+    }
     // Now invoke hook_install on all modules, including core.
     module_invoke_all('install');
   }
@@ -398,9 +406,11 @@ function drupalgap_load_theme() {
         var fn = window[template_info_function];
         drupalgap.theme = fn();
         // For each region in the name, set the 'name' value on the region JSON.
-        $.each(drupalgap.theme.regions, function(name, region) {
+        for (var name in drupalgap.theme.regions) {
+            if (!drupalgap.theme.regions.hasOwnProperty(name)) { continue; }
+            var region = drupalgap.theme.regions[name];
             drupalgap.theme.regions[name].name = name;
-        });
+        }
         // Make sure the theme implements the required regions.
         var regions = system_regions_list();
         for (var i = 0; i < regions.length; i++) {
@@ -785,7 +795,9 @@ function drupalgap_format_interval(interval) {
       '1 sec|@count sec': 1
     };
     var output = '';
-    $.each(units, function(key, value) {
+    for (var key in units) {
+      if (!units.hasOwnProperty(key)) { continue; }
+      var value = units[key];
       var key = key.split('|');
       if (interval >= value) {
         var count = Math.floor(interval / value);
@@ -802,8 +814,8 @@ function drupalgap_format_interval(interval) {
         interval %= value;
         granularity--;
       }
-      if (granularity == 0) { return false; }
-    });
+      if (granularity == 0) { break; }
+    }
     return output ? output : '0 sec';
   }
   catch (error) { console.log('drupalgap_format_interval - ' + error); }
@@ -902,14 +914,16 @@ function drupalgap_image_path(uri) {
     // If any modules want to alter the path, let them do it.
     var modules = module_implements('image_path_alter');
     if (modules) {
-      $.each(modules, function(index, module) {
+      for (var index in modules) {
+          if (!modules.hasOwnProperty(index)) { continue; }
+          var module = modules[index];
           var result = module_invoke(module, 'image_path_alter', uri);
           if (result) {
             altered = true;
             uri = result;
-            return false;
+            break;
           }
-      });
+      }
     }
     if (!altered) {
       // No one modified the image path, we'll use the default approach to
@@ -938,7 +952,9 @@ function drupalgap_image_path(uri) {
 function drupalgap_includes_load() {
   try {
     if (drupalgap.includes != null && drupalgap.includes.length != 0) {
-      $.each(drupalgap.includes, function(index, include) {
+      for (var index in drupalgap.includes) {
+          if (!drupalgap.includes.hasOwnProperty(index)) { continue; }
+          var include = drupalgap.includes[index];
           var include_path = 'includes/' + include.name + '.inc.js';
           jQuery.ajax({
               async: false,
@@ -956,7 +972,7 @@ function drupalgap_includes_load() {
                 console.log(errorThrown);
               }
           });
-      });
+      }
     }
   }
   catch (error) { console.log('drupalgap_includes_load - ' + error); }
@@ -1047,22 +1063,22 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
  * @see http://api.jquerymobile.com/category/events/
  */
 function drupalgap_jqm_page_events() {
-    return [
-      'pagebeforechange',
-      'pagebeforecreate',
-      'pagebeforehide',
-      'pagebeforeload',
-      'pagebeforeshow',
-      'pagechange',
-      'pagechangefailed',
-      'pagecreate',
-      'pagehide',
-      'pageinit',
-      'pageload',
-      'pageloadfailed',
-      'pageremove',
-      'pageshow'
-    ];
+  return [
+    'pagebeforechange',
+    'pagebeforecreate',
+    'pagebeforehide',
+    'pagebeforeload',
+    'pagebeforeshow',
+    'pagechange',
+    'pagechangefailed',
+    'pagecreate',
+    'pagehide',
+    'pageinit',
+    'pageload',
+    'pageloadfailed',
+    'pageremove',
+    'pageshow'
+  ];
 }
 
 /**
@@ -1197,11 +1213,12 @@ function drupalgap_menu_access(path) {
         // grant access.
         if (drupalgap.menu_links[path].access_arguments) {
           if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
-            $.each(drupalgap.menu_links[path].access_arguments, function(index, 
-              permission) {
+            for (var index in drupalgap.menu_links[path].access_arguments) {
+              if (!drupalgap.menu_links[path].access_arguments.hasOwnProperty(index)) { continue; }
+              var permission = drupalgap.menu_links[path].access_arguments[index];
               access = user_access(permission);
-              if (access) { return false; }
-            });
+              if (access) { break; }
+            }
           }
         }
         else {
@@ -1226,12 +1243,14 @@ function drupalgap_menu_access(path) {
             // in the page arguments with the loaded entity.
             if (arguments[2]) {
               var entity = arguments[2];
-              $.each(access_arguments, function(index, page_argument) {
+              for (var index in access_arguments) {
+                  if (!access_arguments.hasOwnProperty(index)) { continue; }
+                  var page_argument = access_arguments[index];
                   if (is_int(parseInt(page_argument))) {
                     access_arguments[index] = entity;
-                    return false;
+                    break;
                   }
-              });
+              }
             }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
           }
@@ -1306,18 +1325,22 @@ function drupalgap_place_args_in_path(input_path) {
       var wildcards;
       var input_path_args = arg(null, input_path);
       if (input_path_args && input_path_args.length > 0) {
-        $.each(input_path_args, function(index, arg) {
+        for (var index in input_path_args) {
+            if (!input_path_args.hasOwnProperty(index)) { continue; }
+            var arg = input_path_args[index];
             if (arg == '%') {
               if (!wildcards) { wildcards = []; }
               wildcards.push(index);
             }
-        });
+        }
         if (wildcards && wildcards.length > 0) {
-          $.each(wildcards, function(index, wildcard) {
+          for (var index in wildcards) {
+              if (!wildcards.hasOwnProperty(index)) { continue; }
+              var wildcard = wildcards[index];
               if (path_args[wildcard]) {
                 input_path_args[wildcard] = path_args[wildcard];
               }
-          });
+          }
           assembled_path = input_path_args.join('/');
         }
       }
@@ -1530,12 +1553,16 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
       }
       // Convert the paths to page ids, then remove them from the DOM.
       var pages = [];
-      $.each(paths, function(index, path) {
+      for (var index in paths) {
+          if (!paths.hasOwnProperty(index)) { continue; }
+          var path = paths[index];
           pages.push(drupalgap_get_page_id(path));
-      });
-      $.each(pages, function(index, page_id) {
+      }
+      for (var index in pages) {
+          if (!pages.hasOwnProperty(index)) { continue; }
+          var page_id = pages[index];
           drupalgap_remove_page_from_dom(page_id);
-      });
+      }
     }
   }
   catch (error) {
@@ -1563,18 +1590,22 @@ function drupalgap_settings_load() {
 function drupalgap_theme_registry_build() {
   try {
     var modules = module_implements('theme');
-    $.each(modules, function(index, module) {
+    for (var index in modules) {
+        if (!modules.hasOwnProperty(index)) { continue; }
+        var module = modules[index];
         var function_name = module + '_theme';
         var fn = window[function_name];
         var hook_theme = fn();
-        $.each(hook_theme, function(element, variables) {
+        for (var element in hook_theme) {
+            if (!hook_theme.hasOwnProperty(element)) { continue; }
+            var variables = hook_theme[element];
             variables.path = drupalgap_get_path(
               'theme',
               drupalgap.settings.theme
             );
             drupalgap.theme_registry[element] = variables;
-        });
-    });
+        }
+    }
   }
   catch (error) { console.log('drupalgap_theme_registry_build - ' + error); }
 }
@@ -1910,7 +1941,9 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
             var items = [];
             var _value = autocomplete.value;
             var _label = autocomplete.label;
-            $.each(result_items, function(index, object) {
+            for (var index in result_items) {
+                if (!result_items.hasOwnProperty(index)) { continue; }
+                var object = result_items[index];
                 var _item = null;
                 if (_wrapped) { _item = object[_child]; }
                 else { _item = object; }
@@ -1919,15 +1952,17 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                   label: _item[_label]
                 };
                 items.push(item);
-            });
+            }
 
             // Now render the items, add them to list and refresh the list.
             if (items.length != 0) {
               autocomplete.items = items;
               var _items = _theme_autocomplete_prepare_items(autocomplete);
-              $.each(_items, function(index, item) {
-                html += '<li>' + item + '</li>';
-              });
+              for (var index in _items) {
+                  if (!_items.hasOwnProperty(index)) { continue; }
+                  var item = _items[index];
+                  html += '<li>' + item + '</li>';
+              }
               $ul.html(html);
               $ul.listview('refresh');
               $ul.trigger('updatelayout');
@@ -2014,13 +2049,13 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           };
           options.parameters[autocomplete.filter] = '%' + value + '%';
           options.parameters_op[autocomplete.filter] = 'like';
-          $.each(
-            field_settings.handler_settings.target_bundles,
-            function(bundle, name) {
+          for (var bundle in field_settings.handler_settings.target_bundles) {
+              if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
+              var name = field_settings.handler_settings.target_bundles[bundle];
               options.parameters.type = bundle;
               // @TODO allow multiple bundles to be indexed.
-              return false;
-          });
+              break;
+          }
           var fn = window[index_resource];
           fn(options, {
               success: function(results) {
@@ -2102,7 +2137,9 @@ function _theme_autocomplete_prepare_items(variables) {
     // Prepare the items, and return them.
     var _items = [];
     if (items.length > 0) {
-      $.each(items, function(index, item) {
+      for (var index in items) {
+          if (!items.hasOwnProperty(index)) { continue; }
+          var item = items[index];
           var value = '';
           var label = '';
           if (typeof item === 'string') {
@@ -2123,7 +2160,7 @@ function _theme_autocomplete_prepare_items(variables) {
           };
           var _item = l(label, null, options);
           _items.push(_item);
-      });
+      }
     }
     return _items;
   }
@@ -2189,12 +2226,14 @@ function drupalgap_block_load(delta) {
   try {
     var block = null;
     if (drupalgap.blocks) {
-      $.each(drupalgap.blocks, function(index, object) {
+      for (var index in drupalgap.blocks) {
+          if (!drupalgap.blocks.hasOwnProperty(index)) { continue; }
+          var object = drupalgap.blocks[index];
           if (object[delta]) {
             block = object[delta];
-            return false;
+            break;
           }
-      });
+      }
     }
     if (block == null) {
       var msg = 'drupalgap_block_load - ' + t('failed to load') + ' "' + delta +
@@ -2275,7 +2314,9 @@ function drupalgap_attributes(attributes) {
   try {
     var attribute_string = '';
     if (attributes) {
-      $.each(attributes, function(name, value) {
+      for (var name in attributes) {
+          if (!attributes.hasOwnProperty(name)) { continue; }
+          var value = attributes[name];
           if (value != '') {
             // @todo - if someone passes in a value with double quotes, this
             // will break. e.g.
@@ -2290,7 +2331,7 @@ function drupalgap_attributes(attributes) {
             // element.
             attribute_string += name + ' ';
           }
-      });
+      }
     }
     return attribute_string;
   }
@@ -2319,7 +2360,9 @@ function drupalgap_check_visibility(type, data) {
     // Roles.
     else if (typeof data.roles !== 'undefined' &&
       data.roles && data.roles.value && data.roles.value.length != 0) {
-      $.each(data.roles.value, function(role_index, role) {
+      for (var role_index in data.roles.value) {
+          if (!data.roles.value.hasOwnProperty(role_index)) { continue; }
+          var role = data.roles.value[role_index];
           if (drupalgap_user_has_role(role)) {
             // User has role, show/hide the block accordingly.
             if (data.roles.mode == 'include') { visible = true; }
@@ -2331,20 +2374,22 @@ function drupalgap_check_visibility(type, data) {
             if (data.roles.mode == 'exclude') { visible = true; }
           }
           // Break out of the loop if already determined to be visible.
-          if (visible) { return false; }
-      });
+          if (visible) { break; }
+      }
     }
     // Pages.
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
       var current_path = drupalgap_path_get();
       var current_path_parts = current_path.split('/');
-      $.each(data.pages.value, function(page_index, path) {
+      for (var page_index in data.pages.value) {
+          if (!data.pages.value.hasOwnProperty(page_index)) { continue; }
+          var path = data.pages.value[page_index];
           if (path == '') { path = drupalgap.settings.front; }
           if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
-            return false;
+            break;
           }
           else {
             // It wasn't a direct path match, is there a wildcard that matches
@@ -2355,7 +2400,7 @@ function drupalgap_check_visibility(type, data) {
               if (router_path.replace(/%/g, '*') == path) {
                 if (data.pages.mode == 'include') { visible = true; }
                 else if (data.pages.mode == 'exclude') { visible = false; }
-                return false;
+                break;
               }
               else {
                 var path_parts = path.split('/');
@@ -2381,7 +2426,7 @@ function drupalgap_check_visibility(type, data) {
               else if (data.pages.mode == 'exclude') { visible = true; }
             }
           }
-      });
+      }
     }
     return visible;
   }
@@ -2432,10 +2477,14 @@ function drupalgap_get_path(type, name) {
     var path = null;
     if (type == 'module') {
       var found_module = false;
-      $.each(Drupal.modules, function(bundle, modules) {
-          if (found_module) { return false; }
+      for (var bundle in Drupal.modules) {
+          if (!Drupal.modules.hasOwnProperty(bundle)) { continue; }
+          var modules = Drupal.modules[bundle];
+          if (found_module) { break; }
           else {
-            $.each(modules, function(index, module) {
+            for (var index in modules) {
+                if (!modules.hasOwnProperty(index)) { continue; }
+                var module = modules[index];
                 if (module.name == name) {
                   found_module = true;
                   path = '';
@@ -2447,14 +2496,14 @@ function drupalgap_get_path(type, name) {
                       bundle +
                     ')';
                     drupalgap_alert(msg);
-                    return false;
+                    break;
                   }
                   path += '/' + name;
-                  return false;
+                  break;
                 }
-            });
+            }
           }
-      });
+      }
     }
     else if (type == 'theme') {
       if (name == 'easystreet3' || name == 'ava') { path = 'themes/' + name; }
@@ -2747,7 +2796,9 @@ function _drupalgap_form_render_elements(form) {
     // set it, then render the element if access is permitted. While rendering
     // the elements, set them aside according to their widget weight so they
     // can be appended to the content string in the correct order later.
-    $.each(form.elements, function(name, element) {
+    for (var name in form.elements) {
+        if (!form.elements.hasOwnProperty(name)) { continue; }
+        var element = form.elements[name];
         if (!element.name) { element.name = name; }
         if (drupalgap_form_element_access(element)) {
           if (element.is_field && element.field_info_instance.widget.weight) {
@@ -2785,7 +2836,7 @@ function _drupalgap_form_render_elements(form) {
             else { content += _drupalgap_form_render_element(form, element); }
           }
         }
-    });
+    }
     // Prepend the weighted elements to the content.
     if (!empty(content_weighted)) {
       for (var weight in content_weighted) {
@@ -2797,7 +2848,9 @@ function _drupalgap_form_render_elements(form) {
     // Add any form buttons to the form elements html, if access to the button
     // is permitted.
     if (form.buttons && form.buttons.length != 0) {
-      $.each(form.buttons, function(name, button) {
+      for (var name in form.buttons) {
+          if (!form.buttons.hasOwnProperty(name)) { continue; }
+          var button = form.buttons[name];
           if (drupalgap_form_element_access(button)) {
             var attributes = {
               type: 'button',
@@ -2808,7 +2861,7 @@ function _drupalgap_form_render_elements(form) {
               button.title +
             '</button>';
           }
-      });
+      }
     }
     return content;
   }
@@ -2887,8 +2940,9 @@ function _drupalgap_form_render_element(form, element) {
     var item_html = '';
     var item_label = '';
     var render_item = null;
-    $.each(items, function(delta, item) {
-
+    for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
         // We'll render the item, unless we prove otherwise.
         render_item = true;
 
@@ -2974,9 +3028,9 @@ function _drupalgap_form_render_element(form, element) {
         );
         if (typeof item_html === 'undefined') {
           render_item = false;
-          return false;
+          break;
         }
-    });
+    }
 
     // Are we skipping the render of the item?
     if (!render_item) { return ''; }
@@ -3462,9 +3516,11 @@ function drupalgap_form_load(form_id) {
       // each to to the form arguments, afterwards remove the argument at index
       // zero because that is the form id.
       var form_arguments = [];
-      $.each(arguments, function(index, argument) {
-            form_arguments.push(argument);
-      });
+      for (var index in arguments) {
+          if (!arguments.hasOwnProperty(index)) { continue; }
+          var argument = arguments[index];
+          form_arguments.push(argument);
+      }
       form_arguments.splice(0, 1);
 
       // Attach the form arguments to the form object.
@@ -3481,9 +3537,11 @@ function drupalgap_form_load(form_id) {
         var form_state = null;
         consolidated_arguments.push(form);
         consolidated_arguments.push(form_state);
-        $.each(form_arguments, function(index, argument) {
-          consolidated_arguments.push(argument);
-        });
+        for (var index in form_arguments) {
+            if (!form_arguments.hasOwnProperty(index)) { continue; }
+            var argument = form_arguments[index];
+            consolidated_arguments.push(argument);
+        }
         form = fn.apply(
           null,
           Array.prototype.slice.call(consolidated_arguments)
@@ -3494,7 +3552,9 @@ function drupalgap_form_load(form_id) {
       // element does not yet have any. This allows others to more easily modify
       // options and attributes on an element without having to worry about
       // testing for nulls and creating empty properties first.
-      $.each(form.elements, function(name, element) {
+      for (var name in form.elements) {
+          if (!form.elements.hasOwnProperty(name)) { continue; }
+          var element = form.elements[name];
           // If this element is a field, load its field_info_field and
           // field_info_instance onto the element.
           var element_is_field = false;
@@ -3562,7 +3622,7 @@ function drupalgap_form_load(form_id) {
             form.elements[name].id = id;
             form.elements[name].options.attributes.id = id;
           }
-      });
+      }
 
       // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, null, form_id);
@@ -3690,10 +3750,12 @@ function _drupalgap_form_submit(form_id) {
       try {
 
         // Call the form's validate function(s), if any.
-        $.each(form.validate, function(index, function_name) {
+        for (var index in form.validate) {
+            if (!form.validate.hasOwnProperty(index)) { continue; }
+            var function_name = form.validate[index];
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        });
+        }
 
         // Call drupalgap form's api validate.
         _drupalgap_form_validate(form, form_state);
@@ -3702,9 +3764,11 @@ function _drupalgap_form_submit(form_id) {
         // form submission. Otherwise submit the form.
         if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
           var html = '';
-          $.each(drupalgap.form_errors, function(name, message) {
+          for (var name in drupalgap.form_errors) {
+              if (!drupalgap.form_errors.hasOwnProperty(name)) { continue; }
+              var message = drupalgap.form_errors[name];
               html += message + '\n\n';
-          });
+          }
           drupalgap_alert(html);
         }
         else { form_submission(); }
@@ -3718,10 +3782,12 @@ function _drupalgap_form_submit(form_id) {
     var form_submission = function() {
       try {
         // Call the form's submit function(s), if any.
-        $.each(form.submit, function(index, function_name) {
+        for (var index in form.submit) {
+            if (!form.submit.hasOwnProperty(index)) { continue; }
+            var function_name = form.submit[index];
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        });
+        }
         // Remove the form from local storage.
         // @todo - we can't do this here because often times a form's submit
         // handler makes asynchronous calls (i.e. user login) and although the
@@ -3764,8 +3830,10 @@ function _drupalgap_form_submit(form_id) {
  */
 function _drupalgap_form_validate(form, form_state) {
   try {
-    $.each(form.elements, function(name, element) {
-        if (name == 'submit') { return; }
+    for (var name in form.elements) {
+        if (!form.elements.hasOwnProperty(name)) { continue; }
+        var element = form.elements[name];
+        if (name == 'submit') { continue; }
         if (element.required) {
           var valid = true;
           var value = null;
@@ -3781,9 +3849,11 @@ function _drupalgap_form_validate(form, form_state) {
           ) { valid = false; }
           else if (element.type == 'checkboxes' && element.required) {
             var has_value = false;
-            $.each(form_state.values[name], function(key, value) {
-                if (value) { has_value = true; return false; }
-            });
+            for (var key in form_state.values[name]) {
+              if (!form_state.values[name].hasOwnProperty(key)) { continue; }
+              var value = form_state.values[name][key];
+              if (value) { has_value = true; break; }
+            }
             if (!has_value) { valid = false; }
           }
           if (!valid) {
@@ -3795,7 +3865,7 @@ function _drupalgap_form_validate(form, form_state) {
             );
           }
         }
-    });
+    }
   }
   catch (error) { console.log('_drupalgap_form_validate - ' + error); }
 }
@@ -3810,9 +3880,11 @@ function _drupalgap_form_validate(form, form_state) {
 function drupalgap_form_state_values_assemble(form) {
   try {
     var lng = language_default();
-    var form_state = {'values': {}};
-    $.each(form.elements, function(name, element) {
-      if (name == 'submit') { return; } // Always skip the form 'submit'.
+    var form_state = { values: {} };
+    for (var name in form.elements) {
+      if (!form.elements.hasOwnProperty(name)) { continue; }
+      var element = form.elements[name];
+      if (name == 'submit') { continue; } // Always skip the form 'submit'.
       var id = null;
       if (element.is_field) {
         form_state.values[name] = {};
@@ -3838,7 +3910,7 @@ function drupalgap_form_state_values_assemble(form) {
             element
           );
       }
-    });
+    }
     // Attach the form state to drupalgap.form_states keyed by the form id.
     drupalgap.form_states[form.id] = form_state;
     return form_state;
@@ -3884,12 +3956,14 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
         // over the element option(s) in the DOM.
         value = {};
         var options = $('label[for="' + id + '"]').siblings('.ui-checkbox');
-        $.each(options, function(index, option) {
+        for (var index in options) {
+            if (!options.hasOwnProperty(index)) { continue; }
+            var option = options[index];
             var checkbox = $(option).children('input');
             var _value = $(checkbox).attr('value');
             if ($(checkbox).is(':checked')) { value[_value] = _value; }
             else { value[_value] = 0; }
-        });
+        }
         break;
       case 'list_boolean':
         var _checkbox = $(selector);
@@ -3935,7 +4009,9 @@ function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
     var responseText = JSON.parse(xhr.responseText);
     if (typeof responseText === 'object' && responseText.form_errors) {
       var msg = '';
-      $.each(responseText.form_errors, function(element_name, error_msg) {
+      for (var element_name in responseText.form_errors) {
+          if (!responseText.form_errors.hasOwnProperty(element_name)) { continue; }
+          var error_msg = responseText.form_errors[element_name];
           if (error_msg != '') {
             // The element name tends to come back weird, e.g.
             // "field_art_type][und", so let's trim anything at and after
@@ -3952,7 +4028,7 @@ function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
             msg += $('<div>(' + label + ') - ' +
               error_msg + '</div>').text() + '\n';
           }
-      });
+      }
       if (msg != '') { return msg; }
     }
     return false;
@@ -3989,8 +4065,10 @@ function theme_checkboxes(variables) {
   try {
     var html = '';
     variables.attributes.type = 'checkboxes';
-    $.each(variables.options, function(value, label) {
-        if (value == 'attributes') { return; } // Skip attributes.
+    for (var value in variables.options) {
+        if (!variables.options.hasOwnProperty(value)) { continue; }
+        var label = variables.options[value];
+        if (value == 'attributes') { continue; } // Skip attributes.
         var _label = value;
         if (!empty(label)) { _label = label; }
         var checkbox = {
@@ -4007,7 +4085,7 @@ function theme_checkboxes(variables) {
         html += '<label>' +
           theme('checkbox', checkbox) + '&nbsp;' + label +
         '</label>';
-    });
+    }
     // Check the box?
     /*if (variables.checked) {
       variables.attributes.checked = 'checked';
@@ -4149,7 +4227,9 @@ function theme_radios(variables) {
       }
       // Init a delta value so each radio button can have a unique id.
       var delta = 0;
-      $.each(variables.options, function(value, label) {
+      for (var value in variables.options) {
+          if (!variables.options.hasOwnProperty(value)) { continue; }
+          var label = variables.options[value];
           if (value == 'attributes') { return; } // Skip the attributes.
           var checked = '';
           if (variables.value && variables.value == value) {
@@ -4162,7 +4242,7 @@ function theme_radios(variables) {
                                  drupalgap_attributes(variables.attributes) +
                                  checked + ' />' + input_label;
           delta++;
-      });
+      }
     }
     return radios;
   }
@@ -4209,8 +4289,10 @@ function theme_select(variables) {
   try {
     var options = '';
     if (variables.options) {
-      $.each(variables.options, function(value, label) {
-          if (value == 'attributes') { return; } // Skip the attributes.
+      for (var value in variables.options) {
+          if (!variables.options.hasOwnProperty(value)) { continue; }
+          var label = variables.options[value];
+          if (value == 'attributes') { continue; } // Skip the attributes.
           // Is the option selected?
           var selected = '';
           if (
@@ -4221,7 +4303,7 @@ function theme_select(variables) {
           options += '<option value="' + value + '" ' + selected + '>' +
             label +
           '</option>';
-      });
+      }
     }
     return '<select ' + drupalgap_attributes(variables.attributes) + '>' +
       options +
@@ -4313,12 +4395,14 @@ function drupalgap_goto(path) {
       var new_path = false;
       var invocation_results = module_invoke_all('404', router_path);
       if (invocation_results) {
-        $.each(invocation_results, function(index, result) {
+        for (var index in invocation_results) {
+            if (!invocation_results.hasOwnProperty(index)) { continue; }
+            var result = invocation_results[index];
             if (result !== false) {
               new_path = result;
-              return false;
+              break;
             }
-        });
+        }
       }
       // If a 404 handler provided a new path use it, otherwise just use the
       // system 404 page. Either way, update the router path before continuing
@@ -4850,12 +4934,14 @@ function template_process_page(variables) {
     var page_id = drupalgap_get_page_id(drupalgap_path);
     var page_html = $('#' + page_id).html();
     if (!page_html) { return; }
-    $.each(drupalgap.theme.regions, function(index, region) {
+    for (var index in drupalgap.theme.regions) {
+        if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
+        var region = drupalgap.theme.regions[index];
         page_html = page_html.replace(
           '{:' + region.name + ':}',
           drupalgap_render_region(region)
         );
-    });
+    }
     $('#' + page_id).html(page_html);
   }
   catch (error) { console.log('template_process_page - ' + error); }
@@ -4949,11 +5035,13 @@ function drupalgap_remove_page_from_dom(page_id) {
 function drupalgap_remove_pages_from_dom() {
   try {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
-    $.each(drupalgap.pages, function(index, page_id) {
+    for (var index in drupalgap.pages) {
+        if (!drupalgap.pages.hasOwnProperty(index)) { continue; }
+        var page_id = drupalgap.pages[index];
         if (current_page_id != page_id) {
           drupalgap_remove_page_from_dom(page_id, null, current_page_id);
         }
-    });
+    }
     // Reset drupalgap.pages to only contain the current page id.
     drupalgap.pages = [current_page_id];
     // Reset the drupalgap.views.ids array.
@@ -4994,12 +5082,14 @@ function drupalgap_page_in_dom(page_id) {
     var pages = $("body div[data-role$='page']");
     var page_in_dom = false;
     if (pages && pages.length > 0) {
-      $.each(pages, function(index, page) {
+      for (var index in pages) {
+          if (!pages.hasOwnProperty(index)) { continue; }
+          var page = pages[index];
           if (($(page).attr('id')) == page_id) {
             page_in_dom = true;
-            return false;
+            break;
           }
-      });
+      }
     }
     return page_in_dom;
   }
@@ -5086,7 +5176,9 @@ function drupalgap_render_page() {
               // Replace each placeholder with html.
               // @todo - each placeholder should have its own container div and
               // unique id.
-              $.each(placeholders, function(index, placeholder) {
+              for (var index in placeholders) {
+                  if (!placeholders.hasOwnProperty(index)) { continue; }
+                  var placeholder = placeholders[index];
                   var html = '';
                   if (output[placeholder]) {
                     // Grab the element variable from the output.
@@ -5108,7 +5200,7 @@ function drupalgap_render_page() {
                     '{:' + placeholder + ':}',
                     html
                   );
-              });
+              }
             }
             else {
               // There were no place holders found, do nothing, ok.
@@ -5137,11 +5229,13 @@ function drupalgap_render_page() {
       // Iterate over any remaining variables and theme them.
       // @todo - each remaining variables should have its own container div and
       // unique id, similar to the placeholder div containers mentioned above.
-      $.each(output, function(element, variables) {
+      for (var element in output) {
+          if (!output.hasOwnProperty(element)) { continue; }
+          var variables = output[element];
           if ($.inArray(element, render_variables) == -1) {
             content += theme(variables.theme, variables);
           }
-      });
+      }
     }
 
     // Now that we are done assembling the content into an html string, we can
@@ -5202,9 +5296,11 @@ function drupalgap_render_region(region) {
         // This will allow us to properly wrap region links in a control group.
         var ui_btn_left_count = 0;
         var ui_btn_right_count = 0;
-        $.each(region.links, function(index, link) {
+        for (var index in region.links) {
+            if (!region.links.hasOwnProperty(index)) { continue; }
+            var link = region.links[index];
             var data = menu_region_link_get_data(link);
-            if (!drupalgap_check_visibility('region', data)) { return; }
+            if (!drupalgap_check_visibility('region', data)) { continue; }
             region_link_count++;
             var css_class = drupalgap_link_get_class(link);
             if (css_class) {
@@ -5212,7 +5308,7 @@ function drupalgap_render_region(region) {
               if (side == 'left') { ui_btn_left_count++; }
               else if (side == 'right') { ui_btn_right_count++; }
             }
-        });
+        }
 
         // We need to separately render each side of the header (left, right).
         // That allows us to properly wrap the links with a control group if
@@ -5331,12 +5427,12 @@ function drupalgap_render_region(region) {
         block_count: 0,
         block_menu_count: 0
       };
-      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
-        function(block_delta, block_settings) {
-
+      var blocks = drupalgap.settings.blocks[drupalgap.settings.theme][region.name];
+      for (var block_delta in blocks) {
+          if (!blocks.hasOwnProperty(block_delta)) { continue; }
+          var block_settings = blocks[block_delta];
           // Ignore region _prefix and _suffix.
-          if (block_delta == '_prefix' || block_delta == '_suffix') { return; }
-
+          if (block_delta == '_prefix' || block_delta == '_suffix') { continue; }
           // Render the block.
           region_html += drupalgap_block_render(
             region,
@@ -5345,8 +5441,7 @@ function drupalgap_render_region(region) {
             block_settings,
             block_counts
           );
-
-      });
+      }
 
       // If this was a header or footer, and there were only region links
       // rendered, place an empty header in the region.
@@ -5396,14 +5491,16 @@ function _drupalgap_region_render_zone(zone, region, current_path) {
       drupalgap.settings.blocks[drupalgap.settings.theme][region.name];
     if (typeof region_settings[zone] === 'undefined') { return html; }
     var blocks = region_settings[zone];
-    $.each(blocks, function(block_delta, block_settings) {
+    for (var block_delta in blocks) {
+        if (!blocks.hasOwnProperty(block_delta)) { continue; }
+        var block_settings = blocks[block_delta];
         html += drupalgap_block_render(
           region,
           current_path,
           block_delta,
           block_settings
         );
-    });
+    }
     return html;
   }
   catch (error) { console.log('_drupalgap_region_render_zone - ' + error); }
@@ -5461,15 +5558,14 @@ function menu_execute_active_handler() {
         // the url so the entity is sent via the page arguments to the page
         // callback, instead of just sending the integer.
         var args = arg(null, path);
-        $.each(
-          drupalgap.menu_links[router_path].page_arguments,
-          function(index, object) {
+        for (var index in drupalgap.menu_links[router_path].page_arguments) {
+            if (!drupalgap.menu_links[router_path].page_arguments.hasOwnProperty(index)) { continue; }
+            var object = drupalgap.menu_links[router_path].page_arguments[index];
             if (is_int(object) && args[object]) {
               page_arguments.push(args[object]);
             }
             else { page_arguments.push(object); }
-          }
-        );
+        }
 
         // Call the page callback function with the page arguments.
         content = fn.apply(null, Array.prototype.slice.call(page_arguments));
@@ -5609,9 +5705,11 @@ function menu_list_system_menus() {
       }
     };
     // Add the menu_name to each menu as a property.
-    $.each(system_menus, function(menu_name, menu) {
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
         menu.menu_name = menu_name;
-    });
+    }
     return system_menus;
   }
   catch (error) { console.log('menu_list_system_menus - ' + error); }
@@ -5630,14 +5728,18 @@ function menu_router_build() {
     var function_name;
     var fn;
     var menu_links;
-    $.each(modules, function(index, module) {
+    for (var index in modules) {
+        if (!modules.hasOwnProperty(index)) { continue; }
+        var module = modules[index];
         // Determine the hook function name, grab the function, and call it
         // to retrieve the hook's menu links.
         function_name = module + '_menu';
         fn = window[function_name];
         menu_links = fn();
         // Iterate over each item.
-        $.each(menu_links, function(path, menu_item) {
+        for (var path in menu_links) {
+            if (!menu_links.hasOwnProperty(path)) { continue; }
+            var menu_item = menu_links[path];
             // Attach module name to item.
             menu_item.module = module;
             // Set a default type for the item if one isn't provided.
@@ -5663,8 +5765,8 @@ function menu_router_build() {
             );
             // Attach item to menu links.
             drupalgap.menu_links[path] = menu_item;
-        });
-    });
+        }
+    }
   }
   catch (error) { console.log('menu_router_build - ' + error); }
 }
@@ -5804,7 +5906,9 @@ function drupalgap_menus_load() {
   try {
     if (drupalgap.settings.menus) {
       // Process each menu defined in the settings.
-      $.each(drupalgap.settings.menus, function(menu_name, menu) {
+      for (var menu_name in drupalgap.settings.menus) {
+          if (!drupalgap.settings.menus.hasOwnProperty(menu_name)) { continue; }
+          var menu = drupalgap.settings.menus[menu_name];
           // If the menu does not already exist, it is a custom menu, so create
           // the menu and its corresponding block.
           if (!drupalgap.menus[menu_name]) {
@@ -5830,11 +5934,13 @@ function drupalgap_menus_load() {
             // custom settings.
             $.extend(true, drupalgap.menus[menu_name], menu);
           }
-      });
+      }
       // Now that we have all of the menus loaded up, and the menu router is
       // built, let's iterate over all the menu links and perform various
       // operations on them.
-      $.each(drupalgap.menu_links, function(path, menu_link) {
+      for (var path in drupalgap.menu_links) {
+          if (!drupalgap.menu_links.hasOwnProperty(path)) { continue; }
+          var menu_link = drupalgap.menu_links[path];
           // Let's grab any links from the router that have a menu specified,
           // and add the link to the router.
           if (menu_link.menu_name) {
@@ -5871,12 +5977,14 @@ function drupalgap_menus_load() {
               menu_link
             );
           }
-      });
+      }
       // If there are any region menu links defined in settings.js, create a
       // links array for the region if one doesn't exist already, then add the
       // menu item to the links array as a link.
       if (typeof drupalgap.settings.menus.regions !== 'undefined') {
-        $.each(drupalgap.settings.menus.regions, function(region, menu) {
+        for (var region in drupalgap.settings.menus.regions) {
+            if (!drupalgap.settings.menus.regions.hasOwnProperty(region)) { continue; }
+            var menu = drupalgap.settings.menus.regions[region];
             if (
               typeof menu.links !== 'undefined' &&
               $.isArray(menu.links) &&
@@ -5885,11 +5993,13 @@ function drupalgap_menus_load() {
               if (!drupalgap.theme.regions[region].links) {
                 drupalgap.theme.regions[region].links = [];
               }
-              $.each(menu.links, function(index, link) {
+              for (var index in menu.links) {
+                  if (!menu.links.hasOwnProperty(index)) { continue; }
+                  var link = menu.links[index];
                   drupalgap.theme.regions[region].links.push(link);
-              });
+              }
             }
-        });
+        }
       }
     }
   }
@@ -5962,7 +6072,9 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
         if (typeof menu_item.siblings === 'undefined') {
           menu_item.siblings = [];
         }
-        $.each(drupalgap.menu_links[parent].children, function(index, sibling) {
+        for (var index in drupalgap.menu_links[parent].children) {
+            if (!drupalgap.menu_links[parent].children.hasOwnProperty(index)) { continue; }
+            var sibling = drupalgap.menu_links[parent].children[index];
             if (sibling != path && drupalgap.menu_links[sibling]) {
               if (
                 typeof drupalgap.menu_links[sibling].siblings === 'undefined'
@@ -5972,7 +6084,7 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
               drupalgap.menu_links[sibling].siblings.push(path);
               menu_item.siblings.push(sibling);
             }
-        });
+        }
       }
     }
   }
@@ -6115,9 +6227,11 @@ function theme_collapsibleset(variables) {
   try {
     variables.attributes['data-role'] = 'collapsible-set';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
-    $.each(variables.items, function(index, item) {
+    for (var index in variables.items) {
+        if (!variables.items.hasOwnProperty(index)) { continue; }
+        var item = variables.items[index];
         html += theme('collapsible', item);
-    });
+    }
     html += '</div>';
     return html;
   }
@@ -6133,7 +6247,11 @@ function theme_controlgroup(variables) {
   try {
     variables.attributes['data-role'] = 'controlgroup';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
-    $.each(variables.items, function(index, item) { html += item; });
+    for (var index in variables.items) {
+      if (!variables.items.hasOwnProperty(index)) { continue; }
+      var item = variables.items[index];
+      html += item;
+    }
     html += '</div>';
     return html;
   }
@@ -6231,12 +6349,13 @@ function theme_image_style(variables) {
 function theme_item(variables) {
   try {
     var html = '';
-    //var mvc_model_system_fields
-    $.each(variables.item, function(field, value) {
+    for (var field in variables.item) {
+        if (!variables.item.hasOwnProperty(field)) { continue; }
+        var value = variables.item[field];
         html +=
           '<h2>' + variables.model.fields[field].title + '</h2>' +
           '<p>' + value + '</p>';
-    });
+    }
     return html;
   }
   catch (error) { console.log('theme_item - ' + error); }
@@ -6260,9 +6379,11 @@ function theme_item_list(variables) {
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
       var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
-          variables.attributes['data-role'] == 'listview';
-      $.each(variables.items, function(index, item) {
-          var icon;
+        variables.attributes['data-role'] == 'listview';
+      for (var index in variables.items) {
+          if (!variables.items.hasOwnProperty(index)) { continue; }
+          var item = variables.items[index];
+          var icon = null;
           html += '<li';
           if (listview && (icon = $(item).attr('data-icon'))) {
             // If we're in a listview and the item specifies an icon,
@@ -6270,7 +6391,7 @@ function theme_item_list(variables) {
             html += ' data-icon="' + icon + '"';
           }
           html += '>' + item + '</li>';
-      });
+      }
     }
     html += '</' + type + '>';
     return html;
@@ -6342,11 +6463,13 @@ function theme_link(variables) {
           // onclick handler.
 
           var goto_options = '';
-          $.each(variables.options, function(option, value) {
-              if (option == 'attributes') { return; }
+          for (var option in variables.options) {
+              if (!variables.options.hasOwnProperty(option)) { continue; }
+              var value = variables.options[option];
+              if (option == 'attributes') { continue; }
               if (typeof value === 'string') { value = "'" + value + "'"; }
               goto_options += option + ':' + value + ',';
-          });
+          }
           onclick =
             'drupalgap_goto(\'' +
               variables.path + '\', ' +
@@ -6455,24 +6578,30 @@ function theme_table(variables) {
     var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
     if (variables.header) {
       html += '<thead><tr>';
-      $.each(variables.header, function(index, column) {
+      for (var index in variables.header) {
+          if (!variables.header.hasOwnProperty(index)) { continue; }
+          var column = variables.header[index];
           if (column.data) {
             html += '<td>' + column.data + '</td>';
           }
-      });
+      }
       html += '</tr></thead>';
     }
     html += '<tbody>';
     if (variables.rows) {
-      $.each(variables.rows, function(row_index, row) {
+      for (var row_index in variables.rows) {
+          if (!variables.rows.hasOwnProperty(row_index)) { continue; }
+          var row = variables.rows[row_index];
           html += '<tr>';
           if (row) {
-            $.each(row, function(column_index, column) {
-                html += '<td>' + column + '</td>';
-            });
+            for (var column_index in row) {
+              if (!row.hasOwnProperty(column_index)) { continue; }
+              var column = row[column_index];
+              html += '<td>' + column + '</td>';
+            }
           }
           html += '</tr>';
-      });
+      }
     }
     return html + '</tbody></table>';
   }
@@ -6523,14 +6652,15 @@ function _drupalgap_page_title_pageshow(page_arguments) {
           // corresponding arg(#), otherwise just push the arg onto the title
           // arguments.
           var args = arg(null, drupalgap_path_get());
-          $.each(
-            drupalgap.menu_links[router_path].title_arguments,
-            function(index, object) {
+          var _title_arguments = drupalgap.menu_links[router_path].title_arguments;
+          for (var index in items) {
+              if (!items.hasOwnProperty(index)) { continue; }
+              var object = items[index];
               if (is_int(object) && args[object]) {
                 title_arguments.push(args[object]);
               }
               else { title_arguments.push(object); }
-          });
+          }
         }
         // Call the title callback function with the title arguments.
         drupalgap_set_title(
@@ -7054,14 +7184,16 @@ function contact_site_form_pageshow() {
     contact_index({
         success: function(results) {
           if (!results || !results.length) { return; }
-          $.each(results, function(index, result) {
+          for (var index in results) {
+              if (!results.hasOwnProperty(index)) { continue; }
+              var result = results[index];
               var selected = result.selected == 1 ? 'selected' : '';
               var option =
                 '<option value="' + result.cid + '" ' + selected + '>' +
                   result.category +
                 '</option>';
               $('#edit-contact-site-form-category').append(option);
-          });
+          }
           $('#edit-contact-site-form-category').selectmenu('refresh');
           if (results.length == 1) {
             $('#contact_site_form .field-name-category').hide();
@@ -7105,9 +7237,11 @@ function contact_site_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }
@@ -7240,9 +7374,11 @@ function contact_personal_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }
@@ -7276,12 +7412,14 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
     // Iterate over each core field in the entity and add it to the form. If
     // there is a value present in the entity, then set the field's form element
     // default value equal to the core field value.
-    $.each(fields, function(name, field) {
+    for (var name in fields) {
+      if (!fields.hasOwnProperty(name)) { continue; }
+      var field = fields[name];
       var default_value = field.default_value;
       if (entity && entity[name]) { default_value = entity[name]; }
       form.elements[name] = field;
       form.elements[name].default_value = default_value;
-    });
+    }
   }
   catch (error) {
     console.log('drupalgap_entity_add_core_fields_to_form - ' + error);
@@ -7398,10 +7536,12 @@ function drupalgap_entity_render_content(entity_type, entity) {
     if (!field_info) { return; }
     var field_weights = {};
     var field_displays = {};
-    $.each(field_info, function(field_name, field) {
+    for (var field_name in field_info) {
+        if (!field_info.hasOwnProperty(field_name)) { continue; }
+        var field = field_info[field_name];
         // Determine which display mode to use. The default mode will be used
         // if the drupalgap display mode is not present.
-        if (!field.display) { return false; }
+        if (!field.display) { break; }
         var display = field.display['default'];
         if (field.display['drupalgap']) {
           display = field.display['drupalgap'];
@@ -7413,22 +7553,28 @@ function drupalgap_entity_render_content(entity_type, entity) {
           ) { display.module = field.display['default'].module; }
         }
         // Skip hidden fields.
-        if (display.type == 'hidden') { return; }
+        if (display.type == 'hidden') { continue; }
         // Save the field display and weight.
         field_displays[field_name] = display;
         field_weights[field_name] = display.weight;
-    });
+    }
     // Extract the field weights and sort them.
     var extracted_weights = [];
-    $.each(field_weights, function(field_name, weight) {
+    for (var field_name in field_weights) {
+        if (!field_weights.hasOwnProperty(field_name)) { continue; }
+        var weight = field_weights[field_name];
         extracted_weights.push(weight);
-    });
+    }
     extracted_weights.sort(function(a, b) { return a - b; });
     // For each sorted weight, locate the field with the corresponding weight,
     // then render it's field content.
     var completed_fields = [];
-    $.each(extracted_weights, function(weight_index, target_weight) {
-        $.each(field_weights, function(field_name, weight) {
+    for (var weight_index in extracted_weights) {
+        if (!extracted_weights.hasOwnProperty(weight_index)) { continue; }
+        var target_weight = extracted_weights[weight_index];
+        for (var field_name in field_weights) {
+            if (!field_weights.hasOwnProperty(field_name)) { continue; }
+            var weight = field_weights[field_name];
             if (target_weight == weight) {
               if (completed_fields.indexOf(field_name) == -1) {
                 completed_fields.push(field_name);
@@ -7439,11 +7585,11 @@ function drupalgap_entity_render_content(entity_type, entity) {
                   field_info[field_name],
                   field_displays[field_name]
                 );
-                return false;
+                break;
               }
             }
-        });
-    });
+        }
+    }
     // Give modules a chance to alter the content.
     module_invoke_all(
       'entity_post_render_content',
@@ -7535,7 +7681,9 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
         items,
         display
       );
-      $.each(elements, function(delta, element) {
+      for (var delta in elements) {
+          if (!elements.hasOwnProperty(delta)) { continue; }
+          var element = elements[delta];
           // If the element has markup, render it as is, if it is
           // themeable, then theme it.
           var element_content = '';
@@ -7543,9 +7691,8 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
           else if (element.theme) {
             element_content = theme(element.theme, element);
           }
-          //content += '<div>' + element_content + '</div>';
           content += element_content;
-      });
+      }
     }
     else {
       console.log(
@@ -7593,14 +7740,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
     var entity = {};
     var language = language_default();
-    $.each(form_state.values, function(name, value) {
-
+    for (var name in form_state.values) {
+        if (!form_state.values.hasOwnProperty(name)) { continue; }
+        var value = form_state.values[name];
+  
         // Skip elements with restricted access.
         if (
           typeof form.elements[name].access !== 'undefined' &&
           !form.elements[name].access
-        ) { return; }
-
+        ) { continue; }
+  
         // Determine wether or not this element is a field. If it is, determine
         // it's module and field assembly hook.
         var is_field = false;
@@ -7612,26 +7761,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           hook = module + '_assemble_form_state_into_field';
           if (!function_exists(hook)) { hook = false; }
         }
-
+  
         // Retrieve the potential key for the element, if we don't get one
         // then it is a flat field that should be attached as a property to the
         // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-
+  
           // Determine how many allowed values for this field.
           var allowed_values = form.elements[name].field_info_field.cardinality;
-
+  
           // Convert unlimited value fields to one, for now...
           if (allowed_values == -1) { allowed_values = 1; }
-
+  
           // Make sure there is at least one value before creating the form
           // element on the entity.
-          if (typeof value[language][0] === 'undefined') { return; }
-
+          if (typeof value[language][0] === 'undefined') { continue; }
+  
           // Create an empty object to house the field on the entity.
           entity[name] = {};
-
+  
           // Some fields do not use a delta value in the service call, so we
           // prepare for that here.
           // @todo - Do all options_select widgets really have no delta value?
@@ -7648,12 +7797,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             entity[name][language] = {};
           }
           else { entity[name][language] = []; }
-
+  
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
             if (typeof value[language][delta] !== 'undefined') {
-
+  
               // @TODO - the way values are determined here is turning into
               // spaghetti code. Every form element needs its own
               // value_callback, just like Drupal's FAPI. Right now DG has
@@ -7668,10 +7817,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // drupalgap_field_info_instances_add_to_form(), that function
               // should use the value_callback idea to properly map entity data
               // to the form element's value.
-
+  
               // Extract the value.
               var field_value = value[language][delta];
-
+  
               // By default, we'll assume we'll be attaching this element item's
               // value according to a key (usually 'value' is the default key
               // used by Drupal fields). However, we'll give modules that
@@ -7691,7 +7840,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 form_id: form.id,
                 element_id: form.elements[name][language][delta].id
               };
-
+  
               // If this element is a field, give the field's module an
               // opportunity to assemble its own value, otherwise we'll just
               // use the field value extracted above.
@@ -7707,10 +7856,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   field_key
                 );
               }
-
+  
               // If someone updated the key, use it.
               if (key != field_key.value) { key = field_key.value; }
-
+  
               // If we don't need a delta value, place the field value using the
               // key, if posible. If we're using a delta value, push the key
               // and value onto the field to indicate the delta.
@@ -7740,7 +7889,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   entity[name][language].push(field_value);
                 }
               }
-
+  
               // If the field value was null, we won't send along the field, so
               // just remove it. Except for list_boolean fields, they need a
               // null value to set the field value to false.
@@ -7752,7 +7901,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 typeof entity[name] !== 'undefined' &&
                 form.elements[name].type != 'list_boolean'
               ) { delete entity[name]; }
-
+  
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
               // @TODO - will this cause multi value issues?
@@ -7762,12 +7911,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   'options_select' && !form.elements[name].required &&
                 field_value === '' && typeof entity[name] !== 'undefined'
               ) { delete entity[name]; }
-
+  
             }
           }
-        }
-        else if (typeof value !== 'undefined') { entity[name] = value; }
-    });
+      }
+      else if (typeof value !== 'undefined') { entity[name] = value; }
+    }
     return entity;
   }
   catch (error) {
@@ -7880,18 +8029,18 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
       case 'comment':
         var content_type = bundle.replace('comment_node_', '');
         // Add each schema field to the field collection.
-        $.each(
-          drupalgap.entity_info[entity_type].schema_fields_sql['base table'],
-          function(index, name) {
+        var base_table = drupalgap.entity_info[entity_type].schema_fields_sql['base table'];
+        for (var index in base_table) {
+            if (!base_table.hasOwnProperty(index)) { continue; }
+            var name = base_table[index];
             var field = {
-              'type': 'hidden',
-              'required': false,
-              'default_value': '',
-              'title': ucfirst(name)
+              type: 'hidden',
+              required: false,
+              default_value: '',
+              title: ucfirst(name)
             };
             fields[name] = field;
-          }
-        );
+        }
         // Make the node id required.
         fields['nid'].required = true;
         // Only anonymous users can fill out the name field, authenticated users
@@ -8241,18 +8390,19 @@ function entity_services_request_pre_postprocess_alter(options, result) {
     }
     // If we're indexing comments, render its content, if it isn't already set.
     else if (options.service == 'comment' && options.resource == 'index') {
-      $.each(result, function(index, object) {
+      for (var index in result) {
+          if (!result.hasOwnProperty(index)) { continue; }
+          var object = result[index];
           // @TODO - does this condition ever evaluate to true?
-          if (typeof object.content !== 'undefined') { return; }
+          if (typeof object.content !== 'undefined') { continue; }
           drupalgap_entity_render_content(options.service, result[index]);
-      });
+      }
     }
   }
   catch (error) {
     console.log('entity_services_request_pre_postprocess_alter - ' + error);
   }
 }
-
 
 /**
  * Given a field name, this will return its field info.
@@ -8365,13 +8515,15 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
     // a value present in the entity, then set the field's form element default
     // value equal to the field value.
     if (fields) {
-      $.each(fields, function(name, field) {
+      for (var name in fields) {
+        if (!fields.hasOwnProperty(name)) { continue; }
+        var field = fields[name];
         // The user registration form is a special case, in that we only want
         // to place fields that are set to display on the user registration
         // form. Skip any fields not set to display.
         if (form.id == 'user_register_form' &&
           !field.settings.user_register_form) {
-          return;
+          continue;
         }
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
@@ -8427,7 +8579,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
           }
 
         }
-      });
+      }
     }
   }
   catch (error) {
@@ -8480,7 +8632,9 @@ function list_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           var markup = '';
           // list_default or list_key
           if (display.type == 'list_default') {
@@ -8494,7 +8648,7 @@ function list_field_formatter_view(entity_type, entity, field, instance,
           }
           else { markup = item.value; }
           element[delta] = { markup: markup };
-      });
+      }
     }
     return element;
   }
@@ -8527,13 +8681,15 @@ function list_assemble_form_state_into_field(entity_type, bundle,
         if (instance.widget.type == 'options_onoff') {
           var index = 0;
           var on = true;
-          $.each(field.settings.allowed_values, function(value, label) {
+          for (var value in field.settings.allowed_values) {
+              if (!field.settings.allowed_values.hasOwnProperty(value)) { continue; }
+              var label = field.settings.allowed_values[value];
               if (form_state_value == value && index == 0) {
                 on = false;
-                return false;
+                break;
               }
               index++;
-          });
+          }
           if (!on) {
             field_key.use_delta = false;
             field_key.use_wrapper = false;
@@ -8634,11 +8790,13 @@ function number_field_formatter_view(entity_type, entity, field, instance,
       if (!empty(field.settings.prefix)) { prefix = field.settings.prefix; }
       var suffix = '';
       if (!empty(field.settings.suffix)) { suffix = field.settings.suffix; }
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           element[delta] = {
             markup: prefix + item.value + suffix
           };
-      });
+      }
     }
     return element;
   }
@@ -8727,10 +8885,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               }
             }
             else {
-              $.each(field.settings.allowed_values, function(value, label) {
+              for (var value in field.settings.allowed_values) {
+                  if (!field.settings.allowed_values.hasOwnProperty(value)) { continue; }
+                  var label = field.settings.allowed_values[value];
                   if (off === null) { off = value; }
                   else { on = value; }
-              });
+              }
             }
             items[delta].options.attributes['off'] = off;
             items[delta].options.attributes['on'] = on;
@@ -8789,19 +8949,21 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           // If there are any allowed values, place them on the options
           // list. Then check for a default value, and set it if necessary.
           if (field && field.settings.allowed_values) {
-            $.each(field.settings.allowed_values, function(key, value) {
+            for (var key in field.settings.allowed_values) {
+                if (!field.settings.allowed_values.hasOwnProperty(key)) { continue; }
+                var value = field.settings.allowed_values[key];
                 // Don't place values that are objects onto the options
                 // (i.e. commerce taxonomy term reference fields).
-                if (typeof value === 'object') { return; }
+                if (typeof value === 'object') { continue; }
                 // If the value already exists in the options, then someone
                 // else has populated the list (e.g. commerce), so don't do
                 // any processing.
                 if (typeof items[delta].options[key] !== 'undefined') {
-                  return false;
+                  break;
                 }
                 // Set the key and value for the option.
                 items[delta].options[key] = value;
-            });
+            }
             if (instance.default_value && instance.default_value[delta] &&
               typeof instance.default_value[delta].value !== 'undefined') {
                 items[delta].value = instance.default_value[delta].value;
@@ -8888,14 +9050,16 @@ function text_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           // Grab the field value, but use the safe_value if we have it.
           var value = item.value;
           if (typeof item.safe_value !== 'undefined') {
             value = item.safe_value;
           }
           element[delta] = { markup: value };
-      });
+      }
     }
     return element;
   }
@@ -8957,7 +9121,9 @@ function image_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           // @TODO - add support for image_style
           element[delta] = {
             theme: 'image',
@@ -8966,7 +9132,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
             path: drupalgap_image_path(item.uri)
             /*image_style:display.settings.image_style*/
           };
-      });
+      }
     }
     return element;
   }
@@ -9155,14 +9321,15 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
     var results = [];
     var fields = drupalgap_field_info_instances(entity_type, bundle);
     if (!fields) { return false; }
-    $.each(fields, function(name, field) {
-        if (field.widget &&
+    for (var name in fields) {
+        if (!fields.hasOwnProperty(name)) { continue; }
+        var field = fields[name];
+        if (
+          field.widget &&
           field.widget.type &&
           field.widget.type == 'image_image'
-        ) {
-          results.push(name);
-        }
-    });
+        ) { results.push(name); }
+    }
     if (results.length == 0) { return false; }
     return results;
   }
@@ -9190,9 +9357,11 @@ function image_form_alter(form, form_state, form_id) {
         form.image_fields = image_fields;
         // For each image field, create a place for it in the global var.
         if ($.isArray(image_fields)) {
-          $.each(image_fields, function(index, name) {
-              image_phonegap_camera_options[name] = {0: null};
-          });
+          for (var index in image_fields) {
+              if (!image_fields.hasOwnProperty(index)) { continue; }
+              var name = image_fields[index];
+              image_phonegap_camera_options[name] = { 0: null };
+          }
         }
       }
     }
@@ -9283,11 +9452,13 @@ function _image_field_form_process(form, form_state, options) {
     // @todo - this needs mutli value field support (delta)
     var lng = language_default();
     var processed_an_image = false;
-    $.each(form.image_fields, function(index, name) {
+    for (var index in form.image_fields) {
+      if (!form.image_fields.hasOwnProperty(index)) { continue; }
+      var name = form.image_fields[index];
       // Skip empty images.
-      if (!image_phonegap_camera_options[name][0]) { return false; }
+      if (!image_phonegap_camera_options[name][0]) { break; }
       // Skip image fields that already have their file id set.
-      if (form_state.values[name][lng][0] != '') { return false; }
+      if (form_state.values[name][lng][0] != '') { break; }
       // Create a unique file name using the UTC integer value.
       var d = new Date();
       var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
@@ -9321,7 +9492,7 @@ function _image_field_form_process(form, form_state, options) {
             }
           }
       });
-    });
+    }
     // If no images were processed, we need to continue onward anyway.
     if (!processed_an_image && options.success) { options.success(); }
   }
@@ -9350,6 +9521,7 @@ function image_assemble_form_state_into_field(entity_type, bundle,
     console.log('image_assemble_form_state_into_field - ' + error);
   }
 }
+
 /**
  * Implements hook_block_view().
  * @param {String} delta
@@ -9449,7 +9621,9 @@ function menu_block_view_pageshow(options) {
             var menu_items = [];
             var link_path = '';
             if (local_tasks && !empty(local_tasks)) {
-              $.each(local_tasks, function(index, local_task) {
+              for (var index in local_tasks) {
+                  if (!local_tasks.hasOwnProperty(index)) { continue; }
+                  var local_task = local_tasks[index];
                   if (drupalgap.menu_links[local_task] && (
                     drupalgap.menu_links[local_task].type ==
                       'MENU_DEFAULT_LOCAL_TASK' ||
@@ -9460,7 +9634,7 @@ function menu_block_view_pageshow(options) {
                       menu_items.push(drupalgap.menu_links[local_task]);
                     }
                   }
-              });
+              }
             }
             // If there was only one local task menu item, and it is the default
             // local task, don't render the menu, otherwise render the menu as
@@ -9470,7 +9644,9 @@ function menu_block_view_pageshow(options) {
             ) { html = ''; }
             else {
               var items = [];
-              $.each(menu_items, function(index, item) {
+              for (var index in menu_items) {
+                  if (!menu_items.hasOwnProperty(index)) { continue; }
+                  var item = menu_items[index];
                   // Make a deep copy of the menu link so we don't modify it.
                   var link = jQuery.extend(true, {}, item);
                   // If there are no link options, set up defaults.
@@ -9502,7 +9678,7 @@ function menu_block_view_pageshow(options) {
                       link.options
                     )
                   );
-              });
+              }
               if (items.length > 0) {
                 html = theme('item_list', {'items': items});
               }
@@ -9530,7 +9706,9 @@ function menu_block_view_pageshow(options) {
         var has_entity_arg = false;
         var has_access_callback = false;
         if (local_tasks) {
-          $.each(local_tasks, function(index, local_task) {
+          for (var index in local_tasks) {
+              if (!local_tasks.hasOwnProperty(index)) { continue; }
+              var local_task = local_tasks[index];
               if (drupalgap.menu_links[local_task] &&
                 (
                   drupalgap.menu_links[local_task].type ==
@@ -9548,7 +9726,7 @@ function menu_block_view_pageshow(options) {
                     'undefined'
                 ) { has_access_callback = true; }
               }
-          });
+          }
         }
 
         // If we have an entity arg, and an access_callback, let's load up the
@@ -9613,7 +9791,9 @@ function menu_block_view_pageshow(options) {
       if (drupalgap.menus[delta] && drupalgap.menus[delta].links) {
         menu = drupalgap.menus[delta];
         var items = [];
-        $.each(menu.links, function(index, menu_link) {
+        for (var index in menu.links) {
+            if (!menu.links.hasOwnProperty(index)) { continue; }
+            var menu_link = menu.links[index];
             // Make a deep copy of the menu link so we don't modify it.
             var link = jQuery.extend(true, {}, menu_link);
             // If there are no link options, set up defaults.
@@ -9628,7 +9808,7 @@ function menu_block_view_pageshow(options) {
                 ' ui-btn ui-btn-active ui-state-persist ';
             }
             items.push(l(t(link.title), link.path, link.options));
-        });
+        }
         if (items.length > 0) {
           // Pass along any menu attributes.
           var attributes = null;
@@ -9659,9 +9839,11 @@ function menu_install() {
   try {
     // Grab the list of system menus and save each.
     var system_menus = menu_list_system_menus();
-    $.each(system_menus, function(menu_name, menu) {
-        menu_save(menu);
-    });
+    for (var menu_name in system_menus) {
+      if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+      var menu = system_menus[menu_name];
+      menu_save(menu);
+    }
   }
   catch (error) { console.log('menu_install - ' + error); }
 }
@@ -9787,10 +9969,12 @@ function collection_list_page(module, type) {
     var items = [];
     var collection = collection_load(module, type);
     if (collection) {
-      $.each(collection, function(id, item) {
+      for (var id in collection) {
+          if (!collection.hasOwnProperty(id)) { continue; }
+          var item = collection[id];
           var path = 'mvc/item/' + module + '/' + type + '/' + id;
           items.push(l(item.name, path));
-      });
+      }
       content.collection_list.items = items;
     }
     return content;
@@ -9866,7 +10050,9 @@ function mvc_install() {
           drupalgap.mvc.models[module] = {};
         }
         // For each model type...
-        $.each(models, function(model_type, model) {
+        for (var model_type in models) {
+            if (!models.hasOwnProperty(model_type)) { continue; }
+            var model = models[model_type];
             // Set the primary key 'id', the module name, and model type
             // on the model fields. These are the mvc_model_system_fields().
             model.fields.id = {
@@ -9905,7 +10091,7 @@ function mvc_install() {
                 '{"auto_increment":0}'
               );
             }
-        });
+        }
       }
     }
     //console.log(JSON.stringify(drupalgap.mvc.models));
@@ -10142,23 +10328,23 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>' + t('Create Content') + '</h2>'},
-      'node_type_listing': {
-        'theme': 'jqm_item_list',
-        'title': t('Content Types'),
-        'attributes': {'id': 'node_type_listing_items'}
+      header: { markup: '<h2>' + t('Create Content') + '</h2>' },
+      node_type_listing: {
+        theme: 'jqm_item_list',
+        title: t('Content Types'),
+        attributes: { id: 'node_type_listing_items' }
       }
     };
     var items = [];
-    $.each(
-      Drupal.user.content_types_user_permissions,
-      function(type, permissions) {
+    var user_permissions = Drupal.user.content_types_user_permissions;
+    for (var type in user_permissions) {
+        if (!user_permissions.hasOwnProperty(type)) { continue; }
+        var permissions = user_permissions[type];
         if (permissions.create) {
           items.push(l(drupalgap.content_types_list[type].name,
           'node/add/' + type));
         }
-      }
-    );
+    }
     content.node_type_listing.items = items;
     return content;
   }
@@ -10326,9 +10512,11 @@ function node_page_pageshow() {
         success: function(content) {
           // Extract the nodes into items, then drop them in the list.
           var items = [];
-          $.each(content.nodes, function(index, object) {
+          for (var index in content.nodes) {
+              if (!content.nodes.hasOwnProperty(index)) { continue; }
+              var object = content.nodes[index];
               items.push(l(object.node.title, 'node/' + object.node.nid));
-          });
+          }
           drupalgap_item_list_populate('#node_listing_items', items);
         }
       }
@@ -10438,9 +10626,11 @@ function node_page_view_pageshow(nid) {
                       try {
                         // Render the comments.
                         var comments = '';
-                        $.each(results, function(index, comment) {
+                        for (var index in results) {
+                            if (!results.hasOwnProperty(index)) { continue; }
+                            var comment = results[index];
                             comments += theme('comment', { comment: comment });
-                        });
+                        }
                         build.content.markup += theme('comments', {
                             node: node,
                             comments: comments
@@ -10671,10 +10861,12 @@ function search_form_submit(form, form_state) {
         search_node(keys, {
             success: function(results) {
               var items = [];
-              $.each(results, function(index, result) {
+              for (var index in results) {
+                  if (!results.hasOwnProperty(index)) { continue; }
+                  var result = results[index];
                   var link = theme('search_result_node', result);
                   items.push(link);
-              });
+              }
               drupalgap_item_list_populate('#search_form_results', items);
             }
         });
@@ -10700,10 +10892,12 @@ function search_form_pageshow(form_id) {
         search_node(keys, {
             success: function(results) {
               var items = [];
-              $.each(results, function(index, result) {
+              for (var index in results) {
+                  if (!results.hasOwnProperty(index)) { continue; }
+                  var result = results[index];
                   var link = theme('search_result_node', result);
                   items.push(link);
-              });
+              }
               drupalgap_item_list_populate('#search_form_results', items);
             }
         });
@@ -10810,9 +11004,12 @@ function drupalgap_service_resource_extract_results(options) {
         options.data.user.permissions.push(permissions[permission]);
       }
       // Pull out the content types, and set them by their type.
-      $.each(options.data.content_types_list, function(index, object) {
+      var content_types_list = options.data.content_types_list;
+      for (var index in content_types_list) {
+          if (!content_types_list.hasOwnProperty(index)) { continue; }
+          var object = content_types_list[index];
           drupalgap.content_types_list[object.type] = object;
-      });
+      }
       // Pull out the content types user permissions.
       options.data.user.content_types_user_permissions =
         options.data.content_types_user_permissions;
@@ -10905,14 +11102,16 @@ function system_block_info() {
     };
     // Make additional blocks for each system menu.
     var system_menus = menu_list_system_menus();
-    $.each(system_menus, function(menu_name, menu) {
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
         var block_delta = menu.menu_name;
         blocks[block_delta] = {
           name: block_delta,
           delta: block_delta,
           module: 'menu'
         };
-    });
+    }
     return blocks;
 }
 
@@ -10936,11 +11135,13 @@ function system_block_view(delta) {
         // clear out the messages array.
         var html = '';
         if (drupalgap.messages.length == 0) { return html; }
-        $.each(drupalgap.messages, function(index, msg) {
+        for (var index in drupalgap.messages) {
+            if (!drupalgap.messages.hasOwnProperty(index)) { continue; }
+            var msg = drupalgap.messages[index];
             html += '<div class="messages ' + msg.type + '">' +
               msg.message +
             '</div>';
-        });
+        }
         drupalgap.messages = [];
         return html;
         break;
@@ -11248,9 +11449,11 @@ function system_settings_form(form, form_state) {
 function system_settings_form_submit(form, form_state) {
   try {
     if (form_state.values) {
-      $.each(form_state.values, function(variable, value) {
+      for (var variable in form_state.values) {
+          if (!form_state.values.hasOwnProperty(variable)) { continue; }
+          var value = form_state.values[variable];
           variable_set(variable, value);
-      });
+      }
     }
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
@@ -11290,6 +11493,7 @@ function system_logout_block_access_callback(options) {
     console.log('system_logout_block_access_callback - ' + error);
   }
 }
+
 /**
  * Determine whether the user has a given privilege. Optionally pass in a user
  * account JSON object for the second paramater to check that particular
@@ -11305,12 +11509,14 @@ function user_access(string) {
     else { account = Drupal.user; }
     if (account.uid == 1) { return true; }
     var access = false;
-    $.each(account.permissions, function(index, object) {
+    for (var index in account.permissions) {
+        if (!account.permissions.hasOwnProperty(index)) { continue; }
+        var object = account.permissions[index];
         if (object.permission == string) {
           access = true;
-          return false;
+          break;
         }
-    });
+    }
     return access;
   }
   catch (error) { console.log('user_access - ' + error); }
@@ -11362,9 +11568,11 @@ function user_listing_pageshow() {
         success: function(data) {
           // Extract the users into items, then drop them in the list.
           var items = [];
-          $.each(data.users, function(index, object) {
+          for (var index in data.users) {
+              if (!data.users.hasOwnProperty(index)) { continue; }
+              var object = data.users[index];
               items.push(l(object.user.name, 'user/' + object.user.uid));
-          });
+          }
           drupalgap_item_list_populate('#user_listing_items', items);
         }
       }
@@ -11511,9 +11719,11 @@ function user_services_postprocess(options, result) {
     var response = JSON.parse(result.responseText);
     if ($.isArray(response)) {
       var msg = '';
-      $.each(response, function(index, message) {
+      for (var index in response) {
+          if (!response.hasOwnProperty(index)) { continue; }
+          var message = response[index];
           msg += message + '\n';
-      });
+      }
       if (msg != '') { drupalgap_alert(msg); }
     }
   }
@@ -11638,12 +11848,14 @@ function drupalgap_user_has_role(role) {
     var account = null;
     if (arguments[1]) { account = arguments[1]; }
     else { account = Drupal.user; }
-    $.each(account.roles, function(rid, value) {
+    for (var rid in account.roles) {
+        if (!account.roles.hasOwnProperty(rid)) { continue; }
+        var value = account.roles[rid];
         if (role == value) {
           has_role = true;
-          return false;
+          break;
         }
-    });
+    }
     return has_role;
   }
   catch (error) { console.log('drupalgap_user_has_role - ' + error); }
@@ -12066,9 +12278,11 @@ function drupalgap_taxonomy_vocabularies_extract(taxonomy_vocabularies) {
     var results = false;
     if (taxonomy_vocabularies && taxonomy_vocabularies.length > 0) {
       results = {};
-      $.each(taxonomy_vocabularies, function(index, vocabulary) {
+      for (var index in taxonomy_vocabularies) {
+          if (!taxonomy_vocabularies.hasOwnProperty(index)) { continue; }
+          var vocabulary = taxonomy_vocabularies[index];
           results[vocabulary.machine_name] = vocabulary;
-      });
+      }
     }
     return results;
   }
@@ -12100,7 +12314,9 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
       items = items[language_default()];
     }
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           var text = item.tid;
           if (item.name) { text = item.name; }
           var content = null;
@@ -12120,7 +12336,7 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
               break;
           }
           element[delta] = content;
-      });
+      }
     }
     return element;
   }
@@ -12224,7 +12440,9 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
               if (terms.length != 0) {
                 // Extract the terms into items, then drop them in the list.
                 var items = [];
-                $.each(terms, function(index, term) {
+                for (var index in terms) {
+                    if (!terms.hasOwnProperty(index)) { continue; }
+                    var term = terms[index];
                     var attributes = {
                       tid: term.tid,
                       vid: vid,
@@ -12238,7 +12456,7 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
                     html += '<li ' + drupalgap_attributes(attributes) + '>' +
                       term.name +
                     '</li>';
-                });
+                }
                 $ul.html(html);
                 $ul.listview('refresh');
                 $ul.trigger('updatelayout');
@@ -12528,9 +12746,11 @@ function taxonomy_term_pageshow(tid) {
               success: function(results) {
                 // Extract the nodes into items, then drop them in the list.
                 var items = [];
-                $.each(results, function(index, node) {
+                for (var index in results) {
+                    if (!results.hasOwnProperty(index)) { continue; }
+                    var node = results[index];
                     items.push(l(node.title, 'node/' + node.nid));
-                });
+                }
                 drupalgap_item_list_populate(
                   '#taxonomy_term_node_listing_items_' + term.tid,
                   items
@@ -12588,11 +12808,13 @@ function taxonomy_vocabularies_pageshow() {
         success: function(vocabularies) {
           // Extract the vocabs into items, then drop them in the list.
           var items = [];
-          $.each(vocabularies, function(index, vocabulary) {
+          for (var index in vocabularies) {
+              if (!vocabularies.hasOwnProperty(index)) { continue; }
+              var vocabulary = vocabularies[index];
               items.push(
                 l(vocabulary.name, 'taxonomy/vocabulary/' + vocabulary.vid)
               );
-          });
+          }
           drupalgap_item_list_populate('#vocabulary_listing_items', items);
         }
     });
@@ -12664,9 +12886,11 @@ function taxonomy_vocabulary_pageshow(vid) {
                 if (terms.length != 0) {
                   // Extract the terms into items, then drop them in the list.
                   var items = [];
-                  $.each(terms, function(index, term) {
+                  for (var index in terms) {
+                      if (!terms.hasOwnProperty(index)) { continue; }
+                      var term = terms[index];
                       items.push(l(term.name, 'taxonomy/term/' + term.tid));
-                  });
+                  }
                   drupalgap_item_list_populate(
                     '#taxonomy_term_listing_items_' + vid,
                     items
@@ -12881,14 +13105,16 @@ function _theme_taxonomy_term_reference_load_items(options) {
 
           // Place each term in the widget as an option, and set the option
           // aside.
-          $.each(terms, function(index, term) {
+          for (var index in terms) {
+              if (!terms.hasOwnProperty(index)) { continue; }
+              var term = terms[index];
               var option = '<option value="' + term.tid + '">' +
                 term.name +
               '</option>';
               $(widget).append(option);
               _taxonomy_term_reference_terms[options.element_id][term.tid] =
                 term.name;
-          });
+          }
 
           // Refresh the select list.
           $(widget).selectmenu('refresh', true);
@@ -12940,7 +13166,9 @@ function taxonomy_views_exposed_filter(
     // them into the widget. We'll just use a taxonomy term reference field and
     // fake its instance.
     element.type = 'hidden';
-    $.each(field.settings.allowed_values, function(index, object) {
+    for (var index in field.settings.allowed_values) {
+        if (!field.settings.allowed_values.hasOwnProperty(index)) { continue; }
+        var object = field.settings.allowed_values[index];
 
         // Build the variables for the widget.
         var variables = {
@@ -12975,7 +13203,7 @@ function taxonomy_views_exposed_filter(
         child += theme('taxonomy_term_reference', variables);
         element.children.push({ markup: child });
 
-    });
+    }
   }
   catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
 }
@@ -13094,7 +13322,9 @@ function views_exposed_form(form, form_state, options) {
     // Attach the variables to the form so it can be used later.
     form.variables = options.variables;
 
-    $.each(options.filter, function(views_field, filter) {
+    for (var views_field in options.filter) {
+        if (!options.filter.hasOwnProperty(views_field)) { continue; }
+        var filter = options.filter[views_field];
 
         // Prep the element basics.
         var element_id = null;
@@ -13143,14 +13373,14 @@ function views_exposed_form(form, form_state, options) {
               'created to assemble the ' + field.type + ' filter used by ' +
               field_name
             );
-            return;
+            continue;
           }
 
           // We have a handler, let's call it so the element can be assembled.
           window[handler](form, form_state, element, filter, field);
 
-        }
-        else {
+      }
+      else {
           // This is NOT an entity field, so it is probably a core field (e.g.
           // nid, status, etc). Let's assemble the element. In some cases we may
           // just be able to forward it to a pre-existing handler.
@@ -13162,15 +13392,15 @@ function views_exposed_form(form, form_state, options) {
               'WARNING: views_exposed_form() - I do not know how to handle ' +
               'the exposed filter for the "' + views_field + '" field'
             );
-            dpm(filter);
-            return;
+            console.log(filter);
+            continue;
           }
-        }
+      }
 
-        // Finally attach the assembled element to the form.
-        if (element_id) { form.elements[element_id] = element; }
+      // Finally attach the assembled element to the form.
+      if (element_id) { form.elements[element_id] = element; }
 
-    });
+    }
 
     // Add the submit button.
     form.elements['submit'] = {
@@ -13206,10 +13436,12 @@ function views_exposed_form_submit(form, form_state) {
 
     // Assemble the query string from the form state values.
     var query = '';
-    $.each(form_state.values, function(key, value) {
-        if (empty(value)) { return; }
+    for (var key in form_state.values) {
+        if (!form_state.values.hasOwnProperty(key)) { continue; }
+        var value = form_state.values[key];
+        if (empty(value)) { continue; }
         query += key + '=' + encodeURIComponent(value) + '&';
-    });
+    }
     if (!empty(query)) { query = query.substr(0, query.length - 1); }
 
     // If there is a query set aside from previous requests, and it is equal to
@@ -13521,7 +13753,9 @@ function theme_views_view(variables) {
         break;
     }
     var rows = '' + open;
-    $.each(results[root], function(count, object) {
+    for (var count in results[root]) {
+        if (!results[root].hasOwnProperty(count)) { continue; }
+        var object = results[root][count];
         // Extract the row.
         var row = object[child];
         // Mark the row position.
@@ -13535,7 +13769,7 @@ function theme_views_view(variables) {
         }
         else { row_content = JSON.stringify(row); }
         rows += open_row + row_content + close_row;
-    });
+    }
     rows += close;
     // If we have any pages, render the pager above or below the results
     // according to the pager_pos setting.
