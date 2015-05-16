@@ -135,14 +135,16 @@ function contact_site_form_pageshow() {
     contact_index({
         success: function(results) {
           if (!results || !results.length) { return; }
-          $.each(results, function(index, result) {
+          for (var index in results) {
+              if (!results.hasOwnProperty(index)) { continue; }
+              var result = results[index];
               var selected = result.selected == 1 ? 'selected' : '';
               var option =
                 '<option value="' + result.cid + '" ' + selected + '>' +
                   result.category +
                 '</option>';
               $('#edit-contact-site-form-category').append(option);
-          });
+          }
           $('#edit-contact-site-form-category').selectmenu('refresh');
           if (results.length == 1) {
             $('#contact_site_form .field-name-category').hide();
@@ -186,9 +188,11 @@ function contact_site_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }
@@ -321,9 +325,11 @@ function contact_personal_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }
