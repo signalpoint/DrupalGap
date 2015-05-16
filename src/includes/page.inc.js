@@ -157,12 +157,14 @@ function template_process_page(variables) {
     var page_id = drupalgap_get_page_id(drupalgap_path);
     var page_html = $('#' + page_id).html();
     if (!page_html) { return; }
-    $.each(drupalgap.theme.regions, function(index, region) {
+    for (var index in drupalgap.theme.regions) {
+        if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
+        var region = drupalgap.theme.regions[index];
         page_html = page_html.replace(
           '{:' + region.name + ':}',
           drupalgap_render_region(region)
         );
-    });
+    }
     $('#' + page_id).html(page_html);
   }
   catch (error) { console.log('template_process_page - ' + error); }
@@ -256,11 +258,13 @@ function drupalgap_remove_page_from_dom(page_id) {
 function drupalgap_remove_pages_from_dom() {
   try {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
-    $.each(drupalgap.pages, function(index, page_id) {
+    for (var index in drupalgap.pages) {
+        if (!drupalgap.pages.hasOwnProperty(index)) { continue; }
+        var page_id = drupalgap.pages[index];
         if (current_page_id != page_id) {
           drupalgap_remove_page_from_dom(page_id, null, current_page_id);
         }
-    });
+    }
     // Reset drupalgap.pages to only contain the current page id.
     drupalgap.pages = [current_page_id];
     // Reset the drupalgap.views.ids array.
@@ -301,12 +305,14 @@ function drupalgap_page_in_dom(page_id) {
     var pages = $("body div[data-role$='page']");
     var page_in_dom = false;
     if (pages && pages.length > 0) {
-      $.each(pages, function(index, page) {
+      for (var index in pages) {
+          if (!pages.hasOwnProperty(index)) { continue; }
+          var page = pages[index];
           if (($(page).attr('id')) == page_id) {
             page_in_dom = true;
-            return false;
+            break;
           }
-      });
+      }
     }
     return page_in_dom;
   }
@@ -393,7 +399,9 @@ function drupalgap_render_page() {
               // Replace each placeholder with html.
               // @todo - each placeholder should have its own container div and
               // unique id.
-              $.each(placeholders, function(index, placeholder) {
+              for (var index in placeholders) {
+                  if (!placeholders.hasOwnProperty(index)) { continue; }
+                  var placeholder = placeholders[index];
                   var html = '';
                   if (output[placeholder]) {
                     // Grab the element variable from the output.
@@ -415,7 +423,7 @@ function drupalgap_render_page() {
                     '{:' + placeholder + ':}',
                     html
                   );
-              });
+              }
             }
             else {
               // There were no place holders found, do nothing, ok.
@@ -444,11 +452,13 @@ function drupalgap_render_page() {
       // Iterate over any remaining variables and theme them.
       // @todo - each remaining variables should have its own container div and
       // unique id, similar to the placeholder div containers mentioned above.
-      $.each(output, function(element, variables) {
+      for (var element in output) {
+          if (!output.hasOwnProperty(element)) { continue; }
+          var variables = output[element];
           if ($.inArray(element, render_variables) == -1) {
             content += theme(variables.theme, variables);
           }
-      });
+      }
     }
 
     // Now that we are done assembling the content into an html string, we can
