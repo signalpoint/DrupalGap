@@ -15,10 +15,12 @@ function collection_list_page(module, type) {
     var items = [];
     var collection = collection_load(module, type);
     if (collection) {
-      $.each(collection, function(id, item) {
+      for (var id in collection) {
+          if (!collection.hasOwnProperty(id)) { continue; }
+          var item = collection[id];
           var path = 'mvc/item/' + module + '/' + type + '/' + id;
           items.push(l(item.name, path));
-      });
+      }
       content.collection_list.items = items;
     }
     return content;
@@ -94,7 +96,9 @@ function mvc_install() {
           drupalgap.mvc.models[module] = {};
         }
         // For each model type...
-        $.each(models, function(model_type, model) {
+        for (var model_type in models) {
+            if (!models.hasOwnProperty(model_type)) { continue; }
+            var model = models[model_type];
             // Set the primary key 'id', the module name, and model type
             // on the model fields. These are the mvc_model_system_fields().
             model.fields.id = {
@@ -133,7 +137,7 @@ function mvc_install() {
                 '{"auto_increment":0}'
               );
             }
-        });
+        }
       }
     }
     //console.log(JSON.stringify(drupalgap.mvc.models));
