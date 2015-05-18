@@ -132,9 +132,11 @@ function theme_collapsibleset(variables) {
   try {
     variables.attributes['data-role'] = 'collapsible-set';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
-    $.each(variables.items, function(index, item) {
+    for (var index in variables.items) {
+        if (!variables.items.hasOwnProperty(index)) { continue; }
+        var item = variables.items[index];
         html += theme('collapsible', item);
-    });
+    }
     html += '</div>';
     return html;
   }
@@ -150,7 +152,11 @@ function theme_controlgroup(variables) {
   try {
     variables.attributes['data-role'] = 'controlgroup';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
-    $.each(variables.items, function(index, item) { html += item; });
+    for (var index in variables.items) {
+      if (!variables.items.hasOwnProperty(index)) { continue; }
+      var item = variables.items[index];
+      html += item;
+    }
     html += '</div>';
     return html;
   }
@@ -248,12 +254,13 @@ function theme_image_style(variables) {
 function theme_item(variables) {
   try {
     var html = '';
-    //var mvc_model_system_fields
-    $.each(variables.item, function(field, value) {
+    for (var field in variables.item) {
+        if (!variables.item.hasOwnProperty(field)) { continue; }
+        var value = variables.item[field];
         html +=
           '<h2>' + variables.model.fields[field].title + '</h2>' +
           '<p>' + value + '</p>';
-    });
+    }
     return html;
   }
   catch (error) { console.log('theme_item - ' + error); }
@@ -277,9 +284,11 @@ function theme_item_list(variables) {
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
       var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
-          variables.attributes['data-role'] == 'listview';
-      $.each(variables.items, function(index, item) {
-          var icon;
+        variables.attributes['data-role'] == 'listview';
+      for (var index in variables.items) {
+          if (!variables.items.hasOwnProperty(index)) { continue; }
+          var item = variables.items[index];
+          var icon = null;
           html += '<li';
           if (listview && (icon = $(item).attr('data-icon'))) {
             // If we're in a listview and the item specifies an icon,
@@ -287,7 +296,7 @@ function theme_item_list(variables) {
             html += ' data-icon="' + icon + '"';
           }
           html += '>' + item + '</li>';
-      });
+      }
     }
     html += '</' + type + '>';
     return html;
@@ -359,11 +368,13 @@ function theme_link(variables) {
           // onclick handler.
 
           var goto_options = '';
-          $.each(variables.options, function(option, value) {
-              if (option == 'attributes') { return; }
+          for (var option in variables.options) {
+              if (!variables.options.hasOwnProperty(option)) { continue; }
+              var value = variables.options[option];
+              if (option == 'attributes') { continue; }
               if (typeof value === 'string') { value = "'" + value + "'"; }
               goto_options += option + ':' + value + ',';
-          });
+          }
           onclick =
             'drupalgap_goto(\'' +
               variables.path + '\', ' +
@@ -472,24 +483,30 @@ function theme_table(variables) {
     var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
     if (variables.header) {
       html += '<thead><tr>';
-      $.each(variables.header, function(index, column) {
+      for (var index in variables.header) {
+          if (!variables.header.hasOwnProperty(index)) { continue; }
+          var column = variables.header[index];
           if (column.data) {
             html += '<td>' + column.data + '</td>';
           }
-      });
+      }
       html += '</tr></thead>';
     }
     html += '<tbody>';
     if (variables.rows) {
-      $.each(variables.rows, function(row_index, row) {
+      for (var row_index in variables.rows) {
+          if (!variables.rows.hasOwnProperty(row_index)) { continue; }
+          var row = variables.rows[row_index];
           html += '<tr>';
           if (row) {
-            $.each(row, function(column_index, column) {
-                html += '<td>' + column + '</td>';
-            });
+            for (var column_index in row) {
+              if (!row.hasOwnProperty(column_index)) { continue; }
+              var column = row[column_index];
+              html += '<td>' + column + '</td>';
+            }
           }
           html += '</tr>';
-      });
+      }
     }
     return html + '</tbody></table>';
   }

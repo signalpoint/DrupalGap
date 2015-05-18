@@ -39,14 +39,16 @@ function system_block_info() {
     };
     // Make additional blocks for each system menu.
     var system_menus = menu_list_system_menus();
-    $.each(system_menus, function(menu_name, menu) {
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
         var block_delta = menu.menu_name;
         blocks[block_delta] = {
           name: block_delta,
           delta: block_delta,
           module: 'menu'
         };
-    });
+    }
     return blocks;
 }
 
@@ -70,11 +72,13 @@ function system_block_view(delta) {
         // clear out the messages array.
         var html = '';
         if (drupalgap.messages.length == 0) { return html; }
-        $.each(drupalgap.messages, function(index, msg) {
+        for (var index in drupalgap.messages) {
+            if (!drupalgap.messages.hasOwnProperty(index)) { continue; }
+            var msg = drupalgap.messages[index];
             html += '<div class="messages ' + msg.type + '">' +
               msg.message +
             '</div>';
-        });
+        }
         drupalgap.messages = [];
         return html;
         break;
@@ -95,7 +99,7 @@ function system_block_view(delta) {
         return '<h1 id="' + title_id + '"></h1>';
         break;
       case 'powered_by':
-        return '<p style="text-align: center;">'+t('Powered by')+': ' +
+        return '<p style="text-align: center;">' + t('Powered by') + ': ' +
           l('DrupalGap', 'http://www.drupalgap.org', {InAppBrowser: true}) +
         '</p>';
         break;
@@ -129,16 +133,16 @@ function system_menu() {
         'page_callback': 'system_offline_page'
       },
       '401': {
-        title: '401 - '+t('Not Authorized'),
+        title: '401 - ' + t('Not Authorized'),
         page_callback: 'system_401_page'
       },
       '404': {
-        title: '404 - '+t('Not Found'),
+        title: '404 - ' + t('Not Found'),
         page_callback: 'system_404_page'
       }
     };
     items['_reload'] = {
-      title: t('Reloading')+'...',
+      title: t('Reloading') + '...',
       page_callback: 'system_reload_page',
       pageshow: 'system_reload_pageshow'
     };
@@ -237,10 +241,12 @@ function system_dashboard_page() {
       '</h4>'
     };
     content.welcome = {
-      markup: '<h2 style="text-align: center;">'+t('Welcome to DrupalGap')+'</h2>' +
-        '<p style="text-align: center;">' +
-          t('The open source application development kit for Drupal!') +
-        '</p>'
+      markup: '<h2 style="text-align: center;">' +
+        t('Welcome to DrupalGap') +
+      '</h2>' +
+      '<p style="text-align: center;">' +
+        t('The open source application development kit for Drupal!') +
+      '</p>'
     };
     if (drupalgap.settings.logo) {
       content.logo = {
@@ -273,7 +279,7 @@ function system_dashboard_page() {
 function system_error_page() {
     var content = {
       info: {
-        markup: '<p>'+t('An unexpected error has occurred!')+'</p>'
+        markup: '<p>' + t('An unexpected error has occurred!') + '</p>'
       }
     };
     return content;
@@ -287,8 +293,8 @@ function system_offline_page() {
   try {
     var content = {
       'message': {
-        'markup': '<h2>'+t('Failed Connection')+'</h2>' +
-          "<p>"+t("Oops! We couldn't connect to")+":</p>" +
+        'markup': '<h2>' + t('Failed Connection') + '</h2>' +
+          '<p>' + t("Oops! We couldn't connect to") + ':</p>' +
           '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
@@ -299,7 +305,9 @@ function system_offline_page() {
         }
       },
       'footer': {
-        'markup': "<p>"+t("Check your device's network settings and try again.")+"</p>"
+        'markup': '<p>' +
+          t("Check your device's network settings and try again.") +
+        '</p>'
       }
     };
     return content;
@@ -324,7 +332,7 @@ function offline_try_again() {
       });
     }
     else {
-      var msg = t('Sorry, no connection found!')+' (' + connection + ')';
+      var msg = t('Sorry, no connection found!') + ' (' + connection + ')';
       drupalgap_alert(msg, {
           title: 'Offline'
       });
@@ -378,9 +386,11 @@ function system_settings_form(form, form_state) {
 function system_settings_form_submit(form, form_state) {
   try {
     if (form_state.values) {
-      $.each(form_state.values, function(variable, value) {
+      for (var variable in form_state.values) {
+          if (!form_state.values.hasOwnProperty(variable)) { continue; }
+          var value = form_state.values[variable];
           variable_set(variable, value);
-      });
+      }
     }
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
@@ -420,3 +430,4 @@ function system_logout_block_access_callback(options) {
     console.log('system_logout_block_access_callback - ' + error);
   }
 }
+

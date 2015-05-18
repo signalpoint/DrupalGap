@@ -8,7 +8,9 @@ function drupalgap_attributes(attributes) {
   try {
     var attribute_string = '';
     if (attributes) {
-      $.each(attributes, function(name, value) {
+      for (var name in attributes) {
+          if (!attributes.hasOwnProperty(name)) { continue; }
+          var value = attributes[name];
           if (value != '') {
             // @todo - if someone passes in a value with double quotes, this
             // will break. e.g.
@@ -23,7 +25,7 @@ function drupalgap_attributes(attributes) {
             // element.
             attribute_string += name + ' ';
           }
-      });
+      }
     }
     return attribute_string;
   }
@@ -52,7 +54,9 @@ function drupalgap_check_visibility(type, data) {
     // Roles.
     else if (typeof data.roles !== 'undefined' &&
       data.roles && data.roles.value && data.roles.value.length != 0) {
-      $.each(data.roles.value, function(role_index, role) {
+      for (var role_index in data.roles.value) {
+          if (!data.roles.value.hasOwnProperty(role_index)) { continue; }
+          var role = data.roles.value[role_index];
           if (drupalgap_user_has_role(role)) {
             // User has role, show/hide the block accordingly.
             if (data.roles.mode == 'include') { visible = true; }
@@ -64,20 +68,22 @@ function drupalgap_check_visibility(type, data) {
             if (data.roles.mode == 'exclude') { visible = true; }
           }
           // Break out of the loop if already determined to be visible.
-          if (visible) { return false; }
-      });
+          if (visible) { break; }
+      }
     }
     // Pages.
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
       var current_path = drupalgap_path_get();
       var current_path_parts = current_path.split('/');
-      $.each(data.pages.value, function(page_index, path) {
+      for (var page_index in data.pages.value) {
+          if (!data.pages.value.hasOwnProperty(page_index)) { continue; }
+          var path = data.pages.value[page_index];
           if (path == '') { path = drupalgap.settings.front; }
           if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
-            return false;
+            break;
           }
           else {
             // It wasn't a direct path match, is there a wildcard that matches
@@ -88,7 +94,7 @@ function drupalgap_check_visibility(type, data) {
               if (router_path.replace(/%/g, '*') == path) {
                 if (data.pages.mode == 'include') { visible = true; }
                 else if (data.pages.mode == 'exclude') { visible = false; }
-                return false;
+                break;
               }
               else {
                 var path_parts = path.split('/');
@@ -114,7 +120,7 @@ function drupalgap_check_visibility(type, data) {
               else if (data.pages.mode == 'exclude') { visible = true; }
             }
           }
-      });
+      }
     }
     return visible;
   }
@@ -165,10 +171,14 @@ function drupalgap_get_path(type, name) {
     var path = null;
     if (type == 'module') {
       var found_module = false;
-      $.each(Drupal.modules, function(bundle, modules) {
-          if (found_module) { return false; }
+      for (var bundle in Drupal.modules) {
+          if (!Drupal.modules.hasOwnProperty(bundle)) { continue; }
+          var modules = Drupal.modules[bundle];
+          if (found_module) { break; }
           else {
-            $.each(modules, function(index, module) {
+            for (var index in modules) {
+                if (!modules.hasOwnProperty(index)) { continue; }
+                var module = modules[index];
                 if (module.name == name) {
                   found_module = true;
                   path = '';
@@ -180,14 +190,14 @@ function drupalgap_get_path(type, name) {
                       bundle +
                     ')';
                     drupalgap_alert(msg);
-                    return false;
+                    break;
                   }
                   path += '/' + name;
-                  return false;
+                  break;
                 }
-            });
+            }
           }
-      });
+      }
     }
     else if (type == 'theme') {
       if (name == 'easystreet3' || name == 'ava') { path = 'themes/' + name; }
@@ -377,7 +387,7 @@ function t(str) {
     lang != 'und' &&
     typeof drupalgap.locale[lang] !== 'undefined' &&
     drupalgap.locale[lang][str]
-  ) {  return drupalgap.locale[lang][str]; }
+  ) { return drupalgap.locale[lang][str]; }
   return str;
 }
 

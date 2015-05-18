@@ -192,7 +192,8 @@ function drupalgap_get_form(form_id) {
       html = drupalgap_form_render(form);
     }
     else {
-      var msg = 'drupalgap_get_form - '+t('failed to get form')+' (' + form_id + ')';
+      var msg = 'drupalgap_get_form - ' + t('failed to get form') +
+        ' (' + form_id + ')';
       drupalgap_alert(msg);
     }
     return html;
@@ -225,9 +226,11 @@ function drupalgap_form_load(form_id) {
       // each to to the form arguments, afterwards remove the argument at index
       // zero because that is the form id.
       var form_arguments = [];
-      $.each(arguments, function(index, argument) {
-            form_arguments.push(argument);
-      });
+      for (var index in arguments) {
+          if (!arguments.hasOwnProperty(index)) { continue; }
+          var argument = arguments[index];
+          form_arguments.push(argument);
+      }
       form_arguments.splice(0, 1);
 
       // Attach the form arguments to the form object.
@@ -244,9 +247,11 @@ function drupalgap_form_load(form_id) {
         var form_state = null;
         consolidated_arguments.push(form);
         consolidated_arguments.push(form_state);
-        $.each(form_arguments, function(index, argument) {
-          consolidated_arguments.push(argument);
-        });
+        for (var index in form_arguments) {
+            if (!form_arguments.hasOwnProperty(index)) { continue; }
+            var argument = form_arguments[index];
+            consolidated_arguments.push(argument);
+        }
         form = fn.apply(
           null,
           Array.prototype.slice.call(consolidated_arguments)
@@ -257,7 +262,9 @@ function drupalgap_form_load(form_id) {
       // element does not yet have any. This allows others to more easily modify
       // options and attributes on an element without having to worry about
       // testing for nulls and creating empty properties first.
-      $.each(form.elements, function(name, element) {
+      for (var name in form.elements) {
+          if (!form.elements.hasOwnProperty(name)) { continue; }
+          var element = form.elements[name];
           // If this element is a field, load its field_info_field and
           // field_info_instance onto the element.
           var element_is_field = false;
@@ -325,7 +332,7 @@ function drupalgap_form_load(form_id) {
             form.elements[name].id = id;
             form.elements[name].options.attributes.id = id;
           }
-      });
+      }
 
       // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, null, form_id);
@@ -335,8 +342,9 @@ function drupalgap_form_load(form_id) {
       drupalgap_form_local_storage_save(form);
     }
     else {
-      var error_msg = 'drupalgap_form_load - '+t('no callback function')+' (' +
-                       function_name + ') '+t('available for form')+' (' + form_id + ')';
+      var error_msg = 'drupalgap_form_load - ' + t('no callback function') +
+        ' (' + function_name + ') ' + t('available for form') +
+        ' (' + form_id + ')';
       drupalgap_alert(error_msg);
     }
     return form;

@@ -26,23 +26,23 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>'+t('Create Content')+'</h2>'},
-      'node_type_listing': {
-        'theme': 'jqm_item_list',
-        'title': t('Content Types'),
-        'attributes': {'id': 'node_type_listing_items'}
+      header: { markup: '<h2>' + t('Create Content') + '</h2>' },
+      node_type_listing: {
+        theme: 'jqm_item_list',
+        title: t('Content Types'),
+        attributes: { id: 'node_type_listing_items' }
       }
     };
     var items = [];
-    $.each(
-      Drupal.user.content_types_user_permissions,
-      function(type, permissions) {
+    var user_permissions = Drupal.user.content_types_user_permissions;
+    for (var type in user_permissions) {
+        if (!user_permissions.hasOwnProperty(type)) { continue; }
+        var permissions = user_permissions[type];
         if (permissions.create) {
           items.push(l(drupalgap.content_types_list[type].name,
           'node/add/' + type));
         }
-      }
-    );
+    }
     content.node_type_listing.items = items;
     return content;
   }
@@ -69,7 +69,7 @@ function node_add_page_by_type(type) {
  */
 function node_add_page_by_type_title(callback, type) {
   try {
-    var title = t('Create')+' ' + drupalgap.content_types_list[type].name;
+    var title = t('Create') + ' ' + drupalgap.content_types_list[type].name;
     return callback.call(null, title);
   }
   catch (error) { console.log('node_add_page_by_type_title - ' + error); }
@@ -210,9 +210,11 @@ function node_page_pageshow() {
         success: function(content) {
           // Extract the nodes into items, then drop them in the list.
           var items = [];
-          $.each(content.nodes, function(index, object) {
+          for (var index in content.nodes) {
+              if (!content.nodes.hasOwnProperty(index)) { continue; }
+              var object = content.nodes[index];
               items.push(l(object.node.title, 'node/' + object.node.nid));
-          });
+          }
           drupalgap_item_list_populate('#node_listing_items', items);
         }
       }
@@ -322,9 +324,11 @@ function node_page_view_pageshow(nid) {
                       try {
                         // Render the comments.
                         var comments = '';
-                        $.each(results, function(index, comment) {
+                        for (var index in results) {
+                            if (!results.hasOwnProperty(index)) { continue; }
+                            var comment = results[index];
                             comments += theme('comment', { comment: comment });
-                        });
+                        }
                         build.content.markup += theme('comments', {
                             node: node,
                             comments: comments

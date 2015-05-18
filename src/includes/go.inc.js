@@ -37,12 +37,14 @@ function drupalgap_goto(path) {
       var new_path = false;
       var invocation_results = module_invoke_all('404', router_path);
       if (invocation_results) {
-        $.each(invocation_results, function(index, result) {
+        for (var index in invocation_results) {
+            if (!invocation_results.hasOwnProperty(index)) { continue; }
+            var result = invocation_results[index];
             if (result !== false) {
               new_path = result;
-              return false;
+              break;
             }
-        });
+        }
       }
       // If a 404 handler provided a new path use it, otherwise just use the
       // system 404 page. Either way, update the router path before continuing
@@ -347,7 +349,7 @@ function _drupalgap_goto_prepare_path(path) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      var msg = t('Exit')+' ' + drupalgap.settings.title + '?';
+      var msg = t('Exit') + ' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
       }

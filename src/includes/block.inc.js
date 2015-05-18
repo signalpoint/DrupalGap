@@ -8,15 +8,18 @@ function drupalgap_block_load(delta) {
   try {
     var block = null;
     if (drupalgap.blocks) {
-      $.each(drupalgap.blocks, function(index, object) {
+      for (var index in drupalgap.blocks) {
+          if (!drupalgap.blocks.hasOwnProperty(index)) { continue; }
+          var object = drupalgap.blocks[index];
           if (object[delta]) {
             block = object[delta];
-            return false;
+            break;
           }
-      });
+      }
     }
     if (block == null) {
-      var msg = 'drupalgap_block_load - '+t('failed to load')+' "' + delta + '" '+t('block!');
+      var msg = 'drupalgap_block_load - ' + t('failed to load') + ' "' + delta +
+        '" ' + t('block!');
       drupalgap_alert(msg);
     }
     return block;

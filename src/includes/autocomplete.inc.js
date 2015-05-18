@@ -110,7 +110,8 @@ function theme_autocomplete(variables) {
       js += drupalgap_jqm_page_event_script_code({
           page_id: drupalgap_get_page_id(),
           jqm_page_event: 'pageshow',
-          jqm_page_event_callback: '_theme_autocomplete_set_default_value_label',
+          jqm_page_event_callback:
+            '_theme_autocomplete_set_default_value_label',
           jqm_page_event_args: JSON.stringify({
               selector: selector,
               default_value_label: variables.default_value_label
@@ -199,7 +200,9 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
             var items = [];
             var _value = autocomplete.value;
             var _label = autocomplete.label;
-            $.each(result_items, function(index, object) {
+            for (var index in result_items) {
+                if (!result_items.hasOwnProperty(index)) { continue; }
+                var object = result_items[index];
                 var _item = null;
                 if (_wrapped) { _item = object[_child]; }
                 else { _item = object; }
@@ -208,15 +211,17 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                   label: _item[_label]
                 };
                 items.push(item);
-            });
+            }
 
             // Now render the items, add them to list and refresh the list.
             if (items.length != 0) {
               autocomplete.items = items;
               var _items = _theme_autocomplete_prepare_items(autocomplete);
-              $.each(_items, function(index, item) {
-                html += '<li>' + item + '</li>';
-              });
+              for (var index in _items) {
+                  if (!_items.hasOwnProperty(index)) { continue; }
+                  var item = _items[index];
+                  html += '<li>' + item + '</li>';
+              }
               $ul.html(html);
               $ul.listview('refresh');
               $ul.trigger('updatelayout');
@@ -303,13 +308,13 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           };
           options.parameters[autocomplete.filter] = '%' + value + '%';
           options.parameters_op[autocomplete.filter] = 'like';
-          $.each(
-            field_settings.handler_settings.target_bundles,
-            function(bundle, name) {
+          for (var bundle in field_settings.handler_settings.target_bundles) {
+              if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
+              var name = field_settings.handler_settings.target_bundles[bundle];
               options.parameters.type = bundle;
               // @TODO allow multiple bundles to be indexed.
-              return false;
-          });
+              break;
+          }
           var fn = window[index_resource];
           fn(options, {
               success: function(results) {
@@ -391,7 +396,9 @@ function _theme_autocomplete_prepare_items(variables) {
     // Prepare the items, and return them.
     var _items = [];
     if (items.length > 0) {
-      $.each(items, function(index, item) {
+      for (var index in items) {
+          if (!items.hasOwnProperty(index)) { continue; }
+          var item = items[index];
           var value = '';
           var label = '';
           if (typeof item === 'string') {
@@ -412,7 +419,7 @@ function _theme_autocomplete_prepare_items(variables) {
           };
           var _item = l(label, null, options);
           _items.push(_item);
-      });
+      }
     }
     return _items;
   }
@@ -463,6 +470,8 @@ function _theme_autocomplete_set_default_value_label(options) {
         $(options.selector).val(options.default_value_label).trigger('create');
     }, 250);
   }
-  catch (error) { console.log('_theme_autocomplete_set_default_value_label - ' + error); }
+  catch (error) {
+    console.log('_theme_autocomplete_set_default_value_label - ' + error);
+  }
 }
 

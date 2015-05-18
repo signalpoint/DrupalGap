@@ -113,11 +113,13 @@ function user_register_form(form, form_state) {
     drupalgap_field_info_instances_add_to_form('user', null, form, null);
     // Add registration messages to form.
     form.user_register = {
-      'user_mail_register_no_approval_required_body': t('Registration complete!'),
+      'user_mail_register_no_approval_required_body':
+        t('Registration complete!'),
       'user_mail_register_pending_approval_required_body':
         t('Registration complete, waiting for administrator approval.'),
       'user_mail_register_email_verification_body':
-        t('Registration complete, check your e-mail inbox to verify the account.')
+        t('Registration complete, check your e-mail inbox to verify the ' +
+          'account.')
     };
     // Set the auto login boolean. This only happens when the site's account
     // settings require no e-mail verification. Others can stop this from
@@ -386,7 +388,8 @@ function user_pass_form_submit(form, form_state) {
             drupalgap_set_message(msg);
           }
           else {
-            var msg = t('There was a problem sending an e-mail to your address.');
+            var msg =
+              t('There was a problem sending an e-mail to your address.');
             drupalgap_set_message(msg, 'warning');
           }
           drupalgap_goto('user/login');

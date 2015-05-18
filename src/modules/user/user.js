@@ -13,12 +13,14 @@ function user_access(string) {
     else { account = Drupal.user; }
     if (account.uid == 1) { return true; }
     var access = false;
-    $.each(account.permissions, function(index, object) {
+    for (var index in account.permissions) {
+        if (!account.permissions.hasOwnProperty(index)) { continue; }
+        var object = account.permissions[index];
         if (object.permission == string) {
           access = true;
-          return false;
+          break;
         }
-    });
+    }
     return access;
   }
   catch (error) { console.log('user_access - ' + error); }
@@ -70,9 +72,11 @@ function user_listing_pageshow() {
         success: function(data) {
           // Extract the users into items, then drop them in the list.
           var items = [];
-          $.each(data.users, function(index, object) {
+          for (var index in data.users) {
+              if (!data.users.hasOwnProperty(index)) { continue; }
+              var object = data.users[index];
               items.push(l(object.user.name, 'user/' + object.user.uid));
-          });
+          }
           drupalgap_item_list_populate('#user_listing_items', items);
         }
       }
@@ -86,7 +90,7 @@ function user_listing_pageshow() {
  * @return {String}
  */
 function user_logout_callback() {
-  return '<p>'+t('Logging out')+'...</p>';
+  return '<p>' + t('Logging out') + '...</p>';
 }
 
 /**
@@ -219,9 +223,11 @@ function user_services_postprocess(options, result) {
     var response = JSON.parse(result.responseText);
     if ($.isArray(response)) {
       var msg = '';
-      $.each(response, function(index, message) {
+      for (var index in response) {
+          if (!response.hasOwnProperty(index)) { continue; }
+          var message = response[index];
           msg += message + '\n';
-      });
+      }
       if (msg != '') { drupalgap_alert(msg); }
     }
   }
@@ -284,8 +290,10 @@ function user_view_pageshow(uid) {
               'name': {'markup': account.name},
               'created': {
                 markup:
-                '<div class="user_profile_history"><h3>'+t('History')+'</h3>' +
-                '<dl><dt>'+t('Member since')+'</td></dt><dd>' +
+                '<div class="user_profile_history"><h3>' +
+                  t('History') +
+                '</h3>' +
+                '<dl><dt>' + t('Member since') + '</td></dt><dd>' +
                   (new Date(parseInt(account.created) * 1000)).toDateString() +
                 '</dd></div>'
               }
@@ -344,12 +352,14 @@ function drupalgap_user_has_role(role) {
     var account = null;
     if (arguments[1]) { account = arguments[1]; }
     else { account = Drupal.user; }
-    $.each(account.roles, function(rid, value) {
+    for (var rid in account.roles) {
+        if (!account.roles.hasOwnProperty(rid)) { continue; }
+        var value = account.roles[rid];
         if (role == value) {
           has_role = true;
-          return false;
+          break;
         }
-    });
+    }
     return has_role;
   }
   catch (error) { console.log('drupalgap_user_has_role - ' + error); }

@@ -97,7 +97,9 @@ function menu_block_view_pageshow(options) {
             var menu_items = [];
             var link_path = '';
             if (local_tasks && !empty(local_tasks)) {
-              $.each(local_tasks, function(index, local_task) {
+              for (var index in local_tasks) {
+                  if (!local_tasks.hasOwnProperty(index)) { continue; }
+                  var local_task = local_tasks[index];
                   if (drupalgap.menu_links[local_task] && (
                     drupalgap.menu_links[local_task].type ==
                       'MENU_DEFAULT_LOCAL_TASK' ||
@@ -108,7 +110,7 @@ function menu_block_view_pageshow(options) {
                       menu_items.push(drupalgap.menu_links[local_task]);
                     }
                   }
-              });
+              }
             }
             // If there was only one local task menu item, and it is the default
             // local task, don't render the menu, otherwise render the menu as
@@ -118,7 +120,9 @@ function menu_block_view_pageshow(options) {
             ) { html = ''; }
             else {
               var items = [];
-              $.each(menu_items, function(index, item) {
+              for (var index in menu_items) {
+                  if (!menu_items.hasOwnProperty(index)) { continue; }
+                  var item = menu_items[index];
                   // Make a deep copy of the menu link so we don't modify it.
                   var link = jQuery.extend(true, {}, item);
                   // If there are no link options, set up defaults.
@@ -150,7 +154,7 @@ function menu_block_view_pageshow(options) {
                       link.options
                     )
                   );
-              });
+              }
               if (items.length > 0) {
                 html = theme('item_list', {'items': items});
               }
@@ -178,7 +182,9 @@ function menu_block_view_pageshow(options) {
         var has_entity_arg = false;
         var has_access_callback = false;
         if (local_tasks) {
-          $.each(local_tasks, function(index, local_task) {
+          for (var index in local_tasks) {
+              if (!local_tasks.hasOwnProperty(index)) { continue; }
+              var local_task = local_tasks[index];
               if (drupalgap.menu_links[local_task] &&
                 (
                   drupalgap.menu_links[local_task].type ==
@@ -196,7 +202,7 @@ function menu_block_view_pageshow(options) {
                     'undefined'
                 ) { has_access_callback = true; }
               }
-          });
+          }
         }
 
         // If we have an entity arg, and an access_callback, let's load up the
@@ -261,7 +267,9 @@ function menu_block_view_pageshow(options) {
       if (drupalgap.menus[delta] && drupalgap.menus[delta].links) {
         menu = drupalgap.menus[delta];
         var items = [];
-        $.each(menu.links, function(index, menu_link) {
+        for (var index in menu.links) {
+            if (!menu.links.hasOwnProperty(index)) { continue; }
+            var menu_link = menu.links[index];
             // Make a deep copy of the menu link so we don't modify it.
             var link = jQuery.extend(true, {}, menu_link);
             // If there are no link options, set up defaults.
@@ -276,7 +284,7 @@ function menu_block_view_pageshow(options) {
                 ' ui-btn ui-btn-active ui-state-persist ';
             }
             items.push(l(t(link.title), link.path, link.options));
-        });
+        }
         if (items.length > 0) {
           // Pass along any menu attributes.
           var attributes = null;
@@ -307,9 +315,11 @@ function menu_install() {
   try {
     // Grab the list of system menus and save each.
     var system_menus = menu_list_system_menus();
-    $.each(system_menus, function(menu_name, menu) {
-        menu_save(menu);
-    });
+    for (var menu_name in system_menus) {
+      if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+      var menu = system_menus[menu_name];
+      menu_save(menu);
+    }
   }
   catch (error) { console.log('menu_install - ' + error); }
 }

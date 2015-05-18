@@ -6,7 +6,7 @@
 //window.localStorage.clear();
 
 // Set to true to see console.log() messages. Set to false when publishing app.
-Drupal.settings.debug = false;
+Drupal.settings.debug = true;
 
 /****************************************|
  * Drupal Settings (provided by jDrupal) |
@@ -38,7 +38,6 @@ Drupal.settings.cache.views.enabled = false;
 Drupal.settings.cache.entity.expiration = 3600;
 Drupal.settings.cache.views.expiration = 3600;
 
-
 /*********************|
  * DrupalGap Settings |
  *********************/
@@ -47,6 +46,11 @@ Drupal.settings.cache.views.expiration = 3600;
 //  'web-app' - use this mode to build a web application for a browser window
 //  'phonegap' - use this mode to build a mobile application with phonegap
 drupalgap.settings.mode = 'web-app';
+
+// Language Files - locale/[language-code].json
+drupalgap.settings.locale = {
+   /* es: { } */
+};
 
 /*************|
  * Appearance |
@@ -87,11 +91,6 @@ drupalgap.settings.loader = {
     textVisible: true,
     theme: 'b'
   }
-};
-
-// Language Files - locale/[language-code].json
-drupalgap.settings.locale = {
-   /* es: { } */
 };
 
 /*****************************************|
