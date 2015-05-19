@@ -29,9 +29,9 @@ function _drupalgap_page_title_pageshow(page_arguments) {
           // arguments.
           var args = arg(null, drupalgap_path_get());
           var _title_arguments = drupalgap.menu_links[router_path].title_arguments;
-          for (var index in items) {
-              if (!items.hasOwnProperty(index)) { continue; }
-              var object = items[index];
+          for (var index in _title_arguments) {
+              if (!_title_arguments.hasOwnProperty(index)) { continue; }
+              var object = _title_arguments[index];
               if (is_int(object) && args[object]) {
                 title_arguments.push(args[object]);
               }
