@@ -2,11 +2,8 @@
  * Optionally use this function as an HTML DOM onkeypress handler, and it will
  * attempt to listen for the enter key being pressed and submit the form at that
  * time.
-<<<<<<< HEAD
-=======
  * @param {String} form_id
  * @return {Boolean}
->>>>>>> 6867827dac7c1a530598d866cf0b18628bac03a9
  */
 function drupalgap_form_onkeypress(form_id) {
   try {
