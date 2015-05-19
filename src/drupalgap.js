@@ -57,6 +57,7 @@ function drupalgap_init() {
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
+      locale: {}, /* holds onto language json objects, keyed by language code */
       messages: [],
       menus: {},
       menu_links: {},
@@ -170,9 +171,9 @@ function _drupalgap_deviceready() {
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      var msg = 'No site_path to Drupal set in the app/settings.js file!';
+      var msg = t('No site_path to Drupal set in the app/settings.js file!');
       drupalgap_alert(msg, {
-          title: 'Error'
+          title: t('Error')
       });
       return;
     }
@@ -184,7 +185,7 @@ function _drupalgap_deviceready() {
       module_invoke_all('device_offline');
       if (drupalgap.settings.offline_message) {
         drupalgap_alert(drupalgap.settings.offline_message, {
-            title: 'Offline',
+            title: t('Offline'),
             alertCallback: function() { drupalgap_goto('offline'); }
         });
       }
@@ -210,38 +211,47 @@ function _drupalgap_deviceready() {
         }
       }
       if (!proceed) {
-        drupalgap_goto('');
         // @todo - if module's are going to skip the System Connect call, then
         // we need to make sure Drupal.user is set up with appropriate defaults.
       }
       else {
-        // Device is online, let's build the default system connect options.
-        var options = {
-          success: function(result) {
-            // Call all hook_device_connected implementations then go to
-            // the front page.
-            module_invoke_all('device_connected');
-            drupalgap_goto('');
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-            // Build an informative error message and display it.
-            var msg = 'Failed connection to ' + drupalgap.settings.site_path;
-            if (errorThrown != '') { msg += ' - ' + errorThrown; }
-            msg += ' - Check your device\'s connection and check that ' +
-                   Drupal.settings.site_path + ' is online.';
-           drupalgap_alert(msg, {
-               title: 'Unable to Connect',
-               alertCallback: function() { drupalgap_goto('offline'); }
-           });
-          }
-        };
-
-        // Make the system connect call.
-        system_connect(options);
+        // Device is online, make the system connect call.
+        system_connect(_drupalgap_deviceready_options());
       }
     }
   }
   catch (error) { console.log('_drupalgap_deviceready - ' + error); }
+}
+
+/**
+ * Builds the default system connect options.
+ * @return {Object}
+ */
+function _drupalgap_deviceready_options() {
+  try {
+    var page_options = arguments[0] ? arguments[0] : {};
+    return {
+      success: function(result) {
+        // Call all hook_device_connected implementations then go to
+        // the front page.
+        module_invoke_all('device_connected');
+        drupalgap_goto('', page_options);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        // Build an informative error message and display it.
+        var msg = t('Failed connection to') + ' ' +
+          drupalgap.settings.site_path;
+        if (errorThrown != '') { msg += ' - ' + errorThrown; }
+        msg += ' - ' + t('Check your device\'s connection and check that') +
+          ' ' + Drupal.settings.site_path + ' ' + t('is online.');
+       drupalgap_alert(msg, {
+           title: t('Unable to Connect'),
+           alertCallback: function() { drupalgap_goto('offline'); }
+       });
+      }
+    };
+  }
+  catch (error) { console.log('_drupalgap_deviceready_options - ' + error); }
 }
 
 /**
@@ -255,6 +265,7 @@ function drupalgap_bootstrap() {
     drupalgap_load_modules();
     drupalgap_load_theme();
     drupalgap_load_blocks();
+    drupalgap_load_locales();
     menu_router_build();
     drupalgap_menus_load();
     drupalgap_theme_registry_build();
@@ -274,7 +285,9 @@ function drupalgap_load_modules() {
     var module_types = ['contrib', 'custom'];
     // We only need to load contrib and custom modules because core modules are
     // already included in the binary.
-    $.each(module_types, function(index, bundle) {
+    for (var index in module_types) {
+        if (!module_types.hasOwnProperty(index)) { continue; }
+        var bundle = module_types[index];
         // Let's be nice and try to load any old drupalgap.modules declarations
         // in developers settings.js files for a while, but throw a warning to
         // encourage them to update. This code can be removed after a few
@@ -284,7 +297,9 @@ function drupalgap_load_modules() {
           drupalgap.modules[bundle] &&
           drupalgap.modules[bundle].length != 0
         ) {
-          $.each(drupalgap.modules[bundle], function(index, module) {
+          for (var index in drupalgap.modules[bundle]) {
+              if (!drupalgap.modules[bundle].hasOwnProperty(index)) { continue; }
+              var module = drupalgap.modules[bundle][index];
               if (module.name) {
                 var msg = 'WARNING: The module "' + module.name + '" defined ' +
                   'in settings.js needs to be added to ' +
@@ -293,9 +308,11 @@ function drupalgap_load_modules() {
                 console.log(msg);
                 Drupal.modules[bundle][module.name] = module;
               }
-          });
+          }
         }
-        $.each(Drupal.modules[bundle], function(module_name, module) {
+        for (var module_name in Drupal.modules[bundle]) {
+            if (!Drupal.modules[bundle].hasOwnProperty(module_name)) { continue; }
+            var module = Drupal.modules[bundle][module_name];
             // If the module object is empty, initialize a module object.
             if ($.isEmptyObject(module)) {
               Drupal.modules[bundle][module_name] =
@@ -316,15 +333,18 @@ function drupalgap_load_modules() {
             // If there are any includes with this module, add them to the
             // list of paths to include.
             if (module.includes != null && module.includes.length != 0) {
-              $.each(module.includes, function(include_index, include_object) {
+              for (var include_index in module.includes) {
+                if (!module.includes.hasOwnProperty(include_index)) { continue; }
+                var include_object = module.includes[include_index];
                 modules_paths.push(
                   module_base_path + '/' + include_object.name + '.js'
                 );
-              });
+              }
             }
             // Now load all the paths for this module.
-            $.each(modules_paths,
-              function(modules_paths_index, modules_paths_object) {
+            for (var modules_paths_index in modules_paths) {
+                if (!modules_paths.hasOwnProperty(modules_paths_index)) { continue; }
+                var modules_paths_object = modules_paths[modules_paths_index];
                 jQuery.ajax({
                     async: false,
                     type: 'GET',
@@ -335,18 +355,18 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = 'Failed to load module! (' + module.name + ')';
+                      var msg = t('Failed to load module!') +
+                        ' (' + module.name + ')';
                       dpm(msg);
-                      dpm(modules_paths_object);
+                      console.log(modules_paths_object);
                       dpm(textStatus);
                       dpm(errorThrown.message);
                       drupalgap_alert(msg);
                     }
                 });
-              }
-            );
-      });
-    });
+            }
+        }
+    }
     // Now invoke hook_install on all modules, including core.
     module_invoke_all('install');
   }
@@ -361,7 +381,8 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      var msg = 'drupalgap_load_theme - no theme specified in settings.js';
+      var msg = 'drupalgap_load_theme - ' +
+        t('no theme specified in settings.js');
       drupalgap_alert(msg);
     }
     else {
@@ -372,8 +393,8 @@ function drupalgap_load_theme() {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
       }
       if (!drupalgap_file_exists(theme_path)) {
-        var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
-          'The theme\'s JS file does not exist: ' + theme_path;
+        var error_msg = 'drupalgap_theme_load - ' + t('Failed to load theme!') +
+          ' ' + t('The theme\'s JS file does not exist') + ': ' + theme_path;
         drupalgap_alert(error_msg);
         return false;
       }
@@ -385,9 +406,11 @@ function drupalgap_load_theme() {
         var fn = window[template_info_function];
         drupalgap.theme = fn();
         // For each region in the name, set the 'name' value on the region JSON.
-        $.each(drupalgap.theme.regions, function(name, region) {
+        for (var name in drupalgap.theme.regions) {
+            if (!drupalgap.theme.regions.hasOwnProperty(name)) { continue; }
+            var region = drupalgap.theme.regions[name];
             drupalgap.theme.regions[name].name = name;
-        });
+        }
         // Make sure the theme implements the required regions.
         var regions = system_regions_list();
         for (var i = 0; i < regions.length; i++) {
@@ -404,8 +427,8 @@ function drupalgap_load_theme() {
         return true;
       }
       else {
-        var error_msg = 'drupalgap_load_theme() - failed - ' +
-          template_info_function + '() does not exist!';
+        var error_msg = 'drupalgap_load_theme() - ' + t('failed') + ' - ' +
+          template_info_function + '() ' + t('does not exist!');
         drupalgap_alert(error_msg);
       }
     }
@@ -477,8 +500,8 @@ function drupalgap_alert(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var alertCallback = function() { };
-    var title = 'Alert';
-    var buttonName = 'OK';
+    var title = t('Alert');
+    var buttonName = t('OK');
     if (options) {
       if (options.alertCallback) { alertCallback = options.alertCallback; }
       if (options.title) { title = options.title; }
@@ -517,8 +540,8 @@ function drupalgap_confirm(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var confirmCallback = function(button) { };
-    var title = 'Confirm';
-    var buttonLabels = ['OK', 'Cancel'];
+    var title = t('Confirm');
+    var buttonLabels = [t('OK'), t('Cancel')];
     if (options) {
       if (options.confirmCallback) {
         confirmCallback = options.confirmCallback;
@@ -534,7 +557,8 @@ function drupalgap_confirm(message) {
       drupalgap.settings.mode == 'web-app'
     ) {
       var r = confirm(message);
-      if (r == true) { confirmCallback(); }
+      if (r == true) { confirmCallback(1); } // OK button.
+      else { confirmCallback(2); } // Cancel button.
     }
     else {
       navigator.notification.confirm(
@@ -555,7 +579,7 @@ function drupalgap_confirm(message) {
  * to wait before closing the message. Likewise, you can pass in a
  * third argument to specify how long to wait before opening the
  * message.
- * @param {html} string - The html to display.
+ * @param {string} html - The html to display.
  */
 function drupalgap_toast(html) {
   try {
@@ -585,6 +609,60 @@ function drupalgap_load_blocks() {
     drupalgap.blocks = module_invoke_all('block_info');
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
+}
+
+/**
+ * Loads language files.
+ */
+function drupalgap_load_locales() {
+  try {
+
+    // Load any drupalgap.settings.locale specified language files.
+    if (typeof drupalgap.settings.locale === 'undefined') { return; }
+    for (var language_code in drupalgap.settings.locale) {
+      if (!drupalgap.settings.locale.hasOwnProperty(language_code)) {
+        continue;
+      }
+      var language = drupalgap.settings.locale[language_code];
+      var file_path = 'locale/' + language_code + '.json';
+      if (!drupalgap_file_exists(file_path)) { continue; }
+      drupalgap.locale[language_code] = drupalgap_file_get_contents(
+        file_path,
+        { dataType: 'json' }
+      );
+    }
+
+    // Load any language files specified by modules, and merge them into the
+    // global language file (or create a new one if it doesn't exist).
+    var modules = module_implements('locale');
+    for (var i = 0; i < modules.length; i++) {
+      var module = modules[i];
+      var fn = window[module + '_locale'];
+      var languages = fn();
+      for (var j = 0; j < languages.length; j++) {
+        var language_code = languages[i];
+        var file_path =
+          drupalgap_get_path('module', module) +
+          '/locale/' + language_code + '.json';
+        var translations = drupalgap_file_get_contents(
+          file_path,
+          { dataType: 'json' }
+        );
+        if (typeof drupalgap.locale[language_code] === 'undefined') {
+          drupalgap.locale[language_code] = translations;
+        }
+        else {
+          $.extend(
+            drupalgap.locale[language_code],
+            drupalgap.locale[language_code],
+            translations
+          );
+        }
+      }
+    }
+
+  }
+  catch (error) { console.log('drupalgap_load_locales - ' + error); }
 }
 
 /**
@@ -717,7 +795,9 @@ function drupalgap_format_interval(interval) {
       '1 sec|@count sec': 1
     };
     var output = '';
-    $.each(units, function(key, value) {
+    for (var key in units) {
+      if (!units.hasOwnProperty(key)) { continue; }
+      var value = units[key];
       var key = key.split('|');
       if (interval >= value) {
         var count = Math.floor(interval / value);
@@ -734,8 +814,8 @@ function drupalgap_format_interval(interval) {
         interval %= value;
         granularity--;
       }
-      if (granularity == 0) { return false; }
-    });
+      if (granularity == 0) { break; }
+    }
     return output ? output : '0 sec';
   }
   catch (error) { console.log('drupalgap_format_interval - ' + error); }
@@ -834,14 +914,16 @@ function drupalgap_image_path(uri) {
     // If any modules want to alter the path, let them do it.
     var modules = module_implements('image_path_alter');
     if (modules) {
-      $.each(modules, function(index, module) {
+      for (var index in modules) {
+          if (!modules.hasOwnProperty(index)) { continue; }
+          var module = modules[index];
           var result = module_invoke(module, 'image_path_alter', uri);
           if (result) {
             altered = true;
             uri = result;
-            return false;
+            break;
           }
-      });
+      }
     }
     if (!altered) {
       // No one modified the image path, we'll use the default approach to
@@ -870,7 +952,9 @@ function drupalgap_image_path(uri) {
 function drupalgap_includes_load() {
   try {
     if (drupalgap.includes != null && drupalgap.includes.length != 0) {
-      $.each(drupalgap.includes, function(index, include) {
+      for (var index in drupalgap.includes) {
+          if (!drupalgap.includes.hasOwnProperty(index)) { continue; }
+          var include = drupalgap.includes[index];
           var include_path = 'includes/' + include.name + '.inc.js';
           jQuery.ajax({
               async: false,
@@ -888,7 +972,7 @@ function drupalgap_includes_load() {
                 console.log(errorThrown);
               }
           });
-      });
+      }
     }
   }
   catch (error) { console.log('drupalgap_includes_load - ' + error); }
@@ -979,22 +1063,22 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
  * @see http://api.jquerymobile.com/category/events/
  */
 function drupalgap_jqm_page_events() {
-    return [
-      'pagebeforechange',
-      'pagebeforecreate',
-      'pagebeforehide',
-      'pagebeforeload',
-      'pagebeforeshow',
-      'pagechange',
-      'pagechangefailed',
-      'pagecreate',
-      'pagehide',
-      'pageinit',
-      'pageload',
-      'pageloadfailed',
-      'pageremove',
-      'pageshow'
-    ];
+  return [
+    'pagebeforechange',
+    'pagebeforecreate',
+    'pagebeforehide',
+    'pagebeforeload',
+    'pagebeforeshow',
+    'pagechange',
+    'pagechangefailed',
+    'pagecreate',
+    'pagehide',
+    'pageinit',
+    'pageload',
+    'pageloadfailed',
+    'pageremove',
+    'pageshow'
+  ];
 }
 
 /**
@@ -1074,19 +1158,20 @@ function drupalgap_loading_message_hide() {
 function drupalgap_loader_options() {
   try {
     var mode = drupalgap.loader;
-    var text = 'Loading...';
+    var text = t('Loading') + '...';
     var textVisible = true;
-    if (mode == 'saving') { var text = 'Saving...'; }
+    if (mode == 'saving') { var text = t('Saving') + '...'; }
     var options = {
       text: text,
       textVisible: textVisible
     };
     if (drupalgap.settings.loader && drupalgap.settings.loader[mode]) {
-      options = drupalgap.settings.loader[mode];
+      options = $.extend(true, options, drupalgap.settings.loader[mode]);
+      if (options.text) { options.text = t(options.text); }
     }
     return options;
   }
-  catch (error) { console.log(' - ' + error); }
+  catch (error) { console.log('drupalgap_loader_options - ' + error); }
 }
 
 /**
@@ -1128,11 +1213,12 @@ function drupalgap_menu_access(path) {
         // grant access.
         if (drupalgap.menu_links[path].access_arguments) {
           if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
-            $.each(drupalgap.menu_links[path].access_arguments, function(index, 
-              permission) {
+            for (var index in drupalgap.menu_links[path].access_arguments) {
+              if (!drupalgap.menu_links[path].access_arguments.hasOwnProperty(index)) { continue; }
+              var permission = drupalgap.menu_links[path].access_arguments[index];
               access = user_access(permission);
-              if (access) { return false; }
-            });
+              if (access) { break; }
+            }
           }
         }
         else {
@@ -1157,12 +1243,14 @@ function drupalgap_menu_access(path) {
             // in the page arguments with the loaded entity.
             if (arguments[2]) {
               var entity = arguments[2];
-              $.each(access_arguments, function(index, page_argument) {
+              for (var index in access_arguments) {
+                  if (!access_arguments.hasOwnProperty(index)) { continue; }
+                  var page_argument = access_arguments[index];
                   if (is_int(parseInt(page_argument))) {
                     access_arguments[index] = entity;
-                    return false;
+                    break;
                   }
-              });
+              }
             }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
           }
@@ -1237,18 +1325,22 @@ function drupalgap_place_args_in_path(input_path) {
       var wildcards;
       var input_path_args = arg(null, input_path);
       if (input_path_args && input_path_args.length > 0) {
-        $.each(input_path_args, function(index, arg) {
+        for (var index in input_path_args) {
+            if (!input_path_args.hasOwnProperty(index)) { continue; }
+            var arg = input_path_args[index];
             if (arg == '%') {
               if (!wildcards) { wildcards = []; }
               wildcards.push(index);
             }
-        });
+        }
         if (wildcards && wildcards.length > 0) {
-          $.each(wildcards, function(index, wildcard) {
+          for (var index in wildcards) {
+              if (!wildcards.hasOwnProperty(index)) { continue; }
+              var wildcard = wildcards[index];
               if (path_args[wildcard]) {
                 input_path_args[wildcard] = path_args[wildcard];
               }
-          });
+          }
           assembled_path = input_path_args.join('/');
         }
       }
@@ -1313,6 +1405,28 @@ function drupalgap_set_message(message) {
     drupalgap.messages.push(msg);
   }
   catch (error) { console.log('drupalgap_set_message - ' + error); }
+}
+
+/**
+ * Sets the current messages.
+ * @param {Array} messages
+ */
+function drupalgap_set_messages(messages) {
+  try {
+    drupalgap.messages = messages;
+  }
+  catch (error) { console.log('drupalgap_set_messages - ' + error); }
+}
+
+/**
+ * Returns the current messages.
+ * @return {Array}
+ */
+function drupalgap_get_messages() {
+  try {
+    return drupalgap.messages;
+  }
+  catch (error) { console.log('drupalgap_get_messages - ' + error); }
 }
 
 /**
@@ -1439,12 +1553,16 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
       }
       // Convert the paths to page ids, then remove them from the DOM.
       var pages = [];
-      $.each(paths, function(index, path) {
+      for (var index in paths) {
+          if (!paths.hasOwnProperty(index)) { continue; }
+          var path = paths[index];
           pages.push(drupalgap_get_page_id(path));
-      });
-      $.each(pages, function(index, page_id) {
+      }
+      for (var index in pages) {
+          if (!pages.hasOwnProperty(index)) { continue; }
+          var page_id = pages[index];
           drupalgap_remove_page_from_dom(page_id);
-      });
+      }
     }
   }
   catch (error) {
@@ -1472,18 +1590,22 @@ function drupalgap_settings_load() {
 function drupalgap_theme_registry_build() {
   try {
     var modules = module_implements('theme');
-    $.each(modules, function(index, module) {
+    for (var index in modules) {
+        if (!modules.hasOwnProperty(index)) { continue; }
+        var module = modules[index];
         var function_name = module + '_theme';
         var fn = window[function_name];
         var hook_theme = fn();
-        $.each(hook_theme, function(element, variables) {
+        for (var element in hook_theme) {
+            if (!hook_theme.hasOwnProperty(element)) { continue; }
+            var variables = hook_theme[element];
             variables.path = drupalgap_get_path(
               'theme',
               drupalgap.settings.theme
             );
             drupalgap.theme_registry[element] = variables;
-        });
-    });
+        }
+    }
   }
   catch (error) { console.log('drupalgap_theme_registry_build - ' + error); }
 }

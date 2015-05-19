@@ -57,6 +57,7 @@ function drupalgap_init() {
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
+      locale: {}, /* holds onto language json objects, keyed by language code */
       messages: [],
       menus: {},
       menu_links: {},
@@ -170,9 +171,9 @@ function _drupalgap_deviceready() {
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
-      var msg = 'No site_path to Drupal set in the app/settings.js file!';
+      var msg = t('No site_path to Drupal set in the app/settings.js file!');
       drupalgap_alert(msg, {
-          title: 'Error'
+          title: t('Error')
       });
       return;
     }
@@ -184,7 +185,7 @@ function _drupalgap_deviceready() {
       module_invoke_all('device_offline');
       if (drupalgap.settings.offline_message) {
         drupalgap_alert(drupalgap.settings.offline_message, {
-            title: 'Offline',
+            title: t('Offline'),
             alertCallback: function() { drupalgap_goto('offline'); }
         });
       }
@@ -210,38 +211,47 @@ function _drupalgap_deviceready() {
         }
       }
       if (!proceed) {
-        drupalgap_goto('');
         // @todo - if module's are going to skip the System Connect call, then
         // we need to make sure Drupal.user is set up with appropriate defaults.
       }
       else {
-        // Device is online, let's build the default system connect options.
-        var options = {
-          success: function(result) {
-            // Call all hook_device_connected implementations then go to
-            // the front page.
-            module_invoke_all('device_connected');
-            drupalgap_goto('');
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-            // Build an informative error message and display it.
-            var msg = 'Failed connection to ' + drupalgap.settings.site_path;
-            if (errorThrown != '') { msg += ' - ' + errorThrown; }
-            msg += ' - Check your device\'s connection and check that ' +
-                   Drupal.settings.site_path + ' is online.';
-           drupalgap_alert(msg, {
-               title: 'Unable to Connect',
-               alertCallback: function() { drupalgap_goto('offline'); }
-           });
-          }
-        };
-
-        // Make the system connect call.
-        system_connect(options);
+        // Device is online, make the system connect call.
+        system_connect(_drupalgap_deviceready_options());
       }
     }
   }
   catch (error) { console.log('_drupalgap_deviceready - ' + error); }
+}
+
+/**
+ * Builds the default system connect options.
+ * @return {Object}
+ */
+function _drupalgap_deviceready_options() {
+  try {
+    var page_options = arguments[0] ? arguments[0] : {};
+    return {
+      success: function(result) {
+        // Call all hook_device_connected implementations then go to
+        // the front page.
+        module_invoke_all('device_connected');
+        drupalgap_goto('', page_options);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        // Build an informative error message and display it.
+        var msg = t('Failed connection to') + ' ' +
+          drupalgap.settings.site_path;
+        if (errorThrown != '') { msg += ' - ' + errorThrown; }
+        msg += ' - ' + t('Check your device\'s connection and check that') +
+          ' ' + Drupal.settings.site_path + ' ' + t('is online.');
+       drupalgap_alert(msg, {
+           title: t('Unable to Connect'),
+           alertCallback: function() { drupalgap_goto('offline'); }
+       });
+      }
+    };
+  }
+  catch (error) { console.log('_drupalgap_deviceready_options - ' + error); }
 }
 
 /**
@@ -255,6 +265,7 @@ function drupalgap_bootstrap() {
     drupalgap_load_modules();
     drupalgap_load_theme();
     drupalgap_load_blocks();
+    drupalgap_load_locales();
     menu_router_build();
     drupalgap_menus_load();
     drupalgap_theme_registry_build();
@@ -274,7 +285,9 @@ function drupalgap_load_modules() {
     var module_types = ['contrib', 'custom'];
     // We only need to load contrib and custom modules because core modules are
     // already included in the binary.
-    $.each(module_types, function(index, bundle) {
+    for (var index in module_types) {
+        if (!module_types.hasOwnProperty(index)) { continue; }
+        var bundle = module_types[index];
         // Let's be nice and try to load any old drupalgap.modules declarations
         // in developers settings.js files for a while, but throw a warning to
         // encourage them to update. This code can be removed after a few
@@ -284,7 +297,9 @@ function drupalgap_load_modules() {
           drupalgap.modules[bundle] &&
           drupalgap.modules[bundle].length != 0
         ) {
-          $.each(drupalgap.modules[bundle], function(index, module) {
+          for (var index in drupalgap.modules[bundle]) {
+              if (!drupalgap.modules[bundle].hasOwnProperty(index)) { continue; }
+              var module = drupalgap.modules[bundle][index];
               if (module.name) {
                 var msg = 'WARNING: The module "' + module.name + '" defined ' +
                   'in settings.js needs to be added to ' +
@@ -293,9 +308,11 @@ function drupalgap_load_modules() {
                 console.log(msg);
                 Drupal.modules[bundle][module.name] = module;
               }
-          });
+          }
         }
-        $.each(Drupal.modules[bundle], function(module_name, module) {
+        for (var module_name in Drupal.modules[bundle]) {
+            if (!Drupal.modules[bundle].hasOwnProperty(module_name)) { continue; }
+            var module = Drupal.modules[bundle][module_name];
             // If the module object is empty, initialize a module object.
             if ($.isEmptyObject(module)) {
               Drupal.modules[bundle][module_name] =
@@ -316,15 +333,18 @@ function drupalgap_load_modules() {
             // If there are any includes with this module, add them to the
             // list of paths to include.
             if (module.includes != null && module.includes.length != 0) {
-              $.each(module.includes, function(include_index, include_object) {
+              for (var include_index in module.includes) {
+                if (!module.includes.hasOwnProperty(include_index)) { continue; }
+                var include_object = module.includes[include_index];
                 modules_paths.push(
                   module_base_path + '/' + include_object.name + '.js'
                 );
-              });
+              }
             }
             // Now load all the paths for this module.
-            $.each(modules_paths,
-              function(modules_paths_index, modules_paths_object) {
+            for (var modules_paths_index in modules_paths) {
+                if (!modules_paths.hasOwnProperty(modules_paths_index)) { continue; }
+                var modules_paths_object = modules_paths[modules_paths_index];
                 jQuery.ajax({
                     async: false,
                     type: 'GET',
@@ -335,18 +355,18 @@ function drupalgap_load_modules() {
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = 'Failed to load module! (' + module.name + ')';
+                      var msg = t('Failed to load module!') +
+                        ' (' + module.name + ')';
                       dpm(msg);
-                      dpm(modules_paths_object);
+                      console.log(modules_paths_object);
                       dpm(textStatus);
                       dpm(errorThrown.message);
                       drupalgap_alert(msg);
                     }
                 });
-              }
-            );
-      });
-    });
+            }
+        }
+    }
     // Now invoke hook_install on all modules, including core.
     module_invoke_all('install');
   }
@@ -361,7 +381,8 @@ function drupalgap_load_modules() {
 function drupalgap_load_theme() {
   try {
     if (!drupalgap.settings.theme) {
-      var msg = 'drupalgap_load_theme - no theme specified in settings.js';
+      var msg = 'drupalgap_load_theme - ' +
+        t('no theme specified in settings.js');
       drupalgap_alert(msg);
     }
     else {
@@ -372,8 +393,8 @@ function drupalgap_load_theme() {
         theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
       }
       if (!drupalgap_file_exists(theme_path)) {
-        var error_msg = 'drupalgap_theme_load - Failed to load theme! ' +
-          'The theme\'s JS file does not exist: ' + theme_path;
+        var error_msg = 'drupalgap_theme_load - ' + t('Failed to load theme!') +
+          ' ' + t('The theme\'s JS file does not exist') + ': ' + theme_path;
         drupalgap_alert(error_msg);
         return false;
       }
@@ -385,9 +406,11 @@ function drupalgap_load_theme() {
         var fn = window[template_info_function];
         drupalgap.theme = fn();
         // For each region in the name, set the 'name' value on the region JSON.
-        $.each(drupalgap.theme.regions, function(name, region) {
+        for (var name in drupalgap.theme.regions) {
+            if (!drupalgap.theme.regions.hasOwnProperty(name)) { continue; }
+            var region = drupalgap.theme.regions[name];
             drupalgap.theme.regions[name].name = name;
-        });
+        }
         // Make sure the theme implements the required regions.
         var regions = system_regions_list();
         for (var i = 0; i < regions.length; i++) {
@@ -404,8 +427,8 @@ function drupalgap_load_theme() {
         return true;
       }
       else {
-        var error_msg = 'drupalgap_load_theme() - failed - ' +
-          template_info_function + '() does not exist!';
+        var error_msg = 'drupalgap_load_theme() - ' + t('failed') + ' - ' +
+          template_info_function + '() ' + t('does not exist!');
         drupalgap_alert(error_msg);
       }
     }
@@ -477,8 +500,8 @@ function drupalgap_alert(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var alertCallback = function() { };
-    var title = 'Alert';
-    var buttonName = 'OK';
+    var title = t('Alert');
+    var buttonName = t('OK');
     if (options) {
       if (options.alertCallback) { alertCallback = options.alertCallback; }
       if (options.title) { title = options.title; }
@@ -517,8 +540,8 @@ function drupalgap_confirm(message) {
     var options = null;
     if (arguments[1]) { options = arguments[1]; }
     var confirmCallback = function(button) { };
-    var title = 'Confirm';
-    var buttonLabels = ['OK', 'Cancel'];
+    var title = t('Confirm');
+    var buttonLabels = [t('OK'), t('Cancel')];
     if (options) {
       if (options.confirmCallback) {
         confirmCallback = options.confirmCallback;
@@ -534,7 +557,8 @@ function drupalgap_confirm(message) {
       drupalgap.settings.mode == 'web-app'
     ) {
       var r = confirm(message);
-      if (r == true) { confirmCallback(); }
+      if (r == true) { confirmCallback(1); } // OK button.
+      else { confirmCallback(2); } // Cancel button.
     }
     else {
       navigator.notification.confirm(
@@ -550,6 +574,33 @@ function drupalgap_confirm(message) {
 }
 
 /**
+ * Show a non intrusive alert message. You may optionally pass in an
+ * integer value as the second argument to specify how many milliseconds
+ * to wait before closing the message. Likewise, you can pass in a
+ * third argument to specify how long to wait before opening the
+ * message.
+ * @param {string} html - The html to display.
+ */
+function drupalgap_toast(html) {
+  try {
+    var open = arguments[2] ? arguments[2] : 1;
+    var close = arguments[1] ? arguments[1] : 420;
+    setInterval(function() {
+        $.mobile.loading('show', {
+            textVisible: true,
+            html: html
+        });
+        setInterval(function() {
+            $.mobile.loading().hide();
+        }, close);
+    }, open);
+  }
+  catch (error) {
+    console.log('drupalgap_toast - ' + error);
+  }
+}
+
+/**
  * Rounds up all blocks defined by hook_block_info and places them in the
  * drupalgap.blocks array.
  */
@@ -558,6 +609,60 @@ function drupalgap_load_blocks() {
     drupalgap.blocks = module_invoke_all('block_info');
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
+}
+
+/**
+ * Loads language files.
+ */
+function drupalgap_load_locales() {
+  try {
+
+    // Load any drupalgap.settings.locale specified language files.
+    if (typeof drupalgap.settings.locale === 'undefined') { return; }
+    for (var language_code in drupalgap.settings.locale) {
+      if (!drupalgap.settings.locale.hasOwnProperty(language_code)) {
+        continue;
+      }
+      var language = drupalgap.settings.locale[language_code];
+      var file_path = 'locale/' + language_code + '.json';
+      if (!drupalgap_file_exists(file_path)) { continue; }
+      drupalgap.locale[language_code] = drupalgap_file_get_contents(
+        file_path,
+        { dataType: 'json' }
+      );
+    }
+
+    // Load any language files specified by modules, and merge them into the
+    // global language file (or create a new one if it doesn't exist).
+    var modules = module_implements('locale');
+    for (var i = 0; i < modules.length; i++) {
+      var module = modules[i];
+      var fn = window[module + '_locale'];
+      var languages = fn();
+      for (var j = 0; j < languages.length; j++) {
+        var language_code = languages[i];
+        var file_path =
+          drupalgap_get_path('module', module) +
+          '/locale/' + language_code + '.json';
+        var translations = drupalgap_file_get_contents(
+          file_path,
+          { dataType: 'json' }
+        );
+        if (typeof drupalgap.locale[language_code] === 'undefined') {
+          drupalgap.locale[language_code] = translations;
+        }
+        else {
+          $.extend(
+            drupalgap.locale[language_code],
+            drupalgap.locale[language_code],
+            translations
+          );
+        }
+      }
+    }
+
+  }
+  catch (error) { console.log('drupalgap_load_locales - ' + error); }
 }
 
 /**
@@ -690,7 +795,9 @@ function drupalgap_format_interval(interval) {
       '1 sec|@count sec': 1
     };
     var output = '';
-    $.each(units, function(key, value) {
+    for (var key in units) {
+      if (!units.hasOwnProperty(key)) { continue; }
+      var value = units[key];
       var key = key.split('|');
       if (interval >= value) {
         var count = Math.floor(interval / value);
@@ -707,8 +814,8 @@ function drupalgap_format_interval(interval) {
         interval %= value;
         granularity--;
       }
-      if (granularity == 0) { return false; }
-    });
+      if (granularity == 0) { break; }
+    }
     return output ? output : '0 sec';
   }
   catch (error) { console.log('drupalgap_format_interval - ' + error); }
@@ -807,14 +914,16 @@ function drupalgap_image_path(uri) {
     // If any modules want to alter the path, let them do it.
     var modules = module_implements('image_path_alter');
     if (modules) {
-      $.each(modules, function(index, module) {
+      for (var index in modules) {
+          if (!modules.hasOwnProperty(index)) { continue; }
+          var module = modules[index];
           var result = module_invoke(module, 'image_path_alter', uri);
           if (result) {
             altered = true;
             uri = result;
-            return false;
+            break;
           }
-      });
+      }
     }
     if (!altered) {
       // No one modified the image path, we'll use the default approach to
@@ -843,7 +952,9 @@ function drupalgap_image_path(uri) {
 function drupalgap_includes_load() {
   try {
     if (drupalgap.includes != null && drupalgap.includes.length != 0) {
-      $.each(drupalgap.includes, function(index, include) {
+      for (var index in drupalgap.includes) {
+          if (!drupalgap.includes.hasOwnProperty(index)) { continue; }
+          var include = drupalgap.includes[index];
           var include_path = 'includes/' + include.name + '.inc.js';
           jQuery.ajax({
               async: false,
@@ -861,7 +972,7 @@ function drupalgap_includes_load() {
                 console.log(errorThrown);
               }
           });
-      });
+      }
     }
   }
   catch (error) { console.log('drupalgap_includes_load - ' + error); }
@@ -952,22 +1063,22 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
  * @see http://api.jquerymobile.com/category/events/
  */
 function drupalgap_jqm_page_events() {
-    return [
-      'pagebeforechange',
-      'pagebeforecreate',
-      'pagebeforehide',
-      'pagebeforeload',
-      'pagebeforeshow',
-      'pagechange',
-      'pagechangefailed',
-      'pagecreate',
-      'pagehide',
-      'pageinit',
-      'pageload',
-      'pageloadfailed',
-      'pageremove',
-      'pageshow'
-    ];
+  return [
+    'pagebeforechange',
+    'pagebeforecreate',
+    'pagebeforehide',
+    'pagebeforeload',
+    'pagebeforeshow',
+    'pagechange',
+    'pagechangefailed',
+    'pagecreate',
+    'pagehide',
+    'pageinit',
+    'pageload',
+    'pageloadfailed',
+    'pageremove',
+    'pageshow'
+  ];
 }
 
 /**
@@ -1047,19 +1158,20 @@ function drupalgap_loading_message_hide() {
 function drupalgap_loader_options() {
   try {
     var mode = drupalgap.loader;
-    var text = 'Loading...';
+    var text = t('Loading') + '...';
     var textVisible = true;
-    if (mode == 'saving') { var text = 'Saving...'; }
+    if (mode == 'saving') { var text = t('Saving') + '...'; }
     var options = {
       text: text,
       textVisible: textVisible
     };
     if (drupalgap.settings.loader && drupalgap.settings.loader[mode]) {
-      options = drupalgap.settings.loader[mode];
+      options = $.extend(true, options, drupalgap.settings.loader[mode]);
+      if (options.text) { options.text = t(options.text); }
     }
     return options;
   }
-  catch (error) { console.log(' - ' + error); }
+  catch (error) { console.log('drupalgap_loader_options - ' + error); }
 }
 
 /**
@@ -1101,11 +1213,12 @@ function drupalgap_menu_access(path) {
         // grant access.
         if (drupalgap.menu_links[path].access_arguments) {
           if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
-            $.each(drupalgap.menu_links[path].access_arguments, function(index, 
-              permission) {
+            for (var index in drupalgap.menu_links[path].access_arguments) {
+              if (!drupalgap.menu_links[path].access_arguments.hasOwnProperty(index)) { continue; }
+              var permission = drupalgap.menu_links[path].access_arguments[index];
               access = user_access(permission);
-              if (access) { return false; }
-            });
+              if (access) { break; }
+            }
           }
         }
         else {
@@ -1130,12 +1243,14 @@ function drupalgap_menu_access(path) {
             // in the page arguments with the loaded entity.
             if (arguments[2]) {
               var entity = arguments[2];
-              $.each(access_arguments, function(index, page_argument) {
+              for (var index in access_arguments) {
+                  if (!access_arguments.hasOwnProperty(index)) { continue; }
+                  var page_argument = access_arguments[index];
                   if (is_int(parseInt(page_argument))) {
                     access_arguments[index] = entity;
-                    return false;
+                    break;
                   }
-              });
+              }
             }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
           }
@@ -1210,18 +1325,22 @@ function drupalgap_place_args_in_path(input_path) {
       var wildcards;
       var input_path_args = arg(null, input_path);
       if (input_path_args && input_path_args.length > 0) {
-        $.each(input_path_args, function(index, arg) {
+        for (var index in input_path_args) {
+            if (!input_path_args.hasOwnProperty(index)) { continue; }
+            var arg = input_path_args[index];
             if (arg == '%') {
               if (!wildcards) { wildcards = []; }
               wildcards.push(index);
             }
-        });
+        }
         if (wildcards && wildcards.length > 0) {
-          $.each(wildcards, function(index, wildcard) {
+          for (var index in wildcards) {
+              if (!wildcards.hasOwnProperty(index)) { continue; }
+              var wildcard = wildcards[index];
               if (path_args[wildcard]) {
                 input_path_args[wildcard] = path_args[wildcard];
               }
-          });
+          }
           assembled_path = input_path_args.join('/');
         }
       }
@@ -1286,6 +1405,28 @@ function drupalgap_set_message(message) {
     drupalgap.messages.push(msg);
   }
   catch (error) { console.log('drupalgap_set_message - ' + error); }
+}
+
+/**
+ * Sets the current messages.
+ * @param {Array} messages
+ */
+function drupalgap_set_messages(messages) {
+  try {
+    drupalgap.messages = messages;
+  }
+  catch (error) { console.log('drupalgap_set_messages - ' + error); }
+}
+
+/**
+ * Returns the current messages.
+ * @return {Array}
+ */
+function drupalgap_get_messages() {
+  try {
+    return drupalgap.messages;
+  }
+  catch (error) { console.log('drupalgap_get_messages - ' + error); }
 }
 
 /**
@@ -1412,12 +1553,16 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
       }
       // Convert the paths to page ids, then remove them from the DOM.
       var pages = [];
-      $.each(paths, function(index, path) {
+      for (var index in paths) {
+          if (!paths.hasOwnProperty(index)) { continue; }
+          var path = paths[index];
           pages.push(drupalgap_get_page_id(path));
-      });
-      $.each(pages, function(index, page_id) {
+      }
+      for (var index in pages) {
+          if (!pages.hasOwnProperty(index)) { continue; }
+          var page_id = pages[index];
           drupalgap_remove_page_from_dom(page_id);
-      });
+      }
     }
   }
   catch (error) {
@@ -1445,18 +1590,22 @@ function drupalgap_settings_load() {
 function drupalgap_theme_registry_build() {
   try {
     var modules = module_implements('theme');
-    $.each(modules, function(index, module) {
+    for (var index in modules) {
+        if (!modules.hasOwnProperty(index)) { continue; }
+        var module = modules[index];
         var function_name = module + '_theme';
         var fn = window[function_name];
         var hook_theme = fn();
-        $.each(hook_theme, function(element, variables) {
+        for (var element in hook_theme) {
+            if (!hook_theme.hasOwnProperty(element)) { continue; }
+            var variables = hook_theme[element];
             variables.path = drupalgap_get_path(
               'theme',
               drupalgap.settings.theme
             );
             drupalgap.theme_registry[element] = variables;
-        });
-    });
+        }
+    }
   }
   catch (error) { console.log('drupalgap_theme_registry_build - ' + error); }
 }
@@ -1591,6 +1740,483 @@ function scrollToElement(selector, time, verticalOffset) {
 }
 
 /**
+ * Autocomplete global variables. Used to hold onto various global variables
+ * needed for an autocomplete.
+ */
+// The autocomplete text field input selector.
+var _theme_autocomplete_input_selector = {};
+
+// The autocomplete remote boolean.
+var _theme_autocomplete_remote = {};
+
+// The theme autocomplete variables.
+var _theme_autocomplete_variables = {};
+
+// The theme autocomplete variables.
+var _theme_autocomplete_success_handlers = {};
+
+/**
+ * Themes an autocomplete.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_autocomplete(variables) {
+  try {
+    var html = '';
+
+    // We need to have a unique identifier for this autocomplete. If it is a
+    // field, use the field name. Otherwise use the id attribute if it is
+    // provided or generate a random one. Then finally attach the autocomplete
+    // id to the variables so it can be passed along.
+    var autocomplete_id = null;
+    if (typeof variables.field_info_field !== 'undefined') {
+      autocomplete_id = variables.field_info_field.field_name;
+    }
+    else if (typeof variables.attributes.id !== 'undefined') {
+      autocomplete_id = variables.attributes.id;
+    }
+    else { autocomplete_id = user_password(); }
+    variables.autocomplete_id = autocomplete_id;
+
+    // Hold onto a copy of the variables.
+    _theme_autocomplete_variables[autocomplete_id] = variables;
+
+    // Are we dealing with a remote data set?
+    var remote = false;
+    if (variables.remote) { remote = true; }
+    variables.remote = remote;
+    _theme_autocomplete_remote[autocomplete_id] = variables.remote;
+
+    // Make sure we have an id to use on the list.
+    var id = null;
+    if (variables.attributes.id) { id = variables.attributes.id; }
+    else {
+      id = 'autocomplete_' + user_password();
+      variables.attributes.id = id;
+    }
+
+    // We need a hidden input to hold the value. If a default value
+    // was provided by a form element, use it.
+    var hidden_attributes = { id: id };
+    if (
+      variables.element &&
+      typeof variables.element.default_value !== 'undefined'
+    ) { hidden_attributes.value = variables.element.default_value; }
+    html += theme('hidden', { attributes: hidden_attributes });
+
+    // Now we need an id for the list.
+    var list_id = id + '-list';
+
+    // Build the widget variables.
+    var widget = {
+      attributes: {
+        'id': list_id,
+        'data-role': 'listview',
+        'data-filter': 'true',
+        'data-inset': 'true',
+        'data-filter-placeholder': '...'
+      }
+    };
+
+    // Handle a remote data set.
+    var js = '';
+    if (variables.remote) {
+      widget.items = [];
+      // We have a remote data set.
+      js += '<script type="text/javascript">' +
+        '$("#' + list_id + '").on("filterablebeforefilter", function(e, d) { ' +
+          '_theme_autocomplete(this, e, d, "' + autocomplete_id + '"); ' +
+        '});' +
+      '</script>';
+    }
+    else {
+      // Prepare the items then set the data filter reveal attribute.
+      widget.items = _theme_autocomplete_prepare_items(variables);
+      widget.attributes['data-filter-reveal'] = true;
+    }
+
+    // Save a reference to the autocomplete text field input.
+    var selector = '#' + drupalgap_get_page_id() +
+      ' #' + id + ' + form.ui-filterable' +
+      ' input[data-type="search"]';
+    js += '<script type="text/javascript">' +
+      '_theme_autocomplete_input_selector["' + autocomplete_id + '"] = \'' +
+        selector +
+      '\';' +
+    '</script>';
+
+    // If there was a default value, set it's key title in the autocomplete's
+    // text field.
+    if (variables.default_value_label) {
+      js += drupalgap_jqm_page_event_script_code({
+          page_id: drupalgap_get_page_id(),
+          jqm_page_event: 'pageshow',
+          jqm_page_event_callback:
+            '_theme_autocomplete_set_default_value_label',
+          jqm_page_event_args: JSON.stringify({
+              selector: selector,
+              default_value_label: variables.default_value_label
+          })
+      }, id);
+    }
+
+    // Theme the list and add the js to it, then return the html.
+    html += theme('item_list', widget);
+    html += js;
+    return html;
+  }
+  catch (error) { console.log('theme_autocomplete - ' + error); }
+}
+
+/**
+ * An internal function used to handle remote data for an autocomplete.
+ * @param {Object} list The unordered list that displays the items.
+ * @param {Object} e
+ * @param {Object} data
+ * @param {String} autocomplete_id
+ */
+function _theme_autocomplete(list, e, data, autocomplete_id) {
+  try {
+    var autocomplete = _theme_autocomplete_variables[autocomplete_id];
+    // Make sure a filter is present.
+    if (typeof autocomplete.filter === 'undefined') {
+      console.log(
+        '_theme_autocomplete - A "filter" was not supplied.'
+      );
+      return;
+    }
+
+    // Make sure a value and/or label has been supplied so we know how to render
+    // the items in the autocomplete list.
+    var value_provided =
+      typeof autocomplete.value !== 'undefined' ? true : false;
+    var label_provided =
+      typeof autocomplete.label !== 'undefined' ? true : false;
+    if (!value_provided && !label_provided) {
+      console.log(
+        '_theme_autocomplete - A "value" and/or "label" was not supplied.'
+      );
+      return;
+    }
+    else {
+      // We have a value and/or label. If one isn't provided, set it equal to
+      // the other.
+      if (!value_provided) { autocomplete.value = autocomplete.label; }
+      else if (!label_provided) { autocomplete.label = autocomplete.value; }
+    }
+    // Setup the vars to handle this widget.
+    var $ul = $(list),
+        $input = $(data.input),
+        value = $input.val(),
+        html = '';
+    // Clear the list.
+    $ul.html('');
+    // If a value has been input, start the autocomplete search.
+    if (value && value.length > 0) {
+      // Show the loader icon.
+      $ul.html('<li><div class="ui-loader">' +
+        '<span class="ui-icon ui-icon-loading"></span>' +
+        '</div></li>');
+      $ul.listview('refresh');
+
+      // Let's first build the success handler that will place the items into
+      // the autocomplete list.
+      _theme_autocomplete_success_handlers[autocomplete_id] = function(
+        _autocomplete_id, result_items, _wrapped, _child) {
+        try {
+
+          // If there are no results, and then if an empty callback handler was
+          // provided, call it.
+          // empty callback handler, then call it and return.
+          if (result_items.length == 0) {
+            if (autocomplete.empty_callback) {
+              var fn = window[autocomplete.empty_callback];
+              fn(value);
+            }
+          }
+          else {
+
+            // Convert the result into an items array for a list. Each item will
+            // be a JSON object with a "value" and "label" properties.
+            var items = [];
+            var _value = autocomplete.value;
+            var _label = autocomplete.label;
+            for (var index in result_items) {
+                if (!result_items.hasOwnProperty(index)) { continue; }
+                var object = result_items[index];
+                var _item = null;
+                if (_wrapped) { _item = object[_child]; }
+                else { _item = object; }
+                var item = {
+                  value: _item[_value],
+                  label: _item[_label]
+                };
+                items.push(item);
+            }
+
+            // Now render the items, add them to list and refresh the list.
+            if (items.length != 0) {
+              autocomplete.items = items;
+              var _items = _theme_autocomplete_prepare_items(autocomplete);
+              for (var index in _items) {
+                  if (!_items.hasOwnProperty(index)) { continue; }
+                  var item = _items[index];
+                  html += '<li>' + item + '</li>';
+              }
+              $ul.html(html);
+              $ul.listview('refresh');
+              $ul.trigger('updatelayout');
+            }
+          }
+
+          // Anybody want to act on the completion of the autocomplete?
+          if (autocomplete.finish_callback) {
+            var fn = window[autocomplete.finish_callback];
+            fn(value);
+          }
+
+        }
+        catch (error) {
+          console.log('_theme_autocomplete_success_handlers[' +
+            _autocomplete_id +
+          '] - ' + error);
+        }
+      };
+
+      // Depending on the handler, build the path and call the Drupal site for
+      // the data. If it's a custom path, see if a handler was provided,
+      // otherwise just default to views.
+      var handler = null;
+      if (autocomplete.custom) {
+        if (autocomplete.handler) { handler = autocomplete.handler; }
+        else if (autocomplete.field_info_field.settings.handler) {
+          handler = autocomplete.field_info_field.settings.handler;
+        }
+        else { handler = 'views'; }
+      }
+      else {
+        handler = autocomplete.field_info_field.settings.handler;
+      }
+      switch (handler) {
+
+        // Views (and Organic Groups)
+        case 'views':
+        case 'og':
+          // Prepare the path to the view.
+          var path = autocomplete.path + '?' + autocomplete.filter + '=' +
+            encodeURIComponent(value);
+          // Any extra params to send along?
+          if (autocomplete.params) { path += '&' + autocomplete.params; }
+
+          // Retrieve JSON results. Keep in mind, we use this for retrieving
+          // Views JSON results and custom hook_menu() path results in Drupal.
+          views_datasource_get_view_result(path, {
+              success: function(results) {
+                // If this was a custom path, don't use a wrapper around the
+                // results like the one used by Views Datasource.
+                var wrapped = true;
+                if (autocomplete.custom) { wrapped = false; }
+
+                // Extract the result items based on the presence of the wrapper
+                // or not.
+                var result_items = null;
+                if (wrapped) { result_items = results[results.view.root]; }
+                else { result_items = results; }
+
+                // Finally call the sucess handler.
+                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
+                fn(autocomplete_id, result_items, wrapped, results.view.child);
+              }
+          });
+          break;
+
+        // Simple entity selection mode (provided by the entity reference
+        // module), use the Index resource for the entity type.
+        case 'base':
+          var field_settings =
+            autocomplete.field_info_field.settings;
+          var index_resource = field_settings.target_type + '_index';
+          if (!drupalgap_function_exists(index_resource)) {
+            console.log('WARNING - _theme_autocomplete - ' +
+              index_resource + '() does not exist!'
+            );
+            return;
+          }
+          var options = {
+            fields: [autocomplete.value, autocomplete.filter],
+            parameters: { },
+            parameters_op: { }
+          };
+          options.parameters[autocomplete.filter] = '%' + value + '%';
+          options.parameters_op[autocomplete.filter] = 'like';
+          for (var bundle in field_settings.handler_settings.target_bundles) {
+              if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
+              var name = field_settings.handler_settings.target_bundles[bundle];
+              options.parameters.type = bundle;
+              // @TODO allow multiple bundles to be indexed.
+              break;
+          }
+          var fn = window[index_resource];
+          fn(options, {
+              success: function(results) {
+                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
+                fn(autocomplete_id, results, false);
+              }
+          });
+          break;
+
+        // An entity index resource call. Figure out which entity type index
+        // to call, and build a default query if one wasn't provided.
+        case 'index':
+          if (!autocomplete.entity_type) {
+            console.log(
+              'WARNING - _theme_autocomplete - no entity_type provided'
+            );
+            return;
+          }
+          var function_name = autocomplete.entity_type + '_index';
+          var fn = window[function_name];
+          var query = null;
+          if (autocomplete.query) { query = autocomplete.query; }
+          else {
+            query = {
+              parameters: { },
+              parameters_op: { }
+            };
+            var fields = [
+              entity_primary_key(autocomplete.entity_type),
+              entity_primary_key_title(autocomplete.entity_type)
+            ];
+            if (autocomplete.entity_type == 'taxonomy_term') {
+              if (autocomplete.vid) {
+                query.parameters['vid'] = autocomplete.vid;
+              }
+            }
+            query.fields = fields;
+            query.parameters[autocomplete.filter] = '%' + value + '%';
+            query.parameters_op[autocomplete.filter] = 'like';
+          }
+          fn.apply(null, [query, {
+              success: function(results) {
+                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
+                fn(autocomplete_id, results, false, null);
+              }
+          }]);
+          break;
+
+        // The default handler...
+        default:
+
+          // If we made it this far, and don't have a handler, then warn the
+          // developer.
+          if (!handler) {
+            console.log('WARNING - _theme_autocomplete - no handler provided');
+            return;
+          }
+
+          break;
+
+      }
+
+    }
+  }
+  catch (error) { console.log('_theme_autocomplete - ' + error); }
+}
+
+/**
+ * An internal function used to prepare the items for an autocomplete list.
+ * @param {Object} variables
+ * @return {*}
+ */
+function _theme_autocomplete_prepare_items(variables) {
+  try {
+    // Make sure we have an items array.
+    var items = [];
+    if (variables.items) { items = variables.items; }
+
+    // Prepare the items, and return them.
+    var _items = [];
+    if (items.length > 0) {
+      for (var index in items) {
+          if (!items.hasOwnProperty(index)) { continue; }
+          var item = items[index];
+          var value = '';
+          var label = '';
+          if (typeof item === 'string') {
+            value = item;
+            label = item;
+          }
+          else {
+            value = item.value;
+            label = item.label;
+          }
+          var options = {
+            attributes: {
+              value: value,
+              onclick: '_theme_autocomplete_click(\'' +
+                variables.attributes.id +
+              '\', this, \'' + variables.autocomplete_id + '\')'
+            }
+          };
+          var _item = l(label, null, options);
+          _items.push(_item);
+      }
+    }
+    return _items;
+  }
+  catch (error) { console.log('_theme_autocomplete_prepare_items - ' + error); }
+}
+
+/**
+ * An internal function used to handle clicks on items in autocomplete results.
+ * @param {String} id The id of the hidden input that holds the value.
+ * @param {Object} item The list item anchor that was just clicked.
+ * @param {String} autocomplete_id
+ */
+function _theme_autocomplete_click(id, item, autocomplete_id) {
+  try {
+    // Set the hidden input with the value, and the text field with the text.
+    var list_id = id + '-list';
+    $('#' + id).val($(item).attr('value'));
+    $(_theme_autocomplete_input_selector[autocomplete_id]).val($(item).html());
+    if (_theme_autocomplete_remote[autocomplete_id]) {
+      $('#' + list_id).html('');
+    }
+    else {
+      $('#' + list_id + ' li').addClass('ui-screen-hidden');
+      $('#' + list_id).listview('refresh');
+    }
+    // Now fire the item onclick handler, if one was provided.
+    if (
+      _theme_autocomplete_variables[autocomplete_id].item_onclick &&
+      drupalgap_function_exists(
+        _theme_autocomplete_variables[autocomplete_id].item_onclick
+      )
+    ) {
+      var fn =
+        window[_theme_autocomplete_variables[autocomplete_id].item_onclick];
+      fn(id, $(item));
+    }
+  }
+  catch (error) { console.log('_theme_autocomplete_click - ' + error); }
+}
+
+/**
+ * Used to set a default value in an autocomplete's text field.
+ * @param {Object} options
+ */
+function _theme_autocomplete_set_default_value_label(options) {
+  try {
+    setTimeout(function() {
+        $(options.selector).val(options.default_value_label).trigger('create');
+    }, 250);
+  }
+  catch (error) {
+    console.log('_theme_autocomplete_set_default_value_label - ' + error);
+  }
+}
+
+/**
  * Given a block delta, this will return the corresponding
  * block from drupalgap.blocks.
  * @param {String} delta
@@ -1600,15 +2226,18 @@ function drupalgap_block_load(delta) {
   try {
     var block = null;
     if (drupalgap.blocks) {
-      $.each(drupalgap.blocks, function(index, object) {
+      for (var index in drupalgap.blocks) {
+          if (!drupalgap.blocks.hasOwnProperty(index)) { continue; }
+          var object = drupalgap.blocks[index];
           if (object[delta]) {
             block = object[delta];
-            return false;
+            break;
           }
-      });
+      }
     }
     if (block == null) {
-      var msg = 'drupalgap_block_load - failed to load "' + delta + '" block!';
+      var msg = 'drupalgap_block_load - ' + t('failed to load') + ' "' + delta +
+        '" ' + t('block!');
       drupalgap_alert(msg);
     }
     return block;
@@ -1617,7 +2246,13 @@ function drupalgap_block_load(delta) {
 }
 
 /**
- *
+ * Renders the html string for a block.
+ * @param {Object} region
+ * @param {String} current_path
+ * @param {String} block_delta
+ * @param {Object} block_settings
+ * @param {Object} block_counts
+ * @return {String}
  */
 function drupalgap_block_render(region, current_path, block_delta,
   block_settings, block_counts) {
@@ -1679,7 +2314,9 @@ function drupalgap_attributes(attributes) {
   try {
     var attribute_string = '';
     if (attributes) {
-      $.each(attributes, function(name, value) {
+      for (var name in attributes) {
+          if (!attributes.hasOwnProperty(name)) { continue; }
+          var value = attributes[name];
           if (value != '') {
             // @todo - if someone passes in a value with double quotes, this
             // will break. e.g.
@@ -1694,7 +2331,7 @@ function drupalgap_attributes(attributes) {
             // element.
             attribute_string += name + ' ';
           }
-      });
+      }
     }
     return attribute_string;
   }
@@ -1723,7 +2360,9 @@ function drupalgap_check_visibility(type, data) {
     // Roles.
     else if (typeof data.roles !== 'undefined' &&
       data.roles && data.roles.value && data.roles.value.length != 0) {
-      $.each(data.roles.value, function(role_index, role) {
+      for (var role_index in data.roles.value) {
+          if (!data.roles.value.hasOwnProperty(role_index)) { continue; }
+          var role = data.roles.value[role_index];
           if (drupalgap_user_has_role(role)) {
             // User has role, show/hide the block accordingly.
             if (data.roles.mode == 'include') { visible = true; }
@@ -1735,20 +2374,22 @@ function drupalgap_check_visibility(type, data) {
             if (data.roles.mode == 'exclude') { visible = true; }
           }
           // Break out of the loop if already determined to be visible.
-          if (visible) { return false; }
-      });
+          if (visible) { break; }
+      }
     }
     // Pages.
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
       var current_path = drupalgap_path_get();
       var current_path_parts = current_path.split('/');
-      $.each(data.pages.value, function(page_index, path) {
+      for (var page_index in data.pages.value) {
+          if (!data.pages.value.hasOwnProperty(page_index)) { continue; }
+          var path = data.pages.value[page_index];
           if (path == '') { path = drupalgap.settings.front; }
           if (path == current_path) {
             if (data.pages.mode == 'include') { visible = true; }
             else if (data.pages.mode == 'exclude') { visible = false; }
-            return false;
+            break;
           }
           else {
             // It wasn't a direct path match, is there a wildcard that matches
@@ -1759,7 +2400,7 @@ function drupalgap_check_visibility(type, data) {
               if (router_path.replace(/%/g, '*') == path) {
                 if (data.pages.mode == 'include') { visible = true; }
                 else if (data.pages.mode == 'exclude') { visible = false; }
-                return false;
+                break;
               }
               else {
                 var path_parts = path.split('/');
@@ -1785,7 +2426,7 @@ function drupalgap_check_visibility(type, data) {
               else if (data.pages.mode == 'exclude') { visible = true; }
             }
           }
-      });
+      }
     }
     return visible;
   }
@@ -1836,10 +2477,14 @@ function drupalgap_get_path(type, name) {
     var path = null;
     if (type == 'module') {
       var found_module = false;
-      $.each(Drupal.modules, function(bundle, modules) {
-          if (found_module) { return false; }
+      for (var bundle in Drupal.modules) {
+          if (!Drupal.modules.hasOwnProperty(bundle)) { continue; }
+          var modules = Drupal.modules[bundle];
+          if (found_module) { break; }
           else {
-            $.each(modules, function(index, module) {
+            for (var index in modules) {
+                if (!modules.hasOwnProperty(index)) { continue; }
+                var module = modules[index];
                 if (module.name == name) {
                   found_module = true;
                   path = '';
@@ -1851,14 +2496,14 @@ function drupalgap_get_path(type, name) {
                       bundle +
                     ')';
                     drupalgap_alert(msg);
-                    return false;
+                    break;
                   }
                   path += '/' + name;
-                  return false;
+                  break;
                 }
-            });
+            }
           }
-      });
+      }
     }
     else if (type == 'theme') {
       if (name == 'easystreet3' || name == 'ava') { path = 'themes/' + name; }
@@ -2038,121 +2683,18 @@ function bl() {
 }
 
 /**
- * Internal function used to dynamically add another element item to a form for
- * unlimited value fields.
- * @param {String} form_id
- * @param {String} name
- * @param {Number} delta
+ * Returns translated text.
+ * @param {String} str The string to translate
+ * @return {String}
  */
-function _drupalgap_form_add_another_item(form_id, name, delta) {
-  try {
-    // Locate the last item, load the form, extract the element from
-    // the form, generate default variables for the new item, determine the next
-    // delta value.
-    var selector = '.' + drupalgap_form_get_element_container_class(name) +
-      ' .drupalgap_form_add_another_item';
-    var add_another_item_button = $(selector);
-    var form = drupalgap_form_local_storage_load(form_id);
-    var language = language_default();
-    var item = drupalgap_form_element_item_create(
-      name,
-      form,
-      language,
-      delta + 1
-    );
-    form.elements[name][language][delta + 1] = item;
-    var element = form.elements[name];
-    var variables = {
-      attributes: {},
-      field_info_field: element.field_info_field,
-      field_info_instance: element.field_info_instance
-    };
-    var field_widget_form_function =
-      element.field_info_instance.widget.module + '_field_widget_form';
-    window[field_widget_form_function].apply(
-      null,
-      _drupalgap_form_element_items_widget_arguments(
-        form,
-        null,
-        element,
-        language,
-        delta + 1
-      )
-    );
-    drupalgap_form_local_storage_save(form);
-    $(add_another_item_button).before(
-      _drupalgap_form_render_element_item(form, element, variables, item)
-    );
-  }
-  catch (error) { console.log('_drupalgap_form_add_another_item - ' + error); }
-}
-
-/**
- * Returns a 'Cancel' button object that can be used on most forms.
- * @return {Object}
- */
-function drupalgap_form_cancel_button() {
-    return {
-      'title': 'Cancel',
-      attributes: {
-        onclick: 'javascript:drupalgap_back();'
-      }
-    };
-}
-
-/**
- * Given a jQuery selector to a form, this will clear all the elements on
- * the UI.
- * @see http://stackoverflow.com/a/6364313/763010
- */
-function drupalgap_form_clear(form_selector) {
-  try {
-    $(':input', form_selector)
-     .not(':button, :submit, :reset, :hidden')
-     .val('')
-     .removeAttr('checked')
-     .removeAttr('selected');
-  }
-  catch (error) { console.log('drupalgap_form_clear - ' + error); }
-}
-
-/**
- * Given a form id, this will assemble and return the default form JSON object.
- * @param {String} form_id
- * @return {Object}
- */
-function drupalgap_form_defaults(form_id) {
-  try {
-    var form = {};
-    // Set the form id, elements, buttons, options and attributes.
-    form.id = form_id;
-    form.elements = {};
-    form.buttons = {};
-    form.options = {
-      attributes: {
-        'class': ''
-      }
-    };
-    // Create a prefix and suffix.
-    form.prefix = '';
-    form.suffix = '';
-    // Create empty arrays for the form's validation and submission handlers,
-    // then add the default call back functions to their respective array, if
-    // they exist.
-    form.validate = [];
-    form.submit = [];
-    var validate_function_name = form.id + '_validate';
-    if (drupalgap_function_exists(validate_function_name)) {
-      form.validate.push(validate_function_name);
-    }
-    var submit_function_name = form.id + '_submit';
-    if (drupalgap_function_exists(submit_function_name)) {
-      form.submit.push(submit_function_name);
-    }
-    // Finally, return the form.
-    return form;
-  }
-  catch (error) { console.log('drupalgap_form_defaults - ' + error); }
+function t(str) {
+  var lang = arguments[3] ? arguments[3] : Drupal.settings.language_default;
+  if (
+    lang != 'und' &&
+    typeof drupalgap.locale[lang] !== 'undefined' &&
+    drupalgap.locale[lang][str]
+  ) { return drupalgap.locale[lang][str]; }
+  return str;
 }
 
 /**
@@ -2241,405 +2783,6 @@ function drupalgap_form_get_element_container_class(name) {
 }
 
 /**
- * Given a drupalgap form, this renders the form html and returns it.
- * @param {Object} form
- * @return {String}
- */
-function drupalgap_form_render(form) {
-  try {
-    // @TODO - we may possibly colliding html element ids!!! For example, I
-    // think the node edit page gets an id of "node_edit" and possibly so does
-    // the node edit form, which also may get an id of "node_edit". We may want
-    // to prefix both the template page and form ids with prefixes, e.g.
-    // drupalgap_page_* and drupalgap_form_*, but adding these prefixes could
-    // get annoying for css selectors used in jQuery and CSS. What to do?
-
-    // If no form id is provided, warn the user.
-    if (!form.id) {
-      return '<p>drupalgap_form_render() - missing form id!</p>' +
-        JSON.stringify(form);
-    }
-    // If the form already exists in the DOM, remove it.
-    if ($('form#' + form.id).length) { $('form#' + form.id).remove(); }
-    // Render the prefix and suffix and wrap them in their own div.
-    var prefix = form.prefix;
-    if (!empty(prefix)) {
-      prefix = '<div class="form_prefix">' + prefix + '</div>';
-    }
-    var suffix = form.suffix;
-    if (!empty(suffix)) {
-      suffix = '<div class="form_suffix">' + suffix + '</div>';
-    }
-    // Render the form's input elements.
-    var form_elements = _drupalgap_form_render_elements(form);
-    var form_attributes = drupalgap_attributes(form.options.attributes);
-    // Return the form html.
-    var form_html = '<form id="' + form.id + '" ' + form_attributes + '>' +
-      prefix +
-      '<div id="drupalgap_form_errors"></div>' +
-      form_elements +
-      suffix +
-    '</form>';
-    return form_html;
-  }
-  catch (error) { console.log('drupalgap_form_render - ' + error); }
-}
-
-/**
- * Given a form element name and an error message, this attaches the error
- * message to the drupalgap.form_errors array, keyed by the form element name.
- * @param {String} name
- * @param {String} message
- */
-function drupalgap_form_set_error(name, message) {
-  try {
-    drupalgap.form_errors[name] = message;
-  }
-  catch (error) { console.log('drupalgap_form_set_error - ' + error); }
-}
-
-/**
- * Given a form, this function iterates over the form's elements and assembles
- * each element and value and places them into the form state's values. This
- * is similar to $form_state['values'] in Drupal.
- * @param {Object} form
- * @return {Object}
- */
-function drupalgap_form_state_values_assemble(form) {
-  try {
-    var lng = language_default();
-    var form_state = {'values': {}};
-    $.each(form.elements, function(name, element) {
-      if (name == 'submit') { return; } // Always skip the form 'submit'.
-      var id = null;
-      if (element.is_field) {
-        form_state.values[name] = {};
-        form_state.values[name][lng] = {};
-        var allowed_values = element.field_info_field.cardinality;
-        if (allowed_values == -1) {
-          allowed_values = 1; // Convert unlimited value field to one for now...
-        }
-        for (var delta = 0; delta < allowed_values; delta++) {
-          id = drupalgap_form_get_element_id(name, form.id, lng, delta);
-          form_state.values[name][lng][delta] =
-            _drupalgap_form_state_values_assemble_get_element_value(
-              id,
-              element
-            );
-        }
-      }
-      else {
-        id = drupalgap_form_get_element_id(name, form.id);
-        form_state.values[name] =
-          _drupalgap_form_state_values_assemble_get_element_value(
-            id,
-            element
-          );
-      }
-    });
-    // Attach the form state to drupalgap.form_states keyed by the form id.
-    drupalgap.form_states[form.id] = form_state;
-    return form_state;
-  }
-  catch (error) {
-    console.log('drupalgap_form_state_values_assemble - ' + error);
-  }
-}
-
-/**
- *
- * @param {String} id
- * @param {Object} element
- * @return {String|Number}
- */
-function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
-  try {
-    // If a value_callback is specified on the element, call that function to
-    // retrieve the element's value. Ohterwise, we'll use the default techniques
-    // implemented to extract a value for the form state.
-    if (element.value_callback && function_exists(element.value_callback)) {
-      var fn = window[element.value_callback];
-      return fn(id, element);
-    }
-    // Figure out the value, depending on the element type.
-    var value = null;
-    var selector = '';
-    if (element.type == 'radios') {
-      selector = 'input:radio[name="' + id + '"]:checked';
-    }
-    else { selector = '#' + id; }
-    switch (element.type) {
-      case 'checkbox':
-        var _checkbox = $(selector);
-        if ($(_checkbox).is(':checked')) { value = 1; }
-        else { value = 0; }
-        break;
-      case 'checkboxes':
-        // Iterate over each option, and see if it is checked, then pop it onto
-        // the value array. It's possible for values to be updated dynamically
-        // by a developer (i.e. through a pageshow handler), so it isn't safe to
-        // look at the options in local storage. Instead we'll directly iterate
-        // over the element option(s) in the DOM.
-        value = {};
-        var options = $('label[for="' + id + '"]').siblings('.ui-checkbox');
-        $.each(options, function(index, option) {
-            var checkbox = $(option).children('input');
-            var _value = $(checkbox).attr('value');
-            if ($(checkbox).is(':checked')) { value[_value] = _value; }
-            else { value[_value] = 0; }
-        });
-        break;
-      case 'list_boolean':
-        var _checkbox = $(selector);
-        if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
-        else { value = $(_checkbox).attr('off'); }
-        break;
-    }
-    if (value === null) { value = $(selector).val(); }
-    if (typeof value === 'undefined') { value = null; }
-    return value;
-  }
-  catch (error) {
-    console.log(
-      '_drupalgap_form_state_values_assemble_get_element_value - ' +
-      error
-    );
-  }
-}
-
-/**
- * Given a form id, this will render the form and return the html for the form.
- * Any additional arguments will be sent along to the form.
- * @param {String} form_id
- * @return {String}
- */
-function drupalgap_get_form(form_id) {
-  try {
-    var html = '';
-    var form = drupalgap_form_load.apply(
-      null,
-      Array.prototype.slice.call(arguments)
-    );
-    if (form) {
-      // Render the form.
-      html = drupalgap_form_render(form);
-    }
-    else {
-      var msg = 'drupalgap_get_form - failed to get form (' + form_id + ')';
-      drupalgap_alert(msg);
-    }
-    return html;
-  }
-  catch (error) { console.log('drupalgap_get_form - ' + error); }
-}
-
-/**
- * Given a form id, this will return the form JSON object assembled by the
- * form's call back function. If the form fails to load, this returns false.
- * @param {String} form_id
- * @return {Object}
- */
-function drupalgap_form_load(form_id) {
-  try {
-
-    var form = drupalgap_form_defaults(form_id);
-
-    // The form's call back function will be equal to the form id.
-    var function_name = form_id;
-    if (drupalgap_function_exists(function_name)) {
-
-      // Grab the form's function.
-      var fn = window[function_name];
-
-      // Determine the language code.
-      var language = language_default();
-
-      // Build the form arguments by iterating over each argument then adding
-      // each to to the form arguments, afterwards remove the argument at index
-      // zero because that is the form id.
-      var form_arguments = [];
-      $.each(arguments, function(index, argument) {
-            form_arguments.push(argument);
-      });
-      form_arguments.splice(0, 1);
-
-      // Attach the form arguments to the form object.
-      form.arguments = form_arguments;
-
-      // If there were no arguments to pass along, call the function directly to
-      // retrieve the form, otherwise call the function and pass along any
-      // arguments to retrieve the form.
-      if (form_arguments.length == 0) { form = fn(form, null); }
-      else {
-        // We must consolidate the form, form_state and arguments into one array
-        // and then pass it along to the form builder.
-        var consolidated_arguments = [];
-        var form_state = null;
-        consolidated_arguments.push(form);
-        consolidated_arguments.push(form_state);
-        $.each(form_arguments, function(index, argument) {
-          consolidated_arguments.push(argument);
-        });
-        form = fn.apply(
-          null,
-          Array.prototype.slice.call(consolidated_arguments)
-        );
-      }
-
-      // Set empty options and attributes properties on each form element if the
-      // element does not yet have any. This allows others to more easily modify
-      // options and attributes on an element without having to worry about
-      // testing for nulls and creating empty properties first.
-      $.each(form.elements, function(name, element) {
-          // If this element is a field, load its field_info_field and
-          // field_info_instance onto the element.
-          var element_is_field = false;
-          var field_info_field = drupalgap_field_info_field(name);
-          if (field_info_field) {
-            element_is_field = true;
-            form.elements[name].field_info_field = field_info_field;
-            form.elements[name].field_info_instance =
-              drupalgap_field_info_instance(
-                form.entity_type,
-                name,
-                form.bundle
-              );
-          }
-          form.elements[name].is_field = element_is_field;
-          // Set the name property on the element if it isn't already set.
-          if (!form.elements[name].name) { form.elements[name].name = name; }
-          // If the element is a field, we'll append a language code and delta
-          // value to the element id, along with the field items appended
-          // onto the element using the language code and delta values.
-          var id = null;
-          if (element_is_field) {
-            // What's the number of allowed values (cardinality) on this field?
-            // A cardinality of -1 means the field has unlimited values.
-            var cardinality = parseInt(element.field_info_field.cardinality);
-            if (cardinality == -1) {
-              cardinality = 1; // we'll just add one element for now, until we
-                               // figure out how to handle the 'add another
-                               // item' feature.
-            }
-            // Initialize the item collections language code if it hasn't been.
-            if (!form.elements[name][language]) {
-              form.elements[name][language] = {};
-            }
-            // Prepare the item(s) for this element.
-            for (var delta = 0; delta < cardinality; delta++) {
-              // Prepare some item defaults.
-              var item = drupalgap_form_element_item_create(
-                name,
-                form,
-                language,
-                delta
-              );
-              // If the delta for this item hasn't been created on the element,
-              // create it using the default item values. Otherwise, merge the
-              // default values into the pre existing item on the element.
-              if (!form.elements[name][language][delta]) {
-                form.elements[name][language][delta] = item;
-              }
-              else {
-                $.extend(true, form.elements[name][language][delta], item);
-              }
-            }
-          }
-          else {
-            // This element is not a field, setup default options if none
-            // have been provided. Then set the element id.
-            if (!element.options) {
-              form.elements[name].options = {attributes: {}};
-            }
-            else if (!element.options.attributes) {
-              form.elements[name].options.attributes = {};
-            }
-            id = drupalgap_form_get_element_id(name, form.id);
-            form.elements[name].id = id;
-            form.elements[name].options.attributes.id = id;
-          }
-      });
-
-      // Give modules an opportunity to alter the form.
-      module_invoke_all('form_alter', form, null, form_id);
-
-      // Place the assembled form into local storage so _drupalgap_form_submit
-      // will have access to the assembled form.
-      drupalgap_form_local_storage_save(form);
-    }
-    else {
-      var error_msg = 'drupalgap_form_load - no callback function (' +
-                       function_name + ') available for form (' + form_id + ')';
-      drupalgap_alert(error_msg);
-    }
-    return form;
-  }
-  catch (error) { console.log('drupalgap_form_load - ' + error); }
-}
-
-/**
- * Given a form id, this will delete the form from local storage.
- * If the form isn't in local storage, this returns false.
- * @param {String} form_id
- * @return {Object}
- */
-function drupalgap_form_local_storage_delete(form_id) {
-  try {
-    var result = window.localStorage.removeItem(
-      drupalgap_form_id_local_storage_key(form_id)
-    );
-    return result;
-  }
-  catch (error) {
-    console.log('drupalgap_form_local_storage_delete - ' + error);
-  }
-}
-
-/**
- * Given a form id, this will load the form from local storage and return it.
- * If the form isn't in local storage, this returns false.
- * @param {String} form_id
- * @return {Object}
- */
-function drupalgap_form_local_storage_load(form_id) {
-  try {
-    var form = false;
-    form = window.localStorage.getItem(
-      drupalgap_form_id_local_storage_key(form_id)
-    );
-    if (!form) { form = false; }
-    else { form = JSON.parse(form); }
-    return form;
-  }
-  catch (error) { console.log('drupalgap_form_local_storage_load - ' + error); }
-}
-
-/**
- * Given a form, this will save the form to local storage, overwriting any
- * previously saved forms.
- * @param {Object} form
- */
-function drupalgap_form_local_storage_save(form) {
-  try {
-    window.localStorage.setItem(
-      drupalgap_form_id_local_storage_key(form.id),
-      JSON.stringify(form)
-    );
-  }
-  catch (error) { console.log('drupalgap_form_local_storage_save - ' + error); }
-}
-
-/**
- * Given a form id, this will return the local storage key used by DrupalGap
- * to save the assembled form to the device's local storage.
- * @param {String} form_id
- * @return {String}
- */
-function drupalgap_form_id_local_storage_key(form_id) {
-    return 'drupalgap_form_' + form_id;
-}
-
-/**
  * Renders all the input elements in a form.
  * @param {Object} form
  * @return {String}
@@ -2653,7 +2796,9 @@ function _drupalgap_form_render_elements(form) {
     // set it, then render the element if access is permitted. While rendering
     // the elements, set them aside according to their widget weight so they
     // can be appended to the content string in the correct order later.
-    $.each(form.elements, function(name, element) {
+    for (var name in form.elements) {
+        if (!form.elements.hasOwnProperty(name)) { continue; }
+        var element = form.elements[name];
         if (!element.name) { element.name = name; }
         if (drupalgap_form_element_access(element)) {
           if (element.is_field && element.field_info_instance.widget.weight) {
@@ -2691,7 +2836,7 @@ function _drupalgap_form_render_elements(form) {
             else { content += _drupalgap_form_render_element(form, element); }
           }
         }
-    });
+    }
     // Prepend the weighted elements to the content.
     if (!empty(content_weighted)) {
       for (var weight in content_weighted) {
@@ -2703,7 +2848,9 @@ function _drupalgap_form_render_elements(form) {
     // Add any form buttons to the form elements html, if access to the button
     // is permitted.
     if (form.buttons && form.buttons.length != 0) {
-      $.each(form.buttons, function(name, button) {
+      for (var name in form.buttons) {
+          if (!form.buttons.hasOwnProperty(name)) { continue; }
+          var button = form.buttons[name];
           if (drupalgap_form_element_access(button)) {
             var attributes = {
               type: 'button',
@@ -2714,7 +2861,7 @@ function _drupalgap_form_render_elements(form) {
               button.title +
             '</button>';
           }
-      });
+      }
     }
     return content;
   }
@@ -2793,8 +2940,9 @@ function _drupalgap_form_render_element(form, element) {
     var item_html = '';
     var item_label = '';
     var render_item = null;
-    $.each(items, function(delta, item) {
-
+    for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
         // We'll render the item, unless we prove otherwise.
         render_item = true;
 
@@ -2880,9 +3028,9 @@ function _drupalgap_form_render_element(form, element) {
         );
         if (typeof item_html === 'undefined') {
           render_item = false;
-          return false;
+          break;
         }
-    });
+    }
 
     // Are we skipping the render of the item?
     if (!render_item) { return ''; }
@@ -2949,7 +3097,7 @@ function _drupalgap_form_render_element(form, element) {
 
     // Add element description.
     if (element.description && element.type != 'hidden') {
-      html += '<div>' + element.description + '</div>';
+      html += '<div>' + t(element.description) + '</div>';
     }
 
     // Close the element container.
@@ -3141,6 +3289,441 @@ function _drupalgap_form_element_items_widget_arguments(form, form_state,
 }
 
 /**
+ * Internal function used to dynamically add another element item to a form for
+ * unlimited value fields.
+ * @param {String} form_id
+ * @param {String} name
+ * @param {Number} delta
+ */
+function _drupalgap_form_add_another_item(form_id, name, delta) {
+  try {
+    // Locate the last item, load the form, extract the element from
+    // the form, generate default variables for the new item, determine the next
+    // delta value.
+    var selector = '.' + drupalgap_form_get_element_container_class(name) +
+      ' .drupalgap_form_add_another_item';
+    var add_another_item_button = $(selector);
+    var form = drupalgap_form_local_storage_load(form_id);
+    var language = language_default();
+    var item = drupalgap_form_element_item_create(
+      name,
+      form,
+      language,
+      delta + 1
+    );
+    form.elements[name][language][delta + 1] = item;
+    var element = form.elements[name];
+    var variables = {
+      attributes: {},
+      field_info_field: element.field_info_field,
+      field_info_instance: element.field_info_instance
+    };
+    var field_widget_form_function =
+      element.field_info_instance.widget.module + '_field_widget_form';
+    window[field_widget_form_function].apply(
+      null,
+      _drupalgap_form_element_items_widget_arguments(
+        form,
+        null,
+        element,
+        language,
+        delta + 1
+      )
+    );
+    drupalgap_form_local_storage_save(form);
+    $(add_another_item_button).before(
+      _drupalgap_form_render_element_item(form, element, variables, item)
+    );
+  }
+  catch (error) { console.log('_drupalgap_form_add_another_item - ' + error); }
+}
+
+/**
+ * Returns a 'Cancel' button object that can be used on most forms.
+ * @return {Object}
+ */
+function drupalgap_form_cancel_button() {
+    return {
+      'title': t('Cancel'),
+      attributes: {
+        onclick: 'javascript:drupalgap_back();'
+      }
+    };
+}
+
+/**
+ * Given a jQuery selector to a form, this will clear all the elements on
+ * the UI.
+ * @see http://stackoverflow.com/a/6364313/763010
+ */
+function drupalgap_form_clear(form_selector) {
+  try {
+    $(':input', form_selector)
+     .not(':button, :submit, :reset, :hidden')
+     .val('')
+     .removeAttr('checked')
+     .removeAttr('selected');
+  }
+  catch (error) { console.log('drupalgap_form_clear - ' + error); }
+}
+
+/**
+ * Given a form id, this will assemble and return the default form JSON object.
+ * @param {String} form_id
+ * @return {Object}
+ */
+function drupalgap_form_defaults(form_id) {
+  try {
+    var form = {};
+    // Set the form id, elements, buttons, options and attributes.
+    form.id = form_id;
+    form.elements = {};
+    form.buttons = {};
+    form.options = {
+      attributes: {
+        'class': ''
+      }
+    };
+    // Create a prefix and suffix.
+    form.prefix = '';
+    form.suffix = '';
+    // Create empty arrays for the form's validation and submission handlers,
+    // then add the default call back functions to their respective array, if
+    // they exist.
+    form.validate = [];
+    form.submit = [];
+    var validate_function_name = form.id + '_validate';
+    if (drupalgap_function_exists(validate_function_name)) {
+      form.validate.push(validate_function_name);
+    }
+    var submit_function_name = form.id + '_submit';
+    if (drupalgap_function_exists(submit_function_name)) {
+      form.submit.push(submit_function_name);
+    }
+    // Finally, return the form.
+    return form;
+  }
+  catch (error) { console.log('drupalgap_form_defaults - ' + error); }
+}
+
+/**
+ * Given a drupalgap form, this renders the form html and returns it.
+ * @param {Object} form
+ * @return {String}
+ */
+function drupalgap_form_render(form) {
+  try {
+    // @TODO - we may possibly colliding html element ids!!! For example, I
+    // think the node edit page gets an id of "node_edit" and possibly so does
+    // the node edit form, which also may get an id of "node_edit". We may want
+    // to prefix both the template page and form ids with prefixes, e.g.
+    // drupalgap_page_* and drupalgap_form_*, but adding these prefixes could
+    // get annoying for css selectors used in jQuery and CSS. What to do?
+
+    // If no form id is provided, warn the user.
+    if (!form.id) {
+      return '<p>drupalgap_form_render() - missing form id!</p>' +
+        JSON.stringify(form);
+    }
+    // If the form already exists in the DOM, remove it.
+    if ($('form#' + form.id).length) { $('form#' + form.id).remove(); }
+    // Render the prefix and suffix and wrap them in their own div.
+    var prefix = form.prefix;
+    if (!empty(prefix)) {
+      prefix = '<div class="form_prefix">' + prefix + '</div>';
+    }
+    var suffix = form.suffix;
+    if (!empty(suffix)) {
+      suffix = '<div class="form_suffix">' + suffix + '</div>';
+    }
+    // Render the form's input elements.
+    var form_elements = _drupalgap_form_render_elements(form);
+    var form_attributes = drupalgap_attributes(form.options.attributes);
+    // Return the form html.
+    var form_html = '<form id="' + form.id + '" ' + form_attributes + '>' +
+      prefix +
+      '<div id="drupalgap_form_errors"></div>' +
+      form_elements +
+      suffix +
+    '</form>';
+    return form_html;
+  }
+  catch (error) { console.log('drupalgap_form_render - ' + error); }
+}
+
+/**
+ * Given a form element name and an error message, this attaches the error
+ * message to the drupalgap.form_errors array, keyed by the form element name.
+ * @param {String} name
+ * @param {String} message
+ */
+function drupalgap_form_set_error(name, message) {
+  try {
+    drupalgap.form_errors[name] = message;
+  }
+  catch (error) { console.log('drupalgap_form_set_error - ' + error); }
+}
+
+/**
+ * Given a form id, this will render the form and return the html for the form.
+ * Any additional arguments will be sent along to the form.
+ * @param {String} form_id
+ * @return {String}
+ */
+function drupalgap_get_form(form_id) {
+  try {
+    var html = '';
+    var form = drupalgap_form_load.apply(
+      null,
+      Array.prototype.slice.call(arguments)
+    );
+    if (form) {
+      // Render the form.
+      html = drupalgap_form_render(form);
+    }
+    else {
+      var msg = 'drupalgap_get_form - ' + t('failed to get form') +
+        ' (' + form_id + ')';
+      drupalgap_alert(msg);
+    }
+    return html;
+  }
+  catch (error) { console.log('drupalgap_get_form - ' + error); }
+}
+
+/**
+ * Given a form id, this will return the form JSON object assembled by the
+ * form's call back function. If the form fails to load, this returns false.
+ * @param {String} form_id
+ * @return {Object}
+ */
+function drupalgap_form_load(form_id) {
+  try {
+
+    var form = drupalgap_form_defaults(form_id);
+
+    // The form's call back function will be equal to the form id.
+    var function_name = form_id;
+    if (drupalgap_function_exists(function_name)) {
+
+      // Grab the form's function.
+      var fn = window[function_name];
+
+      // Determine the language code.
+      var language = language_default();
+
+      // Build the form arguments by iterating over each argument then adding
+      // each to to the form arguments, afterwards remove the argument at index
+      // zero because that is the form id.
+      var form_arguments = [];
+      for (var index in arguments) {
+          if (!arguments.hasOwnProperty(index)) { continue; }
+          var argument = arguments[index];
+          form_arguments.push(argument);
+      }
+      form_arguments.splice(0, 1);
+
+      // Attach the form arguments to the form object.
+      form.arguments = form_arguments;
+
+      // If there were no arguments to pass along, call the function directly to
+      // retrieve the form, otherwise call the function and pass along any
+      // arguments to retrieve the form.
+      if (form_arguments.length == 0) { form = fn(form, null); }
+      else {
+        // We must consolidate the form, form_state and arguments into one array
+        // and then pass it along to the form builder.
+        var consolidated_arguments = [];
+        var form_state = null;
+        consolidated_arguments.push(form);
+        consolidated_arguments.push(form_state);
+        for (var index in form_arguments) {
+            if (!form_arguments.hasOwnProperty(index)) { continue; }
+            var argument = form_arguments[index];
+            consolidated_arguments.push(argument);
+        }
+        form = fn.apply(
+          null,
+          Array.prototype.slice.call(consolidated_arguments)
+        );
+      }
+
+      // Set empty options and attributes properties on each form element if the
+      // element does not yet have any. This allows others to more easily modify
+      // options and attributes on an element without having to worry about
+      // testing for nulls and creating empty properties first.
+      for (var name in form.elements) {
+          if (!form.elements.hasOwnProperty(name)) { continue; }
+          var element = form.elements[name];
+          // If this element is a field, load its field_info_field and
+          // field_info_instance onto the element.
+          var element_is_field = false;
+          var field_info_field = drupalgap_field_info_field(name);
+          if (field_info_field) {
+            element_is_field = true;
+            form.elements[name].field_info_field = field_info_field;
+            form.elements[name].field_info_instance =
+              drupalgap_field_info_instance(
+                form.entity_type,
+                name,
+                form.bundle
+              );
+          }
+          form.elements[name].is_field = element_is_field;
+          // Set the name property on the element if it isn't already set.
+          if (!form.elements[name].name) { form.elements[name].name = name; }
+          // If the element is a field, we'll append a language code and delta
+          // value to the element id, along with the field items appended
+          // onto the element using the language code and delta values.
+          var id = null;
+          if (element_is_field) {
+            // What's the number of allowed values (cardinality) on this field?
+            // A cardinality of -1 means the field has unlimited values.
+            var cardinality = parseInt(element.field_info_field.cardinality);
+            if (cardinality == -1) {
+              cardinality = 1; // we'll just add one element for now, until we
+                               // figure out how to handle the 'add another
+                               // item' feature.
+            }
+            // Initialize the item collections language code if it hasn't been.
+            if (!form.elements[name][language]) {
+              form.elements[name][language] = {};
+            }
+            // Prepare the item(s) for this element.
+            for (var delta = 0; delta < cardinality; delta++) {
+              // Prepare some item defaults.
+              var item = drupalgap_form_element_item_create(
+                name,
+                form,
+                language,
+                delta
+              );
+              // If the delta for this item hasn't been created on the element,
+              // create it using the default item values. Otherwise, merge the
+              // default values into the pre existing item on the element.
+              if (!form.elements[name][language][delta]) {
+                form.elements[name][language][delta] = item;
+              }
+              else {
+                $.extend(true, form.elements[name][language][delta], item);
+              }
+            }
+          }
+          else {
+            // This element is not a field, setup default options if none
+            // have been provided. Then set the element id.
+            if (!element.options) {
+              form.elements[name].options = {attributes: {}};
+            }
+            else if (!element.options.attributes) {
+              form.elements[name].options.attributes = {};
+            }
+            id = drupalgap_form_get_element_id(name, form.id);
+            form.elements[name].id = id;
+            form.elements[name].options.attributes.id = id;
+          }
+      }
+
+      // Give modules an opportunity to alter the form.
+      module_invoke_all('form_alter', form, null, form_id);
+
+      // Place the assembled form into local storage so _drupalgap_form_submit
+      // will have access to the assembled form.
+      drupalgap_form_local_storage_save(form);
+    }
+    else {
+      var error_msg = 'drupalgap_form_load - ' + t('no callback function') +
+        ' (' + function_name + ') ' + t('available for form') +
+        ' (' + form_id + ')';
+      drupalgap_alert(error_msg);
+    }
+    return form;
+  }
+  catch (error) { console.log('drupalgap_form_load - ' + error); }
+}
+
+/**
+ * Given a form id, this will delete the form from local storage.
+ * If the form isn't in local storage, this returns false.
+ * @param {String} form_id
+ * @return {Object}
+ */
+function drupalgap_form_local_storage_delete(form_id) {
+  try {
+    var result = window.localStorage.removeItem(
+      drupalgap_form_id_local_storage_key(form_id)
+    );
+    return result;
+  }
+  catch (error) {
+    console.log('drupalgap_form_local_storage_delete - ' + error);
+  }
+}
+
+/**
+ * Given a form id, this will load the form from local storage and return it.
+ * If the form isn't in local storage, this returns false.
+ * @param {String} form_id
+ * @return {Object}
+ */
+function drupalgap_form_local_storage_load(form_id) {
+  try {
+    var form = false;
+    form = window.localStorage.getItem(
+      drupalgap_form_id_local_storage_key(form_id)
+    );
+    if (!form) { form = false; }
+    else { form = JSON.parse(form); }
+    return form;
+  }
+  catch (error) { console.log('drupalgap_form_local_storage_load - ' + error); }
+}
+
+/**
+ * Given a form, this will save the form to local storage, overwriting any
+ * previously saved forms.
+ * @param {Object} form
+ */
+function drupalgap_form_local_storage_save(form) {
+  try {
+    window.localStorage.setItem(
+      drupalgap_form_id_local_storage_key(form.id),
+      JSON.stringify(form)
+    );
+  }
+  catch (error) { console.log('drupalgap_form_local_storage_save - ' + error); }
+}
+
+/**
+ * Given a form id, this will return the local storage key used by DrupalGap
+ * to save the assembled form to the device's local storage.
+ * @param {String} form_id
+ * @return {String}
+ */
+function drupalgap_form_id_local_storage_key(form_id) {
+    return 'drupalgap_form_' + form_id;
+}
+
+/**
+ * Optionally use this function as an HTML DOM onkeypress handler, and it will
+ * attempt to listen for the enter key being pressed and submit the form at that
+ * time.
+ * @param {String} form_id
+ * @return {Boolean}
+ */
+function drupalgap_form_onkeypress(form_id) {
+  try {
+    var event = window.event;
+    var charCode = event.which || event.keyCode;
+    if (charCode != '13') { return; }
+    $('#' + form_id + ' button.dg_form_submit_button').click();
+    event.preventDefault();
+    return false;
+  }
+  catch (error) { console.log('drupalgap_form_onkeypress - ' + error); }
+}
+
+/**
  * Handles a drupalgap form's submit button click.
  * @param {String} form_id
  * @return {*}
@@ -3150,7 +3733,8 @@ function _drupalgap_form_submit(form_id) {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
     if (!form) {
-      var msg = '_drupalgap_form_submit - failed to load form: ' + form_id;
+      var msg = '_drupalgap_form_submit - ' + t('failed to load form') + ': ' +
+        form_id;
       drupalgap_alert(msg);
       return false;
     }
@@ -3166,10 +3750,12 @@ function _drupalgap_form_submit(form_id) {
       try {
 
         // Call the form's validate function(s), if any.
-        $.each(form.validate, function(index, function_name) {
+        for (var index in form.validate) {
+            if (!form.validate.hasOwnProperty(index)) { continue; }
+            var function_name = form.validate[index];
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        });
+        }
 
         // Call drupalgap form's api validate.
         _drupalgap_form_validate(form, form_state);
@@ -3178,9 +3764,11 @@ function _drupalgap_form_submit(form_id) {
         // form submission. Otherwise submit the form.
         if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
           var html = '';
-          $.each(drupalgap.form_errors, function(name, message) {
+          for (var name in drupalgap.form_errors) {
+              if (!drupalgap.form_errors.hasOwnProperty(name)) { continue; }
+              var message = drupalgap.form_errors[name];
               html += message + '\n\n';
-          });
+          }
           drupalgap_alert(html);
         }
         else { form_submission(); }
@@ -3194,10 +3782,12 @@ function _drupalgap_form_submit(form_id) {
     var form_submission = function() {
       try {
         // Call the form's submit function(s), if any.
-        $.each(form.submit, function(index, function_name) {
+        for (var index in form.submit) {
+            if (!form.submit.hasOwnProperty(index)) { continue; }
+            var function_name = form.submit[index];
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        });
+        }
         // Remove the form from local storage.
         // @todo - we can't do this here because often times a form's submit
         // handler makes asynchronous calls (i.e. user login) and although the
@@ -3233,6 +3823,176 @@ function _drupalgap_form_submit(form_id) {
 }
 
 /**
+ * An internal function used by the DrupalGap forms api to validate all the
+ * elements on a form.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function _drupalgap_form_validate(form, form_state) {
+  try {
+    for (var name in form.elements) {
+        if (!form.elements.hasOwnProperty(name)) { continue; }
+        var element = form.elements[name];
+        if (name == 'submit') { continue; }
+        if (element.required) {
+          var valid = true;
+          var value = null;
+          if (element.is_field) {
+            value = form_state.values[name][language_default()][0];
+          }
+          else { value = form_state.values[name]; }
+          // Check for empty values.
+          if (empty(value)) { valid = false; }
+          // Validate a required select list.
+          else if (
+            element.type == 'select' && element.required && value == ''
+          ) { valid = false; }
+          else if (element.type == 'checkboxes' && element.required) {
+            var has_value = false;
+            for (var key in form_state.values[name]) {
+              if (!form_state.values[name].hasOwnProperty(key)) { continue; }
+              var value = form_state.values[name][key];
+              if (value) { has_value = true; break; }
+            }
+            if (!has_value) { valid = false; }
+          }
+          if (!valid) {
+            var field_title = name;
+            if (element.title) { field_title = element.title; }
+            drupalgap_form_set_error(
+              name,
+              t('The') + ' ' + field_title + ' ' + t('field is required') + '.'
+            );
+          }
+        }
+    }
+  }
+  catch (error) { console.log('_drupalgap_form_validate - ' + error); }
+}
+
+/**
+ * Given a form, this function iterates over the form's elements and assembles
+ * each element and value and places them into the form state's values. This
+ * is similar to $form_state['values'] in Drupal.
+ * @param {Object} form
+ * @return {Object}
+ */
+function drupalgap_form_state_values_assemble(form) {
+  try {
+    var lng = language_default();
+    var form_state = { values: {} };
+    for (var name in form.elements) {
+      if (!form.elements.hasOwnProperty(name)) { continue; }
+      var element = form.elements[name];
+      if (name == 'submit') { continue; } // Always skip the form 'submit'.
+      var id = null;
+      if (element.is_field) {
+        form_state.values[name] = {};
+        form_state.values[name][lng] = {};
+        var allowed_values = element.field_info_field.cardinality;
+        if (allowed_values == -1) {
+          allowed_values = 1; // Convert unlimited value field to one for now...
+        }
+        for (var delta = 0; delta < allowed_values; delta++) {
+          id = drupalgap_form_get_element_id(name, form.id, lng, delta);
+          form_state.values[name][lng][delta] =
+            _drupalgap_form_state_values_assemble_get_element_value(
+              id,
+              element
+            );
+        }
+      }
+      else {
+        id = drupalgap_form_get_element_id(name, form.id);
+        form_state.values[name] =
+          _drupalgap_form_state_values_assemble_get_element_value(
+            id,
+            element
+          );
+      }
+    }
+    // Attach the form state to drupalgap.form_states keyed by the form id.
+    drupalgap.form_states[form.id] = form_state;
+    return form_state;
+  }
+  catch (error) {
+    console.log('drupalgap_form_state_values_assemble - ' + error);
+  }
+}
+
+/**
+ *
+ * @param {String} id
+ * @param {Object} element
+ * @return {String|Number}
+ */
+function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
+  try {
+    // If a value_callback is specified on the element, call that function to
+    // retrieve the element's value. Ohterwise, we'll use the default techniques
+    // implemented to extract a value for the form state.
+    if (element.value_callback && function_exists(element.value_callback)) {
+      var fn = window[element.value_callback];
+      return fn(id, element);
+    }
+    // Figure out the value, depending on the element type.
+    var value = null;
+    var selector = '';
+    if (element.type == 'radios') {
+      selector = 'input:radio[name="' + id + '"]:checked';
+    }
+    else { selector = '#' + id; }
+    switch (element.type) {
+      case 'checkbox':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = 1; }
+        else { value = 0; }
+        break;
+      case 'checkboxes':
+        // Iterate over each option, and see if it is checked, then pop it onto
+        // the value array. It's possible for values to be updated dynamically
+        // by a developer (i.e. through a pageshow handler), so it isn't safe to
+        // look at the options in local storage. Instead we'll directly iterate
+        // over the element option(s) in the DOM.
+        value = {};
+        var options = $('label[for="' + id + '"]').siblings('.ui-checkbox');
+        for (var index in options) {
+            if (!options.hasOwnProperty(index)) { continue; }
+            var option = options[index];
+            var checkbox = $(option).children('input');
+            var _value = $(checkbox).attr('value');
+            if ($(checkbox).is(':checked')) { value[_value] = _value; }
+            else { value[_value] = 0; }
+        }
+        break;
+      case 'list_boolean':
+        var _checkbox = $(selector);
+        if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
+        else { value = $(_checkbox).attr('off'); }
+        break;
+      case 'list_text':
+        // Radio buttons.
+        if (
+          element.field_info_instance &&
+          element.field_info_instance.widget.type == 'options_buttons'
+        ) {
+          selector = 'input:radio[name="' + id + '"]:checked';
+        }
+        break;
+    }
+    if (value === null) { value = $(selector).val(); }
+    if (typeof value === 'undefined') { value = null; }
+    return value;
+  }
+  catch (error) {
+    console.log(
+      '_drupalgap_form_state_values_assemble_get_element_value - ' +
+      error
+    );
+  }
+}
+
+/**
  * When a service call results in an error, this function is used to extract the
  * request's response form errors into a human readble string and returns it. If
  * there are no form errors, it will return false.
@@ -3249,7 +4009,9 @@ function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
     var responseText = JSON.parse(xhr.responseText);
     if (typeof responseText === 'object' && responseText.form_errors) {
       var msg = '';
-      $.each(responseText.form_errors, function(element_name, error_msg) {
+      for (var element_name in responseText.form_errors) {
+          if (!responseText.form_errors.hasOwnProperty(element_name)) { continue; }
+          var error_msg = responseText.form_errors[element_name];
           if (error_msg != '') {
             // The element name tends to come back weird, e.g.
             // "field_art_type][und", so let's trim anything at and after
@@ -3266,7 +4028,7 @@ function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
             msg += $('<div>(' + label + ') - ' +
               error_msg + '</div>').text() + '\n';
           }
-      });
+      }
       if (msg != '') { return msg; }
     }
     return false;
@@ -3274,67 +4036,6 @@ function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
   catch (error) {
     console.log('_drupalgap_form_submit_response_errors - ' + error);
   }
-}
-
-/**
- * An internal function used by the DrupalGap forms api to validate all the
- * elements on a form.
- * @param {Object} form
- * @param {Object} form_state
- */
-function _drupalgap_form_validate(form, form_state) {
-  try {
-    $.each(form.elements, function(name, element) {
-        if (name == 'submit') { return; }
-        if (element.required) {
-          var valid = true;
-          var value = null;
-          if (element.is_field) {
-            value = form_state.values[name][language_default()][0];
-          }
-          else { value = form_state.values[name]; }
-          // Check for empty values.
-          if (empty(value)) { valid = false; }
-          // Validate a required select list.
-          else if (
-            element.type == 'select' && element.required && value == ''
-          ) { valid = false; }
-          else if (element.type == 'checkboxes' && element.required) {
-            var has_value = false;
-            $.each(form_state.values[name], function(key, value) {
-                if (value) { has_value = true; return false; }
-            });
-            if (!has_value) { valid = false; }
-          }
-          if (!valid) {
-            var field_title = name;
-            if (element.title) { field_title = element.title; }
-            drupalgap_form_set_error(
-              name,
-              'The ' + field_title + ' field is required.'
-            );
-          }
-        }
-    });
-  }
-  catch (error) { console.log('_drupalgap_form_validate - ' + error); }
-}
-
-/**
- * Optionally use this function as an HTML DOM onkeypress handler, and it will
- * attempt to listen for the enter key being pressed and submit the form at that
- * time.
- */
-function drupalgap_form_onkeypress(form_id) {
-  try {
-    var event = window.event;
-    var charCode = event.which || event.keyCode;
-    if (charCode != '13') { return; }
-    $('#' + form_id + ' button.dg_form_submit_button').click();
-    event.preventDefault();
-    return false;
-  }
-  catch (error) { console.log('drupalgap_form_onkeypress - ' + error); }
 }
 
 /**
@@ -3364,8 +4065,10 @@ function theme_checkboxes(variables) {
   try {
     var html = '';
     variables.attributes.type = 'checkboxes';
-    $.each(variables.options, function(value, label) {
-        if (value == 'attributes') { return; } // Skip attributes.
+    for (var value in variables.options) {
+        if (!variables.options.hasOwnProperty(value)) { continue; }
+        var label = variables.options[value];
+        if (value == 'attributes') { continue; } // Skip attributes.
         var _label = value;
         if (!empty(label)) { _label = label; }
         var checkbox = {
@@ -3382,7 +4085,7 @@ function theme_checkboxes(variables) {
         html += '<label>' +
           theme('checkbox', checkbox) + '&nbsp;' + label +
         '</label>';
-    });
+    }
     // Check the box?
     /*if (variables.checked) {
       variables.attributes.checked = 'checked';
@@ -3524,7 +4227,9 @@ function theme_radios(variables) {
       }
       // Init a delta value so each radio button can have a unique id.
       var delta = 0;
-      $.each(variables.options, function(value, label) {
+      for (var value in variables.options) {
+          if (!variables.options.hasOwnProperty(value)) { continue; }
+          var label = variables.options[value];
           if (value == 'attributes') { return; } // Skip the attributes.
           var checked = '';
           if (variables.value && variables.value == value) {
@@ -3537,7 +4242,7 @@ function theme_radios(variables) {
                                  drupalgap_attributes(variables.attributes) +
                                  checked + ' />' + input_label;
           delta++;
-      });
+      }
     }
     return radios;
   }
@@ -3584,8 +4289,10 @@ function theme_select(variables) {
   try {
     var options = '';
     if (variables.options) {
-      $.each(variables.options, function(value, label) {
-          if (value == 'attributes') { return; } // Skip the attributes.
+      for (var value in variables.options) {
+          if (!variables.options.hasOwnProperty(value)) { continue; }
+          var label = variables.options[value];
+          if (value == 'attributes') { continue; } // Skip the attributes.
           // Is the option selected?
           var selected = '';
           if (
@@ -3596,7 +4303,7 @@ function theme_select(variables) {
           options += '<option value="' + value + '" ' + selected + '>' +
             label +
           '</option>';
-      });
+      }
     }
     return '<select ' + drupalgap_attributes(variables.attributes) + '>' +
       options +
@@ -3649,6 +4356,9 @@ function theme_textarea(variables) {
   catch (error) { console.log('theme_textarea - ' + error); }
 }
 
+// Holds onto any query string during the page go process.
+var _drupalgap_goto_query_string = null;
+
 /**
  * Given a path, this will change the current page in the app.
  * @param {String} path
@@ -3685,12 +4395,14 @@ function drupalgap_goto(path) {
       var new_path = false;
       var invocation_results = module_invoke_all('404', router_path);
       if (invocation_results) {
-        $.each(invocation_results, function(index, result) {
+        for (var index in invocation_results) {
+            if (!invocation_results.hasOwnProperty(index)) { continue; }
+            var result = invocation_results[index];
             if (result !== false) {
               new_path = result;
-              return false;
+              break;
             }
-        });
+        }
       }
       // If a 404 handler provided a new path use it, otherwise just use the
       // system 404 page. Either way, update the router path before continuing
@@ -3719,13 +4431,12 @@ function drupalgap_goto(path) {
 
     // If the new router path is the same as the current router path and the new
     // path is the same as the current path, we may need to cancel the
-    // navigation attempt (i.e. don't go anywhere), unless...act on it...don't go anywhere, unless it is a
+    // navigation attempt (i.e. don't go anywhere), unless it is a
     // form submission, then continue.
     if (
       router_path == drupalgap_router_path_get() &&
-      drupalgap_path_get() == path
+      path == drupalgap_path_get()
     ) {
-
       // If it's a form submission, we'll continue onward...
       if (options.form_submission) { }
 
@@ -3759,8 +4470,14 @@ function drupalgap_goto(path) {
       return false;
     }
 
+    // @TODO when drupalgap_goto() is called during the bootstrap, we shouldn't
+    // put the path onto the back_path array.
+
     // Save the back path.
-    drupalgap.back_path.push(drupalgap_path_get());
+    var back_paths_to_ignore = ['user/logout', '_reload'];
+    if (!in_array(drupalgap_path_get())) {
+      drupalgap.back_path.push(drupalgap_path_get());
+    }
 
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
@@ -3790,24 +4507,32 @@ function drupalgap_goto(path) {
       // remove it since it thinks we are already on the page, so it won't
       // remove it.
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        drupalgap_remove_page_from_dom(page_id, { force: true });
+        // @TODO we may need to leave the query ONLY if the above call to
+        // _drupalgap_goto_prepare_path() yielded a query string, otherwise we
+        // may be leaving unwanted queries in _GET()!
+        var leaveQuery = _drupalgap_goto_query_string ? true : false;
+        drupalgap_remove_page_from_dom(page_id, {
+          force: true,
+          leaveQuery: leaveQuery
+        });
         delete options.reloadPage;
         options.reloadingPage = true;
       }
       else if (!options.form_submission) {
-        // Clear any messages from the page.
         drupalgap_clear_messages();
+        _drupalgap_goto_query_string = null;
         drupalgap.page.process = false;
+        // @TODO changePage has been deprecated as of jQM 1.4.0 and will be
+        // removed in 1.50.
+        // @see https://api.jquerymobile.com/jQuery.mobile.changePage/
         $.mobile.changePage('#' + page_id, options);
-        // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
         return;
       }
     }
     else if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-      // The page is not in the DOM, and we're being asked to reload it, this
-      // can't happen, so we'll just delete the reloadPage option.
-      console.log('WARNING - drupalgap_goto() asked to reload page not in DOM');
+      // The page is not in the DOM, and we're being asked to reload it, so
+      // we'll just delete the reloadPage option.
       delete options.reloadPage;
     }
 
@@ -3845,6 +4570,9 @@ function drupalgap_goto_generate_page_and_go(
       );
     }
     else {
+
+      // Reset the internal query string.
+      _drupalgap_goto_query_string = null;
 
       // If options wasn't set, set it as an empty JSON object.
       if (typeof options === 'undefined') { options = {}; }
@@ -3888,7 +4616,7 @@ function drupalgap_goto_generate_page_and_go(
       else {
         drupalgap_alert(
           'drupalgap_goto_generate_page_and_go - ' +
-          'failed to load theme\'s page.tpl.html file'
+          t('failed to load theme\'s page.tpl.html file')
         );
       }
     }
@@ -3898,8 +4626,11 @@ function drupalgap_goto_generate_page_and_go(
   }
 }
 
- /**
- * @deprecated
+/**
+ * Prepares a drupalgap page path.
+ * @deprecated Use _drupalgap_goto_prepare_path() instead.
+ * @param {String} path
+ * @return {String}
  */
 function drupalgap_goto_prepare_path(path) {
   try {
@@ -3921,12 +4652,13 @@ function _drupalgap_goto_prepare_path(path) {
   try {
 
     // Pull out any query string parameters and populate them into _GET, if we
-    // were instructed to do so.
+    // were instructed to do so. Hold onto a global copy of the query string
+    // for page go processing.
     if (typeof arguments[1] !== 'undefined' && arguments[1]) {
       var pos = path.indexOf('?');
       if (pos != -1 && pos != path.length - 1) {
-        dpm('a ? is in the path! ' + path);
         var query = path.substr(pos + 1, path.length - pos);
+        _drupalgap_goto_query_string = query;
         path = path.substr(0, pos);
         var parts = query.split('&');
         for (var i = 0; i < parts.length; i++) {
@@ -3934,7 +4666,11 @@ function _drupalgap_goto_prepare_path(path) {
           if (pos == -1) { continue; }
           query = parts[i].split('=');
           if (query.length != 2) { continue; }
-          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]), path);
+          _GET(
+            decodeURIComponent(query[0]),
+            decodeURIComponent(query[1]),
+            path
+          );
         }
       }
     }
@@ -3944,7 +4680,7 @@ function _drupalgap_goto_prepare_path(path) {
       if (!drupalgap.settings.front) {
         drupalgap_alert(
           'drupalgap_goto_prepare_path - ' +
-          'no front page specified in settings.js!'
+          t('no front page specified in settings.js!')
         );
         return false;
       }
@@ -3971,7 +4707,7 @@ function _drupalgap_goto_prepare_path(path) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      var msg = 'Exit ' + drupalgap.settings.title + '?';
+      var msg = t('Exit') + ' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
       }
@@ -3989,9 +4725,16 @@ function drupalgap_back() {
  */
 function _drupalgap_back() {
   try {
+    // @WARNING - any changes here (except the history.back() call) need to be
+    // reflected into the window "navigate" handler below
     drupalgap.back = true;
     history.back();
     drupalgap_path_set(drupalgap.back_path.pop());
+    drupalgap_router_path_set(
+      drupalgap_get_menu_link_router_path(
+        drupalgap_path_get()
+      )
+    );
   }
   catch (error) { console.log('drupalgap_back' + error); }
 }
@@ -4007,25 +4750,38 @@ function _drupalgap_back_exit(button) {
   catch (error) { console.log('_drupalgap_back_exit - ' + error); }
 }
 
-$(window).on("navigate", function (event, data) {
+$(window).on('navigate', function(event, data) {
 
     // In web-app mode, clicking the back button on your browser (or Android
-    // device browser), the drupalgap path doesn't get updated for some
-    // reason(s), so we'll update it manually.
+    // device browser), does not actually fire drupalgap_back(), so we mimic
+    // it here, but skip the history.back() call because that's already
+    // happened via the hardware button.
     if (drupalgap.settings.mode == 'web-app') {
-      var direction = data.state.direction; // back or forward
+      // Grab the direction we're travelling.
+      // back, forward (or undefined, aka moving from splash to front page)
+      var direction = data.state.direction;
       if (direction == 'back' && drupalgap.back_path.length > 0) {
-        drupalgap.path = drupalgap.back_path[drupalgap.back_path.length - 1];
+        // @WARNING - any changes here should be reflected into
+        // _drupalgap_back().
+        drupalgap.back = true;
+        drupalgap_path_set(drupalgap.back_path[drupalgap.back_path.length - 1]);
+        drupalgap_router_path_set(
+          drupalgap_get_menu_link_router_path(
+            drupalgap_path_get()
+          )
+        );
       }
     }
 
 });
+
 /**
  * This will return the query string arguments for the page. You may optionally
  * pass in a key to get its value, pass in a key then a value to set the key
  * equal to the value, and you may optionally pass in a third argument to use
  * a specific page id, otherwise DrupalGap will automatically use the
  * appropriate page id.
+ * @return {String|NULL}
  */
 function _GET() {
   try {
@@ -4093,7 +4849,7 @@ function _GET() {
       // If the id hasn't been instantiated, do so. Then set the key and value
       // onto it.
       if (typeof _dg_GET[id] === 'undefined') { _dg_GET[id] = {}; }
-      if (value) {  _dg_GET[id][key] = value; }
+      if (value) { _dg_GET[id][key] = value; }
 
     }
     return null;
@@ -4178,12 +4934,14 @@ function template_process_page(variables) {
     var page_id = drupalgap_get_page_id(drupalgap_path);
     var page_html = $('#' + page_id).html();
     if (!page_html) { return; }
-    $.each(drupalgap.theme.regions, function(index, region) {
+    for (var index in drupalgap.theme.regions) {
+        if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
+        var region = drupalgap.theme.regions[index];
         page_html = page_html.replace(
           '{:' + region.name + ':}',
           drupalgap_render_region(region)
         );
-    });
+    }
     $('#' + page_id).html(page_html);
   }
   catch (error) { console.log('template_process_page - ' + error); }
@@ -4257,7 +5015,11 @@ function drupalgap_remove_page_from_dom(page_id) {
     if (current_page_id != page_id || options.force) {
       $('#' + page_id).empty().remove();
       delete drupalgap.pages[page_id];
-      if (typeof _dg_GET[page_id] !== 'undefined') { delete _dg_GET[page_id]; }
+      // We'll remove the query string, unless we were instructed to leave it.
+      if (
+        typeof _dg_GET[page_id] !== 'undefined' &&
+        (typeof options.leaveQuery === 'undefined' || !options.leaveQuery)
+      ) { delete _dg_GET[page_id]; }
     }
     else {
       console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
@@ -4273,11 +5035,13 @@ function drupalgap_remove_page_from_dom(page_id) {
 function drupalgap_remove_pages_from_dom() {
   try {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
-    $.each(drupalgap.pages, function(index, page_id) {
+    for (var index in drupalgap.pages) {
+        if (!drupalgap.pages.hasOwnProperty(index)) { continue; }
+        var page_id = drupalgap.pages[index];
         if (current_page_id != page_id) {
           drupalgap_remove_page_from_dom(page_id, null, current_page_id);
         }
-    });
+    }
     // Reset drupalgap.pages to only contain the current page id.
     drupalgap.pages = [current_page_id];
     // Reset the drupalgap.views.ids array.
@@ -4318,12 +5082,14 @@ function drupalgap_page_in_dom(page_id) {
     var pages = $("body div[data-role$='page']");
     var page_in_dom = false;
     if (pages && pages.length > 0) {
-      $.each(pages, function(index, page) {
+      for (var index in pages) {
+          if (!pages.hasOwnProperty(index)) { continue; }
+          var page = pages[index];
           if (($(page).attr('id')) == page_id) {
             page_in_dom = true;
-            return false;
+            break;
           }
-      });
+      }
     }
     return page_in_dom;
   }
@@ -4410,7 +5176,9 @@ function drupalgap_render_page() {
               // Replace each placeholder with html.
               // @todo - each placeholder should have its own container div and
               // unique id.
-              $.each(placeholders, function(index, placeholder) {
+              for (var index in placeholders) {
+                  if (!placeholders.hasOwnProperty(index)) { continue; }
+                  var placeholder = placeholders[index];
                   var html = '';
                   if (output[placeholder]) {
                     // Grab the element variable from the output.
@@ -4432,7 +5200,7 @@ function drupalgap_render_page() {
                     '{:' + placeholder + ':}',
                     html
                   );
-              });
+              }
             }
             else {
               // There were no place holders found, do nothing, ok.
@@ -4461,11 +5229,13 @@ function drupalgap_render_page() {
       // Iterate over any remaining variables and theme them.
       // @todo - each remaining variables should have its own container div and
       // unique id, similar to the placeholder div containers mentioned above.
-      $.each(output, function(element, variables) {
+      for (var element in output) {
+          if (!output.hasOwnProperty(element)) { continue; }
+          var variables = output[element];
           if ($.inArray(element, render_variables) == -1) {
             content += theme(variables.theme, variables);
           }
-      });
+      }
     }
 
     // Now that we are done assembling the content into an html string, we can
@@ -4526,9 +5296,11 @@ function drupalgap_render_region(region) {
         // This will allow us to properly wrap region links in a control group.
         var ui_btn_left_count = 0;
         var ui_btn_right_count = 0;
-        $.each(region.links, function(index, link) {
+        for (var index in region.links) {
+            if (!region.links.hasOwnProperty(index)) { continue; }
+            var link = region.links[index];
             var data = menu_region_link_get_data(link);
-            if (!drupalgap_check_visibility('region', data)) { return; }
+            if (!drupalgap_check_visibility('region', data)) { continue; }
             region_link_count++;
             var css_class = drupalgap_link_get_class(link);
             if (css_class) {
@@ -4536,7 +5308,7 @@ function drupalgap_render_region(region) {
               if (side == 'left') { ui_btn_left_count++; }
               else if (side == 'right') { ui_btn_right_count++; }
             }
-        });
+        }
 
         // We need to separately render each side of the header (left, right).
         // That allows us to properly wrap the links with a control group if
@@ -4655,12 +5427,12 @@ function drupalgap_render_region(region) {
         block_count: 0,
         block_menu_count: 0
       };
-      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name],
-        function(block_delta, block_settings) {
-
+      var blocks = drupalgap.settings.blocks[drupalgap.settings.theme][region.name];
+      for (var block_delta in blocks) {
+          if (!blocks.hasOwnProperty(block_delta)) { continue; }
+          var block_settings = blocks[block_delta];
           // Ignore region _prefix and _suffix.
-          if (block_delta == '_prefix' || block_delta == '_suffix') { return; }
-
+          if (block_delta == '_prefix' || block_delta == '_suffix') { continue; }
           // Render the block.
           region_html += drupalgap_block_render(
             region,
@@ -4669,8 +5441,7 @@ function drupalgap_render_region(region) {
             block_settings,
             block_counts
           );
-
-      });
+      }
 
       // If this was a header or footer, and there were only region links
       // rendered, place an empty header in the region.
@@ -4720,14 +5491,16 @@ function _drupalgap_region_render_zone(zone, region, current_path) {
       drupalgap.settings.blocks[drupalgap.settings.theme][region.name];
     if (typeof region_settings[zone] === 'undefined') { return html; }
     var blocks = region_settings[zone];
-    $.each(blocks, function(block_delta, block_settings) {
+    for (var block_delta in blocks) {
+        if (!blocks.hasOwnProperty(block_delta)) { continue; }
+        var block_settings = blocks[block_delta];
         html += drupalgap_block_render(
           region,
           current_path,
           block_delta,
           block_settings
         );
-    });
+    }
     return html;
   }
   catch (error) { console.log('_drupalgap_region_render_zone - ' + error); }
@@ -4736,6 +5509,8 @@ function _drupalgap_region_render_zone(zone, region, current_path) {
 /**
  * Given a key (typically a block delta), this will generate a unique ID that
  * can be used for the panel. It will be fused with the current page id.
+ * @param {String} key
+ * @return {String}
  */
 function drupalgap_panel_id(key) {
   try {
@@ -4783,15 +5558,14 @@ function menu_execute_active_handler() {
         // the url so the entity is sent via the page arguments to the page
         // callback, instead of just sending the integer.
         var args = arg(null, path);
-        $.each(
-          drupalgap.menu_links[router_path].page_arguments,
-          function(index, object) {
+        for (var index in drupalgap.menu_links[router_path].page_arguments) {
+            if (!drupalgap.menu_links[router_path].page_arguments.hasOwnProperty(index)) { continue; }
+            var object = drupalgap.menu_links[router_path].page_arguments[index];
             if (is_int(object) && args[object]) {
               page_arguments.push(args[object]);
             }
             else { page_arguments.push(object); }
-          }
-        );
+        }
 
         // Call the page callback function with the page arguments.
         content = fn.apply(null, Array.prototype.slice.call(page_arguments));
@@ -4918,22 +5692,24 @@ function menu_list_system_menus() {
   try {
     var system_menus = {
       'user_menu_anonymous': {
-        'title': 'User menu authenticated'
+        'title': t('User menu authenticated')
       },
       'user_menu_authenticated': {
-        'title': 'User menu authenticated'
+        'title': t('User menu authenticated')
       },
       'main_menu': {
-        'title': 'Main menu'
+        'title': t('Main menu')
       },
       'primary_local_tasks': {
-        'title': 'Primary Local Tasks'
+        'title': t('Primary Local Tasks')
       }
     };
     // Add the menu_name to each menu as a property.
-    $.each(system_menus, function(menu_name, menu) {
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
         menu.menu_name = menu_name;
-    });
+    }
     return system_menus;
   }
   catch (error) { console.log('menu_list_system_menus - ' + error); }
@@ -4952,14 +5728,18 @@ function menu_router_build() {
     var function_name;
     var fn;
     var menu_links;
-    $.each(modules, function(index, module) {
+    for (var index in modules) {
+        if (!modules.hasOwnProperty(index)) { continue; }
+        var module = modules[index];
         // Determine the hook function name, grab the function, and call it
         // to retrieve the hook's menu links.
         function_name = module + '_menu';
         fn = window[function_name];
         menu_links = fn();
         // Iterate over each item.
-        $.each(menu_links, function(path, menu_item) {
+        for (var path in menu_links) {
+            if (!menu_links.hasOwnProperty(path)) { continue; }
+            var menu_item = menu_links[path];
             // Attach module name to item.
             menu_item.module = module;
             // Set a default type for the item if one isn't provided.
@@ -4985,8 +5765,8 @@ function menu_router_build() {
             );
             // Attach item to menu links.
             drupalgap.menu_links[path] = menu_item;
-        });
-    });
+        }
+    }
   }
   catch (error) { console.log('menu_router_build - ' + error); }
 }
@@ -5126,7 +5906,9 @@ function drupalgap_menus_load() {
   try {
     if (drupalgap.settings.menus) {
       // Process each menu defined in the settings.
-      $.each(drupalgap.settings.menus, function(menu_name, menu) {
+      for (var menu_name in drupalgap.settings.menus) {
+          if (!drupalgap.settings.menus.hasOwnProperty(menu_name)) { continue; }
+          var menu = drupalgap.settings.menus[menu_name];
           // If the menu does not already exist, it is a custom menu, so create
           // the menu and its corresponding block.
           if (!drupalgap.menus[menu_name]) {
@@ -5152,11 +5934,13 @@ function drupalgap_menus_load() {
             // custom settings.
             $.extend(true, drupalgap.menus[menu_name], menu);
           }
-      });
+      }
       // Now that we have all of the menus loaded up, and the menu router is
       // built, let's iterate over all the menu links and perform various
       // operations on them.
-      $.each(drupalgap.menu_links, function(path, menu_link) {
+      for (var path in drupalgap.menu_links) {
+          if (!drupalgap.menu_links.hasOwnProperty(path)) { continue; }
+          var menu_link = drupalgap.menu_links[path];
           // Let's grab any links from the router that have a menu specified,
           // and add the link to the router.
           if (menu_link.menu_name) {
@@ -5193,12 +5977,14 @@ function drupalgap_menus_load() {
               menu_link
             );
           }
-      });
+      }
       // If there are any region menu links defined in settings.js, create a
       // links array for the region if one doesn't exist already, then add the
       // menu item to the links array as a link.
       if (typeof drupalgap.settings.menus.regions !== 'undefined') {
-        $.each(drupalgap.settings.menus.regions, function(region, menu) {
+        for (var region in drupalgap.settings.menus.regions) {
+            if (!drupalgap.settings.menus.regions.hasOwnProperty(region)) { continue; }
+            var menu = drupalgap.settings.menus.regions[region];
             if (
               typeof menu.links !== 'undefined' &&
               $.isArray(menu.links) &&
@@ -5207,11 +5993,13 @@ function drupalgap_menus_load() {
               if (!drupalgap.theme.regions[region].links) {
                 drupalgap.theme.regions[region].links = [];
               }
-              $.each(menu.links, function(index, link) {
+              for (var index in menu.links) {
+                  if (!menu.links.hasOwnProperty(index)) { continue; }
+                  var link = menu.links[index];
                   drupalgap.theme.regions[region].links.push(link);
-              });
+              }
             }
-        });
+        }
       }
     }
   }
@@ -5284,7 +6072,9 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
         if (typeof menu_item.siblings === 'undefined') {
           menu_item.siblings = [];
         }
-        $.each(drupalgap.menu_links[parent].children, function(index, sibling) {
+        for (var index in drupalgap.menu_links[parent].children) {
+            if (!drupalgap.menu_links[parent].children.hasOwnProperty(index)) { continue; }
+            var sibling = drupalgap.menu_links[parent].children[index];
             if (sibling != path && drupalgap.menu_links[sibling]) {
               if (
                 typeof drupalgap.menu_links[sibling].siblings === 'undefined'
@@ -5294,7 +6084,7 @@ function drupalgap_menu_router_build_menu_item_relationships(path, menu_item) {
               drupalgap.menu_links[sibling].siblings.push(path);
               menu_item.siblings.push(sibling);
             }
-        });
+        }
       }
     }
   }
@@ -5377,449 +6167,6 @@ function theme(hook, variables) {
 }
 
 /**
- * Autocomplete global variables. Used to hold onto various global variables
- * needed for an autocomplete.
- */
-// The autocomplete text field input selector.
-var _theme_autocomplete_input_selector = {};
-
-// The autocomplete remote boolean.
-var _theme_autocomplete_remote = {};
-
-// The theme autocomplete variables.
-var _theme_autocomplete_variables = {};
-
-// The theme autocomplete variables.
-var _theme_autocomplete_success_handlers = {};
-
-/**
- * Themes an autocomplete.
- * @param {Object} variables
- * @return {String}
- */
-function theme_autocomplete(variables) {
-  try {
-    var html = '';
-
-    // We need to have a unique identifier for this autocomplete. If it is a
-    // field, use the field name. Otherwise use the id attribute if it is
-    // provided or generate a random one. Then finally attach the autocomplete
-    // id to the variables so it can be passed along.
-    var autocomplete_id = null;
-    if (typeof variables.field_info_field !== 'undefined') {
-      autocomplete_id = variables.field_info_field.field_name;
-    }
-    else if (typeof variables.attributes.id !== 'undefined') {
-      autocomplete_id = variables.attributes.id;
-    }
-    else { autocomplete_id = user_password(); }
-    variables.autocomplete_id = autocomplete_id;
-
-    // Hold onto a copy of the variables.
-    _theme_autocomplete_variables[autocomplete_id] = variables;
-
-    // Are we dealing with a remote data set?
-    var remote = false;
-    if (variables.remote) { remote = true; }
-    variables.remote = remote;
-    _theme_autocomplete_remote[autocomplete_id] = variables.remote;
-
-    // Make sure we have an id to use on the list.
-    var id = null;
-    if (variables.attributes.id) { id = variables.attributes.id; }
-    else {
-      id = 'autocomplete_' + user_password();
-      variables.attributes.id = id;
-    }
-
-    // We need a hidden input to hold the value. If a default value
-    // was provided by a form element, use it.
-    var hidden_attributes = { id: id };
-    if (
-      variables.element &&
-      typeof variables.element.default_value !== 'undefined'
-    ) { hidden_attributes.value = variables.element.default_value; }
-    html += theme('hidden', { attributes: hidden_attributes });
-
-    // Now we need an id for the list.
-    var list_id = id + '-list';
-
-    // Build the widget variables.
-    var widget = {
-      attributes: {
-        'id': list_id,
-        'data-role': 'listview',
-        'data-filter': 'true',
-        'data-inset': 'true',
-        'data-filter-placeholder': '...'
-      }
-    };
-
-    // Handle a remote data set.
-    var js = '';
-    if (variables.remote) {
-      widget.items = [];
-      // We have a remote data set.
-      js += '<script type="text/javascript">' +
-        '$("#' + list_id + '").on("filterablebeforefilter", function(e, d) { ' +
-          '_theme_autocomplete(this, e, d, "' + autocomplete_id + '"); ' +
-        '});' +
-      '</script>';
-    }
-    else {
-      // Prepare the items then set the data filter reveal attribute.
-      widget.items = _theme_autocomplete_prepare_items(variables);
-      widget.attributes['data-filter-reveal'] = true;
-    }
-
-    // Save a reference to the autocomplete text field input.
-    var selector = '#' + drupalgap_get_page_id() +
-      ' #' + id + ' + form.ui-filterable' +
-      ' input[data-type="search"]';
-    js += '<script type="text/javascript">' +
-      '_theme_autocomplete_input_selector["' + autocomplete_id + '"] = \'' +
-        selector +
-      '\';' +
-    '</script>';
-
-    // Theme the list and add the js to it, then return the html.
-    html += theme('item_list', widget);
-    html += js;
-    return html;
-  }
-  catch (error) { console.log('theme_autocomplete - ' + error); }
-}
-
-/**
- * An internal function used to handle remote data for an autocomplete.
- * @param {Object} list The unordered list that displays the items.
- * @param {Object} e
- * @param {Object} data
- * @param {String} autocomplete_id
- */
-function _theme_autocomplete(list, e, data, autocomplete_id) {
-  try {
-    var autocomplete = _theme_autocomplete_variables[autocomplete_id];
-    // Make sure a filter is present.
-    if (typeof autocomplete.filter === 'undefined') {
-      console.log(
-        '_theme_autocomplete - A "filter" was not supplied.'
-      );
-      return;
-    }
-
-    // Make sure a value and/or label has been supplied so we know how to render
-    // the items in the autocomplete list.
-    var value_provided =
-      typeof autocomplete.value !== 'undefined' ? true : false;
-    var label_provided =
-      typeof autocomplete.label !== 'undefined' ? true : false;
-    if (!value_provided && !label_provided) {
-      console.log(
-        '_theme_autocomplete - A "value" and/or "label" was not supplied.'
-      );
-      return;
-    }
-    else {
-      // We have a value and/or label. If one isn't provided, set it equal to
-      // the other.
-      if (!value_provided) { autocomplete.value = autocomplete.label; }
-      else if (!label_provided) { autocomplete.label = autocomplete.value; }
-    }
-    // Setup the vars to handle this widget.
-    var $ul = $(list),
-        $input = $(data.input),
-        value = $input.val(),
-        html = '';
-    // Clear the list.
-    $ul.html('');
-    // If a value has been input, start the autocomplete search.
-    if (value && value.length > 0) {
-      // Show the loader icon.
-      $ul.html('<li><div class="ui-loader">' +
-        '<span class="ui-icon ui-icon-loading"></span>' +
-        '</div></li>');
-      $ul.listview('refresh');
-
-      // Let's first build the success handler that will place the items into
-      // the autocomplete list.
-      _theme_autocomplete_success_handlers[autocomplete_id] = function(
-        _autocomplete_id, result_items, _wrapped, _child) {
-        try {
-
-          // If there are no results, and then if an empty callback handler was
-          // provided, call it.
-          // empty callback handler, then call it and return.
-          if (result_items.length == 0) {
-            if (autocomplete.empty_callback) {
-              var fn = window[autocomplete.empty_callback];
-              fn(value);
-            }
-          }
-          else {
-
-            // Convert the result into an items array for a list. Each item will
-            // be a JSON object with a "value" and "label" properties.
-            var items = [];
-            var _value = autocomplete.value;
-            var _label = autocomplete.label;
-            $.each(result_items, function(index, object) {
-                var _item = null;
-                if (_wrapped) { _item = object[_child]; }
-                else { _item = object; }
-                var item = {
-                  value: _item[_value],
-                  label: _item[_label]
-                };
-                items.push(item);
-            });
-
-            // Now render the items, add them to list and refresh the list.
-            if (items.length != 0) {
-              autocomplete.items = items;
-              var _items = _theme_autocomplete_prepare_items(autocomplete);
-              $.each(_items, function(index, item) {
-                html += '<li>' + item + '</li>';
-              });
-              $ul.html(html);
-              $ul.listview('refresh');
-              $ul.trigger('updatelayout');
-            }
-          }
-
-          // Anybody want to act on the completion of the autocomplete?
-          if (autocomplete.finish_callback) {
-            var fn = window[autocomplete.finish_callback];
-            fn(value);
-          }
-
-        }
-        catch (error) {
-          console.log('_theme_autocomplete_success_handlers[' +
-            _autocomplete_id +
-          '] - ' + error);
-        }
-      };
-
-      // Depending on the handler, build the path and call the Drupal site for
-      // the data. If it's a custom path, see if a handler was provided,
-      // otherwise just default to views.
-      var handler = null;
-      if (autocomplete.custom) {
-        if (autocomplete.handler) { handler = autocomplete.handler; }
-        else { handler = 'views'; }
-      }
-      else {
-        handler = autocomplete.field_info_field.settings.handler;
-      }
-      switch (handler) {
-
-        // Views (and Organic Groups)
-        case 'views':
-        case 'og':
-          // Prepare the path to the view.
-          var path = autocomplete.path + '?' + autocomplete.filter + '=' +
-            encodeURIComponent(value);
-          // Any extra params to send along?
-          if (autocomplete.params) { path += '&' + autocomplete.params; }
-
-          // Retrieve JSON results. Keep in mind, we use this for retrieving
-          // Views JSON results and custom hook_menu() path results in Drupal.
-          views_datasource_get_view_result(path, {
-              success: function(results) {
-                // If this was a custom path, don't use a wrapper around the
-                // results like the one used by Views Datasource.
-                var wrapped = true;
-                if (autocomplete.custom) { wrapped = false; }
-
-                // Extract the result items based on the presence of the wrapper
-                // or not.
-                var result_items = null;
-                if (wrapped) { result_items = results[results.view.root]; }
-                else { result_items = results; }
-
-                // Finally call the sucess handler.
-                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, result_items, wrapped, results.view.child);
-              }
-          });
-          break;
-
-        // Simple entity selection mode, use the Index resource for the entity
-        // type.
-        case 'base':
-          var field_settings =
-            autocomplete.field_info_field.settings;
-          var index_resource = field_settings.target_type + '_index';
-          if (!drupalgap_function_exists(index_resource)) {
-            console.log('WARNING - _theme_autocomplete - ' +
-              index_resource + '() does not exist!'
-            );
-            return;
-          }
-          var options = {
-            fields: ['nid', 'title'],
-            parameters: {
-              title: '%' + value + '%'
-            },
-            parameters_op: {
-              title: 'like'
-            }
-          };
-          $.each(
-            field_settings.handler_settings.target_bundles,
-            function(bundle, name) {
-              options.parameters.type = bundle;
-              // @TODO allow multiple bundles to be indexed.
-              return false;
-          });
-          var fn = window[index_resource];
-          fn(options, {
-              success: function(results) {
-                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, results, false);
-              }
-          });
-          break;
-
-        // An entity index resource call. Figure out which entity type index
-        // to call, and build a default query if one wasn't provided.
-        case 'index':
-          if (!autocomplete.entity_type) {
-            console.log(
-              'WARNING - _theme_autocomplete - no entity_type provided'
-            );
-            return;
-          }
-          var function_name = autocomplete.entity_type + '_index';
-          var fn = window[function_name];
-          var query = null;
-          if (autocomplete.query) { query = autocomplete.query; }
-          else {
-            query = {
-              parameters: { },
-              parameters_op: { }
-            };
-            var fields = [];
-            switch (autocomplete.entity_type) {
-              case 'node':
-                fields = ['nid', 'title'];
-                break;
-              case 'taxonomy_term':
-                fields = ['tid', 'name'];
-                if (autocomplete.vid) {
-                  query.parameters['vid'] = autocomplete.vid;
-                }
-                break;
-            }
-            query.fields = fields;
-            query.parameters[autocomplete.filter] = '%' + value + '%';
-            query.parameters_op[autocomplete.filter] = 'like';
-          }
-          fn.apply(null, [query, {
-              success: function(results) {
-                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, results, false, null);
-              }
-          }]);
-          break;
-
-        // The default handler...
-        default:
-
-          // If we made it this far, and don't have a handler, then warn the
-          // developer.
-          if (!handler) {
-            console.log('WARNING - _theme_autocomplete - no handler provided');
-            return;
-          }
-
-          break;
-
-      }
-
-    }
-  }
-  catch (error) { console.log('_theme_autocomplete - ' + error); }
-}
-
-/**
- * An internal function used to prepare the items for an autocomplete list.
- * @param {Object} variables
- * @return {*}
- */
-function _theme_autocomplete_prepare_items(variables) {
-  try {
-    // Make sure we have an items array.
-    var items = [];
-    if (variables.items) { items = variables.items; }
-
-    // Prepare the items, and return them.
-    var _items = [];
-    if (items.length > 0) {
-      $.each(items, function(index, item) {
-          var value = '';
-          var label = '';
-          if (typeof item === 'string') {
-            value = item;
-            label = item;
-          }
-          else {
-            value = item.value;
-            label = item.label;
-          }
-          var options = {
-            attributes: {
-              value: value,
-              onclick: '_theme_autocomplete_click(\'' +
-                variables.attributes.id +
-              '\', this, \'' + variables.autocomplete_id + '\')'
-            }
-          };
-          var _item = l(label, null, options);
-          _items.push(_item);
-      });
-    }
-    return _items;
-  }
-  catch (error) { console.log('_theme_autocomplete_prepare_items - ' + error); }
-}
-
-/**
- * An internal function used to handle clicks on items in autocomplete results.
- * @param {String} id The id of the hidden input that holds the value.
- * @param {Object} item The list item anchor that was just clicked.
- * @param {String} autocomplete_id
- */
-function _theme_autocomplete_click(id, item, autocomplete_id) {
-  try {
-    // Set the hidden input with the value, and the text field with the text.
-    var list_id = id + '-list';
-    $('#' + id).val($(item).attr('value'));
-    $(_theme_autocomplete_input_selector[autocomplete_id]).val($(item).html());
-    if (_theme_autocomplete_remote[autocomplete_id]) {
-      $('#' + list_id).html('');
-    }
-    else {
-      $('#' + list_id + ' li').addClass('ui-screen-hidden');
-      $('#' + list_id).listview('refresh');
-    }
-    // Now fire the item onclick handler, if one was provided.
-    if (
-      _theme_autocomplete_variables[autocomplete_id].item_onclick &&
-      drupalgap_function_exists(
-        _theme_autocomplete_variables[autocomplete_id].item_onclick
-      )
-    ) {
-      var fn =
-        window[_theme_autocomplete_variables[autocomplete_id].item_onclick];
-      fn(id, $(item));
-    }
-  }
-  catch (error) { console.log('_theme_autocomplete_click - ' + error); }
-}
-
-/**
  * Themes a button.
  * @param {Object} variables
  * @return {String}
@@ -5880,9 +6227,11 @@ function theme_collapsibleset(variables) {
   try {
     variables.attributes['data-role'] = 'collapsible-set';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
-    $.each(variables.items, function(index, item) {
+    for (var index in variables.items) {
+        if (!variables.items.hasOwnProperty(index)) { continue; }
+        var item = variables.items[index];
         html += theme('collapsible', item);
-    });
+    }
     html += '</div>';
     return html;
   }
@@ -5898,7 +6247,11 @@ function theme_controlgroup(variables) {
   try {
     variables.attributes['data-role'] = 'controlgroup';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>';
-    $.each(variables.items, function(index, item) { html += item; });
+    for (var index in variables.items) {
+      if (!variables.items.hasOwnProperty(index)) { continue; }
+      var item = variables.items[index];
+      html += item;
+    }
     html += '</div>';
     return html;
   }
@@ -5996,12 +6349,13 @@ function theme_image_style(variables) {
 function theme_item(variables) {
   try {
     var html = '';
-    //var mvc_model_system_fields
-    $.each(variables.item, function(field, value) {
+    for (var field in variables.item) {
+        if (!variables.item.hasOwnProperty(field)) { continue; }
+        var value = variables.item[field];
         html +=
           '<h2>' + variables.model.fields[field].title + '</h2>' +
           '<p>' + value + '</p>';
-    });
+    }
     return html;
   }
   catch (error) { console.log('theme_item - ' + error); }
@@ -6025,9 +6379,11 @@ function theme_item_list(variables) {
       drupalgap_attributes(variables.attributes) + '>';
     if (variables.items && variables.items.length > 0) {
       var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
-          variables.attributes['data-role'] == 'listview';
-      $.each(variables.items, function(index, item) {
-          var icon;
+        variables.attributes['data-role'] == 'listview';
+      for (var index in variables.items) {
+          if (!variables.items.hasOwnProperty(index)) { continue; }
+          var item = variables.items[index];
+          var icon = null;
           html += '<li';
           if (listview && (icon = $(item).attr('data-icon'))) {
             // If we're in a listview and the item specifies an icon,
@@ -6035,7 +6391,7 @@ function theme_item_list(variables) {
             html += ' data-icon="' + icon + '"';
           }
           html += '>' + item + '</li>';
-      });
+      }
     }
     html += '</' + type + '>';
     return html;
@@ -6107,11 +6463,13 @@ function theme_link(variables) {
           // onclick handler.
 
           var goto_options = '';
-          $.each(variables.options, function(option, value) {
-              if (option == 'attributes') { return; }
+          for (var option in variables.options) {
+              if (!variables.options.hasOwnProperty(option)) { continue; }
+              var value = variables.options[option];
+              if (option == 'attributes') { continue; }
               if (typeof value === 'string') { value = "'" + value + "'"; }
               goto_options += option + ':' + value + ',';
-          });
+          }
           onclick =
             'drupalgap_goto(\'' +
               variables.path + '\', ' +
@@ -6158,7 +6516,7 @@ function theme_link(variables) {
 function theme_logout(variables) {
   try {
     return bl(
-      'Logout',
+      t('Logout'),
       'user/logout',
       {
         attributes: {
@@ -6220,24 +6578,30 @@ function theme_table(variables) {
     var html = '<table ' + drupalgap_attributes(variables.attributes) + '>';
     if (variables.header) {
       html += '<thead><tr>';
-      $.each(variables.header, function(index, column) {
+      for (var index in variables.header) {
+          if (!variables.header.hasOwnProperty(index)) { continue; }
+          var column = variables.header[index];
           if (column.data) {
             html += '<td>' + column.data + '</td>';
           }
-      });
+      }
       html += '</tr></thead>';
     }
     html += '<tbody>';
     if (variables.rows) {
-      $.each(variables.rows, function(row_index, row) {
+      for (var row_index in variables.rows) {
+          if (!variables.rows.hasOwnProperty(row_index)) { continue; }
+          var row = variables.rows[row_index];
           html += '<tr>';
           if (row) {
-            $.each(row, function(column_index, column) {
-                html += '<td>' + column + '</td>';
-            });
+            for (var column_index in row) {
+              if (!row.hasOwnProperty(column_index)) { continue; }
+              var column = row[column_index];
+              html += '<td>' + column + '</td>';
+            }
           }
           html += '</tr>';
-      });
+      }
     }
     return html + '</tbody></table>';
   }
@@ -6288,14 +6652,15 @@ function _drupalgap_page_title_pageshow(page_arguments) {
           // corresponding arg(#), otherwise just push the arg onto the title
           // arguments.
           var args = arg(null, drupalgap_path_get());
-          $.each(
-            drupalgap.menu_links[router_path].title_arguments,
-            function(index, object) {
+          var _title_arguments = drupalgap.menu_links[router_path].title_arguments;
+          for (var index in items) {
+              if (!items.hasOwnProperty(index)) { continue; }
+              var object = items[index];
               if (is_int(object) && args[object]) {
                 title_arguments.push(args[object]);
               }
               else { title_arguments.push(object); }
-          });
+          }
         }
         // Call the title callback function with the title arguments.
         drupalgap_set_title(
@@ -6335,7 +6700,7 @@ function _drupalgap_page_title_pageshow_success(title) {
 function comment_menu() {
     var items = {
       'comment/%': {
-        title: 'Comment',
+        title: t('Comment'),
         page_callback: 'comment_page_view',
         page_arguments: [1],
         pageshow: 'comment_page_view_pageshow',
@@ -6343,12 +6708,12 @@ function comment_menu() {
         title_arguments: [1]
       },
       'comment/%/view': {
-        title: 'View',
+        title: t('View'),
         type: 'MENU_DEFAULT_LOCAL_TASK',
         weight: -10
       },
       'comment/%/edit': {
-        title: 'Edit',
+        title: t('Edit'),
         page_callback: 'entity_page_edit',
         pageshow: 'entity_page_edit_pageshow',
         page_arguments: ['comment_edit', 'comment', 1],
@@ -6424,7 +6789,7 @@ function comment_page_view(cid) {
       };
       return content;
     }
-    else { drupalgap_error('No comment id provided!'); }
+    else { drupalgap_error(t('No comment id provided!')); }
   }
   catch (error) { console.log('comment_page_view - ' + error); }
 }
@@ -6518,14 +6883,14 @@ function comment_edit(form, form_state, comment, node) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel and delete button to form if we're editing a comment. Also
     // figure out a form title to use in the prefix.
-    var form_title = 'Add comment';
+    var form_title = t('Add comment');
     if (comment && comment.cid) {
-      form_title = 'Edit comment';
+      form_title = t('Edit comment');
       form.buttons['cancel'] = drupalgap_form_cancel_button();
       form.buttons['delete'] =
         drupalgap_entity_edit_form_delete_button('comment', comment.cid);
@@ -6668,7 +7033,7 @@ function theme_comment(variables) {
       (user_access('edit own comments') && comment.uid == Drupal.user.uid)
     ) {
       html += theme('button_link', {
-          text: 'Edit',
+          text: t('Edit'),
           path: 'comment/' + comment.cid + '/edit',
           attributes: {
             'data-icon': 'gear'
@@ -6690,14 +7055,14 @@ function contact_menu() {
   try {
     var items = {};
     items['contact'] = {
-      title: 'Contact',
+      title: t('Contact'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['contact_site_form'],
       pageshow: 'contact_site_form_pageshow',
       access_arguments: ['access site-wide contact form']
     };
     items['user/%/contact'] = {
-      title: 'User contact',
+      title: t('User contact'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['contact_personal_form', 1],
       pageshow: 'contact_personal_form_pageshow',
@@ -6764,39 +7129,39 @@ function contact_personal(options) {
 function contact_site_form(form, form_state) {
   try {
     form.elements.name = {
-      title: 'Your name',
+      title: t('Your name'),
       type: 'textfield',
       required: true
     };
     form.elements.mail = {
-      title: 'Your e-mail address',
+      title: t('Your e-mail address'),
       type: 'email',
       required: true
     };
     form.elements.subject = {
-      title: 'Subject',
+      title: t('Subject'),
       type: 'textfield',
       required: true
     };
     form.elements.category = {
-      title: 'Category',
+      title: t('Category'),
       type: 'select',
       required: true
     };
     form.elements.message = {
-      title: 'Message',
+      title: t('Message'),
       type: 'textarea',
       required: true
     };
     form.elements.copy = {
-      title: 'Send yourself a copy?',
+      title: t('Send yourself a copy?'),
       type: 'checkbox',
       default_value: 0,
       access: false
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Send message'
+      value: t('Send message')
     };
     // If the user is logged in, set the default values.
     if (Drupal.user.uid != 0) {
@@ -6819,14 +7184,16 @@ function contact_site_form_pageshow() {
     contact_index({
         success: function(results) {
           if (!results || !results.length) { return; }
-          $.each(results, function(index, result) {
+          for (var index in results) {
+              if (!results.hasOwnProperty(index)) { continue; }
+              var result = results[index];
               var selected = result.selected == 1 ? 'selected' : '';
               var option =
                 '<option value="' + result.cid + '" ' + selected + '>' +
                   result.category +
                 '</option>';
               $('#edit-contact-site-form-category').append(option);
-          });
+          }
           $('#edit-contact-site-form-category').selectmenu('refresh');
           if (results.length == 1) {
             $('#contact_site_form .field-name-category').hide();
@@ -6855,12 +7222,12 @@ function contact_site_form_submit(form, form_state) {
       data: JSON.stringify(data),
       success: function(result) {
         if (result[0]) {
-          drupalgap_alert('Your message has been sent!');
+          drupalgap_alert(t('Your message has been sent!'));
         }
         else {
           drupalgap_alert(
-            'There was a problem sending your message!',
-            { title: 'Error' }
+            t('There was a problem sending your message!'),
+            { title: t('Error') }
           );
         }
         drupalgap_form_clear();
@@ -6870,9 +7237,11 @@ function contact_site_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }
@@ -6892,12 +7261,12 @@ function contact_personal_form(form, form_state, recipient) {
     // @TODO - when providing a personal contact form, make sure the user has
     // their personal contact form enabled.
     form.elements.name = {
-      title: 'Your name',
+      title: t('Your name'),
       type: 'textfield',
       required: true
     };
     form.elements.mail = {
-      title: 'Your e-mail address',
+      title: t('Your e-mail address'),
       type: 'email',
       required: true
     };
@@ -6911,24 +7280,24 @@ function contact_personal_form(form, form_state, recipient) {
       markup: '<div id="' + container_id + '"></div>'
     };
     form.elements.subject = {
-      title: 'Subject',
+      title: t('Subject'),
       type: 'textfield',
       required: true
     };
     form.elements.message = {
-      title: 'Message',
+      title: t('Message'),
       type: 'textarea',
       required: true
     };
     form.elements.copy = {
-      title: 'Send yourself a copy?',
+      title: t('Send yourself a copy?'),
       type: 'checkbox',
       default_value: 0,
       access: false
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Send message'
+      value: t('Send message')
     };
     // If the user is logged in, set the default values.
     if (Drupal.user.uid != 0) {
@@ -6956,7 +7325,7 @@ function contact_personal_form_pageshow(form, recipient) {
           if (!account.data.contact) {
             $('#' + drupalgap_get_page_id() + ' #drupalgap_form_errors').html(
               "<div class='messages warning'>" +
-                "Sorry, this user's contact form is disabled." +
+                t("Sorry, this user's contact form is disabled.") +
               '</div>'
             );
             return;
@@ -6991,11 +7360,11 @@ function contact_personal_form_submit(form, form_state) {
   contact_personal({
       data: JSON.stringify(data),
       success: function(result) {
-        if (result[0]) { drupalgap_alert('Your message has been sent!'); }
+        if (result[0]) { drupalgap_alert(t('Your message has been sent!')); }
         else {
           drupalgap_alert(
-            'There was a problem sending your message!',
-            { title: 'Error' }
+            t('There was a problem sending your message!'),
+            { title: t('Error') }
           );
         }
         drupalgap_form_clear();
@@ -7005,9 +7374,11 @@ function contact_personal_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }
@@ -7041,12 +7412,14 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
     // Iterate over each core field in the entity and add it to the form. If
     // there is a value present in the entity, then set the field's form element
     // default value equal to the core field value.
-    $.each(fields, function(name, field) {
+    for (var name in fields) {
+      if (!fields.hasOwnProperty(name)) { continue; }
+      var field = fields[name];
       var default_value = field.default_value;
       if (entity && entity[name]) { default_value = entity[name]; }
       form.elements[name] = field;
       form.elements[name].default_value = default_value;
-    });
+    }
   }
   catch (error) {
     console.log('drupalgap_entity_add_core_fields_to_form - ' + error);
@@ -7079,7 +7452,7 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
     return {
-      title: 'Delete',
+      title: t('Delete'),
       attributes: {
         onclick: "javascript:drupalgap_entity_edit_form_delete_confirmation('" +
           entity_type + "', " + entity_id +
@@ -7101,35 +7474,43 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
   entity_id) {
   try {
     var confirm_msg =
-      'Delete this content, are you sure? This action cannot be undone...';
-    if (confirm(confirm_msg)) {
-      // Change the jQM loader mode to saving.
-      drupalgap.loader = 'deleting';
-      // Set up the api call arguments and success callback.
-      var call_arguments = {};
-      call_arguments.success = function(result) {
-        // Remove the entities page from the DOM, if it exists.
-        var entity_page_path = entity_type + '/' + entity_id;
-        var entity_page_id = drupalgap_get_page_id(entity_page_path);
-        if (drupalgap_page_in_dom(entity_page_id)) {
-          drupalgap_remove_page_from_dom(entity_page_id);
+      t('Delete this content, are you sure? This action cannot be undone...');
+    drupalgap_confirm(confirm_msg, {
+        confirmCallback: function(button) {
+          if (button == 2) { return; }
+          // Change the jQM loader mode to deleting.
+          drupalgap.loader = 'deleting';
+          // Set up the api call arguments and success callback.
+          var call_arguments = {};
+          call_arguments.success = function(result) {
+            // Remove the entities page from the DOM, if it exists.
+            var entity_page_path = entity_type + '/' + entity_id;
+            var entity_page_id = drupalgap_get_page_id(entity_page_path);
+            if (drupalgap_page_in_dom(entity_page_id)) {
+              drupalgap_remove_page_from_dom(entity_page_id);
+            }
+            // Remove the entity from local storage.
+            // @todo - this should be moved to jDrupal.
+            window.localStorage.removeItem(
+              entity_local_storage_key(entity_type, entity_id)
+            );
+            // Go to the front page, unless a form action path was specified.
+            var form = drupalgap_form_local_storage_load('node_edit');
+            var destination = form.action ? form.action : '';
+            drupalgap_goto(destination, {
+              reloadPage: true,
+              form_submission: true
+            });
+          };
+          // Call the delete function.
+          var name = services_get_resource_function_for_entity(
+            entity_type,
+            'delete'
+          );
+          var fn = window[name];
+          fn(entity_id, call_arguments);
         }
-        // Remove the entity from local storage.
-        // @todo - this should be moved to jDrupal.
-        window.localStorage.removeItem(
-          entity_local_storage_key(entity_type, entity_id)
-        );
-        // Go to the front page.
-        drupalgap_goto('', { reloadPage: true, form_submission: true });
-      };
-      // Call the delete function.
-      var name = services_get_resource_function_for_entity(
-        entity_type,
-        'delete'
-      );
-      var fn = window[name];
-      fn(entity_id, call_arguments);
-    }
+    });
   }
   catch (error) {
     console.log('drupalgap_entity_edit_form_delete_confirmation - ' + error);
@@ -7155,10 +7536,12 @@ function drupalgap_entity_render_content(entity_type, entity) {
     if (!field_info) { return; }
     var field_weights = {};
     var field_displays = {};
-    $.each(field_info, function(field_name, field) {
+    for (var field_name in field_info) {
+        if (!field_info.hasOwnProperty(field_name)) { continue; }
+        var field = field_info[field_name];
         // Determine which display mode to use. The default mode will be used
         // if the drupalgap display mode is not present.
-        if (!field.display) { return false; }
+        if (!field.display) { break; }
         var display = field.display['default'];
         if (field.display['drupalgap']) {
           display = field.display['drupalgap'];
@@ -7170,22 +7553,28 @@ function drupalgap_entity_render_content(entity_type, entity) {
           ) { display.module = field.display['default'].module; }
         }
         // Skip hidden fields.
-        if (display.type == 'hidden') { return; }
+        if (display.type == 'hidden') { continue; }
         // Save the field display and weight.
         field_displays[field_name] = display;
         field_weights[field_name] = display.weight;
-    });
+    }
     // Extract the field weights and sort them.
     var extracted_weights = [];
-    $.each(field_weights, function(field_name, weight) {
+    for (var field_name in field_weights) {
+        if (!field_weights.hasOwnProperty(field_name)) { continue; }
+        var weight = field_weights[field_name];
         extracted_weights.push(weight);
-    });
+    }
     extracted_weights.sort(function(a, b) { return a - b; });
     // For each sorted weight, locate the field with the corresponding weight,
     // then render it's field content.
     var completed_fields = [];
-    $.each(extracted_weights, function(weight_index, target_weight) {
-        $.each(field_weights, function(field_name, weight) {
+    for (var weight_index in extracted_weights) {
+        if (!extracted_weights.hasOwnProperty(weight_index)) { continue; }
+        var target_weight = extracted_weights[weight_index];
+        for (var field_name in field_weights) {
+            if (!field_weights.hasOwnProperty(field_name)) { continue; }
+            var weight = field_weights[field_name];
             if (target_weight == weight) {
               if (completed_fields.indexOf(field_name) == -1) {
                 completed_fields.push(field_name);
@@ -7196,11 +7585,11 @@ function drupalgap_entity_render_content(entity_type, entity) {
                   field_info[field_name],
                   field_displays[field_name]
                 );
-                return false;
+                break;
               }
             }
-        });
-    });
+        }
+    }
     // Give modules a chance to alter the content.
     module_invoke_all(
       'entity_post_render_content',
@@ -7292,7 +7681,9 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
         items,
         display
       );
-      $.each(elements, function(delta, element) {
+      for (var delta in elements) {
+          if (!elements.hasOwnProperty(delta)) { continue; }
+          var element = elements[delta];
           // If the element has markup, render it as is, if it is
           // themeable, then theme it.
           var element_content = '';
@@ -7300,9 +7691,8 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
           else if (element.theme) {
             element_content = theme(element.theme, element);
           }
-          //content += '<div>' + element_content + '</div>';
           content += element_content;
-      });
+      }
     }
     else {
       console.log(
@@ -7350,14 +7740,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
     var entity = {};
     var language = language_default();
-    $.each(form_state.values, function(name, value) {
-
+    for (var name in form_state.values) {
+        if (!form_state.values.hasOwnProperty(name)) { continue; }
+        var value = form_state.values[name];
+  
         // Skip elements with restricted access.
         if (
           typeof form.elements[name].access !== 'undefined' &&
           !form.elements[name].access
-        ) { return; }
-
+        ) { continue; }
+  
         // Determine wether or not this element is a field. If it is, determine
         // it's module and field assembly hook.
         var is_field = false;
@@ -7369,26 +7761,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           hook = module + '_assemble_form_state_into_field';
           if (!function_exists(hook)) { hook = false; }
         }
-
+  
         // Retrieve the potential key for the element, if we don't get one
         // then it is a flat field that should be attached as a property to the
         // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-
+  
           // Determine how many allowed values for this field.
           var allowed_values = form.elements[name].field_info_field.cardinality;
-
+  
           // Convert unlimited value fields to one, for now...
           if (allowed_values == -1) { allowed_values = 1; }
-
+  
           // Make sure there is at least one value before creating the form
           // element on the entity.
-          if (typeof value[language][0] === 'undefined') { return; }
-
+          if (typeof value[language][0] === 'undefined') { continue; }
+  
           // Create an empty object to house the field on the entity.
           entity[name] = {};
-
+  
           // Some fields do not use a delta value in the service call, so we
           // prepare for that here.
           // @todo - Do all options_select widgets really have no delta value?
@@ -7405,12 +7797,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             entity[name][language] = {};
           }
           else { entity[name][language] = []; }
-
+  
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
             if (typeof value[language][delta] !== 'undefined') {
-
+  
               // @TODO - the way values are determined here is turning into
               // spaghetti code. Every form element needs its own
               // value_callback, just like Drupal's FAPI. Right now DG has
@@ -7425,10 +7817,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // drupalgap_field_info_instances_add_to_form(), that function
               // should use the value_callback idea to properly map entity data
               // to the form element's value.
-
+  
               // Extract the value.
               var field_value = value[language][delta];
-
+  
               // By default, we'll assume we'll be attaching this element item's
               // value according to a key (usually 'value' is the default key
               // used by Drupal fields). However, we'll give modules that
@@ -7448,7 +7840,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 form_id: form.id,
                 element_id: form.elements[name][language][delta].id
               };
-
+  
               // If this element is a field, give the field's module an
               // opportunity to assemble its own value, otherwise we'll just
               // use the field value extracted above.
@@ -7464,10 +7856,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   field_key
                 );
               }
-
+  
               // If someone updated the key, use it.
               if (key != field_key.value) { key = field_key.value; }
-
+  
               // If we don't need a delta value, place the field value using the
               // key, if posible. If we're using a delta value, push the key
               // and value onto the field to indicate the delta.
@@ -7497,7 +7889,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   entity[name][language].push(field_value);
                 }
               }
-
+  
               // If the field value was null, we won't send along the field, so
               // just remove it. Except for list_boolean fields, they need a
               // null value to set the field value to false.
@@ -7509,7 +7901,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 typeof entity[name] !== 'undefined' &&
                 form.elements[name].type != 'list_boolean'
               ) { delete entity[name]; }
-
+  
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
               // @TODO - will this cause multi value issues?
@@ -7519,12 +7911,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   'options_select' && !form.elements[name].required &&
                 field_value === '' && typeof entity[name] !== 'undefined'
               ) { delete entity[name]; }
-
+  
             }
           }
-        }
-        else if (typeof value !== 'undefined') { entity[name] = value; }
-    });
+      }
+      else if (typeof value !== 'undefined') { entity[name] = value; }
+    }
     return entity;
   }
   catch (error) {
@@ -7570,8 +7962,16 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
           }
           destination = prefix + '/' + result[primary_key];
         }
+        // Is there a destination URL query parameter overwriting the action?
         if (_GET('destination')) { destination = _GET('destination'); }
-        drupalgap_goto(destination, { form_submission: true });
+        // Set up the default goto options, and use any options provided by the
+        // form.
+        var goto_options = { form_submission: true };
+        if (form.action_options) {
+          goto_options = $.extend({}, goto_options, form.action_options);
+        }
+        // Finally goto our destination.
+        drupalgap_goto(destination, goto_options);
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - success - ' + error);
@@ -7629,18 +8029,18 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
       case 'comment':
         var content_type = bundle.replace('comment_node_', '');
         // Add each schema field to the field collection.
-        $.each(
-          drupalgap.entity_info[entity_type].schema_fields_sql['base table'],
-          function(index, name) {
+        var base_table = drupalgap.entity_info[entity_type].schema_fields_sql['base table'];
+        for (var index in base_table) {
+            if (!base_table.hasOwnProperty(index)) { continue; }
+            var name = base_table[index];
             var field = {
-              'type': 'hidden',
-              'required': false,
-              'default_value': '',
-              'title': ucfirst(name)
+              type: 'hidden',
+              required: false,
+              default_value: '',
+              title: ucfirst(name)
             };
             fields[name] = field;
-          }
-        );
+        }
         // Make the node id required.
         fields['nid'].required = true;
         // Only anonymous users can fill out the name field, authenticated users
@@ -7694,7 +8094,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.title = {
           'type': 'textfield',
-          'title': 'Title',
+          'title': t('Title'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -7718,14 +8118,14 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.name = {
           'type': 'textfield',
-          'title': 'Username',
+          'title': t('Username'),
           'required': true,
           'default_value': '',
           'description': ''
         };
         fields.mail = {
           'type': 'email',
-          'title': 'E-mail address',
+          'title': t('E-mail address'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -7733,9 +8133,9 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         fields.picture = {
           'type': 'image',
           'widget_type': 'imagefield_widget',
-          'title': 'Picture',
+          'title': t('Picture'),
           'required': false,
-          'value': 'Add Picture'
+          'value': t('Add Picture')
         };
         break;
       case 'taxonomy_term':
@@ -7752,13 +8152,13 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }
@@ -7773,19 +8173,19 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'machine_name': {
             'type': 'textfield',
-            'title': 'Machine Name',
+            'title': t('Machine Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }
@@ -7990,18 +8390,19 @@ function entity_services_request_pre_postprocess_alter(options, result) {
     }
     // If we're indexing comments, render its content, if it isn't already set.
     else if (options.service == 'comment' && options.resource == 'index') {
-      $.each(result, function(index, object) {
+      for (var index in result) {
+          if (!result.hasOwnProperty(index)) { continue; }
+          var object = result[index];
           // @TODO - does this condition ever evaluate to true?
-          if (typeof object.content !== 'undefined') { return; }
+          if (typeof object.content !== 'undefined') { continue; }
           drupalgap_entity_render_content(options.service, result[index]);
-      });
+      }
     }
   }
   catch (error) {
     console.log('entity_services_request_pre_postprocess_alter - ' + error);
   }
 }
-
 
 /**
  * Given a field name, this will return its field info.
@@ -8114,13 +8515,15 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
     // a value present in the entity, then set the field's form element default
     // value equal to the field value.
     if (fields) {
-      $.each(fields, function(name, field) {
+      for (var name in fields) {
+        if (!fields.hasOwnProperty(name)) { continue; }
+        var field = fields[name];
         // The user registration form is a special case, in that we only want
         // to place fields that are set to display on the user registration
         // form. Skip any fields not set to display.
         if (form.id == 'user_register_form' &&
           !field.settings.user_register_form) {
-          return;
+          continue;
         }
         var field_info = drupalgap_field_info_field(name);
         if (field_info) {
@@ -8165,8 +8568,18 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
               }
             }
           }
+
+          // Give module's a chance to alter their own element during the form
+          // build, that way element properties will be saved to local storage
+          // and then available during hook_field_widget_form() and the form
+          // submission process.
+          var fn = field.widget.module + '_field_info_instance_add_to_form';
+          if (drupalgap_function_exists(fn)) {
+            window[fn](entity_type, bundle, form, entity, form.elements[name]);
+          }
+
         }
-      });
+      }
     }
   }
   catch (error) {
@@ -8219,7 +8632,9 @@ function list_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           var markup = '';
           // list_default or list_key
           if (display.type == 'list_default') {
@@ -8233,7 +8648,7 @@ function list_field_formatter_view(entity_type, entity, field, instance,
           }
           else { markup = item.value; }
           element[delta] = { markup: markup };
-      });
+      }
     }
     return element;
   }
@@ -8266,13 +8681,15 @@ function list_assemble_form_state_into_field(entity_type, bundle,
         if (instance.widget.type == 'options_onoff') {
           var index = 0;
           var on = true;
-          $.each(field.settings.allowed_values, function(value, label) {
+          for (var value in field.settings.allowed_values) {
+              if (!field.settings.allowed_values.hasOwnProperty(value)) { continue; }
+              var label = field.settings.allowed_values[value];
               if (form_state_value == value && index == 0) {
                 on = false;
-                return false;
+                break;
               }
               index++;
-          });
+          }
           if (!on) {
             field_key.use_delta = false;
             field_key.use_wrapper = false;
@@ -8285,6 +8702,18 @@ function list_assemble_form_state_into_field(entity_type, bundle,
               field.type +
             ') on list_boolean'
           );
+        }
+        break;
+      case 'list_text':
+        // For radio buttons on the user entity form, field values must be
+        // "flattened", i.e. this field_foo: { und: [ { value: 123 }]}, should
+        // be turned into field_foo: { und: 123 }
+        if (
+          entity_type == 'user' &&
+          instance.widget.type == 'options_buttons'
+        ) {
+          field_key.use_delta = false;
+          field_key.use_wrapper = false;
         }
         break;
       default:
@@ -8322,7 +8751,7 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
       // the default value accordingly.
       element.options = filter.value_options;
       if (!element.required) {
-        element.options['All'] = '- Any -';
+        element.options['All'] = '- ' + t('Any') + ' -';
         if (typeof element.value === 'undefined') { element.value = 'All'; }
       }
     }
@@ -8361,11 +8790,13 @@ function number_field_formatter_view(entity_type, entity, field, instance,
       if (!empty(field.settings.prefix)) { prefix = field.settings.prefix; }
       var suffix = '';
       if (!empty(field.settings.suffix)) { suffix = field.settings.suffix; }
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           element[delta] = {
             markup: prefix + item.value + suffix
           };
-      });
+      }
     }
     return element;
   }
@@ -8454,10 +8885,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               }
             }
             else {
-              $.each(field.settings.allowed_values, function(value, label) {
+              for (var value in field.settings.allowed_values) {
+                  if (!field.settings.allowed_values.hasOwnProperty(value)) { continue; }
+                  var label = field.settings.allowed_values[value];
                   if (off === null) { off = value; }
                   else { on = value; }
-              });
+              }
             }
             items[delta].options.attributes['off'] = off;
             items[delta].options.attributes['on'] = on;
@@ -8486,7 +8919,9 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               // it as the default.  If it is optional, place a "none" option
               // for the user to choose from.
               var text = '- None -';
-              if (items[delta].required) { text = '- Select a value -'; }
+              if (items[delta].required) {
+                text = '- ' + t('Select a value') + ' -';
+              }
               items[delta].options[''] = text;
               if (empty(items[delta].value)) { items[delta].value = ''; }
               // If more than one value is allowed, turn it into a multiple
@@ -8514,19 +8949,21 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           // If there are any allowed values, place them on the options
           // list. Then check for a default value, and set it if necessary.
           if (field && field.settings.allowed_values) {
-            $.each(field.settings.allowed_values, function(key, value) {
+            for (var key in field.settings.allowed_values) {
+                if (!field.settings.allowed_values.hasOwnProperty(key)) { continue; }
+                var value = field.settings.allowed_values[key];
                 // Don't place values that are objects onto the options
                 // (i.e. commerce taxonomy term reference fields).
-                if (typeof value === 'object') { return; }
+                if (typeof value === 'object') { continue; }
                 // If the value already exists in the options, then someone
                 // else has populated the list (e.g. commerce), so don't do
                 // any processing.
                 if (typeof items[delta].options[key] !== 'undefined') {
-                  return false;
+                  break;
                 }
                 // Set the key and value for the option.
                 items[delta].options[key] = value;
-            });
+            }
             if (instance.default_value && instance.default_value[delta] &&
               typeof instance.default_value[delta].value !== 'undefined') {
                 items[delta].value = instance.default_value[delta].value;
@@ -8557,8 +8994,10 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
           // If the select list is required, add a 'Select' option and set
           // it as the default.  If it is optional, place a "none" option
           // for the user to choose from.
-          var text = '- None -';
-          if (items[delta].required) { text = '- Select a value -'; }
+          var text = '- ' + t('None') + ' -';
+          if (items[delta].required) {
+            text = '- ' + t('Select a value') + ' -';
+          }
           items[delta].children.push({
               type: widget_type,
               attributes: {
@@ -8611,14 +9050,16 @@ function text_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           // Grab the field value, but use the safe_value if we have it.
           var value = item.value;
           if (typeof item.safe_value !== 'undefined') {
             value = item.safe_value;
           }
           element[delta] = { markup: value };
-      });
+      }
     }
     return element;
   }
@@ -8680,7 +9121,9 @@ function image_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           // @TODO - add support for image_style
           element[delta] = {
             theme: 'image',
@@ -8689,7 +9132,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
             path: drupalgap_image_path(item.uri)
             /*image_style:display.settings.image_style*/
           };
-      });
+      }
     }
     return element;
   }
@@ -8712,6 +9155,14 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
   try {
     // Change the item type to a hidden input to hold the file id.
     items[delta].type = 'hidden';
+
+    // If we're dealing with the user profile 'picture' it isn't a real field,
+    // so we need to spoof some field settings to get the widget to render
+    // properly.
+    // @TODO the field label doesn't show up.
+    if (form.id == 'user_profile_form' && element.name == 'picture') {
+      field = { field_name: 'picture' };
+    }
 
     // If we already have an image for this item, show it.
     if (typeof items[delta].item !== 'undefined' && items[delta].item.fid) {
@@ -8743,9 +9194,9 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
 
     // Set the default button text, and if a value was provided,
     // overwrite the button text.
-    var button_text = 'Take Photo';
+    var button_text = t('Take Photo');
     if (items[delta].value) { button_text = items[delta].value; }
-    var browse_button_text = 'Browse';
+    var browse_button_text = t('Browse');
     if (items[delta].value2) { browse_button_text = items[delta].value2; }
 
     // Place variables into document for PhoneGap image processing.
@@ -8870,14 +9321,15 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
     var results = [];
     var fields = drupalgap_field_info_instances(entity_type, bundle);
     if (!fields) { return false; }
-    $.each(fields, function(name, field) {
-        if (field.widget &&
+    for (var name in fields) {
+        if (!fields.hasOwnProperty(name)) { continue; }
+        var field = fields[name];
+        if (
+          field.widget &&
           field.widget.type &&
           field.widget.type == 'image_image'
-        ) {
-          results.push(name);
-        }
-    });
+        ) { results.push(name); }
+    }
     if (results.length == 0) { return false; }
     return results;
   }
@@ -8905,9 +9357,11 @@ function image_form_alter(form, form_state, form_id) {
         form.image_fields = image_fields;
         // For each image field, create a place for it in the global var.
         if ($.isArray(image_fields)) {
-          $.each(image_fields, function(index, name) {
-              image_phonegap_camera_options[name] = {0: null};
-          });
+          for (var index in image_fields) {
+              if (!image_fields.hasOwnProperty(index)) { continue; }
+              var name = image_fields[index];
+              image_phonegap_camera_options[name] = { 0: null };
+          }
         }
       }
     }
@@ -8998,11 +9452,13 @@ function _image_field_form_process(form, form_state, options) {
     // @todo - this needs mutli value field support (delta)
     var lng = language_default();
     var processed_an_image = false;
-    $.each(form.image_fields, function(index, name) {
+    for (var index in form.image_fields) {
+      if (!form.image_fields.hasOwnProperty(index)) { continue; }
+      var name = form.image_fields[index];
       // Skip empty images.
-      if (!image_phonegap_camera_options[name][0]) { return false; }
+      if (!image_phonegap_camera_options[name][0]) { break; }
       // Skip image fields that already have their file id set.
-      if (form_state.values[name][lng][0] != '') { return false; }
+      if (form_state.values[name][lng][0] != '') { break; }
       // Create a unique file name using the UTC integer value.
       var d = new Date();
       var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
@@ -9036,7 +9492,7 @@ function _image_field_form_process(form, form_state, options) {
             }
           }
       });
-    });
+    }
     // If no images were processed, we need to continue onward anyway.
     if (!processed_an_image && options.success) { options.success(); }
   }
@@ -9065,6 +9521,7 @@ function image_assemble_form_state_into_field(entity_type, bundle,
     console.log('image_assemble_form_state_into_field - ' + error);
   }
 }
+
 /**
  * Implements hook_block_view().
  * @param {String} delta
@@ -9164,7 +9621,9 @@ function menu_block_view_pageshow(options) {
             var menu_items = [];
             var link_path = '';
             if (local_tasks && !empty(local_tasks)) {
-              $.each(local_tasks, function(index, local_task) {
+              for (var index in local_tasks) {
+                  if (!local_tasks.hasOwnProperty(index)) { continue; }
+                  var local_task = local_tasks[index];
                   if (drupalgap.menu_links[local_task] && (
                     drupalgap.menu_links[local_task].type ==
                       'MENU_DEFAULT_LOCAL_TASK' ||
@@ -9175,7 +9634,7 @@ function menu_block_view_pageshow(options) {
                       menu_items.push(drupalgap.menu_links[local_task]);
                     }
                   }
-              });
+              }
             }
             // If there was only one local task menu item, and it is the default
             // local task, don't render the menu, otherwise render the menu as
@@ -9185,7 +9644,9 @@ function menu_block_view_pageshow(options) {
             ) { html = ''; }
             else {
               var items = [];
-              $.each(menu_items, function(index, item) {
+              for (var index in menu_items) {
+                  if (!menu_items.hasOwnProperty(index)) { continue; }
+                  var item = menu_items[index];
                   // Make a deep copy of the menu link so we don't modify it.
                   var link = jQuery.extend(true, {}, item);
                   // If there are no link options, set up defaults.
@@ -9217,7 +9678,7 @@ function menu_block_view_pageshow(options) {
                       link.options
                     )
                   );
-              });
+              }
               if (items.length > 0) {
                 html = theme('item_list', {'items': items});
               }
@@ -9245,7 +9706,9 @@ function menu_block_view_pageshow(options) {
         var has_entity_arg = false;
         var has_access_callback = false;
         if (local_tasks) {
-          $.each(local_tasks, function(index, local_task) {
+          for (var index in local_tasks) {
+              if (!local_tasks.hasOwnProperty(index)) { continue; }
+              var local_task = local_tasks[index];
               if (drupalgap.menu_links[local_task] &&
                 (
                   drupalgap.menu_links[local_task].type ==
@@ -9263,7 +9726,7 @@ function menu_block_view_pageshow(options) {
                     'undefined'
                 ) { has_access_callback = true; }
               }
-          });
+          }
         }
 
         // If we have an entity arg, and an access_callback, let's load up the
@@ -9328,7 +9791,9 @@ function menu_block_view_pageshow(options) {
       if (drupalgap.menus[delta] && drupalgap.menus[delta].links) {
         menu = drupalgap.menus[delta];
         var items = [];
-        $.each(menu.links, function(index, menu_link) {
+        for (var index in menu.links) {
+            if (!menu.links.hasOwnProperty(index)) { continue; }
+            var menu_link = menu.links[index];
             // Make a deep copy of the menu link so we don't modify it.
             var link = jQuery.extend(true, {}, menu_link);
             // If there are no link options, set up defaults.
@@ -9342,8 +9807,8 @@ function menu_block_view_pageshow(options) {
               link.options.attributes['class'] +=
                 ' ui-btn ui-btn-active ui-state-persist ';
             }
-            items.push(l(link.title, link.path, link.options));
-        });
+            items.push(l(t(link.title), link.path, link.options));
+        }
         if (items.length > 0) {
           // Pass along any menu attributes.
           var attributes = null;
@@ -9374,9 +9839,11 @@ function menu_install() {
   try {
     // Grab the list of system menus and save each.
     var system_menus = menu_list_system_menus();
-    $.each(system_menus, function(menu_name, menu) {
-        menu_save(menu);
-    });
+    for (var menu_name in system_menus) {
+      if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+      var menu = system_menus[menu_name];
+      menu_save(menu);
+    }
   }
   catch (error) { console.log('menu_install - ' + error); }
 }
@@ -9496,16 +9963,18 @@ function collection_list_page(module, type) {
     var content = {
       'collection_list': {
         'theme': 'jqm_item_list',
-        'title': 'Collection'
+        'title': t('Collection')
       }
     };
     var items = [];
     var collection = collection_load(module, type);
     if (collection) {
-      $.each(collection, function(id, item) {
+      for (var id in collection) {
+          if (!collection.hasOwnProperty(id)) { continue; }
+          var item = collection[id];
           var path = 'mvc/item/' + module + '/' + type + '/' + id;
           items.push(l(item.name, path));
-      });
+      }
       content.collection_list.items = items;
     }
     return content;
@@ -9581,23 +10050,25 @@ function mvc_install() {
           drupalgap.mvc.models[module] = {};
         }
         // For each model type...
-        $.each(models, function(model_type, model) {
+        for (var model_type in models) {
+            if (!models.hasOwnProperty(model_type)) { continue; }
+            var model = models[model_type];
             // Set the primary key 'id', the module name, and model type
             // on the model fields. These are the mvc_model_system_fields().
             model.fields.id = {
               'type': 'hidden',
-              'title': 'ID',
+              'title': t('ID'),
               'required': false
             };
             model.fields.module = {
               'type': 'hidden',
-              'title': 'Module',
+              'title': t('Module'),
               'required': true,
               'default_value': module
             };
             model.fields.type = {
               'type': 'hidden',
-              'title': 'Model Type',
+              'title': t('Model Type'),
               'required': true,
               'default_value': model_type
             };
@@ -9620,7 +10091,7 @@ function mvc_install() {
                 '{"auto_increment":0}'
               );
             }
-        });
+        }
       }
     }
     //console.log(JSON.stringify(drupalgap.mvc.models));
@@ -9649,7 +10120,7 @@ function mvc_menu() {
         'page_arguments': [2, 3, 4]
       },
       'mvc/item-add/%/%': {
-        title: 'Add',
+        title: t('Add'),
         page_callback: 'drupalgap_get_form',
         page_arguments: ['item_create_form', 2, 3]
       }
@@ -9714,7 +10185,7 @@ function item_create_form(form, form_state, module, type) {
       form.buttons.cancel = drupalgap_form_cancel_button();
       form.elements.submit = {
         type: 'submit',
-        value: 'Create'
+        value: t('Create')
       };
     }
     return form;
@@ -9857,23 +10328,23 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>Create Content</h2>'},
-      'node_type_listing': {
-        'theme': 'jqm_item_list',
-        'title': 'Content Types',
-        'attributes': {'id': 'node_type_listing_items'}
+      header: { markup: '<h2>' + t('Create Content') + '</h2>' },
+      node_type_listing: {
+        theme: 'jqm_item_list',
+        title: t('Content Types'),
+        attributes: { id: 'node_type_listing_items' }
       }
     };
     var items = [];
-    $.each(
-      Drupal.user.content_types_user_permissions,
-      function(type, permissions) {
+    var user_permissions = Drupal.user.content_types_user_permissions;
+    for (var type in user_permissions) {
+        if (!user_permissions.hasOwnProperty(type)) { continue; }
+        var permissions = user_permissions[type];
         if (permissions.create) {
           items.push(l(drupalgap.content_types_list[type].name,
           'node/add/' + type));
         }
-      }
-    );
+    }
     content.node_type_listing.items = items;
     return content;
   }
@@ -9900,7 +10371,7 @@ function node_add_page_by_type(type) {
  */
 function node_add_page_by_type_title(callback, type) {
   try {
-    var title = 'Create ' + drupalgap.content_types_list[type].name;
+    var title = t('Create') + ' ' + drupalgap.content_types_list[type].name;
     return callback.call(null, title);
   }
   catch (error) { console.log('node_add_page_by_type_title - ' + error); }
@@ -9928,7 +10399,7 @@ function node_edit(form, form_state, node) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -9965,16 +10436,16 @@ function node_edit_submit(form, form_state) {
 function node_menu() {
     var items = {
       'node': {
-        'title': 'Content',
+        'title': t('Content'),
         'page_callback': 'node_page',
         'pageshow': 'node_page_pageshow'
       },
       'node/add': {
-        'title': 'Add content',
+        'title': t('Add content'),
         'page_callback': 'node_add_page'
       },
       'node/add/%': {
-        title: 'Add content',
+        title: t('Add content'),
         title_callback: 'node_add_page_by_type_title',
         title_arguments: [2],
         page_callback: 'node_add_page_by_type',
@@ -9982,7 +10453,7 @@ function node_menu() {
         options: { reloadPage: true }
       },
       'node/%': {
-        'title': 'Node',
+        'title': t('Node'),
         'page_callback': 'node_page_view',
         'page_arguments': [1],
         'pageshow': 'node_page_view_pageshow',
@@ -9990,12 +10461,12 @@ function node_menu() {
         'title_arguments': [1]
       },
       'node/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'node/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['node_edit', 'node', 1],
@@ -10018,11 +10489,11 @@ function node_page() {
       'create_content': {
         'theme': 'button_link',
         'path': 'node/add',
-        'text': 'Create Content'
+        'text': t('Create Content')
       },
       'node_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Content List',
+        'title': t('Content List'),
         'items': [],
         'attributes': {'id': 'node_listing_items'}
       }
@@ -10041,9 +10512,11 @@ function node_page_pageshow() {
         success: function(content) {
           // Extract the nodes into items, then drop them in the list.
           var items = [];
-          $.each(content.nodes, function(index, object) {
+          for (var index in content.nodes) {
+              if (!content.nodes.hasOwnProperty(index)) { continue; }
+              var object = content.nodes[index];
               items.push(l(object.node.title, 'node/' + object.node.nid));
-          });
+          }
           drupalgap_item_list_populate('#node_listing_items', items);
         }
       }
@@ -10065,7 +10538,7 @@ function node_page_view(nid) {
       };
       return content;
     }
-    else { drupalgap_error('No node id provided!'); }
+    else { drupalgap_error(t('No node id provided!')); }
   }
   catch (error) { console.log('node_page_view - ' + error); }
 }
@@ -10153,9 +10626,11 @@ function node_page_view_pageshow(nid) {
                       try {
                         // Render the comments.
                         var comments = '';
-                        $.each(results, function(index, comment) {
+                        for (var index in results) {
+                            if (!results.hasOwnProperty(index)) { continue; }
+                            var comment = results[index];
                             comments += theme('comment', { comment: comment });
-                        });
+                        }
                         build.content.markup += theme('comments', {
                             node: node,
                             comments: comments
@@ -10275,7 +10750,7 @@ function search_menu() {
   try {
     var items = {};
     items['search/%/%'] = {
-      title: 'Search',
+      title: t('Search'),
       'page_callback': 'drupalgap_get_form',
       'pageshow': 'search_form_pageshow',
       'page_arguments': ['search_form'],
@@ -10345,13 +10820,13 @@ function search_form(form, form_state) {
     };
     form.elements.keys = {
       type: 'textfield',
-      title: 'Enter your keywords',
+      title: t('Enter your keywords'),
       required: true,
       default_value: keys ? keys : ''
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Go',
+      value: t('Go'),
       options: {
         attributes: {
           'data-icon': 'search'
@@ -10359,7 +10834,7 @@ function search_form(form, form_state) {
       }
     };
     form.suffix += theme('jqm_item_list', {
-        title: 'Search results',
+        title: t('Search results'),
         items: [],
         options: {
           attributes: {
@@ -10386,10 +10861,12 @@ function search_form_submit(form, form_state) {
         search_node(keys, {
             success: function(results) {
               var items = [];
-              $.each(results, function(index, result) {
+              for (var index in results) {
+                  if (!results.hasOwnProperty(index)) { continue; }
+                  var result = results[index];
                   var link = theme('search_result_node', result);
                   items.push(link);
-              });
+              }
               drupalgap_item_list_populate('#search_form_results', items);
             }
         });
@@ -10415,10 +10892,12 @@ function search_form_pageshow(form_id) {
         search_node(keys, {
             success: function(results) {
               var items = [];
-              $.each(results, function(index, result) {
+              for (var index in results) {
+                  if (!results.hasOwnProperty(index)) { continue; }
+                  var result = results[index];
                   var link = theme('search_result_node', result);
                   items.push(link);
-              });
+              }
               drupalgap_item_list_populate('#search_form_results', items);
             }
         });
@@ -10525,9 +11004,12 @@ function drupalgap_service_resource_extract_results(options) {
         options.data.user.permissions.push(permissions[permission]);
       }
       // Pull out the content types, and set them by their type.
-      $.each(options.data.content_types_list, function(index, object) {
+      var content_types_list = options.data.content_types_list;
+      for (var index in content_types_list) {
+          if (!content_types_list.hasOwnProperty(index)) { continue; }
+          var object = content_types_list[index];
           drupalgap.content_types_list[object.type] = object;
-      });
+      }
       // Pull out the content types user permissions.
       options.data.user.content_types_user_permissions =
         options.data.content_types_user_permissions;
@@ -10580,6 +11062,7 @@ function drupalgap_services_rss_extract_items(data) {
 }
 
 var _system_reload_page = null;
+var _system_reload_messages = null;
 
 /**
  * Implements hook_block_info().
@@ -10619,14 +11102,16 @@ function system_block_info() {
     };
     // Make additional blocks for each system menu.
     var system_menus = menu_list_system_menus();
-    $.each(system_menus, function(menu_name, menu) {
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
         var block_delta = menu.menu_name;
         blocks[block_delta] = {
           name: block_delta,
           delta: block_delta,
           module: 'menu'
         };
-    });
+    }
     return blocks;
 }
 
@@ -10650,11 +11135,13 @@ function system_block_view(delta) {
         // clear out the messages array.
         var html = '';
         if (drupalgap.messages.length == 0) { return html; }
-        $.each(drupalgap.messages, function(index, msg) {
+        for (var index in drupalgap.messages) {
+            if (!drupalgap.messages.hasOwnProperty(index)) { continue; }
+            var msg = drupalgap.messages[index];
             html += '<div class="messages ' + msg.type + '">' +
               msg.message +
             '</div>';
-        });
+        }
         drupalgap.messages = [];
         return html;
         break;
@@ -10675,7 +11162,7 @@ function system_block_view(delta) {
         return '<h1 id="' + title_id + '"></h1>';
         break;
       case 'powered_by':
-        return '<p style="text-align: center;">Powered by: ' +
+        return '<p style="text-align: center;">' + t('Powered by') + ': ' +
           l('DrupalGap', 'http://www.drupalgap.org', {InAppBrowser: true}) +
         '</p>';
         break;
@@ -10697,28 +11184,28 @@ function system_block_view(delta) {
 function system_menu() {
     var items = {
       'dashboard': {
-        'title': 'Dashboard',
+        'title': t('Dashboard'),
         'page_callback': 'system_dashboard_page'
       },
       'error': {
-        'title': 'Error',
+        'title': t('Error'),
         'page_callback': 'system_error_page'
       },
       'offline': {
-        'title': 'Offline',
+        'title': t('Offline'),
         'page_callback': 'system_offline_page'
       },
       '401': {
-        title: '401 - Not Authorized',
+        title: '401 - ' + t('Not Authorized'),
         page_callback: 'system_401_page'
       },
       '404': {
-        title: '404 - Not Found',
+        title: '404 - ' + t('Not Found'),
         page_callback: 'system_404_page'
       }
     };
     items['_reload'] = {
-      title: 'Reloading...',
+      title: t('Reloading') + '...',
       page_callback: 'system_reload_page',
       pageshow: 'system_reload_pageshow'
     };
@@ -10731,7 +11218,7 @@ function system_menu() {
  * @return {String}
  */
 function system_401_page(path) {
-  return 'Sorry, you are not authorized to view this page.';
+  return t('Sorry, you are not authorized to view this page.');
 }
 
 /**
@@ -10740,24 +11227,41 @@ function system_401_page(path) {
  * @return {String}
  */
 function system_404_page(path) {
-  return 'Sorry, the page you requested was not found.';
+  return t('Sorry, the page you requested was not found.');
 }
 
 /**
- *
+ * The page callback for the reload page.
+ * @return {String}
  */
 function system_reload_page() {
   try {
+    // Set aside any messages, then return an empty page.
+    var messages = drupalgap_get_messages();
+    if (!empty(messages)) {
+      _system_reload_messages = messages.slice();
+      drupalgap_set_messages([]);
+    }
     return '';
   }
   catch (error) { console.log('system_reload_page - ' + error); }
 }
 
 /**
- *
+ * The pageshow callback for the reload page.
  */
 function system_reload_pageshow() {
   try {
+    // Set any messages that were set aside.
+    if (_system_reload_messages && !empty(_system_reload_messages)) {
+      for (var i = 0; i < _system_reload_messages.length; i++) {
+        drupalgap_set_message(
+          _system_reload_messages[i].message,
+          _system_reload_messages[i].type
+        );
+      }
+      _system_reload_messages = null;
+    }
     drupalgap_loading_message_show();
   }
   catch (error) { console.log('system_reload_pageshow - ' + error); }
@@ -10765,6 +11269,7 @@ function system_reload_pageshow() {
 
 /**
  * Implements hook_system_drupalgap_goto_post_process().
+ * @param {String} path
  */
 function system_drupalgap_goto_post_process(path) {
   try {
@@ -10799,10 +11304,12 @@ function system_dashboard_page() {
       '</h4>'
     };
     content.welcome = {
-      markup: '<h2 style="text-align: center;">Welcome to DrupalGap</h2>' +
-        '<p style="text-align: center;">' +
-          'The open source application development kit for Drupal!' +
-        '</p>'
+      markup: '<h2 style="text-align: center;">' +
+        t('Welcome to DrupalGap') +
+      '</h2>' +
+      '<p style="text-align: center;">' +
+        t('The open source application development kit for Drupal!') +
+      '</p>'
     };
     if (drupalgap.settings.logo) {
       content.logo = {
@@ -10813,13 +11320,13 @@ function system_dashboard_page() {
     }
     content.get_started = {
       theme: 'button_link',
-      text: 'Getting Started Guide',
+      text: t('Getting Started Guide'),
       path: 'http://www.drupalgap.org/get-started',
       options: {InAppBrowser: true}
     };
     content.support = {
       theme: 'button_link',
-      text: 'Support',
+      text: t('Support'),
       path: 'http://www.drupalgap.org/support',
       options: {InAppBrowser: true}
     };
@@ -10835,7 +11342,7 @@ function system_dashboard_page() {
 function system_error_page() {
     var content = {
       info: {
-        markup: '<p>An unexpected error has occurred!</p>'
+        markup: '<p>' + t('An unexpected error has occurred!') + '</p>'
       }
     };
     return content;
@@ -10849,19 +11356,21 @@ function system_offline_page() {
   try {
     var content = {
       'message': {
-        'markup': '<h2>Failed Connection</h2>' +
-          "<p>Oops! We couldn't connect to:</p>" +
+        'markup': '<h2>' + t('Failed Connection') + '</h2>' +
+          '<p>' + t("Oops! We couldn't connect to") + ':</p>' +
           '<p>' + Drupal.settings.site_path + '</p>'
       },
       'try_again': {
         'theme': 'button',
-        'text': 'Try Again',
+        'text': t('Try Again'),
         'attributes': {
           'onclick': 'javascript:offline_try_again();'
         }
       },
       'footer': {
-        'markup': "<p>Check your device's network settings and try again.</p>"
+        'markup': '<p>' +
+          t("Check your device's network settings and try again.") +
+        '</p>'
       }
     };
     return content;
@@ -10886,7 +11395,7 @@ function offline_try_again() {
       });
     }
     else {
-      var msg = 'Sorry, no connection found! (' + connection + ')';
+      var msg = t('Sorry, no connection found!') + ' (' + connection + ')';
       drupalgap_alert(msg, {
           title: 'Offline'
       });
@@ -10918,7 +11427,7 @@ function system_settings_form(form, form_state) {
     if (!form.elements.submit) {
       form.elements.submit = {
         type: 'submit',
-        value: 'Save configuration'
+        value: t('Save configuration')
       };
     }
     // Add cancel button to form if one isn't present.
@@ -10940,9 +11449,11 @@ function system_settings_form(form, form_state) {
 function system_settings_form_submit(form, form_state) {
   try {
     if (form_state.values) {
-      $.each(form_state.values, function(variable, value) {
+      for (var variable in form_state.values) {
+          if (!form_state.values.hasOwnProperty(variable)) { continue; }
+          var value = form_state.values[variable];
           variable_set(variable, value);
-      });
+      }
     }
   }
   catch (error) { console.log('system_settings_form_submit - ' + error); }
@@ -10982,6 +11493,7 @@ function system_logout_block_access_callback(options) {
     console.log('system_logout_block_access_callback - ' + error);
   }
 }
+
 /**
  * Determine whether the user has a given privilege. Optionally pass in a user
  * account JSON object for the second paramater to check that particular
@@ -10997,12 +11509,14 @@ function user_access(string) {
     else { account = Drupal.user; }
     if (account.uid == 1) { return true; }
     var access = false;
-    $.each(account.permissions, function(index, object) {
+    for (var index in account.permissions) {
+        if (!account.permissions.hasOwnProperty(index)) { continue; }
+        var object = account.permissions[index];
         if (object.permission == string) {
           access = true;
-          return false;
+          break;
         }
-    });
+    }
     return access;
   }
   catch (error) { console.log('user_access - ' + error); }
@@ -11034,7 +11548,7 @@ function user_listing() {
     var content = {
       'user_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Users',
+        'title': t('Users'),
         'items': [],
         'attributes': {'id': 'user_listing_items'}
       }
@@ -11054,9 +11568,11 @@ function user_listing_pageshow() {
         success: function(data) {
           // Extract the users into items, then drop them in the list.
           var items = [];
-          $.each(data.users, function(index, object) {
+          for (var index in data.users) {
+              if (!data.users.hasOwnProperty(index)) { continue; }
+              var object = data.users[index];
               items.push(l(object.user.name, 'user/' + object.user.uid));
-          });
+          }
           drupalgap_item_list_populate('#user_listing_items', items);
         }
       }
@@ -11070,7 +11586,7 @@ function user_listing_pageshow() {
  * @return {String}
  */
 function user_logout_callback() {
-  return '<p>Logging out...</p>';
+  return '<p>' + t('Logging out') + '...</p>';
 }
 
 /**
@@ -11098,26 +11614,26 @@ function user_menu() {
         'page_callback': 'user_page'
       },
       'user/login': {
-        'title': 'Login',
+        'title': t('Login'),
         'page_callback': 'drupalgap_get_form',
         'page_arguments': ['user_login_form'],
         options: {reloadPage: true}
       },
       'user/logout': {
-        'title': 'Logout',
+        'title': t('Logout'),
         'page_callback': 'user_logout_callback',
         'pagechange': 'user_logout_pagechange',
         options: {reloadPage: true}
       },
       'user/register': {
-        'title': 'Register',
+        'title': t('Register'),
         'page_callback': 'drupalgap_get_form',
         'page_arguments': ['user_register_form'],
         'access_callback': 'user_register_access',
         options: {reloadPage: true}
       },
       'user/%': {
-        title: 'My account',
+        title: t('My account'),
         title_callback: 'user_view_title',
         title_arguments: [1],
         page_callback: 'user_view',
@@ -11125,12 +11641,12 @@ function user_menu() {
         page_arguments: [1]
       },
       'user/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'user/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['user_profile_form', 'user', 1],
@@ -11141,14 +11657,14 @@ function user_menu() {
         options: {reloadPage: true}
       },
       'user-listing': {
-        'title': 'Users',
+        'title': t('Users'),
         'page_callback': 'user_listing',
         'access_arguments': ['access user profiles'],
         'pageshow': 'user_listing_pageshow'
       }
     };
     items['user/password'] = {
-      title: 'Request new password',
+      title: t('Request new password'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['user_pass_form']
     };
@@ -11203,9 +11719,11 @@ function user_services_postprocess(options, result) {
     var response = JSON.parse(result.responseText);
     if ($.isArray(response)) {
       var msg = '';
-      $.each(response, function(index, message) {
+      for (var index in response) {
+          if (!response.hasOwnProperty(index)) { continue; }
+          var message = response[index];
           msg += message + '\n';
-      });
+      }
       if (msg != '') { drupalgap_alert(msg); }
     }
   }
@@ -11268,8 +11786,10 @@ function user_view_pageshow(uid) {
               'name': {'markup': account.name},
               'created': {
                 markup:
-                '<div class="user_profile_history"><h3>History</h3>' +
-                '<dl><dt>Member since</td></dt><dd>' +
+                '<div class="user_profile_history"><h3>' +
+                  t('History') +
+                '</h3>' +
+                '<dl><dt>' + t('Member since') + '</td></dt><dd>' +
                   (new Date(parseInt(account.created) * 1000)).toDateString() +
                 '</dd></div>'
               }
@@ -11328,12 +11848,14 @@ function drupalgap_user_has_role(role) {
     var account = null;
     if (arguments[1]) { account = arguments[1]; }
     else { account = Drupal.user; }
-    $.each(account.roles, function(rid, value) {
+    for (var rid in account.roles) {
+        if (!account.roles.hasOwnProperty(rid)) { continue; }
+        var value = account.roles[rid];
         if (role == value) {
           has_role = true;
-          return false;
+          break;
         }
-    });
+    }
     return has_role;
   }
   catch (error) { console.log('drupalgap_user_has_role - ' + error); }
@@ -11351,13 +11873,13 @@ function user_login_form(form, form_state) {
     form.bundle = null;
     form.elements.name = {
       type: 'textfield',
-      title: 'Username',
+      title: t('Username'),
       title_placeholder: true,
       required: true
     };
     form.elements.pass = {
       type: 'password',
-      title: 'Password',
+      title: t('Password'),
       title_placeholder: true,
       required: true,
       attributes: {
@@ -11366,18 +11888,18 @@ function user_login_form(form, form_state) {
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Login'
+      value: t('Login')
     };
     if (user_register_access()) {
       form.buttons['create_new_account'] = {
-        title: 'Create new account',
+        title: t('Create new account'),
         attributes: {
           onclick: "drupalgap_goto('user/register')"
         }
       };
     }
     form.buttons['forgot_password'] = {
-      title: 'Request new password',
+      title: t('Request new password'),
         attributes: {
           onclick: "drupalgap_goto('user/password')"
         }
@@ -11415,15 +11937,15 @@ function user_register_form(form, form_state) {
     form.bundle = null;
     form.elements.name = {
       type: 'textfield',
-      title: 'Username',
+      title: t('Username'),
       title_placeholder: true,
       required: true,
-      description: 'Spaces are allowed; punctuation is not allowed except ' +
-        'for periods, hyphens, apostrophes, and underscores.'
+      description: t('Spaces are allowed; punctuation is not allowed except ' +
+        'for periods, hyphens, apostrophes, and underscores.')
     };
     form.elements.mail = {
       type: 'email',
-      title: 'E-mail address',
+      title: t('E-mail address'),
       title_placeholder: true,
       required: true
     };
@@ -11432,19 +11954,19 @@ function user_register_form(form, form_state) {
     if (!drupalgap.site_settings.user_email_verification) {
       form.elements.conf_mail = {
         type: 'email',
-        title: 'Confirm e-mail address',
+        title: t('Confirm e-mail address'),
         title_placeholder: true,
         required: true
       };
       form.elements.pass = {
         type: 'password',
-        title: 'Password',
+        title: t('Password'),
         title_placeholder: true,
         required: true
       };
       form.elements.pass2 = {
         type: 'password',
-        title: 'Confirm password',
+        title: t('Confirm password'),
         title_placeholder: true,
         required: true
       };
@@ -11454,11 +11976,13 @@ function user_register_form(form, form_state) {
     drupalgap_field_info_instances_add_to_form('user', null, form, null);
     // Add registration messages to form.
     form.user_register = {
-      'user_mail_register_no_approval_required_body': 'Registration complete!',
+      'user_mail_register_no_approval_required_body':
+        t('Registration complete!'),
       'user_mail_register_pending_approval_required_body':
-        'Registration complete, waiting for administrator approval.',
+        t('Registration complete, waiting for administrator approval.'),
       'user_mail_register_email_verification_body':
-        'Registration complete, check your e-mail inbox to verify the account.'
+        t('Registration complete, check your e-mail inbox to verify the ' +
+          'account.')
     };
     // Set the auto login boolean. This only happens when the site's account
     // settings require no e-mail verification. Others can stop this from
@@ -11467,7 +11991,7 @@ function user_register_form(form, form_state) {
     // Add submit button.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Create new account'
+      'value': t('Create new account')
     };
     return form;
   }
@@ -11484,12 +12008,12 @@ function user_register_form_validate(form, form_state) {
     // If e-mail verification is not required, make sure the passwords match.
     if (!drupalgap.site_settings.user_email_verification &&
       form_state.values.pass != form_state.values.pass2) {
-      drupalgap_form_set_error('pass', 'Passwords do not match!');
+      drupalgap_form_set_error('pass', t('Passwords do not match!'));
     }
     // If there are two e-mail address fields on the form, make sure they match.
     if (!empty(form_state.values.mail) && !empty(form_state.values.conf_mail) &&
       form_state.values.mail != form_state.values.conf_mail
-    ) { drupalgap_form_set_error('mail', 'E-mail addresses do not match!'); }
+    ) { drupalgap_form_set_error('mail', t('E-mail addresses do not match!')); }
   }
   catch (error) {
     console.log('user_register_form_validate - ' + error);
@@ -11506,19 +12030,25 @@ function user_register_form_submit(form, form_state) {
     var account = drupalgap_entity_build_from_form_state(form, form_state);
     user_register(account, {
       success: function(data) {
+        var config = form.user_register;
+        var options = {
+          title: t('Registered')
+        };
         // Check if e-mail verification is required or not..
         if (!drupalgap.site_settings.user_email_verification) {
           // E-mail verification not needed, if administrator approval is
           // needed, notify the user, otherwise log them in.
           if (drupalgap.site_settings.user_register == '2') {
             drupalgap_alert(
-            form.user_register.user_mail_register_pending_approval_required_body
+              config.user_mail_register_pending_approval_required_body,
+              options
             );
             drupalgap_goto('');
           }
           else {
             drupalgap_alert(
-              form.user_register.user_mail_register_no_approval_required_body
+              config.user_mail_register_no_approval_required_body,
+              options
             );
             // If we're automatically logging in do it, otherwise just go to
             // the front page.
@@ -11535,7 +12065,8 @@ function user_register_form_submit(form, form_state) {
         else {
           // E-mail verification needed... notify the user.
           drupalgap_alert(
-            form.user_register.user_mail_register_email_verification_body
+            config.user_mail_register_email_verification_body,
+            options
           );
           drupalgap_goto('');
         }
@@ -11570,37 +12101,48 @@ function user_profile_form(form, form_state, account) {
     // Add the fields for accounts to the form.
     drupalgap_field_info_instances_add_to_form('user', null, form, account);
 
+    // If the user can't change their user name, remove access to it.
+    if (!user_access('change own username')) {
+      form.elements['name'].access = false;
+      form.elements['name'].required = false;
+    }
+
+    // If profile pictures are disabled, remove the core field from the form.
+    if (drupalgap.site_settings.user_pictures == 0) {
+      delete form.elements.picture;
+    }
+
     // Add password fields to the form. We show the current password field only
     // if the user is editing their account. We show the password and confirm
     // password field no matter what.
     if (Drupal.user.uid == account.uid) {
       form.elements.current_pass = {
-        'title': 'Current password',
+        'title': t('Current password'),
         'type': 'password',
-        'description': 'Enter your current password to change the E-mail ' +
-          'address or Password.'
+        'description': t('Enter your current password to change the E-mail ' +
+          'address or Password.')
       };
     }
     form.elements.pass_pass1 = {
-      'title': 'Password',
+      'title': t('Password'),
       'type': 'password'
     };
     form.elements.pass_pass2 = {
-      'title': 'Confirm password',
+      'title': t('Confirm password'),
       'type': 'password',
-      'description': 'To change the current user password, enter the new ' +
-        'password in both fields.'
+      'description': t('To change the current user password, enter the new ' +
+        'password in both fields.')
     };
 
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
     form.buttons['cancel'] = {
-      'title': 'Cancel',
+      'title': t('Cancel'),
       attributes: {
         onclick: 'javascript:drupalgap_back();'
       }
@@ -11612,6 +12154,40 @@ function user_profile_form(form, form_state, account) {
 }
 
 /**
+ * The user profile form validate handler.
+ * @param {Object} form
+ * @param {Object} form_state
+ */
+function user_profile_form_validate(form, form_state) {
+  try {
+    // If they entered their current password, and entered new passwords, make
+    // sure the new passwords match.
+    if (!empty(form_state.values['current_pass'])) {
+      if (
+        !empty(form_state.values['pass_pass1']) &&
+        !empty(form_state.values['pass_pass2']) &&
+        form_state.values['pass_pass1'] != form_state.values['pass_pass2']
+      ) {
+        drupalgap_form_set_error('pass_pass1', t('Passwords do not match.'));
+      }
+    }
+    // If they didn't enter their current password and entered new passwords,
+    // tell them they need to enter their current password.
+    else if (
+      empty(form_state.values['current_pass']) &&
+      !empty(form_state.values['pass_pass1']) &&
+      !empty(form_state.values['pass_pass2'])
+    ) {
+      drupalgap_form_set_error(
+        'current_pass',
+        t('You must enter your current password to change your password.')
+      );
+    }
+  }
+  catch (error) { console.log('user_profile_form_validate - ' + error); }
+}
+
+/**
  * The user profile form submit handler.
  * @param {Object} form
  * @param {Object} form_state
@@ -11619,6 +12195,17 @@ function user_profile_form(form, form_state, account) {
 function user_profile_form_submit(form, form_state) {
   try {
     var account = drupalgap_entity_build_from_form_state(form, form_state);
+    // If they provided their current password, and their new password, prepare
+    // the account submission values.
+    if (
+      account.current_pass &&
+      !empty(account.pass_pass1) &&
+      !empty(account.pass_pass2)
+    ) {
+      account.pass = account.pass_pass1;
+      delete account.pass_pass1;
+      delete account.pass_pass2;
+    }
     drupalgap_entity_form_submit(form, form_state, account);
   }
   catch (error) { console.log('user_profile_form_submit - ' + error); }
@@ -11628,12 +12215,13 @@ function user_profile_form_submit(form, form_state) {
  * The request new password form.
  * @param {Object} form
  * @param {Object} form_state
+ * @return {Object}
  */
 function user_pass_form(form, form_state) {
   try {
     form.elements['name'] = {
       type: 'textfield',
-      title: 'Username or e-mail address',
+      title: t('Username or e-mail address'),
       required: true,
       attributes: {
         onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
@@ -11641,7 +12229,7 @@ function user_pass_form(form, form_state) {
     };
     form.elements['submit'] = {
       type: 'submit',
-      value: 'E-mail new password'
+      value: t('E-mail new password')
     };
     return form;
   }
@@ -11659,11 +12247,12 @@ function user_pass_form_submit(form, form_state) {
         success: function(result) {
           if (result[0]) {
             var msg =
-              'Further instructions have been sent to your e-mail address.';
+              t('Further instructions have been sent to your e-mail address.');
             drupalgap_set_message(msg);
           }
           else {
-            var msg = 'There was a problem sending an e-mail to your address.';
+            var msg =
+              t('There was a problem sending an e-mail to your address.');
             drupalgap_set_message(msg, 'warning');
           }
           drupalgap_goto('user/login');
@@ -11689,9 +12278,11 @@ function drupalgap_taxonomy_vocabularies_extract(taxonomy_vocabularies) {
     var results = false;
     if (taxonomy_vocabularies && taxonomy_vocabularies.length > 0) {
       results = {};
-      $.each(taxonomy_vocabularies, function(index, vocabulary) {
+      for (var index in taxonomy_vocabularies) {
+          if (!taxonomy_vocabularies.hasOwnProperty(index)) { continue; }
+          var vocabulary = taxonomy_vocabularies[index];
           results[vocabulary.machine_name] = vocabulary;
-      });
+      }
     }
     return results;
   }
@@ -11723,15 +12314,29 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
       items = items[language_default()];
     }
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           var text = item.tid;
           if (item.name) { text = item.name; }
-          element[delta] = {
-            theme: 'button_link',
-            text: text,
-            path: 'taxonomy/term/' + item.tid
-          };
-      });
+          var content = null;
+          switch (display.type) {
+            case 'taxonomy_term_reference_link':
+              content = {
+                theme: 'button_link',
+                text: text,
+                path: 'taxonomy/term/' + item.tid
+              };
+              break;
+            case 'taxonomy_term_reference_plain':
+              content = { markup: text };
+              break;
+            default:
+              content = { markup: text };
+              break;
+          }
+          element[delta] = content;
+      }
     }
     return element;
   }
@@ -11835,7 +12440,9 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
               if (terms.length != 0) {
                 // Extract the terms into items, then drop them in the list.
                 var items = [];
-                $.each(terms, function(index, term) {
+                for (var index in terms) {
+                    if (!terms.hasOwnProperty(index)) { continue; }
+                    var term = terms[index];
                     var attributes = {
                       tid: term.tid,
                       vid: vid,
@@ -11849,7 +12456,7 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
                     html += '<li ' + drupalgap_attributes(attributes) + '>' +
                       term.name +
                     '</li>';
-                });
+                }
                 $ul.html(html);
                 $ul.listview('refresh');
                 $ul.trigger('updatelayout');
@@ -11918,23 +12525,23 @@ function taxonomy_assemble_form_state_into_field(entity_type, bundle,
 function taxonomy_menu() {
     var items = {
       'taxonomy/vocabularies': {
-        'title': 'Taxonomy',
+        'title': t('Taxonomy'),
         'page_callback': 'taxonomy_vocabularies_page',
         'pageshow': 'taxonomy_vocabularies_pageshow'
       },
       'taxonomy/vocabulary/%': {
-        'title': 'Taxonomy vocabulary',
+        'title': t('Taxonomy vocabulary'),
         'page_callback': 'taxonomy_vocabulary_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_vocabulary_pageshow'
       },
       'taxonomy/vocabulary/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/vocabulary/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': [
@@ -11948,18 +12555,18 @@ function taxonomy_menu() {
         options: {reloadPage: true}
       },
       'taxonomy/term/%': {
-        'title': 'Taxonomy term',
+        'title': t('Taxonomy term'),
         'page_callback': 'taxonomy_term_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_term_pageshow'
       },
       'taxonomy/term/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/term/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['taxonomy_form_term', 'taxonomy_term', 2],
@@ -11998,7 +12605,7 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -12051,7 +12658,7 @@ function taxonomy_form_term(form, form_state, term) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -12139,9 +12746,11 @@ function taxonomy_term_pageshow(tid) {
               success: function(results) {
                 // Extract the nodes into items, then drop them in the list.
                 var items = [];
-                $.each(results, function(index, node) {
+                for (var index in results) {
+                    if (!results.hasOwnProperty(index)) { continue; }
+                    var node = results[index];
                     items.push(l(node.title, 'node/' + node.nid));
-                });
+                }
                 drupalgap_item_list_populate(
                   '#taxonomy_term_node_listing_items_' + term.tid,
                   items
@@ -12182,7 +12791,7 @@ function taxonomy_vocabularies_page() {
     var content = {
       'vocabulary_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Vocabularies',
+        'title': t('Vocabularies'),
         'items': [],
         'attributes': {'id': 'vocabulary_listing_items'}
       }
@@ -12199,11 +12808,13 @@ function taxonomy_vocabularies_pageshow() {
         success: function(vocabularies) {
           // Extract the vocabs into items, then drop them in the list.
           var items = [];
-          $.each(vocabularies, function(index, vocabulary) {
+          for (var index in vocabularies) {
+              if (!vocabularies.hasOwnProperty(index)) { continue; }
+              var vocabulary = vocabularies[index];
               items.push(
                 l(vocabulary.name, 'taxonomy/vocabulary/' + vocabulary.vid)
               );
-          });
+          }
           drupalgap_item_list_populate('#vocabulary_listing_items', items);
         }
     });
@@ -12227,7 +12838,7 @@ function taxonomy_vocabulary_page(vid) {
         ),
         taxonomy_term_listing: {
           theme: 'jqm_item_list',
-          title: 'Terms',
+          title: t('Terms'),
           items: [],
           attributes: {
             id: 'taxonomy_term_listing_items_' + vid
@@ -12275,9 +12886,11 @@ function taxonomy_vocabulary_pageshow(vid) {
                 if (terms.length != 0) {
                   // Extract the terms into items, then drop them in the list.
                   var items = [];
-                  $.each(terms, function(index, term) {
+                  for (var index in terms) {
+                      if (!terms.hasOwnProperty(index)) { continue; }
+                      var term = terms[index];
                       items.push(l(term.name, 'taxonomy/term/' + term.tid));
-                  });
+                  }
                   drupalgap_item_list_populate(
                     '#taxonomy_term_listing_items_' + vid,
                     items
@@ -12478,12 +13091,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
           if (!options.required) {
             var option = null;
             if (options.exposed) {
-              option = '<option value="All">- Any -</option>';
+              option = '<option value="All">- ' + t('Any') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id]['All'] =
                 '- Any -';
             }
             else {
-              option = '<option value="">- None -</option>';
+              option = '<option value="">- ' + t('None') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id][''] =
                 '- None -';
             }
@@ -12492,14 +13105,16 @@ function _theme_taxonomy_term_reference_load_items(options) {
 
           // Place each term in the widget as an option, and set the option
           // aside.
-          $.each(terms, function(index, term) {
+          for (var index in terms) {
+              if (!terms.hasOwnProperty(index)) { continue; }
+              var term = terms[index];
               var option = '<option value="' + term.tid + '">' +
                 term.name +
               '</option>';
               $(widget).append(option);
               _taxonomy_term_reference_terms[options.element_id][term.tid] =
                 term.name;
-          });
+          }
 
           // Refresh the select list.
           $(widget).selectmenu('refresh', true);
@@ -12551,7 +13166,9 @@ function taxonomy_views_exposed_filter(
     // them into the widget. We'll just use a taxonomy term reference field and
     // fake its instance.
     element.type = 'hidden';
-    $.each(field.settings.allowed_values, function(index, object) {
+    for (var index in field.settings.allowed_values) {
+        if (!field.settings.allowed_values.hasOwnProperty(index)) { continue; }
+        var object = field.settings.allowed_values[index];
 
         // Build the variables for the widget.
         var variables = {
@@ -12586,7 +13203,7 @@ function taxonomy_views_exposed_filter(
         child += theme('taxonomy_term_reference', variables);
         element.children.push({ markup: child });
 
-    });
+    }
   }
   catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
 }
@@ -12705,7 +13322,9 @@ function views_exposed_form(form, form_state, options) {
     // Attach the variables to the form so it can be used later.
     form.variables = options.variables;
 
-    $.each(options.filter, function(views_field, filter) {
+    for (var views_field in options.filter) {
+        if (!options.filter.hasOwnProperty(views_field)) { continue; }
+        var filter = options.filter[views_field];
 
         // Prep the element basics.
         var element_id = null;
@@ -12754,14 +13373,14 @@ function views_exposed_form(form, form_state, options) {
               'created to assemble the ' + field.type + ' filter used by ' +
               field_name
             );
-            return;
+            continue;
           }
 
           // We have a handler, let's call it so the element can be assembled.
           window[handler](form, form_state, element, filter, field);
 
-        }
-        else {
+      }
+      else {
           // This is NOT an entity field, so it is probably a core field (e.g.
           // nid, status, etc). Let's assemble the element. In some cases we may
           // just be able to forward it to a pre-existing handler.
@@ -12773,15 +13392,15 @@ function views_exposed_form(form, form_state, options) {
               'WARNING: views_exposed_form() - I do not know how to handle ' +
               'the exposed filter for the "' + views_field + '" field'
             );
-            dpm(filter);
-            return;
+            console.log(filter);
+            continue;
           }
-        }
+      }
 
-        // Finally attach the assembled element to the form.
-        if (element_id) { form.elements[element_id] = element; }
+      // Finally attach the assembled element to the form.
+      if (element_id) { form.elements[element_id] = element; }
 
-    });
+    }
 
     // Add the submit button.
     form.elements['submit'] = {
@@ -12817,10 +13436,12 @@ function views_exposed_form_submit(form, form_state) {
 
     // Assemble the query string from the form state values.
     var query = '';
-    $.each(form_state.values, function(key, value) {
-        if (empty(value)) { return; }
+    for (var key in form_state.values) {
+        if (!form_state.values.hasOwnProperty(key)) { continue; }
+        var value = form_state.values[key];
+        if (empty(value)) { continue; }
         query += key + '=' + encodeURIComponent(value) + '&';
-    });
+    }
     if (!empty(query)) { query = query.substr(0, query.length - 1); }
 
     // If there is a query set aside from previous requests, and it is equal to
@@ -13132,7 +13753,9 @@ function theme_views_view(variables) {
         break;
     }
     var rows = '' + open;
-    $.each(results[root], function(count, object) {
+    for (var count in results[root]) {
+        if (!results[root].hasOwnProperty(count)) { continue; }
+        var object = results[root][count];
         // Extract the row.
         var row = object[child];
         // Mark the row position.
@@ -13146,7 +13769,7 @@ function theme_views_view(variables) {
         }
         else { row_content = JSON.stringify(row); }
         rows += open_row + row_content + close_row;
-    });
+    }
     rows += close;
     // If we have any pages, render the pager above or below the results
     // according to the pager_pos setting.

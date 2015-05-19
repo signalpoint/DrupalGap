@@ -14,12 +14,14 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
     // Iterate over each core field in the entity and add it to the form. If
     // there is a value present in the entity, then set the field's form element
     // default value equal to the core field value.
-    $.each(fields, function(name, field) {
+    for (var name in fields) {
+      if (!fields.hasOwnProperty(name)) { continue; }
+      var field = fields[name];
       var default_value = field.default_value;
       if (entity && entity[name]) { default_value = entity[name]; }
       form.elements[name] = field;
       form.elements[name].default_value = default_value;
-    });
+    }
   }
   catch (error) {
     console.log('drupalgap_entity_add_core_fields_to_form - ' + error);
@@ -52,7 +54,7 @@ function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
  */
 function drupalgap_entity_edit_form_delete_button(entity_type, entity_id) {
     return {
-      title: 'Delete',
+      title: t('Delete'),
       attributes: {
         onclick: "javascript:drupalgap_entity_edit_form_delete_confirmation('" +
           entity_type + "', " + entity_id +
@@ -74,35 +76,43 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
   entity_id) {
   try {
     var confirm_msg =
-      'Delete this content, are you sure? This action cannot be undone...';
-    if (confirm(confirm_msg)) {
-      // Change the jQM loader mode to saving.
-      drupalgap.loader = 'deleting';
-      // Set up the api call arguments and success callback.
-      var call_arguments = {};
-      call_arguments.success = function(result) {
-        // Remove the entities page from the DOM, if it exists.
-        var entity_page_path = entity_type + '/' + entity_id;
-        var entity_page_id = drupalgap_get_page_id(entity_page_path);
-        if (drupalgap_page_in_dom(entity_page_id)) {
-          drupalgap_remove_page_from_dom(entity_page_id);
+      t('Delete this content, are you sure? This action cannot be undone...');
+    drupalgap_confirm(confirm_msg, {
+        confirmCallback: function(button) {
+          if (button == 2) { return; }
+          // Change the jQM loader mode to deleting.
+          drupalgap.loader = 'deleting';
+          // Set up the api call arguments and success callback.
+          var call_arguments = {};
+          call_arguments.success = function(result) {
+            // Remove the entities page from the DOM, if it exists.
+            var entity_page_path = entity_type + '/' + entity_id;
+            var entity_page_id = drupalgap_get_page_id(entity_page_path);
+            if (drupalgap_page_in_dom(entity_page_id)) {
+              drupalgap_remove_page_from_dom(entity_page_id);
+            }
+            // Remove the entity from local storage.
+            // @todo - this should be moved to jDrupal.
+            window.localStorage.removeItem(
+              entity_local_storage_key(entity_type, entity_id)
+            );
+            // Go to the front page, unless a form action path was specified.
+            var form = drupalgap_form_local_storage_load('node_edit');
+            var destination = form.action ? form.action : '';
+            drupalgap_goto(destination, {
+              reloadPage: true,
+              form_submission: true
+            });
+          };
+          // Call the delete function.
+          var name = services_get_resource_function_for_entity(
+            entity_type,
+            'delete'
+          );
+          var fn = window[name];
+          fn(entity_id, call_arguments);
         }
-        // Remove the entity from local storage.
-        // @todo - this should be moved to jDrupal.
-        window.localStorage.removeItem(
-          entity_local_storage_key(entity_type, entity_id)
-        );
-        // Go to the front page.
-        drupalgap_goto('', { reloadPage: true, form_submission: true });
-      };
-      // Call the delete function.
-      var name = services_get_resource_function_for_entity(
-        entity_type,
-        'delete'
-      );
-      var fn = window[name];
-      fn(entity_id, call_arguments);
-    }
+    });
   }
   catch (error) {
     console.log('drupalgap_entity_edit_form_delete_confirmation - ' + error);
@@ -128,10 +138,12 @@ function drupalgap_entity_render_content(entity_type, entity) {
     if (!field_info) { return; }
     var field_weights = {};
     var field_displays = {};
-    $.each(field_info, function(field_name, field) {
+    for (var field_name in field_info) {
+        if (!field_info.hasOwnProperty(field_name)) { continue; }
+        var field = field_info[field_name];
         // Determine which display mode to use. The default mode will be used
         // if the drupalgap display mode is not present.
-        if (!field.display) { return false; }
+        if (!field.display) { break; }
         var display = field.display['default'];
         if (field.display['drupalgap']) {
           display = field.display['drupalgap'];
@@ -143,22 +155,28 @@ function drupalgap_entity_render_content(entity_type, entity) {
           ) { display.module = field.display['default'].module; }
         }
         // Skip hidden fields.
-        if (display.type == 'hidden') { return; }
+        if (display.type == 'hidden') { continue; }
         // Save the field display and weight.
         field_displays[field_name] = display;
         field_weights[field_name] = display.weight;
-    });
+    }
     // Extract the field weights and sort them.
     var extracted_weights = [];
-    $.each(field_weights, function(field_name, weight) {
+    for (var field_name in field_weights) {
+        if (!field_weights.hasOwnProperty(field_name)) { continue; }
+        var weight = field_weights[field_name];
         extracted_weights.push(weight);
-    });
+    }
     extracted_weights.sort(function(a, b) { return a - b; });
     // For each sorted weight, locate the field with the corresponding weight,
     // then render it's field content.
     var completed_fields = [];
-    $.each(extracted_weights, function(weight_index, target_weight) {
-        $.each(field_weights, function(field_name, weight) {
+    for (var weight_index in extracted_weights) {
+        if (!extracted_weights.hasOwnProperty(weight_index)) { continue; }
+        var target_weight = extracted_weights[weight_index];
+        for (var field_name in field_weights) {
+            if (!field_weights.hasOwnProperty(field_name)) { continue; }
+            var weight = field_weights[field_name];
             if (target_weight == weight) {
               if (completed_fields.indexOf(field_name) == -1) {
                 completed_fields.push(field_name);
@@ -169,11 +187,11 @@ function drupalgap_entity_render_content(entity_type, entity) {
                   field_info[field_name],
                   field_displays[field_name]
                 );
-                return false;
+                break;
               }
             }
-        });
-    });
+        }
+    }
     // Give modules a chance to alter the content.
     module_invoke_all(
       'entity_post_render_content',
@@ -265,7 +283,9 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
         items,
         display
       );
-      $.each(elements, function(delta, element) {
+      for (var delta in elements) {
+          if (!elements.hasOwnProperty(delta)) { continue; }
+          var element = elements[delta];
           // If the element has markup, render it as is, if it is
           // themeable, then theme it.
           var element_content = '';
@@ -273,9 +293,8 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
           else if (element.theme) {
             element_content = theme(element.theme, element);
           }
-          //content += '<div>' + element_content + '</div>';
           content += element_content;
-      });
+      }
     }
     else {
       console.log(
@@ -323,14 +342,16 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
     var entity = {};
     var language = language_default();
-    $.each(form_state.values, function(name, value) {
-
+    for (var name in form_state.values) {
+        if (!form_state.values.hasOwnProperty(name)) { continue; }
+        var value = form_state.values[name];
+  
         // Skip elements with restricted access.
         if (
           typeof form.elements[name].access !== 'undefined' &&
           !form.elements[name].access
-        ) { return; }
-
+        ) { continue; }
+  
         // Determine wether or not this element is a field. If it is, determine
         // it's module and field assembly hook.
         var is_field = false;
@@ -342,26 +363,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           hook = module + '_assemble_form_state_into_field';
           if (!function_exists(hook)) { hook = false; }
         }
-
+  
         // Retrieve the potential key for the element, if we don't get one
         // then it is a flat field that should be attached as a property to the
         // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-
+  
           // Determine how many allowed values for this field.
           var allowed_values = form.elements[name].field_info_field.cardinality;
-
+  
           // Convert unlimited value fields to one, for now...
           if (allowed_values == -1) { allowed_values = 1; }
-
+  
           // Make sure there is at least one value before creating the form
           // element on the entity.
-          if (typeof value[language][0] === 'undefined') { return; }
-
+          if (typeof value[language][0] === 'undefined') { continue; }
+  
           // Create an empty object to house the field on the entity.
           entity[name] = {};
-
+  
           // Some fields do not use a delta value in the service call, so we
           // prepare for that here.
           // @todo - Do all options_select widgets really have no delta value?
@@ -378,12 +399,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             entity[name][language] = {};
           }
           else { entity[name][language] = []; }
-
+  
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
             if (typeof value[language][delta] !== 'undefined') {
-
+  
               // @TODO - the way values are determined here is turning into
               // spaghetti code. Every form element needs its own
               // value_callback, just like Drupal's FAPI. Right now DG has
@@ -398,10 +419,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // drupalgap_field_info_instances_add_to_form(), that function
               // should use the value_callback idea to properly map entity data
               // to the form element's value.
-
+  
               // Extract the value.
               var field_value = value[language][delta];
-
+  
               // By default, we'll assume we'll be attaching this element item's
               // value according to a key (usually 'value' is the default key
               // used by Drupal fields). However, we'll give modules that
@@ -421,7 +442,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 form_id: form.id,
                 element_id: form.elements[name][language][delta].id
               };
-
+  
               // If this element is a field, give the field's module an
               // opportunity to assemble its own value, otherwise we'll just
               // use the field value extracted above.
@@ -437,10 +458,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   field_key
                 );
               }
-
+  
               // If someone updated the key, use it.
               if (key != field_key.value) { key = field_key.value; }
-
+  
               // If we don't need a delta value, place the field value using the
               // key, if posible. If we're using a delta value, push the key
               // and value onto the field to indicate the delta.
@@ -470,7 +491,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   entity[name][language].push(field_value);
                 }
               }
-
+  
               // If the field value was null, we won't send along the field, so
               // just remove it. Except for list_boolean fields, they need a
               // null value to set the field value to false.
@@ -482,7 +503,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 typeof entity[name] !== 'undefined' &&
                 form.elements[name].type != 'list_boolean'
               ) { delete entity[name]; }
-
+  
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
               // @TODO - will this cause multi value issues?
@@ -492,12 +513,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   'options_select' && !form.elements[name].required &&
                 field_value === '' && typeof entity[name] !== 'undefined'
               ) { delete entity[name]; }
-
+  
             }
           }
-        }
-        else if (typeof value !== 'undefined') { entity[name] = value; }
-    });
+      }
+      else if (typeof value !== 'undefined') { entity[name] = value; }
+    }
     return entity;
   }
   catch (error) {
@@ -543,8 +564,16 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
           }
           destination = prefix + '/' + result[primary_key];
         }
+        // Is there a destination URL query parameter overwriting the action?
         if (_GET('destination')) { destination = _GET('destination'); }
-        drupalgap_goto(destination, { form_submission: true });
+        // Set up the default goto options, and use any options provided by the
+        // form.
+        var goto_options = { form_submission: true };
+        if (form.action_options) {
+          goto_options = $.extend({}, goto_options, form.action_options);
+        }
+        // Finally goto our destination.
+        drupalgap_goto(destination, goto_options);
       }
       catch (error) {
         console.log('drupalgap_entity_form_submit - success - ' + error);
@@ -602,18 +631,18 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
       case 'comment':
         var content_type = bundle.replace('comment_node_', '');
         // Add each schema field to the field collection.
-        $.each(
-          drupalgap.entity_info[entity_type].schema_fields_sql['base table'],
-          function(index, name) {
+        var base_table = drupalgap.entity_info[entity_type].schema_fields_sql['base table'];
+        for (var index in base_table) {
+            if (!base_table.hasOwnProperty(index)) { continue; }
+            var name = base_table[index];
             var field = {
-              'type': 'hidden',
-              'required': false,
-              'default_value': '',
-              'title': ucfirst(name)
+              type: 'hidden',
+              required: false,
+              default_value: '',
+              title: ucfirst(name)
             };
             fields[name] = field;
-          }
-        );
+        }
         // Make the node id required.
         fields['nid'].required = true;
         // Only anonymous users can fill out the name field, authenticated users
@@ -667,7 +696,7 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.title = {
           'type': 'textfield',
-          'title': 'Title',
+          'title': t('Title'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -691,14 +720,14 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         };
         fields.name = {
           'type': 'textfield',
-          'title': 'Username',
+          'title': t('Username'),
           'required': true,
           'default_value': '',
           'description': ''
         };
         fields.mail = {
           'type': 'email',
-          'title': 'E-mail address',
+          'title': t('E-mail address'),
           'required': true,
           'default_value': '',
           'description': ''
@@ -706,9 +735,9 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         fields.picture = {
           'type': 'image',
           'widget_type': 'imagefield_widget',
-          'title': 'Picture',
+          'title': t('Picture'),
           'required': false,
-          'value': 'Add Picture'
+          'value': t('Add Picture')
         };
         break;
       case 'taxonomy_term':
@@ -725,13 +754,13 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }
@@ -746,19 +775,19 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           },
           'name': {
             'type': 'textfield',
-            'title': 'Name',
+            'title': t('Name'),
             'required': true,
             'default_value': ''
           },
           'machine_name': {
             'type': 'textfield',
-            'title': 'Machine Name',
+            'title': t('Machine Name'),
             'required': true,
             'default_value': ''
           },
           'description': {
             'type': 'textarea',
-            'title': 'Description',
+            'title': t('Description'),
             'required': false,
             'default_value': ''
           }
@@ -963,16 +992,17 @@ function entity_services_request_pre_postprocess_alter(options, result) {
     }
     // If we're indexing comments, render its content, if it isn't already set.
     else if (options.service == 'comment' && options.resource == 'index') {
-      $.each(result, function(index, object) {
+      for (var index in result) {
+          if (!result.hasOwnProperty(index)) { continue; }
+          var object = result[index];
           // @TODO - does this condition ever evaluate to true?
-          if (typeof object.content !== 'undefined') { return; }
+          if (typeof object.content !== 'undefined') { continue; }
           drupalgap_entity_render_content(options.service, result[index]);
-      });
+      }
     }
   }
   catch (error) {
     console.log('entity_services_request_pre_postprocess_alter - ' + error);
   }
 }
-
 

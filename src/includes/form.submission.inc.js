@@ -2,6 +2,11 @@
  * Optionally use this function as an HTML DOM onkeypress handler, and it will
  * attempt to listen for the enter key being pressed and submit the form at that
  * time.
+<<<<<<< HEAD
+=======
+ * @param {String} form_id
+ * @return {Boolean}
+>>>>>>> 6867827dac7c1a530598d866cf0b18628bac03a9
  */
 function drupalgap_form_onkeypress(form_id) {
   try {
@@ -15,7 +20,6 @@ function drupalgap_form_onkeypress(form_id) {
   catch (error) { console.log('drupalgap_form_onkeypress - ' + error); }
 }
 
-
 /**
  * Handles a drupalgap form's submit button click.
  * @param {String} form_id
@@ -26,7 +30,8 @@ function _drupalgap_form_submit(form_id) {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
     if (!form) {
-      var msg = '_drupalgap_form_submit - failed to load form: ' + form_id;
+      var msg = '_drupalgap_form_submit - ' + t('failed to load form') + ': ' +
+        form_id;
       drupalgap_alert(msg);
       return false;
     }
@@ -42,10 +47,12 @@ function _drupalgap_form_submit(form_id) {
       try {
 
         // Call the form's validate function(s), if any.
-        $.each(form.validate, function(index, function_name) {
+        for (var index in form.validate) {
+            if (!form.validate.hasOwnProperty(index)) { continue; }
+            var function_name = form.validate[index];
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        });
+        }
 
         // Call drupalgap form's api validate.
         _drupalgap_form_validate(form, form_state);
@@ -54,9 +61,11 @@ function _drupalgap_form_submit(form_id) {
         // form submission. Otherwise submit the form.
         if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
           var html = '';
-          $.each(drupalgap.form_errors, function(name, message) {
+          for (var name in drupalgap.form_errors) {
+              if (!drupalgap.form_errors.hasOwnProperty(name)) { continue; }
+              var message = drupalgap.form_errors[name];
               html += message + '\n\n';
-          });
+          }
           drupalgap_alert(html);
         }
         else { form_submission(); }
@@ -70,10 +79,12 @@ function _drupalgap_form_submit(form_id) {
     var form_submission = function() {
       try {
         // Call the form's submit function(s), if any.
-        $.each(form.submit, function(index, function_name) {
+        for (var index in form.submit) {
+            if (!form.submit.hasOwnProperty(index)) { continue; }
+            var function_name = form.submit[index];
             var fn = window[function_name];
             fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        });
+        }
         // Remove the form from local storage.
         // @todo - we can't do this here because often times a form's submit
         // handler makes asynchronous calls (i.e. user login) and although the
@@ -116,8 +127,10 @@ function _drupalgap_form_submit(form_id) {
  */
 function _drupalgap_form_validate(form, form_state) {
   try {
-    $.each(form.elements, function(name, element) {
-        if (name == 'submit') { return; }
+    for (var name in form.elements) {
+        if (!form.elements.hasOwnProperty(name)) { continue; }
+        var element = form.elements[name];
+        if (name == 'submit') { continue; }
         if (element.required) {
           var valid = true;
           var value = null;
@@ -133,9 +146,11 @@ function _drupalgap_form_validate(form, form_state) {
           ) { valid = false; }
           else if (element.type == 'checkboxes' && element.required) {
             var has_value = false;
-            $.each(form_state.values[name], function(key, value) {
-                if (value) { has_value = true; return false; }
-            });
+            for (var key in form_state.values[name]) {
+              if (!form_state.values[name].hasOwnProperty(key)) { continue; }
+              var value = form_state.values[name][key];
+              if (value) { has_value = true; break; }
+            }
             if (!has_value) { valid = false; }
           }
           if (!valid) {
@@ -143,11 +158,11 @@ function _drupalgap_form_validate(form, form_state) {
             if (element.title) { field_title = element.title; }
             drupalgap_form_set_error(
               name,
-              'The ' + field_title + ' field is required.'
+              t('The') + ' ' + field_title + ' ' + t('field is required') + '.'
             );
           }
         }
-    });
+    }
   }
   catch (error) { console.log('_drupalgap_form_validate - ' + error); }
 }
@@ -162,9 +177,11 @@ function _drupalgap_form_validate(form, form_state) {
 function drupalgap_form_state_values_assemble(form) {
   try {
     var lng = language_default();
-    var form_state = {'values': {}};
-    $.each(form.elements, function(name, element) {
-      if (name == 'submit') { return; } // Always skip the form 'submit'.
+    var form_state = { values: {} };
+    for (var name in form.elements) {
+      if (!form.elements.hasOwnProperty(name)) { continue; }
+      var element = form.elements[name];
+      if (name == 'submit') { continue; } // Always skip the form 'submit'.
       var id = null;
       if (element.is_field) {
         form_state.values[name] = {};
@@ -190,7 +207,7 @@ function drupalgap_form_state_values_assemble(form) {
             element
           );
       }
-    });
+    }
     // Attach the form state to drupalgap.form_states keyed by the form id.
     drupalgap.form_states[form.id] = form_state;
     return form_state;
@@ -236,17 +253,28 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
         // over the element option(s) in the DOM.
         value = {};
         var options = $('label[for="' + id + '"]').siblings('.ui-checkbox');
-        $.each(options, function(index, option) {
+        for (var index in options) {
+            if (!options.hasOwnProperty(index)) { continue; }
+            var option = options[index];
             var checkbox = $(option).children('input');
             var _value = $(checkbox).attr('value');
             if ($(checkbox).is(':checked')) { value[_value] = _value; }
             else { value[_value] = 0; }
-        });
+        }
         break;
       case 'list_boolean':
         var _checkbox = $(selector);
         if ($(_checkbox).is(':checked')) { value = $(_checkbox).attr('on'); }
         else { value = $(_checkbox).attr('off'); }
+        break;
+      case 'list_text':
+        // Radio buttons.
+        if (
+          element.field_info_instance &&
+          element.field_info_instance.widget.type == 'options_buttons'
+        ) {
+          selector = 'input:radio[name="' + id + '"]:checked';
+        }
         break;
     }
     if (value === null) { value = $(selector).val(); }
@@ -278,7 +306,9 @@ function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
     var responseText = JSON.parse(xhr.responseText);
     if (typeof responseText === 'object' && responseText.form_errors) {
       var msg = '';
-      $.each(responseText.form_errors, function(element_name, error_msg) {
+      for (var element_name in responseText.form_errors) {
+          if (!responseText.form_errors.hasOwnProperty(element_name)) { continue; }
+          var error_msg = responseText.form_errors[element_name];
           if (error_msg != '') {
             // The element name tends to come back weird, e.g.
             // "field_art_type][und", so let's trim anything at and after
@@ -295,7 +325,7 @@ function _drupalgap_form_submit_response_errors(form, form_state, xhr, status,
             msg += $('<div>(' + label + ') - ' +
               error_msg + '</div>').text() + '\n';
           }
-      });
+      }
       if (msg != '') { return msg; }
     }
     return false;

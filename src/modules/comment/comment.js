@@ -5,7 +5,7 @@
 function comment_menu() {
     var items = {
       'comment/%': {
-        title: 'Comment',
+        title: t('Comment'),
         page_callback: 'comment_page_view',
         page_arguments: [1],
         pageshow: 'comment_page_view_pageshow',
@@ -13,12 +13,12 @@ function comment_menu() {
         title_arguments: [1]
       },
       'comment/%/view': {
-        title: 'View',
+        title: t('View'),
         type: 'MENU_DEFAULT_LOCAL_TASK',
         weight: -10
       },
       'comment/%/edit': {
-        title: 'Edit',
+        title: t('Edit'),
         page_callback: 'entity_page_edit',
         pageshow: 'entity_page_edit_pageshow',
         page_arguments: ['comment_edit', 'comment', 1],
@@ -94,7 +94,7 @@ function comment_page_view(cid) {
       };
       return content;
     }
-    else { drupalgap_error('No comment id provided!'); }
+    else { drupalgap_error(t('No comment id provided!')); }
   }
   catch (error) { console.log('comment_page_view - ' + error); }
 }
@@ -188,14 +188,14 @@ function comment_edit(form, form_state, comment, node) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel and delete button to form if we're editing a comment. Also
     // figure out a form title to use in the prefix.
-    var form_title = 'Add comment';
+    var form_title = t('Add comment');
     if (comment && comment.cid) {
-      form_title = 'Edit comment';
+      form_title = t('Edit comment');
       form.buttons['cancel'] = drupalgap_form_cancel_button();
       form.buttons['delete'] =
         drupalgap_entity_edit_form_delete_button('comment', comment.cid);
@@ -338,7 +338,7 @@ function theme_comment(variables) {
       (user_access('edit own comments') && comment.uid == Drupal.user.uid)
     ) {
       html += theme('button_link', {
-          text: 'Edit',
+          text: t('Edit'),
           path: 'comment/' + comment.cid + '/edit',
           attributes: {
             'data-icon': 'gear'

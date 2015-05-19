@@ -28,14 +28,15 @@ function _drupalgap_page_title_pageshow(page_arguments) {
           // corresponding arg(#), otherwise just push the arg onto the title
           // arguments.
           var args = arg(null, drupalgap_path_get());
-          $.each(
-            drupalgap.menu_links[router_path].title_arguments,
-            function(index, object) {
+          var _title_arguments = drupalgap.menu_links[router_path].title_arguments;
+          for (var index in items) {
+              if (!items.hasOwnProperty(index)) { continue; }
+              var object = items[index];
               if (is_int(object) && args[object]) {
                 title_arguments.push(args[object]);
               }
               else { title_arguments.push(object); }
-          });
+          }
         }
         // Call the title callback function with the title arguments.
         drupalgap_set_title(

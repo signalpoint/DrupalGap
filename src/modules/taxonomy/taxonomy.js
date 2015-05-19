@@ -14,9 +14,11 @@ function drupalgap_taxonomy_vocabularies_extract(taxonomy_vocabularies) {
     var results = false;
     if (taxonomy_vocabularies && taxonomy_vocabularies.length > 0) {
       results = {};
-      $.each(taxonomy_vocabularies, function(index, vocabulary) {
+      for (var index in taxonomy_vocabularies) {
+          if (!taxonomy_vocabularies.hasOwnProperty(index)) { continue; }
+          var vocabulary = taxonomy_vocabularies[index];
           results[vocabulary.machine_name] = vocabulary;
-      });
+      }
     }
     return results;
   }
@@ -48,15 +50,29 @@ function taxonomy_field_formatter_view(entity_type, entity, field, instance,
       items = items[language_default()];
     }
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           var text = item.tid;
           if (item.name) { text = item.name; }
-          element[delta] = {
-            theme: 'button_link',
-            text: text,
-            path: 'taxonomy/term/' + item.tid
-          };
-      });
+          var content = null;
+          switch (display.type) {
+            case 'taxonomy_term_reference_link':
+              content = {
+                theme: 'button_link',
+                text: text,
+                path: 'taxonomy/term/' + item.tid
+              };
+              break;
+            case 'taxonomy_term_reference_plain':
+              content = { markup: text };
+              break;
+            default:
+              content = { markup: text };
+              break;
+          }
+          element[delta] = content;
+      }
     }
     return element;
   }
@@ -160,7 +176,9 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
               if (terms.length != 0) {
                 // Extract the terms into items, then drop them in the list.
                 var items = [];
-                $.each(terms, function(index, term) {
+                for (var index in terms) {
+                    if (!terms.hasOwnProperty(index)) { continue; }
+                    var term = terms[index];
                     var attributes = {
                       tid: term.tid,
                       vid: vid,
@@ -174,7 +192,7 @@ function _taxonomy_field_widget_form_autocomplete(id, vid, list, e, data) {
                     html += '<li ' + drupalgap_attributes(attributes) + '>' +
                       term.name +
                     '</li>';
-                });
+                }
                 $ul.html(html);
                 $ul.listview('refresh');
                 $ul.trigger('updatelayout');
@@ -243,23 +261,23 @@ function taxonomy_assemble_form_state_into_field(entity_type, bundle,
 function taxonomy_menu() {
     var items = {
       'taxonomy/vocabularies': {
-        'title': 'Taxonomy',
+        'title': t('Taxonomy'),
         'page_callback': 'taxonomy_vocabularies_page',
         'pageshow': 'taxonomy_vocabularies_pageshow'
       },
       'taxonomy/vocabulary/%': {
-        'title': 'Taxonomy vocabulary',
+        'title': t('Taxonomy vocabulary'),
         'page_callback': 'taxonomy_vocabulary_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_vocabulary_pageshow'
       },
       'taxonomy/vocabulary/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/vocabulary/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': [
@@ -273,18 +291,18 @@ function taxonomy_menu() {
         options: {reloadPage: true}
       },
       'taxonomy/term/%': {
-        'title': 'Taxonomy term',
+        'title': t('Taxonomy term'),
         'page_callback': 'taxonomy_term_page',
         'page_arguments': [2],
         'pageshow': 'taxonomy_term_pageshow'
       },
       'taxonomy/term/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'taxonomy/term/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['taxonomy_form_term', 'taxonomy_term', 2],
@@ -323,7 +341,7 @@ function taxonomy_form_vocabulary(form, form_state, vocabulary) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -376,7 +394,7 @@ function taxonomy_form_term(form, form_state, term) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -464,9 +482,11 @@ function taxonomy_term_pageshow(tid) {
               success: function(results) {
                 // Extract the nodes into items, then drop them in the list.
                 var items = [];
-                $.each(results, function(index, node) {
+                for (var index in results) {
+                    if (!results.hasOwnProperty(index)) { continue; }
+                    var node = results[index];
                     items.push(l(node.title, 'node/' + node.nid));
-                });
+                }
                 drupalgap_item_list_populate(
                   '#taxonomy_term_node_listing_items_' + term.tid,
                   items
@@ -507,7 +527,7 @@ function taxonomy_vocabularies_page() {
     var content = {
       'vocabulary_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Vocabularies',
+        'title': t('Vocabularies'),
         'items': [],
         'attributes': {'id': 'vocabulary_listing_items'}
       }
@@ -524,11 +544,13 @@ function taxonomy_vocabularies_pageshow() {
         success: function(vocabularies) {
           // Extract the vocabs into items, then drop them in the list.
           var items = [];
-          $.each(vocabularies, function(index, vocabulary) {
+          for (var index in vocabularies) {
+              if (!vocabularies.hasOwnProperty(index)) { continue; }
+              var vocabulary = vocabularies[index];
               items.push(
                 l(vocabulary.name, 'taxonomy/vocabulary/' + vocabulary.vid)
               );
-          });
+          }
           drupalgap_item_list_populate('#vocabulary_listing_items', items);
         }
     });
@@ -552,7 +574,7 @@ function taxonomy_vocabulary_page(vid) {
         ),
         taxonomy_term_listing: {
           theme: 'jqm_item_list',
-          title: 'Terms',
+          title: t('Terms'),
           items: [],
           attributes: {
             id: 'taxonomy_term_listing_items_' + vid
@@ -600,9 +622,11 @@ function taxonomy_vocabulary_pageshow(vid) {
                 if (terms.length != 0) {
                   // Extract the terms into items, then drop them in the list.
                   var items = [];
-                  $.each(terms, function(index, term) {
+                  for (var index in terms) {
+                      if (!terms.hasOwnProperty(index)) { continue; }
+                      var term = terms[index];
                       items.push(l(term.name, 'taxonomy/term/' + term.tid));
-                  });
+                  }
                   drupalgap_item_list_populate(
                     '#taxonomy_term_listing_items_' + vid,
                     items
@@ -803,12 +827,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
           if (!options.required) {
             var option = null;
             if (options.exposed) {
-              option = '<option value="All">- Any -</option>';
+              option = '<option value="All">- ' + t('Any') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id]['All'] =
                 '- Any -';
             }
             else {
-              option = '<option value="">- None -</option>';
+              option = '<option value="">- ' + t('None') + ' -</option>';
               _taxonomy_term_reference_terms[options.element_id][''] =
                 '- None -';
             }
@@ -817,14 +841,16 @@ function _theme_taxonomy_term_reference_load_items(options) {
 
           // Place each term in the widget as an option, and set the option
           // aside.
-          $.each(terms, function(index, term) {
+          for (var index in terms) {
+              if (!terms.hasOwnProperty(index)) { continue; }
+              var term = terms[index];
               var option = '<option value="' + term.tid + '">' +
                 term.name +
               '</option>';
               $(widget).append(option);
               _taxonomy_term_reference_terms[options.element_id][term.tid] =
                 term.name;
-          });
+          }
 
           // Refresh the select list.
           $(widget).selectmenu('refresh', true);
@@ -876,7 +902,9 @@ function taxonomy_views_exposed_filter(
     // them into the widget. We'll just use a taxonomy term reference field and
     // fake its instance.
     element.type = 'hidden';
-    $.each(field.settings.allowed_values, function(index, object) {
+    for (var index in field.settings.allowed_values) {
+        if (!field.settings.allowed_values.hasOwnProperty(index)) { continue; }
+        var object = field.settings.allowed_values[index];
 
         // Build the variables for the widget.
         var variables = {
@@ -911,7 +939,7 @@ function taxonomy_views_exposed_filter(
         child += theme('taxonomy_term_reference', variables);
         element.children.push({ markup: child });
 
-    });
+    }
   }
   catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
 }

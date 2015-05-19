@@ -9,16 +9,18 @@ function collection_list_page(module, type) {
     var content = {
       'collection_list': {
         'theme': 'jqm_item_list',
-        'title': 'Collection'
+        'title': t('Collection')
       }
     };
     var items = [];
     var collection = collection_load(module, type);
     if (collection) {
-      $.each(collection, function(id, item) {
+      for (var id in collection) {
+          if (!collection.hasOwnProperty(id)) { continue; }
+          var item = collection[id];
           var path = 'mvc/item/' + module + '/' + type + '/' + id;
           items.push(l(item.name, path));
-      });
+      }
       content.collection_list.items = items;
     }
     return content;
@@ -94,23 +96,25 @@ function mvc_install() {
           drupalgap.mvc.models[module] = {};
         }
         // For each model type...
-        $.each(models, function(model_type, model) {
+        for (var model_type in models) {
+            if (!models.hasOwnProperty(model_type)) { continue; }
+            var model = models[model_type];
             // Set the primary key 'id', the module name, and model type
             // on the model fields. These are the mvc_model_system_fields().
             model.fields.id = {
               'type': 'hidden',
-              'title': 'ID',
+              'title': t('ID'),
               'required': false
             };
             model.fields.module = {
               'type': 'hidden',
-              'title': 'Module',
+              'title': t('Module'),
               'required': true,
               'default_value': module
             };
             model.fields.type = {
               'type': 'hidden',
-              'title': 'Model Type',
+              'title': t('Model Type'),
               'required': true,
               'default_value': model_type
             };
@@ -133,7 +137,7 @@ function mvc_install() {
                 '{"auto_increment":0}'
               );
             }
-        });
+        }
       }
     }
     //console.log(JSON.stringify(drupalgap.mvc.models));
@@ -162,7 +166,7 @@ function mvc_menu() {
         'page_arguments': [2, 3, 4]
       },
       'mvc/item-add/%/%': {
-        title: 'Add',
+        title: t('Add'),
         page_callback: 'drupalgap_get_form',
         page_arguments: ['item_create_form', 2, 3]
       }
@@ -227,7 +231,7 @@ function item_create_form(form, form_state, module, type) {
       form.buttons.cancel = drupalgap_form_cancel_button();
       form.elements.submit = {
         type: 'submit',
-        value: 'Create'
+        value: t('Create')
       };
     }
     return form;

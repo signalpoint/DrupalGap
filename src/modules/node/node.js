@@ -26,23 +26,23 @@ function node_access(node) {
 function node_add_page() {
   try {
     var content = {
-      'header': {'markup': '<h2>Create Content</h2>'},
-      'node_type_listing': {
-        'theme': 'jqm_item_list',
-        'title': 'Content Types',
-        'attributes': {'id': 'node_type_listing_items'}
+      header: { markup: '<h2>' + t('Create Content') + '</h2>' },
+      node_type_listing: {
+        theme: 'jqm_item_list',
+        title: t('Content Types'),
+        attributes: { id: 'node_type_listing_items' }
       }
     };
     var items = [];
-    $.each(
-      Drupal.user.content_types_user_permissions,
-      function(type, permissions) {
+    var user_permissions = Drupal.user.content_types_user_permissions;
+    for (var type in user_permissions) {
+        if (!user_permissions.hasOwnProperty(type)) { continue; }
+        var permissions = user_permissions[type];
         if (permissions.create) {
           items.push(l(drupalgap.content_types_list[type].name,
           'node/add/' + type));
         }
-      }
-    );
+    }
     content.node_type_listing.items = items;
     return content;
   }
@@ -69,7 +69,7 @@ function node_add_page_by_type(type) {
  */
 function node_add_page_by_type_title(callback, type) {
   try {
-    var title = 'Create ' + drupalgap.content_types_list[type].name;
+    var title = t('Create') + ' ' + drupalgap.content_types_list[type].name;
     return callback.call(null, title);
   }
   catch (error) { console.log('node_add_page_by_type_title - ' + error); }
@@ -97,7 +97,7 @@ function node_edit(form, form_state, node) {
     // Add submit to form.
     form.elements.submit = {
       'type': 'submit',
-      'value': 'Save'
+      'value': t('Save')
     };
 
     // Add cancel button to form.
@@ -134,16 +134,16 @@ function node_edit_submit(form, form_state) {
 function node_menu() {
     var items = {
       'node': {
-        'title': 'Content',
+        'title': t('Content'),
         'page_callback': 'node_page',
         'pageshow': 'node_page_pageshow'
       },
       'node/add': {
-        'title': 'Add content',
+        'title': t('Add content'),
         'page_callback': 'node_add_page'
       },
       'node/add/%': {
-        title: 'Add content',
+        title: t('Add content'),
         title_callback: 'node_add_page_by_type_title',
         title_arguments: [2],
         page_callback: 'node_add_page_by_type',
@@ -151,7 +151,7 @@ function node_menu() {
         options: { reloadPage: true }
       },
       'node/%': {
-        'title': 'Node',
+        'title': t('Node'),
         'page_callback': 'node_page_view',
         'page_arguments': [1],
         'pageshow': 'node_page_view_pageshow',
@@ -159,12 +159,12 @@ function node_menu() {
         'title_arguments': [1]
       },
       'node/%/view': {
-        'title': 'View',
+        'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
       'node/%/edit': {
-        'title': 'Edit',
+        'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
         'page_arguments': ['node_edit', 'node', 1],
@@ -187,11 +187,11 @@ function node_page() {
       'create_content': {
         'theme': 'button_link',
         'path': 'node/add',
-        'text': 'Create Content'
+        'text': t('Create Content')
       },
       'node_listing': {
         'theme': 'jqm_item_list',
-        'title': 'Content List',
+        'title': t('Content List'),
         'items': [],
         'attributes': {'id': 'node_listing_items'}
       }
@@ -210,9 +210,11 @@ function node_page_pageshow() {
         success: function(content) {
           // Extract the nodes into items, then drop them in the list.
           var items = [];
-          $.each(content.nodes, function(index, object) {
+          for (var index in content.nodes) {
+              if (!content.nodes.hasOwnProperty(index)) { continue; }
+              var object = content.nodes[index];
               items.push(l(object.node.title, 'node/' + object.node.nid));
-          });
+          }
           drupalgap_item_list_populate('#node_listing_items', items);
         }
       }
@@ -234,7 +236,7 @@ function node_page_view(nid) {
       };
       return content;
     }
-    else { drupalgap_error('No node id provided!'); }
+    else { drupalgap_error(t('No node id provided!')); }
   }
   catch (error) { console.log('node_page_view - ' + error); }
 }
@@ -322,9 +324,11 @@ function node_page_view_pageshow(nid) {
                       try {
                         // Render the comments.
                         var comments = '';
-                        $.each(results, function(index, comment) {
+                        for (var index in results) {
+                            if (!results.hasOwnProperty(index)) { continue; }
+                            var comment = results[index];
                             comments += theme('comment', { comment: comment });
-                        });
+                        }
                         build.content.markup += theme('comments', {
                             node: node,
                             comments: comments

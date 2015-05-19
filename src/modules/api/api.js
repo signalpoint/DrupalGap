@@ -127,7 +127,7 @@ function hook_drupalgap_goto_preprocess(path) {
   try {
     // Pre process the front page.
     if (path == drupalgap.settings.front) {
-      drupalgap_alert('Preprocessing the front page!');
+      drupalgap_alert(t('Preprocessing the front page!'));
     }
   }
   catch (error) {
@@ -144,7 +144,7 @@ function hook_drupalgap_goto_post_process(path) {
   try {
     // Post process the front page.
     if (path == drupalgap.settings.front) {
-      drupalgap_alert('Post processing the front page!');
+      drupalgap_alert(t('Post processing the front page!'));
     }
   }
   catch (error) {
@@ -185,12 +185,34 @@ function hook_404(router_path) {}
 function hook_entity_post_render_content(entity, entity_type, bundle) {
   try {
     if (entity.type == 'article') {
-      entity.content += '<p>Example text on every article!</p>';
+      entity.content += '<p>'.t('Example text on every article!')+'</p>';
     }
   }
   catch (error) {
     console.log('hook_entity_post_render_content - ' + error);
   }
+}
+
+/**
+ * Implements hook_field_info_instance_add_to_form().
+ * Used by modules that provide custom fields to operate on a form or its
+ * elements before the form gets saved to local storage. This allows extra
+ * data be attached to the form that way things like hook_field_widget_form(),
+ * which takes place at render time, can have access to any extra data it may
+ * need.
+ * @param {String} entity_type
+ * @param {String} bundle
+ * @param {Object} form
+ * @param {Object} entity
+ * @param {Object} element
+ */
+function hook_field_info_instance_add_to_form(entity_type, bundle, form, entity, element) {
+  try {
+    // Attach a value_callback to the element so we can manually build its form
+    // state value.
+    element.value_callback = 'example_field_value_callback';
+  }
+  catch (error) { console.log('hook_field_info_instance_add_to_form - ' + error); }
 }
 
 /**
@@ -220,11 +242,13 @@ function hook_field_formatter_view(entity_type, entity, field, instance, langcod
     
     // Iterate over each item, and place a widget onto the render array.
     var content = {};
-    $.each(items, function(delta, item) {
+    for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
         content[delta] = {
-          markup: '<p>Hello!</p>'
+          markup: '<p>' + t('Hello!') + '</p>'
         };
-    });
+    }
     return content;
   }
   catch (error) { console.log('hook_field_formatter_view - ' + error); }
@@ -261,6 +285,7 @@ function hook_field_widget_form(form, form_state, field, instance, langcode, ite
 //function hook_form_element_alter(form, element, variables) { }
 
 /**
+ * Implements hook_image_path_alter().
  * Called after drupalgap_entity_render_field() assembles the field content
  * string. Use this to make modifications to the HTML output of the entity's
  * field before it is displayed. The field content will be inside of
@@ -274,11 +299,18 @@ function hook_entity_post_render_field(entity, field_name, field, reference) {
 }
 
 /**
+ * Implements hook_form_alter().
  * This hook is used to make alterations to existing forms.
  */
-function hook_form_alter(form, form_state, form_id) {}
+function hook_form_alter(form, form_state, form_id) {
+  // Change the description of the name element on the user login form
+  if (form_id == 'user_login_form') {
+    form.elements['name'].description = t('Enter your login name');
+  }
+}
 
 /**
+ * Implements hook_image_path_alter().
  * Called after drupalgap_image_path() assembles the image path. Use this hook
  * to make modifications to the image path. Return the modified path, or false
  * to allow the default path to be generated.
@@ -286,11 +318,25 @@ function hook_form_alter(form, form_state, form_id) {}
 function hook_image_path_alter(src) { }
 
 /**
+ * Implements hook_install().
  * This hook is used by modules that need to execute custom code when the module
  * is loaded. Note, the Drupal.user object is not initialized at this point, and
  * always appears to be an anonymous user.
  */
-function hook_install() {}
+function hook_install() { }
+
+/**
+ * Implements hook_locale().
+ * Used to declare language code .json files that should be loaded by DrupalGap.
+ * @see http://drupalgap.org/translate
+ */
+function hook_locale() {
+  // Tell DrupalGap to load our custom Spanish and Italian language files
+  // located here:
+  //   app/modules/custom/my_module/locale/es.json
+  //   app/modules/custom/my_module/locale/it.json
+  return ['es', 'it'];
+}
 
 /**
  * Implements hook_menu()
@@ -300,7 +346,7 @@ function hook_menu() {
   try {
     var items = {};
     items['hello_world'] = {
-      title: 'Hello World',
+      title: t('Hello World'),
       page_callback: 'my_module_hello_world_page'
     };
     return items;
@@ -330,7 +376,7 @@ function hook_node_page_view_alter_TYPE(node, options) {
 
     var content = {};
     content['my_markup'] = {
-      markup: '<p>Click below to see the node!</p>'
+      markup: '<p>'+t('Click below to see the node!')+'</p>'
     };
     content['my_collapsible'] = {
       theme: 'collapsible',

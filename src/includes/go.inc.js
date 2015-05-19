@@ -1,3 +1,6 @@
+// Holds onto any query string during the page go process.
+var _drupalgap_goto_query_string = null;
+
 /**
  * Given a path, this will change the current page in the app.
  * @param {String} path
@@ -34,12 +37,14 @@ function drupalgap_goto(path) {
       var new_path = false;
       var invocation_results = module_invoke_all('404', router_path);
       if (invocation_results) {
-        $.each(invocation_results, function(index, result) {
+        for (var index in invocation_results) {
+            if (!invocation_results.hasOwnProperty(index)) { continue; }
+            var result = invocation_results[index];
             if (result !== false) {
               new_path = result;
-              return false;
+              break;
             }
-        });
+        }
       }
       // If a 404 handler provided a new path use it, otherwise just use the
       // system 404 page. Either way, update the router path before continuing
@@ -68,13 +73,12 @@ function drupalgap_goto(path) {
 
     // If the new router path is the same as the current router path and the new
     // path is the same as the current path, we may need to cancel the
-    // navigation attempt (i.e. don't go anywhere), unless...act on it...don't go anywhere, unless it is a
+    // navigation attempt (i.e. don't go anywhere), unless it is a
     // form submission, then continue.
     if (
       router_path == drupalgap_router_path_get() &&
-      drupalgap_path_get() == path
+      path == drupalgap_path_get()
     ) {
-
       // If it's a form submission, we'll continue onward...
       if (options.form_submission) { }
 
@@ -108,8 +112,14 @@ function drupalgap_goto(path) {
       return false;
     }
 
+    // @TODO when drupalgap_goto() is called during the bootstrap, we shouldn't
+    // put the path onto the back_path array.
+
     // Save the back path.
-    drupalgap.back_path.push(drupalgap_path_get());
+    var back_paths_to_ignore = ['user/logout', '_reload'];
+    if (!in_array(drupalgap_path_get())) {
+      drupalgap.back_path.push(drupalgap_path_get());
+    }
 
     // Set the current menu path to the path input.
     drupalgap_path_set(path);
@@ -139,24 +149,32 @@ function drupalgap_goto(path) {
       // remove it since it thinks we are already on the page, so it won't
       // remove it.
       if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-        drupalgap_remove_page_from_dom(page_id, { force: true });
+        // @TODO we may need to leave the query ONLY if the above call to
+        // _drupalgap_goto_prepare_path() yielded a query string, otherwise we
+        // may be leaving unwanted queries in _GET()!
+        var leaveQuery = _drupalgap_goto_query_string ? true : false;
+        drupalgap_remove_page_from_dom(page_id, {
+          force: true,
+          leaveQuery: leaveQuery
+        });
         delete options.reloadPage;
         options.reloadingPage = true;
       }
       else if (!options.form_submission) {
-        // Clear any messages from the page.
         drupalgap_clear_messages();
+        _drupalgap_goto_query_string = null;
         drupalgap.page.process = false;
+        // @TODO changePage has been deprecated as of jQM 1.4.0 and will be
+        // removed in 1.50.
+        // @see https://api.jquerymobile.com/jQuery.mobile.changePage/
         $.mobile.changePage('#' + page_id, options);
-        // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
         return;
       }
     }
     else if (typeof options.reloadPage !== 'undefined' && options.reloadPage) {
-      // The page is not in the DOM, and we're being asked to reload it, this
-      // can't happen, so we'll just delete the reloadPage option.
-      console.log('WARNING - drupalgap_goto() asked to reload page not in DOM');
+      // The page is not in the DOM, and we're being asked to reload it, so
+      // we'll just delete the reloadPage option.
       delete options.reloadPage;
     }
 
@@ -194,6 +212,9 @@ function drupalgap_goto_generate_page_and_go(
       );
     }
     else {
+
+      // Reset the internal query string.
+      _drupalgap_goto_query_string = null;
 
       // If options wasn't set, set it as an empty JSON object.
       if (typeof options === 'undefined') { options = {}; }
@@ -237,7 +258,7 @@ function drupalgap_goto_generate_page_and_go(
       else {
         drupalgap_alert(
           'drupalgap_goto_generate_page_and_go - ' +
-          'failed to load theme\'s page.tpl.html file'
+          t('failed to load theme\'s page.tpl.html file')
         );
       }
     }
@@ -247,8 +268,11 @@ function drupalgap_goto_generate_page_and_go(
   }
 }
 
- /**
- * @deprecated
+/**
+ * Prepares a drupalgap page path.
+ * @deprecated Use _drupalgap_goto_prepare_path() instead.
+ * @param {String} path
+ * @return {String}
  */
 function drupalgap_goto_prepare_path(path) {
   try {
@@ -270,12 +294,13 @@ function _drupalgap_goto_prepare_path(path) {
   try {
 
     // Pull out any query string parameters and populate them into _GET, if we
-    // were instructed to do so.
+    // were instructed to do so. Hold onto a global copy of the query string
+    // for page go processing.
     if (typeof arguments[1] !== 'undefined' && arguments[1]) {
       var pos = path.indexOf('?');
       if (pos != -1 && pos != path.length - 1) {
-        dpm('a ? is in the path! ' + path);
         var query = path.substr(pos + 1, path.length - pos);
+        _drupalgap_goto_query_string = query;
         path = path.substr(0, pos);
         var parts = query.split('&');
         for (var i = 0; i < parts.length; i++) {
@@ -283,7 +308,11 @@ function _drupalgap_goto_prepare_path(path) {
           if (pos == -1) { continue; }
           query = parts[i].split('=');
           if (query.length != 2) { continue; }
-          _GET(decodeURIComponent(query[0]), decodeURIComponent(query[1]), path);
+          _GET(
+            decodeURIComponent(query[0]),
+            decodeURIComponent(query[1]),
+            path
+          );
         }
       }
     }
@@ -293,7 +322,7 @@ function _drupalgap_goto_prepare_path(path) {
       if (!drupalgap.settings.front) {
         drupalgap_alert(
           'drupalgap_goto_prepare_path - ' +
-          'no front page specified in settings.js!'
+          t('no front page specified in settings.js!')
         );
         return false;
       }
@@ -320,7 +349,7 @@ function _drupalgap_goto_prepare_path(path) {
 function drupalgap_back() {
   try {
     if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
-      var msg = 'Exit ' + drupalgap.settings.title + '?';
+      var msg = t('Exit') + ' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
       }
@@ -338,9 +367,16 @@ function drupalgap_back() {
  */
 function _drupalgap_back() {
   try {
+    // @WARNING - any changes here (except the history.back() call) need to be
+    // reflected into the window "navigate" handler below
     drupalgap.back = true;
     history.back();
     drupalgap_path_set(drupalgap.back_path.pop());
+    drupalgap_router_path_set(
+      drupalgap_get_menu_link_router_path(
+        drupalgap_path_get()
+      )
+    );
   }
   catch (error) { console.log('drupalgap_back' + error); }
 }
@@ -356,16 +392,28 @@ function _drupalgap_back_exit(button) {
   catch (error) { console.log('_drupalgap_back_exit - ' + error); }
 }
 
-$(window).on("navigate", function (event, data) {
+$(window).on('navigate', function(event, data) {
 
     // In web-app mode, clicking the back button on your browser (or Android
-    // device browser), the drupalgap path doesn't get updated for some
-    // reason(s), so we'll update it manually.
+    // device browser), does not actually fire drupalgap_back(), so we mimic
+    // it here, but skip the history.back() call because that's already
+    // happened via the hardware button.
     if (drupalgap.settings.mode == 'web-app') {
-      var direction = data.state.direction; // back or forward
+      // Grab the direction we're travelling.
+      // back, forward (or undefined, aka moving from splash to front page)
+      var direction = data.state.direction;
       if (direction == 'back' && drupalgap.back_path.length > 0) {
-        drupalgap.path = drupalgap.back_path[drupalgap.back_path.length - 1];
+        // @WARNING - any changes here should be reflected into
+        // _drupalgap_back().
+        drupalgap.back = true;
+        drupalgap_path_set(drupalgap.back_path[drupalgap.back_path.length - 1]);
+        drupalgap_router_path_set(
+          drupalgap_get_menu_link_router_path(
+            drupalgap_path_get()
+          )
+        );
       }
     }
 
 });
+

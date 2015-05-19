@@ -97,10 +97,15 @@ function _drupalgap_form_render_elements(form) {
     // set it, then render the element if access is permitted. While rendering
     // the elements, set them aside according to their widget weight so they
     // can be appended to the content string in the correct order later.
-    $.each(form.elements, function(name, element) {
+    for (var name in form.elements) {
+        if (!form.elements.hasOwnProperty(name)) { continue; }
+        var element = form.elements[name];
         if (!element.name) { element.name = name; }
         if (drupalgap_form_element_access(element)) {
-          if (element.is_field && element.field_info_instance.widget.weight) {
+          if (
+            element.is_field &&
+            typeof element.field_info_instance.widget.weight !== 'undefined'
+          ) {
             content_weighted[element.field_info_instance.widget.weight] =
               _drupalgap_form_render_element(form, element);
           }
@@ -135,7 +140,7 @@ function _drupalgap_form_render_elements(form) {
             else { content += _drupalgap_form_render_element(form, element); }
           }
         }
-    });
+    }
     // Prepend the weighted elements to the content.
     if (!empty(content_weighted)) {
       for (var weight in content_weighted) {
@@ -147,7 +152,9 @@ function _drupalgap_form_render_elements(form) {
     // Add any form buttons to the form elements html, if access to the button
     // is permitted.
     if (form.buttons && form.buttons.length != 0) {
-      $.each(form.buttons, function(name, button) {
+      for (var name in form.buttons) {
+          if (!form.buttons.hasOwnProperty(name)) { continue; }
+          var button = form.buttons[name];
           if (drupalgap_form_element_access(button)) {
             var attributes = {
               type: 'button',
@@ -158,7 +165,7 @@ function _drupalgap_form_render_elements(form) {
               button.title +
             '</button>';
           }
-      });
+      }
     }
     return content;
   }
@@ -237,8 +244,9 @@ function _drupalgap_form_render_element(form, element) {
     var item_html = '';
     var item_label = '';
     var render_item = null;
-    $.each(items, function(delta, item) {
-
+    for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
         // We'll render the item, unless we prove otherwise.
         render_item = true;
 
@@ -324,9 +332,9 @@ function _drupalgap_form_render_element(form, element) {
         );
         if (typeof item_html === 'undefined') {
           render_item = false;
-          return false;
+          break;
         }
-    });
+    }
 
     // Are we skipping the render of the item?
     if (!render_item) { return ''; }
@@ -393,7 +401,7 @@ function _drupalgap_form_render_element(form, element) {
 
     // Add element description.
     if (element.description && element.type != 'hidden') {
-      html += '<div>' + element.description + '</div>';
+      html += '<div>' + t(element.description) + '</div>';
     }
 
     // Close the element container.

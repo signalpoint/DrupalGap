@@ -6,14 +6,14 @@ function contact_menu() {
   try {
     var items = {};
     items['contact'] = {
-      title: 'Contact',
+      title: t('Contact'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['contact_site_form'],
       pageshow: 'contact_site_form_pageshow',
       access_arguments: ['access site-wide contact form']
     };
     items['user/%/contact'] = {
-      title: 'User contact',
+      title: t('User contact'),
       page_callback: 'drupalgap_get_form',
       page_arguments: ['contact_personal_form', 1],
       pageshow: 'contact_personal_form_pageshow',
@@ -80,39 +80,39 @@ function contact_personal(options) {
 function contact_site_form(form, form_state) {
   try {
     form.elements.name = {
-      title: 'Your name',
+      title: t('Your name'),
       type: 'textfield',
       required: true
     };
     form.elements.mail = {
-      title: 'Your e-mail address',
+      title: t('Your e-mail address'),
       type: 'email',
       required: true
     };
     form.elements.subject = {
-      title: 'Subject',
+      title: t('Subject'),
       type: 'textfield',
       required: true
     };
     form.elements.category = {
-      title: 'Category',
+      title: t('Category'),
       type: 'select',
       required: true
     };
     form.elements.message = {
-      title: 'Message',
+      title: t('Message'),
       type: 'textarea',
       required: true
     };
     form.elements.copy = {
-      title: 'Send yourself a copy?',
+      title: t('Send yourself a copy?'),
       type: 'checkbox',
       default_value: 0,
       access: false
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Send message'
+      value: t('Send message')
     };
     // If the user is logged in, set the default values.
     if (Drupal.user.uid != 0) {
@@ -135,14 +135,16 @@ function contact_site_form_pageshow() {
     contact_index({
         success: function(results) {
           if (!results || !results.length) { return; }
-          $.each(results, function(index, result) {
+          for (var index in results) {
+              if (!results.hasOwnProperty(index)) { continue; }
+              var result = results[index];
               var selected = result.selected == 1 ? 'selected' : '';
               var option =
                 '<option value="' + result.cid + '" ' + selected + '>' +
                   result.category +
                 '</option>';
               $('#edit-contact-site-form-category').append(option);
-          });
+          }
           $('#edit-contact-site-form-category').selectmenu('refresh');
           if (results.length == 1) {
             $('#contact_site_form .field-name-category').hide();
@@ -171,12 +173,12 @@ function contact_site_form_submit(form, form_state) {
       data: JSON.stringify(data),
       success: function(result) {
         if (result[0]) {
-          drupalgap_alert('Your message has been sent!');
+          drupalgap_alert(t('Your message has been sent!'));
         }
         else {
           drupalgap_alert(
-            'There was a problem sending your message!',
-            { title: 'Error' }
+            t('There was a problem sending your message!'),
+            { title: t('Error') }
           );
         }
         drupalgap_form_clear();
@@ -186,9 +188,11 @@ function contact_site_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }
@@ -208,12 +212,12 @@ function contact_personal_form(form, form_state, recipient) {
     // @TODO - when providing a personal contact form, make sure the user has
     // their personal contact form enabled.
     form.elements.name = {
-      title: 'Your name',
+      title: t('Your name'),
       type: 'textfield',
       required: true
     };
     form.elements.mail = {
-      title: 'Your e-mail address',
+      title: t('Your e-mail address'),
       type: 'email',
       required: true
     };
@@ -227,24 +231,24 @@ function contact_personal_form(form, form_state, recipient) {
       markup: '<div id="' + container_id + '"></div>'
     };
     form.elements.subject = {
-      title: 'Subject',
+      title: t('Subject'),
       type: 'textfield',
       required: true
     };
     form.elements.message = {
-      title: 'Message',
+      title: t('Message'),
       type: 'textarea',
       required: true
     };
     form.elements.copy = {
-      title: 'Send yourself a copy?',
+      title: t('Send yourself a copy?'),
       type: 'checkbox',
       default_value: 0,
       access: false
     };
     form.elements.submit = {
       type: 'submit',
-      value: 'Send message'
+      value: t('Send message')
     };
     // If the user is logged in, set the default values.
     if (Drupal.user.uid != 0) {
@@ -272,7 +276,7 @@ function contact_personal_form_pageshow(form, recipient) {
           if (!account.data.contact) {
             $('#' + drupalgap_get_page_id() + ' #drupalgap_form_errors').html(
               "<div class='messages warning'>" +
-                "Sorry, this user's contact form is disabled." +
+                t("Sorry, this user's contact form is disabled.") +
               '</div>'
             );
             return;
@@ -307,11 +311,11 @@ function contact_personal_form_submit(form, form_state) {
   contact_personal({
       data: JSON.stringify(data),
       success: function(result) {
-        if (result[0]) { drupalgap_alert('Your message has been sent!'); }
+        if (result[0]) { drupalgap_alert(t('Your message has been sent!')); }
         else {
           drupalgap_alert(
-            'There was a problem sending your message!',
-            { title: 'Error' }
+            t('There was a problem sending your message!'),
+            { title: t('Error') }
           );
         }
         drupalgap_form_clear();
@@ -321,9 +325,11 @@ function contact_personal_form_submit(form, form_state) {
           message = JSON.parse(message);
           if (message.form_errors) {
             var errors = '';
-            $.each(message.form_errors, function(element, error) {
+            for (var element in message.form_errors) {
+                if (!message.form_errors.hasOwnProperty(element)) { continue; }
+                var error = message.form_errors[element];
                 errors += error + '\n';
-            });
+            }
             if (errors != '') { drupalgap_alert(errors); }
           }
         }

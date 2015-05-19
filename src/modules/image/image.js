@@ -22,7 +22,9 @@ function image_field_formatter_view(entity_type, entity, field, instance,
   try {
     var element = {};
     if (!empty(items)) {
-      $.each(items, function(delta, item) {
+      for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
           // @TODO - add support for image_style
           element[delta] = {
             theme: 'image',
@@ -31,7 +33,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
             path: drupalgap_image_path(item.uri)
             /*image_style:display.settings.image_style*/
           };
-      });
+      }
     }
     return element;
   }
@@ -54,6 +56,14 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
   try {
     // Change the item type to a hidden input to hold the file id.
     items[delta].type = 'hidden';
+
+    // If we're dealing with the user profile 'picture' it isn't a real field,
+    // so we need to spoof some field settings to get the widget to render
+    // properly.
+    // @TODO the field label doesn't show up.
+    if (form.id == 'user_profile_form' && element.name == 'picture') {
+      field = { field_name: 'picture' };
+    }
 
     // If we already have an image for this item, show it.
     if (typeof items[delta].item !== 'undefined' && items[delta].item.fid) {
@@ -85,9 +95,9 @@ function image_field_widget_form(form, form_state, field, instance, langcode,
 
     // Set the default button text, and if a value was provided,
     // overwrite the button text.
-    var button_text = 'Take Photo';
+    var button_text = t('Take Photo');
     if (items[delta].value) { button_text = items[delta].value; }
-    var browse_button_text = 'Browse';
+    var browse_button_text = t('Browse');
     if (items[delta].value2) { browse_button_text = items[delta].value2; }
 
     // Place variables into document for PhoneGap image processing.
@@ -212,14 +222,15 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
     var results = [];
     var fields = drupalgap_field_info_instances(entity_type, bundle);
     if (!fields) { return false; }
-    $.each(fields, function(name, field) {
-        if (field.widget &&
+    for (var name in fields) {
+        if (!fields.hasOwnProperty(name)) { continue; }
+        var field = fields[name];
+        if (
+          field.widget &&
           field.widget.type &&
           field.widget.type == 'image_image'
-        ) {
-          results.push(name);
-        }
-    });
+        ) { results.push(name); }
+    }
     if (results.length == 0) { return false; }
     return results;
   }
@@ -247,9 +258,11 @@ function image_form_alter(form, form_state, form_id) {
         form.image_fields = image_fields;
         // For each image field, create a place for it in the global var.
         if ($.isArray(image_fields)) {
-          $.each(image_fields, function(index, name) {
-              image_phonegap_camera_options[name] = {0: null};
-          });
+          for (var index in image_fields) {
+              if (!image_fields.hasOwnProperty(index)) { continue; }
+              var name = image_fields[index];
+              image_phonegap_camera_options[name] = { 0: null };
+          }
         }
       }
     }
@@ -340,11 +353,13 @@ function _image_field_form_process(form, form_state, options) {
     // @todo - this needs mutli value field support (delta)
     var lng = language_default();
     var processed_an_image = false;
-    $.each(form.image_fields, function(index, name) {
+    for (var index in form.image_fields) {
+      if (!form.image_fields.hasOwnProperty(index)) { continue; }
+      var name = form.image_fields[index];
       // Skip empty images.
-      if (!image_phonegap_camera_options[name][0]) { return false; }
+      if (!image_phonegap_camera_options[name][0]) { break; }
       // Skip image fields that already have their file id set.
-      if (form_state.values[name][lng][0] != '') { return false; }
+      if (form_state.values[name][lng][0] != '') { break; }
       // Create a unique file name using the UTC integer value.
       var d = new Date();
       var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
@@ -378,7 +393,7 @@ function _image_field_form_process(form, form_state, options) {
             }
           }
       });
-    });
+    }
     // If no images were processed, we need to continue onward anyway.
     if (!processed_an_image && options.success) { options.success(); }
   }
@@ -407,3 +422,4 @@ function image_assemble_form_state_into_field(entity_type, bundle,
     console.log('image_assemble_form_state_into_field - ' + error);
   }
 }
+
