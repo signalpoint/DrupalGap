@@ -1327,8 +1327,8 @@ function drupalgap_place_args_in_path(input_path) {
       if (input_path_args && input_path_args.length > 0) {
         for (var index in input_path_args) {
             if (!input_path_args.hasOwnProperty(index)) { continue; }
-            var arg = input_path_args[index];
-            if (arg == '%') {
+            var _arg = input_path_args[index];
+            if (_arg == '%') {
               if (!wildcards) { wildcards = []; }
               wildcards.push(index);
             }

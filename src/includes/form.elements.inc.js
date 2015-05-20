@@ -102,7 +102,10 @@ function _drupalgap_form_render_elements(form) {
         var element = form.elements[name];
         if (!element.name) { element.name = name; }
         if (drupalgap_form_element_access(element)) {
-          if (element.is_field && element.field_info_instance.widget.weight) {
+          if (
+            element.is_field &&
+            typeof element.field_info_instance.widget.weight !== 'undefined'
+          ) {
             content_weighted[element.field_info_instance.widget.weight] =
               _drupalgap_form_render_element(form, element);
           }
