@@ -6,6 +6,7 @@ app/.gitignore
 app/README.*
 res
 config.xml
+npm-debug.log
 
 # Ignore a potential jDrupal folder
 jDrupal
