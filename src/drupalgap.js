@@ -102,6 +102,8 @@ function drupalgap_init() {
 function drupalgap_onload() {
   try {
 
+    dpm('drupalgap_onload');
+    
     // Remove any hash in case the app is restarting.
     window.location.hash = '';
 
@@ -167,7 +169,9 @@ function _drupalgap_deviceready() {
   try {
 
     // The device is now ready, it is now safe for DrupalGap to start...
+    dpm('boostraping...');
     drupalgap_bootstrap();
+    dpm('done');
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
@@ -235,7 +239,7 @@ function _drupalgap_deviceready_options() {
         // Call all hook_device_connected implementations then go to
         // the front page.
         module_invoke_all('device_connected');
-        drupalgap_goto('', page_options);
+        //drupalgap_goto('', page_options);
       },
       error: function(jqXHR, textStatus, errorThrown) {
         // Build an informative error message and display it.
@@ -262,13 +266,13 @@ function drupalgap_bootstrap() {
     // Load up any contrib and/or custom modules (the DG core moodules have
     // already been loaded at this point), load the theme and all blocks. Then
     // build the menu router, load the menus, and build the theme registry.
-    drupalgap_load_modules();
-    drupalgap_load_theme();
-    drupalgap_load_blocks();
-    drupalgap_load_locales();
+    //drupalgap_load_modules();
+    //drupalgap_load_theme();
+    //drupalgap_load_blocks();
+    //drupalgap_load_locales();
     menu_router_build();
-    drupalgap_menus_load();
-    drupalgap_theme_registry_build();
+    //drupalgap_menus_load();
+    //drupalgap_theme_registry_build();
 
     // Attach device back button handler (Android).
     document.addEventListener('backbutton', drupalgap_back, false);
@@ -946,39 +950,6 @@ function drupalgap_image_path(uri) {
 }
 
 /**
- * @deprecated - This is no longer needed since the includes are built via the
- * makefile. Loads the js files in includes specified by drupalgap.includes.
- */
-function drupalgap_includes_load() {
-  try {
-    if (drupalgap.includes != null && drupalgap.includes.length != 0) {
-      for (var index in drupalgap.includes) {
-          if (!drupalgap.includes.hasOwnProperty(index)) { continue; }
-          var include = drupalgap.includes[index];
-          var include_path = 'includes/' + include.name + '.inc.js';
-          jQuery.ajax({
-              async: false,
-              type: 'GET',
-              url: include_path,
-              data: null,
-              success: function() {
-                if (Drupal.settings.debug) {
-                  // Print the include path to the console.
-                  dpm(include_path);
-                }
-              },
-              dataType: 'script',
-              error: function(xhr, textStatus, errorThrown) {
-                console.log(errorThrown);
-              }
-          });
-      }
-    }
-  }
-  catch (error) { console.log('drupalgap_includes_load - ' + error); }
-}
-
-/**
  * Given an html list element id and an array of items, this will clear the
  * list, populate it with the items, and then refresh the list.
  * @param {String} list_css_selector
@@ -1117,7 +1088,7 @@ function drupalgap_jqm_page_event_script_code(options) {
  */
 function drupalgap_loading_message_show() {
   try {
-    // Backwards compatability for versions prior to 7.x-1.6-alpha
+    /*// Backwards compatability for versions prior to 7.x-1.6-alpha
     if (drupalgap.loading === 'undefined') { drupalgap.loading = false; }
     // Return if the loading message is already shown.
     if (drupalgap.loading) { return; }
@@ -1129,7 +1100,7 @@ function drupalgap_loading_message_show() {
     setTimeout(function() {
         $.mobile.loading('show', options);
         drupalgap.loading = true;
-    }, 1);
+    }, 1);*/
   }
   catch (error) { console.log('drupalgap_loading_message_show - ' + error); }
 }
@@ -1139,14 +1110,11 @@ function drupalgap_loading_message_show() {
  */
 function drupalgap_loading_message_hide() {
   try {
-    /*$.mobile.loading('hide');
-    drupalgap.loading = false;
-    drupalgap.loader = 'loading';*/
-    setTimeout(function() {
+    /*setTimeout(function() {
         $.mobile.loading('hide');
         drupalgap.loading = false;
         drupalgap.loader = 'loading';
-    }, 100);
+    }, 100);*/
   }
   catch (error) { console.log('drupalgap_loading_message_hide - ' + error); }
 }
@@ -1157,7 +1125,7 @@ function drupalgap_loading_message_hide() {
  */
 function drupalgap_loader_options() {
   try {
-    var mode = drupalgap.loader;
+    /*var mode = drupalgap.loader;
     var text = t('Loading') + '...';
     var textVisible = true;
     if (mode == 'saving') { var text = t('Saving') + '...'; }
@@ -1169,7 +1137,7 @@ function drupalgap_loader_options() {
       options = $.extend(true, options, drupalgap.settings.loader[mode]);
       if (options.text) { options.text = t(options.text); }
     }
-    return options;
+    return options;*/
   }
   catch (error) { console.log('drupalgap_loader_options - ' + error); }
 }
@@ -1492,10 +1460,11 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
       drupalgap.field_info_instances = result.field_info_instances;
       drupalgap.field_info_fields = result.field_info_fields;
       drupalgap.field_info_extra_fields = result.field_info_extra_fields;
-      drupalgap.taxonomy_vocabularies =
+      // @TODO uncomment once 7.x-2.x is more stable
+      /*drupalgap.taxonomy_vocabularies =
         drupalgap_taxonomy_vocabularies_extract(
           result.taxonomy_vocabularies
-        );
+        );*/
       drupalgap_service_resource_extract_results({
         service: options.service,
         resource: options.resource,
