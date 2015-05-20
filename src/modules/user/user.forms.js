@@ -45,7 +45,7 @@ function user_login_form(form, form_state) {
       type: 'submit',
       value: t('Login')
     };
-    /*if (user_register_access()) {
+    if (user_register_access()) {
       form.buttons['create_new_account'] = {
         title: t('Create new account'),
         attributes: {
@@ -58,7 +58,7 @@ function user_login_form(form, form_state) {
         attributes: {
           onclick: "drupalgap_goto('user/password')"
         }
-    };*/
+    };
     return form;
   }
   catch (error) { console.log('user_login_form - ' + error); }
