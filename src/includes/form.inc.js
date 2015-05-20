@@ -174,6 +174,14 @@ function drupalgap_form_set_error(name, message) {
   catch (error) { console.log('drupalgap_form_set_error - ' + error); }
 }
 
+phonecatControllers.controller('drupalgap_get_form', ['$scope', '$sce', 'form_id',
+  function($scope, $sce, form_id) {
+    try {
+      $scope.content = $sce.trustAsHtml(drupalgap_get_form(form_id));
+    }
+    catch (error) { console.log('drupalgap_get_form controller - ' + error); }
+  }]);
+
 /**
  * Given a form id, this will render the form and return the html for the form.
  * Any additional arguments will be sent along to the form.
