@@ -1,17 +1,33 @@
-// Holds onto any query string during the page go process.
-var _drupalgap_goto_query_string = null;
+// used to render the "drupalgap-goto-directive" attribute of page.tpl.html
+phonecatControllers.directive("drupalgapGotoDirective", function($compile) {
+    return {
+      link: function(scope, element) {
+        var template = '';
+        for (var index in drupalgap.theme.regions) {
+          if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
+          var region = drupalgap.theme.regions[index];
+          template += drupalgap_render_region(region, scope);
+        }
+        var linkFn = $compile(template);
+        var content = linkFn(scope);
+        element.append(content);
+      }
+    };
+});
 
-phonecatControllers.controller('drupalgap_goto_controller', ['$scope', '$sce',
-  function($scope, $sce) {
+phonecatControllers.controller('drupalgap_goto_controller', ['$scope', '$sce', '$route', '$location',
+  function($scope, $sce, $route, $location) {
     try {
-      module_invoke_all('preprocess_page', $scope);
-      $scope.content = $sce.trustAsHtml(
-        drupalgap_render_page(menu_execute_active_handler())
-      );
-      module_invoke_all('postprocess_page', $scope);
+
+      drupalgap_ng_set('route', $route);
+      drupalgap_ng_set('location', $location);
+
     }
     catch (error) { console.log('drupalgap_goto_controller - ' + error); }
   }]);
+
+// Holds onto any query string during the page go process.
+var _drupalgap_goto_query_string = null;
 
 /**
  * Given a path, this will change the current page in the app.
@@ -118,11 +134,11 @@ function drupalgap_goto(path) {
     // id.
     // @todo - this boolean doesn't match the comment description of the code
     // block, i.e. the form_submission check is opposite of what it says
-    if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
+    /*if (drupalgap_jqm_active_page_url() == page_id && options.form_submission) {
       // Clear any messages from the page before returning.
       drupalgap_clear_messages();
       return false;
-    }
+    }*/
 
     // @TODO when drupalgap_goto() is called during the bootstrap, we shouldn't
     // put the path onto the back_path array.
@@ -143,7 +159,7 @@ function drupalgap_goto(path) {
     // remove the page and let it rebuild itself. If we're not reloading the
     // page and we're not in the middle of a form submission, prevent the page
     // from processing then change to it.
-    if (drupalgap_page_in_dom(page_id)) {
+    /*if (drupalgap_page_in_dom(page_id)) {
       // If there are any hook_menu() item options for this router path, bring
       // them into the current options without overwriting any existing values.
       if (drupalgap.menu_links[router_path].options) {
@@ -188,15 +204,20 @@ function drupalgap_goto(path) {
       // The page is not in the DOM, and we're being asked to reload it, so
       // we'll just delete the reloadPage option.
       delete options.reloadPage;
-    }
+    }*/
 
     // Generate the page.
-    drupalgap_goto_generate_page_and_go(
+    /*drupalgap_goto_generate_page_and_go(
       path,
       page_id,
       options,
       drupalgap.menu_links[router_path]
-    );
+    );*/
+    $location = drupalgap_ng_get('location');
+    $location.path('/' + path);
+    $route = drupalgap_ng_get('route');
+    $route.reload(); // If drupalgap_goto() was called during a 
+    // success handler of an asyc call, we need to reload the route.
 
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
