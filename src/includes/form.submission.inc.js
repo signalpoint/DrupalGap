@@ -20,9 +20,10 @@ function drupalgap_form_onkeypress(form_id) {
 /**
  * Handles a drupalgap form's submit button click.
  * @param {String} form_id
+ * @param {Object} form_state
  * @return {*}
  */
-function _drupalgap_form_submit(form_id) {
+function _drupalgap_form_submit(form_id, form_state) {
   try {
     // Load the form from local storage.
     var form = drupalgap_form_local_storage_load(form_id);
@@ -34,7 +35,8 @@ function _drupalgap_form_submit(form_id) {
     }
 
     // Assemble the form state values.
-    var form_state = drupalgap_form_state_values_assemble(form);
+    // @UPDATE - this is now taken care of by Angular.
+    //var form_state = drupalgap_form_state_values_assemble(form);
 
     // Clear out previous form errors.
     drupalgap.form_errors = {};
