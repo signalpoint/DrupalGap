@@ -71,7 +71,10 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
         field_info_instances =
           drupalgap.field_info_instances[entity_type];
       }
-      else {
+      else if (
+        typeof drupalgap.field_info_instances[entity_type] !== 'undefined' &&
+        typeof drupalgap.field_info_instances[entity_type][entity_type] !== 'undefined'
+      ) {
         field_info_instances =
           drupalgap.field_info_instances[entity_type][entity_type];
       }
