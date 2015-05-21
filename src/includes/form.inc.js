@@ -1,3 +1,12 @@
+
+phonecatControllers.controller('drupalgapFormController', ['$scope',
+  function($scope) {
+    // Create the form state and location on the scope, then attach the submit
+    // handler to the scope.
+    $scope.form_state = { values: { } };
+    $scope.submit = _drupalgap_form_submit;
+  }]);
+
 /**
  * Internal function used to dynamically add another element item to a form for
  * unlimited value fields.
@@ -91,6 +100,7 @@ function drupalgap_form_defaults(form_id) {
     form.buttons = {};
     form.options = {
       attributes: {
+        id: form_id,
         'class': ''
       }
     };
@@ -150,12 +160,12 @@ function drupalgap_form_render(form) {
     var form_elements = _drupalgap_form_render_elements(form);
     var form_attributes = drupalgap_attributes(form.options.attributes);
     // Return the form html.
-    var form_html = '<form id="' + form.id + '" ' + form_attributes + '>' +
+    var form_html = '<div ng-controller="drupalgapFormController"><form ' + form_attributes + '>' +
       prefix +
       '<div id="drupalgap_form_errors"></div>' +
       form_elements +
       suffix +
-    '</form>';
+    '</form></div>';
     return form_html;
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
@@ -174,13 +184,13 @@ function drupalgap_form_set_error(name, message) {
   catch (error) { console.log('drupalgap_form_set_error - ' + error); }
 }
 
-phonecatControllers.controller('drupalgap_get_form_controller', ['$scope', '$sce', 'form_id',
+/*phonecatControllers.controller('drupalgap_get_form_controller', ['$scope', '$sce', 'form_id',
   function($scope, $sce, form_id) {
     try {
       $scope.content = $sce.trustAsHtml(drupalgap_get_form(form_id));
     }
     catch (error) { console.log('drupalgap_get_form_controller - ' + error); }
-  }]);
+  }]);*/
 
 /**
  * Given a form id, this will render the form and return the html for the form.
