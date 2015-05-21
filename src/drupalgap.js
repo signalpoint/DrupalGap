@@ -104,11 +104,6 @@ function drupalgap_init() {
 function drupalgap_onload() {
   try {
 
-    dpm('drupalgap_onload');
-    
-    // Remove any hash in case the app is restarting.
-    window.location.hash = '';
-
     // At this point, the Drupal object has been initialized by jDrupal and the
     // app/settings.js file was loaded in <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
@@ -172,9 +167,7 @@ function _drupalgap_deviceready() {
   try {
 
     // The device is now ready, it is now safe for DrupalGap to start...
-    dpm('boostraping...');
     drupalgap_bootstrap();
-    dpm('done');
 
     // Verify site path is set.
     if (!Drupal.settings.site_path || Drupal.settings.site_path == '') {
