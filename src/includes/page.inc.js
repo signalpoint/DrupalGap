@@ -1,15 +1,3 @@
-phonecatControllers.controller('drupalgap_page_callback_controller', ['$scope', '$sce',
-  function($scope, $sce) {
-    try {
-      module_invoke_all('preprocess_page', $scope);
-      $scope.content = $sce.trustAsHtml(
-        drupalgap_render_page(menu_execute_active_handler())
-      );
-      module_invoke_all('postprocess_page', $scope);
-    }
-    catch (error) { console.log('drupalgap_page_callback_controller - ' + error); }
-  }]);
-
 /**
  * This will return the query string arguments for the page. You may optionally
  * pass in a key to get its value, pass in a key then a value to set the key

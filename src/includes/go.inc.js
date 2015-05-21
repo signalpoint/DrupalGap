@@ -1,6 +1,18 @@
 // Holds onto any query string during the page go process.
 var _drupalgap_goto_query_string = null;
 
+phonecatControllers.controller('drupalgap_goto_controller', ['$scope', '$sce',
+  function($scope, $sce) {
+    try {
+      module_invoke_all('preprocess_page', $scope);
+      $scope.content = $sce.trustAsHtml(
+        drupalgap_render_page(menu_execute_active_handler())
+      );
+      module_invoke_all('postprocess_page', $scope);
+    }
+    catch (error) { console.log('drupalgap_goto_controller - ' + error); }
+  }]);
+
 /**
  * Given a path, this will change the current page in the app.
  * @param {String} path
