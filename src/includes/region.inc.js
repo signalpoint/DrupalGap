@@ -1,8 +1,6 @@
 phonecatControllers.controller('drupalgapRegionController', ['$scope', '$sce',
   function($scope, $sce) {
     
-    dpm('drupalgapRegionController');
-    
     // Call all hook_preprocess_page functions.
     // @TODO will we need this in Angular?
     //module_invoke_all('preprocess_page');
@@ -48,9 +46,12 @@ function drupalgap_render_region(region, $scope) {
     var current_path = drupalgap_path_get();
 
     // Let's render the region...
-    var region_html = '';
+    var data = {
+      region_html: ''
+    }
+    module_invoke_all('preprocess_region_container', $scope, region, data);
 
-    region_html +=
+    data.region_html +=
       _drupalgap_region_render_zone('_prefix', region, current_path);
 
     // If the region has blocks specified for it in the theme in settings.js...
@@ -63,7 +64,8 @@ function drupalgap_render_region(region, $scope) {
 
       // Open the region container.
       var format = region.format ? region.format : 'div';
-      region_html += '<' + format + ' ' + drupalgap_attributes(region.attributes) + '>';
+      data.region_html += '<' + format + ' ' + drupalgap_attributes(region.attributes) + '>';
+      module_invoke_all('preprocess_region_container_open', $scope, region, data);
 
       // If there are any links attached to this region, render them first.
       var region_link_count = 0;
@@ -197,7 +199,7 @@ function drupalgap_render_region(region, $scope) {
         }
 
         // Finally render the ui sides on the region.
-        region_html += ui_btn_left_html + ui_btn_right_html;
+        data.region_html += ui_btn_left_html + ui_btn_right_html;
       }
 
       // Render each block in the region. Determine how many visible blocks are
@@ -213,7 +215,7 @@ function drupalgap_render_region(region, $scope) {
           // Ignore region _prefix and _suffix.
           if (block_delta == '_prefix' || block_delta == '_suffix') { continue; }
           // Render the block.
-          region_html += drupalgap_block_render(
+          data.region_html += drupalgap_block_render(
             region,
             current_path,
             block_delta,
@@ -241,18 +243,21 @@ function drupalgap_render_region(region, $scope) {
         if (
           typeof region.collapse_on_empty === 'undefined' ||
           region.collapse_on_empty === false
-        ) { region_html += '<h2>&nbsp;</h2>'; }
+        ) { data.region_html += '<h2>&nbsp;</h2>'; }
       }
 
       // Close the region container.
-      region_html += '</' + format + '><!-- ' + region.name + ' -->';
+      module_invoke_all('preprocess_region_container_close', $scope, region, data);
+      data.region_html += '</' + format + '><!-- ' + region.name + ' -->';
 
     }
 
-    region_html +=
+    data.region_html +=
       _drupalgap_region_render_zone('_suffix', region, current_path);
 
-    return region_html;
+    module_invoke_all('postprocess_region_container', $scope, region, data);
+
+    return data.region_html;
   }
   catch (error) { console.log('drupalgap_render_region - ' + error); }
 }
