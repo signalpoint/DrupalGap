@@ -119,10 +119,12 @@ function user_menu() {
       },*/
       'user/login': {
         title: t('Login'),
-        controller: 'drupalgap_get_form_controller',
+        /*controller: 'drupalgap_get_form_controller',
         resolve: {
           form_id: function() { return 'user_login_form'; }
-        },
+        },*/
+        page_callback: 'drupalgap_get_form',
+        page_arguments: ['user_login_form'],
         /*options: {reloadPage: true}*/
       },
       /*'user/logout': {
@@ -130,7 +132,7 @@ function user_menu() {
         'page_callback': 'user_logout_callback',
         'pagechange': 'user_logout_pagechange',
         options: {reloadPage: true}
-      },
+      },*/
       'user/register': {
         'title': t('Register'),
         'page_callback': 'drupalgap_get_form',
@@ -138,7 +140,7 @@ function user_menu() {
         'access_callback': 'user_register_access',
         options: {reloadPage: true}
       },
-      'user/%': {
+      /*'user/%': {
         title: t('My account'),
         title_callback: 'user_view_title',
         title_arguments: [1],
