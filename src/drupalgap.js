@@ -267,11 +267,11 @@ function drupalgap_bootstrap() {
     // already been loaded at this point), load the theme and all blocks. Then
     // build the menu router, load the menus, and build the theme registry.
     //drupalgap_load_modules();
-    //drupalgap_load_theme();
-    //drupalgap_load_blocks();
+    drupalgap_load_theme();
+    drupalgap_load_blocks();
     //drupalgap_load_locales();
     menu_router_build();
-    //drupalgap_menus_load();
+    drupalgap_menus_load();
     //drupalgap_theme_registry_build();
 
     // Attach device back button handler (Android).
@@ -390,20 +390,16 @@ function drupalgap_load_theme() {
       drupalgap_alert(msg);
     }
     else {
+      
       // Pull the theme name from the settings.js file.
       var theme_name = drupalgap.settings.theme;
       var theme_path = 'themes/' + theme_name + '/' + theme_name + '.js';
-      if (theme_name != 'easystreet3' && theme_name != 'ava') {
-        theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js';
-      }
-      if (!drupalgap_file_exists(theme_path)) {
-        var error_msg = 'drupalgap_theme_load - ' + t('Failed to load theme!') +
-          ' ' + t('The theme\'s JS file does not exist') + ': ' + theme_path;
-        drupalgap_alert(error_msg);
-        return false;
-      }
-      // We found the theme's js file, add it to the page.
-      drupalgap_add_js(theme_path);
+      if (
+        theme_name != 'easystreet3' &&
+        theme_name != 'ava' &&
+        theme_name != 'spi'
+      ) { theme_path = 'app/themes/' + theme_name + '/' + theme_name + '.js'; }
+      
       // Call the theme's template_info implementation.
       var template_info_function = theme_name + '_info';
       if (drupalgap_function_exists(template_info_function)) {
