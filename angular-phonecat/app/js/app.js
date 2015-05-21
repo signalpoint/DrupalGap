@@ -81,10 +81,10 @@ phonecatApp.config(['$routeProvider',
       
       // Warn the developer that each page_argument must be converted to an
       // Angular "resolve".
-      var page_arguments = [];
+      /*var page_arguments = [];
       if (typeof menu_link.page_arguments !== 'undefined') {
         console.log('UPGRADE: phonecatApp - routeProvider | convert the page_arguments into a "resolve" on path: ' + path);
-      }
+      }*/
       
       // Add the menu link to Angular's routeProvider.
       // @TODO apparently attaching all the controllers at once, instead of on
@@ -104,11 +104,15 @@ phonecatApp.config(['$routeProvider',
         }
     });*/
 
+    // @TODO - we can't be setting the path and router path like this, because
+    // if we start on something other than the front page (i.e. a hash is in the
+    // url), this will set off incorrect values.
+    
     // Set the app's front page on the routeProvider.
-    drupalgap_path_set(drupalgap.settings.front);
+    //drupalgap_path_set(drupalgap.settings.front);
 
     // Determine and set the drupalgap router path.
-    drupalgap_router_path_set(drupalgap_get_menu_link_router_path(drupalgap.settings.front));
+    //drupalgap_router_path_set(drupalgap_get_menu_link_router_path(drupalgap.settings.front));
 
     // Set the otherwise ruling to load the front page.
     $routeProvider.otherwise({
