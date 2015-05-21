@@ -1,3 +1,28 @@
+phonecatControllers.controller('drupalgapRegionController', ['$scope', '$sce',
+  function($scope, $sce) {
+    
+    dpm('drupalgapRegionController');
+    
+    // Call all hook_preprocess_page functions.
+    // @TODO will we need this in Angular?
+    //module_invoke_all('preprocess_page');
+    
+    // Render each region by processing the page.
+    $scope.drupalgap_render_region_controller = function(region_html) {
+      return $sce.trustAsHtml(region_html);
+    };
+    //$scope.regions = [];
+    $scope.regions = '';
+    for (var index in drupalgap.theme.regions) {
+        if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
+        var region = drupalgap.theme.regions[index];
+        /*$scope.regions.push({
+          content: drupalgap_render_region(region, $scope)
+        });*/
+        $scope.regions += drupalgap_render_region(region, $scope);
+    }
+  }]);
+
 /**
  * Given a region, this renders it and all the blocks in it. The blocks are
  * specified in the settings.js file, they are bundled under a region, which in
@@ -5,7 +30,7 @@
  * @param {Object} region
  * @return {String}
  */
-function drupalgap_render_region(region) {
+function drupalgap_render_region(region, $scope) {
   try {
     // @TODO - this function is getting huge. Break it up into many more
     // manageable functions.
@@ -37,7 +62,8 @@ function drupalgap_render_region(region) {
       region.attributes['class'] += ' region_' + region.name + ' ';
 
       // Open the region container.
-      region_html += '<div ' + drupalgap_attributes(region.attributes) + '>';
+      var format = region.format ? region.format : 'div';
+      region_html += '<' + format + ' ' + drupalgap_attributes(region.attributes) + '>';
 
       // If there are any links attached to this region, render them first.
       var region_link_count = 0;
@@ -192,7 +218,8 @@ function drupalgap_render_region(region) {
             current_path,
             block_delta,
             block_settings,
-            block_counts
+            block_counts,
+            $scope
           );
       }
 
@@ -218,7 +245,7 @@ function drupalgap_render_region(region) {
       }
 
       // Close the region container.
-      region_html += '</div><!-- ' + region.name + ' -->';
+      region_html += '</' + format + '><!-- ' + region.name + ' -->';
 
     }
 
