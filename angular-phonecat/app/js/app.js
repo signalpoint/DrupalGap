@@ -23,8 +23,7 @@ var phonecatApp = angular.module('phonecatApp', [
           // Extract the current menu path from the Angular route, and warn
           // about any uncrecognized routes.
           var path_current = drupalgap_angular_get_route_path(current);
-          var path_next = drupalgap_angular_get_route_path(next);           
-          if (path_current == drupalgap_path_get()) { return; } // Don't process current path.
+          var path_next = drupalgap_angular_get_route_path(next);
           if (!path_next) {
             if (!drupalgap_path_get()) { return; } // Don't warn about the first page load.
             console.log('locationChangeStart - unsupported path: ' + path_next);
@@ -33,14 +32,9 @@ var phonecatApp = angular.module('phonecatApp', [
           // Set the current menu path to the path input.
           drupalgap_path_set(path_next);
 
-          // Determine the router path.
-          var router_path = drupalgap_get_menu_link_router_path(path_next);
+          // Determine and set the drupalgap router path.
+          drupalgap_router_path_set(drupalgap_get_menu_link_router_path(path_next));
 
-          // Set the drupalgap router path.
-          drupalgap_router_path_set(router_path);
-          
-          console.log('navigated to: ' + path_next);
-          
       });
   }]);
 
@@ -70,9 +64,9 @@ phonecatApp.config(['$routeProvider',
         menu_link.controller = menu_link.page_callback;
       }*/
       if (!menu_link.controller && menu_link.page_callback) {
-        menu_link.controller = 'drupalgap_page_callback_controller';
+        menu_link.controller = 'drupalgap_goto_controller';
         // @WARNING - dynamically resolving page arguments always gets stuck
-        // on the last menu link item.
+        // with the last menu link item in this loop...
         /*menu_link.resolve = {
           menu_link: function() {
             dpm('grabbing the menu link now!');
@@ -98,7 +92,7 @@ phonecatApp.config(['$routeProvider',
       //console.log(menu_link);
       $routeProvider.when('/' + path, menu_link);
     }
-    
+
     /* each page_argument can be dynamically resolved here!!! */
     /*$routeProvider.when('/user/login', {
         templateUrl: 'js/drupalgap/src/modules/user/views/user_login_form.html',
@@ -109,9 +103,14 @@ phonecatApp.config(['$routeProvider',
           }
         }
     });*/
-    
+
     // Set the app's front page on the routeProvider.
-    drupalgap_router_path_set(drupalgap.settings.front);
+    drupalgap_path_set(drupalgap.settings.front);
+
+    // Determine and set the drupalgap router path.
+    drupalgap_router_path_set(drupalgap_get_menu_link_router_path(drupalgap.settings.front));
+
+    // Set the otherwise ruling to load the front page.
     $routeProvider.otherwise({
         redirectTo: '/' + drupalgap.settings.front
     });
