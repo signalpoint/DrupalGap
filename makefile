@@ -12,6 +12,7 @@ files = src/drupalgap.js\
                                 src/includes/region.inc.js\
                                 src/includes/theme.inc.js\
                                 src/modules/field/field.js\
+                                src/modules/image/image.js\
                                 src/modules/menu/menu.js\
                                 src/modules/services/services.js\
                                 src/modules/system/system.js\
