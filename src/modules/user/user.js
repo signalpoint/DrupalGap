@@ -118,8 +118,8 @@ function user_menu() {
         'page_callback': 'user_page'
       },*/
       'user/login': {
-        /*title: t('Login'),*/
-        controller: 'drupalgap_get_form',
+        title: t('Login'),
+        controller: 'drupalgap_get_form_controller',
         resolve: {
           form_id: function() { return 'user_login_form'; }
         },
