@@ -228,9 +228,12 @@ function _drupalgap_form_render_element(form, element) {
     // If there were no items, just return.
     if (!items || items.length == 0) { return html; }
 
-    // Generate default variables.
+    // Generate default variables. Set the angular model to the form state
+    // values for the element's name.
     var variables = {
-      attributes: {}
+      attributes: {
+        'ng-model': "form_state.values['" + name + "']"
+      }
     };
 
     // Grab the info instance and info field for the field, then attach them
@@ -455,11 +458,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // cleanly to their theme function.
     // @todo A hook_field_widget_form() should be used instead here.
     if (item.type == 'submit') {
-      variables.attributes.onclick =
-        '_drupalgap_form_submit(\'' + form.id + '\');';
-      if (!variables.attributes['data-theme']) {
-        variables.attributes['data-theme'] = 'b';
-      }
+      variables.attributes['data-ng-click'] = 'submit(\'' + form.id + '\', form_state);';
       if (typeof variables.attributes.type === 'undefined') {
         variables.attributes.type = 'button';
       }
