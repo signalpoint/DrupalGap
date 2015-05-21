@@ -390,6 +390,68 @@ function hook_node_page_view_alter_TYPE(node, options) {
 }
 
 /**
+ * Implements hook_preprocess_page().
+ */
+function hook_preprocess_page($scope) {
+  try {
+  }
+  catch (error) { console.log('hook_preprocess_page - ' + error); }
+}
+
+/**
+ * Implements hook_postprocess_page().
+ */
+function hook_postprocess_page($scope) {
+  try {
+  }
+  catch (error) { console.log('hook_postprocess_page - ' + error); }
+}
+
+/**
+ * Implements hook_preprocess_region_container().
+ */
+function hook_preprocess_region_container($scope, region, data) {
+  try {
+    // Put a div before each region.
+    data.region_html = '<div>Hello World</div>' + data.region_html;
+  }
+  catch (error) { console.log('hook_postprocess_region_container - ' + error); }
+}
+
+/**
+ * Implements hook_postprocess_region_container().
+ */
+function hook_postprocess_region_container($scope, region, data) {
+  try {
+    // Wrap wrap all regions in our div.
+    data.region_html = '<div class="foo">' + data.region_html + '</div>';
+  }
+  catch (error) { console.log('hook_postprocess_region_container - ' + error); }
+}
+
+/**
+ * Implements hook_preprocess_region_container_open().
+ */
+function hook_preprocess_region_container_open($scope, region, data) {
+  try {
+    // Put a div before each region.
+    data.region_html += '<div class="bar">';
+  }
+  catch (error) { console.log('hook_preprocess_region_container_open - ' + error); }
+}
+
+/**
+ * Implements hook_preprocess_region_container_close().
+ */
+function hook_preprocess_region_container_close($scope, region, data) {
+  try {
+    // Close our div from hook_preprocess_region_container_open().
+    data.region_html += '</div>';
+  }
+  catch (error) { console.log('hook_preprocess_region_container_close - ' + error); }
+}
+
+/**
  * Implements hook_views_exposed_filter().
  * @param {Object} form
  * @param {Object} form_state
