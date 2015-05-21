@@ -3,29 +3,51 @@
 /* App Module */
 
 var phonecatApp = angular.module('phonecatApp', [
-  'ngRoute',
-  'ngSanitize',
-  'phonecatAnimations',
-  'phonecatControllers',
-  'phonecatFilters',
-  'phonecatServices'
-]);
+    'ngRoute',
+    'ngSanitize',
+    'phonecatAnimations',
+    'phonecatControllers',
+    'phonecatFilters',
+    'phonecatServices'
+]).config(function() {
 
-/**
- *
- */
-function dgResolveController() {
-  try {
-    
-  }
-  catch (error) { console.log('dgResolveController - ' + error); }
-}
+    // @WARNING only providers available here, no scope available here...
 
+    drupalgap_onload();
+
+}).run(['$rootScope', function($rootScope) {
+  
+      // Watch for changes in the Angular route (this is fired twice per route change)...
+      $rootScope.$on("$locationChangeStart", function(event, next, current) {
+
+          // Extract the current menu path from the Angular route, and warn
+          // about any uncrecognized routes.
+          var path_current = drupalgap_angular_get_route_path(current);
+          var path_next = drupalgap_angular_get_route_path(next);           
+          if (path_current == drupalgap_path_get()) { return; } // Don't process current path.
+          if (!path_next) {
+            if (!drupalgap_path_get()) { return; } // Don't warn about the first page load.
+            console.log('locationChangeStart - unsupported path: ' + path_next);
+          }
+
+          // Set the current menu path to the path input.
+          drupalgap_path_set(path_next);
+
+          // Determine the router path.
+          var router_path = drupalgap_get_menu_link_router_path(path_next);
+
+          // Set the drupalgap router path.
+          drupalgap_router_path_set(router_path);
+          
+          console.log('navigated to: ' + path_next);
+          
+      });
+  }]);
+
+  // @TODO attach this directly to the object we're building above.
 phonecatApp.config(['$routeProvider',
   function($routeProvider) {
     
-    // Load DrupalGap.
-    drupalgap_onload();
     
     // Attach hoom_menu() paths to Angular's routeProvider.
     for (var path in drupalgap.menu_links) {
@@ -43,9 +65,21 @@ phonecatApp.config(['$routeProvider',
       // Determine the menu link's controller, by first falling back to the
       // page_callback property which we'll warn the developer about, otherwise
       // we'll use menu_link object for the routeProvider.
-      if (!menu_link.controller && menu_link.page_callback) {
+      /*if (!menu_link.controller && menu_link.page_callback) {
         console.log('DEPRECATED: phonecatApp - routeProvider | rename the ' + path + ' menu link path\'s page_callback property name to controller');
         menu_link.controller = menu_link.page_callback;
+      }*/
+      if (!menu_link.controller && menu_link.page_callback) {
+        menu_link.controller = 'drupalgap_page_callback_controller';
+        // @WARNING - dynamically resolving page arguments always gets stuck
+        // on the last menu link item.
+        /*menu_link.resolve = {
+          menu_link: function() {
+            dpm('grabbing the menu link now!');
+            console.log(menu_link);
+            return menu_link.page_callback;
+          }
+        };*/
       }
       else if (!menu_link.controller) {
         console.log('WARNING: phonecatApp - routeProvider | no controller provided for path: ' + path);
@@ -61,7 +95,7 @@ phonecatApp.config(['$routeProvider',
       // Add the menu link to Angular's routeProvider.
       // @TODO apparently attaching all the controllers at once, instead of on
       // demand is expensive, seek alternative routes in utilizing controllers.
-      console.log(menu_link);
+      //console.log(menu_link);
       $routeProvider.when('/' + path, menu_link);
     }
     
@@ -77,6 +111,7 @@ phonecatApp.config(['$routeProvider',
     });*/
     
     // Set the app's front page on the routeProvider.
+    drupalgap_router_path_set(drupalgap.settings.front);
     $routeProvider.otherwise({
         redirectTo: '/' + drupalgap.settings.front
     });
