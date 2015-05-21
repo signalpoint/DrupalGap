@@ -66,7 +66,8 @@ function system_block_view(delta) {
         // comments, etc). Depending on the menu link router, we need to route
         // this through the appropriate template files and functions.
         //return drupalgap_render_page();
-        return arguments[2].content; // arguments[2] = $scope
+        return drupalgap_render_page(menu_execute_active_handler());
+        //return arguments[2].content; // arguments[2] = $scope
         break;
       case 'messages':
         // If there are any messages waiting to be displayed, render them, then
