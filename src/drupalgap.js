@@ -4,6 +4,8 @@ var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 // Init _GET for url path query strings.
 var _dg_GET = _dg_GET || {};
 
+//angular.module('drupalgap', [])
+
 /**
  * Initializes the drupalgap json object.
  * @return {Object}
@@ -145,6 +147,7 @@ function drupalgap_onload() {
     }
     switch (drupalgap.settings.mode) {
       case 'phonegap':
+        alert('congrats, you ran drupalgap 7.x-2.x in phonegap, now pass the $scope to _drupalgap_deviceready to get it to work!');
         document.addEventListener('deviceready', _drupalgap_deviceready, false);
         break;
       case 'web-app':
@@ -258,15 +261,23 @@ function _drupalgap_deviceready_options() {
   catch (error) { console.log('_drupalgap_deviceready_options - ' + error); }
 }
 
+/*phonecatControllers.controller('drupalgap_bootstrap_controller', ['$scope',
+  function($scope) {
+    try {
+      drupalgap_bootstrap($scope);
+    }
+    catch (error) { console.log('drupalgap_bootstrap_controller - ' + error); }
+  }]);*/
+
 /**
  * Loads up all necessary assets to make DrupalGap ready.
  */
-function drupalgap_bootstrap() {
+function drupalgap_bootstrap($scope) {
   try {
     // Load up any contrib and/or custom modules (the DG core moodules have
     // already been loaded at this point), load the theme and all blocks. Then
     // build the menu router, load the menus, and build the theme registry.
-    //drupalgap_load_modules();
+    drupalgap_load_modules($scope);
     drupalgap_load_theme();
     drupalgap_load_blocks();
     //drupalgap_load_locales();
@@ -317,23 +328,28 @@ function drupalgap_load_modules() {
         for (var module_name in Drupal.modules[bundle]) {
             if (!Drupal.modules[bundle].hasOwnProperty(module_name)) { continue; }
             var module = Drupal.modules[bundle][module_name];
+
             // If the module object is empty, initialize a module object.
-            if ($.isEmptyObject(module)) {
+            if (empty(module)) {
               Drupal.modules[bundle][module_name] =
                 module_object_template(module_name);
               module = Drupal.modules[bundle][module_name];
             }
+
             // If the module's name isn't set, set it.
             if (!module.name) {
               Drupal.modules[bundle][module_name].name = module_name;
               module = Drupal.modules[bundle][module_name];
             }
+
             // Determine module directory.
             var dir = drupalgap_modules_get_bundle_directory(bundle);
             module_base_path = dir + '/' + module.name;
+
             // Add module .js file to array of paths to load.
             module_path = module_base_path + '/' + module.name + '.js';
             modules_paths = [module_path];
+
             // If there are any includes with this module, add them to the
             // list of paths to include.
             if (module.includes != null && module.includes.length != 0) {
@@ -345,29 +361,15 @@ function drupalgap_load_modules() {
                 );
               }
             }
-            // Now load all the paths for this module.
+
+            // Now load the module's JavaScript into scope.
+            
             for (var modules_paths_index in modules_paths) {
                 if (!modules_paths.hasOwnProperty(modules_paths_index)) { continue; }
                 var modules_paths_object = modules_paths[modules_paths_index];
-                jQuery.ajax({
-                    async: false,
-                    type: 'GET',
-                    url: modules_paths_object,
-                    data: null,
-                    success: function() {
-                      if (Drupal.settings.debug) { dpm(modules_paths_object); }
-                    },
-                    dataType: 'script',
-                    error: function(xhr, textStatus, errorThrown) {
-                      var msg = t('Failed to load module!') +
-                        ' (' + module.name + ')';
-                      dpm(msg);
-                      console.log(modules_paths_object);
-                      dpm(textStatus);
-                      dpm(errorThrown.message);
-                      drupalgap_alert(msg);
-                    }
-                });
+                // @TODO dynamically load scripts here.
+                console.log('DEV: manually include JS file via index.html: ' + modules_paths_object);
+                //$scope.loadScript(modules_paths_index, 'text/javascript', 'utf-8');
             }
         }
     }
