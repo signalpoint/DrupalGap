@@ -1,4 +1,19 @@
 /**
+ * Given an Angular route, this will return the corresponding DrupalGap path.
+ * @param {String} route Then angular route as a full URL path.
+ * @return {String}  The DrupalGap path.
+ */
+function drupalgap_angular_get_route_path(route) {
+  try {
+    var find = '#/';
+    var pos = route.indexOf(find);
+    if (pos == -1) { return false; }
+    return route.substr(pos + find.length, route.length - (pos + find.length));
+  }
+  catch (error) { console.log('drupalgap_angular_get_route_path - ' + error); }
+}
+
+/**
  * Converts a JSON object to an XML/HTML tag attribute string and returns the
  * string.
  * @param {Object} attributes
