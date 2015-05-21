@@ -85,7 +85,7 @@ function _GET() {
  * the pagebeforehange event. If we're not moving backwards, or navigating to
  * the same page, this will preproccesses the page, then processes it.
  */
-$(document).on('pagebeforechange', function(e, data) {
+/*$(document).on('pagebeforechange', function(e, data) {
     try {
       // If we're moving backwards, reset drupalgap.back and return.
       if (drupalgap && drupalgap.back) {
@@ -117,7 +117,7 @@ $(document).on('pagebeforechange', function(e, data) {
       }
     }
     catch (error) { console.log('pagebeforechange - ' + error); }
-});
+});*/
 
 /**
  * Implementation of template_preprocess_page().
@@ -146,8 +146,9 @@ function template_preprocess_page(variables) {
  * Implementation of template_process_page().
  * @param {Object} variables
  */
-function template_process_page(variables) {
+function template_process_page($scope) {
   try {
+    return 'template_process_page - DEPRECATED!';
     var drupalgap_path = drupalgap_path_get();
     // Execute the active menu handler to assemble the page output. We need to
     // do this before we render the regions below.
@@ -155,17 +156,11 @@ function template_process_page(variables) {
     // For each region, render it, then replace the placeholder in the page's
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap_path);
-    var page_html = $('#' + page_id).html();
-    if (!page_html) { return; }
     for (var index in drupalgap.theme.regions) {
         if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
         var region = drupalgap.theme.regions[index];
-        page_html = page_html.replace(
-          '{:' + region.name + ':}',
-          drupalgap_render_region(region)
-        );
+        $scope.regions.push({ content: drupalgap_render_region(region) });
     }
-    $('#' + page_id).html(page_html);
   }
   catch (error) { console.log('template_process_page - ' + error); }
 }
