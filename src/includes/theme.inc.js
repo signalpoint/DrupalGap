@@ -350,13 +350,12 @@ function theme_link(variables) {
 
       // By default our onclick will use a drupalgap_goto(). If we have any
       // incoming link options, then modify the link accordingly.
-      var onclick = 'drupalgap_goto(\'' + variables.path + '\');';
       if (variables.options) {
 
         // Use an InAppBrowser?
         if (variables.options.InAppBrowser) {
-          onclick =
-            "window.open('" + variables.path + "', '_blank', 'location=yes');";
+          variables.attributes['onclick'] =
+            "javascript:window.open('" + variables.path + "', '_blank', 'location=yes');";
         }
 
         else {
@@ -364,10 +363,14 @@ function theme_link(variables) {
           // Prepare the path.
           variables.path = _drupalgap_goto_prepare_path(variables.path);
 
+          if (typeof variables.attributes['href'] === 'undefined') {
+            variables.attributes['href'] = '#/' + variables.path;
+          }
+
           // All other options need to be extracted into a JSON string for the
           // onclick handler.
 
-          var goto_options = '';
+          /*var goto_options = '';
           for (var option in variables.options) {
               if (!variables.options.hasOwnProperty(option)) { continue; }
               var value = variables.options[option];
@@ -378,7 +381,7 @@ function theme_link(variables) {
           onclick =
             'drupalgap_goto(\'' +
               variables.path + '\', ' +
-              '{' + goto_options + '});';
+              '{' + goto_options + '});';*/
 
         }
       }
@@ -394,8 +397,7 @@ function theme_link(variables) {
       }
 
       // Finally, return the link.
-      return '<a href="#" onclick="javascript:' + onclick + '"' +
-        drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
+      return '<a ' + drupalgap_attributes(variables.attributes) + '>' + text + '</a>';
 
     }
     else {
