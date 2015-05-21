@@ -1,3 +1,15 @@
+phonecatControllers.controller('drupalgap_page_callback_controller', ['$scope', '$sce',
+  function($scope, $sce) {
+    try {
+      module_invoke_all('preprocess_page', $scope);
+      $scope.content = $sce.trustAsHtml(
+        drupalgap_render_page(menu_execute_active_handler())
+      );
+      module_invoke_all('postprocess_page', $scope);
+    }
+    catch (error) { console.log('drupalgap_page_callback_controller - ' + error); }
+  }]);
+
 /**
  * This will return the query string arguments for the page. You may optionally
  * pass in a key to get its value, pass in a key then a value to set the key
@@ -125,6 +137,8 @@ function _GET() {
  */
 function template_preprocess_page(variables) {
   try {
+    alert('template_preprocess_page - DEPRECATED!');
+    return;
     // Set up default attribute's for the page's div container.
     if (typeof variables.attributes === 'undefined') {
       variables.attributes = {};
@@ -148,7 +162,8 @@ function template_preprocess_page(variables) {
  */
 function template_process_page($scope) {
   try {
-    return 'template_process_page - DEPRECATED!';
+    alert('template_process_page - DEPRECATED!');
+    return;
     var drupalgap_path = drupalgap_path_get();
     // Execute the active menu handler to assemble the page output. We need to
     // do this before we render the regions below.
@@ -346,12 +361,11 @@ function drupalgap_jqm_active_page_url() {
  * drupalgap.output.
  * @return {String}
  */
-function drupalgap_render_page() {
+function drupalgap_render_page(output) {
   try {
     // Since the page output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.
-    var output = drupalgap.output;
     var output_type = $.type(output);
     var content = '';
 
