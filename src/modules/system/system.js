@@ -65,7 +65,8 @@ function system_block_view(delta) {
         // region for the content of a page to show up (nodes, users, taxonomy,
         // comments, etc). Depending on the menu link router, we need to route
         // this through the appropriate template files and functions.
-        return drupalgap_render_page();
+        //return drupalgap_render_page();
+        return arguments[2].content; // arguments[2] = $scope
         break;
       case 'messages':
         // If there are any messages waiting to be displayed, render them, then
@@ -96,7 +97,7 @@ function system_block_view(delta) {
         break;
       case 'title':
         var title_id = system_title_block_id(drupalgap_path_get());
-        return '<h1 id="' + title_id + '"></h1>';
+        return '<h1 id="' + title_id + '">HI</h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">' + t('Powered by') + ': ' +
