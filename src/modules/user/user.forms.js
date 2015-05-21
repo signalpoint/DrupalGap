@@ -1,21 +1,3 @@
-phonecatControllers.controller('user_login_form', ['$scope', '$sce', 'form',
-  function($scope, $sce, form) {
-    try {
-
-      //$scope.form = drupalgap_form_load('user_login_form');
-      //$scope.template = '<div ng-include="templateUrl">Loading yo!...</div>';
-      //$scope.templateUrl = 'partials/phone-list.html';
-
-      dpm('hitting that controller!');
-      console.log(form);
-      //$scope.form = form;
-      //$scope.form = drupalgap_form_load('user_login_form');
-      $scope.form = $sce.trustAsHtml(drupalgap_get_form('user_login_form'));
-
-    }
-    catch (error) { console.log('user_login_form controller - ' + error); }
-  }]);
-
 /**
  * The user login form.
  * @param {Object} form
