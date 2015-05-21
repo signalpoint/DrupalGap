@@ -2,10 +2,15 @@
 <html lang="en" ng-app="phonecatApp">
 <head>
   <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+
   <title>DrupalGap</title>
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
-  <link rel="stylesheet" href="css/app.css">
-  <link rel="stylesheet" href="css/animations.css">
+  
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
 
   <script src="bower_components/jquery/dist/jquery.js"></script>
   <script src="bower_components/angular/angular.js"></script>
@@ -19,18 +24,25 @@
   <script src="js/controllers.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/services.js"></script>
-  
+
   <!-- jDrupal -->
   <script src="js/jdrupal.js"></script>
-  
+
   <!-- DrupalGap -->
   <script src="js/drupalgap/bin/drupalgap.js"></script>
-  
+
   <!-- DrupalGap Settings -->
   <script src="js/settings.js"></script>
-  
+
   <!-- DrupalGap Theme -->
   <script src="js/drupalgap/themes/spi/spi.js"></script>
+  
+  <!-- DrupalGap Contributed Modules -->
+  <script src="js/drupalgap/app/modules/bootstrap/bootstrap.js"></script>
+  <link rel="stylesheet" href="js/drupalgap/app/modules/bootstrap/bootstrap.css">
+
+  <!-- DrupalGap Custom Modules -->
+  <script src="js/drupalgap/app/modules/custom/my_module/my_module.js"></script>
   
 </head>
 <body>
