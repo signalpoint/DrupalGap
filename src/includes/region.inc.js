@@ -1,4 +1,4 @@
-phonecatControllers.controller('drupalgapRegionController', ['$scope', '$sce',
+/*phonecatControllers.controller('drupalgapRegionController', ['$scope', '$sce',
   function($scope, $sce) {
     
     // Call all hook_preprocess_page functions.
@@ -14,12 +14,9 @@ phonecatControllers.controller('drupalgapRegionController', ['$scope', '$sce',
     for (var index in drupalgap.theme.regions) {
         if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
         var region = drupalgap.theme.regions[index];
-        /*$scope.regions.push({
-          content: drupalgap_render_region(region, $scope)
-        });*/
         $scope.regions += drupalgap_render_region(region, $scope);
     }
-  }]);
+  }]);*/
 
 /**
  * Given a region, this renders it and all the blocks in it. The blocks are
