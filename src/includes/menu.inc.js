@@ -31,6 +31,8 @@ function menu_execute_active_handler() {
 
       // Are there any arguments to send to the page callback?
       if (drupalgap.menu_links[router_path].page_arguments) {
+        dpm('page_arguments for ' + function_name + '()');
+        console.log(drupalgap.menu_links[router_path].page_arguments);
         // For each page argument, if the argument is an integer, grab the
         // corresponding arg(#), otherwise just push the arg onto the page
         // arguments. Then try to prepare any entity that may be present in
@@ -70,25 +72,18 @@ function menu_execute_active_handler() {
       // any page arguments to the jQM event handler function.
       drupalgap.page.jqm_events = [];
       var jqm_page_events = drupalgap_jqm_page_events();
-      var jqm_page_event_args = null;
-      if (page_arguments.length > 0) {
-        jqm_page_event_args = JSON.stringify(page_arguments);
-      }
       for (var i = 0; i < jqm_page_events.length; i++) {
         if (drupalgap.menu_links[router_path][jqm_page_events[i]]) {
           var jqm_page_event = jqm_page_events[i];
           var jqm_page_event_callback =
             drupalgap.menu_links[router_path][jqm_page_event];
           if (drupalgap_function_exists(jqm_page_event_callback)) {
-            var options = {
-              'page_id': page_id,
-              'jqm_page_event': jqm_page_event,
-              'jqm_page_event_callback': jqm_page_event_callback,
-              'jqm_page_event_args': jqm_page_event_args
-            };
-            content[jqm_page_event] = {
-              markup: drupalgap_jqm_page_event_script_code(options)
-            };
+            console.log('DEPRECATED (all jQM page events): "' + jqm_page_event + '" for hook_menu() "' + router_path + '", ignoring call to ' + jqm_page_event_callback + '()...');
+            /*var fn = window[jqm_page_event_callback];
+            if (page_arguments.length > 0) {
+              fn.apply(null, Array.prototype.slice.call(page_arguments));
+            }
+            else { fn(); }*/
           }
           else {
             console.log(
@@ -102,15 +97,20 @@ function menu_execute_active_handler() {
 
       // Add a pageshow handler for the page title.
       if (typeof content === 'object') {
-        var options = {
+        var fn = window['_drupalgap_page_title_pageshow'];
+        if (page_arguments.length > 0) {
+          fn.apply(null, Array.prototype.slice.call(page_arguments));
+        }
+        else { fn(); }
+        /*var options = {
           'page_id': page_id,
           'jqm_page_event': 'pageshow',
-          'jqm_page_event_callback': '_drupalgap_page_title_pageshow',
+          'jqm_page_event_callback': '',
           'jqm_page_event_args': jqm_page_event_args
         };
         content['drupalgap_page_title_pageshow'] = {
           markup: drupalgap_jqm_page_event_script_code(options)
-        };
+        };*/
       }
 
       // And finally return the content.
