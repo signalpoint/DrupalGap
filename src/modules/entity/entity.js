@@ -846,6 +846,33 @@ function drupalgap_entity_get_primary_key(entity_type) {
   catch (error) { console.log('drupalgap_entity_get_primary_key - ' + error); }
 }
 
+phonecatControllers.controller('_drupalgap_entity_page_container_inject_controller', ['$scope', '$http', 'jdrupal',
+  function($scope, $http, jdrupal) {
+    try {
+
+      dpm('_drupalgap_entity_page_container_inject_controller');
+      console.log(arguments);
+      
+      jdrupal.node_load(arg(1)).then(
+        function(result) {
+          $scope.node = result.data;
+        }
+      );
+
+    }
+    catch (error) { console.log('_drupalgap_entity_page_container_inject_controller - ' + error); }
+  }]);
+
+/**
+ *
+ */
+function _drupalgap_entity_page_container_model(entity_type, entity_id, mode) {
+  try {
+    return '<' + entity_type + ' ng-controller="_drupalgap_entity_page_container_inject_controller">{{node.title}}</' + entity_type + '>';
+  }
+  catch (error) { console.log('_drupalgap_entity_page_container_model - ' + error); }
+}
+
 /**
  * Given an entity type, an entity id and a mode, this will return a render
  * object for the entity's page container.
@@ -853,9 +880,12 @@ function drupalgap_entity_get_primary_key(entity_type) {
  * @param {Number} entity_id
  * @param {String} mode
  * @return {Object}
+ * @deprecated
  */
 function _drupalgap_entity_page_container(entity_type, entity_id, mode) {
   try {
+    console.log('DEPRECATED: _drupalgap_entity_page_container() - use _drupalgap_entity_page_container_model() instead ');
+    return '';
     var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
     var attrs = {
       id: id,
@@ -887,10 +917,13 @@ function _drupalgap_entity_page_container_id(entity_type, entity_id, mode) {
  * @param {Number} entity_id
  * @param {String} mode
  * @param {Object} build
+ * @deprecated
  */
 function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
   build) {
   try {
+    console.log('DEPRECATED: _drupalgap_entity_page_container_inject - automatically handled by angular controller now.');
+    return;
     // Get the container id, set the drupalgap.output to the page build, then
     // inject the rendered page into the container.
     var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
