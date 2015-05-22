@@ -13,7 +13,7 @@
   "Edit": "編輯",
   "E-mail address": "電子郵件地址",
   "E-mail new password": "經由電子郵件傳送新密碼",
-  "Enter your current password to change the E-mail address or Password.": "Inserisci la tua password attuale per modificare l'indirizzo email o la password.",
+  "Enter your current password to change the E-mail address or Password.": "輸入現設密碼來更改電子郵件地址或密碼.",
   "Getting Started Guide": "入門指南",
   "History": "歷史",
   "Logging out": "登出中",
@@ -27,10 +27,10 @@
   "Please wait...": "請稍候...",
   "Powered by": "供應由",
   "Register": "登錄",
-  "Registered": "Registrato",
-  "Registration complete!": "Registrazione completata!",
-  "Registration complete, check your e-mail inbox to verify the account.": "Registrazione completata, controlla la tua casella email per la successiva verifica del tuo account.", 
-  "Registration complete, waiting for administrator approval.": "Registrazione completata, attendi l'approvazione dell'amministratore del sito.",
+  "Registered": "已登錄",
+  "Registration complete!": "已登錄完成!",
+  "Registration complete, check your e-mail inbox to verify the account.": "已登錄完成,請您的檢查您的電子信箱來確認您的帳號.", 
+  "Registration complete, waiting for administrator approval.": "已登錄完成, 等待管理員的確認.",
   "Request new password": "請求新密碼",
   "Save": "儲存",
   "Sorry, the page you requested was not found.": "抱歉，您所搜尋的頁面找不到！",
@@ -46,5 +46,5 @@
   "View": "View",
   "Vocabularies": "字彙",
   "Welcome to DrupalGap": "歡迎光臨 DrupalGap",
-  "Wrong username or password": "Nome utente o password errati"
+  "Wrong username or password": "帳號或密碼錯誤"
 }
