@@ -15,25 +15,29 @@ var phonecatApp = angular.module('phonecatApp', [
 
     drupalgap_onload();
 
-}).run(['$rootScope', function($rootScope) {
-  
+}).run(['$rootScope', '$routeParams', '$location', function($rootScope, $routeParams, $location) {
+
+      dpm('phonecatApp.run()');
+      console.log(arguments);
+
+      drupalgap_ng_set('routeParams', $routeParams);
+      drupalgap_ng_set('location', $location);
+
       // Watch for changes in the Angular route (this is fired twice per route change)...
       $rootScope.$on("$locationChangeStart", function(event, next, current) {
 
           // Extract the current menu path from the Angular route, and warn
           // about any uncrecognized routes.
+          // @TODO this doesn't do anything, but it a good placeholder for
+          // future needs/hooks while pages are changing. Revisit these two
+          // function's implementations now that we have a better understanding
+          // of Angular's routing.
           var path_current = drupalgap_angular_get_route_path(current);
           var path_next = drupalgap_angular_get_route_path(next);
           if (!path_next) {
             if (!drupalgap_path_get()) { return; } // Don't warn about the first page load.
             console.log('locationChangeStart - unsupported path: ' + path_next);
           }
-
-          // Set the current menu path to the path input.
-          drupalgap_path_set(path_next);
-
-          // Determine and set the drupalgap router path.
-          drupalgap_router_path_set(drupalgap_get_menu_link_router_path(path_next));
 
       });
   }]);
@@ -42,6 +46,8 @@ var phonecatApp = angular.module('phonecatApp', [
 phonecatApp.config(['$routeProvider',
   function($routeProvider) {
     
+    dpm('phonecatApp.config()');
+    console.log(arguments);
     
     // Attach hoom_menu() paths to Angular's routeProvider.
     for (var path in drupalgap.menu_links) {
@@ -49,6 +55,12 @@ phonecatApp.config(['$routeProvider',
       
       // Extract the menu link.
       var menu_link = drupalgap.menu_links[path];
+      
+      // Skip 'MENU_DEFAULT_LOCAL_TASK' items.
+      if (menu_link.type == 'MENU_DEFAULT_LOCAL_TASK') {
+        console.log('WARNING: phonecatApp - deprecated | MENU_DEFAULT_LOCAL_TASK on path: ' + path);
+        continue;
+      }
       
       // Use the active theme's page template as the templateUrl, if one wasn't
       // provided.
@@ -90,6 +102,9 @@ phonecatApp.config(['$routeProvider',
       // @TODO apparently attaching all the controllers at once, instead of on
       // demand is expensive, seek alternative routes in utilizing controllers.
       //console.log(menu_link);
+      // @TODO by attaching the complete hook_menu item link here, DG stuff ends
+      // up in the same object as an Angular route, and we may or may not be
+      // colliding with how they do things.
       $routeProvider.when('/' + path, menu_link);
     }
 
