@@ -40,6 +40,15 @@ var phonecatApp = angular.module('phonecatApp', [
       });
   }]);
 
+angular.module('jdrupal-ng').config(function($provide) {
+    $provide.value('jdrupalSettings', {
+        site_path: 'http://localhost/drupal-7',
+        endpoint: 'drupalgap'
+    });
+    console.log('configure that beast from the app!');
+    console.log(arguments);
+});
+
   // @TODO attach this directly to the object we're building above.
 phonecatApp.config(['$routeProvider',
   function($routeProvider) {
@@ -50,6 +59,8 @@ phonecatApp.config(['$routeProvider',
     // @TODO this should be included via index.html as a script.
     // @WARNING to get this file navigate to ?q=drupalgap/connect in your
     // browser then save it at the path mentioned below.
+    // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated because of its
+    // detrimental effects to the end user's experience.
     drupalgap_service_resource_extract_results({
         service: 'system',
         resource: 'connect',
