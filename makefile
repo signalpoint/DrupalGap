@@ -11,6 +11,7 @@ files = src/drupalgap.js\
                                 src/includes/page.inc.js\
                                 src/includes/region.inc.js\
                                 src/includes/theme.inc.js\
+                                src/includes/title.inc.js\
                                 src/modules/comment/comment.js\
                                 src/modules/entity/entity.js\
                                 src/modules/field/field.js\
@@ -26,7 +27,7 @@ files = src/drupalgap.js\
 
 #                                                              
 #                                
-#                                src/includes/title.inc.js\
+#                                
 #                                
 #                                src/modules/contact/contact.js\
 #                                
