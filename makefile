@@ -11,9 +11,12 @@ files = src/drupalgap.js\
                                 src/includes/page.inc.js\
                                 src/includes/region.inc.js\
                                 src/includes/theme.inc.js\
+                                src/modules/comment/comment.js\
+                                src/modules/entity/entity.js\
                                 src/modules/field/field.js\
                                 src/modules/image/image.js\
                                 src/modules/menu/menu.js\
+                                src/modules/node/node.js\
                                 src/modules/services/services.js\
                                 src/modules/system/system.js\
                                 src/modules/user/user.js\
@@ -24,15 +27,15 @@ files = src/drupalgap.js\
 #                                                              
 #                                
 #                                src/includes/title.inc.js\
-#                                src/modules/comment/comment.js\
+#                                
 #                                src/modules/contact/contact.js\
-#                                src/modules/entity/entity.js\
+#                                
 #                                
 #                                src/modules/file/file.js\
 #                                src/modules/image/image.js\
 #                                
 #                                src/modules/mvc/mvc.js\
-#                                src/modules/node/node.js\
+#                                
 #                                src/modules/search/search.js\
 #                                
 #                                src/modules/taxonomy/taxonomy.js\
