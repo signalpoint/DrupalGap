@@ -297,8 +297,8 @@ function drupalgap_ng_set(key, value) {
  */
 function drupalgap_path_get() {
   try {
-    var path = drupalgap.path;
-    return path;
+    var $location = drupalgap_ng_get('location');
+    return $location['$$path'].slice('1');
   }
   catch (error) { console.log('drupalgap_path_get - ' + error); }
 }
@@ -306,10 +306,11 @@ function drupalgap_path_get() {
 /**
  * Set the current DrupalGap path.
  * @param {String} path
+ * @deprecated
  */
 function drupalgap_path_set(path) {
-  try { drupalgap.path = path; }
-  catch (error) { console.log('drupalgap_path_set - ' + error); }
+  console.log('DEPRECATED - drupalgap_path_set() is handled by Angular!');
+  return;
 }
 
 /**
@@ -318,8 +319,8 @@ function drupalgap_path_set(path) {
  */
 function drupalgap_router_path_get() {
   try {
-    var router_path = drupalgap.router_path;
-    return router_path;
+    var $route = drupalgap_ng_get('route');
+    return $route.current['$$route'].path;
   }
   catch (error) { console.log('drupalgap_router_path_get - ' + error); }
 }
@@ -327,10 +328,11 @@ function drupalgap_router_path_get() {
 /**
  * Set the current DrupalGap router_path.
  * @param {String} router_path
+ * @deprecated
  */
 function drupalgap_router_path_set(router_path) {
-  try { drupalgap.router_path = router_path; }
-  catch (error) { console.log('drupalgap_router_path_set - ' + error); }
+  console.log('DEPRECATED - drupalgap_path_set() is handled by Angular!');
+  return;
 }
 
 /**
