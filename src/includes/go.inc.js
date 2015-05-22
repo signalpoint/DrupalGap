@@ -1,26 +1,38 @@
 // used to render the "drupalgap-goto-directive" attribute of page.tpl.html
 phonecatControllers.directive("drupalgapGotoDirective", function($compile) {
+    dpm('drupalgapGotoDirective');
     return {
       link: function(scope, element) {
+
+        // Build an Angular route 'template' string by rendering each region
+        // from the DrupalGap theme onto it.
         var template = '';
         for (var index in drupalgap.theme.regions) {
           if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
           var region = drupalgap.theme.regions[index];
           template += drupalgap_render_region(region, scope);
         }
+        
+        // Compile the template for Angular and append it to the directive's
+        // html element.
         var linkFn = $compile(template);
         var content = linkFn(scope);
         element.append(content);
+
       }
     };
 });
 
-phonecatControllers.controller('drupalgap_goto_controller', ['$scope', '$sce', '$route', '$location',
-  function($scope, $sce, $route, $location) {
+phonecatControllers.controller('drupalgap_goto_controller', ['$scope', '$sce', '$route', '$location', '$routeParams',
+  function($scope, $sce, $route, $location, $routeParams) {
     try {
 
+      dpm('drupalgap_goto_controller');
+      console.log(arguments);
+      
+      // @TODO move this into run().
       drupalgap_ng_set('route', $route);
-      drupalgap_ng_set('location', $location);
+      
 
     }
     catch (error) { console.log('drupalgap_goto_controller - ' + error); }
