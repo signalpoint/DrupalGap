@@ -345,13 +345,22 @@ function drupalgap_jqm_active_page_url() {
 }
 
 /**
- * Renders the html string of the page content that is stored in
- * drupalgap.output.
- * @return {String}
+ * @deprecated
  */
 function drupalgap_render_page(output) {
+  return drupalgap_render(output);
+}
+
+/**
+ * Given a html string or render array, this return the rendered html string.
+ * @param {String|Object} output The html string or render array to render.
+ * @return {String}
+ */
+function drupalgap_render(output) {
   try {
-    // Since the page output has already been assembled, render the content
+    dpm('drupalgap_render');
+    console.log(arguments);
+    // Since the output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.
     var output_type = $.type(output);
@@ -431,7 +440,7 @@ function drupalgap_render_page(output) {
           }
           else {
             console.log(
-              'drupalgap_render_page - failed to get file contents (' +
+              'drupalgap_render - failed to get file contents (' +
                 template_file_path +
               ')'
             );
@@ -439,7 +448,7 @@ function drupalgap_render_page(output) {
         }
         else {
           console.log(
-            'drupalgap_render_page - template file does not exist (' +
+            'drupalgap_render - template file does not exist (' +
               template_file_path +
               ')'
             );
@@ -462,6 +471,6 @@ function drupalgap_render_page(output) {
     // return it.
     return content;
   }
-  catch (error) { console.log('drupalgap_render_page - ' + error); }
+  catch (error) { console.log('drupalgap_render - ' + error); }
 }
 
