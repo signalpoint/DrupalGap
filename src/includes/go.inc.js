@@ -5,7 +5,8 @@ phonecatControllers.directive("drupalgapGotoDirective", function($compile) {
       link: function(scope, element) {
 
         // Build an Angular route 'template' string by rendering each region
-        // from the DrupalGap theme onto it.
+        // from the DrupalGap theme onto it. Keep in mind the actual page's
+        // content is rendered via the "main" block in the system module.
         var template = '';
         for (var index in drupalgap.theme.regions) {
           if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
