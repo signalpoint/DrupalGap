@@ -5,10 +5,8 @@
 var phonecatApp = angular.module('phonecatApp', [
     'ngRoute',
     'ngSanitize',
-    'phonecatAnimations',
     'phonecatControllers',
-    'phonecatFilters',
-    'phonecatServices'
+    'jdrupal-ng'
 ]).config(function() {
 
     // @WARNING only providers available here, no scope available here...
@@ -48,6 +46,15 @@ phonecatApp.config(['$routeProvider',
     
     dpm('phonecatApp.config()');
     console.log(arguments);
+    
+    // @TODO this should be included via index.html as a script.
+    // @WARNING to get this file navigate to ?q=drupalgap/connect in your
+    // browser then save it at the path mentioned below.
+    drupalgap_service_resource_extract_results({
+        service: 'system',
+        resource: 'connect',
+        data: JSON.parse(drupalgap_file_get_contents('js/drupalgap_connect.json'))
+    });
     
     // Attach hoom_menu() paths to Angular's routeProvider.
     for (var path in drupalgap.menu_links) {
