@@ -281,7 +281,7 @@ function drupalgap_bootstrap($scope) {
     drupalgap_load_modules($scope);
     drupalgap_load_theme();
     drupalgap_load_blocks();
-    //drupalgap_load_locales();
+    drupalgap_load_locales();
     menu_router_build();
     drupalgap_menus_load();
     //drupalgap_theme_registry_build();
