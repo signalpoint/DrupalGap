@@ -261,7 +261,7 @@ function user_theme() {
 function user_view(uid) {
   try {
     if (uid) {
-      return _drupalgap_entity_page_container_model('user', uid, 'view');
+      return _drupalgap_entity_view('user', uid, 'view');
     }
     else { console.log('user_view - No user id provided!'); }
   }
