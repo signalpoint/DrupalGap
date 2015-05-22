@@ -63,11 +63,8 @@ function system_block_view(delta) {
       case 'main':
         // This is the main content block, it is required to be in a theme's
         // region for the content of a page to show up (nodes, users, taxonomy,
-        // comments, etc). Depending on the menu link router, we need to route
-        // this through the appropriate template files and functions.
-        //return drupalgap_render_page();
-        return drupalgap_render_page(menu_execute_active_handler());
-        //return arguments[2].content; // arguments[2] = $scope
+        // comments, etc).
+        return drupalgap_render(menu_execute_active_handler());
         break;
       case 'messages':
         // If there are any messages waiting to be displayed, render them, then
