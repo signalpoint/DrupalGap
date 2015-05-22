@@ -1,4 +1,41 @@
 /**
+ *
+ */
+function _drupalgap_entity_view(entity_type, entity_id, mode) {
+  try {
+    var attrs = drupalgap_attributes({
+        'ng-controller': '_drupalgap_entity_view_controller',
+        entity_type: entity_type,
+        entity_id: entity_id
+    });
+    return '<' + entity_type + ' ' + attrs + '>' +
+      drupalgap.views.templates[entity_type]['page'].template +
+    '</' + entity_type + '>';
+  }
+  catch (error) { console.log('_drupalgap_entity_view - ' + error); }
+}
+
+phonecatControllers.controller(
+  '_drupalgap_entity_view_controller',
+  [ '$scope', '$element', '$http', 'jdrupal',
+  function($scope, $element, $http, jdrupal) {
+    try {
+
+      dpm('_drupalgap_entity_view_controller');
+      console.log(arguments);
+
+      var entity_type = $element.attr('entity_type');
+      jdrupal[entity_type + '_load'](arg(1)).then(
+        function(result) { $scope[entity_type] = result.data; }
+      );
+
+    }
+    catch (error) { console.log('_drupalgap_entity_view_controller - ' + error); }
+  }]);
+
+
+
+/**
  * Given an entity type, bundle name, form and entity, this will add the
  * entity's core fields to the form via the DrupalGap forms api.
  * @param {String} entity_type
@@ -119,14 +156,19 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
   }
 }
 
+
+
 /**
  * Given an entity, this will render the content of the entity and place it in
  * the entity JSON object as the 'content' property.
  * @param {String} entity_type
  * @param {Object} entity
+ * @deprecated
  */
 function drupalgap_entity_render_content(entity_type, entity) {
   try {
+    console.log('DEPRECATED - drupalgap_entity_render_content');
+    return;
     entity.content = '';
     // Render each field on the entity, using the default display. The fields
     // need to be appended according to their weight, so we'll keep track of
@@ -844,40 +886,6 @@ function drupalgap_entity_get_primary_key(entity_type) {
     return entity_primary_key(entity_type);
   }
   catch (error) { console.log('drupalgap_entity_get_primary_key - ' + error); }
-}
-
-phonecatControllers.controller(
-  '_drupalgap_entity_page_container_inject_controller',
-  [ '$scope', '$element', '$http', 'jdrupal',
-  function($scope, $element, $http, jdrupal) {
-    try {
-
-      dpm('_drupalgap_entity_page_container_inject_controller');
-      console.log(arguments);
-
-      var entity_type = $element.attr('entity_type');
-      jdrupal[entity_type + '_load'](arg(1)).then(
-        function(result) { $scope[entity_type] = result.data; }
-      );
-
-    }
-    catch (error) { console.log('_drupalgap_entity_page_container_inject_controller - ' + error); }
-  }]);
-
-/**
- *
- */
-function _drupalgap_entity_page_container_model(entity_type, entity_id, mode) {
-  try {
-    var build = '{{' + entity_type + '.' + entity_primary_key_title(entity_type) + '}}';
-    var attrs = drupalgap_attributes({
-        'ng-controller': '_drupalgap_entity_page_container_inject_controller',
-        entity_type: entity_type,
-        entity_id: entity_id
-    });
-    return '<' + entity_type + ' ' + attrs + '>' + build + '</' + entity_type + '>';
-  }
-  catch (error) { console.log('_drupalgap_entity_page_container_model - ' + error); }
 }
 
 /**
