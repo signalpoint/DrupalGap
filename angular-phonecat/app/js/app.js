@@ -8,11 +8,134 @@ var phonecatApp = angular.module('phonecatApp', [
     'phonecatControllers',
     'jdrupal-ng'
 ]).config(function() {
+  
+  dpm('config() - initializing...');
 
-    // @WARNING only providers available here, no scope available here...
+  // @WARNING only providers available here, no scope available here...
 
-    drupalgap_onload();
+  drupalgap_onload();
+    
+  // @TODO this should be included via index.html as a script.
+  // @WARNING to get this file navigate to ?q=drupalgap/connect in your
+  // browser then save it at the path mentioned below.
+  // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated because of its
+  // detrimental effects to the end user's experience.
+  drupalgap_service_resource_extract_results({
+      service: 'system',
+      resource: 'connect',
+      data: JSON.parse(drupalgap_file_get_contents('js/drupalgap_connect.json'))
+  });
 
+}).config(function() {
+  
+  dpm('config() - building entity views...');
+  
+  // For each entity type...
+  for (var entity_type in drupalgap.field_info_instances) {
+    if (!drupalgap.field_info_instances.hasOwnProperty(entity_type)) { continue; }
+    var entity_bundles = drupalgap.field_info_instances[entity_type];
+    //dpm(entity_type);
+    //console.log(entity_bundles);
+    
+    drupalgap.views.templates[entity_type] = {};
+    
+    // For each bundle on the entity type...
+    for (var bundle in entity_bundles) {
+      if (!entity_bundles.hasOwnProperty(bundle)) { continue; }
+      //dpm(bundle);
+      
+      // Grab the field instances for this entity type and bundle.
+      var instances = entity_bundles[bundle];
+      //console.log(instances);
+
+      // If there are no fields on the bundle, skip it.
+      if (typeof instances !== 'object') {
+        dpm('skipping ' + entity_type + '/' + bundle + ', no fields on it...');
+        continue;
+      }
+      
+      drupalgap.views.templates[entity_type][bundle] = {
+        template: '{{' + entity_type + '.' + entity_primary_key_title(entity_type) + '}}'
+      };
+      
+      var field_weights = {};
+      var field_displays = {};
+      
+      // For each field on the instance...
+      for (var field_name in instances) {
+        if (!instances.hasOwnProperty(field_name)) { continue; }
+        var field = instances[field_name];
+        //console.log(field);
+        
+        // Determine which display mode to use. The default mode will be used
+        // if the drupalgap display mode is not present.
+        if (!field.display) { break; }
+        var display = field.display['default'];
+        if (field.display['drupalgap']) {
+          display = field.display['drupalgap'];
+          // If a module isn't listed on the drupalgap display, use the default
+          // display's module.
+          if (
+            typeof display.module === 'undefined' &&
+            typeof field.display['default'].module !== 'undefined'
+          ) { display.module = field.display['default'].module; }
+        }
+        
+        // Skip hidden fields.
+        if (display.type == 'hidden') { continue; }
+        
+        // Save the field display and weight.
+        field_displays[field_name] = display;
+        field_weights[field_name] = display.weight;
+        
+      }
+      
+      //dpm('field_weights');
+      //console.log(field_weights);
+      //dpm('field_displays');
+      //console.log(field_displays);
+      
+      // Extract the field weights and sort them.
+      var extracted_weights = [];
+      for (var field_name in field_weights) {
+          if (!field_weights.hasOwnProperty(field_name)) { continue; }
+          var weight = field_weights[field_name];
+          extracted_weights.push(weight);
+      }
+      extracted_weights.sort(function(a, b) { return a - b; });
+
+      // For each sorted weight, locate the field with the corresponding weight,
+      // then render it's field content.
+      var completed_fields = [];
+      for (var weight_index in extracted_weights) {
+          if (!extracted_weights.hasOwnProperty(weight_index)) { continue; }
+          var target_weight = extracted_weights[weight_index];
+          for (var field_name in field_weights) {
+              if (!field_weights.hasOwnProperty(field_name)) { continue; }
+              var weight = field_weights[field_name];
+              if (target_weight == weight) {
+                if (completed_fields.indexOf(field_name) == -1) {
+                  completed_fields.push(field_name);
+                  drupalgap.views.templates[entity_type][bundle].template += '<p>' + field_name + '</p>';
+                  /*entity.content += drupalgap_entity_render_field(
+                    entity_type,
+                    entity,
+                    field_name,
+                    field_info[field_name],
+                    field_displays[field_name]
+                  );*/
+                  break;
+                }
+              }
+          }
+      }
+      
+      //console.log(completed_fields);
+
+    }
+
+  }
+  
 }).run(['$rootScope', '$routeParams', '$location', function($rootScope, $routeParams, $location) {
 
       dpm('phonecatApp.run()');
@@ -40,32 +163,22 @@ var phonecatApp = angular.module('phonecatApp', [
       });
   }]);
 
+// JDRUPAL MODULE
 angular.module('jdrupal-ng').config(function($provide) {
+    // @TODO when jdrupal becomes an angular module, this snippet of code can be
+    // used by other angular apps to config jdrupal
     $provide.value('jdrupalSettings', {
-        site_path: 'http://localhost/drupal-7',
-        endpoint: 'drupalgap'
+        site_path: Drupal.settings.site_path,
+        endpoint: Drupal.settings.endpoint
     });
-    console.log('configure that beast from the app!');
-    console.log(arguments);
 });
 
-  // @TODO attach this directly to the object we're building above.
+// CONFIGURE HOOK_MENU() ITEMS AS ANGULAR ROUTES
 phonecatApp.config(['$routeProvider',
   function($routeProvider) {
     
-    dpm('phonecatApp.config()');
-    console.log(arguments);
-    
-    // @TODO this should be included via index.html as a script.
-    // @WARNING to get this file navigate to ?q=drupalgap/connect in your
-    // browser then save it at the path mentioned below.
-    // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated because of its
-    // detrimental effects to the end user's experience.
-    drupalgap_service_resource_extract_results({
-        service: 'system',
-        resource: 'connect',
-        data: JSON.parse(drupalgap_file_get_contents('js/drupalgap_connect.json'))
-    });
+    dpm('config() - route provider...');
+    //console.log(arguments);
     
     // Attach hoom_menu() paths to Angular's routeProvider.
     for (var path in drupalgap.menu_links) {
