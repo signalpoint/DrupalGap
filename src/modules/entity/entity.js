@@ -846,17 +846,18 @@ function drupalgap_entity_get_primary_key(entity_type) {
   catch (error) { console.log('drupalgap_entity_get_primary_key - ' + error); }
 }
 
-phonecatControllers.controller('_drupalgap_entity_page_container_inject_controller', ['$scope', '$http', 'jdrupal',
-  function($scope, $http, jdrupal) {
+phonecatControllers.controller(
+  '_drupalgap_entity_page_container_inject_controller',
+  [ '$scope', '$element', '$http', 'jdrupal',
+  function($scope, $element, $http, jdrupal) {
     try {
 
       dpm('_drupalgap_entity_page_container_inject_controller');
       console.log(arguments);
-      
-      jdrupal.node_load(arg(1)).then(
-        function(result) {
-          $scope.node = result.data;
-        }
+
+      var entity_type = $element.attr('entity_type');
+      jdrupal[entity_type + '_load'](arg(1)).then(
+        function(result) { $scope[entity_type] = result.data; }
       );
 
     }
@@ -868,7 +869,13 @@ phonecatControllers.controller('_drupalgap_entity_page_container_inject_controll
  */
 function _drupalgap_entity_page_container_model(entity_type, entity_id, mode) {
   try {
-    return '<' + entity_type + ' ng-controller="_drupalgap_entity_page_container_inject_controller">{{node.title}}</' + entity_type + '>';
+    var build = '{{' + entity_type + '.' + entity_primary_key_title(entity_type) + '}}';
+    var attrs = drupalgap_attributes({
+        'ng-controller': '_drupalgap_entity_page_container_inject_controller',
+        entity_type: entity_type,
+        entity_id: entity_id
+    });
+    return '<' + entity_type + ' ' + attrs + '>' + build + '</' + entity_type + '>';
   }
   catch (error) { console.log('_drupalgap_entity_page_container_model - ' + error); }
 }
