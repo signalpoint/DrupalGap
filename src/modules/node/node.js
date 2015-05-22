@@ -231,11 +231,7 @@ function node_page_pageshow() {
 function node_page_view(nid) {
   try {
     if (nid) {
-      return _drupalgap_entity_page_container_model('node', nid, 'view');
-      /*var content = {
-        container: _drupalgap_entity_page_container('node', nid, 'view')
-      };
-      return content;*/
+      return _drupalgap_entity_view('node', nid, 'view');
     }
     else { drupalgap_error(t('No node id provided!')); }
   }
