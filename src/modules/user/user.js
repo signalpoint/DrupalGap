@@ -140,7 +140,7 @@ function user_menu() {
         'access_callback': 'user_register_access',
         options: {reloadPage: true}
       },
-      /*'user/%': {
+      'user/:uid': {
         title: t('My account'),
         title_callback: 'user_view_title',
         title_arguments: [1],
@@ -148,12 +148,12 @@ function user_menu() {
         pageshow: 'user_view_pageshow',
         page_arguments: [1]
       },
-      'user/%/view': {
+      'user/:uid/view': {
         'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
-      'user/%/edit': {
+      'user/:uid/edit': {
         'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
@@ -163,7 +163,7 @@ function user_menu() {
         'weight': 0,
         'type': 'MENU_LOCAL_TASK',
         options: {reloadPage: true}
-      },
+      },/*
       'user-listing': {
         'title': t('Users'),
         'page_callback': 'user_listing',
@@ -261,10 +261,7 @@ function user_theme() {
 function user_view(uid) {
   try {
     if (uid) {
-      var content = {
-        container: _drupalgap_entity_page_container('user', uid, 'view')
-      };
-      return content;
+      return _drupalgap_entity_page_container_model('user', uid, 'view');
     }
     else { console.log('user_view - No user id provided!'); }
   }
