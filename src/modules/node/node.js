@@ -150,7 +150,7 @@ function node_menu() {
         page_arguments: [2],
         options: { reloadPage: true }
       },
-      'node/%': {
+      'node/:nid': {
         'title': t('Node'),
         'page_callback': 'node_page_view',
         'page_arguments': [1],
@@ -158,12 +158,12 @@ function node_menu() {
         'title_callback': 'node_page_title',
         'title_arguments': [1]
       },
-      'node/%/view': {
+      'node/:nid/view': {
         'title': t('View'),
         'type': 'MENU_DEFAULT_LOCAL_TASK',
         'weight': -10
       },
-      'node/%/edit': {
+      'node/:nid/edit': {
         'title': t('Edit'),
         'page_callback': 'entity_page_edit',
         'pageshow': 'entity_page_edit_pageshow',
