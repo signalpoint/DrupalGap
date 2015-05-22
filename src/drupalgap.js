@@ -735,15 +735,10 @@ function drupalgap_empty(value) {
  */
 function drupalgap_file_exists(path) {
   try {
-    var file_exists = false;
-    jQuery.ajax({
-      async: false,
-      type: 'HEAD',
-      url: path,
-      success: function() { file_exists = true; },
-      error: function(xhr, textStatus, errorThrown) { }
-    });
-    return file_exists;
+    var http = new XMLHttpRequest();
+    http.open('HEAD', path, false);
+    http.send();
+    return http.status!=404;
   }
   catch (error) { console.log('drupalgap_file_exists - ' + error); }
 }
@@ -1454,16 +1449,6 @@ function drupalgap_services_request_pre_postprocess_alter(options, result) {
   try {
     // Extract drupalgap system connect service resource results.
     if (options.service == 'system' && options.resource == 'connect') {
-      drupalgap.remote_addr = result.remote_addr;
-      drupalgap.entity_info = result.entity_info;
-      drupalgap.field_info_instances = result.field_info_instances;
-      drupalgap.field_info_fields = result.field_info_fields;
-      drupalgap.field_info_extra_fields = result.field_info_extra_fields;
-      // @TODO uncomment once 7.x-2.x is more stable
-      /*drupalgap.taxonomy_vocabularies =
-        drupalgap_taxonomy_vocabularies_extract(
-          result.taxonomy_vocabularies
-        );*/
       drupalgap_service_resource_extract_results({
         service: options.service,
         resource: options.resource,
