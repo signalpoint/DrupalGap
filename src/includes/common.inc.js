@@ -154,9 +154,9 @@ function drupalgap_get_bundle(entity_type, entity) {
     var bundle = null;
     switch (entity_type) {
       case 'node': bundle = entity.type; break;
+      case 'user': bundle = 'user'; break;
       case 'comment':
       case 'file':
-      case 'user':
       case 'taxonomy_vocabulary':
       case 'taxonomy_term':
         // These entity types don't have a bundle.
