@@ -210,9 +210,10 @@ function _drupalgap_form_render_element(form, element) {
       items = {0: element};
       module = drupalgap_form_element_get_module_name(element.type);
     }
+    
+    // Do we have a hook_field_widget_form()?
     if (module) {
       field_widget_form_function_name = module + '_field_widget_form';
-
       if (drupalgap_function_exists(field_widget_form_function_name)) {
         field_widget_form_function = window[field_widget_form_function_name];
       }
@@ -296,10 +297,20 @@ function _drupalgap_form_render_element(form, element) {
           variables.attributes.value = item.value;
         }
 
+        // HOOK_FIELD_WIDGET_FORM VIEW
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
         if (field_widget_form_function) {
-          field_widget_form_function.apply(
+          var attrs = drupalgap_attributes({
+            'ng-controller': 'hook_field_widget_form',
+            field_name: name,
+            field_widget_form: field_widget_form_function_name,
+            delta: delta,
+            language: language,
+            'ng-init': 'init(variables)'
+          });
+          html += '<div ' + attrs + '>{{' + name + '}}</div>';
+          /*field_widget_form_function.apply(
             null, [
               form,
               null,
@@ -314,25 +325,28 @@ function _drupalgap_form_render_element(form, element) {
           // @UPDATE - did the recursive extend fix this?
           item = $.extend(true, item, items[delta]);
           // If the item type got lost, replace it.
-          if (!item.type && element.type) { item.type = element.type; }
+          if (!item.type && element.type) { item.type = element.type; }*/
         }
 
         // Merge element attributes into the variables object.
-        if (item.options && item.options.attributes) {
+        /*if (item.options && item.options.attributes) {
           variables.attributes = $.extend(
             true,
             variables.attributes,
             item.options.attributes
           );
-        }
+        }*/
 
-        // Render the element item, unless it wasn't supported.
-        item_html = _drupalgap_form_render_element_item(
-          form,
-          element,
-          variables,
-          item
-        );
+        // Render only "non field" element items here, any field items will be
+        // taken care of by the hook_field_widget_form controller..
+        if (!field_widget_form_function) {
+          item_html = _drupalgap_form_render_element_item(
+            form,
+            element,
+            variables,
+            item
+          );
+        }
         if (typeof item_html === 'undefined') {
           render_item = false;
           break;
