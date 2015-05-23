@@ -4,36 +4,51 @@
 function _drupalgap_entity_view(entity_type, entity_id, mode) {
   try {
     var attrs = drupalgap_attributes({
-        'ng-controller': '_drupalgap_entity_view_controller',
+        'drupalgap-entity-directive': 'entity_load.promise', // => drupalgapEntityDirective
         entity_type: entity_type,
-        entity_id: entity_id
+        entity_id: entity_id,
+        bundle: '{{bundle}}'
     });
-    return '<' + entity_type + ' ' + attrs + '>' +
-      drupalgap.views.templates[entity_type]['page'].template +
-    '</' + entity_type + '>';
+    return '<' + entity_type + ' ' + attrs + '><div ng-model="' + entity_type + '">{{build}}</div></' + entity_type + '>';
   }
   catch (error) { console.log('_drupalgap_entity_view - ' + error); }
 }
 
-phonecatControllers.controller(
-  '_drupalgap_entity_view_controller',
-  [ '$scope', '$element', '$http', 'jdrupal',
-  function($scope, $element, $http, jdrupal) {
-    try {
-
-      dpm('_drupalgap_entity_view_controller');
-      console.log(arguments);
-
-      var entity_type = $element.attr('entity_type');
-      jdrupal[entity_type + '_load'](arg(1)).then(
-        function(result) { $scope[entity_type] = result.data; }
-      );
-
-    }
-    catch (error) { console.log('_drupalgap_entity_view_controller - ' + error); }
-  }]);
-
-
+phonecatControllers.directive("drupalgapEntityDirective", function($compile) {
+    return {
+      
+      controller: function($scope, $element, $http, jdrupal) {
+        dpm('drupalgapEntityDirective - controller');
+        console.log(arguments);
+        
+        var entity_type = $element.attr('entity_type');
+        dpm(entity_type);
+        
+        $scope.entity_type = entity_type;
+        $scope.entity_load = {
+          promise: jdrupal[entity_type + '_load'](arg(1))
+        };
+        
+        console.log($scope.entity);
+        
+      },
+      scope: { promise: '=drupalgapEntityDirective' },
+      replace: true,
+      link: function (scope, elem, attrs) {
+        dpm('drupalgapEntityDirective - link');
+        console.log(arguments);
+          scope.entity_load.promise.success(function (entity) {
+              
+              scope.$parent.bundle = entity.type;
+              scope.node = entity;
+              
+              var html = drupalgap.views.templates[scope.entity_type][entity.type].template;
+              var e = $compile(html)(scope);
+              elem.replaceWith(e);
+          });
+      }
+    };
+});
 
 /**
  * Given an entity type, bundle name, form and entity, this will add the
