@@ -127,19 +127,90 @@ phonecatControllers.controller('hook_field_widget_form',
     try {
 
       dpm('hook_field_widget_form');
-      //console.log(arguments);
+      console.log(arguments);
+      
+      $scope.init = function(variables) {
+        $scope.variables = variables;
+      }
       
       var entity_type = $scope.$parent.entity_type;
       var entity = $scope.$parent[entity_type];
       var bundle = drupalgap_get_bundle(entity_type, entity);
-      var form = $scope.$parent.form;
+      var form = $scope.$parent.$parent.form;
+      console.log(form);
       var field_name = $element.attr('field_name');
+      var field_widget_form = $element.attr('field_widget_form');
+      var delta = $element.attr('delta');
+      var language = $element.attr('language');
       
       //console.log(entity_type);
       //console.log(entity);
       //console.log(bundle);
       //console.log(form);
       //console.log(field_name);
+      
+      // Invoke hook_field_widget_form().
+      var fn = window[field_widget_form];
+      fn.apply(
+        null, [
+          form,
+          null,
+          form.elements[field_name].field_info_field,
+          form.elements[field_name].field_info_instance,
+          language,
+          form.elements[field_name][language],
+          delta,
+          form.elements[field_name]
+      ]);
+      
+      // @TODO - sometimes an item gets merged without a type here, why?
+      // @UPDATE - did the recursive extend fix this?
+      /*form.elements[field_name][language][delta] =
+        $.extend(
+          true,
+          form.elements[field_name][language],
+          form.elements[field_name][language][delta]
+        );
+      // If the item type got lost, replace it.
+      if (!form.elements[field_name][language.type && form.elements[field_name].type) {
+        form.elements[field_name][language.type = form.elements[field_name].type;
+      }*/
+      
+      // Merge element attributes into the variables object.
+      if (
+        form.elements[field_name][language][delta].options &&
+        form.elements[field_name][language][delta].options.attributes
+      ) {
+        variables.attributes = $.extend(
+          true,
+          variables.attributes,
+          form.elements[field_name][language][delta].options.attributes
+        );
+      }
+      
+      // Render the element into the scope.
+      $scope[field_name] = _drupalgap_form_render_element_item(
+        form,
+        form.elements[field_name],
+        variables,
+        form.elements[field_name][language][delta]
+      );
+      
+      /*
+      // @TODO - sometimes an item gets merged without a type here, why?
+      // @UPDATE - did the recursive extend fix this?
+      item = $.extend(true, item, items[delta]);
+      // If the item type got lost, replace it.
+      if (!item.type && element.type) { item.type = element.type; }
+      */
+      
+      
+      
+      return;
+      
+      
+      
+      
       
       // Load the field instance.
       var field = drupalgap_field_info_instance(entity_type, field_name, bundle);
@@ -338,8 +409,7 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
 function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
   form, entity) {
   try {
-    console.log('DEPRECATED - drupalgap_field_info_instances_add_to_form()');
-    return;
+    
     // Grab the field info instances for this entity type and bundle.
     var fields = drupalgap_field_info_instances(entity_type, bundle);
     // If there is no bundle, pull the fields out of the wrapper.
@@ -353,6 +423,14 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
     if (fields) {
       for (var name in fields) {
         if (!fields.hasOwnProperty(name)) { continue; }
+        
+        
+        
+        
+        
+        
+        
+        
         var field = fields[name];
         // The user registration form is a special case, in that we only want
         // to place fields that are set to display on the user registration
