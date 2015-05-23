@@ -4,12 +4,15 @@
 function _drupalgap_entity_view(entity_type, entity_id, mode) {
   try {
     var attrs = drupalgap_attributes({
-        'drupalgap-entity-directive': 'entity_load.promise', // => drupalgapEntityDirective
+        'drupalgap-entity-directive': 'entity_load.promise', // ===> drupalgapEntityDirective
         entity_type: entity_type,
         entity_id: entity_id,
-        bundle: '{{bundle}}'
+        bundle: '{{bundle}}',
+        mode: mode
     });
-    return '<' + entity_type + ' ' + attrs + '><div ng-model="' + entity_type + '">{{build}}</div></' + entity_type + '>';
+    return '<' + entity_type + ' ' + attrs + '>' +
+      '<div ng-model="' + entity_type + '">{{build}}</div>' +
+    '</' + entity_type + '>';
   }
   catch (error) { console.log('_drupalgap_entity_view - ' + error); }
 }
@@ -19,36 +22,90 @@ phonecatControllers.directive("drupalgapEntityDirective", function($compile) {
       
       controller: function($scope, $element, $http, jdrupal) {
         dpm('drupalgapEntityDirective - controller');
-        console.log(arguments);
+        //console.log(arguments);
         
+        // Extract the entity type and place it into the scope, then load the
+        // entity from Drupal and then continue with the "promise" success
+        // handler when the entity comes back.
+        var mode = $element.attr('mode');
         var entity_type = $element.attr('entity_type');
-        dpm(entity_type);
-        
+        $scope.mode = mode;
         $scope.entity_type = entity_type;
         $scope.entity_load = {
           promise: jdrupal[entity_type + '_load'](arg(1))
         };
-        
-        console.log($scope.entity);
         
       },
       scope: { promise: '=drupalgapEntityDirective' },
       replace: true,
       link: function (scope, elem, attrs) {
         dpm('drupalgapEntityDirective - link');
-        console.log(arguments);
+        //console.log(arguments);
           scope.entity_load.promise.success(function (entity) {
+
+              // Extract the entity type and bundle, and then set the bundle on
+              // the parent scope.
+              var mode = scope.mode;
+              var entity_type = scope.entity_type;
+              var bundle = drupalgap_get_bundle(entity_type, entity);
+              scope.$parent.bundle = bundle;
+
+              // Set the view's ng-model equal to the entity JSON.
+              scope[entity_type] = entity;
               
-              scope.$parent.bundle = entity.type;
-              scope.node = entity;
-              
-              var html = drupalgap.views.templates[scope.entity_type][entity.type].template;
+              // Add the form to the scope in edit mode.
+              if (mode == 'edit') {
+                var form_id = entity_type + '_edit';
+                //scope['form'] = drupalgap_get_form(form_id, entity);
+                scope['form'] = drupalgap_form_load(form_id, entity_type, entity[entity_primary_key(entity_type)]);
+              }
+
+              // Grab the template for the view, compile it with the scope, then
+              // replace the element "build".
+              var html = drupalgap.views.templates[entity_type][bundle][mode].template;
               var e = $compile(html)(scope);
               elem.replaceWith(e);
+
           });
       }
     };
 });
+
+/**
+ * The page callback for entity edit forms.
+ * @param {String} form_id
+ * @param {String} entity_type
+ * @param {Number} entity_id
+ * @return {Object}
+ */
+function entity_page_edit(form_id, entity_type, entity_id) {
+  try {
+    return _drupalgap_entity_view(entity_type, entity_id, 'edit');
+  }
+  catch (error) { console.log('entity_page_edit - ' + error); }
+}
+
+/**
+ * The pageshow callback for entity edit forms.
+ * @param {String} form_id
+ * @param {String} entity_type
+ * @param {Number} entity_id
+ */
+function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
+  try {
+    entity_load(entity_type, entity_id, {
+        success: function(entity) {
+          _drupalgap_entity_page_container_inject(
+            entity_type,
+            entity_id,
+            'edit',
+            drupalgap_get_form(form_id, entity)
+          );
+        }
+    });
+  }
+  catch (error) { console.log('entity_page_edit_pageshow - ' + error); }
+}
 
 /**
  * Given an entity type, bundle name, form and entity, this will add the
@@ -277,10 +334,13 @@ function drupalgap_entity_render_content(entity_type, entity) {
  * @param {Object} field
  * @param {*} display
  * @return {String}
+ * @deprecated
  */
 function drupalgap_entity_render_field(entity_type, entity, field_name,
   field, display) {
   try {
+    console.log('DEPRECATED - drupalgap_entity_render_field()');
+    return;
     var content = '';
     // Determine module that implements the hook_field_formatter_view,
     // then determine the hook's function name, then render the field content.
@@ -914,16 +974,8 @@ function drupalgap_entity_get_primary_key(entity_type) {
  */
 function _drupalgap_entity_page_container(entity_type, entity_id, mode) {
   try {
-    console.log('DEPRECATED: _drupalgap_entity_page_container() - use _drupalgap_entity_page_container_model() instead ');
-    return '';
-    var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
-    var attrs = {
-      id: id,
-      'class': entity_type + ' ' + entity_type + '-' + mode
-    };
-    return {
-      markup: '<div ' + drupalgap_attributes(attrs) + '></div>'
-    };
+    console.log('DEPRECATED: _drupalgap_entity_page_container() - use _drupalgap_entity_view() instead ');
+    return _drupalgap_entity_view(entity_type, entity_id, mode);
   }
   catch (error) { console.log('_drupalgap_entity_page_container - ' + error); }
 }
@@ -963,49 +1015,6 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
   catch (error) {
     console.log('_drupalgap_entity_page_container_inject - ' + error);
   }
-}
-
-/**
- * The page callback for entity edit forms.
- * @param {String} form_id
- * @param {String} entity_type
- * @param {Number} entity_id
- * @return {Object}
- */
-function entity_page_edit(form_id, entity_type, entity_id) {
-  try {
-    var content = {
-      container: _drupalgap_entity_page_container(
-        entity_type,
-        entity_id,
-        'edit'
-      )
-    };
-    return content;
-  }
-  catch (error) { console.log('entity_page_edit - ' + error); }
-}
-
-/**
- * The pageshow callback for entity edit forms.
- * @param {String} form_id
- * @param {String} entity_type
- * @param {Number} entity_id
- */
-function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
-  try {
-    entity_load(entity_type, entity_id, {
-        success: function(entity) {
-          _drupalgap_entity_page_container_inject(
-            entity_type,
-            entity_id,
-            'edit',
-            drupalgap_get_form(form_id, entity)
-          );
-        }
-    });
-  }
-  catch (error) { console.log('entity_page_edit_pageshow - ' + error); }
 }
 
 /**
