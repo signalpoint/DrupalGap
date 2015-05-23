@@ -40,7 +40,7 @@ phonecatControllers.directive("drupalgapEntityDirective", function($compile) {
       replace: true,
       link: function (scope, elem, attrs) {
         dpm('drupalgapEntityDirective - link');
-        //console.log(arguments);
+        console.log(arguments);
           scope.entity_load.promise.success(function (entity) {
 
               // Extract the entity type and bundle, and then set the bundle on
@@ -53,18 +53,31 @@ phonecatControllers.directive("drupalgapEntityDirective", function($compile) {
               // Set the view's ng-model equal to the entity JSON.
               scope[entity_type] = entity;
               
-              // Add the form to the scope in edit mode.
+              // Depending on the mode, use either the entity view or the entity
+              // edit form as the template.
+              // @TODO the "edit" template is now not used, remove it from
+              // drupalgap.views.templates.
+              var html = '';
               if (mode == 'edit') {
-                var form_id = entity_type + '_edit';
-                //scope['form'] = drupalgap_get_form(form_id, entity);
-                scope['form'] = drupalgap_form_load(form_id, entity_type, entity[entity_primary_key(entity_type)]);
+                // We mimic drupalgap_get_form() here because we need to place
+                // the form in the scope, and then manually render it.
+                var form = drupalgap_form_load.apply(
+                  null,
+                  Array.prototype.slice.call([entity_type + '_edit', entity])
+                );
+                scope.form = form;
+                scope.form_state = { values: entity };
+                //scope.$parent.form_state = { values: entity };
+                html = drupalgap_form_render(form);
               }
+              else {
+                html = drupalgap.views.templates[entity_type][bundle][mode].template
+              }
+              console.log(html);
 
-              // Grab the template for the view, compile it with the scope, then
-              // replace the element "build".
-              var html = drupalgap.views.templates[entity_type][bundle][mode].template;
-              var e = $compile(html)(scope);
-              elem.replaceWith(e);
+              // Compile the html with the scope, then replace the element's
+              // "{{build}}" with it.
+              elem.replaceWith($compile(html)(scope));
 
           });
       }
