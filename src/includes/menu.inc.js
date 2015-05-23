@@ -5,6 +5,7 @@
  */
 function menu_execute_active_handler() {
   try {
+    dpm('menu_execute_active_handler');
 
     // Determine the path and then grab the page id.
     var path = null;
@@ -24,6 +25,8 @@ function menu_execute_active_handler() {
     var function_name = drupalgap.menu_links[router_path].page_callback;
     var page_arguments = [];
     if (drupalgap_function_exists(function_name)) {
+      
+      dpm(function_name);
 
       // Grab the page callback function and get ready to build the html.
       var fn = window[function_name];
@@ -31,7 +34,6 @@ function menu_execute_active_handler() {
 
       // Are there any arguments to send to the page callback?
       if (drupalgap.menu_links[router_path].page_arguments) {
-        dpm('page_arguments for ' + function_name + '()');
         console.log(drupalgap.menu_links[router_path].page_arguments);
         // For each page argument, if the argument is an integer, grab the
         // corresponding arg(#), otherwise just push the arg onto the page
@@ -97,20 +99,11 @@ function menu_execute_active_handler() {
 
       // Add a pageshow handler for the page title.
       if (typeof content === 'object') {
-        var fn = window['_drupalgap_page_title_pageshow'];
+        /*var fn = window['_drupalgap_page_title_pageshow'];
         if (page_arguments.length > 0) {
           fn.apply(null, Array.prototype.slice.call(page_arguments));
         }
-        else { fn(); }
-        /*var options = {
-          'page_id': page_id,
-          'jqm_page_event': 'pageshow',
-          'jqm_page_event_callback': '',
-          'jqm_page_event_args': jqm_page_event_args
-        };
-        content['drupalgap_page_title_pageshow'] = {
-          markup: drupalgap_jqm_page_event_script_code(options)
-        };*/
+        else { fn(); }*/
       }
 
       // And finally return the content.
