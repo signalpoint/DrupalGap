@@ -3,6 +3,8 @@ phonecatControllers.directive("drupalgapGotoDirective", function($compile) {
     dpm('drupalgapGotoDirective');
     return {
       link: function(scope, element) {
+        
+        dpm('drupalgapGotoDirective - link...');
 
         // Build an Angular route 'template' string by rendering each region
         // from the DrupalGap theme onto it. Keep in mind the actual page's
@@ -29,11 +31,12 @@ phonecatControllers.controller('drupalgap_goto_controller', ['$scope', '$sce', '
     try {
 
       dpm('drupalgap_goto_controller');
-      console.log(arguments);
-      
-      // @TODO move this into run().
+      //console.log(arguments);
+
+      // Place the route into the global dg ng, we don't do this in run()
+      // because the route isn't fully initalized until this controller is
+      // invoked.
       drupalgap_ng_set('route', $route);
-      
 
     }
     catch (error) { console.log('drupalgap_goto_controller - ' + error); }
