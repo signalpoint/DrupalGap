@@ -1,10 +1,11 @@
 
 phonecatControllers.controller('drupalgapFormController', ['$scope',
   function($scope) {
-    // Create the form state and location on the scope, then attach the submit
-    // handler to the scope.
-    $scope.form_state = { values: { } };
-    $scope.submit = _drupalgap_form_submit;
+    dpm('drupalgapFormController');
+    // Create an empty form_state and attach the default submit handler to the
+    // scope, if they haven't been set already.
+    if (!$scope.form_state) { $scope.form_state = { values: { } } };
+    if (!$scope.submit) { $scope.submit = _drupalgap_form_submit; }
   }]);
 
 /**
