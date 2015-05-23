@@ -55,7 +55,7 @@ var phonecatApp = angular.module('phonecatApp', [
       }
       
       drupalgap.views.templates[entity_type][bundle] = {
-        template: '{{' + entity_type + '.' + entity_primary_key_title(entity_type) + '}}'
+        template: '<div ng-model="' + entity_type + '">{{' + entity_type + '.' + entity_primary_key_title(entity_type) + '}}</div>'
       };
       
       var field_weights = {};
