@@ -1,4 +1,318 @@
 /**
+ * Renders an input element for a form.
+ * @param {Object} form
+ * @param {Object} element
+ * @return {String}
+ */
+function _drupalgap_form_render_element(form, element) {
+  try {
+    var attrs = drupalgap_attributes({
+        //'ng-controller': 'drupalgapFormElementController',
+        'drupalgap-form-element-directive':'',
+        element_name: element.name
+    });
+    return '<div ' + attrs + '></div>';
+    //{{' + element.name + '}}
+  }
+  catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
+}
+
+phonecatControllers.directive("drupalgapFormElementDirective", function($compile) {
+    dpm('drupalgapFormElementDirective');
+    return {
+      link: function($scope, $element) {
+        
+        dpm('drupalgapFormElementDirective - link...');
+        console.log(arguments);
+        //return;
+        
+        var element = $scope.$parent.form.elements[$element.attr('element_name')];
+        console.log(element);
+        
+        var html = '';
+    
+        if (!element) { return html; }
+    
+        // Extract the element name.
+        var name = element.name;
+    
+        // Grab the language.
+        var language = language_default();
+        $scope.language = language;
+    
+        // We'll assume the element has no items (e.g. title, nid, vid, etc), unless
+        // we determine later that this element is a field, then it'll have items.
+        var items = false;
+    
+        // If this element is a field, extract the items from the language code and
+        // determine what module and hook will handle the items. If the element is
+        // not a field, just flatten it into a single item collection and determine
+        // which module handles this element type. Keep in mind not all the modules
+        // actually exist, and we've placed implementations into the field module.
+        var module = false;
+        var field_widget_form_function_name = false;
+        var field_widget_form_function = false;
+        if (element.is_field) {
+          items = element[language];
+          module = element.field_info_instance.widget.module;
+        }
+        else {
+          items = {0: element};
+          module = drupalgap_form_element_get_module_name(element.type);
+        }
+        
+        // Do we have a hook_field_widget_form()?
+        if (module) {
+          field_widget_form_function_name = module + '_field_widget_form';
+          if (drupalgap_function_exists(field_widget_form_function_name)) {
+            field_widget_form_function = window[field_widget_form_function_name];
+          }
+          else {
+            console.log(
+              'WARNING: _drupalgap_form_render_element() - ' +
+              field_widget_form_function_name +
+              '() does not exist for the "' + element.type + '" form element!'
+            );
+          }
+        }
+        
+        
+    
+        // If there were no items, just return.
+        if (!items || items.length == 0) { return html; }
+    
+        // Generate default variables. Set the angular model to the form state
+        // values for the element's name.
+        var variables = {
+          attributes: {
+            
+          }
+        };
+    
+        // Grab the info instance and info field for the field, then attach them
+        // both to the variables object so all theme functions will have access
+        // to that data.
+        variables.field_info_field = element.field_info_field;
+        variables.field_info_instance = element.field_info_instance;
+    
+        // Render the element item(s). Remember the final delta value for later.
+        var delta = 0;
+        var item_html = '';
+        var item_label = '';
+        var render_item = null;
+        for (var delta in items) {
+            if (!items.hasOwnProperty(delta)) { continue; }
+            var item = items[delta];
+            
+            // Build the ng-model for the element.
+            var model_path = "form_state.values['" + name + "']";
+            if (module) {
+              model_path += '.' + language + '[' + delta + '].value';
+              //model_path = name + '.' + language + '[' + delta + ']';
+              //model_path = name + '.foo';
+            }
+            variables.attributes['ng-model'] = model_path;
+            
+            // We'll render the item, unless we prove otherwise.
+            render_item = true;
+    
+            // Overwrite the variable's attributes id with the item's id.
+            variables.attributes.id = item.id;
+    
+            // Attach the item as the element onto variables.
+            variables.element = item;
+    
+            // Create an array for the item's children if it doesn't exist already.
+            // This is used by field widget forms to extend form elements.
+            if (!items[delta].children) { items[delta].children = []; }
+    
+            // Generate the label for field items on delta zero only. Keep in mind
+            // rendered labels, with an element title_placeholder set to true,
+            // will not be appended to the result html later.
+            if (element.is_field && delta == 0) {
+              item.title = element.title;
+              item_label = theme('form_element_label', {'element': item});
+            }
+    
+            // If the element's title is set to be a placeholder, set the
+            // placeholder attribute equal to the title on the current item, unless
+            // someone already set it. If it is a required element, mark it as such.
+            if (
+              delta == 0 && typeof element.title_placeholder !== 'undefined' &&
+              element.title_placeholder &&
+              typeof variables.attributes['placeholder'] === 'undefined'
+            ) {
+              var placeholder = element.title;
+              // @TODO show a better required marker for placeholders.
+              /*if (element.required) {
+                placeholder += ' ' + theme('form_required_marker', { });
+              }*/
+              variables.attributes['placeholder'] = placeholder;
+            }
+    
+            // If there wasn't a default value provided, set one. Then set the
+            // default value into the variables' attributes. Although, if we have an
+            // item value, just use that.
+            if (!item.default_value) { item.default_value = ''; }
+            variables.attributes.value = item.default_value;
+            if (typeof item.value !== 'undefined') {
+              variables.attributes.value = item.value;
+            }
+    
+            // HOOK_FIELD_WIDGET_FORM VIEW
+            // Call the hook_field_widget_form() if necessary. Merge any changes
+            // to the item back into this item.
+            if (field_widget_form_function) {
+              var attrs = drupalgap_attributes({
+                'hook-field-widget-form': '',
+                field_name: name,
+                field_widget_form: field_widget_form_function_name,
+                delta: delta,
+                language: language,
+                //'ng-init': 'init(variables)'
+              });
+              html += '<div ' + attrs + '>{{' + name + '}}</div>';
+              /*field_widget_form_function.apply(
+                null, [
+                  form,
+                  null,
+                  element.field_info_field,
+                  element.field_info_instance,
+                  language,
+                  items,
+                  delta,
+                  element
+              ]);
+              // @TODO - sometimes an item gets merged without a type here, why?
+              // @UPDATE - did the recursive extend fix this?
+              item = $.extend(true, item, items[delta]);
+              // If the item type got lost, replace it.
+              if (!item.type && element.type) { item.type = element.type; }*/
+            }
+    
+            // Merge element attributes into the variables object.
+            /*if (item.options && item.options.attributes) {
+              variables.attributes = $.extend(
+                true,
+                variables.attributes,
+                item.options.attributes
+              );
+            }*/
+    
+            // Render only "non field" element items here, any field items will be
+            // taken care of by the hook_field_widget_form controller..
+            if (!field_widget_form_function) {
+              item_html = _drupalgap_form_render_element_item(
+                $scope.$parent.$parent.form,
+                element,
+                variables,
+                item
+              );
+            }
+            if (typeof item_html === 'undefined') {
+              render_item = false;
+              break;
+            }
+        }
+        
+        // Set the variables onto the scope.
+        $scope.variables = variables;
+    
+        // Are we skipping the render of the item?
+        if (!render_item) { return ''; }
+    
+        // Show the 'Add another item' button on unlimited value fields.
+        /*if (element.field_info_field &&
+          element.field_info_field.cardinality == -1) {
+          var add_another_item_variables = {
+            text: 'Add another item',
+            attributes: {
+              'class': 'drupalgap_form_add_another_item',
+              onclick:
+                "javascript:_drupalgap_form_add_another_item('" +
+                  form.id + "', '" +
+                  element.name + "', " +
+                  delta +
+                ')'
+            }
+          };
+          html += theme('button', add_another_item_variables);
+        }*/
+    
+        // Is this element wrapped? We won't wrap hidden inputs by default, unless
+        // someone is overriding it.
+        var wrapped = true;
+        if (typeof element.wrapped !== 'undefined' && !element.wrapped) {
+          wrapped = false;
+        }
+        if (element.type == 'hidden') {
+          wrapped = false;
+          if (element.wrapped) { wrapped = true; }
+        }
+    
+        // If there is an element prefix, place it in the html.
+        if (element.prefix) { html += element.prefix; }
+    
+        // Open the element container.
+        var container_attributes = {
+          'class': drupalgap_form_get_element_container_class(name)
+        };
+        if (wrapped) {
+          html += '<div ' + drupalgap_attributes(container_attributes) + '>';
+        }
+    
+        // Add a label to the element, except submit and hidden elements. Any field
+        // labels have already been rendered, other element labels must be manually
+        // rendered here. Don't attach the label if the element's title_placeholder
+        // is set to true.
+        if (element.type != 'submit' && element.type != 'hidden') {
+          if (
+            typeof element.title_placeholder !== 'undefined' &&
+            element.title_placeholder
+          ) { /* Skip label for placeholders. */ }
+          else {
+            if (element.is_field) { html += item_label; }
+            else {
+              html += theme('form_element_label', {'element': element});
+            }
+          }
+        }
+    
+        // Add the item html if it isn't empty.
+        if (item_html != '') { html += item_html; }
+    
+        // Add element description.
+        if (element.description && element.type != 'hidden') {
+          html += '<div>' + t(element.description) + '</div>';
+        }
+    
+        // Close the element container.
+        if (wrapped) { html += '</div>'; }
+    
+        // If there is an element suffix, place it in the html.
+        if (element.suffix) { html += element.suffix; }
+        
+        // Compile the template for Angular and append it to the directive's
+        // html element.
+        var linkFn = $compile(html);
+        var content = linkFn($scope);
+        $element.append(content);
+
+      }
+    };
+});
+
+phonecatControllers.controller('drupalgapFormElementController', ['$scope', '$element', '$sce',
+  function($scope, $element, $sce) {
+
+    dpm('drupalgapFormElementController');
+    console.log(arguments);
+    
+    
+    
+  }]);
+
+/**
  * Given a form element, this will return true if access to the element is
  * permitted, false otherwise.
  * @param {Object} element
@@ -170,268 +484,6 @@ function _drupalgap_form_render_elements(form) {
     return content;
   }
   catch (error) { console.log('_drupalgap_form_render_elements - ' + error); }
-}
-
-/**
- * Renders an input element for a form.
- * @param {Object} form
- * @param {Object} element
- * @return {String}
- */
-function _drupalgap_form_render_element(form, element) {
-  try {
-    var html = '';
-
-    if (!element) { return html; }
-
-    // Extract the element name.
-    var name = element.name;
-
-    // Grab the language.
-    var language = language_default();
-
-    // We'll assume the element has no items (e.g. title, nid, vid, etc), unless
-    // we determine later that this element is a field, then it'll have items.
-    var items = false;
-
-    // If this element is a field, extract the items from the language code and
-    // determine what module and hook will handle the items. If the element is
-    // not a field, just flatten it into a single item collection and determine
-    // which module handles this element type. Keep in mind not all the modules
-    // actually exist, and we've placed implementations into the field module.
-    var module = false;
-    var field_widget_form_function_name = false;
-    var field_widget_form_function = false;
-    if (element.is_field) {
-      items = element[language];
-      module = element.field_info_instance.widget.module;
-    }
-    else {
-      items = {0: element};
-      module = drupalgap_form_element_get_module_name(element.type);
-    }
-    
-    // Do we have a hook_field_widget_form()?
-    if (module) {
-      field_widget_form_function_name = module + '_field_widget_form';
-      if (drupalgap_function_exists(field_widget_form_function_name)) {
-        field_widget_form_function = window[field_widget_form_function_name];
-      }
-      else {
-        console.log(
-          'WARNING: _drupalgap_form_render_element() - ' +
-          field_widget_form_function_name +
-          '() does not exist for the "' + element.type + '" form element!'
-        );
-      }
-    }
-
-    // If there were no items, just return.
-    if (!items || items.length == 0) { return html; }
-
-    // Generate default variables. Set the angular model to the form state
-    // values for the element's name.
-    var variables = {
-      attributes: {
-        'ng-model': "form_state.values['" + name + "']"
-      }
-    };
-
-    // Grab the info instance and info field for the field, then attach them
-    // both to the variables object so all theme functions will have access
-    // to that data.
-    variables.field_info_field = element.field_info_field;
-    variables.field_info_instance = element.field_info_instance;
-
-    // Render the element item(s). Remember the final delta value for later.
-    var delta = 0;
-    var item_html = '';
-    var item_label = '';
-    var render_item = null;
-    for (var delta in items) {
-        if (!items.hasOwnProperty(delta)) { continue; }
-        var item = items[delta];
-        // We'll render the item, unless we prove otherwise.
-        render_item = true;
-
-        // Overwrite the variable's attributes id with the item's id.
-        variables.attributes.id = item.id;
-
-        // Attach the item as the element onto variables.
-        variables.element = item;
-
-        // Create an array for the item's children if it doesn't exist already.
-        // This is used by field widget forms to extend form elements.
-        if (!items[delta].children) { items[delta].children = []; }
-
-        // Generate the label for field items on delta zero only. Keep in mind
-        // rendered labels, with an element title_placeholder set to true,
-        // will not be appended to the result html later.
-        if (element.is_field && delta == 0) {
-          item.title = element.title;
-          item_label = theme('form_element_label', {'element': item});
-        }
-
-        // If the element's title is set to be a placeholder, set the
-        // placeholder attribute equal to the title on the current item, unless
-        // someone already set it. If it is a required element, mark it as such.
-        if (
-          delta == 0 && typeof element.title_placeholder !== 'undefined' &&
-          element.title_placeholder &&
-          typeof variables.attributes['placeholder'] === 'undefined'
-        ) {
-          var placeholder = element.title;
-          // @TODO show a better required marker for placeholders.
-          /*if (element.required) {
-            placeholder += ' ' + theme('form_required_marker', { });
-          }*/
-          variables.attributes['placeholder'] = placeholder;
-        }
-
-        // If there wasn't a default value provided, set one. Then set the
-        // default value into the variables' attributes. Although, if we have an
-        // item value, just use that.
-        if (!item.default_value) { item.default_value = ''; }
-        variables.attributes.value = item.default_value;
-        if (typeof item.value !== 'undefined') {
-          variables.attributes.value = item.value;
-        }
-
-        // HOOK_FIELD_WIDGET_FORM VIEW
-        // Call the hook_field_widget_form() if necessary. Merge any changes
-        // to the item back into this item.
-        if (field_widget_form_function) {
-          var attrs = drupalgap_attributes({
-            'ng-controller': 'hook_field_widget_form',
-            field_name: name,
-            field_widget_form: field_widget_form_function_name,
-            delta: delta,
-            language: language,
-            'ng-init': 'init(variables)'
-          });
-          html += '<div ' + attrs + '>{{' + name + '}}</div>';
-          /*field_widget_form_function.apply(
-            null, [
-              form,
-              null,
-              element.field_info_field,
-              element.field_info_instance,
-              language,
-              items,
-              delta,
-              element
-          ]);
-          // @TODO - sometimes an item gets merged without a type here, why?
-          // @UPDATE - did the recursive extend fix this?
-          item = $.extend(true, item, items[delta]);
-          // If the item type got lost, replace it.
-          if (!item.type && element.type) { item.type = element.type; }*/
-        }
-
-        // Merge element attributes into the variables object.
-        /*if (item.options && item.options.attributes) {
-          variables.attributes = $.extend(
-            true,
-            variables.attributes,
-            item.options.attributes
-          );
-        }*/
-
-        // Render only "non field" element items here, any field items will be
-        // taken care of by the hook_field_widget_form controller..
-        if (!field_widget_form_function) {
-          item_html = _drupalgap_form_render_element_item(
-            form,
-            element,
-            variables,
-            item
-          );
-        }
-        if (typeof item_html === 'undefined') {
-          render_item = false;
-          break;
-        }
-    }
-
-    // Are we skipping the render of the item?
-    if (!render_item) { return ''; }
-
-    // Show the 'Add another item' button on unlimited value fields.
-    /*if (element.field_info_field &&
-      element.field_info_field.cardinality == -1) {
-      var add_another_item_variables = {
-        text: 'Add another item',
-        attributes: {
-          'class': 'drupalgap_form_add_another_item',
-          onclick:
-            "javascript:_drupalgap_form_add_another_item('" +
-              form.id + "', '" +
-              element.name + "', " +
-              delta +
-            ')'
-        }
-      };
-      html += theme('button', add_another_item_variables);
-    }*/
-
-    // Is this element wrapped? We won't wrap hidden inputs by default, unless
-    // someone is overriding it.
-    var wrapped = true;
-    if (typeof element.wrapped !== 'undefined' && !element.wrapped) {
-      wrapped = false;
-    }
-    if (element.type == 'hidden') {
-      wrapped = false;
-      if (element.wrapped) { wrapped = true; }
-    }
-
-    // If there is an element prefix, place it in the html.
-    if (element.prefix) { html += element.prefix; }
-
-    // Open the element container.
-    var container_attributes = {
-      'class': drupalgap_form_get_element_container_class(name)
-    };
-    if (wrapped) {
-      html += '<div ' + drupalgap_attributes(container_attributes) + '>';
-    }
-
-    // Add a label to the element, except submit and hidden elements. Any field
-    // labels have already been rendered, other element labels must be manually
-    // rendered here. Don't attach the label if the element's title_placeholder
-    // is set to true.
-    if (element.type != 'submit' && element.type != 'hidden') {
-      if (
-        typeof element.title_placeholder !== 'undefined' &&
-        element.title_placeholder
-      ) { /* Skip label for placeholders. */ }
-      else {
-        if (element.is_field) { html += item_label; }
-        else {
-          html += theme('form_element_label', {'element': element});
-        }
-      }
-    }
-
-    // Add the item html if it isn't empty.
-    if (item_html != '') { html += item_html; }
-
-    // Add element description.
-    if (element.description && element.type != 'hidden') {
-      html += '<div>' + t(element.description) + '</div>';
-    }
-
-    // Close the element container.
-    if (wrapped) { html += '</div>'; }
-
-    // If there is an element suffix, place it in the html.
-    if (element.suffix) { html += element.suffix; }
-
-    // Return the element html.
-    return html;
-
-  }
-  catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
 }
 
 /**
