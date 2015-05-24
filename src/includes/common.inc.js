@@ -14,6 +14,36 @@ function drupalgap_angular_get_route_path(route) {
 }
 
 /**
+ *
+ */
+function dg_ng_get(key) { return drupalgap_ng_get(key); }
+
+/**
+ *
+ */
+function dg_ng_set(key, value) { drupalgap_ng_set(key, value); }
+
+/**
+ *
+ */
+function drupalgap_ng_get(key) {
+  try {
+    return drupalgap.ng[key];
+  }
+  catch (error) { console.log('drupalgap_ng_get - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_ng_set(key, value) {
+  try {
+    drupalgap.ng[key] = value;
+  }
+  catch (error) { console.log('drupalgap_ng_set - ' + error); }
+}
+
+/**
  * Converts a JSON object to an XML/HTML tag attribute string and returns the
  * string.
  * @param {Object} attributes
@@ -269,26 +299,6 @@ function drupalgap_link_get_class(link) {
     return css_class;
   }
   catch (error) { console.log('drupalgap_link_get_class - ' + error); }
-}
-
-/**
- *
- */
-function drupalgap_ng_get(key) {
-  try {
-    return drupalgap.ng[key];
-  }
-  catch (error) { console.log('drupalgap_ng_get - ' + error); }
-}
-
-/**
- *
- */
-function drupalgap_ng_set(key, value) {
-  try {
-    drupalgap.ng[key] = value;
-  }
-  catch (error) { console.log('drupalgap_ng_set - ' + error); }
 }
 
 /**
