@@ -56,6 +56,7 @@ function drupalgap_init() {
       field_info_instances: {},
       field_info_extra_fields: {},
       form_errors: {},
+      form_id: null, /* holds the id of the last form loaded */
       form_states: [],
       loading: false, /* indicates if the loading message is shown or not */
       loader: 'loading', /* used to determine the jQM loader mode */
