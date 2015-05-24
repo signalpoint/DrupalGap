@@ -222,7 +222,11 @@ function drupalgap_form_load(form_id) {
         ' (' + form_id + ')';
       drupalgap_alert(error_msg);
     }
+
+    // Set the global form id and then return the form.
+    drupalgap.form_id = function_name;
     return form;
+
   }
   catch (error) { console.log('drupalgap_form_load - ' + error); }
 }
