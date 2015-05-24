@@ -26,7 +26,10 @@ phonecatControllers.directive("drupalgapFormElementDirective", function($compile
         console.log(arguments);
         //return;
         
-        var element = $scope.$parent.form.elements[$element.attr('element_name')];
+        var form = $scope.$parent.form;
+        if (!form) { form = drupalgap_form_local_storage_load(drupalgap.form_id); }
+        
+        var element = form.elements[$element.attr('element_name')];
         console.log(element);
         
         var html = '';
@@ -203,7 +206,7 @@ phonecatControllers.directive("drupalgapFormElementDirective", function($compile
             // taken care of by the hook_field_widget_form controller..
             if (!field_widget_form_function) {
               item_html = _drupalgap_form_render_element_item(
-                $scope.$parent.$parent.form,
+                form,
                 element,
                 variables,
                 item
@@ -497,6 +500,9 @@ function _drupalgap_form_render_elements(form) {
  */
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
+    dpm('_drupalgap_form_render_element_item');
+    console.log(arguments);
+    
     var html = '';
     // Depending on the element type, if necessary, adjust the variables and/or
     // theme function to be used, then render the element by calling its theme
