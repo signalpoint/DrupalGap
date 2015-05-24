@@ -78,6 +78,19 @@ function drupalgap_attributes(attributes) {
 }
 
 /**
+ * Given a string separated by commas or hyphens, this will return the camel
+ * case version of a string. For example, given "foo_bar" or "foo-bar", this
+ * will return "fooBar".
+ * @see http://stackoverflow.com/a/2970667/763010
+ */
+function drupalgap_get_camel_case(str) {
+  try {
+    return str.replace(/[-_]([a-z])/g, function (g) { return g[1].toUpperCase(); });
+  }
+  catch (error) { console.log('drupalgap_get_camel_case - ' + error); }
+}
+
+/**
  * Used by drupalgap_render_region to check the visibility settings on region
  * links and blocks. Just like Drupal Blocks, this function checks the
  * visibility rules specified by role or pages specified in data. Returns true
