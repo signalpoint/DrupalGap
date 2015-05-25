@@ -125,6 +125,7 @@ phonecatControllers.controller('hook_field_formatter_view',
 phonecatControllers.directive("hookFieldWidgetForm", function($compile) {
     dpm('hookFieldWidgetForm');
     return {
+      //transclude: true,
       link: function(scope, element) {
         
         dpm('hookFieldWidgetForm - link...');
@@ -148,6 +149,7 @@ phonecatControllers.directive("hookFieldWidgetForm", function($compile) {
       //console.log(field_name);
       
       // Invoke hook_field_widget_form().
+      dpm('invoking widget hook.');
       var fn = window[field_widget_form];
       fn.apply(
         null, [
@@ -160,8 +162,10 @@ phonecatControllers.directive("hookFieldWidgetForm", function($compile) {
           delta,
           form.elements[field_name]
       ]);
+      console.log(form);
       
       // Merge element attributes into the variables object.
+      dpm('merging elements');
       if (
         form.elements[field_name][language][delta].options &&
         form.elements[field_name][language][delta].options.attributes
@@ -173,10 +177,13 @@ phonecatControllers.directive("hookFieldWidgetForm", function($compile) {
         );
       }
       //if (!item.type && element.type) { item.type = element.type; }
+      console.log(form);
         
         // Render the element into the scope.  
         // Compile the template for Angular and append it to the directive's
         // html element.
+        dpm('compiling element');
+        console.log(form);
         var linkFn = $compile(_drupalgap_form_render_element_item(
           form,
           form.elements[field_name],
