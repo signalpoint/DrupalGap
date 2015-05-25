@@ -81,45 +81,6 @@ function _GET() {
 }
 
 /**
- * Each time we use drupalgap_goto to change a page, this function is called on
- * the pagebeforehange event. If we're not moving backwards, or navigating to
- * the same page, this will preproccesses the page, then processes it.
- */
-/*$(document).on('pagebeforechange', function(e, data) {
-    try {
-      // If we're moving backwards, reset drupalgap.back and return.
-      if (drupalgap && drupalgap.back) {
-        drupalgap.back = false;
-        return;
-      }
-      // If the jqm active page url is the same as the page id of the current
-      // path, return.
-      if (
-        drupalgap_jqm_active_page_url() ==
-        drupalgap_get_page_id(drupalgap_path_get())
-      ) { return; }
-      // We only want to process the page we are going to, not the page we are
-      // coming from. When data.toPage is a string that is our destination page.
-      if (typeof data.toPage === 'string') {
-
-        // If drupalgap_goto() determined that it is necessary to prevent the
-        // default page from reloading, then we'll skip the page
-        // processing and reset the prevention boolean.
-        if (drupalgap && !drupalgap.page.process) {
-          drupalgap.page.process = true;
-        }
-        else if (drupalgap) {
-          // Pre process, then process the page.
-          template_preprocess_page(drupalgap.page.variables);
-          template_process_page(drupalgap.page.variables);
-        }
-
-      }
-    }
-    catch (error) { console.log('pagebeforechange - ' + error); }
-});*/
-
-/**
  * Implementation of template_preprocess_page().
  * @param {Object} variables
  */
@@ -127,19 +88,6 @@ function template_preprocess_page(variables) {
   try {
     alert('template_preprocess_page - DEPRECATED!');
     return;
-    // Set up default attribute's for the page's div container.
-    if (typeof variables.attributes === 'undefined') {
-      variables.attributes = {};
-    }
-
-    // @todo - is this needed?
-    variables.attributes['data-role'] = 'page';
-
-    // Call all hook_preprocess_page functions.
-    module_invoke_all('preprocess_page');
-
-    // Place the variables into drupalgap.page
-    drupalgap.page.variables = variables;
   }
   catch (error) { console.log('template_preprocess_page - ' + error); }
 }
@@ -152,18 +100,6 @@ function template_process_page($scope) {
   try {
     alert('template_process_page - DEPRECATED!');
     return;
-    var drupalgap_path = drupalgap_path_get();
-    // Execute the active menu handler to assemble the page output. We need to
-    // do this before we render the regions below.
-    drupalgap.output = menu_execute_active_handler();
-    // For each region, render it, then replace the placeholder in the page's
-    // html with the rendered region.
-    var page_id = drupalgap_get_page_id(drupalgap_path);
-    for (var index in drupalgap.theme.regions) {
-        if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
-        var region = drupalgap.theme.regions[index];
-        $scope.regions.push({ content: drupalgap_render_region(region) });
-    }
   }
   catch (error) { console.log('template_process_page - ' + error); }
 }
@@ -190,29 +126,12 @@ function drupalgap_get_page_id(path) {
  * DOM. It doesn't actually render the page, that is taken care of by the
  * pagebeforechange handler.
  * @param {Object} options
+ * @deprecated
  */
 function drupalgap_add_page_to_dom(options) {
   try {
-    // Prepare the default page attributes, then merge in any customizations
-    // from the hook_menu() item, then inject the attributes into the
-    // placeholder. We have to manually add our default class name after the
-    // extend until this issue is resolved:
-    // https://github.com/signalpoint/DrupalGap/issues/321
-    var attributes = {
-      id: options.page_id,
-      'data-role': 'page'
-    };
-    attributes =
-      $.extend(true, attributes, options.menu_link.options.attributes);
-    attributes['class'] +=
-      ' ' + drupalgap_page_class_get(drupalgap.router_path);
-    options.html = options.html.replace(
-      /{:drupalgap_page_attributes:}/g,
-      drupalgap_attributes(attributes)
-    );
-    // Add the html to the page and the page id to drupalgap.pages.
-    $('body').append(options.html);
-    drupalgap.pages.push(options.page_id);
+    console.log('DEPRECATED - drupalgap_add_page_to_dom()');
+    return;
   }
   catch (error) { console.log('drupalgap_add_page_to_dom - ' + error); }
 }
@@ -225,52 +144,24 @@ function drupalgap_add_page_to_dom(options) {
  * is the current page. No matter what, the current page (specified or not)
  * can't be removed from the DOM, because jQM always needs one page in the DOM.
  * @param {String} page_id
+ * @deprecated
  */
 function drupalgap_remove_page_from_dom(page_id) {
   try {
-    var current_page_id = null;
-    if (typeof arguments[2] !== 'undefined') { current_page_id = arguments[2]; }
-    else { current_page_id = drupalgap_get_page_id(drupalgap_path_get()); }
-    var options = {};
-    if (typeof arguments[1] !== 'undefined') { options = arguments[1]; }
-    if (current_page_id != page_id || options.force) {
-      $('#' + page_id).empty().remove();
-      delete drupalgap.pages[page_id];
-      // We'll remove the query string, unless we were instructed to leave it.
-      if (
-        typeof _dg_GET[page_id] !== 'undefined' &&
-        (typeof options.leaveQuery === 'undefined' || !options.leaveQuery)
-      ) { delete _dg_GET[page_id]; }
-    }
-    else {
-      console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
-        'the current page (' + page_id + ') from the DOM!');
-    }
+    console.log('DEPRECATED - drupalgap_remove_page_from_dom()');
+    return;
   }
   catch (error) { console.log('drupalgap_remove_page_from_dom - ' + error); }
 }
 
 /**
  * Removes all pages from the DOM except the current one.
+ * @deprecated
  */
 function drupalgap_remove_pages_from_dom() {
   try {
-    var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
-    for (var index in drupalgap.pages) {
-        if (!drupalgap.pages.hasOwnProperty(index)) { continue; }
-        var page_id = drupalgap.pages[index];
-        if (current_page_id != page_id) {
-          drupalgap_remove_page_from_dom(page_id, null, current_page_id);
-        }
-    }
-    // Reset drupalgap.pages to only contain the current page id.
-    drupalgap.pages = [current_page_id];
-    // Reset the drupalgap.views.ids array.
-    drupalgap.views.ids = [];
-    // Reset the jQM page events.
-    drupalgap.page.jqm_events = [];
-    // Reset the back path.
-    drupalgap.back_path = [];
+    console.log('DEPRECATED - drupalgap_remove_pages_from_dom()');
+    return;
   }
   catch (error) { console.log('drupalgap_remove_pages_from_dom - ' + error); }
 }
@@ -297,22 +188,12 @@ function drupalgap_page_class_get(router_path) {
  * Returns true if the given page id's page div already exists in the DOM.
  * @param {String} page_id
  * @return {Boolean}
+ * @deprecated
  */
 function drupalgap_page_in_dom(page_id) {
   try {
-    var pages = $("body div[data-role$='page']");
-    var page_in_dom = false;
-    if (pages && pages.length > 0) {
-      for (var index in pages) {
-          if (!pages.hasOwnProperty(index)) { continue; }
-          var page = pages[index];
-          if (($(page).attr('id')) == page_id) {
-            page_in_dom = true;
-            break;
-          }
-      }
-    }
-    return page_in_dom;
+    console.log('DEPRECATED - drupalgap_page_in_dom()');
+    return;
   }
   catch (error) { console.log('drupalgap_page_in_dom - ' + error); }
 }
@@ -331,15 +212,12 @@ function drupalgap_is_front_page() {
 /**
  * Returns the URL of the active jQuery Mobile page.
  * @return {String}
+ * @deprecated
  */
 function drupalgap_jqm_active_page_url() {
   try {
-    // WARNING: when the app first loads, this value may be much different than
-    // you expect. It certainly is not the front page path, because on Android
-    // for example it returns '/android_asset/www/index.html'. Also, when the
-    // app first loads, activePage is null, so just return an empty string.
-    if (!$.mobile.activePage) { return ''; }
-    return $.mobile.activePage.data('url');
+    console.log('DEPRECATED - drupalgap_jqm_active_page_url()');
+    return;
   }
   catch (error) { console.log('drupalgap_jqm_active_page_url - ' + error); }
 }
@@ -348,6 +226,7 @@ function drupalgap_jqm_active_page_url() {
  * @deprecated
  */
 function drupalgap_render_page(output) {
+  console.log('DEPRECATED - drupalgap_render_page() - use drupalgap_render() instead');
   return drupalgap_render(output);
 }
 
