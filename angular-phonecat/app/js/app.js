@@ -162,7 +162,7 @@ var phonecatApp = angular.module('phonecatApp', [
       drupalgap_ng_set('location', $location);
 
       // Watch for changes in the Angular route (this is fired twice per route change)...
-      $rootScope.$on("$locationChangeStart", function(event, next, current) {
+      /*$rootScope.$on("$locationChangeStart", function(event, next, current) {
 
           // Extract the current menu path from the Angular route, and warn
           // about any uncrecognized routes.
@@ -177,7 +177,7 @@ var phonecatApp = angular.module('phonecatApp', [
             console.log('locationChangeStart - unsupported path: ' + path_next);
           }
 
-      });
+      });*/
   }]);
 
 // JDRUPAL MODULE
