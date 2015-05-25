@@ -35,7 +35,14 @@ function menu_block_view(delta, region) {
       menu.options.wrap_options.attributes
     ) { container_attributes = menu.options.wrap_options.attributes; }
     container_attributes.id = container_id;
-    return '<div ' + drupalgap_attributes(container_attributes) + '></div>' +
+    // @TODO don't just fake a call to the pageshow, now that pageshow events
+    // are deprecated.
+    return menu_block_view_pageshow({
+        menu_name: delta,
+        container_id: container_id,
+        'data-role': data_role
+    });
+    /*return '<div ' + drupalgap_attributes(container_attributes) + '></div>' +
       drupalgap_jqm_page_event_script_code({
           page_id: drupalgap_get_page_id(),
           jqm_page_event: 'pageshow',
@@ -45,7 +52,7 @@ function menu_block_view(delta, region) {
               container_id: container_id,
               'data-role': data_role
           })
-      }, delta);
+      }, delta);*/
   }
   catch (error) { console.log('menu_block_view - ' + error); }
 }
@@ -160,7 +167,8 @@ function menu_block_view_pageshow(options) {
               }
             }
             // Inject the html.
-            $('#' + options.container_id).html(html).trigger('create');
+            return html;
+            /*$('#' + options.container_id).html(html).trigger('create');
             // If the block's region is a jQM navbar, refresh the navbar.
             if (options['data-role'] && options['data-role'] == 'navbar') {
               $('#' + options.container_id).navbar();
@@ -170,7 +178,7 @@ function menu_block_view_pageshow(options) {
             if (
               typeof menu.options !== 'undefined' &&
               (typeof menu.options.wrap === 'undefined' || !menu.options.wrap)
-            ) { $('#' + options.container_id).children().unwrap(); }
+            ) { $('#' + options.container_id).children().unwrap(); }*/
           }
           catch (error) {
             console.log('menu_block_view_pageshow - success - ' + error);
@@ -295,14 +303,16 @@ function menu_block_view_pageshow(options) {
         }
       }
       // Inject the html.
-      $('#' + options.container_id).html(html).trigger('create');
+      return html;
+
+      /*$('#' + options.container_id).html(html).trigger('create');
       // Remove the placeholder wrapper, unless we were instructed not to.
       var wrap = false;
       if (
         menu && typeof menu.options !== 'undefined' &&
         typeof menu.options.wrap !== 'undefined' && menu.options.wrap
       ) { wrap = true; }
-      if (!wrap) { $('#' + options.container_id).children().unwrap(); }
+      if (!wrap) { $('#' + options.container_id).children().unwrap(); }*/
     }
   }
   catch (error) { console.log('menu_block_view_pageshow - ' + error); }
