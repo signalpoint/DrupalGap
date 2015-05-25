@@ -51,12 +51,10 @@ function user_login_form(form, form_state) {
  * @param {Object} form
  * @param {Object} form_state
  */
-function user_login_form_submit(form, form_state) {
+function user_login_form_submit(form, form_state, jdrupal) {
   try {
-    user_login(form_state.values.name, form_state.values.pass, {
-      success: function(result) {
+    jdrupal.user_login(form_state.values.name, form_state.values.pass).success(function(result) {
         drupalgap_goto(drupalgap.settings.front);
-      }
     });
   }
   catch (error) { console.log('user_login_form_submit - ' + error); }
