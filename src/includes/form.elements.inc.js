@@ -6,23 +6,26 @@
  */
 function _drupalgap_form_render_element(form, element) {
   try {
+    dpm('_drupalgap_form_render_element');
+    console.log(element);
     var attrs = drupalgap_attributes({
-        //'ng-controller': 'drupalgapFormElementController',
-        'drupalgap-form-element-directive':'',
-        element_name: element.name
+        'dg-form-element': '',
+        element_name: element.name,
+        'class': drupalgap_form_get_element_container_class(name)
     });
     return '<div ' + attrs + '></div>';
+    
     //{{' + element.name + '}}
   }
   catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
 }
 
-phonecatControllers.directive("drupalgapFormElementDirective", function($compile) {
-    dpm('drupalgapFormElementDirective');
+phonecatControllers.directive("dgFormElement", function($compile) {
+    dpm('dgFormElement');
     return {
       link: function($scope, $element) {
         
-        dpm('drupalgapFormElementDirective - link...');
+        dpm('dgFormElement - link...');
         console.log(arguments);
         //return;
         
@@ -257,12 +260,12 @@ phonecatControllers.directive("drupalgapFormElementDirective", function($compile
         if (element.prefix) { html += element.prefix; }
     
         // Open the element container.
-        var container_attributes = {
+        /*var container_attributes = {
           'class': drupalgap_form_get_element_container_class(name)
         };
         if (wrapped) {
           html += '<div ' + drupalgap_attributes(container_attributes) + '>';
-        }
+        }*/
     
         // Add a label to the element, except submit and hidden elements. Any field
         // labels have already been rendered, other element labels must be manually
@@ -290,7 +293,7 @@ phonecatControllers.directive("drupalgapFormElementDirective", function($compile
         }
     
         // Close the element container.
-        if (wrapped) { html += '</div>'; }
+        //if (wrapped) { html += '</div>'; }
     
         // If there is an element suffix, place it in the html.
         if (element.suffix) { html += element.suffix; }
@@ -305,7 +308,7 @@ phonecatControllers.directive("drupalgapFormElementDirective", function($compile
     };
 });
 
-phonecatControllers.controller('drupalgapFormElementController', ['$scope', '$element', '$sce',
+/*phonecatControllers.controller('drupalgapFormElementController', ['$scope', '$element', '$sce',
   function($scope, $element, $sce) {
 
     dpm('drupalgapFormElementController');
@@ -313,7 +316,7 @@ phonecatControllers.controller('drupalgapFormElementController', ['$scope', '$el
     
     
     
-  }]);
+  }]);*/
 
 /**
  * Given a form element, this will return true if access to the element is
@@ -530,7 +533,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
     // cleanly to their theme function.
     // @todo A hook_field_widget_form() should be used instead here.
     if (item.type == 'submit') {
-      variables.attributes['data-ng-click'] = 'submit(\'' + form.id + '\', form_state);';
+      variables.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
       if (typeof variables.attributes.type === 'undefined') {
         variables.attributes.type = 'button';
       }
