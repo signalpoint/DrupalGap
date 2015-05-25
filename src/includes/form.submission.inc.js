@@ -25,95 +25,7 @@ function drupalgap_form_onkeypress(form_id) {
  */
 function _drupalgap_form_submit(form_id, form_state) {
   try {
-    // Load the form from local storage.
-    var form = drupalgap_form_local_storage_load(form_id);
-    if (!form) {
-      var msg = '_drupalgap_form_submit - ' + t('failed to load form') + ': ' +
-        form_id;
-      drupalgap_alert(msg);
-      return false;
-    }
-
-    // Assemble the form state values.
-    // @UPDATE - this is now taken care of by Angular.
-    //var form_state = drupalgap_form_state_values_assemble(form);
-
-    // Clear out previous form errors.
-    drupalgap.form_errors = {};
-
-    // Build the form validation wrapper function.
-    var form_validation = function() {
-      try {
-
-        // Call the form's validate function(s), if any.
-        for (var index in form.validate) {
-            if (!form.validate.hasOwnProperty(index)) { continue; }
-            var function_name = form.validate[index];
-            var fn = window[function_name];
-            fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        }
-
-        // Call drupalgap form's api validate.
-        _drupalgap_form_validate(form, form_state);
-
-        // If there were validation errors, show the form errors and stop the
-        // form submission. Otherwise submit the form.
-        if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
-          var html = '';
-          for (var name in drupalgap.form_errors) {
-              if (!drupalgap.form_errors.hasOwnProperty(name)) { continue; }
-              var message = drupalgap.form_errors[name];
-              html += message + '\n\n';
-          }
-          drupalgap_alert(html);
-        }
-        else { form_submission(); }
-      }
-      catch (error) {
-        console.log('_drupalgap_form_submit - form_validation - ' + error);
-      }
-    };
-
-    // Build the form submission wrapper function.
-    var form_submission = function() {
-      try {
-        // Call the form's submit function(s), if any.
-        for (var index in form.submit) {
-            if (!form.submit.hasOwnProperty(index)) { continue; }
-            var function_name = form.submit[index];
-            var fn = window[function_name];
-            fn.apply(null, Array.prototype.slice.call([form, form_state]));
-        }
-        // Remove the form from local storage.
-        // @todo - we can't do this here because often times a form's submit
-        // handler makes asynchronous calls (i.e. user login) and although the
-        // form validated, server side may say the input was invalid, so the
-        // user will still be on the form, except we already removed the form.
-        //drupalgap_form_local_storage_delete(form_id);
-      }
-      catch (error) {
-        console.log('_drupalgap_form_submit - form_submission - ' + error);
-      }
-    };
-
-    // Get ready to validate and submit the form, but first...
-
-    // If this is an entity form, and there is an image field on the form, we
-    // need to asynchronously process the image field, then continue onward
-    // with normal form validation and submission.
-    if (form.entity_type &&
-      image_fields_present_on_entity_type(form.entity_type, form.bundle)
-    ) {
-      _image_field_form_process(form, form_state, {
-          success: form_validation
-      });
-    }
-    else {
-      // There were no image fields on the form, proceed normally with form
-      // validation, which will in turn process the submission if there are no
-      // validation errors.
-      form_validation();
-    }
+    
   }
   catch (error) { console.log('_drupalgap_form_submit - ' + error); }
 }
@@ -172,9 +84,12 @@ function _drupalgap_form_validate(form, form_state) {
  * is similar to $form_state['values'] in Drupal.
  * @param {Object} form
  * @return {Object}
+ * @deprecated
  */
 function drupalgap_form_state_values_assemble(form) {
   try {
+    return 'DEPRECATED - drupalgap_form_state_values_assemble';
+    return;
     var lng = language_default();
     var form_state = { values: {} };
     for (var name in form.elements) {
