@@ -15,6 +15,7 @@ phonecatControllers.directive("drupalgapGotoDirective", function($compile) {
           var region = drupalgap.theme.regions[index];
           template += drupalgap_render_region(region, scope);
         }
+        //dpm(template);
         
         // Compile the template for Angular and append it to the directive's
         // html element.
@@ -52,6 +53,21 @@ var _drupalgap_goto_query_string = null;
  */
 function drupalgap_goto(path) {
   try {
+    
+    $location = drupalgap_ng_get('location');
+    $location.path('/' + path);
+    
+    // @TODO this breaks user login, is this even needed anymore? I think we
+    // needed it while trying entity crud, but that has since been improved
+    // so maybe this snippet is totally worthless now.
+    //$route = drupalgap_ng_get('route');
+    //$route.reload(); // If drupalgap_goto() was called during a 
+    // success handler of an asyc call, we need to reload the route.
+    
+    
+    
+    return;
+    
 
     // Extract any incoming options, set any defaults that weren't provided,
     // then populate the global page options variable.
@@ -166,10 +182,10 @@ function drupalgap_goto(path) {
     }
 
     // Set the current menu path to the path input.
-    drupalgap_path_set(path);
+    //drupalgap_path_set(path);
 
     // Set the drupalgap router path.
-    drupalgap_router_path_set(router_path);
+    //drupalgap_router_path_set(router_path);
 
     // If the page is already in the DOM and we're asked to reload it, then
     // remove the page and let it rebuild itself. If we're not reloading the
@@ -229,11 +245,7 @@ function drupalgap_goto(path) {
       options,
       drupalgap.menu_links[router_path]
     );*/
-    $location = drupalgap_ng_get('location');
-    $location.path('/' + path);
-    $route = drupalgap_ng_get('route');
-    $route.reload(); // If drupalgap_goto() was called during a 
-    // success handler of an asyc call, we need to reload the route.
+    
 
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
