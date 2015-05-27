@@ -67,13 +67,12 @@ phonecatControllers.directive("drupalgapEntityDirective", function($compile) {
                 );
                 scope.form = form;
                 scope.form_state = { values: entity };
-                //scope.$parent.form_state = { values: entity };
                 html = drupalgap_form_render(form);
               }
               else {
                 html = drupalgap.views.templates[entity_type][bundle][mode].template
               }
-              console.log(html);
+              //console.log(html);
 
               // Compile the html with the scope, then replace the element's
               // "{{build}}" with it.
@@ -103,6 +102,7 @@ function entity_page_edit(form_id, entity_type, entity_id) {
  * @param {String} form_id
  * @param {String} entity_type
  * @param {Number} entity_id
+ * @deprecated
  */
 function entity_page_edit_pageshow(form_id, entity_type, entity_id) {
   try {
@@ -467,9 +467,13 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
  * @param {Object} form
  * @param {Object} form_state
  * @return {Object}
+ * @deprecated
  */
 function drupalgap_entity_build_from_form_state(form, form_state) {
   try {
+    dpm('DEPRECATED - drupalgap_entity_build_from_form_state()');
+    return;
+    console.log(arguments);
     var entity = {};
     var language = language_default();
     for (var name in form_state.values) {
@@ -661,11 +665,14 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
  * resource to create or update the entity.
  * @param {Object} form
  * @param {Object} form_state
- * @param {Object} entity
  * @return {*}
  */
-function drupalgap_entity_form_submit(form, form_state, entity) {
+function drupalgap_entity_form_submit(form, form_state) {
   try {
+    dpm('drupalgap_entity_form_submit');
+    console.log(arguments);
+    
+    var entity = form_state.values;
 
     // Grab the primary key name for this entity type.
     var primary_key = entity_primary_key(form.entity_type);
@@ -737,10 +744,15 @@ function drupalgap_entity_form_submit(form, form_state, entity) {
         entity_local_storage_key(form.entity_type, entity[primary_key])
       );
     }
-    var fn = window[
+    /*var fn = window[
       services_get_resource_function_for_entity(form.entity_type, crud)
     ];
-    fn(entity, call_arguments);
+    fn(entity, call_arguments);*/
+    var crud_function = services_get_resource_function_for_entity(
+      form.entity_type,
+      crud
+    );
+    //jdrupal[crud_function];
   }
   catch (error) { console.log('drupalgap_entity_form_submit - ' + error); }
 }
