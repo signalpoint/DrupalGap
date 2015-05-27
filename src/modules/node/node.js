@@ -142,7 +142,7 @@ function node_menu() {
         'title': t('Add content'),
         'page_callback': 'node_add_page'
       },
-      'node/add/%': {
+      'node/add/:bundle': {
         title: t('Add content'),
         title_callback: 'node_add_page_by_type_title',
         title_arguments: [2],
