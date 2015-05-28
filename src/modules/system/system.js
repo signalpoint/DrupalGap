@@ -1,6 +1,80 @@
 var _system_reload_page = null;
 var _system_reload_messages = null;
 
+phonecatApp.directive("dgMain", function($compile, $injector) {
+    dpm('dgMain');
+    return {
+      link: function(scope, element) {
+        
+        dpm('dgMain - link...');
+        
+        // Compile the template for Angular and append it to the directive's
+        // html element.
+        var linkFn = $compile(
+          drupalgap_render(
+            menu_execute_active_handler($compile, $injector)
+          )
+        );
+        var content = linkFn(scope);
+        element.append(content);
+
+      }
+    };
+});
+
+phonecatApp.directive("systemDashboardPage", function($compile) {
+    dpm('systemDashboardPage');
+    return {
+      link: function(scope, element) {
+        
+        dpm('systemDashboardPage - link...');
+        
+        var content = {};
+        content.site_info = {
+          markup: '<h4 style="text-align: center;">' +
+            Drupal.settings.site_path +
+          '</h4>'
+        };
+        content.welcome = {
+          markup: '<h2 style="text-align: center;">' +
+            t('Welcome to DrupalGap') +
+          '</h2>' +
+          '<p style="text-align: center;">' +
+            t('The open source application development kit for Drupal!') +
+          '</p>'
+        };
+        if (drupalgap.settings.logo) {
+          content.logo = {
+            markup: '<center>' +
+                     theme('image', {path: drupalgap.settings.logo}) +
+                   '</center>'
+          };
+        }
+        content.get_started = {
+          theme: 'button_link',
+          text: t('Getting Started Guide'),
+          path: 'http://www.drupalgap.org/get-started',
+          options: {InAppBrowser: true}
+        };
+        content.support = {
+          theme: 'button_link',
+          text: t('Support'),
+          path: 'http://www.drupalgap.org/support',
+          options: {InAppBrowser: true}
+        };
+
+        // Compile the template for Angular and append it to the directive's
+        // html element.
+        var linkFn = $compile(drupalgap_render(content));
+        var content = linkFn(scope);
+        element.append(content);
+
+      }
+    };
+});
+
+
+
 /**
  * Implements hook_block_info().
  * @return {Object}
@@ -63,8 +137,8 @@ function system_block_view(delta) {
       case 'main':
         // This is the main content block, it is required to be in a theme's
         // region for the content of a page to show up (nodes, users, taxonomy,
-        // comments, etc).
-        return drupalgap_render(menu_execute_active_handler());
+        // comments, etc). Here we use it as an Angular directive, dgMain.
+        return '<div dg-main></div>';
         break;
       case 'messages':
         // If there are any messages waiting to be displayed, render them, then
@@ -225,50 +299,6 @@ function system_drupalgap_goto_post_process(path) {
   catch (error) {
     console.log('system_drupalgap_goto_post_process - ' + error);
   }
-}
-
-/**
- * Page callback for the dashboard page.
- * @return {Object}
- */
-function system_dashboard_page() {
-  try {
-    var content = {};
-    content.site_info = {
-      markup: '<h4 style="text-align: center;">' +
-        Drupal.settings.site_path +
-      '</h4>'
-    };
-    content.welcome = {
-      markup: '<h2 style="text-align: center;">' +
-        t('Welcome to DrupalGap') +
-      '</h2>' +
-      '<p style="text-align: center;">' +
-        t('The open source application development kit for Drupal!') +
-      '</p>'
-    };
-    if (drupalgap.settings.logo) {
-      content.logo = {
-        markup: '<center>' +
-                 theme('image', {path: drupalgap.settings.logo}) +
-               '</center>'
-      };
-    }
-    content.get_started = {
-      theme: 'button_link',
-      text: t('Getting Started Guide'),
-      path: 'http://www.drupalgap.org/get-started',
-      options: {InAppBrowser: true}
-    };
-    content.support = {
-      theme: 'button_link',
-      text: t('Support'),
-      path: 'http://www.drupalgap.org/support',
-      options: {InAppBrowser: true}
-    };
-    return content;
-  }
-  catch (error) { console.log('system_dashboard_page - ' + error); }
 }
 
 /**
