@@ -1,14 +1,14 @@
-// used to render the "drupalgap-goto-directive" attribute of page.tpl.html
-phonecatControllers.directive("drupalgapGotoDirective", function($compile) {
-    dpm('drupalgapGotoDirective');
+// Used to render the "dg-page" directive attribute from the theme's
+// page.tpl.html file.
+phonecatApp.directive("dgPage", function($compile) {
+    dpm('dgPage');
     return {
       link: function(scope, element) {
         
-        dpm('drupalgapGotoDirective - link...');
+        dpm('dgPage - link...');
 
-        // Build an Angular route 'template' string by rendering each region
-        // from the DrupalGap theme onto it. Keep in mind the actual page's
-        // content is rendered via the "main" block in the system module.
+        // Build a 'template' string for an Angular route by rendering each
+        // region from the DrupalGap theme onto it.
         var template = '';
         for (var index in drupalgap.theme.regions) {
           if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
@@ -27,7 +27,7 @@ phonecatControllers.directive("drupalgapGotoDirective", function($compile) {
     };
 });
 
-phonecatControllers.controller('drupalgap_goto_controller', ['$scope', '$sce', '$route', '$location', '$routeParams',
+phonecatApp.controller('drupalgap_goto_controller', ['$scope', '$sce', '$route', '$location', '$routeParams',
   function($scope, $sce, $route, $location, $routeParams) {
     try {
 
