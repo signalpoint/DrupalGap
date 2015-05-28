@@ -1,23 +1,3 @@
-/*phonecatControllers.controller('drupalgapRegionController', ['$scope', '$sce',
-  function($scope, $sce) {
-    
-    // Call all hook_preprocess_page functions.
-    // @TODO will we need this in Angular?
-    //module_invoke_all('preprocess_page');
-    
-    // Render each region by processing the page.
-    $scope.drupalgap_render_region_controller = function(region_html) {
-      return $sce.trustAsHtml(region_html);
-    };
-    //$scope.regions = [];
-    $scope.regions = '';
-    for (var index in drupalgap.theme.regions) {
-        if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
-        var region = drupalgap.theme.regions[index];
-        $scope.regions += drupalgap_render_region(region, $scope);
-    }
-  }]);*/
-
 /**
  * Given a region, this renders it and all the blocks in it. The blocks are
  * specified in the settings.js file, they are bundled under a region, which in
@@ -236,7 +216,7 @@ function drupalgap_render_region(region, $scope) {
           block_counts.block_count == 0
         )
       ) {
-        // Show an empty header if we're not collapsing on an empty region.
+        // Show an empty header if we're not collapsing an empty region.
         if (
           typeof region.collapse_on_empty === 'undefined' ||
           region.collapse_on_empty === false
