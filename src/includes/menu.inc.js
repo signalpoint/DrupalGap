@@ -1,15 +1,16 @@
 /**
  * Execute the page callback associated with the current path and return its
  * content.
+ * @param {Object} $compile
+ * @param {Object} $injector
  * @return {Object}
  */
-function menu_execute_active_handler() {
+function menu_execute_active_handler($compile, $injector) {
   try {
     dpm('menu_execute_active_handler');
 
     // Determine the path and then grab the page id.
     var path = null;
-    if (arguments[0]) { path = arguments[0]; }
     if (!path) { path = drupalgap_path_get(); }
     var page_id = drupalgap_get_page_id(path);
 
@@ -17,12 +18,29 @@ function menu_execute_active_handler() {
 
     // Get the router path.
     var router_path = drupalgap_router_path_get();
-
     if (!router_path) { return; }
+
+    // Grab the page_callback function for this route.
+    var function_name = drupalgap.menu_links[router_path].page_callback;
+    
+    // Determine the directive's name that may handle this route, and then check
+    // for its existence. If it exists use the directive to render the page,
+    // otherwise use the traditional page_callback mechanism...
+    var directive = drupalgap_get_camel_case(function_name);
+    if ($injector.has(directive + 'Directive')) {
+      var directive_attr_name = drupalgap_kill_camel_case(directive, '-').toLowerCase();
+      return {
+        content: {
+          markup: '<div ' + directive_attr_name + '></div>'
+        }
+      };
+    }
+    
+    // We're not using a directive to render the page, so...
+    console.log('DEPRECATED: the page_callback function ' + function_name + '() should to be turned into an Angular directive called: ' + directive);
 
     // Call the page call back for this router path and send along any
     // arguments.
-    var function_name = drupalgap.menu_links[router_path].page_callback;
     var page_arguments = [];
     if (drupalgap_function_exists(function_name)) {
       
@@ -72,6 +90,7 @@ function menu_execute_active_handler() {
       // event callback functions attached to the menu link for this page, set
       // each event up to be fired with inline JS on the page. We pass along
       // any page arguments to the jQM event handler function.
+      // DEPRECATED
       drupalgap.page.jqm_events = [];
       var jqm_page_events = drupalgap_jqm_page_events();
       for (var i = 0; i < jqm_page_events.length; i++) {
@@ -81,11 +100,6 @@ function menu_execute_active_handler() {
             drupalgap.menu_links[router_path][jqm_page_event];
           if (drupalgap_function_exists(jqm_page_event_callback)) {
             console.log('DEPRECATED (all jQM page events): "' + jqm_page_event + '" for hook_menu() "' + router_path + '", ignoring call to ' + jqm_page_event_callback + '()...');
-            /*var fn = window[jqm_page_event_callback];
-            if (page_arguments.length > 0) {
-              fn.apply(null, Array.prototype.slice.call(page_arguments));
-            }
-            else { fn(); }*/
           }
           else {
             console.log(
@@ -98,13 +112,13 @@ function menu_execute_active_handler() {
       }
 
       // Add a pageshow handler for the page title.
-      if (typeof content === 'object') {
-        /*var fn = window['_drupalgap_page_title_pageshow'];
+      /*if (typeof content === 'object') {
+        var fn = window['_drupalgap_page_title_pageshow'];
         if (page_arguments.length > 0) {
           fn.apply(null, Array.prototype.slice.call(page_arguments));
         }
-        else { fn(); }*/
-      }
+        else { fn(); }
+      }*/
 
       // And finally return the content.
       return content;
