@@ -220,7 +220,10 @@ function _drupalgap_deviceready() {
       else {
 
         // Device is online, make the system connect call.
-        system_connect(_drupalgap_deviceready_options());
+        
+        // @TODO the system connect probably can't go here since services aren't
+        // available during the Angular app config.
+        //system_connect(_drupalgap_deviceready_options());
 
         // @WARNING - careful, Angular continues on with the page's display and
         // will display the page before the system connect call is done,
