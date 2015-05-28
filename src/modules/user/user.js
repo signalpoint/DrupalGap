@@ -1,3 +1,13 @@
+phonecatApp.directive("userLogoutCallback", function($compile, $injector) {
+    return {
+      controller: function(jdrupal) {
+        jdrupal.user_logout().success(function(result) {
+            drupalgap_goto(drupalgap.settings.front);
+        });
+      }
+    };
+});
+
 /**
  * Determine whether the user has a given privilege. Optionally pass in a user
  * account JSON object for the second paramater to check that particular
@@ -44,6 +54,19 @@ function user_edit_access(account) {
 }
 
 /**
+ * Returns true if the current user is logged, false otherwise. While DrupalGap
+ * is loading, this value may not be accurate until a System Connect call is
+ * completed, so use with caution during any initialization.
+ */
+function user_is_logged_in() {
+  try {
+    if (Drupal.user.uid && Drupal.user.uid != 0) { return true; }
+    return false;
+  }
+  catch (error) { console.log('user_is_logged_in - ' + error); }
+}
+
+/**
  * A page call back function to display a simple list of drupal users.
  * @return {Object}
  */
@@ -86,29 +109,6 @@ function user_listing_pageshow() {
 }
 
 /**
- * The user logout page callback.
- * @return {String}
- */
-function user_logout_callback() {
-  return '<p>' + t('Logging out') + '...</p>';
-}
-
-/**
- * The user logout pageshow callback. This actually handles the call to the
- * user logout service resource.
- */
-function user_logout_pagechange() {
-  try {
-    user_logout({
-      success: function(data) {
-        drupalgap_goto(drupalgap.settings.front);
-      }
-    });
-  }
-  catch (error) { console.log('user_logout_pagechange - ' + error); }
-}
-
-/**
  * Implements hook_menu().
  * @return {Object}
  */
@@ -127,12 +127,11 @@ function user_menu() {
         page_arguments: ['user_login_form'],
         /*options: {reloadPage: true}*/
       },
-      /*'user/logout': {
+      'user/logout': {
         'title': t('Logout'),
         'page_callback': 'user_logout_callback',
-        'pagechange': 'user_logout_pagechange',
         options: {reloadPage: true}
-      },*/
+      },
       'user/register': {
         'title': t('Register'),
         'page_callback': 'drupalgap_get_form',
