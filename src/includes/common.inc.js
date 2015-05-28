@@ -90,6 +90,15 @@ function drupalgap_get_camel_case(str) {
   catch (error) { console.log('drupalgap_get_camel_case - ' + error); }
 }
 
+function drupalgap_kill_camel_case(str, separator) {
+  try {
+    return str.replace(/([A-Z])/g, separator + '$1');
+  }
+  catch (error) { console.log('drupalgap_kill_camel_case - ' + error); }
+}
+
+
+
 /**
  * Used by drupalgap_render_region to check the visibility settings on region
  * links and blocks. Just like Drupal Blocks, this function checks the
