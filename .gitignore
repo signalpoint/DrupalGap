@@ -18,3 +18,11 @@ bin/themes/*.css
 # Ignore tools
 tools/*
 
+logs/*
+!.gitkeep
+node_modules/
+tmp
+.idea
+.DS_Store
+bower_components/
+
