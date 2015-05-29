@@ -10,6 +10,7 @@ var phonecatApp = angular.module('phonecatApp', [
 ]).config(function() {
   
   dpm('config() - initializing...');
+  console.log(arguments);
 
   // @WARNING only providers available here, no scope available here...
 
@@ -182,6 +183,7 @@ var phonecatApp = angular.module('phonecatApp', [
 
 // JDRUPAL MODULE
 angular.module('jdrupal-ng').config(function($provide) {
+    console.log('jdrupal-ng - config');
     // @TODO when jdrupal becomes an angular module, this snippet of code can be
     // used by other angular apps to config jdrupal
     $provide.value('jdrupalSettings', {
