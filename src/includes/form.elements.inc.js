@@ -20,7 +20,7 @@ function _drupalgap_form_render_element(form, element) {
   catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
 }
 
-phonecatControllers.directive("dgFormElement", function($compile) {
+dgControllers.directive("dgFormElement", function($compile) {
     dpm('dgFormElement');
     return {
       link: function($scope, $element) {
@@ -308,7 +308,7 @@ phonecatControllers.directive("dgFormElement", function($compile) {
     };
 });
 
-/*phonecatControllers.controller('drupalgapFormElementController', ['$scope', '$element', '$sce',
+/*dgControllers.controller('drupalgapFormElementController', ['$scope', '$element', '$sce',
   function($scope, $element, $sce) {
 
     dpm('drupalgapFormElementController');

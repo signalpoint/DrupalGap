@@ -1,15 +1,4 @@
-
-/*phonecatControllers.controller('drupalgapFormController', ['$scope',
-  function($scope) {
-    dpm('drupalgapFormController');
-    console.log(arguments);
-    // Create an empty form_state and attach the default submit handler to the
-    // scope, if they haven't been set already.
-    if (!$scope.form_state) { $scope.form_state = { values: { } } };
-    if (!$scope.submit) { $scope.submit = _drupalgap_form_submit; }
-  }]);*/
-
-phonecatApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
+dgApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
       
       dpm('dgForm');
       console.log(arguments);

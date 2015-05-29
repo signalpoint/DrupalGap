@@ -1,4 +1,4 @@
-phonecatApp.directive("userLogoutCallback", function($compile, $injector) {
+dgApp.directive("userLogoutCallback", function($compile, $injector) {
     return {
       controller: function(jdrupal) {
         jdrupal.user_logout().success(function(result) {

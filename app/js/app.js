@@ -2,10 +2,10 @@
 
 /* App Module */
 
-var phonecatApp = angular.module('phonecatApp', [
+var dgApp = angular.module('dgApp', [
     'ngRoute',
     'ngSanitize',
-    'phonecatControllers',
+    'dgControllers',
     'jdrupal-ng'
 ]).config(function() {
   
@@ -156,7 +156,7 @@ var phonecatApp = angular.module('phonecatApp', [
   
 }).run(['$rootScope', '$routeParams', '$location', function($rootScope, $routeParams, $location) {
 
-      dpm('phonecatApp.run()');
+      dpm('dgApp.run()');
       //console.log(arguments);
 
       drupalgap_ng_set('routeParams', $routeParams);
@@ -193,7 +193,7 @@ angular.module('jdrupal-ng').config(function($provide) {
 });
 
 // CONFIGURE HOOK_MENU() ITEMS AS ANGULAR ROUTES
-phonecatApp.config(['$routeProvider',
+dgApp.config(['$routeProvider',
   function($routeProvider) {
 
     dpm('config() - building route provider...');
@@ -208,7 +208,7 @@ phonecatApp.config(['$routeProvider',
 
       // Skip 'MENU_DEFAULT_LOCAL_TASK' items.
       if (menu_link.type == 'MENU_DEFAULT_LOCAL_TASK') {
-        console.log('WARNING: phonecatApp - deprecated | MENU_DEFAULT_LOCAL_TASK on path: ' + path);
+        console.log('WARNING: dgApp - deprecated | MENU_DEFAULT_LOCAL_TASK on path: ' + path);
         continue;
       }
 
@@ -226,7 +226,7 @@ phonecatApp.config(['$routeProvider',
         menu_link.controller = 'drupalgap_goto_controller';
       }
       else if (!menu_link.controller) {
-        console.log('WARNING: phonecatApp - routeProvider | no controller provided for path: ' + path);
+        console.log('WARNING: dgApp - routeProvider | no controller provided for path: ' + path);
       }
 
       // Add the menu link to Angular's routeProvider.

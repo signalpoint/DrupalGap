@@ -1,6 +1,6 @@
 // Used to render the "dg-page" directive attribute from the theme's
 // page.tpl.html file.
-phonecatApp.directive("dgPage", function($compile) {
+dgApp.directive("dgPage", function($compile) {
     dpm('dgPage');
     return {
       link: function(scope, element) {
@@ -27,7 +27,7 @@ phonecatApp.directive("dgPage", function($compile) {
     };
 });
 
-phonecatApp.controller('drupalgap_goto_controller', ['$scope', '$sce', '$route', '$location', '$routeParams',
+dgApp.controller('drupalgap_goto_controller', ['$scope', '$sce', '$route', '$location', '$routeParams',
   function($scope, $sce, $route, $location, $routeParams) {
     try {
 

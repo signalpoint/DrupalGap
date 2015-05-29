@@ -1,7 +1,7 @@
 var _system_reload_page = null;
 var _system_reload_messages = null;
 
-phonecatApp.directive("dgMain", function($compile, $injector) {
+dgApp.directive("dgMain", function($compile, $injector) {
     dpm('dgMain');
     return {
       link: function(scope, element) {
@@ -22,7 +22,7 @@ phonecatApp.directive("dgMain", function($compile, $injector) {
     };
 });
 
-phonecatApp.directive("systemDashboardPage", function($compile) {
+dgApp.directive("systemDashboardPage", function($compile) {
     dpm('systemDashboardPage');
     return {
       link: function(scope, element) {

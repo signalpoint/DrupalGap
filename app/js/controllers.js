@@ -2,5 +2,5 @@
 
 /* Controllers */
 
-var phonecatControllers = angular.module('phonecatControllers', []);
+var dgControllers = angular.module('dgControllers', []);
 

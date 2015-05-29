@@ -17,7 +17,7 @@ function _drupalgap_entity_view(entity_type, entity_id, mode) {
   catch (error) { console.log('_drupalgap_entity_view - ' + error); }
 }
 
-phonecatControllers.directive("drupalgapEntityDirective", function($compile) {
+dgControllers.directive("drupalgapEntityDirective", function($compile) {
     return {
       
       controller: function($scope, $element, $http, jdrupal) {

@@ -267,14 +267,6 @@ function _drupalgap_deviceready_options() {
   catch (error) { console.log('_drupalgap_deviceready_options - ' + error); }
 }
 
-/*phonecatControllers.controller('drupalgap_bootstrap_controller', ['$scope',
-  function($scope) {
-    try {
-      drupalgap_bootstrap($scope);
-    }
-    catch (error) { console.log('drupalgap_bootstrap_controller - ' + error); }
-  }]);*/
-
 /**
  * Loads up all necessary assets to make DrupalGap ready.
  */

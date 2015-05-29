@@ -1,4 +1,4 @@
-phonecatControllers.controller('hook_field_formatter_view',
+dgControllers.controller('hook_field_formatter_view',
   [ '$scope', '$element', function($scope, $element) {
     try {
 
@@ -122,7 +122,7 @@ phonecatControllers.controller('hook_field_formatter_view',
   } ]
 );
 
-phonecatControllers.directive("hookFieldWidgetForm", function($compile) {
+dgControllers.directive("hookFieldWidgetForm", function($compile) {
     dpm('hookFieldWidgetForm');
     return {
       //transclude: true,
@@ -197,7 +197,7 @@ phonecatControllers.directive("hookFieldWidgetForm", function($compile) {
     };
 });
 
-phonecatControllers.controller('hook_field_widget_form',
+dgControllers.controller('hook_field_widget_form',
   [ '$scope', '$element', function($scope, $element) {
     try {
 
