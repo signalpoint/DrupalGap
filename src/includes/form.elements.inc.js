@@ -6,34 +6,31 @@
  */
 function _drupalgap_form_render_element(form, element) {
   try {
-    dpm('_drupalgap_form_render_element');
-    console.log(element);
+    //dpm('_drupalgap_form_render_element');
+    //console.log(element);
     var attrs = drupalgap_attributes({
         'dg-form-element': '',
         element_name: element.name,
         'class': drupalgap_form_get_element_container_class(name)
     });
     return '<div ' + attrs + '></div>';
-    
-    //{{' + element.name + '}}
   }
   catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
 }
 
 dgControllers.directive("dgFormElement", function($compile) {
-    dpm('dgFormElement');
+    //dpm('dgFormElement');
     return {
       link: function($scope, $element) {
         
-        dpm('dgFormElement - link...');
-        console.log(arguments);
-        //return;
+        //dpm('dgFormElement - link...');
+        //console.log(arguments);
         
         var form = $scope.$parent.form;
         if (!form) { form = drupalgap_form_local_storage_load(drupalgap.form_id); }
         
         var element = form.elements[$element.attr('element_name')];
-        console.log(element);
+        //console.log(element);
         
         var html = '';
     
@@ -503,8 +500,8 @@ function _drupalgap_form_render_elements(form) {
  */
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
-    dpm('_drupalgap_form_render_element_item');
-    console.log(arguments);
+    //dpm('_drupalgap_form_render_element_item');
+    //console.log(arguments);
     
     var html = '';
     // Depending on the element type, if necessary, adjust the variables and/or
