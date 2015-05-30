@@ -1,7 +1,7 @@
 dgApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
       
-      dpm('dgForm');
-      console.log(arguments);
+      //dpm('dgForm');
+      //console.log(arguments);
       
     return {
         /* require: [] */ // <= multiple controllers....?
@@ -10,9 +10,12 @@ dgApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
         controller: function($scope, $element, $attrs, jdrupal) {
           
           dpm('dgForm controller');
-          console.log(arguments);
+          //console.log(arguments);
 
-          $scope.form = drupalgap_form_load($attrs.id);
+          // Load the form, and set a default form state if one doesn't exist.
+          $scope.form = drupalgap_form_load.apply(null,
+            Array.prototype.slice.call(dg_ng_get('dgFormArguments'))
+          );
           if (!$scope.form_state) { $scope.form_state = { values: { } } };
           
           // FORM SUBMIT HANDLER
@@ -193,15 +196,22 @@ function drupalgap_form_defaults(form_id) {
  */
 function drupalgap_get_form(form_id) {
   try {
+    dpm('drupalgap_get_form');
+    console.log(arguments);
+    
+    // Set aside the arguments, that way they can be used in the dgForm
+    // directive's controller and passed along to the form builder function.
+    // @TODO this should be keyed by form id so we can have multiple forms on a
+    // page.
+    dg_ng_set('dgFormArguments', arguments);
+    
+    // Build the attributes and directive for the form, and return it.
     var attrs = drupalgap_attributes({
       id: form_id,
-      'dg-form': '', // dgForm directive
+      'dg-form': ''
     });
     return '<form ' + attrs  + '></form>';
-    /*var form = drupalgap_form_load.apply(
-      null,
-      Array.prototype.slice.call(arguments)
-    );*/
+
   }
   catch (error) { console.log('drupalgap_get_form - ' + error); }
 }
