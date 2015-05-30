@@ -24,7 +24,7 @@ var dgApp = angular.module('dgApp', [
   drupalgap_service_resource_extract_results({
       service: 'system',
       resource: 'connect',
-      data: JSON.parse(drupalgap_file_get_contents('js/drupalgap_connect.json'))
+      data: JSON.parse(drupalgap_file_get_contents('app/js/drupalgap_connect.json'))
   });
 
 }).config(function() {
