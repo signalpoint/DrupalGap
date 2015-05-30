@@ -1,3 +1,26 @@
+
+
+dgApp.directive("nodeAddPageByType", ['$compile', '$routeParams', function($compile, $routeParams) {
+    dpm('nodeAddPageByType');
+    return {
+      link: function(scope, element) {
+        
+        dpm('nodeAddPageByType - link...');
+        console.log($routeParams);
+
+        // Compile the template for Angular and append it to the directive's
+        // html element.
+        var linkFn = $compile(drupalgap_get_form(
+          'node_edit',
+          { type: $routeParams.bundle }
+        ));
+        var content = linkFn(scope);
+        element.append(content);
+
+      }
+    };
+}]);
+
 /**
  * Given a node, this determines if the current user has access to it. Returns
  * true if so, false otherwise. This function implementation is incomplete, use
@@ -54,12 +77,12 @@ function node_add_page() {
  * @param {String} type
  * @return {Object}
  */
-function node_add_page_by_type(type) {
+/*function node_add_page_by_type(type) {
   try {
     return drupalgap_get_form('node_edit', {'type': type});
   }
   catch (error) { console.log('node_add_page_by_type - ' + error); }
-}
+}*/
 
 /**
  * Title call back function for node/add/[type].
