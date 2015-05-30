@@ -160,8 +160,15 @@ function user_register_form_validate(form, form_state) {
  * @param {Object} form
  * @param {Object} form_state
  */
-function user_register_form_submit(form, form_state) {
+function user_register_form_submit(form, form_state, jdrupal) {
   try {
+    console.log(form);
+    console.log(form_state);
+    return jdrupal.user_register(form_state.values).success(function(result) {
+        dpm('w00t');
+        console.log(result);
+    });
+    
     var account = drupalgap_entity_build_from_form_state(form, form_state);
     user_register(account, {
       success: function(data) {
