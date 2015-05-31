@@ -97,6 +97,18 @@ function drupalgap_kill_camel_case(str, separator) {
   catch (error) { console.log('drupalgap_kill_camel_case - ' + error); }
 }
 
+/**
+ * Returns true if the directive exists, false otherwise.
+ * @param {Object} $injector
+ * @param {String} directive The directive name.
+ */
+function dg_directive_exists($injector, directive) {
+  try {
+    return $injector.has(directive + 'Directive');
+  }
+  catch (error) { console.log('dg_directive_exists - ' + error); }
+}
+
 
 
 /**
