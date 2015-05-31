@@ -27,16 +27,18 @@ function menu_execute_active_handler($compile, $injector) {
     // for its existence. If it exists use the directive to render the page,
     // otherwise use the traditional page_callback mechanism...
     var directive = drupalgap_get_camel_case(function_name);
-    if ($injector.has(directive + 'Directive')) {
+    if (dg_directive_exists($injector, directive)) {
       var directive_attr_name = drupalgap_kill_camel_case(directive, '-').toLowerCase();
+      var attrs = { };
+      attrs[directive_attr_name] = '';
       return {
         content: {
-          markup: '<div ' + directive_attr_name + '></div>'
+          markup: '<div ' + drupalgap_attributes(attrs) + '></div>'
         }
       };
     }
     
-    // We're not using a directive to render the page, so...
+    // There is no directive to render the page, so...
     console.log('DEPRECATED: the page_callback function ' + function_name + '() should to be turned into an Angular directive called: ' + directive);
 
     // Call the page call back for this router path and send along any
