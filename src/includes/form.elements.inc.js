@@ -18,7 +18,7 @@ function _drupalgap_form_render_element(form, element) {
   catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
 }
 
-dgControllers.directive("dgFormElement", function($compile) {
+dgControllers.directive("dgFormElement", function($compile, $injector) {
     //dpm('dgFormElement');
     return {
       link: function($scope, $element) {
@@ -161,20 +161,47 @@ dgControllers.directive("dgFormElement", function($compile) {
             if (typeof item.value !== 'undefined') {
               variables.attributes.value = item.value;
             }
+            
+            // If this is a field, is there a directive available to handle the
+            // field's widget form?
+            if (element.is_field) {
+              var directive_name = drupalgap_get_camel_case(field_widget_form_function_name);
+              dpm('looking for directive: ' + directive_name);
+              if (dg_directive_exists($injector, directive_name)) {
+                
+                // Place variables into the scope so the hookFieldWidgetForm
+                // implementor will have access to them.
+                $scope.form = form;
+                $scope.form_state = null
+                $scope.field = element.field_info_field;
+                $scope.instance = element.field_info_instance;
+                $scope.items = items;
+                $scope.delta = delta;
+                $scope.element = element;
+
+                // Set up basic widget attributes.
+                var attrs = {
+                  field_name: name,
+                  field_widget_form: field_widget_form_function_name,
+                  delta: delta,
+                  language: language
+                };
+
+                // Add the directive's attribute and then render the container.
+                attrs[field_widget_form_function_name.replace(/_/g, '-')] = '';
+                item_html += '<div ' + drupalgap_attributes(attrs) + '>{{' + name + '}}</div>';
+
+              }
+              else {
+                console.log('WARNING: you must change ' + field_widget_form_function_name + '() to a directive called ' + directive_name);
+              }
+            }
     
             // HOOK_FIELD_WIDGET_FORM VIEW
             // Call the hook_field_widget_form() if necessary. Merge any changes
             // to the item back into this item.
             if (field_widget_form_function) {
-              var attrs = drupalgap_attributes({
-                'hook-field-widget-form': '',
-                field_name: name,
-                field_widget_form: field_widget_form_function_name,
-                delta: delta,
-                language: language,
-                //'ng-init': 'init(variables)'
-              });
-              html += '<div ' + attrs + '>{{' + name + '}}</div>';
+              
               /*field_widget_form_function.apply(
                 null, [
                   form,
