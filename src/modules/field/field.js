@@ -414,6 +414,7 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
     switch (element.type) {
       case 'number_integer':
       case 'number_float':
+      case 'number_decimal':
       case 'range':
         // Change the form element into a number, unless we're using a range
         // slider. Then set its min/max attributes along with the step.
@@ -426,6 +427,7 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
         }
         var step = 1;
         if (element.type == 'number_float') { step = 0.01; }
+        if (element.type == 'number_decimal') { step = 0.01; }
         items[delta].options.attributes['step'] = step;
         break;
       default:
