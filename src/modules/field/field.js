@@ -1,3 +1,40 @@
+/**
+ *
+ */
+function dgFieldWidgetFormCompile($compile, $scope, $element) {
+  try {
+    // Merge element attributes into the variables object.
+      /*dpm('merging elements');
+      if (
+        form.elements[field_name][language][delta].options &&
+        form.elements[field_name][language][delta].options.attributes
+      ) {
+        variables.attributes = $.extend(
+          true,
+          variables.attributes,
+          form.elements[field_name][language][delta].options.attributes
+        );
+      }
+      //if (!item.type && element.type) { item.type = element.type; }
+      console.log(form);*/
+        
+        // Render the element into the scope.  
+        // Compile the template for Angular and append it to the directive's
+        // html element.
+        //dpm('compiling element');
+        //console.log($scope);
+        var linkFn = $compile(_drupalgap_form_render_element_item(
+          $scope.form,
+          $scope.element, // form.elements[field_name]
+          $scope.variables,
+          $scope.element[$scope.language][$scope.delta]
+        ));
+        var content = linkFn($scope);
+        $element.append(content);
+  }
+  catch (error) { console.log('dgFieldWidgetFormCompile - ' + error); }
+}
+
 dgControllers.controller('hook_field_formatter_view',
   [ '$scope', '$element', function($scope, $element) {
     try {
@@ -122,6 +159,7 @@ dgControllers.controller('hook_field_formatter_view',
   } ]
 );
 
+
 dgControllers.directive("hookFieldWidgetForm", function($compile) {
     dpm('hookFieldWidgetForm');
     return {
@@ -164,34 +202,7 @@ dgControllers.directive("hookFieldWidgetForm", function($compile) {
       ]);
       console.log(form);
       
-      // Merge element attributes into the variables object.
-      dpm('merging elements');
-      if (
-        form.elements[field_name][language][delta].options &&
-        form.elements[field_name][language][delta].options.attributes
-      ) {
-        variables.attributes = $.extend(
-          true,
-          variables.attributes,
-          form.elements[field_name][language][delta].options.attributes
-        );
-      }
-      //if (!item.type && element.type) { item.type = element.type; }
-      console.log(form);
-        
-        // Render the element into the scope.  
-        // Compile the template for Angular and append it to the directive's
-        // html element.
-        dpm('compiling element');
-        console.log(form);
-        var linkFn = $compile(_drupalgap_form_render_element_item(
-          form,
-          form.elements[field_name],
-          variables,
-          form.elements[field_name][language][delta]
-        ));
-        var content = linkFn(scope);
-        element.append(content);
+      
 
       }
     };
@@ -989,33 +1000,30 @@ function text_field_formatter_view(entity_type, entity, field, instance,
   catch (error) { console.log('text_field_formatter_view - ' + error); }
 }
 
-/**
- * Implements hook_field_widget_form().
- * @param {Object} form
- * @param {Object} form_state
- * @param {Object} field
- * @param {Object} instance
- * @param {String} langcode
- * @param {Object} items
- * @param {Number} delta
- * @param {Object} element
- */
-function text_field_widget_form(form, form_state, field, instance, langcode,
-  items, delta, element) {
-  try {
-    // Determine the widget type, then set the delta item's type property.
-    var type = null;
-    switch (element.type) {
-      case 'search': type = 'search'; break;
-      case 'text': type = 'textfield'; break;
-      case 'textarea':
-      case 'text_long':
-      case 'text_with_summary':
-      case 'text_textarea':
-        type = 'textarea';
-    }
-    items[delta].type = type;
-  }
-  catch (error) { console.log('text_field_widget_form - ' + error); }
-}
+dgApp.directive('textFieldWidgetForm', ['$compile', function($compile) {
+      return {
+        link: function($scope, $element) {
+
+          //dpm('textFieldWidgetForm link');
+          //console.log(arguments);
+          
+          // Determine the widget type, then set the delta item's type property.
+          var type = null;
+          switch ($scope.element.type) {
+            case 'search': type = 'search'; break;
+            case 'text': type = 'textfield'; break;
+            case 'textarea':
+            case 'text_long':
+            case 'text_with_summary':
+            case 'text_textarea':
+              type = 'textarea';
+          }
+          $scope.items[$scope.delta].type = type;
+          
+          // Compile the widget.
+          dgFieldWidgetFormCompile($compile, $scope, $element);
+
+        }
+      };
+}]);
 
