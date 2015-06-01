@@ -26,9 +26,9 @@ function menu_execute_active_handler($compile, $injector) {
     // Determine the directive's name that may handle this route, and then check
     // for its existence. If it exists use the directive to render the page,
     // otherwise use the traditional page_callback mechanism...
-    var directive = drupalgap_get_camel_case(function_name);
+    var directive = dg_get_camel_case(function_name);
     if (dg_directive_exists($injector, directive)) {
-      var directive_attr_name = drupalgap_kill_camel_case(directive, '-').toLowerCase();
+      var directive_attr_name = dg_kill_camel_case(directive, '-').toLowerCase();
       var attrs = { };
       attrs[directive_attr_name] = '';
       return {
