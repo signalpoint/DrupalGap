@@ -151,24 +151,6 @@ function drupalgap_entity_add_core_fields_to_form(entity_type, bundle,
 }
 
 /**
- * Deprecated! Given an entity type, the bundle, the entity (assembled from form
- * state values) and any options, this assembles the ?data= string for the
- * entity service resource call URLs.
- * @param {String} entity_type
- * @param {String} bundle
- * @param {Object} entity
- * @param {Object} options
- */
-function drupalgap_entity_assemble_data(entity_type, bundle, entity, options) {
-  try {
-    console.log('WARNING: drupalgap_entity_assemble_data() has been ' +
-      'deprecated! Now just call e.g. node_save() for auto assembly.');
-    return;
-  }
-  catch (error) { console.log('drupalgap_entity_assemble_data - ' + error); }
-}
-
-/**
  * Returns the 'Delete' button object that is used on entity edit forms.
  * @param {String} entity_type
  * @param {Number} entity_id
