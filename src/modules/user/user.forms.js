@@ -1,228 +1,239 @@
-/**
- * The user login form.
- * @param {Object} form
- * @param {Object} form_state
- * @return {Object}
- */
-function user_login_form(form, form_state) {
-  try {
-    form.entity_type = 'user';
-    form.bundle = null;
-    form.elements.name = {
-      type: 'textfield',
-      title: t('Username'),
-      title_placeholder: true,
-      required: true
-    };
-    form.elements.pass = {
-      type: 'password',
-      title: t('Password'),
-      title_placeholder: true,
-      required: true,
-      attributes: {
-        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
-      }
-    };
-    form.elements.submit = {
-      type: 'submit',
-      value: t('Login')
-    };
-    if (user_register_access()) {
-      form.buttons['create_new_account'] = {
-        title: t('Create new account'),
-        attributes: {
-          onclick: "drupalgap_goto('user/register')"
-        }
-      };
-    }
-    form.buttons['forgot_password'] = {
-      title: t('Request new password'),
-        attributes: {
-          onclick: "drupalgap_goto('user/password')"
-        }
-    };
-    return form;
-  }
-  catch (error) { console.log('user_login_form - ' + error); }
-}
+dgApp.directive("userLoginForm", function($compile) {
+    return {
 
-/**
- * The user login form submit handler.
- * @param {Object} form
- * @param {Object} form_state
- */
-function user_login_form_submit(form, form_state, jdrupal) {
-  try {
-    jdrupal.user_login(form_state.values.name, form_state.values.pass).success(function(result) {
-        drupalgap_goto(drupalgap.settings.front);
-    });
-  }
-  catch (error) { console.log('user_login_form_submit - ' + error); }
-}
+      controller: function($scope, jdrupal) {
 
-/**
- * The user registration form.
- * @param {Object} form
- * @param {Object} form_state
- * @return {Object}
- */
-function user_register_form(form, form_state) {
-  try {
-    form.entity_type = 'user';
-    form.bundle = null;
-    form.elements.name = {
-      type: 'textfield',
-      title: t('Username'),
-      title_placeholder: true,
-      required: true,
-      description: t('Spaces are allowed; punctuation is not allowed except ' +
-        'for periods, hyphens, apostrophes, and underscores.')
-    };
-    form.elements.mail = {
-      type: 'email',
-      title: t('E-mail address'),
-      title_placeholder: true,
-      required: true
-    };
-    // If e-mail verification is not requred, provide password fields and
-    // the confirm e-mail address field.
-    if (!drupalgap.site_settings.user_email_verification) {
-      form.elements.conf_mail = {
-        type: 'email',
-        title: t('Confirm e-mail address'),
-        title_placeholder: true,
-        required: true
-      };
-      form.elements.pass = {
-        type: 'password',
-        title: t('Password'),
-        title_placeholder: true,
-        required: true
-      };
-      form.elements.pass2 = {
-        type: 'password',
-        title: t('Confirm password'),
-        title_placeholder: true,
-        required: true
-      };
-    }
-    // @todo - instead of a null bundle, it appears drupal uses the bundle
-    // 'user' instead.
-    drupalgap_field_info_instances_add_to_form('user', null, form, null);
-    // Add registration messages to form.
-    form.user_register = {
-      'user_mail_register_no_approval_required_body':
-        t('Registration complete!'),
-      'user_mail_register_pending_approval_required_body':
-        t('Registration complete, waiting for administrator approval.'),
-      'user_mail_register_email_verification_body':
-        t('Registration complete, check your e-mail inbox to verify the ' +
-          'account.')
-    };
-    // Set the auto login boolean. This only happens when the site's account
-    // settings require no e-mail verification. Others can stop this from
-    // happening via hook_form_alter().
-    form.auto_user_login = true;
-    // Add submit button.
-    form.elements.submit = {
-      'type': 'submit',
-      'value': t('Create new account')
-    };
-    return form;
-  }
-  catch (error) { console.log('user_register_form - ' + error); }
-}
+        // Set up form defaults.
+        var form = dg_form_defaults("user_login_form", $scope);
 
-/**
- * Define the form's validation function (optional).
- * @param {Object} form
- * @param {Object} form_state
- */
-function user_register_form_validate(form, form_state) {
-  try {
-    // If e-mail verification is not required, make sure the passwords match.
-    if (!drupalgap.site_settings.user_email_verification &&
-      form_state.values.pass != form_state.values.pass2) {
-      drupalgap_form_set_error('pass', t('Passwords do not match!'));
-    }
-    // If there are two e-mail address fields on the form, make sure they match.
-    if (!empty(form_state.values.mail) && !empty(form_state.values.conf_mail) &&
-      form_state.values.mail != form_state.values.conf_mail
-    ) { drupalgap_form_set_error('mail', t('E-mail addresses do not match!')); }
-  }
-  catch (error) {
-    console.log('user_register_form_validate - ' + error);
-  }
-}
-
-/**
- * The user registration form submit handler.
- * @param {Object} form
- * @param {Object} form_state
- */
-function user_register_form_submit(form, form_state, jdrupal) {
-  try {
-    console.log(form);
-    console.log(form_state);
-    return jdrupal.user_register(form_state.values).success(function(result) {
-        dpm('w00t');
-        console.log(result);
-    });
-    
-    var account = drupalgap_entity_build_from_form_state(form, form_state);
-    user_register(account, {
-      success: function(data) {
-        var config = form.user_register;
-        var options = {
-          title: t('Registered')
+        // Build form elements.
+        form.entity_type = 'user';
+        form.bundle = null;
+        form.elements.name = {
+          type: 'textfield',
+          title: t('Username'),
+          title_placeholder: true,
+          required: true
         };
-        // Check if e-mail verification is required or not..
-        if (!drupalgap.site_settings.user_email_verification) {
-          // E-mail verification not needed, if administrator approval is
-          // needed, notify the user, otherwise log them in.
-          if (drupalgap.site_settings.user_register == '2') {
-            drupalgap_alert(
-              config.user_mail_register_pending_approval_required_body,
-              options
-            );
-            drupalgap_goto('');
+        form.elements.pass = {
+          type: 'password',
+          title: t('Password'),
+          title_placeholder: true,
+          required: true,
+          attributes: {
+            onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
           }
-          else {
-            drupalgap_alert(
-              config.user_mail_register_no_approval_required_body,
-              options
-            );
-            // If we're automatically logging in do it, otherwise just go to
-            // the front page.
-            if (form.auto_user_login) {
-              user_login(account.name, account.pass, {
-                  success: function(result) {
+        };
+        form.elements.submit = {
+          type: 'submit',
+          value: t('Login')
+        };
+        if (user_register_access()) {
+          form.buttons['create_new_account'] = {
+            title: t('Create new account'),
+            attributes: {
+              onclick: "drupalgap_goto('user/register')"
+            }
+          };
+        }
+        form.buttons['forgot_password'] = {
+          title: t('Request new password'),
+            attributes: {
+              onclick: "drupalgap_goto('user/password')"
+            }
+        };
+
+        // Form submit handler.
+        form.submit.push(function(form, form_state) {
+            jdrupal.user_login(
+              form_state.values.name,
+              form_state.values.pass
+            ).success(function(result) {
+                drupalgap_goto(drupalgap.settings.front);
+            });
+        });
+
+        // Place the form into the scope.
+        $scope.form = form;
+
+      },
+
+      link: function(scope, element) {
+
+        // Add the form to the element.
+        element.append(dg_ng_compile_form($compile, scope));
+
+      }
+
+    };
+});
+
+dgApp.directive("userRegisterForm", function($compile) {
+    return {
+
+      controller: function($scope, jdrupal) {
+
+        // Set up form defaults.
+        var form = dg_form_defaults("user_register_form", $scope);
+
+        // Build form elements.
+        form.entity_type = 'user';
+        form.bundle = null;
+        form.elements.name = {
+          type: 'textfield',
+          title: t('Username'),
+          title_placeholder: true,
+          required: true,
+          description: t('Spaces are allowed; punctuation is not allowed except ' +
+            'for periods, hyphens, apostrophes, and underscores.')
+        };
+        form.elements.mail = {
+          type: 'email',
+          title: t('E-mail address'),
+          title_placeholder: true,
+          required: true
+        };
+
+        // If e-mail verification is not requred, provide password fields and
+        // the confirm e-mail address field.
+        if (!drupalgap.site_settings.user_email_verification) {
+          form.elements.conf_mail = {
+            type: 'email',
+            title: t('Confirm e-mail address'),
+            title_placeholder: true,
+            required: true
+          };
+          form.elements.pass = {
+            type: 'password',
+            title: t('Password'),
+            title_placeholder: true,
+            required: true
+          };
+          form.elements.pass2 = {
+            type: 'password',
+            title: t('Confirm password'),
+            title_placeholder: true,
+            required: true
+          };
+        }
+
+        // @todo - instead of a null bundle, it appears drupal uses the bundle
+        // 'user' instead.
+        drupalgap_field_info_instances_add_to_form('user', null, form, null);
+
+        // Add registration messages to form.
+        form.user_register = {
+          'user_mail_register_no_approval_required_body':
+            t('Registration complete!'),
+          'user_mail_register_pending_approval_required_body':
+            t('Registration complete, waiting for administrator approval.'),
+          'user_mail_register_email_verification_body':
+            t('Registration complete, check your e-mail inbox to verify the ' +
+              'account.')
+        };
+
+        // Set the auto login boolean. This only happens when the site's account
+        // settings require no e-mail verification. Others can stop this from
+        // happening via hook_form_alter().
+        form.auto_user_login = true;
+
+        // Add submit button.
+        form.elements.submit = {
+          'type': 'submit',
+          'value': t('Create new account')
+        };
+        
+        // Form validate handler.
+        form.validate.push(function(form, form_state) {
+            // If e-mail verification is not required, make sure the passwords match.
+            if (!drupalgap.site_settings.user_email_verification &&
+              form_state.values.pass != form_state.values.pass2) {
+              drupalgap_form_set_error('pass', t('Passwords do not match!'));
+            }
+            // If there are two e-mail address fields on the form, make sure they match.
+            if (!empty(form_state.values.mail) && !empty(form_state.values.conf_mail) &&
+              form_state.values.mail != form_state.values.conf_mail
+            ) { drupalgap_form_set_error('mail', t('E-mail addresses do not match!')); }
+        });
+
+        // Form submit handler.
+        form.submit.push(function(form, form_state) {
+            console.log(form);
+            console.log(form_state);
+            return jdrupal.user_register(form_state.values).success(function(result) {
+                dpm('w00t');
+                console.log(result);
+                // @TODO we're getting the token back here, and not the result
+                // of the user registration call!
+            });
+            
+            var account = drupalgap_entity_build_from_form_state(form, form_state);
+            user_register(account, {
+              success: function(data) {
+                var config = form.user_register;
+                var options = {
+                  title: t('Registered')
+                };
+                // Check if e-mail verification is required or not..
+                if (!drupalgap.site_settings.user_email_verification) {
+                  // E-mail verification not needed, if administrator approval is
+                  // needed, notify the user, otherwise log them in.
+                  if (drupalgap.site_settings.user_register == '2') {
+                    drupalgap_alert(
+                      config.user_mail_register_pending_approval_required_body,
+                      options
+                    );
                     drupalgap_goto('');
                   }
-              });
-            }
-            else { drupalgap_goto(''); }
-          }
-        }
-        else {
-          // E-mail verification needed... notify the user.
-          drupalgap_alert(
-            config.user_mail_register_email_verification_body,
-            options
-          );
-          drupalgap_goto('');
-        }
+                  else {
+                    drupalgap_alert(
+                      config.user_mail_register_no_approval_required_body,
+                      options
+                    );
+                    // If we're automatically logging in do it, otherwise just go to
+                    // the front page.
+                    if (form.auto_user_login) {
+                      user_login(account.name, account.pass, {
+                          success: function(result) {
+                            drupalgap_goto('');
+                          }
+                      });
+                    }
+                    else { drupalgap_goto(''); }
+                  }
+                }
+                else {
+                  // E-mail verification needed... notify the user.
+                  drupalgap_alert(
+                    config.user_mail_register_email_verification_body,
+                    options
+                  );
+                  drupalgap_goto('');
+                }
+              },
+              error: function(xhr, status, message) {
+                // If there were any form errors, display them.
+                var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
+                  status, message);
+                if (msg) { drupalgap_alert(msg); }
+              }
+            });
+        });
+
+        // Place the form into the scope.
+        $scope.form = form;
+
       },
-      error: function(xhr, status, message) {
-        // If there were any form errors, display them.
-        var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
-          status, message);
-        if (msg) { drupalgap_alert(msg); }
+
+      link: function(scope, element) {
+
+        // Add the form to the element.
+        element.append(dg_ng_compile_form($compile, scope));
+
       }
-    });
-  }
-  catch (error) { console.log('user_register_form_submit - ' + error); }
-}
+
+    };
+});
 
 /**
  * The user profile form.
