@@ -44,6 +44,17 @@ function drupalgap_ng_set(key, value) {
 }
 
 /**
+ *
+ */
+function dg_ng_compile($compile, $scope, html) {
+  try {
+    var linkFn = $compile(html);
+    return linkFn($scope);
+  }
+  catch (error) { console.log('dg_ng_compile - ' + error); }
+}
+
+/**
  * Converts a JSON object to an XML/HTML tag attribute string and returns the
  * string.
  * @param {Object} attributes
@@ -83,16 +94,41 @@ function drupalgap_attributes(attributes) {
  * will return "fooBar".
  * @see http://stackoverflow.com/a/2970667/763010
  */
-function drupalgap_get_camel_case(str) {
+function dg_get_camel_case(str) {
   try {
     return str.replace(/[-_]([a-z])/g, function (g) { return g[1].toUpperCase(); });
+  }
+  catch (error) { console.log('dg_get_camel_case - ' + error); }
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_get_camel_case(str) {
+  try {
+    console.log('DEPRECATED - drupalgap_get_camel_case(), use dg_get_camel_case() instead');
+    return dg_get_camel_case(str);
   }
   catch (error) { console.log('drupalgap_get_camel_case - ' + error); }
 }
 
-function drupalgap_kill_camel_case(str, separator) {
+/**
+ *
+ */
+function dg_kill_camel_case(str, separator) {
   try {
     return str.replace(/([A-Z])/g, separator + '$1');
+  }
+  catch (error) { console.log('dg_kill_camel_case - ' + error); }
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_kill_camel_case(str, separator) {
+  try {
+    console.log('DEPRECATED - drupalgap_kill_camel_case(), use dg_kill_camel_case() instead');
+    return dg_kill_camel_case(str, separator);
   }
   catch (error) { console.log('drupalgap_kill_camel_case - ' + error); }
 }
