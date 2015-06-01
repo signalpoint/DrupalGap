@@ -1,3 +1,4 @@
+// DEPRECATED
 dgApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
       
       //dpm('dgForm');
@@ -10,113 +11,13 @@ dgApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
         controller: function($scope, $element, $attrs, jdrupal) {
           
           dpm('dgForm controller');
-          //console.log(arguments);
+          console.log(arguments);
 
           // Load the form, and set a default form state if one doesn't exist.
           $scope.form = drupalgap_form_load.apply(null,
             Array.prototype.slice.call(dg_ng_get('dgFormArguments'))
           );
-          if (!$scope.form_state) { $scope.form_state = { values: { } } };
           
-          // FORM SUBMIT HANDLER
-          $scope.drupalgap_form_submit = function() {
-            var form = $scope.form;
-            var form_id = $attrs.id;
-            var form_state = $scope.form_state;
-            
-            // Load the form from local storage.
-            /*var form = drupalgap_form_local_storage_load(form_id);
-            if (!form) {
-              var msg = '_drupalgap_form_submit - ' + t('failed to load form') + ': ' +
-                form_id;
-              drupalgap_alert(msg);
-              return false;
-            }*/
-        
-            // Assemble the form state values.
-            // @UPDATE - this is now taken care of by Angular.
-            //var form_state = drupalgap_form_state_values_assemble(form);
-        
-            // Clear out previous form errors.
-            drupalgap.form_errors = {};
-        
-            // Build the form validation wrapper function.
-            var form_validation = function() {
-              try {
-        
-                // Call the form's validate function(s), if any.
-                for (var index in form.validate) {
-                    if (!form.validate.hasOwnProperty(index)) { continue; }
-                    var function_name = form.validate[index];
-                    var fn = window[function_name];
-                    fn.apply(null, Array.prototype.slice.call([form, form_state, jdrupal]));
-                }
-        
-                // Call drupalgap form's api validate.
-                _drupalgap_form_validate(form, form_state);
-        
-                // If there were validation errors, show the form errors and stop the
-                // form submission. Otherwise submit the form.
-                if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
-                  var html = '';
-                  for (var name in drupalgap.form_errors) {
-                      if (!drupalgap.form_errors.hasOwnProperty(name)) { continue; }
-                      var message = drupalgap.form_errors[name];
-                      html += message + '\n\n';
-                  }
-                  drupalgap_alert(html);
-                }
-                else { form_submission(); }
-              }
-              catch (error) {
-                console.log('_drupalgap_form_submit - form_validation - ' + error);
-              }
-            };
-        
-            // Build the form submission wrapper function.
-            var form_submission = function() {
-              try {
-                // Call the form's submit function(s), if any.
-                for (var index in form.submit) {
-                    if (!form.submit.hasOwnProperty(index)) { continue; }
-                    var function_name = form.submit[index];
-                    var fn = window[function_name];
-                    fn.apply(null, Array.prototype.slice.call([form, form_state, jdrupal]));
-                }
-                // Remove the form from local storage.
-                // @todo - we can't do this here because often times a form's submit
-                // handler makes asynchronous calls (i.e. user login) and although the
-                // form validated, server side may say the input was invalid, so the
-                // user will still be on the form, except we already removed the form.
-                //drupalgap_form_local_storage_delete(form_id);
-              }
-              catch (error) {
-                console.log('_drupalgap_form_submit - form_submission - ' + error);
-              }
-            };
-        
-            // Get ready to validate and submit the form, but first...
-        
-            // If this is an entity form, and there is an image field on the form, we
-            // need to asynchronously process the image field, then continue onward
-            // with normal form validation and submission.
-            if (form.entity_type &&
-              image_fields_present_on_entity_type(form.entity_type, form.bundle)
-            ) {
-              _image_field_form_process(form, form_state, {
-                  success: form_validation
-              });
-            }
-            else {
-              // There were no image fields on the form, proceed normally with form
-              // validation, which will in turn process the submission if there are no
-              // validation errors.
-              form_validation();
-            }
-            
-            
-            
-          }
         },
         
         // LINK
@@ -133,6 +34,16 @@ dgApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
         },
     };
 }]);
+
+/**
+ *
+ */
+function dg_ng_compile_form($compile, $scope) {
+  try {
+    return dg_ng_compile($compile, $scope, drupalgap_form_render($scope.form));
+  }
+  catch (error) { console.log('dg_ng_compile_form - ' + error); }
+}
 
 /**
  * Given a scope from a form's controller, this will attach default properties
@@ -153,9 +64,10 @@ function drupalgap_form_scope_defaults($scope) {
  * @param {String} form_id
  * @return {Object}
  */
-function drupalgap_form_defaults(form_id) {
+function dg_form_defaults(form_id, $scope) {
   try {
     var form = {};
+    
     // Set the form id, elements, buttons, options and attributes.
     form.id = form_id;
     form.elements = {};
@@ -166,24 +78,120 @@ function drupalgap_form_defaults(form_id) {
         'class': ''
       }
     };
+    
     // Create a prefix and suffix.
     form.prefix = '';
     form.suffix = '';
-    // Create empty arrays for the form's validation and submission handlers,
-    // then add the default call back functions to their respective array, if
-    // they exist.
+    
+    // Create empty arrays for the form's validation and submission handlers.
     form.validate = [];
     form.submit = [];
-    var validate_function_name = form.id + '_validate';
-    if (drupalgap_function_exists(validate_function_name)) {
-      form.validate.push(validate_function_name);
+    
+    if (!$scope.form_state) { $scope.form_state = { values: { } } };
+    
+    // FORM SUBMIT HANDLER
+    $scope.drupalgap_form_submit = function() {
+      
+      //dpm('drupalgap_form_submit');
+      //console.log(arguments);
+      
+      // Extract the form and its id along with the form state, from the scope.
+      // Remember the form state values are automatically assembled by Angular,
+      // unlike DrupalGap 1.x where we assembled them manually.
+      var form = $scope.form;
+      var form_state = $scope.form_state;
+      var form_id = form.id;
+      //console.log(form);
+      //console.log(form_state);
+      //console.log(form_id);
+  
+      // Clear out previous form errors.
+      drupalgap.form_errors = {};
+  
+      // Build the form validation wrapper function.
+      var form_validation = function() {
+        try {
+  
+          // Call the form's validate function(s), if any.
+          for (var index in form.validate) {
+              if (!form.validate.hasOwnProperty(index)) { continue; }
+              var fn = form.validate[index];
+              fn.apply(null, Array.prototype.slice.call([form, form_state]));
+          }
+  
+          // Call drupalgap form's api validate.
+          _drupalgap_form_validate(form, form_state);
+  
+          // If there were validation errors, show the form errors and stop the
+          // form submission. Otherwise submit the form.
+          if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
+            var html = '';
+            for (var name in drupalgap.form_errors) {
+                if (!drupalgap.form_errors.hasOwnProperty(name)) { continue; }
+                var message = drupalgap.form_errors[name];
+                html += message + '\n\n';
+            }
+            drupalgap_alert(html);
+          }
+          else { form_submission(); }
+
+        }
+        catch (error) {
+          console.log('_drupalgap_form_submit - form_validation - ' + error);
+        }
+      };
+  
+      // Build the form submission wrapper function.
+      var form_submission = function() {
+        try {
+          // Call the form's submit function(s), if any.
+          for (var index in form.submit) {
+              if (!form.submit.hasOwnProperty(index)) { continue; }
+              var fn = form.submit[index];
+              fn.apply(null, Array.prototype.slice.call([form, form_state]));
+          }
+        }
+        catch (error) {
+          console.log('_drupalgap_form_submit - form_submission - ' + error);
+        }
+      };
+  
+      // Get ready to validate and submit the form, but first...
+  
+      // If this is an entity form, and there is an image field on the form, we
+      // need to asynchronously process the image field, then continue onward
+      // with normal form validation and submission.
+      if (form.entity_type &&
+        image_fields_present_on_entity_type(form.entity_type, form.bundle)
+      ) {
+        _image_field_form_process(form, form_state, {
+            success: form_validation
+        });
+      }
+      else {
+        // There were no image fields on the form, proceed normally with form
+        // validation, which will in turn process the submission if there are no
+        // validation errors.
+        form_validation();
+      }
+      
+      
+      
     }
-    var submit_function_name = form.id + '_submit';
-    if (drupalgap_function_exists(submit_function_name)) {
-      form.submit.push(submit_function_name);
-    }
+
     // Finally, return the form.
     return form;
+  }
+  catch (error) { console.log('dg_form_defaults - ' + error); }
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_form_defaults(form_id) {
+  try {
+    console.log('DEPRECATED - drupalgap_form_defaults(), use dg_form_defaults() instead');
+    return dg_form_defaults(form_id);
   }
   catch (error) { console.log('drupalgap_form_defaults - ' + error); }
 }
@@ -193,9 +201,14 @@ function drupalgap_form_defaults(form_id) {
  * dgForm.
  * @param {String} form_id
  * @return {String}
+ * @deprecated
  */
 function drupalgap_get_form(form_id) {
   try {
+    
+    console.log('DEPRECATED - drupalgap_get_form() - use a directive instead with the name: ' + dg_get_camel_case(form_id));
+    return;
+    
     dpm('drupalgap_get_form');
     console.log(arguments);
     
@@ -272,82 +285,8 @@ function drupalgap_form_load(form_id) {
           Array.prototype.slice.call(consolidated_arguments)
         );
       }
-
-      // Set empty options and attributes properties on each form element if the
-      // element does not yet have any. This allows others to more easily modify
-      // options and attributes on an element without having to worry about
-      // testing for nulls and creating empty properties first.
-      for (var name in form.elements) {
-          if (!form.elements.hasOwnProperty(name)) { continue; }
-          var element = form.elements[name];
-          // If this element is a field, load its field_info_field and
-          // field_info_instance onto the element.
-          var element_is_field = false;
-          var field_info_field = drupalgap_field_info_field(name);
-          if (field_info_field) {
-            element_is_field = true;
-            form.elements[name].field_info_field = field_info_field;
-            form.elements[name].field_info_instance =
-              drupalgap_field_info_instance(
-                form.entity_type,
-                name,
-                form.bundle
-              );
-          }
-          form.elements[name].is_field = element_is_field;
-          // Set the name property on the element if it isn't already set.
-          if (!form.elements[name].name) { form.elements[name].name = name; }
-          // If the element is a field, we'll append a language code and delta
-          // value to the element id, along with the field items appended
-          // onto the element using the language code and delta values.
-          var id = null;
-          if (element_is_field) {
-            // What's the number of allowed values (cardinality) on this field?
-            // A cardinality of -1 means the field has unlimited values.
-            var cardinality = parseInt(element.field_info_field.cardinality);
-            if (cardinality == -1) {
-              cardinality = 1; // we'll just add one element for now, until we
-                               // figure out how to handle the 'add another
-                               // item' feature.
-            }
-            // Initialize the item collections language code if it hasn't been.
-            if (!form.elements[name][language]) {
-              form.elements[name][language] = {};
-            }
-            // Prepare the item(s) for this element.
-            for (var delta = 0; delta < cardinality; delta++) {
-              // Prepare some item defaults.
-              var item = drupalgap_form_element_item_create(
-                name,
-                form,
-                language,
-                delta
-              );
-              // If the delta for this item hasn't been created on the element,
-              // create it using the default item values. Otherwise, merge the
-              // default values into the pre existing item on the element.
-              if (!form.elements[name][language][delta]) {
-                form.elements[name][language][delta] = item;
-              }
-              else {
-                $.extend(true, form.elements[name][language][delta], item);
-              }
-            }
-          }
-          else {
-            // This element is not a field, setup default options if none
-            // have been provided. Then set the element id.
-            if (!element.options) {
-              form.elements[name].options = {attributes: {}};
-            }
-            else if (!element.options.attributes) {
-              form.elements[name].options.attributes = {};
-            }
-            id = drupalgap_form_get_element_id(name, form.id);
-            form.elements[name].id = id;
-            form.elements[name].options.attributes.id = id;
-          }
-      }
+      
+      dg_form_element_set_empty_options_and_attributes(form, language_default());
 
       // Give modules an opportunity to alter the form.
       module_invoke_all('form_alter', form, null, form_id);
@@ -401,16 +340,18 @@ function drupalgap_form_render(form) {
 
     // Render the form's input elements.
     var form_elements = _drupalgap_form_render_elements(form);
+    //var directive = form.id.replace(/_/g, '-');
+    //var form_elements = '<' + directive + '></' + directive + '>';
     
     // @TODO migrate up the stack in angular
     //var form_attributes = drupalgap_attributes(form.options.attributes);
     
     // Return the form html.
-    var form_html =
+    var form_html = '<form ' + drupalgap_attributes(form.options.attributes) + '>' +
       prefix +
       '<div id="drupalgap_form_errors"></div>' +
       form_elements +
-      suffix
+      suffix + '</form>';
     return form_html;
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
