@@ -23,11 +23,11 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
     return {
       link: function($scope, $element) {
         
-        //dpm('dgFormElement - link...');
-        //console.log(arguments);
+        dpm('dgFormElement - link...');
+        //console.log($element);
         
-        var form = $scope.$parent.form;
-        if (!form) { form = drupalgap_form_local_storage_load(drupalgap.form_id); }
+        var form = $scope.form;
+        //if (!form) { form = drupalgap_form_local_storage_load(drupalgap.form_id); }
         
         var element = form.elements[$element.attr('element_name')];
         //console.log(element);
@@ -64,23 +64,11 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
           module = drupalgap_form_element_get_module_name(element.type);
         }
         
-        // Do we have a hook_field_widget_form()?
+        // If we have a module, determine the widget form function name.
         if (module) {
           field_widget_form_function_name = module + '_field_widget_form';
-          if (drupalgap_function_exists(field_widget_form_function_name)) {
-            field_widget_form_function = window[field_widget_form_function_name];
-          }
-          else {
-            console.log(
-              'WARNING: _drupalgap_form_render_element() - ' +
-              field_widget_form_function_name +
-              '() does not exist for the "' + element.type + '" form element!'
-            );
-          }
         }
-        
-        
-    
+
         // If there were no items, just return.
         if (!items || items.length == 0) { return html; }
     
@@ -107,14 +95,14 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
             if (!items.hasOwnProperty(delta)) { continue; }
             var item = items[delta];
             
-            // Build the ng-model for the element.
-            var model_path = "form_state.values['" + name + "']";
-            if (module) {
-              model_path += '.' + language + '[' + delta + '].value';
-              //model_path = name + '.' + language + '[' + delta + ']';
-              //model_path = name + '.foo';
-            }
-            variables.attributes['ng-model'] = model_path;
+            // Build the ng-model for the element, except hidden elements.
+            //if (item.type != 'hidden') {
+              var model_path = "form_state.values['" + name + "']";
+              if (module) {
+                model_path += '.' + language + '[' + delta + '].value';
+              }
+              variables.attributes['ng-model'] = model_path;
+            //}
             
             // We'll render the item, unless we prove otherwise.
             render_item = true;
@@ -166,13 +154,12 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
             // field's widget form?
             if (element.is_field) {
               var directive_name = drupalgap_get_camel_case(field_widget_form_function_name);
-              dpm('looking for directive: ' + directive_name);
               if (dg_directive_exists($injector, directive_name)) {
                 
                 // Place variables into the scope so the hookFieldWidgetForm
                 // implementor will have access to them.
                 $scope.form = form;
-                $scope.form_state = null
+                $scope.form_state = null;
                 $scope.field = element.field_info_field;
                 $scope.instance = element.field_info_instance;
                 $scope.items = items;
@@ -231,7 +218,7 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
     
             // Render only "non field" element items here, any field items will be
             // taken care of by the hook_field_widget_form controller..
-            if (!field_widget_form_function) {
+            if (!element.is_field) {
               item_html = _drupalgap_form_render_element_item(
                 form,
                 element,
@@ -341,6 +328,90 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
     
     
   }]);*/
+
+/**
+ *
+ */
+function dg_form_element_set_empty_options_and_attributes(form, language) {
+  try {
+    // Set empty options and attributes properties on each form element if the
+    // element does not yet have any. This allows others to more easily modify
+    // options and attributes on an element without having to worry about
+    // testing for nulls and creating empty properties first.
+    for (var name in form.elements) {
+      if (!form.elements.hasOwnProperty(name)) { continue; }
+      var element = form.elements[name];
+      // If this element is a field, load its field_info_field and
+      // field_info_instance onto the element.
+      var element_is_field = false;
+      var field_info_field = drupalgap_field_info_field(name);
+      if (field_info_field) {
+        element_is_field = true;
+        form.elements[name].field_info_field = field_info_field;
+        form.elements[name].field_info_instance =
+          drupalgap_field_info_instance(
+            form.entity_type,
+            name,
+            form.bundle
+          );
+      }
+      form.elements[name].is_field = element_is_field;
+      // Set the name property on the element if it isn't already set.
+      if (!form.elements[name].name) { form.elements[name].name = name; }
+      // If the element is a field, we'll append a language code and delta
+      // value to the element id, along with the field items appended
+      // onto the element using the language code and delta values.
+      var id = null;
+      if (element_is_field) {
+        // What's the number of allowed values (cardinality) on this field?
+        // A cardinality of -1 means the field has unlimited values.
+        var cardinality = parseInt(element.field_info_field.cardinality);
+        if (cardinality == -1) {
+          cardinality = 1; // we'll just add one element for now, until we
+                           // figure out how to handle the 'add another
+                           // item' feature.
+        }
+        // Initialize the item collections language code if it hasn't been.
+        if (!form.elements[name][language]) {
+          form.elements[name][language] = {};
+        }
+        // Prepare the item(s) for this element.
+        for (var delta = 0; delta < cardinality; delta++) {
+          // Prepare some item defaults.
+          var item = drupalgap_form_element_item_create(
+            name,
+            form,
+            language,
+            delta
+          );
+          // If the delta for this item hasn't been created on the element,
+          // create it using the default item values. Otherwise, merge the
+          // default values into the pre existing item on the element.
+          if (!form.elements[name][language][delta]) {
+            form.elements[name][language][delta] = item;
+          }
+          else {
+            $.extend(true, form.elements[name][language][delta], item);
+          }
+        }
+      }
+      else {
+        // This element is not a field, setup default options if none
+        // have been provided. Then set the element id.
+        if (!element.options) {
+          form.elements[name].options = {attributes: {}};
+        }
+        else if (!element.options.attributes) {
+          form.elements[name].options.attributes = {};
+        }
+        id = drupalgap_form_get_element_id(name, form.id);
+        form.elements[name].id = id;
+        form.elements[name].options.attributes.id = id;
+      }
+    }
+  }
+  catch (error) { console.log('dg_form_element_set_empty_options_and_attributes - ' + error); }
+}
 
 /**
  * Given a form element, this will return true if access to the element is
@@ -527,8 +598,9 @@ function _drupalgap_form_render_elements(form) {
  */
 function _drupalgap_form_render_element_item(form, element, variables, item) {
   try {
-    //dpm('_drupalgap_form_render_element_item');
-    //console.log(arguments);
+    dpm('_drupalgap_form_render_element_item');
+    dpm(element.name);
+    console.log(arguments);
     
     var html = '';
     // Depending on the element type, if necessary, adjust the variables and/or
