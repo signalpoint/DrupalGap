@@ -123,8 +123,7 @@ function user_menu() {
         resolve: {
           form_id: function() { return 'user_login_form'; }
         },*/
-        page_callback: 'drupalgap_get_form',
-        page_arguments: ['user_login_form'],
+        page_callback: 'user_login_form',
         /*options: {reloadPage: true}*/
       },
       'user/logout': {
@@ -134,8 +133,7 @@ function user_menu() {
       },
       'user/register': {
         'title': t('Register'),
-        'page_callback': 'drupalgap_get_form',
-        'page_arguments': ['user_register_form'],
+        'page_callback': 'user_register_form',
         'access_callback': 'user_register_access',
         options: {reloadPage: true}
       },
