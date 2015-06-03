@@ -1,26 +1,3 @@
-
-
-dgApp.directive("nodeAddPageByType", ['$compile', '$routeParams', function($compile, $routeParams) {
-    dpm('nodeAddPageByType');
-    return {
-      link: function(scope, element) {
-        
-        dpm('nodeAddPageByType - link...');
-        console.log($routeParams);
-
-        // Compile the template for Angular and append it to the directive's
-        // html element.
-        var linkFn = $compile(drupalgap_get_form(
-          'node_edit',
-          { type: $routeParams.bundle }
-        ));
-        var content = linkFn(scope);
-        element.append(content);
-
-      }
-    };
-}]);
-
 /**
  * Given a node, this determines if the current user has access to it. Returns
  * true if so, false otherwise. This function implementation is incomplete, use
@@ -131,8 +108,6 @@ function node_edit(form, form_state, node) {
       form.buttons['delete'] =
         drupalgap_entity_edit_form_delete_button('node', node.nid);
     }
-
-    return form;
   }
   catch (error) { console.log('node_edit - ' + error); }
 }
@@ -141,9 +116,12 @@ function node_edit(form, form_state, node) {
  * The node edit form's submit function.
  * @param {Object} form
  * @param {Object} form_state
+ * @deprecated
  */
 function node_edit_submit(form, form_state) {
   try {
+    console.log(arguments);
+    return;
     var node = drupalgap_entity_build_from_form_state(form, form_state);
     drupalgap_entity_form_submit(form, form_state, node);
   }
@@ -167,9 +145,9 @@ function node_menu() {
       },
       'node/add/:bundle': {
         title: t('Add content'),
-        title_callback: 'node_add_page_by_type_title',
-        title_arguments: [2],
-        page_callback: 'node_add_page_by_type',
+        /*title_callback: 'node_add_page_by_type_title',
+        title_arguments: [2],*/
+        page_callback: 'entity_page_add',
         page_arguments: [2],
         options: { reloadPage: true }
       },
