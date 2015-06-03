@@ -3,8 +3,11 @@
  */
 function _drupalgap_entity_view(entity_type, entity_id, mode) {
   try {
+    // DEPRECATED
+    dpm('_drupalgap_entity_view');
+    console.log(arguments);
     var attrs = drupalgap_attributes({
-        'drupalgap-entity-directive': 'entity_load.promise', // ===> drupalgapEntityDirective
+        'dg-entity': 'entity_load.promise',
         entity_type: entity_type,
         entity_id: entity_id,
         bundle: '{{bundle}}',
@@ -17,11 +20,237 @@ function _drupalgap_entity_view(entity_type, entity_id, mode) {
   catch (error) { console.log('_drupalgap_entity_view - ' + error); }
 }
 
-dgControllers.directive("drupalgapEntityDirective", function($compile) {
+dgApp.directive("entityPageAdd", function($compile) {
+    return {
+
+      controller: function($scope, $element, $http, jdrupal) {
+        dpm('entityPageAdd - controller');
+        console.log(arguments);
+        console.log(arg());
+
+        // Prepare an entity for creation.
+        var entity_type = arg(0);
+        var bundle = null;
+        var entity = null;
+        var form_id = entity_type + '_edit';
+        switch (entity_type) {
+          case 'node':
+            bundle = arg(2);
+            entity = { type: bundle };
+            break;
+          default: console.log('entityPageAdd - unsupported type: ' + entity_type); break;
+        }
+
+        // Set up form defaults.
+        var form = dg_form_defaults(form_id, $scope);
+        
+        // Call the [entity-type]_edit form to assemble its elements.
+        var fn = window[form_id];
+        fn(form, null, entity);
+
+        // Form submit handler.
+        form.submit.push(function(form, form_state) {
+            drupalgap_entity_form_submit(form, form_state, jdrupal);
+        });
+
+        // Place entity and the form into the scope.
+        $scope.entity_type = entity_type;
+        $scope.bundle = bundle;
+        $scope.entity = entity;
+        $scope.form = form;
+
+      },
+
+      replace: true,
+
+      link: function (scope, element) {
+        dpm('entityPageAdd - link');
+        console.log(arguments);
+
+        // Set the view's ng-model equal to the entity JSON.
+        //scope[entity_type] = entity;
+        
+        // Add the form to the element.
+        element.append(dg_ng_compile_form($compile, scope));
+
+      }
+
+    };
+});
+
+dgApp.directive("entityPageEdit", function($compile) {
     return {
       
       controller: function($scope, $element, $http, jdrupal) {
-        dpm('drupalgapEntityDirective - controller');
+        dpm('entityPageEdit - controller');
+        console.log(arguments);
+        console.log(arg());
+
+        // Extract the entity type and place it into the scope, then load the
+        // entity from Drupal and then continue with the "promise" success
+        // handler when the entity comes back.
+        //var mode = $element.attr('mode');
+        //var entity_type = $element.attr('entity_type');
+        var entity_type = arg(0);
+        var entity_id = arg(1);
+        $scope.entity_type = entity_type;
+        $scope.entity_load = {
+          promise: jdrupal[entity_type + '_load'](entity_id)
+        };
+      },
+      scope: { promise: '=dgEntity' },
+      replace: true,
+      link: function (scope, elem, attrs) {
+        dpm('entityPageEdit - link');
+        console.log(arguments);
+          scope.entity_load.promise.success(function (entity) {
+
+              // Extract the entity type and bundle, and then set the bundle on
+              // the parent scope.
+              var mode = scope.mode;
+              var entity_type = scope.entity_type;
+              var bundle = drupalgap_get_bundle(entity_type, entity);
+              scope.$parent.bundle = bundle;
+
+              // Set the view's ng-model equal to the entity JSON.
+              scope[entity_type] = entity;
+              
+              // Depending on the mode, use either the entity view or the entity
+              // edit form as the template.
+              // @TODO the "edit" template is now not used, remove it from
+              // drupalgap.views.templates.
+              var html = '';
+              if (mode == 'edit') {
+                // We mimic drupalgap_get_form() here because we need to place
+                // the form in the scope, and then manually render it.
+                var form = drupalgap_form_load.apply(
+                  null,
+                  Array.prototype.slice.call([entity_type + '_edit', entity])
+                );
+                scope.form = form;
+                scope.form_state = { values: entity };
+                html = drupalgap_form_render(form);
+              }
+              else {
+                html = drupalgap.views.templates[entity_type][bundle][mode].template
+              }
+              //console.log(html);
+
+              // Compile the html with the scope, then replace the element's
+              // "{{build}}" with it.
+              elem.replaceWith($compile(html)(scope));
+
+          });
+      }
+    };
+});
+
+/**
+ * Given a form, form_state and entity, this will call the appropriate service
+ * resource to create or update the entity.
+ * @param {Object} form
+ * @param {Object} form_state
+ * @return {*}
+ */
+function drupalgap_entity_form_submit(form, form_state, jdrupal) {
+  try {
+    //dpm('drupalgap_entity_form_submit');
+    //console.log(arguments);
+
+    var entity = form_state.values;
+
+    // Grab the primary key name for this entity type.
+    var primary_key = entity_primary_key(form.entity_type);
+
+    // Determine if we are editing an entity or creating a new one.
+    var editing = false;
+    if (entity[primary_key] && entity[primary_key] != '') {
+      editing = true;
+    }
+
+    // Let's set up the api call arguments.
+    var call_arguments = {};
+
+    // Setup the success call back to go back to the entity page view.
+    call_arguments.success = function(result) {
+      try {
+        // If no one has provided a form.action to submit this form to,
+        // by default we'll try to redirect to [entity-type]/[entity-id] to view
+        // the entity. For taxonomy, we replace the underscore with a forward
+        // slash in the path.
+        var destination = form.action;
+        if (!destination) {
+          var prefix = form.entity_type;
+          if (prefix == 'taxonomy_vocabulary' || prefix == 'taxonomy_term') {
+            prefix = prefix.replace('_', '/');
+          }
+          destination = prefix + '/' + result[primary_key];
+        }
+        // Is there a destination URL query parameter overwriting the action?
+        if (_GET('destination')) { destination = _GET('destination'); }
+        // Set up the default goto options, and use any options provided by the
+        // form.
+        var goto_options = { form_submission: true };
+        if (form.action_options) {
+          goto_options = $.extend({}, goto_options, form.action_options);
+        }
+        // Finally goto our destination.
+        drupalgap_goto(destination, goto_options);
+      }
+      catch (error) {
+        console.log('drupalgap_entity_form_submit - success - ' + error);
+      }
+    };
+
+    // Setup the error call back.
+    call_arguments.error = function(xhr, status, message) {
+      try {
+        // If there were any form errors, display them in an alert.
+        var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
+          status, message);
+        if (msg) { drupalgap_alert(msg); }
+      }
+      catch (error) {
+        console.log('drupalgap_entity_form_submit - error - ' + error);
+      }
+    };
+
+    // Change the jQM loader mode to saving.
+    drupalgap.loader = 'saving';
+
+    // Depending on if we are creating a new entity, or editing an existing one,
+    // call the appropriate service resource.
+    var crud = 'create';
+    if (editing) {
+      crud = 'update';
+      // Remove the entity from local storage.
+      // @todo This should be moved to jDrupal.
+      window.localStorage.removeItem(
+        entity_local_storage_key(form.entity_type, entity[primary_key])
+      );
+    }
+    /*var fn = window[
+      services_get_resource_function_for_entity(form.entity_type, crud)
+    ];
+    fn(entity, call_arguments);*/
+    var crud_function = services_get_resource_function_for_entity(
+      form.entity_type,
+      crud
+    );
+    jdrupal[crud_function](entity).success(function(result) {
+        dpm('holy shitake!');
+        console.log(result);
+    });
+  }
+  catch (error) { console.log('drupalgap_entity_form_submit - ' + error); }
+}
+
+// deprecated???
+dgControllers.directive("dgEntity", function($compile) {
+    return {
+      
+      controller: function($scope, $element, $http, jdrupal) {
+        dpm('dgEntity - controller');
         //console.log(arguments);
         
         // Extract the entity type and place it into the scope, then load the
@@ -36,10 +265,10 @@ dgControllers.directive("drupalgapEntityDirective", function($compile) {
         };
         
       },
-      scope: { promise: '=drupalgapEntityDirective' },
+      scope: { promise: '=dgEntity' },
       replace: true,
       link: function (scope, elem, attrs) {
-        dpm('drupalgapEntityDirective - link');
+        dpm('dgEntity - link');
         console.log(arguments);
           scope.entity_load.promise.success(function (entity) {
 
@@ -643,103 +872,6 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
 }
 
 /**
- * Given a form, form_state and entity, this will call the appropriate service
- * resource to create or update the entity.
- * @param {Object} form
- * @param {Object} form_state
- * @return {*}
- */
-function drupalgap_entity_form_submit(form, form_state) {
-  try {
-    dpm('drupalgap_entity_form_submit');
-    console.log(arguments);
-    
-    var entity = form_state.values;
-
-    // Grab the primary key name for this entity type.
-    var primary_key = entity_primary_key(form.entity_type);
-
-    // Determine if we are editing an entity or creating a new one.
-    var editing = false;
-    if (entity[primary_key] && entity[primary_key] != '') {
-      editing = true;
-    }
-
-    // Let's set up the api call arguments.
-    var call_arguments = {};
-
-    // Setup the success call back to go back to the entity page view.
-    call_arguments.success = function(result) {
-      try {
-        // If no one has provided a form.action to submit this form to,
-        // by default we'll try to redirect to [entity-type]/[entity-id] to view
-        // the entity. For taxonomy, we replace the underscore with a forward
-        // slash in the path.
-        var destination = form.action;
-        if (!destination) {
-          var prefix = form.entity_type;
-          if (prefix == 'taxonomy_vocabulary' || prefix == 'taxonomy_term') {
-            prefix = prefix.replace('_', '/');
-          }
-          destination = prefix + '/' + result[primary_key];
-        }
-        // Is there a destination URL query parameter overwriting the action?
-        if (_GET('destination')) { destination = _GET('destination'); }
-        // Set up the default goto options, and use any options provided by the
-        // form.
-        var goto_options = { form_submission: true };
-        if (form.action_options) {
-          goto_options = $.extend({}, goto_options, form.action_options);
-        }
-        // Finally goto our destination.
-        drupalgap_goto(destination, goto_options);
-      }
-      catch (error) {
-        console.log('drupalgap_entity_form_submit - success - ' + error);
-      }
-    };
-
-    // Setup the error call back.
-    call_arguments.error = function(xhr, status, message) {
-      try {
-        // If there were any form errors, display them in an alert.
-        var msg = _drupalgap_form_submit_response_errors(form, form_state, xhr,
-          status, message);
-        if (msg) { drupalgap_alert(msg); }
-      }
-      catch (error) {
-        console.log('drupalgap_entity_form_submit - error - ' + error);
-      }
-    };
-
-    // Change the jQM loader mode to saving.
-    drupalgap.loader = 'saving';
-
-    // Depending on if we are creating a new entity, or editing an existing one,
-    // call the appropriate service resource.
-    var crud = 'create';
-    if (editing) {
-      crud = 'update';
-      // Remove the entity from local storage.
-      // @todo This should be moved to jDrupal.
-      window.localStorage.removeItem(
-        entity_local_storage_key(form.entity_type, entity[primary_key])
-      );
-    }
-    /*var fn = window[
-      services_get_resource_function_for_entity(form.entity_type, crud)
-    ];
-    fn(entity, call_arguments);*/
-    var crud_function = services_get_resource_function_for_entity(
-      form.entity_type,
-      crud
-    );
-    //jdrupal[crud_function];
-  }
-  catch (error) { console.log('drupalgap_entity_form_submit - ' + error); }
-}
-
-/**
  * Given an entity type, this returns its core fields as forms api elements.
  * @param {String} entity_type
  * @param {String} bundle
@@ -828,7 +960,10 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
         fields.type = {
           'type': 'hidden',
           'required': true,
-          'default_value': ''
+          'default_value': ''/*,
+          attributes: {
+            name: 'type'
+          }*/
         };
         fields.language = {
           'type': 'hidden',
