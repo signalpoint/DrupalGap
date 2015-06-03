@@ -1,4 +1,97 @@
 /**
+ * Renders all the input elements in a form.
+ * @param {Object} form
+ * @return {String}
+ */
+function _drupalgap_form_render_elements(form) {
+  try {
+    //dpm('_drupalgap_form_render_elements');
+    //console.log(form);
+    var content = '';
+    var content_sorted = '';
+    var content_weighted = [];
+    // For each form element, if the element objects name property isn't set,
+    // set it, then render the element if access is permitted. While rendering
+    // the elements, set them aside according to their widget weight so they
+    // can be appended to the content string in the correct order later.
+    for (var name in form.elements) {
+        if (!form.elements.hasOwnProperty(name)) { continue; }
+        var element = form.elements[name];
+        //dpm(name);
+        //console.log(element);
+        if (!element.name) { element.name = name; }
+        if (drupalgap_form_element_access(element)) {
+          if (
+            element.is_field &&
+            typeof element.field_info_instance.widget.weight !== 'undefined'
+          ) {
+            content_weighted[element.field_info_instance.widget.weight] =
+              _drupalgap_form_render_element(form, element);
+          }
+          else {
+            // Extract the bundle. Note, on comments the bundle is prefixed with
+            // 'comment_node_' so we need to remove that to correctly map to the
+            // potential extra fields data.
+            var bundle = null;
+            if (form.bundle) {
+              bundle = form.bundle;
+              if (
+                form.entity_type == 'comment' &&
+                form.bundle.indexOf('comment_node_') != -1
+              ) { bundle = form.bundle.replace('comment_node_', ''); }
+            }
+            // This is not a field, if it has a weight in
+            // field_info_extra_fields use it, otherwise just append it to the
+            // content.
+            if (
+              form.entity_type && bundle &&
+              typeof drupalgap.field_info_extra_fields[bundle][name] !==
+                'undefined' &&
+              typeof
+                drupalgap.field_info_extra_fields[bundle][name].weight !==
+                'undefined'
+            ) {
+              var weight =
+                drupalgap.field_info_extra_fields[bundle][name].weight;
+              content_weighted[weight] =
+              _drupalgap_form_render_element(form, element);
+            }
+            else { content += _drupalgap_form_render_element(form, element); }
+          }
+        }
+    }
+    // Prepend the weighted elements to the content.
+    if (!empty(content_weighted)) {
+      for (var weight in content_weighted) {
+        content_sorted += content_weighted[weight] + '\n';
+      }
+      // Attach sorted content.
+      content = content_sorted + '\n' + content;
+    }
+    // Add any form buttons to the form elements html, if access to the button
+    // is permitted.
+    if (form.buttons && form.buttons.length != 0) {
+      for (var name in form.buttons) {
+          if (!form.buttons.hasOwnProperty(name)) { continue; }
+          var button = form.buttons[name];
+          if (drupalgap_form_element_access(button)) {
+            var attributes = {
+              type: 'button',
+              id: drupalgap_form_get_element_id(name, form.id)
+            };
+            if (button.attributes) { $.extend(attributes, button.attributes); }
+            content += '<button ' + drupalgap_attributes(attributes) + '">' +
+              button.title +
+            '</button>';
+          }
+      }
+    }
+    return content;
+  }
+  catch (error) { console.log('_drupalgap_form_render_elements - ' + error); }
+}
+
+/**
  * Renders an input element for a form.
  * @param {Object} form
  * @param {Object} element
@@ -8,6 +101,7 @@ function _drupalgap_form_render_element(form, element) {
   try {
     //dpm('_drupalgap_form_render_element');
     //console.log(element);
+    // @TODO don't wrap hidden inputs in divs.
     var attrs = drupalgap_attributes({
         'dg-form-element': '',
         element_name: element.name,
@@ -18,35 +112,53 @@ function _drupalgap_form_render_element(form, element) {
   catch (error) { console.log('_drupalgap_form_render_element - ' + error); }
 }
 
+/**
+ * @param {Object} element
+ * @param {String|undefined} language
+ * @param {Number|undefined} delta
+ */
+function dg_form_element_ng_model(element, language, delta) {
+  try {
+    var model_path = "form_state.values['" + element.name + "']";
+    if (element.is_field) {
+      model_path += '.' + language + '[' + delta + '].value';
+    }
+    return model_path;
+  }
+  catch (error) { console.log('dg_form_element_ng_model - ' + error); }
+}
+
 dgControllers.directive("dgFormElement", function($compile, $injector) {
     //dpm('dgFormElement');
     return {
       link: function($scope, $element) {
         
-        dpm('dgFormElement - link...');
-        //console.log($element);
-        
-        var form = $scope.form;
-        //if (!form) { form = drupalgap_form_local_storage_load(drupalgap.form_id); }
-        
+        //dpm('dgFormElement - link...');
+        //console.log(arguments);
+
+        // Extract the form, then the element from the form.
+        var form = $scope.form;        
         var element = form.elements[$element.attr('element_name')];
+        
+        //console.log(element.name);
+        //console.log(arguments);
         //console.log(element);
         
         var html = '';
     
         if (!element) { return html; }
-    
+
         // Extract the element name.
         var name = element.name;
-    
+
         // Grab the language.
         var language = language_default();
         $scope.language = language;
-    
+
         // We'll assume the element has no items (e.g. title, nid, vid, etc), unless
         // we determine later that this element is a field, then it'll have items.
         var items = false;
-    
+
         // If this element is a field, extract the items from the language code and
         // determine what module and hook will handle the items. If the element is
         // not a field, just flatten it into a single item collection and determine
@@ -95,14 +207,10 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
             if (!items.hasOwnProperty(delta)) { continue; }
             var item = items[delta];
             
-            // Build the ng-model for the element, except hidden elements.
-            //if (item.type != 'hidden') {
-              var model_path = "form_state.values['" + name + "']";
-              if (module) {
-                model_path += '.' + language + '[' + delta + '].value';
-              }
-              variables.attributes['ng-model'] = model_path;
-            //}
+            // Build the ng-model for the element, if it hasn't already been set.
+            if (!variables.attributes['ng-model']) {
+              variables.attributes['ng-model'] = dg_form_element_ng_model(element, language, delta);
+            }
             
             // We'll render the item, unless we prove otherwise.
             render_item = true;
@@ -174,7 +282,7 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
                   language: language
                 };
 
-                // Add the directive's attribute and then render the container.
+                // Add the directive's attribute and the div container.
                 attrs[field_widget_form_function_name.replace(/_/g, '-')] = '';
                 item_html += '<div ' + drupalgap_attributes(attrs) + '>{{' + name + '}}</div>';
 
@@ -318,6 +426,123 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
       }
     };
 });
+
+/**
+ * Given a form, an element, the variables for a theme function, and the element
+ * item, this will return the html rendering of the element item.
+ * @param {Object} form
+ * @param {Object} element
+ * @param {Object} variables
+ * @param {Object} item
+ * @return {*}
+ */
+function _drupalgap_form_render_element_item(form, element, variables, item) {
+  try {
+    //dpm('_drupalgap_form_render_element_item');
+    //dpm(element.name);
+    //console.log(arguments);
+    
+    var html = '';
+    // Depending on the element type, if necessary, adjust the variables and/or
+    // theme function to be used, then render the element by calling its theme
+    // function.
+    // @TODO - this block of code should be moved into their respective
+    // implementations of hook_field_widget_form().
+    switch (item.type) {
+      case 'text':
+        item.type = 'textfield';
+        break;
+      case 'list_text':
+      case 'list_float':
+      case 'list_integer':
+        item.type = 'select';
+        break;
+    }
+
+    // Set the theme function.
+    var theme_function = item.type;
+
+    // If the element is disabled, add the 'disabled' attribute.
+    if (element.disabled) { variables.attributes.disabled = ''; }
+
+    // Make any preprocess modifications to the elements so they will map
+    // cleanly to their theme function.
+    // @todo A hook_field_widget_form() should be used instead here.
+    if (item.type == 'submit') {
+      variables.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
+      if (typeof variables.attributes.type === 'undefined') {
+        variables.attributes.type = 'button';
+      }
+      if (typeof variables.attributes['class'] === 'undefined') {
+        variables.attributes['class'] = '';
+      }
+      variables.attributes['class'] += ' dg_form_submit_button ';
+    }
+
+    // Merge the item into variables.
+    $.extend(true, variables, item);
+
+    // If a value isn't set on variables, try to set it with the default value
+    // on the item.
+    if (typeof variables.value === 'undefined' || variables.value == null) {
+      if (typeof item.default_value !== 'undefined') {
+        variables.value = item.default_value;
+      }
+    }
+
+    // Run the item through the theme system if a theme function exists, or try
+    // to use the item markup, or let the user know the field isn't supported.
+    if (drupalgap_function_exists('theme_' + theme_function)) {
+      html += theme(theme_function, variables);
+    }
+    else {
+      if (item.markup || item.markup == '') { html += item.markup; }
+      else {
+        // @todo - the reason for this warning sometimes happens because the
+        // item.type is lost with $.extend in _drupalgap_form_render_element().
+        // @update - if an item doesn't have a type, it gets set by the parent
+        // element, so we should now always have a type available here.
+        var msg = 'Field ' + item.type + ' not supported.';
+        console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
+        dpm(item);
+        return null;
+      }
+    }
+
+    // Render any item children. If the child has markup, just use the html,
+    // otherwise run the child through theme().
+    if (item.children && item.children.length > 0) {
+      for (var i = 0; i < item.children.length; i++) {
+        if (item.children[i].markup) { html += item.children[i].markup; }
+        else if (item.children[i].type || item.children[i].theme) {
+          var theme_type = item.children[i].type;
+          if (!theme_type) { theme_type = item.children[i].theme; }
+          // Is there a title for a label?
+          if (item.children[i].title) {
+            html += theme('form_element_label', {
+                element: item.children[i]
+            });
+          }
+          // Render the child with the theme system.
+          if (item.children[i].prefix) { html += item.children[i].prefix; }
+          html += theme(theme_type, item.children[i]);
+          if (item.children[i].suffix) { html += item.children[i].suffix; }
+        }
+        else {
+          console.log(
+            'WARNING: _drupalgap_form_render_element_item - ' +
+            'failed to render child ' + i + ' for ' + element.name
+          );
+        }
+      }
+    }
+
+    return html;
+  }
+  catch (error) {
+    console.log('_drupalgap_form_render_element_item - ' + error);
+  }
+}
 
 /*dgControllers.controller('drupalgapFormElementController', ['$scope', '$element', '$sce',
   function($scope, $element, $sce) {
@@ -495,212 +720,6 @@ function drupalgap_form_get_element_container_class(name) {
   }
   catch (error) {
     console.log('drupalgap_form_get_element_container_class - ' + error);
-  }
-}
-
-/**
- * Renders all the input elements in a form.
- * @param {Object} form
- * @return {String}
- */
-function _drupalgap_form_render_elements(form) {
-  try {
-    var content = '';
-    var content_sorted = '';
-    var content_weighted = [];
-    // For each form element, if the element objects name property isn't set,
-    // set it, then render the element if access is permitted. While rendering
-    // the elements, set them aside according to their widget weight so they
-    // can be appended to the content string in the correct order later.
-    for (var name in form.elements) {
-        if (!form.elements.hasOwnProperty(name)) { continue; }
-        var element = form.elements[name];
-        if (!element.name) { element.name = name; }
-        if (drupalgap_form_element_access(element)) {
-          if (
-            element.is_field &&
-            typeof element.field_info_instance.widget.weight !== 'undefined'
-          ) {
-            content_weighted[element.field_info_instance.widget.weight] =
-              _drupalgap_form_render_element(form, element);
-          }
-          else {
-            // Extract the bundle. Note, on comments the bundle is prefixed with
-            // 'comment_node_' so we need to remove that to correctly map to the
-            // potential extra fields data.
-            var bundle = null;
-            if (form.bundle) {
-              bundle = form.bundle;
-              if (
-                form.entity_type == 'comment' &&
-                form.bundle.indexOf('comment_node_') != -1
-              ) { bundle = form.bundle.replace('comment_node_', ''); }
-            }
-            // This is not a field, if it has a weight in
-            // field_info_extra_fields use it, otherwise just append it to the
-            // content.
-            if (
-              form.entity_type && bundle &&
-              typeof drupalgap.field_info_extra_fields[bundle][name] !==
-                'undefined' &&
-              typeof
-                drupalgap.field_info_extra_fields[bundle][name].weight !==
-                'undefined'
-            ) {
-              var weight =
-                drupalgap.field_info_extra_fields[bundle][name].weight;
-              content_weighted[weight] =
-              _drupalgap_form_render_element(form, element);
-            }
-            else { content += _drupalgap_form_render_element(form, element); }
-          }
-        }
-    }
-    // Prepend the weighted elements to the content.
-    if (!empty(content_weighted)) {
-      for (var weight in content_weighted) {
-        content_sorted += content_weighted[weight] + '\n';
-      }
-      // Attach sorted content.
-      content = content_sorted + '\n' + content;
-    }
-    // Add any form buttons to the form elements html, if access to the button
-    // is permitted.
-    if (form.buttons && form.buttons.length != 0) {
-      for (var name in form.buttons) {
-          if (!form.buttons.hasOwnProperty(name)) { continue; }
-          var button = form.buttons[name];
-          if (drupalgap_form_element_access(button)) {
-            var attributes = {
-              type: 'button',
-              id: drupalgap_form_get_element_id(name, form.id)
-            };
-            if (button.attributes) { $.extend(attributes, button.attributes); }
-            content += '<button ' + drupalgap_attributes(attributes) + '">' +
-              button.title +
-            '</button>';
-          }
-      }
-    }
-    return content;
-  }
-  catch (error) { console.log('_drupalgap_form_render_elements - ' + error); }
-}
-
-/**
- * Given a form, an element, the variables for a theme function, and the element
- * item, this will return the html rendering of the element item.
- * @param {Object} form
- * @param {Object} element
- * @param {Object} variables
- * @param {Object} item
- * @return {*}
- */
-function _drupalgap_form_render_element_item(form, element, variables, item) {
-  try {
-    dpm('_drupalgap_form_render_element_item');
-    dpm(element.name);
-    console.log(arguments);
-    
-    var html = '';
-    // Depending on the element type, if necessary, adjust the variables and/or
-    // theme function to be used, then render the element by calling its theme
-    // function.
-    // @TODO - this block of code should be moved into their respective
-    // implementations of hook_field_widget_form().
-    switch (item.type) {
-      case 'text':
-        item.type = 'textfield';
-        break;
-      case 'list_text':
-      case 'list_float':
-      case 'list_integer':
-        item.type = 'select';
-        break;
-    }
-
-    // Set the theme function.
-    var theme_function = item.type;
-
-    // If the element is disabled, add the 'disabled' attribute.
-    if (element.disabled) { variables.attributes.disabled = ''; }
-
-    // Make any preprocess modifications to the elements so they will map
-    // cleanly to their theme function.
-    // @todo A hook_field_widget_form() should be used instead here.
-    if (item.type == 'submit') {
-      variables.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
-      if (typeof variables.attributes.type === 'undefined') {
-        variables.attributes.type = 'button';
-      }
-      if (typeof variables.attributes['class'] === 'undefined') {
-        variables.attributes['class'] = '';
-      }
-      variables.attributes['class'] += ' dg_form_submit_button ';
-    }
-
-    // Merge the item into variables.
-    $.extend(true, variables, item);
-
-    // If a value isn't set on variables, try to set it with the default value
-    // on the item.
-    if (typeof variables.value === 'undefined' || variables.value == null) {
-      if (typeof item.default_value !== 'undefined') {
-        variables.value = item.default_value;
-      }
-    }
-
-    // Run the item through the theme system if a theme function exists, or try
-    // to use the item markup, or let the user know the field isn't supported.
-    if (drupalgap_function_exists('theme_' + theme_function)) {
-      html += theme(theme_function, variables);
-    }
-    else {
-      if (item.markup || item.markup == '') { html += item.markup; }
-      else {
-        // @todo - the reason for this warning sometimes happens because the
-        // item.type is lost with $.extend in _drupalgap_form_render_element().
-        // @update - if an item doesn't have a type, it gets set by the parent
-        // element, so we should now always have a type available here.
-        var msg = 'Field ' + item.type + ' not supported.';
-        console.log('WARNING: _drupalgap_form_render_element_item() - ' + msg);
-        dpm(item);
-        return null;
-      }
-    }
-
-    // Render any item children. If the child has markup, just use the html,
-    // otherwise run the child through theme().
-    if (item.children && item.children.length > 0) {
-      for (var i = 0; i < item.children.length; i++) {
-        if (item.children[i].markup) { html += item.children[i].markup; }
-        else if (item.children[i].type || item.children[i].theme) {
-          var theme_type = item.children[i].type;
-          if (!theme_type) { theme_type = item.children[i].theme; }
-          // Is there a title for a label?
-          if (item.children[i].title) {
-            html += theme('form_element_label', {
-                element: item.children[i]
-            });
-          }
-          // Render the child with the theme system.
-          if (item.children[i].prefix) { html += item.children[i].prefix; }
-          html += theme(theme_type, item.children[i]);
-          if (item.children[i].suffix) { html += item.children[i].suffix; }
-        }
-        else {
-          console.log(
-            'WARNING: _drupalgap_form_render_element_item - ' +
-            'failed to render child ' + i + ' for ' + element.name
-          );
-        }
-      }
-    }
-
-    return html;
-  }
-  catch (error) {
-    console.log('_drupalgap_form_render_element_item - ' + error);
   }
 }
 
