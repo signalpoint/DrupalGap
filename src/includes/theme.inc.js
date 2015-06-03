@@ -60,6 +60,15 @@ function theme(hook, variables) {
         variables.attributes = {};
       }
     }
+    
+    // Attributes are coming in, if there are any in options.attributes,
+    // merge them into variables.attributes.
+    else if (variables.options && variables.options.attributes) {
+      // @TODO update to angular 1.4 to get the merge function
+      //variables.attributes = merge(variables.attributes, variables.options.attributes);
+      variables.attributes = angular.extend({}, variables.attributes, variables.options.attributes);
+    }
+    
     // If there is no class name, set an empty one.
     if (!variables.attributes['class']) {
       variables.attributes['class'] = '';
