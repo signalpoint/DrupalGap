@@ -1,48 +1,91 @@
-// DEPRECATED
-dgApp.directive('dgForm', ['$compile', 'jdrupal', function($compile, jdrupal) {
-      
-      //dpm('dgForm');
-      //console.log(arguments);
-      
-    return {
-        /* require: [] */ // <= multiple controllers....?
-        
-        // CONTROLLER
-        controller: function($scope, $element, $attrs, jdrupal) {
-          
-          dpm('dgForm controller');
-          console.log(arguments);
-
-          // Load the form, and set a default form state if one doesn't exist.
-          $scope.form = drupalgap_form_load.apply(null,
-            Array.prototype.slice.call(dg_ng_get('dgFormArguments'))
-          );
-          
-        },
-        
-        // LINK
-        link: function($scope, $element, $attrs) {
-
-          dpm('dgForm link');
-          console.log(arguments);
-
-          // Render the form, then compile it into the directive's element.
-          var linkFn = $compile(drupalgap_form_render($scope.form));
-          var content = linkFn($scope);
-          $element.append(content);
-
-        },
-    };
-}]);
-
 /**
  *
  */
 function dg_ng_compile_form($compile, $scope) {
   try {
+    dpm('dg_ng_compile_form');
+    
+    dg_form_element_set_empty_options_and_attributes($scope.form, language_default());
+    
+    // Give modules an opportunity to alter the form.
+    module_invoke_all('form_alter', $scope.form, null, $scope.form_id);
+
+    // Place the assembled form into local storage so _drupalgap_form_submit
+    // will have access to the assembled form.
+    //drupalgap_form_local_storage_save($scope.form);
+    
+    // For each form element...
+    for (var name in $scope.form.elements) {
+      if (!$scope.form.elements.hasOwnProperty(name)) { continue; }
+      var element = $scope.form.elements[name];
+      
+      // Place any hidden input's value (if any) into the scope so it can be
+      // properly bound to the form state values.
+      if (element.type == 'hidden') {
+        if (typeof element.options.attributes.name === 'undefined') {
+          $scope.form.elements[name].options.attributes.name = element.name;
+        }
+        if (typeof element.default_value !== 'undefined') {
+          $scope[element.name] = element.default_value;
+        }
+        var ng_model = typeof element.options.attributes['ng-model'] !== 'undefined' ?
+          element.options.attributes['ng-model'] : dg_form_element_ng_model(element);
+        $scope.form.elements[name].options.attributes['ng-init'] = ng_model + " = " + element.options.attributes.name;
+      }
+    
+    }
+    
+    // Finally compile the rendered form.
     return dg_ng_compile($compile, $scope, drupalgap_form_render($scope.form));
   }
   catch (error) { console.log('dg_ng_compile_form - ' + error); }
+}
+
+/**
+ * Given a drupalgap form, this renders the html that will appear inside the
+ * <form></form> element and returns it.
+ * @param {Object} form
+ * @return {String}
+ */
+function drupalgap_form_render(form) {
+  try {
+    // @TODO - we may possibly colliding html element ids!!! For example, I
+    // think the node edit page gets an id of "node_edit" and possibly so does
+    // the node edit form, which also may get an id of "node_edit". We may want
+    // to prefix both the template page and form ids with prefixes, e.g.
+    // drupalgap_page_* and drupalgap_form_*, but adding these prefixes could
+    // get annoying for css selectors used in jQuery and CSS. What to do?
+
+    // If the form already exists in the DOM, remove it.
+    //if ($('form#' + form.id).length) { $('form#' + form.id).remove(); }
+
+    // Render the prefix and suffix and wrap them in their own div.
+    var prefix = form.prefix;
+    if (!empty(prefix)) {
+      prefix = '<div class="form_prefix">' + prefix + '</div>';
+    }
+    var suffix = form.suffix;
+    if (!empty(suffix)) {
+      suffix = '<div class="form_suffix">' + suffix + '</div>';
+    }
+
+    // Render the form's input elements.
+    var form_elements = _drupalgap_form_render_elements(form);
+    //var directive = form.id.replace(/_/g, '-');
+    //var form_elements = '<' + directive + '></' + directive + '>';
+    
+    // @TODO migrate up the stack in angular
+    //var form_attributes = drupalgap_attributes(form.options.attributes);
+    
+    // Return the form html.
+    var form_html = '<form ' + drupalgap_attributes(form.options.attributes) + '>' +
+      prefix +
+      '<div id="drupalgap_form_errors"></div>' +
+      form_elements +
+      suffix + '</form>';
+    return form_html;
+  }
+  catch (error) { console.log('drupalgap_form_render - ' + error); }
 }
 
 /**
@@ -90,10 +133,13 @@ function dg_form_defaults(form_id, $scope) {
     if (!$scope.form_state) { $scope.form_state = { values: { } } };
     
     // FORM SUBMIT HANDLER
+    // @TODO - who is passing the form_id and form_state to this function? we
+    // probably don't need to do that anymore, because that data should already
+    // be available in the scope... I think.
     $scope.drupalgap_form_submit = function() {
       
-      //dpm('drupalgap_form_submit');
-      //console.log(arguments);
+      dpm('drupalgap_form_submit');
+      console.log(arguments);
       
       // Extract the form and its id along with the form state, from the scope.
       // Remember the form state values are automatically assembled by Angular,
@@ -137,7 +183,7 @@ function dg_form_defaults(form_id, $scope) {
 
         }
         catch (error) {
-          console.log('_drupalgap_form_submit - form_validation - ' + error);
+          console.log('drupalgap_form_submit - form_validation - ' + error);
         }
       };
   
@@ -152,7 +198,7 @@ function dg_form_defaults(form_id, $scope) {
           }
         }
         catch (error) {
-          console.log('_drupalgap_form_submit - form_submission - ' + error);
+          console.log('drupalgap_form_submit - form_submission - ' + error);
         }
       };
   
@@ -197,8 +243,7 @@ function drupalgap_form_defaults(form_id) {
 }
 
 /**
- * Given a form id, this will return an empty <form></form> with a directive to
- * dgForm.
+ * Given a form_id, this will return a form with a directive attribute for it.
  * @param {String} form_id
  * @return {String}
  * @deprecated
@@ -206,24 +251,8 @@ function drupalgap_form_defaults(form_id) {
 function drupalgap_get_form(form_id) {
   try {
     
-    console.log('DEPRECATED - drupalgap_get_form() - use a directive instead with the name: ' + dg_get_camel_case(form_id));
+    console.log('DEPRECATED - drupalgap_get_form() - instead, use a directive with this name: ' + dg_get_camel_case(form_id));
     return;
-    
-    dpm('drupalgap_get_form');
-    console.log(arguments);
-    
-    // Set aside the arguments, that way they can be used in the dgForm
-    // directive's controller and passed along to the form builder function.
-    // @TODO this should be keyed by form id so we can have multiple forms on a
-    // page.
-    dg_ng_set('dgFormArguments', arguments);
-    
-    // Build the attributes and directive for the form, and return it.
-    var attrs = drupalgap_attributes({
-      id: form_id,
-      'dg-form': ''
-    });
-    return '<form ' + attrs  + '></form>';
 
   }
   catch (error) { console.log('drupalgap_get_form - ' + error); }
@@ -234,9 +263,16 @@ function drupalgap_get_form(form_id) {
  * form's call back function. If the form fails to load, this returns false.
  * @param {String} form_id
  * @return {Object}
+ * @deprecated
  */
 function drupalgap_form_load(form_id) {
   try {
+    
+    var msg = 'DEPRECATED - drupalgap_form_load() - ' +
+      'each form is now controlled by an individual directive, ' +
+      'with controller and link. Create a directive called: ' + dg_get_camel_case(form_id);
+    console.log(msg);
+    return;
 
     var form = drupalgap_form_defaults(form_id);
 
@@ -308,53 +344,6 @@ function drupalgap_form_load(form_id) {
 
   }
   catch (error) { console.log('drupalgap_form_load - ' + error); }
-}
-
-/**
- * Given a drupalgap form, this renders the html that will appear inside the
- * <form></form> element and returns it.
- * @param {Object} form
- * @return {String}
- */
-function drupalgap_form_render(form) {
-  try {
-    // @TODO - we may possibly colliding html element ids!!! For example, I
-    // think the node edit page gets an id of "node_edit" and possibly so does
-    // the node edit form, which also may get an id of "node_edit". We may want
-    // to prefix both the template page and form ids with prefixes, e.g.
-    // drupalgap_page_* and drupalgap_form_*, but adding these prefixes could
-    // get annoying for css selectors used in jQuery and CSS. What to do?
-
-    // If the form already exists in the DOM, remove it.
-    //if ($('form#' + form.id).length) { $('form#' + form.id).remove(); }
-
-    // Render the prefix and suffix and wrap them in their own div.
-    var prefix = form.prefix;
-    if (!empty(prefix)) {
-      prefix = '<div class="form_prefix">' + prefix + '</div>';
-    }
-    var suffix = form.suffix;
-    if (!empty(suffix)) {
-      suffix = '<div class="form_suffix">' + suffix + '</div>';
-    }
-
-    // Render the form's input elements.
-    var form_elements = _drupalgap_form_render_elements(form);
-    //var directive = form.id.replace(/_/g, '-');
-    //var form_elements = '<' + directive + '></' + directive + '>';
-    
-    // @TODO migrate up the stack in angular
-    //var form_attributes = drupalgap_attributes(form.options.attributes);
-    
-    // Return the form html.
-    var form_html = '<form ' + drupalgap_attributes(form.options.attributes) + '>' +
-      prefix +
-      '<div id="drupalgap_form_errors"></div>' +
-      form_elements +
-      suffix + '</form>';
-    return form_html;
-  }
-  catch (error) { console.log('drupalgap_form_render - ' + error); }
 }
 
 /**
