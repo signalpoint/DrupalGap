@@ -131,6 +131,7 @@ function dg_form_element_ng_model(element, language, delta) {
 dgControllers.directive("dgFormElement", function($compile, $injector) {
     //dpm('dgFormElement');
     return {
+      controller: function($scope) { },
       link: function($scope, $element) {
         
         //dpm('dgFormElement - link...');
@@ -138,7 +139,7 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
 
         // Extract the form, then the element from the form.
         var form = $scope.form;        
-        var element = form.elements[$element.attr('element_name')];
+        var element = form.elements[$element.attr('element_name')]; // @TODO just use "name" here
         
         //console.log(element.name);
         //console.log(arguments);
@@ -209,7 +210,8 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
             
             // Build the ng-model for the element, if it hasn't already been set.
             if (!variables.attributes['ng-model']) {
-              variables.attributes['ng-model'] = dg_form_element_ng_model(element, language, delta);
+              var ng_model = dg_form_element_ng_model(element, language, delta);
+              variables.attributes['ng-model'] = ng_model;
             }
             
             // We'll render the item, unless we prove otherwise.
@@ -256,6 +258,7 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
             variables.attributes.value = item.default_value;
             if (typeof item.value !== 'undefined') {
               variables.attributes.value = item.value;
+              
             }
             
             // If this is a field, is there a directive available to handle the
@@ -266,7 +269,7 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
                 
                 // Place variables into the scope so the hookFieldWidgetForm
                 // implementor will have access to them.
-                $scope.form = form;
+                /*$scope.form = form;
                 $scope.form_state = null;
                 $scope.field = element.field_info_field;
                 $scope.instance = element.field_info_instance;
@@ -284,7 +287,7 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
 
                 // Add the directive's attribute and the div container.
                 attrs[field_widget_form_function_name.replace(/_/g, '-')] = '';
-                item_html += '<div ' + drupalgap_attributes(attrs) + '>{{' + name + '}}</div>';
+                item_html += '<div ' + drupalgap_attributes(attrs) + '>{{' + name + '}}</div>';*/
 
               }
               else {
@@ -297,17 +300,7 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
             // to the item back into this item.
             if (field_widget_form_function) {
               
-              /*field_widget_form_function.apply(
-                null, [
-                  form,
-                  null,
-                  element.field_info_field,
-                  element.field_info_instance,
-                  language,
-                  items,
-                  delta,
-                  element
-              ]);
+              /*
               // @TODO - sometimes an item gets merged without a type here, why?
               // @UPDATE - did the recursive extend fix this?
               item = $.extend(true, item, items[delta]);
@@ -317,8 +310,8 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
     
             // Merge element attributes into the variables object.
             /*if (item.options && item.options.attributes) {
-              variables.attributes = $.extend(
-                true,
+              variables.attributes = angular.extend(
+                {},
                 variables.attributes,
                 item.options.attributes
               );
@@ -327,12 +320,14 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
             // Render only "non field" element items here, any field items will be
             // taken care of by the hook_field_widget_form controller..
             if (!element.is_field) {
+              
               item_html = _drupalgap_form_render_element_item(
                 form,
                 element,
                 variables,
                 item
               );
+
             }
             if (typeof item_html === 'undefined') {
               render_item = false;
@@ -345,24 +340,6 @@ dgControllers.directive("dgFormElement", function($compile, $injector) {
     
         // Are we skipping the render of the item?
         if (!render_item) { return ''; }
-    
-        // Show the 'Add another item' button on unlimited value fields.
-        /*if (element.field_info_field &&
-          element.field_info_field.cardinality == -1) {
-          var add_another_item_variables = {
-            text: 'Add another item',
-            attributes: {
-              'class': 'drupalgap_form_add_another_item',
-              onclick:
-                "javascript:_drupalgap_form_add_another_item('" +
-                  form.id + "', '" +
-                  element.name + "', " +
-                  delta +
-                ')'
-            }
-          };
-          html += theme('button', add_another_item_variables);
-        }*/
     
         // Is this element wrapped? We won't wrap hidden inputs by default, unless
         // someone is overriding it.
