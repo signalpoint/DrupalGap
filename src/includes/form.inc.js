@@ -31,7 +31,8 @@ function dg_ng_compile_form($compile, $scope) {
         }
         if (typeof element.default_value !== 'undefined') {
           // @TODO we shouldn't be dropping all these directly in scope, let's
-          // put them in their own object instead.
+          // put them in their own object instead. Although this may be possible
+          // to deprecate now because of our ng-model usage, needs testing...
           $scope[element.name] = element.default_value;
         }
       }
