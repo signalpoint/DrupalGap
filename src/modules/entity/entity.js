@@ -78,10 +78,10 @@ dgApp.directive("entityPageAdd", function($compile) {
     };
 });
 
-dgApp.directive("entityPageEdit", function($compile) {
+dgApp.directive("entityPageEdit", function($compile, jdrupal) {
     return {
       
-      controller: function($scope, $element, $http, jdrupal) {
+      controller: function($scope, $element, $http) {
         dpm('entityPageEdit - controller');
         console.log(arguments);
         console.log(arg());
@@ -100,10 +100,42 @@ dgApp.directive("entityPageEdit", function($compile) {
       },
       scope: { promise: '=dgEntity' },
       replace: true,
-      link: function (scope, elem, attrs) {
+      link: function (scope, element, attrs) {
+        
         dpm('entityPageEdit - link');
         console.log(arguments);
+
           scope.entity_load.promise.success(function (entity) {
+
+              var form_id = scope.entity_type + '_edit';
+
+              // Set up form defaults.
+              var form = dg_form_defaults(form_id, scope);
+              //form.options.attributes['ng-model'] = scope.entity_type; 
+
+              // Call the [entity-type]_edit form to assemble its elements.
+              var fn = window[form_id];
+              fn(form, null, entity);
+
+              // Form submit handler.
+              form.submit.push(function(form, form_state) {
+                  drupalgap_entity_form_submit(form, form_state, jdrupal);
+              });
+
+              // Place entity and the form into the scope.
+              //scope.entity_type = entity_type;
+              //scope.bundle = bundle;
+              //scope.entity = entity;
+              scope.form = form;
+              scope.form_state = { values: entity };
+              //scope[scope.entity_type] = entity;
+              //dpm('placing entity into form state');
+              //$scope.entity = entity;
+
+              // Add the form to the element.
+              element.append(dg_ng_compile_form($compile, scope));
+
+              return;
 
               // Extract the entity type and bundle, and then set the bundle on
               // the parent scope.
@@ -154,8 +186,8 @@ dgApp.directive("entityPageEdit", function($compile) {
  */
 function drupalgap_entity_form_submit(form, form_state, jdrupal) {
   try {
-    //dpm('drupalgap_entity_form_submit');
-    //console.log(arguments);
+    dpm('drupalgap_entity_form_submit');
+    console.log(arguments);
 
     var entity = form_state.values;
 
