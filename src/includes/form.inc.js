@@ -4,37 +4,59 @@
 function dg_ng_compile_form($compile, $scope) {
   try {
     dpm('dg_ng_compile_form');
+    console.log(arguments);
     
+    // @TODO sometime between dg_ng_compile_form() and dgFormElement.link, we
+    // are losing the form state.
+
     dg_form_element_set_empty_options_and_attributes($scope.form, language_default());
-    
+
     // Give modules an opportunity to alter the form.
-    module_invoke_all('form_alter', $scope.form, null, $scope.form_id);
+    //module_invoke_all('form_alter', $scope.form, null, $scope.form.id);
 
     // Place the assembled form into local storage so _drupalgap_form_submit
     // will have access to the assembled form.
     //drupalgap_form_local_storage_save($scope.form);
-    
+
     // For each form element...
     for (var name in $scope.form.elements) {
       if (!$scope.form.elements.hasOwnProperty(name)) { continue; }
       var element = $scope.form.elements[name];
+      //dpm(name);
+      //console.log(element);
       
-      // Place any hidden input's value (if any) into the scope so it can be
-      // properly bound to the form state values.
-      if (element.type == 'hidden') {
+      if (!element.is_field) {
         if (typeof element.options.attributes.name === 'undefined') {
           $scope.form.elements[name].options.attributes.name = element.name;
         }
         if (typeof element.default_value !== 'undefined') {
+          // @TODO we shouldn't be dropping all these directly in scope, let's
+          // put them in their own object instead.
+          $scope[element.name] = element.default_value;
+        }
+      }
+      else {
+        // @TODO what about fields?
+      }
+      
+
+      
+
+      // Place any hidden input's value (if any) into the scope so it can be
+      // properly bound to the form state values.
+      if (element.type == 'hidden') {
+        if (typeof element.default_value !== 'undefined') {
+          // @TODO we should probably stick these values in their own object, so
+          // they aren't polluting the scope with nonsense.
           $scope[element.name] = element.default_value;
         }
         var ng_model = typeof element.options.attributes['ng-model'] !== 'undefined' ?
           element.options.attributes['ng-model'] : dg_form_element_ng_model(element);
         $scope.form.elements[name].options.attributes['ng-init'] = ng_model + " = " + element.options.attributes.name;
       }
-    
+
     }
-    
+
     // Finally compile the rendered form.
     return dg_ng_compile($compile, $scope, drupalgap_form_render($scope.form));
   }
@@ -86,20 +108,6 @@ function drupalgap_form_render(form) {
     return form_html;
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
-}
-
-/**
- * Given a scope from a form's controller, this will attach default properties
- * to it like form_state and the submit function.
- */
-function drupalgap_form_scope_defaults($scope) {
-  try {
-    // Create an empty form_state and attach the default submit handler to the
-    // scope, if they haven't been set already.
-    if (!$scope.form_state) { $scope.form_state = { values: { } } };
-    if (!$scope.submit) { $scope.submit = _drupalgap_form_submit; }
-  }
-  catch (error) { console.log('drupalgap_form_scope_defaults - ' + error); }
 }
 
 /**
