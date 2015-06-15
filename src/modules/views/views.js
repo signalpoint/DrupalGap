@@ -7,6 +7,12 @@ var _views_exposed_filter_reset = false;
 // Used to hold onto the current views' exposed filter submit's theme variables.
 var _views_exposed_filter_submit_variables = null;
 
+// Global variables used to hold the onto various things during a views embed
+// view call.
+var _views_embed_view_selector = null;
+var _views_embed_view_results = null;
+var _views_embed_view_options = null;
+
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
  * results and pass them along to the provided success callback.
@@ -376,10 +382,6 @@ function _theme_view(variables) {
   catch (error) { console.log('_theme_view - ' + error); }
 }
 
-// A global variable used to hold the current views' results during a views
-// embed view call.
-var _views_embed_view_results = null;
-
 /**
  * Returns the html string to options.success, used to embed a view.
  * @param {String} path
@@ -391,6 +393,7 @@ function views_embed_view(path, options) {
         success: function(results) {
           try {
             _views_embed_view_results = results;
+            _views_embed_view_options = options;
             if (!options.success) { return; }
             options.results = results;
             var html = theme('views_view', options);
@@ -422,14 +425,18 @@ function views_embed_view(path, options) {
 function theme_views_view(variables) {
   try {
     var html = '';
+
     // Extract the results.
     var results = _views_embed_view_results;
     if (!results) { return html; }
+
     // Figure out the format.
     if (!variables.format) { variables.format = 'unformatted_list'; }
+
     // Extract the root and child object name.
     var root = results.view.root;
     var child = results.view.child;
+
     // Is there a title to display?
     if (variables.title) {
       var title_attributes = variables.title_attributes ?
@@ -443,6 +450,7 @@ function theme_views_view(variables) {
         html += theme('views_spacer', null);
       }
     }
+
     // Render the exposed filters, if there are any.
     var views_exposed_form_html = '';
     if (typeof results.view.exposed_data !== 'undefined') {
@@ -455,13 +463,17 @@ function theme_views_view(variables) {
         }
       );
     }
+    
+    // Determine the views container selector and set it aside globally.
+    var selector = '#' + drupalgap_get_page_id() +
+        ' #' + variables.attributes.id;
+    _views_embed_view_selector = selector
+
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
     // the creation of the content area.
     if (results.view.count == 0) {
-      var selector = '#' + drupalgap_get_page_id() +
-        ' #' + variables.attributes.id;
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
@@ -477,90 +489,18 @@ function theme_views_view(variables) {
     }
     // Append the exposed filter html.
     html += views_exposed_form_html;
-    // Depending on the format, let's render the container opening and closing,
-    // and then render the rows.
-    if (!variables.format) { variables.format = 'unformatted_list'; }
-    var open = '';
-    var close = '';
-    var open_row = '';
-    var close_row = '';
-    // Prepare the format's container attributes.
-    var format_attributes = {};
-    if (typeof variables.format_attributes !== 'undefined') {
-      format_attributes = $.extend(
-        true,
-        format_attributes,
-        variables.format_attributes
-      );
-    }
-    switch (variables.format) {
-      case 'ul':
-        if (typeof format_attributes['data-role'] === 'undefined') {
-          format_attributes['data-role'] = 'listview';
-        }
-        open = '<ul ' + drupalgap_attributes(format_attributes) + '>';
-        close = '</ul>';
-        open_row = '<li>';
-        close_row = '</li>';
-        break;
-      case 'ol':
-        if (typeof format_attributes['data-role'] === 'undefined') {
-          format_attributes['data-role'] = 'listview';
-        }
-        open = '<ol ' + drupalgap_attributes(format_attributes) + '>';
-        close = '</ol>';
-        open_row = '<li>';
-        close_row = '</li>';
-        break;
-      case 'table':
-      case 'jqm_table':
-        if (variables.format == 'jqm_table') {
-          if (typeof format_attributes['data-role'] === 'undefined') {
-            format_attributes['data-role'] = 'table';
-          }
-          if (typeof format_attributes['data-mode'] === 'undefined') {
-            format_attributes['data-mode'] = 'reflow';
-          }
-          console.log(
-            'WARNING: theme_views_view() - jqm_table not supported, yet'
-          );
-        }
-        open = '<table ' + drupalgap_attributes(format_attributes) + '>';
-        close = '</table>';
-        open_row = '<tr>';
-        close_row = '</tr>';
-        break;
-      case 'unformatted_list':
-      default:
-        if (typeof format_attributes['class'] === 'undefined') {
-          format_attributes['class'] = '';
-        }
-        format_attributes['class'] += ' views-rows';
-        open = '<div ' + drupalgap_attributes(format_attributes) + '>';
-        close = '</div>';
-        open_row = '';
-        close_row = '';
-        break;
-    }
-    var rows = '' + open;
-    for (var count in results[root]) {
-        if (!results[root].hasOwnProperty(count)) { continue; }
-        var object = results[root][count];
-        // Extract the row.
-        var row = object[child];
-        // Mark the row position.
-        row._position = count;
-        // If a row_callback function exists, call it to render the row,
-        // otherwise use the default row render mechanism.
-        var row_content = '';
-        if (variables.row_callback && function_exists(variables.row_callback)) {
-          row_callback = window[variables.row_callback];
-          row_content = row_callback(results.view, row);
-        }
-        else { row_content = JSON.stringify(row); }
-        rows += open_row + row_content + close_row;
-    }
-    rows += close;
+
+    // Render all the rows.
+    var result_formats = drupalgap_views_get_result_formats(variables);
+    var rows = '' + result_formats.open + drupalgap_views_render_rows(
+      variables,
+      _views_embed_view_results,
+      root,
+      child,
+      result_formats.open_row,
+      result_formats.close_row
+    ) + result_formats.close;
+
     // If we have any pages, render the pager above or below the results
     // according to the pager_pos setting.
     var pager = '';
@@ -569,6 +509,7 @@ function theme_views_view(variables) {
     if (typeof variables.pager_pos !== 'undefined') {
       pager_pos = variables.pager_pos;
     }
+
     // Append the rendered rows and the pager to the html string according to
     // the pager position.
     if (pager_pos == 'top') {
@@ -586,11 +527,9 @@ function theme_views_view(variables) {
         pager_pos +
       ')');
     }
+
     // Since the views content is injected dynamically after the page is loaded,
     // we need to have jQM refresh the page to add its styling.
-    var selector =
-      '#' + drupalgap_get_page_id() +
-      ' #' + variables.attributes.id;
     $(selector).hide();
     setTimeout(function() {
         $(selector).trigger('create').show('fast');
@@ -737,6 +676,123 @@ function theme_pager_previous(variables) {
     return html;
   }
   catch (error) { console.log('theme_pager_previous - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_views_get_result_formats(variables) {
+  try {
+    var result_formats = {};
+    
+    // Depending on the format, let's render the container opening and closing,
+    // and then render the rows.
+    if (!variables.format) { variables.format = 'unformatted_list'; }
+    var open = '';
+    var close = '';
+    var open_row = '';
+    var close_row = '';
+    
+    // Prepare the format's container attributes.
+    var format_attributes = {};
+    if (typeof variables.format_attributes !== 'undefined') {
+      format_attributes = $.extend(
+        true,
+        format_attributes,
+        variables.format_attributes
+      );
+    }
+    
+    // Add a views-results class
+    if (typeof format_attributes['class'] === 'undefined') {
+      format_attributes['class'] = '';
+    }
+    format_attributes['class'] += ' views-results ';
+    
+    switch (variables.format) {
+      case 'ul':
+        if (typeof format_attributes['data-role'] === 'undefined') {
+          format_attributes['data-role'] = 'listview';
+        }
+        open = '<ul ' + drupalgap_attributes(format_attributes) + '>';
+        close = '</ul>';
+        open_row = '<li>';
+        close_row = '</li>';
+        break;
+      case 'ol':
+        if (typeof format_attributes['data-role'] === 'undefined') {
+          format_attributes['data-role'] = 'listview';
+        }
+        open = '<ol ' + drupalgap_attributes(format_attributes) + '>';
+        close = '</ol>';
+        open_row = '<li>';
+        close_row = '</li>';
+        break;
+      case 'table':
+      case 'jqm_table':
+        if (variables.format == 'jqm_table') {
+          if (typeof format_attributes['data-role'] === 'undefined') {
+            format_attributes['data-role'] = 'table';
+          }
+          if (typeof format_attributes['data-mode'] === 'undefined') {
+            format_attributes['data-mode'] = 'reflow';
+          }
+          console.log(
+            'WARNING: theme_views_view() - jqm_table not supported, yet'
+          );
+        }
+        open = '<table ' + drupalgap_attributes(format_attributes) + '>';
+        close = '</table>';
+        open_row = '<tr>';
+        close_row = '</tr>';
+        break;
+      case 'unformatted_list':
+      default:
+        if (typeof format_attributes['class'] === 'undefined') {
+          format_attributes['class'] = '';
+        }
+        format_attributes['class'] += ' views-rows';
+        open = '<div ' + drupalgap_attributes(format_attributes) + '>';
+        close = '</div>';
+        open_row = '';
+        close_row = '';
+        break;
+    }
+    result_formats.open = open;
+    result_formats.close = close;
+    result_formats.open_row = open_row;
+    result_formats.close_row = close_row;
+    return result_formats;
+  }
+  catch (error) { console.log('drupalgap_views_get_result_formats - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_views_render_rows(variables, results, root, child, open_row, close_row) {
+  try {
+    var html = '';
+    for (var count in results[root]) {
+      if (!results[root].hasOwnProperty(count)) { continue; }
+      var object = results[root][count];
+      // Extract the row.
+      var row = object[child];
+      // Mark the row position.
+      row._position = count;
+      // If a row_callback function exists, call it to render the row,
+      // otherwise use the default row render mechanism.
+      var row_content = '';
+      if (variables.row_callback && function_exists(variables.row_callback)) {
+        row_callback = window[variables.row_callback];
+        row_content = row_callback(results.view, row);
+      }
+      else { row_content = JSON.stringify(row); }
+      html += open_row + row_content + close_row;
+    }
+    return html;
+  }
+  catch (error) { console.log('drupalgap_views_render_rows - ' + error); }
 }
 
 /**
