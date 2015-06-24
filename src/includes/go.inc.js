@@ -238,6 +238,16 @@ function drupalgap_goto_generate_page_and_go(
             menu_link: menu_link
         });
 
+        // If we've reached our DOM limit for pages, pull the oldest page out of
+        // the DOM.
+        if (
+          drupalgap.settings.cache.dom &&
+          drupalgap.settings.cache.dom.pages &&
+          drupalgap.pages.length > drupalgap.settings.cache.dom.pages
+        ) {
+          drupalgap_remove_page_from_dom(drupalgap.pages[0]);
+        }
+
         // Setup change page options if necessary.
         if (drupalgap_path_get() == path && options.form_submission) {
           options.allowSamePageTransition = true;
