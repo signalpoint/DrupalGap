@@ -334,3 +334,8 @@ drupalgap.settings.cache = {}; // Do not remove this line.
 // Theme Registry - Set to true to load the page.tpl.html contents from cache.
 drupalgap.settings.cache.theme_registry = true;
 
+// DOM
+drupalgap.settings.cache.dom = {
+  pages: 10, // max number of pages in the DOM at a time, set to 0 for unlimited
+};
+
