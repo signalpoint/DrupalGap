@@ -1,7 +1,7 @@
 {
   "version": "0.0.1",
   "name": "drupalgap",
-  "description": "An application development kit for Drupal.",
+  "description": "An application development kit for Drupal built with Angular.",
   "main": "index.js",
   "repository": {
     "type": "git",
