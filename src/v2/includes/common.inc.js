@@ -35,6 +35,21 @@ function dg_attributes(attributes) {
 }
 
 /**
+ * Given a JS function name, this returns true if the function exists in the
+ * scope, false otherwise.
+ * @param {String} name
+ * @return {Boolean}
+ */
+function dg_function_exists(name) {
+  try {
+    return (eval('typeof ' + name) == 'function');
+  }
+  catch (error) {
+    alert('dg_function_exists - ' + error);
+  }
+}
+
+/**
  * Given a string separated by underscores or hyphens, this will return the
  * camel case version of a string. For example, given "foo_bar" or "foo-bar",
  * this will return "fooBar".

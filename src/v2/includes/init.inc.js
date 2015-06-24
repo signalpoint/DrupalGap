@@ -1,26 +1,37 @@
-dgApp.config(function() {
+dgApp.config(function(drupalgapSettings) {
 
   dpm('config() - initializing...');
   console.log(arguments);
 
-  // @WARNING only providers available here, no scope available here...
+  // @WARNING only certain providers like constants are available here, no scope
+  // or value available here...
 
-  return;
-
-  drupalgap_onload();
+  //console.log($provide.value('drupalgapSettings').$get());
+  
+  drupalgap_onload(drupalgapSettings);
 
   // @TODO this should be included via index.html as a script.
   // @WARNING to get this file navigate to ?q=drupalgap/connect in your
   // browser then save it at the path mentioned below.
   // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated because of its
   // detrimental effects to the end user's experience.
-  drupalgap_service_resource_extract_results({
+  /*drupalgap_service_resource_extract_results({
       service: 'system',
       resource: 'connect',
       data: JSON.parse(drupalgap_file_get_contents('app/js/drupalgap_connect.json'))
-  });
+  });*/
 
 });
+
+/**
+ *
+ */
+function drupalgap_onload(drupalgapSettings) {
+  try {
+    drupalgap_load_blocks(drupalgapSettings);
+  }
+  catch (error) { console.log('drupalgap_onload - ' + error); }
+}
 
 dgApp.config(function() {
     

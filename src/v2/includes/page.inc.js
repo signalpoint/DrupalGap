@@ -15,8 +15,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           var region = theme.regions[name];
           template += drupalgap_render_region(region);
         }
-        //dpm(template);
-        
+
         // Compile the template for Angular and append it to the directive's
         // html element.
         var linkFn = $compile(template);

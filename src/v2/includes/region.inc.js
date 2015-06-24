@@ -3,21 +3,10 @@
  */
 function drupalgap_render_region(region) {
   try {
-    var html = '';
-    
-    
-    html = theme('region', {
+    return theme('region', {
         region: region,
         blocks: drupalgap_render_region_blocks(region)
     });
-    
-    // Open the region.
-    
-    
-    
-    // Close the region.
-    
-    return html;
   }
   catch (error) { console.log('drupalgap_render_region - ' + error); }
 }
@@ -31,8 +20,9 @@ function drupalgap_render_region_blocks(region) {
     var html = '';
     for (var delta in region.blocks) {
       if (!region.blocks.hasOwnProperty(delta)) { continue; }
-      var item = region.blocks[delta];
-      html += '<div>' + delta + '</div>';
+      var block = region.blocks[delta];
+      console.log(block);
+      html += drupalgap_render_block(delta, block);
     }
     return html;
   }
@@ -53,6 +43,4 @@ function theme_region(variables) {
   }
   catch (error) { console.log('theme_region - ' + error); }
 }
-
-
 

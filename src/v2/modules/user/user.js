@@ -1,4 +1,4 @@
-angular.module('dgUser', [])
+angular.module('dgUser', ['drupalgap'])
 .config(function() {
     dpm('dgUser - config');
 })

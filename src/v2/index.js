@@ -1,3 +1,7 @@
+var drupalgap = {
+  blocks: []
+};
+
 angular.module('drupalgap', [])
   .value('drupalgapSettings', null);
 
@@ -47,6 +51,7 @@ function dg_ng_dependencies() {
         //'dgControllers',
         'angular-drupal',
         'drupalgap',
+        'dgSystem',
         'dgUser'
     ];
   }
