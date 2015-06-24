@@ -26,3 +26,21 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
     };
 });
 
+dgApp.controller('dg_page_controller', [
+    '$scope', '$sce', '$route', '$location', '$routeParams',
+    function($scope, $sce, $route, $location, $routeParams) {
+      try {
+
+        dpm('dg_page_controller');
+        //console.log(arguments);
+  
+        // Place the route into the global dg ng, we don't do this in run()
+        // because the route isn't fully initalized until this controller is
+        // invoked.
+        dg_ng_set('route', $route);
+  
+      }
+      catch (error) { console.log('dg_page_controller - ' + error); }
+  }
+]);
+

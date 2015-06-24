@@ -15,6 +15,20 @@ function drupalgap_attributes(attributes) {
 /**
  * @deprecated
  */
+function drupalgap_field_info_field(field_name) {
+  try {
+    console.log(
+      'DEPRECATED - drupalgap_field_info_field(): use dg_field_info_field() instead in ' +
+      arguments.callee.caller.name + '()'
+    );
+    return dg_field_info_field(field_name);
+  }
+  catch (error) { console.log('drupalgap_field_info_field - ' + error); }
+}
+
+/**
+ * @deprecated
+ */
 function drupalgap_function_exists(name) {
   try {
     console.log(
@@ -24,6 +38,73 @@ function drupalgap_function_exists(name) {
     return dg_function_exists(name);
   }
   catch (error) { console.log('drupalgap_function_exists - ' + error); }
+}
+
+/**
+ * Given a form_id, this will return a form with a directive attribute for it.
+ * @param {String} form_id
+ * @return {String}
+ * @deprecated
+ */
+/*function drupalgap_get_form(form_id) {
+  try {
+    console.log(
+      'DEPRECATED - drupalgap_get_form() - instead, use a directive with this name: ' +
+      dg_get_camel_case(form_id)
+    );
+    return;
+  }
+  catch (error) { console.log('drupalgap_get_form - ' + error); }
+}*/
+
+/**
+ * @deprecated
+ */
+function drupalgap_form_defaults(form_id) {
+  try {
+    console.log(
+      'DEPRECATED - drupalgap_form_defaults(): use dg_form_defaults() instead in ' +
+      arguments.callee.caller.name + '(), and pass $scope to it'
+    );
+    return dg_form_defaults(form_id);
+  }
+  catch (error) { console.log('drupalgap_form_defaults - ' + error); }
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_file_get_contents(path, options) {
+  try {
+    console.log(
+      'DEPRECATED - drupalgap_file_get_contents(): use dg_file_get_contents() instead in ' +
+      arguments.callee.caller.name + '()'
+    );
+    return dg_file_get_contents(path, options);
+  }
+  catch (error) { console.log('drupalgap_file_get_contents - ' + error); }
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_form_get_element_id(name, form_id) {
+  console.log(
+    'DEPRECATED - drupalgap_form_get_element_id(): use dg_form_get_element_id() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_form_get_element_id(name, form_id);
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_form_render(form) {
+  console.log(
+    'DEPRECATED - drupalgap_form_render(): use dg_form_render() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_form_render(form);
 }
 
 /**
@@ -48,3 +129,85 @@ function drupalgap_kill_camel_case(str, separator) {
   catch (error) { console.log('drupalgap_kill_camel_case - ' + error); }
 }
 
+/**
+ *
+ */
+function drupalgap_ng_get(key) {
+  try {
+    console.log(
+      'DEPRECATED - drupalgap_ng_get(): use dg_ng_get() instead in ' +
+      arguments.callee.caller.name + '()'
+    );
+    return dg_ng_get(key);
+  }
+  catch (error) { console.log('drupalgap_ng_get - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_ng_set(key, value) {
+  try {
+    console.log(
+      'DEPRECATED - drupalgap_ng_set(): use dg_ng_set() instead in ' +
+      arguments.callee.caller.name + '()'
+    );
+    dg_ng_set(key, value);
+  }
+  catch (error) { console.log('drupalgap_ng_set - ' + error); }
+}
+
+/**
+ * Get the current DrupalGap path.
+ * @return {String}
+ */
+function drupalgap_path_get() {
+  try {
+    console.log(
+      'DEPRECATED - drupalgap_path_get(): use dg_path_get() instead in ' +
+      arguments.callee.caller.name + '()'
+    );
+    return dg_path_get();
+  }
+  catch (error) { console.log('drupalgap_path_get - ' + error); }
+}
+
+/**
+ * Set the current DrupalGap path.
+ * @param {String} path
+ * @deprecated
+ */
+function drupalgap_path_set(path) {
+  console.log(
+    'DEPRECATED - drupalgap_path_set(): is now handled by Angular, the caller is being ignored:' +
+    arguments.callee.caller.name + '()'
+  );
+  return;
+}
+
+/**
+ * Set the current DrupalGap path.
+ * @param {String} path
+ * @deprecated
+ */
+function is_int(n) {
+  console.log(
+    'DEPRECATED - is_int(): use dg_is_int() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_is_int(n);
+}
+
+/**
+ *
+ */
+function language_default() {
+  try {
+    console.log(
+      'DEPRECATED - language_default(): use dg_language_default() instead in ' +
+      arguments.callee.caller.name + '()'
+    );
+    return dg_language_default();
+  }
+  catch (error) { console.log('language_default - ' + error); }
+}

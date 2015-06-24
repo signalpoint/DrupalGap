@@ -15,11 +15,11 @@ dgApp.config(function(drupalgapSettings) {
   // browser then save it at the path mentioned below.
   // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated because of its
   // detrimental effects to the end user's experience.
-  /*drupalgap_service_resource_extract_results({
+  drupalgap_service_resource_extract_results({
       service: 'system',
       resource: 'connect',
-      data: JSON.parse(drupalgap_file_get_contents('app/js/drupalgap_connect.json'))
-  });*/
+      data: JSON.parse(dg_file_get_contents('app/js/drupalgap_connect.json'))
+  });
 
 });
 

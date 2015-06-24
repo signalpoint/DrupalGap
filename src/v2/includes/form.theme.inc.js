@@ -4,7 +4,8 @@
 function theme_form(variables) {
   try {
     
-    console.log(variables);
+    //dpm('theme_form');
+    //console.log(variables);
     
     var form = variables.form;
     
@@ -12,14 +13,14 @@ function theme_form(variables) {
     var html = '<form ' + dg_attributes(form.attributes) + '>';
     
     // Prefix.
-    if (form.prefix) {
+    /*if (form.prefix) {
       console.log(typeof form.prefix);
       if (typeof form.prefix === 'array') { }
       else { html += form.prefix; }
-    }
+    }*/
     
     // Elements.
-    html += variables.elements;
+    //html += variables.elements;
     
     // Close form.
     html += '</form>';

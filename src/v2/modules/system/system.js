@@ -11,10 +11,10 @@ dgApp.directive("dgMain", function($compile, $injector) {
         
         // Compile the template for Angular and append it to the directive's
         // html element.
-        var linkFn = $compile('<p>FUNK BUTTER!</p>'
-          /*drupalgap_render(
+        var linkFn = $compile(
+          drupalgap_render(
             menu_execute_active_handler($compile, $injector)
-          )*/
+          )
         );
         var content = linkFn(scope);
         element.append(content);

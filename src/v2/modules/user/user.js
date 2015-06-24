@@ -9,14 +9,13 @@ angular.module('dgUser', ['drupalgap'])
           templateUrl: 'themes/spi/page.tpl.html',
           //template: drupalgap_get_form('user_login_form'),
           //template: '<form user-login-form></form>',
-          controller: function() {
-            dpm('user/login controller');
-          }
+          controller: 'dg_page_controller',
+          page_callback: 'drupalgap_get_form',
+          page_arguments: ['user_login_form']
       });
 }]);
 
-//dgApp.directive("userLoginForm", function($compile) {
-angular.module('dgUser').directive("userLoginFormDirective", function($compile) {
+dgApp.directive("userLoginForm", function($compile) {
     return {
 
       controller: function($scope, drupal) {
@@ -24,7 +23,7 @@ angular.module('dgUser').directive("userLoginFormDirective", function($compile) 
         dpm('userLoginForm - controller');
 
         // Set up form defaults.
-        /*var form = dg_form_defaults("user_login_form", $scope);
+        var form = dg_form_defaults("user_login_form", $scope);
 
         // Build form elements.
         form.entity_type = 'user';
@@ -41,14 +40,14 @@ angular.module('dgUser').directive("userLoginFormDirective", function($compile) 
           title_placeholder: true,
           required: true,
           attributes: {
-            onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+            //onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
           }
         };
         form.elements.submit = {
           type: 'submit',
           value: t('Login')
         };
-        if (user_register_access()) {
+        /*if (user_register_access()) {
           form.buttons['create_new_account'] = {
             title: t('Create new account'),
             attributes: {
@@ -61,11 +60,11 @@ angular.module('dgUser').directive("userLoginFormDirective", function($compile) 
             attributes: {
               onclick: "drupalgap_goto('user/password')"
             }
-        };
+        };*/
 
         // Form submit handler.
         form.submit.push(function(form, form_state) {
-            jdrupal.user_login(
+            drupal.user_login(
               form_state.values.name,
               form_state.values.pass
             ).success(function(result) {
@@ -74,7 +73,7 @@ angular.module('dgUser').directive("userLoginFormDirective", function($compile) 
         });
 
         // Place the form into the scope.
-        $scope.form = form;*/
+        $scope.form = form;
 
       },
 
@@ -83,7 +82,7 @@ angular.module('dgUser').directive("userLoginFormDirective", function($compile) 
         dpm('userLoginForm - link');
 
         // Add the form to the element.
-        //element.append(dg_ng_compile_form($compile, scope));
+        element.append(dg_ng_compile_form($compile, scope));
 
       }
 

@@ -1,25 +1,36 @@
+// Create the drupalgap object.
 var drupalgap = {
-  blocks: []
+  blocks: [],
+  date_formats: { }, /* @see system_get_date_formats() in Drupal core */
+  date_types: { }, /* @see system_get_date_types() in Drupal core */
+  entity_info: {},
+  field_info_fields: {},
+  field_info_instances: {},
+  field_info_extra_fields: {},
+  ng: { }, /* holds onto angular stuff */
+  remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
+  site_settings: {}, /* holds variable settings from the Drupal site */
 };
 
+// Create the drupalgap module for Angular.
 angular.module('drupalgap', [])
   .value('drupalgapSettings', null);
 
-// Set up default Angular dependencies for DrupalGap.
-var dgAppDependencies = dg_ng_dependencies(); // grab default dependencies.
+// Create the app.
+var dgApp = angular.module('dgApp', dg_ng_dependencies());
 
-// Add on additional dependencies as needed.
-//dgAppDependencies.push('angular-animate');
-
-var dgApp = angular.module('dgApp', dgAppDependencies);
-
-dgApp.run(['$rootScope', '$routeParams', '$location', function($rootScope, $routeParams, $location) {
+// Run the app.
+dgApp.run([
+    '$rootScope', '$routeParams', '$location', 'drupalSettings',
+    function($rootScope, $routeParams, $location, drupalSettings) {
 
       dpm('dgApp.run()');
-      //console.log(arguments);
+      console.log(arguments);
 
-      //drupalgap_ng_set('routeParams', $routeParams);
-      //drupalgap_ng_set('location', $location);
+      dg_ng_set('routeParams', $routeParams);
+      dg_ng_set('location', $location);
+      
+      dg_ng_set('drupalSettings', drupalSettings);
 
       // Watch for changes in the Angular route (this is fired twice per route change)...
       /*$rootScope.$on("$locationChangeStart", function(event, next, current) {
@@ -38,7 +49,8 @@ dgApp.run(['$rootScope', '$routeParams', '$location', function($rootScope, $rout
           }
 
       });*/
-  }]);
+  }
+]);
 
 /**
  *
