@@ -22,7 +22,16 @@ function drupalgap_get_form(form_id) {
  */
 function dg_form_render(form) {
   try {
-    return drupalgap_form_render_elements(form);
+    // Render the prefix and suffix and wrap them in their own div.
+    var prefix = form.prefix;
+    if (!dg_empty(prefix)) {
+      prefix = '<div class="form_prefix">' + prefix + '</div>';
+    }
+    var suffix = form.suffix;
+    if (!dg_empty(suffix)) {
+      suffix = '<div class="form_suffix">' + suffix + '</div>';
+    }
+    return prefix + drupalgap_form_render_elements(form) + suffix;
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
 }
@@ -40,11 +49,9 @@ function dg_form_defaults(form_id, $scope) {
     form.id = form_id;
     form.elements = {};
     form.buttons = {};
-    form.options = {
-      attributes: {
-        id: form_id,
-        'class': ''
-      }
+    form.attributes = {
+      id: form_id,
+      'class': ''
     };
     
     // Create a prefix and suffix.
@@ -191,8 +198,8 @@ function dg_ng_compile_form($compile, $scope) {
       //console.log(element);
       
       if (!element.is_field) {
-        if (typeof element.options.attributes.name === 'undefined') {
-          $scope.form.elements[name].options.attributes.name = element.name;
+        if (typeof element.attributes.name === 'undefined') {
+          $scope.form.elements[name].attributes.name = element.name;
         }
         if (typeof element.default_value !== 'undefined') {
           // @TODO we shouldn't be dropping all these directly in scope, let's
@@ -213,9 +220,9 @@ function dg_ng_compile_form($compile, $scope) {
           // they aren't polluting the scope with nonsense.
           $scope[element.name] = element.default_value;
         }
-        var ng_model = typeof element.options.attributes['ng-model'] !== 'undefined' ?
-          element.options.attributes['ng-model'] : dg_form_element_ng_model(element);
-        $scope.form.elements[name].options.attributes['ng-init'] = ng_model + " = " + element.options.attributes.name;
+        var ng_model = typeof element.attributes['ng-model'] !== 'undefined' ?
+          element.attributes['ng-model'] : dg_form_element_ng_model(element);
+        $scope.form.elements[name].attributes['ng-init'] = ng_model + " = " + element.attributes.name;
       }
 
     }

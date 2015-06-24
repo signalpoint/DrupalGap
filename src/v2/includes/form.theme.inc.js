@@ -3,31 +3,41 @@
  */
 function theme_form(variables) {
   try {
-    
     //dpm('theme_form');
     //console.log(variables);
-    
-    var form = variables.form;
-    
-    // Open form.
-    var html = '<form ' + dg_attributes(form.attributes) + '>';
-    
-    // Prefix.
-    /*if (form.prefix) {
-      console.log(typeof form.prefix);
-      if (typeof form.prefix === 'array') { }
-      else { html += form.prefix; }
-    }*/
-    
-    // Elements.
-    //html += variables.elements;
-    
-    // Close form.
-    html += '</form>';
-
-    return html;
+    return '<form ' + dg_attributes(variables.form.attributes) + '></form>';
   }
   catch (error) { console.log('theme_form - ' + error); }
+}
+
+/**
+ * Themes a password input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_password(variables) {
+  try {
+    variables.attributes.type = 'password';
+    var output = '<input ' + dg_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_password - ' + error); }
+}
+
+/**
+ * Themes a password input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_submit(variables) {
+  try {
+    dpm('theme_submit');
+    console.log(variables);
+    variables.attributes.type = 'submit';
+    var output = '<input ' + dg_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_submit - ' + error); }
 }
 
 /**

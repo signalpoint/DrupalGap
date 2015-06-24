@@ -19,6 +19,14 @@ function drupalgap_form_render_elements(form) {
  */
 function drupalgap_form_render_element(form, element) {
   try {
+    // Preprocess element if necessary.
+    // @TODO great spot for a hook.
+    if (element.type == 'submit') {
+      console.log(element);
+      if (typeof element.attributes['value'] === 'undefined' && element.value) {
+        element.attributes['value'] = element.value;
+      }
+    }
     return theme('form_element', { element: element });
   }
   catch (error) { console.log('drupalgap_form_render_element - ' + error); }
@@ -29,10 +37,12 @@ function drupalgap_form_render_element(form, element) {
  */
 function theme_form_element(variables) {
   try {
-    //console.log(variables);
     return '<div>' +
       theme('form_element_label', { element: variables.element } ) +
-      theme(variables.element.type, { element: variables.element } ) +
+      theme(variables.element.type, {
+          attributes: variables.element.attributes,
+          element: variables.element
+      }) +
     '</div>';
   }
   catch (error) { console.log('theme_form_element - ' + error); }
@@ -118,15 +128,12 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
       else {
         // This element is not a field, setup default options if none
         // have been provided. Then set the element id.
-        if (!element.options) {
-          form.elements[name].options = {attributes: {}};
-        }
-        else if (!element.options.attributes) {
-          form.elements[name].options.attributes = {};
+        if (!element.attributes) {
+          form.elements[name].attributes = { };
         }
         id = dg_form_get_element_id(name, form.id);
         form.elements[name].id = id;
-        form.elements[name].options.attributes.id = id;
+        form.elements[name].attributes.id = id;
       }
     }
   }

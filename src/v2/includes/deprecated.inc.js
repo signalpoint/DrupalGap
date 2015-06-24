@@ -186,6 +186,17 @@ function drupalgap_path_set(path) {
 }
 
 /**
+ * @deprecated
+ */
+function empty(value) {
+  console.log(
+    'DEPRECATED - empty(): use dg_empty() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_empty(value);
+}
+
+/**
  * Set the current DrupalGap path.
  * @param {String} path
  * @deprecated

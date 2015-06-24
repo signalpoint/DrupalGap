@@ -7,6 +7,9 @@
 function theme(hook, variables) {
   try {
     
+    //dpm('theme(' + hook + ')');
+    //console.log(variables);
+    
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
     if (!variables) { variables = {}; }
@@ -20,13 +23,17 @@ function theme(hook, variables) {
     // @TODO check for the current theme implementing the theme hook.
     
     // If no attributes are coming in, look to variables.options.attributes
-    // as a secondary option, otherwise setup an empty JSON object for them.
+    // as a secondary option, and to variables.element.attributes as a third
+    // option, otherwise setup an empty JSON object for them.
     if (
       typeof variables.attributes === 'undefined' ||
       !variables.attributes
     ) {
       if (variables.options && variables.options.attributes) {
         variables.attributes = variables.options.attributes;
+      }
+      if (variables.element && variables.element.attributes) {
+        variables.attributes = variables.element.attributes;
       }
       else {
         variables.attributes = {};
