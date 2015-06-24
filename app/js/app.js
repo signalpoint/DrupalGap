@@ -7,6 +7,7 @@ angular.module('angular-drupal').config(function($provide) {
         //endpoint: Drupal.settings.endpoint
         site_path: 'http://localhost/drupal-7',
         endpoint: 'drupalgap',
+        language: 'und',
         theme: {
           name: 'spi',
           path: 'themes'
