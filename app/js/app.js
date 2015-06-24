@@ -18,7 +18,17 @@ angular.module('angular-drupal').config(function($provide) {
 // Configure the drupalgap module.
 angular.module('drupalgap').config(function($provide) {
     console.log('drupalgap - config');
-    $provide.value('drupalgapSettings', {
+    $provide.constant('drupalgapSettings', {
+        
+        // Modules.
+        modules: {
+          core: {
+            system: {},
+            user: {},
+          },
+          contrib: { },
+          custom: { },
+        },
         
         // Theme.
         theme: {
@@ -45,7 +55,9 @@ angular.module('drupalgap').config(function($provide) {
               blocks: {
                 
                 // Page content.
-                main: { }
+                main: {
+                  foo: 'bar'
+                }
 
               }
             },
