@@ -25,14 +25,19 @@ function image_field_formatter_view(entity_type, entity, field, instance,
       for (var delta in items) {
           if (!items.hasOwnProperty(delta)) { continue; }
           var item = items[delta];
-          // @TODO - add support for image_style
-          element[delta] = {
-            theme: 'image',
+          var theme = empty(display.settings.image_style) ?
+            'image' : 'image_style';
+          var image = {
+            theme: theme,
             alt: item.alt,
-            title: item.title,
-            path: drupalgap_image_path(item.uri)
-            /*image_style:display.settings.image_style*/
+            title: item.title
           };
+          if (!empty(theme)) {
+            image.style_name = display.settings.image_style;
+            image.path = item.uri;
+          }
+          else { image.path = drupalgap_image_path(item.uri); }
+          element[delta] = image;
       }
     }
     return element;
@@ -287,7 +292,7 @@ function image_style_url(style_name, path) {
         Drupal.settings.file_public_path +
           '/styles/' +
           style_name +
-          '/public/'
+          '/public'
       );
     }
     else if (src.indexOf('private://') != -1) {
@@ -296,7 +301,7 @@ function image_style_url(style_name, path) {
         Drupal.settings.file_private_path +
           '/styles/' +
           style_name +
-          '/private/'
+          '/private'
       );
     }
     return src;
