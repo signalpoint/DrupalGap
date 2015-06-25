@@ -1,16 +1,4 @@
 /**
- *
- */
-function theme_form(variables) {
-  try {
-    //dpm('theme_form');
-    //console.log(variables);
-    return '<form ' + dg_attributes(variables.form.attributes) + '></form>';
-  }
-  catch (error) { console.log('theme_form - ' + error); }
-}
-
-/**
  * Themes a password input.
  * @param {Object} variables
  * @return {String}

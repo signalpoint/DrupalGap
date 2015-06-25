@@ -19,12 +19,25 @@ function drupalgap_form_render_elements(form) {
  */
 function drupalgap_form_render_element(form, element) {
   try {
-    // Preprocess element if necessary.
+    // Preprocess element if necessary...
     // @TODO great spot for a hook.
+    
+    // Submit button.
     if (element.type == 'submit') {
-      console.log(element);
+      element.attributes['class'] += ' dg_form_submit_button ';
+      if (typeof element.attributes['data-ng-click'] === 'undefined') {
+        element.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
+      }
       if (typeof element.attributes['value'] === 'undefined' && element.value) {
         element.attributes['value'] = element.value;
+      }
+    }
+    else {
+      // All other elements should have an ng-model attached, which allows the
+      // form state values to be properly assembled and ready for validation and
+      // submission handlers.
+      if (typeof element.attributes['ng-model'] === 'undefined') {
+        element.attributes['ng-model'] = "form_state['values']['" + element.name + "']";
       }
     }
     return theme('form_element', { element: element });

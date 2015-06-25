@@ -3,18 +3,31 @@
  */
 function drupalgap_get_form(form_id) {
   try {
+    return theme('form', { form_id: form_id });
     // Set up form defaults.
-    var form = {
+    /*var form = {
       attributes: {
         id: form_id,
         'class': []
       }
-    };
+    };*/
     // Set up a directive attribute to handle this form, then theme and return.
-    form.attributes[form_id.replace(/_/g, '-')] = '';
-    return theme('form', { form: form });
+    //form.attributes[] = '';
   }
   catch (error) { console.log('drupalgap_get_form - ' + error); }
+}
+
+/**
+ *
+ */
+function theme_form(variables) {
+  try {
+    // Theme the form as an Angular directive based on the form's id.
+    var directive = variables.form_id.replace(/_/g, '-')
+    return '<' + directive + '></' + directive + '>';
+    //return '<form ' + dg_attributes(variables.form.attributes) + '></form>';
+  }
+  catch (error) { console.log('theme_form - ' + error); }
 }
 
 /**
@@ -31,7 +44,11 @@ function dg_form_render(form) {
     if (!dg_empty(suffix)) {
       suffix = '<div class="form_suffix">' + suffix + '</div>';
     }
-    return prefix + drupalgap_form_render_elements(form) + suffix;
+    return '<form ' + dg_attributes(form.attributes) + '>' +
+      prefix +
+      drupalgap_form_render_elements(form) +
+      suffix +
+    '</form>';
   }
   catch (error) { console.log('drupalgap_form_render - ' + error); }
 }
@@ -91,18 +108,19 @@ function dg_form_defaults(form_id, $scope) {
         try {
   
           // Call the form's validate function(s), if any.
-          for (var index in form.validate) {
+          /*for (var index in form.validate) {
               if (!form.validate.hasOwnProperty(index)) { continue; }
               var fn = form.validate[index];
               fn.apply(null, Array.prototype.slice.call([form, form_state]));
-          }
+          }*/
   
           // Call drupalgap form's api validate.
-          _drupalgap_form_validate(form, form_state);
+          // @TODO this should be replaced with Angular's way of doing things.
+          //_drupalgap_form_validate(form, form_state);
   
           // If there were validation errors, show the form errors and stop the
           // form submission. Otherwise submit the form.
-          if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
+          /*if (!jQuery.isEmptyObject(drupalgap.form_errors)) {
             var html = '';
             for (var name in drupalgap.form_errors) {
                 if (!drupalgap.form_errors.hasOwnProperty(name)) { continue; }
@@ -110,8 +128,10 @@ function dg_form_defaults(form_id, $scope) {
                 html += message + '\n\n';
             }
             drupalgap_alert(html);
-          }
-          else { form_submission(); }
+          }*/
+          //else {
+            form_submission();
+          //}
 
         }
         catch (error) {

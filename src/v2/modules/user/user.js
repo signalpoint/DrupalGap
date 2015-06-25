@@ -67,8 +67,9 @@ dgApp.directive("userLoginForm", function($compile) {
             drupal.user_login(
               form_state.values.name,
               form_state.values.pass
-            ).success(function(result) {
-                drupalgap_goto(drupalgap.settings.front);
+            ).then(function(data) {
+                console.log(data);
+                //drupalgap_goto(drupalgap.settings.front);
             });
         });
 
