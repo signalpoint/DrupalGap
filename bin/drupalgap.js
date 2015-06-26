@@ -583,8 +583,8 @@ function drupalgap_confirm(message) {
  */
 function drupalgap_toast(html) {
   try {
-    var open = arguments[2] ? arguments[2] : 1;
-    var close = arguments[1] ? arguments[1] : 2500;
+    var open = arguments[2] ? arguments[2] : 750;
+    var close = arguments[1] ? arguments[1] : 1500;
     setTimeout(function() {
         $.mobile.loading('show', {
             textVisible: true,
@@ -9397,7 +9397,7 @@ function image_style_url(style_name, path) {
         Drupal.settings.file_public_path +
           '/styles/' +
           style_name +
-          '/public'
+          '/public/'
       );
     }
     else if (src.indexOf('private://') != -1) {
@@ -9406,7 +9406,7 @@ function image_style_url(style_name, path) {
         Drupal.settings.file_private_path +
           '/styles/' +
           style_name +
-          '/private'
+          '/private/'
       );
     }
     return src;
