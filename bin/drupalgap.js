@@ -584,13 +584,13 @@ function drupalgap_confirm(message) {
 function drupalgap_toast(html) {
   try {
     var open = arguments[2] ? arguments[2] : 1;
-    var close = arguments[1] ? arguments[1] : 420;
-    setInterval(function() {
+    var close = arguments[1] ? arguments[1] : 2500;
+    setTimeout(function() {
         $.mobile.loading('show', {
             textVisible: true,
             html: html
         });
-        setInterval(function() {
+        setTimeout(function() {
             $.mobile.loading().hide();
         }, close);
     }, open);
