@@ -292,7 +292,7 @@ function image_style_url(style_name, path) {
         Drupal.settings.file_public_path +
           '/styles/' +
           style_name +
-          '/public'
+          '/public/'
       );
     }
     else if (src.indexOf('private://') != -1) {
@@ -301,7 +301,7 @@ function image_style_url(style_name, path) {
         Drupal.settings.file_private_path +
           '/styles/' +
           style_name +
-          '/private'
+          '/private/'
       );
     }
     return src;
