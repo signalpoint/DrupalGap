@@ -19,12 +19,12 @@ angular.module('angular-drupal').config(function($provide) {
 
 // Configure the drupalgap module.
 angular.module('drupalgap').config(function($provide) {
-    console.log('drupalgap - config');
     $provide.constant('drupalgapSettings', {
         
         // Modules.
         modules: {
           core: {
+            admin: {},
             entity: {},
             field: {},
             image: {},

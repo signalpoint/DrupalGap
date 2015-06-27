@@ -1,13 +1,9 @@
-angular.module('dgSystem', ['drupalgap']).config(function() {
-    dpm('dgSystem - config');
-});
+angular.module('dgSystem', ['drupalgap']);
 
+// @TODO attach to module instead of app.
 dgApp.directive("dgMain", function($compile, $injector) {
-    dpm('dgMain');
     return {
       link: function(scope, element) {
-        
-        dpm('dgMain - link...');
         
         // Compile the template for Angular and append it to the directive's
         // html element.

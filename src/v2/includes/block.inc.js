@@ -3,7 +3,7 @@
  */
 function drupalgap_load_blocks(drupalgapSettings) {
   try {
-    dpm('drupalgap_load_blocks');
+    //dpm('drupalgap_load_blocks');
     //console.log(drupalgapSettings);
     
     // For each module type specified in drupalgapSettings (core, contrib,
@@ -27,8 +27,8 @@ function drupalgap_load_blocks(drupalgapSettings) {
         // drupalgap.blocks one by one.
         var module = _modules[name];
         var blocks = window[function_name]();
-        console.log(name);
-        console.log(blocks);
+        //console.log(name);
+        //console.log(blocks);
         for (var delta in blocks) {
           if (!blocks.hasOwnProperty(delta)) { continue; }
           var block = blocks[delta];
@@ -45,8 +45,8 @@ function drupalgap_load_blocks(drupalgapSettings) {
       }
 
     }
-    dpm('BLOCKS!');
-    console.log(drupalgap.blocks);
+    //dpm('BLOCKS!');
+    //console.log(drupalgap.blocks);
   }
   catch (error) { console.log('drupalgap_load_blocks - ' + error); }
 }
@@ -72,8 +72,8 @@ function drupalgap_block_load(delta) {
 function drupalgap_render_block(delta, block) {
   try {
     angular.merge(block, drupalgap_block_load(delta));
-    console.log('loaded block');
-    console.log(block);
+    //console.log('loaded block');
+    //console.log(block);
     var function_name = block.module + '_block_view';
     if (!dg_function_exists(function_name)) {
       console.log('WARNING: ' + function_name + '() does not exist, so we are skipping this block: ' + delta);

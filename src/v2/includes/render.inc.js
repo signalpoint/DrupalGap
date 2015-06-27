@@ -18,13 +18,12 @@ function drupalgap_render(content) {
         if (!content.hasOwnProperty(index)) { continue; }
         var piece = content[index];
         var _type = $.type(piece);
-        if (_type === 'object') { drupalgap_render(piece); }
+        if (_type === 'object') { html += drupalgap_render(piece); }
         else if (_type === 'array') {
           for (var i = 0; i < piece.length; i++) {
             html += drupalgap_render(piece[i]);
           }
         }
-        
       }
     }
     return html;

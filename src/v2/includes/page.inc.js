@@ -1,13 +1,12 @@
 // Used to render the "dg-page" directive attribute from the theme's
 // page.tpl.html file.
 dgApp.directive("dgPage", function($compile, drupalgapSettings) {
-    dpm('dgPage');
     return {
       link: function(scope, element, attrs) {
         
-        dpm('dgPage - link...');
+        //dpm('dgPage - link...');
         var theme = drupalgapSettings.theme;
-        console.log(theme);
+        //console.log(theme);
 
         var template = '';
         for (var name in theme.regions) {
@@ -31,7 +30,7 @@ dgApp.controller('dg_page_controller', [
     function($scope, $sce, $route, $location, $routeParams) {
       try {
 
-        dpm('dg_page_controller');
+        //dpm('dg_page_controller');
         //console.log(arguments);
   
         // Place the route into the global dg ng, we don't do this in run()

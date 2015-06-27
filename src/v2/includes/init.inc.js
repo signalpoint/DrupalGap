@@ -1,7 +1,7 @@
 dgApp.config(function(drupalgapSettings) {
 
-  dpm('config() - initializing...');
-  console.log(arguments);
+  //dpm('config() - initializing...');
+  //console.log(arguments);
 
   // @WARNING only certain providers like constants are available here, no scope
   // or value available here...

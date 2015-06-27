@@ -55,8 +55,8 @@ function dg_attributes(attributes) {
           }
           else {
             // The value was empty, just place the attribute name on the
-            // element.
-            attribute_string += name + ' ';
+            // element, unless it was an empty class.
+            if (name != 'class') { attribute_string += name + ' '; }
           }
       }
     }
@@ -169,6 +169,31 @@ function dg_route_get() {
     return $route.current;
   }
   catch (error) { console.log('dg_route_get - ' + error); }
+}
+
+/**
+ * Returns a link.
+ * @return {String}
+ */
+function l() {
+  try {
+    // Grab the text and the path from the arguments and then build a simple
+    // link object.
+    var text = arguments[0];
+    var path = arguments[1];
+    var link = {'text': text, 'path': path};
+    // Determine if there are any incoming link options, if there are, attach
+    // them to the link object. If there are any attributes, extract them from
+    // the options and attach them directly to the link object.
+    var options = null;
+    if (arguments[2]) {
+      options = arguments[2];
+      if (options.attributes) { link.attributes = options.attributes; }
+      link.options = options;
+    }
+    return theme('link', link);
+  }
+  catch (error) { console.log('l - ' + error); }
 }
 
 /**

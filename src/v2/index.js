@@ -22,15 +22,15 @@ var dgApp = angular.module('dgApp', dg_ng_dependencies());
 
 // Run the app.
 dgApp.run([
-    '$rootScope', '$routeParams', '$location', 'drupalSettings',
-    function($rootScope, $routeParams, $location, drupalSettings) {
+    '$rootScope', '$routeParams', '$location', '$http', 'drupalSettings',
+    function($rootScope, $routeParams, $location, $http, drupalSettings) {
 
-      dpm('dgApp.run()');
-      console.log(arguments);
+      //dpm('dgApp.run()');
+      //console.log(arguments);
 
       dg_ng_set('routeParams', $routeParams);
       dg_ng_set('location', $location);
-      
+      dg_ng_set('http', $http);
       dg_ng_set('drupalSettings', drupalSettings);
 
       // Watch for changes in the Angular route (this is fired twice per route change)...
@@ -63,6 +63,7 @@ function dg_ng_dependencies() {
         'ngSanitize',
         'angular-drupal',
         'drupalgap',
+        'dgAdmin',
         'dgEntity',
         'dgSystem',
         'dgText',

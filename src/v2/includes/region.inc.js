@@ -21,7 +21,6 @@ function drupalgap_render_region_blocks(region) {
     for (var delta in region.blocks) {
       if (!region.blocks.hasOwnProperty(delta)) { continue; }
       var block = region.blocks[delta];
-      console.log(block);
       html += drupalgap_render_block(delta, block);
     }
     return html;
