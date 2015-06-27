@@ -1,24 +1,30 @@
 An application development kit for Drupal websites, built with Angular JS.
 
-# WARNING
+# WARNING - 7.x-2.x
 
-This branch is highly experimental and unstable as we work towards an Alpha!
+This branch is highly experimental and unstable as we completely rebuild the
+DrupalGap engine to work with Angular JS. For a production ready DrupalGap,
+check out the default 7.x-1.x branch and releases built on top of jQuery Mobile:
+
+ - https://github.com/signalpoint/DrupalGap
 
 # DOCS
 
-http://drupalgap.org/docs
-
-# API
-
-http://api.drupalgap.org
+ - http://drupalgap.org/angular
 
 # INSTALLATION
 
-Enable the DrupalGap module on your Drupal site.
+## 1. Enable DrupalGap 7.x-2.x Module
 
-## drupalgap_connect.json
+On your Drupal site, enable the DrupalGap 7.x-2.x module:
 
-Navigate to `?q=drupalgap/connect` as an admin, then save the JSON to this file:
+ - http://drupal.org/project/drupalgap
+
+## 2. drupalgap_connect.json
+
+On your Drupal site, navigate to `http://example.com/drupalgap/connect` as an
+admin. Then in your browser, click File -> Save, and then save this JSON output
+to a file in your app's directory:
 
 ```
 app/js/drupalgap_connect.json
