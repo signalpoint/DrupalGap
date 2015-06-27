@@ -11,6 +11,7 @@ function drupalgap_service_resource_extract_results(options) {
       drupalgap.field_info_instances = options.data.field_info_instances;
       drupalgap.field_info_fields = options.data.field_info_fields;
       drupalgap.field_info_extra_fields = options.data.field_info_extra_fields;
+      
       // @TODO uncomment once 7.x-2.x is more stable
       /*drupalgap.taxonomy_vocabularies =
         drupalgap_taxonomy_vocabularies_extract(

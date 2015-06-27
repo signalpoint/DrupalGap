@@ -7,14 +7,14 @@
  */
 function menu_execute_active_handler($compile, $injector) {
   try {
-    dpm('menu_execute_active_handler');
+    //dpm('menu_execute_active_handler');
     
     var path = dg_path_get();
-    dpm('path: ' + path);
+    //dpm('path: ' + path);
     
     var route = dg_route_get();
-    dpm('route');
-    console.log(route);
+    //dpm('route');
+    //console.log(route);
     
     // Determine the page_callback function.
     var page_callback = typeof route['$$route'].page_callback !== 'undefined' ?

@@ -1,12 +1,38 @@
 /**
- * Given a html string or render array, this return the rendered html string.
- * @param {String|Object} output The html string or render array to render.
+ * Given a html string, a render object or render array, this return the html
+ * representing the content's output.
+ * @param {String|Object|Array} output The html string or render array to render.
  * @return {String}
  */
-function drupalgap_render(output) {
+function drupalgap_render(content) {
   try {
-    dpm('drupalgap_render');
-    console.log(arguments);
+    //dpm('drupalgap_render');
+    //console.log(content);
+    var type = $.type(content);
+    if (type === 'string') { return content; }
+    var html = '';
+    if (type === 'object') {
+      if (content.markup) { return content.markup; }
+      if (content.theme) { return theme(content.theme, content); }
+      for (var index in content) {
+        if (!content.hasOwnProperty(index)) { continue; }
+        var piece = content[index];
+        var _type = $.type(piece);
+        if (_type === 'object') { drupalgap_render(piece); }
+        else if (_type === 'array') {
+          for (var i = 0; i < piece.length; i++) {
+            html += drupalgap_render(piece[i]);
+          }
+        }
+        
+      }
+    }
+    return html;
+    
+    
+    
+    
+    
     // Since the output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.

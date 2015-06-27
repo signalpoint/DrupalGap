@@ -16,7 +16,12 @@ function theme(hook, variables) {
     if (variables.markup) { return variables.markup; }
     var content = '';
     
+    // Determine the theme function and verify its existence.
     var theme_function = 'theme_' + hook;
+    if (!dg_function_exists(theme_function)) {
+      console.log(theme_function + '() missing!');
+      return '';
+    }
     
     // @TODO check for modules implementing the theme hook.
     

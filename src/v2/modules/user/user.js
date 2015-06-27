@@ -1,10 +1,8 @@
 angular.module('dgUser', ['drupalgap'])
-.config(function() {
-    dpm('dgUser - config');
-})
-// $routeProvider == hook_menu()
+
+// hook_menu()
 .config(['$routeProvider', function($routeProvider) {
-      dpm('dgUser - routeProvider');
+      //dpm('dgUser - routeProvider');
       $routeProvider.when('/user/login', {
           templateUrl: 'themes/spi/page.tpl.html',
           //template: drupalgap_get_form('user_login_form'),
@@ -15,6 +13,7 @@ angular.module('dgUser', ['drupalgap'])
       });
 }]);
 
+// @TODO this should be attached to the module, not the app.
 dgApp.directive("userLoginForm", function($compile) {
     return {
 

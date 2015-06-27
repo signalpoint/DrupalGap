@@ -1,6 +1,7 @@
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
+  content_types_list: {}, /* holds info about each content type */
   date_formats: { }, /* @see system_get_date_formats() in Drupal core */
   date_types: { }, /* @see system_get_date_types() in Drupal core */
   entity_info: {},
@@ -60,10 +61,11 @@ function dg_ng_dependencies() {
     return [
         'ngRoute',
         'ngSanitize',
-        //'dgControllers',
         'angular-drupal',
         'drupalgap',
+        'dgEntity',
         'dgSystem',
+        'dgText',
         'dgUser'
     ];
   }
