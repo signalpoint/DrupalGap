@@ -3,15 +3,16 @@
 // Configure the angular-drupal module.
 angular.module('angular-drupal').config(function($provide) {
     $provide.value('drupalSettings', {
-        //site_path: Drupal.settings.site_path,
-        //endpoint: Drupal.settings.endpoint
         site_path: 'http://localhost/drupal-7',
+        base_path: '/',
         endpoint: 'drupalgap',
         language: 'und',
         theme: {
           name: 'spi',
           path: 'themes'
-        }
+        },
+        file_public_path: 'sites/default/files', // use public or private
+        //file_private_path: 'system/files',
     });
     
 });
@@ -24,8 +25,13 @@ angular.module('drupalgap').config(function($provide) {
         // Modules.
         modules: {
           core: {
+            entity: {},
+            field: {},
+            image: {},
+            services: {},
             system: {},
-            user: {},
+            text: {},
+            user: {}
           },
           contrib: { },
           custom: { },
