@@ -157,37 +157,6 @@ function menu_item_default_attributes() {
 }
 
 /**
- * Returns an array containing the names of system-defined (default) menus.
- * @return {Object}
- */
-function menu_list_system_menus() {
-  try {
-    var system_menus = {
-      'user_menu_anonymous': {
-        'title': t('User menu authenticated')
-      },
-      'user_menu_authenticated': {
-        'title': t('User menu authenticated')
-      },
-      'main_menu': {
-        'title': t('Main menu')
-      },
-      'primary_local_tasks': {
-        'title': t('Primary Local Tasks')
-      }
-    };
-    // Add the menu_name to each menu as a property.
-    for (var menu_name in system_menus) {
-        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
-        var menu = system_menus[menu_name];
-        menu.menu_name = menu_name;
-    }
-    return system_menus;
-  }
-  catch (error) { console.log('menu_list_system_menus - ' + error); }
-}
-
-/**
  * Collects and alters the menu definitions.
  */
 function menu_router_build() {
