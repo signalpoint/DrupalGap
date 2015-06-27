@@ -20,13 +20,13 @@ On your Drupal site, enable the DrupalGap 7.x-2.x module:
 
  - http://drupal.org/project/drupalgap
 
-## 2. drupalgap_connect.json
+## 2. drupalgap.json
 
 On your Drupal site, navigate to `http://example.com/drupalgap/connect` as an
 admin. Then in your browser, click File -> Save, and then save this JSON output
 to a file in your app's directory:
 
 ```
-app/js/drupalgap_connect.json
+app/js/drupalgap.json
 ```
 
