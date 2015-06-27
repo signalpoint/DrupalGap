@@ -1,5 +1,9 @@
 An application development kit for Drupal websites, built with Angular JS.
 
+# WARNING
+
+This branch is highly experimental and unstable as we work towards an Alpha!
+
 # DOCS
 
 http://drupalgap.org/docs
