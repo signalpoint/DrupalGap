@@ -1,4 +1,13 @@
-angular.module('dgSystem', ['drupalgap']);
+angular.module('dgSystem', ['drupalgap'])
+
+// hook_menu()
+.config(['$routeProvider', function($routeProvider) {
+      $routeProvider.when('/dg', {
+          templateUrl: 'themes/spi/page.tpl.html',
+          controller: 'dg_page_controller',
+          page_callback: 'dg_system_page'
+      });
+}]);
 
 // @TODO attach to module instead of app.
 dgApp.directive("dgMain", function($compile, $injector) {
@@ -18,6 +27,30 @@ dgApp.directive("dgMain", function($compile, $injector) {
       }
     };
 });
+
+/**
+ *
+ */
+function dg_system_page() {
+  try {
+    
+              
+              var user = dg_user_get();
+              
+              if (user.uid) {
+                
+                // User is authenticated...
+                
+              }
+              else {
+                
+                // User is anonymous...
+                
+              }
+    return '<p>Love the system! (' + user.uid + ')</p>';
+  }
+  catch (error) { console.log('dg_system_page - ' + error); }
+}
 
 /**
  * Implements hook_block_info().

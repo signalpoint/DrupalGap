@@ -7,7 +7,7 @@
  */
 function menu_execute_active_handler($compile, $injector) {
   try {
-    //dpm('menu_execute_active_handler');
+    dpm('menu_execute_active_handler');
     
     var path = dg_path_get();
     //dpm('path: ' + path);

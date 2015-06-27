@@ -10,15 +10,13 @@ dgApp.config(function(drupalgapSettings) {
   
   drupalgap_onload(drupalgapSettings);
 
-  // @TODO this should be included via index.html as a script.
-  // @WARNING to get this file navigate to ?q=drupalgap/connect in your
-  // browser then save it at the path mentioned below.
+  // @TODO this should be included via index.html as a script, if possible
   // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated because of its
   // detrimental effects to the end user's experience.
   drupalgap_service_resource_extract_results({
       service: 'system',
       resource: 'connect',
-      data: JSON.parse(dg_file_get_contents('app/js/drupalgap_connect.json'))
+      data: drupalgap_json_load()
   });
 
 });

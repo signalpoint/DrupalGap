@@ -120,3 +120,41 @@ function user_login_form(form) {
   catch (error) { console.log('user_login_form - ' + error); }
 }
 
+/**
+ *
+ */
+function dg_user_default() {
+  try {
+    return {
+      "uid": 0,
+      "hostname": null,
+      "roles": {
+          "1": "anonymous user"
+      },
+      "cache": 0,
+      "timestamp": Date.now() / 1000 | 0
+    };
+  }
+  catch (error) { console.log('dg_user_default - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_user_get() {
+  try {
+    return drupalgap.user;
+  }
+  catch (error) { console.log('dg_user_get - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_user_set(user) {
+  try {
+    drupalgap.user = user;
+  }
+  catch (error) { console.log('dg_user_set - ' + error); }
+}
+

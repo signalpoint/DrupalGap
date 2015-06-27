@@ -14,6 +14,18 @@ function drupalgap_attributes(attributes) {
 
 /**
  * @deprecated
+ * @see dg_check_connection()
+ */
+function drupalgap_check_connection() {
+  console.log(
+    'DEPRECATED - drupalgap_check_connection(): use dg_check_connection() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_check_connection();
+}
+
+/**
+ * @deprecated
  */
 function drupalgap_field_info_field(field_name) {
   try {
@@ -24,6 +36,18 @@ function drupalgap_field_info_field(field_name) {
     return dg_field_info_field(field_name);
   }
   catch (error) { console.log('drupalgap_field_info_field - ' + error); }
+}
+
+/**
+ * @deprecated
+ * @see dg_file_exists()
+ */
+function drupalgap_file_exists(path) {
+  console.log(
+    'DEPRECATED - drupalgap_file_exists(): use dg_file_exists() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_file_exists(path);
 }
 
 /**
@@ -183,6 +207,18 @@ function drupalgap_path_set(path) {
     arguments.callee.caller.name + '()'
   );
   return;
+}
+
+/**
+ * @deprecated
+ * @see dg_user_default()
+ */
+function drupal_user_defaults() {
+  console.log(
+    'DEPRECATED - drupal_user_defaults(): use dg_user_default() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_user_default();
 }
 
 /**

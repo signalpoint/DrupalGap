@@ -8,6 +8,7 @@ function drupalgap_render(content) {
   try {
     //dpm('drupalgap_render');
     //console.log(content);
+
     var type = $.type(content);
     if (type === 'string') { return content; }
     var html = '';

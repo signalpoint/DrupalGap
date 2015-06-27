@@ -10,12 +10,17 @@ var drupalgap = {
   field_info_extra_fields: {},
   ng: { }, /* holds onto angular stuff */
   remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
+  sessid: null,
+  session_name: null,
   site_settings: {}, /* holds variable settings from the Drupal site */
+  user: {} /* holds onto the current user's account object */
 };
 
 // Create the drupalgap module for Angular.
 angular.module('drupalgap', [])
-  .value('drupalgapSettings', null);
+  .value('drupalgapSettings', null)
+  .service('dgConnect', ['$q', '$http', 'drupalSettings', dgConnect])
+  .service('dgOffline', ['$q', dgOffline]);
 
 // Create the app.
 var dgApp = angular.module('dgApp', dg_ng_dependencies());
@@ -71,5 +76,66 @@ function dg_ng_dependencies() {
     ];
   }
   catch (error) { console.log('dg_ng_dependencies - ' + error); }
+}
+
+/**
+ *
+ */
+function dgConnect($q, $http, drupalSettings) {
+  try {
+    this.json_load = function() {
+      // First, try to load the json from local storage.
+      var json = dg_load('drupalgap.json', null);
+      if (json) { dpm('loaded json from local storage'); }
+      // The json wasn't in local storage, if we don't have a connection load the
+      // drupalgap.json file from the app directory, if it exists.
+      else if (!dg_check_connection()) {
+        var path = 'app/js/drupalgap.json';
+        if (dg_file_exists(path)) {
+          dpm('loaded json from file system, saving it to local storage');
+          json = JSON.parse(dg_file_get_contents(path));
+          dg_save('drupalgap.json', json);
+        }
+        else {
+          dpm('file does not exist');
+        }
+      }
+      if (json) {
+        return $q(function(resolve, reject) {
+          setTimeout(function() {
+              resolve(json);
+            /*if (okToGreet(name)) {
+              resolve('Hello, ' + name + '!');
+            } else {
+              reject('Greeting ' + name + ' is not allowed.');
+            }*/
+          }, 100);
+        });
+      }
+      return null;
+    };
+  }
+  catch (error) { console.log('dgConnect - ' + error); }
+}
+
+/**
+ *
+ */
+function dgOffline($q) {
+  try {
+    this.connect = function() {
+      var anonymous_user = {
+        "sessid": null,
+        "session_name": null,
+        "user": dg_user_default()
+      };
+      return $q(function(resolve, reject) {
+        setTimeout(function() {
+            resolve(anonymous_user);
+        }, 100);
+      });
+    }
+  }
+  catch (error) { console.log('dgOffline - ' + error); }
 }
 
