@@ -16,6 +16,8 @@ function drupalgap_render_region(region) {
  */
 function drupalgap_render_region_blocks(region) {
   try {
+    //dpm('drupalgap_render_region_blocks');
+    //console.log(region);
     if (!region.blocks) { return ''; }
     var html = '';
     for (var delta in region.blocks) {
@@ -33,6 +35,8 @@ function drupalgap_render_region_blocks(region) {
  */
 function theme_region(variables) {
   try {
+    //dpm('theme_region');
+    //console.log(variables);
     var region = variables.region;
     var format = typeof region.format === 'undefined' ?
       'div' : region.format;

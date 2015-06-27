@@ -100,11 +100,14 @@ dgApp.controller('dg_page_controller', [
  */
 function dg_page_link($compile, drupalgapSettings, scope, element, attrs) {
   try {
+    dpm('dg_page_link');
     var theme = drupalgapSettings.theme;
     var template = '';
     for (var name in theme.regions) {
       if (!theme.regions.hasOwnProperty(name)) { continue; }
       var region = theme.regions[name];
+      dpm('region - ' + name);
+      console.log(region);
       template += drupalgap_render_region(region);
     }
 

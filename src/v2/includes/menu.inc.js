@@ -45,3 +45,72 @@ function menu_execute_active_handler($compile, $injector) {
     console.log('menu_execute_active_handler - ' + error);
   }
 }
+
+/**
+ * Returns an array containing the names of system-defined (default) menus.
+ * @return {Object}
+ */
+function menu_list_system_menus() {
+  try {
+    var system_menus = {
+      user_menu_anonymous: {
+        title: t('User menu authenticated')
+      },
+      user_menu_authenticated: {
+        title: t('User menu authenticated')
+      },
+      main_menu: {
+        title: t('Main menu')
+      },
+      /*primary_local_tasks: {
+        title: t('Primary Local Tasks')
+      }*/
+    };
+    // Add the menu_name to each menu as a property.
+    for (var menu_name in system_menus) {
+        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
+        var menu = system_menus[menu_name];
+        menu.menu_name = menu_name;
+    }
+    return system_menus;
+  }
+  catch (error) { console.log('menu_list_system_menus - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_load_menus(drupalgapSettings) {
+  try {
+    if (!drupalgapSettings.menus) { return; } 
+    var menus = drupalgapSettings.menus;
+    for (var name in menus) {
+      if (!menus.hasOwnProperty(name)) { continue; }
+      var menu = menus[name];
+      if (!menu.links) { menu.links = []; }
+      if (!menu.attributes) { menu.attributes = {}; }
+      dg_menu_set(name, menu);
+    }
+  }
+  catch (error) { console.log('drupalgap_load_menus - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_menu_get(name) {
+  try {
+    return drupalgap.menus[name];
+  }
+  catch (error) { console.log('dg_menu_get - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_menu_set(name, menu) {
+  try {
+    drupalgap.menus[name] = menu;
+  }
+  catch (error) { console.log('dg_menu_set - ' + error); }
+}

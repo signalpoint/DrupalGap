@@ -1,19 +1,20 @@
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
-  content_types_list: {}, /* holds info about each content type */
+  content_types_list: { }, /* holds info about each content type */
   date_formats: { }, /* @see system_get_date_formats() in Drupal core */
   date_types: { }, /* @see system_get_date_types() in Drupal core */
-  entity_info: {},
-  field_info_fields: {},
-  field_info_instances: {},
-  field_info_extra_fields: {},
+  entity_info: { },
+  field_info_fields: { },
+  field_info_instances: { },
+  field_info_extra_fields: { },
+  menus: { },
   ng: { }, /* holds onto angular stuff */
   remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
   sessid: null,
   session_name: null,
-  site_settings: {}, /* holds variable settings from the Drupal site */
-  user: {} /* holds onto the current user's account object */
+  site_settings: { }, /* holds variable settings from the Drupal site */
+  user: { } /* holds onto the current user's account object */
 };
 
 // Create the drupalgap module for Angular.
