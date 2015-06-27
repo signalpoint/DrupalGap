@@ -583,14 +583,14 @@ function drupalgap_confirm(message) {
  */
 function drupalgap_toast(html) {
   try {
-    var open = arguments[2] ? arguments[2] : 1;
-    var close = arguments[1] ? arguments[1] : 420;
-    setInterval(function() {
+    var open = arguments[2] ? arguments[2] : 750;
+    var close = arguments[1] ? arguments[1] : 1500;
+    setTimeout(function() {
         $.mobile.loading('show', {
             textVisible: true,
             html: html
         });
-        setInterval(function() {
+        setTimeout(function() {
             $.mobile.loading().hide();
         }, close);
     }, open);
@@ -5017,7 +5017,8 @@ function drupalgap_remove_page_from_dom(page_id) {
     if (typeof arguments[1] !== 'undefined') { options = arguments[1]; }
     if (current_page_id != page_id || options.force) {
       $('#' + page_id).empty().remove();
-      delete drupalgap.pages[page_id];
+      var page_index = drupalgap.pages.indexOf(page_id);
+      if (page_index > -1) { drupalgap.pages.splice(page_index, 1); }
       // We'll remove the query string, unless we were instructed to leave it.
       if (
         typeof _dg_GET[page_id] !== 'undefined' &&
@@ -9129,14 +9130,19 @@ function image_field_formatter_view(entity_type, entity, field, instance,
       for (var delta in items) {
           if (!items.hasOwnProperty(delta)) { continue; }
           var item = items[delta];
-          // @TODO - add support for image_style
-          element[delta] = {
-            theme: 'image',
+          var theme = empty(display.settings.image_style) ?
+            'image' : 'image_style';
+          var image = {
+            theme: theme,
             alt: item.alt,
-            title: item.title,
-            path: drupalgap_image_path(item.uri)
-            /*image_style:display.settings.image_style*/
+            title: item.title
           };
+          if (!empty(theme)) {
+            image.style_name = display.settings.image_style;
+            image.path = item.uri;
+          }
+          else { image.path = drupalgap_image_path(item.uri); }
+          element[delta] = image;
       }
     }
     return element;
