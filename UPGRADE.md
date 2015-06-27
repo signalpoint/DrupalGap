@@ -14,6 +14,15 @@ var drupalSettings = dg_ng_get('drupalSettings');
 alert(drupalSettings.site_path);
 ```
 
+## Drupal.user
+```
+// old way
+alert('Hi user # ' + Drupal.user.uid);
+// new way
+var user = dg_user_get();
+alert('Hi user # ' + user.uid);
+```
+
 ## hook_field_formatter_view()
 Uses element objects in 1.x, uses element arrays in 2.x:
 ```
