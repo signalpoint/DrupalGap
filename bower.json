@@ -1,7 +1,7 @@
 {
   "name": "drupalgap",
-  "description": "An application development kit for Drupal built with Angular.",
-  "version": "0.0.1",
+  "description": "An application development kit for Drupal built with Angular JS.",
+  "version": "0.0.2",
   "homepage": "http://drupalgap.org",
   "license": "GNU",
   "dependencies": {
