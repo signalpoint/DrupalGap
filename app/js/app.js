@@ -37,6 +37,39 @@ angular.module('drupalgap').config(function($provide) {
           custom: { },
         },
         
+        // Menus.
+        menus: {
+          
+          // Anonymous user menu.
+          user_menu_anonymous: {
+            links: [
+              {
+                title: 'Login',
+                path: 'user/login',
+                options: {
+                  attributes: {
+                    
+                  }
+                }
+              },
+              {
+                title: 'Create new account',
+                path: 'user/register',
+                options: {
+                  attributes: {
+                    
+                  }
+                }
+              }
+            ],
+            attributes: {
+              'class': 'nav navbar-nav'
+            }
+          },
+          
+          
+        },
+        
         // Theme.
         theme: {
           
@@ -51,6 +84,12 @@ angular.module('drupalgap').config(function($provide) {
               format: 'nav', // wrap in a nav element instead of a div
               attributes: {
                 'class': 'navbar navbar-inverse navbar-fixed-top'
+              },
+              blocks: {
+                
+                // Main menu.
+                user_menu_anonymous: { }
+                
               }
             },
             
@@ -62,9 +101,7 @@ angular.module('drupalgap').config(function($provide) {
               blocks: {
                 
                 // Page content.
-                main: {
-                  foo: 'bar'
-                }
+                main: { }
 
               }
             },
@@ -85,8 +122,8 @@ angular.module('drupalgap').config(function($provide) {
 
 // Run the App!
 dgApp.run(['drupal', function(drupal) {
-      drupal.connect().then(function(data) {
+      /*drupal.connect().then(function(data) {
           console.log(data);
-      });
+      });*/
 }]);
 
