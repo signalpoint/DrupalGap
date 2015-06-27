@@ -14,126 +14,6 @@ function drupalgap_angular_get_route_path(route) {
 }
 
 /**
- *
- */
-function dg_ng_get(key) { return drupalgap_ng_get(key); }
-
-/**
- *
- */
-function dg_ng_set(key, value) { drupalgap_ng_set(key, value); }
-
-/**
- *
- */
-function drupalgap_ng_get(key) {
-  try {
-    return drupalgap.ng[key];
-  }
-  catch (error) { console.log('drupalgap_ng_get - ' + error); }
-}
-
-/**
- *
- */
-function drupalgap_ng_set(key, value) {
-  try {
-    drupalgap.ng[key] = value;
-  }
-  catch (error) { console.log('drupalgap_ng_set - ' + error); }
-}
-
-/**
- *
- */
-function dg_ng_compile($compile, $scope, html) {
-  try {
-    var linkFn = $compile(html);
-    return linkFn($scope);
-  }
-  catch (error) { console.log('dg_ng_compile - ' + error); }
-}
-
-/**
- * Converts a JSON object to an XML/HTML tag attribute string and returns the
- * string.
- * @param {Object} attributes
- * @return {String{
- */
-function drupalgap_attributes(attributes) {
-  try {
-    var attribute_string = '';
-    if (attributes) {
-      for (var name in attributes) {
-          if (!attributes.hasOwnProperty(name)) { continue; }
-          var value = attributes[name];
-          if (value != '') {
-            // @todo - if someone passes in a value with double quotes, this
-            // will break. e.g.
-            // 'onclick':'_drupalgap_form_submit("' + form.id + "');'
-            // will break, but
-            // 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
-            // will work.
-            attribute_string += name + '="' + value + '" ';
-          }
-          else {
-            // The value was empty, just place the attribute name on the
-            // element.
-            attribute_string += name + ' ';
-          }
-      }
-    }
-    return attribute_string;
-  }
-  catch (error) { console.log('drupalgap_attributes - ' + error); }
-}
-
-/**
- * Given a string separated by commas or hyphens, this will return the camel
- * case version of a string. For example, given "foo_bar" or "foo-bar", this
- * will return "fooBar".
- * @see http://stackoverflow.com/a/2970667/763010
- */
-function dg_get_camel_case(str) {
-  try {
-    return str.replace(/[-_]([a-z])/g, function (g) { return g[1].toUpperCase(); });
-  }
-  catch (error) { console.log('dg_get_camel_case - ' + error); }
-}
-
-/**
- * @deprecated
- */
-function drupalgap_get_camel_case(str) {
-  try {
-    console.log('DEPRECATED - drupalgap_get_camel_case(), use dg_get_camel_case() instead');
-    return dg_get_camel_case(str);
-  }
-  catch (error) { console.log('drupalgap_get_camel_case - ' + error); }
-}
-
-/**
- *
- */
-function dg_kill_camel_case(str, separator) {
-  try {
-    return str.replace(/([A-Z])/g, separator + '$1');
-  }
-  catch (error) { console.log('dg_kill_camel_case - ' + error); }
-}
-
-/**
- * @deprecated
- */
-function drupalgap_kill_camel_case(str, separator) {
-  try {
-    console.log('DEPRECATED - drupalgap_kill_camel_case(), use dg_kill_camel_case() instead');
-    return dg_kill_camel_case(str, separator);
-  }
-  catch (error) { console.log('drupalgap_kill_camel_case - ' + error); }
-}
-
-/**
  * Returns true if the directive exists, false otherwise.
  * @param {Object} $injector
  * @param {String} directive The directive name.
@@ -372,28 +252,6 @@ function drupalgap_link_get_class(link) {
 }
 
 /**
- * Get the current DrupalGap path.
- * @return {String}
- */
-function drupalgap_path_get() {
-  try {
-    var $location = drupalgap_ng_get('location');
-    return $location['$$path'].slice('1');
-  }
-  catch (error) { console.log('drupalgap_path_get - ' + error); }
-}
-
-/**
- * Set the current DrupalGap path.
- * @param {String} path
- * @deprecated
- */
-function drupalgap_path_set(path) {
-  console.log('DEPRECATED - drupalgap_path_set() is handled by Angular!');
-  return;
-}
-
-/**
  * Get the current DrupalGap router_path.
  * @return {String}
  */
@@ -413,37 +271,6 @@ function drupalgap_router_path_get() {
 function drupalgap_router_path_set(router_path) {
   console.log('DEPRECATED - drupalgap_path_set() is handled by Angular!');
   return;
-}
-
-/**
- * Implementation of arg(index = null, path = null).
- * @return {*}
- */
-function arg() {
-  try {
-    var result = null;
-    // If there were zero or one arguments provided.
-    if (arguments.length == 0 || arguments.length == 1) {
-      // Split the path into parts.
-      var drupalgap_path = drupalgap_path_get();
-      var args = drupalgap_path.split('/');
-      // If no arguments were provided just return the split array, otherwise
-      // return whichever argument was requested.
-      if (arguments.length == 0) { result = args; }
-      else if (args[arguments[0]]) { result = args[arguments[0]]; }
-    }
-    else {
-      // A path was provided, split it into parts, then return the split array
-      // if they didn't request a specific index, otherwise return the value of
-      // the specific index inside the split array.
-      var path = arguments[1];
-      var args = path.split('/');
-      if (arguments[0] && args[arguments[0]]) { result = args[arguments[0]]; }
-      else { result = args; }
-    }
-    return result;
-  }
-  catch (error) { console.log('arg - ' + error); }
 }
 
 /**

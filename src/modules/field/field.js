@@ -1,3 +1,15 @@
+dgApp.factory('hookFieldWidgetForm', function() {
+    return {
+        fields: {},
+        setField: function (fieldName, fieldObject) {
+            this.fields[fieldName] = fieldObject;
+        },
+        getField: function (fieldName) {
+            return this.fields[fieldName];
+        }
+    };
+});
+
 /**
  *
  */
@@ -21,13 +33,13 @@ function dgFieldWidgetFormCompile($compile, $scope, $element) {
         // Render the element into the scope.  
         // Compile the template for Angular and append it to the directive's
         // html element.
-        //dpm('compiling element');
-        //console.log($scope);
+        dpm('compiling - ' + $element.attr('field_name'));
+        console.log(arguments);
         var linkFn = $compile(_drupalgap_form_render_element_item(
           $scope.form,
-          $scope.element, // form.elements[field_name]
+          $scope.form.elements[$scope.field.field_name], // form.elements[field_name]
           $scope.variables,
-          $scope.element[$scope.language][$scope.delta]
+          $scope.form.elements[$scope.field.field_name][$scope.language][$scope.delta]
         ));
         var content = linkFn($scope);
         $element.append(content);
@@ -35,7 +47,7 @@ function dgFieldWidgetFormCompile($compile, $scope, $element) {
   catch (error) { console.log('dgFieldWidgetFormCompile - ' + error); }
 }
 
-dgControllers.controller('hook_field_formatter_view',
+dgApp.controller('hook_field_formatter_view',
   [ '$scope', '$element', function($scope, $element) {
     try {
 
@@ -159,8 +171,8 @@ dgControllers.controller('hook_field_formatter_view',
   } ]
 );
 
-
-dgControllers.directive("hookFieldWidgetForm", function($compile) {
+// DEPRECATED
+dgApp.directive("hookFieldWidgetForm", function($compile) {
     dpm('hookFieldWidgetForm');
     return {
       //transclude: true,
@@ -208,7 +220,8 @@ dgControllers.directive("hookFieldWidgetForm", function($compile) {
     };
 });
 
-dgControllers.controller('hook_field_widget_form',
+// DEPRECATED
+dgApp.controller('hook_field_widget_form',
   [ '$scope', '$element', function($scope, $element) {
     try {
 
@@ -323,18 +336,6 @@ function drupalgap_field_display(field) {
 }
 
 /**
- * Given a field name, this will return its field info.
- * @param {String} field_name
- * @return {Object}
- */
-function drupalgap_field_info_field(field_name) {
-  try {
-    return drupalgap.field_info_fields[field_name];
-  }
-  catch (error) { console.log('drupalgap_field_info_field - ' + error); }
-}
-
-/**
  * Returns info on all fields.
  * @return {Object}
  */
@@ -373,45 +374,6 @@ function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
     return instances[field_name];
   }
   catch (error) { console.log('drupalgap_field_info_instance - ' + error); }
-}
-
-/**
- * Given an entity type and/or a bundle name, this returns the field info
- * instances for the entity or the bundle.
- * @param {String} entity_type
- * @param {String} bundle_name
- * @return {Object}
- */
-function drupalgap_field_info_instances(entity_type, bundle_name) {
-  try {
-    var field_info_instances;
-    // If there is no bundle, pull the fields out of the wrapper.
-    // @TODO there appears to be a special case with commerce_products, in that
-    // they aren't wrapped like normal entities (see the else statement when a
-    // bundle name isn't present). Or do we have a bug here, and we shouldn't
-    // be expecting the wrapper in the first place?
-    if (!bundle_name) {
-      if (entity_type == 'commerce_product') {
-        field_info_instances =
-          drupalgap.field_info_instances[entity_type];
-      }
-      else if (
-        typeof drupalgap.field_info_instances[entity_type] !== 'undefined' &&
-        typeof drupalgap.field_info_instances[entity_type][entity_type] !== 'undefined'
-      ) {
-        field_info_instances =
-          drupalgap.field_info_instances[entity_type][entity_type];
-      }
-    }
-    else {
-      if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
-        field_info_instances =
-          drupalgap.field_info_instances[entity_type][bundle_name];
-      }
-    }
-    return field_info_instances;
-  }
-  catch (error) { console.log('drupalgap_field_info_instances - ' + error); }
 }
 
 /**
@@ -968,48 +930,33 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
   catch (error) { console.log('options_field_widget_form - ' + error); }
 }
 
-/**
- * Implements hook_field_formatter_view().
- * @param {String} entity_type
- * @param {Object} entity
- * @param {Object} field
- * @param {Object} instance
- * @param {String} langcode
- * @param {Object} items
- * @param {*} display
- * @return {Object}
- */
-function text_field_formatter_view(entity_type, entity, field, instance,
-  langcode, items, display) {
-  try {
-    var element = {};
-    if (!empty(items)) {
-      for (var delta in items) {
-          if (!items.hasOwnProperty(delta)) { continue; }
-          var item = items[delta];
-          // Grab the field value, but use the safe_value if we have it.
-          var value = item.value;
-          if (typeof item.safe_value !== 'undefined') {
-            value = item.safe_value;
-          }
-          element[delta] = { markup: value };
-      }
-    }
-    return element;
-  }
-  catch (error) { console.log('text_field_formatter_view - ' + error); }
-}
-
-dgApp.directive('textFieldWidgetForm', ['$compile', function($compile) {
+dgApp.directive('textFieldWidgetForm', ['$compile', 'hookFieldWidgetForm', function($compile, hookFieldWidgetForm) {
+      
+      dpm('textFieldWidgetForm');
+      console.log(arguments);
+      
       return {
         link: function($scope, $element) {
-
-          //dpm('textFieldWidgetForm link');
-          //console.log(arguments);
           
+          dpm('textFieldWidgetForm link');
+          console.log(arguments);
+          
+          var field_name = $element.attr('field_name');
+          var form_element = $scope.form.elements[field_name];
+          //console.log(form_element);
+          
+          //var form
+          //var form_state
+          var field = hookFieldWidgetForm.getField('field_name');
+          //var instance
+          //var langcode
+          //var items
+          //var delta
+          //var element
+
           // Determine the widget type, then set the delta item's type property.
           var type = null;
-          switch ($scope.element.type) {
+          switch (form_element.type) {
             case 'search': type = 'search'; break;
             case 'text': type = 'textfield'; break;
             case 'textarea':

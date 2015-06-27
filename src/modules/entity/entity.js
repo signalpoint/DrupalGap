@@ -20,7 +20,7 @@ function _drupalgap_entity_view(entity_type, entity_id, mode) {
   catch (error) { console.log('_drupalgap_entity_view - ' + error); }
 }
 
-dgApp.directive("entityPageAdd", function($compile) {
+dgApp.directive("entityPageAdd", function($compile, hookFieldWidgetForm) {
     return {
 
       controller: function($scope, $element, $http, jdrupal) {
@@ -71,14 +71,14 @@ dgApp.directive("entityPageAdd", function($compile) {
         //scope[entity_type] = entity;
         
         // Add the form to the element.
-        element.append(dg_ng_compile_form($compile, scope));
+        element.append(dg_ng_compile_form($compile, scope, hookFieldWidgetForm));
 
       }
 
     };
 });
 
-dgApp.directive("entityPageEdit", function($compile, jdrupal) {
+dgApp.directive("entityPageEdit", function($compile, jdrupal, hookFieldWidgetForm) {
     return {
       
       controller: function($scope, $element, $http) {
@@ -133,9 +133,15 @@ dgApp.directive("entityPageEdit", function($compile, jdrupal) {
               //$scope.entity = entity;
 
               // Add the form to the element.
-              element.append(dg_ng_compile_form($compile, scope));
+              element.append(dg_ng_compile_form($compile, scope, hookFieldWidgetForm));
 
               return;
+              
+              
+              
+              
+              
+              
 
               // Extract the entity type and bundle, and then set the bundle on
               // the parent scope.
@@ -265,20 +271,23 @@ function drupalgap_entity_form_submit(form, form_state, jdrupal) {
       services_get_resource_function_for_entity(form.entity_type, crud)
     ];
     fn(entity, call_arguments);*/
+    
+    dpm('calling jdrupal');
+    
     var crud_function = services_get_resource_function_for_entity(
       form.entity_type,
       crud
     );
-    jdrupal[crud_function](entity).success(function(result) {
+    jdrupal[crud_function](entity).then(function(entity) {
         dpm('holy shitake!');
-        console.log(result);
+        console.log(entity);
     });
   }
   catch (error) { console.log('drupalgap_entity_form_submit - ' + error); }
 }
 
 // deprecated???
-dgControllers.directive("dgEntity", function($compile) {
+dgApp.directive("dgEntity", function($compile) {
     return {
       
       controller: function($scope, $element, $http, jdrupal) {

@@ -189,24 +189,6 @@ function theme_header(variables) {
 }
 
 /**
- * Implementation of theme_image().
- * @param {Object} variables
- * @return {String}
- */
-function theme_image(variables) {
-  try {
-    // Turn the path, alt and title into attributes if they are present.
-    if (variables.path) { variables.attributes.src = variables.path; }
-    if (variables.alt) { variables.attributes.alt = variables.alt; }
-    if (variables.title) { variables.attributes.title = variables.title; }
-    // Render the image.
-    return '<img ' + drupalgap_attributes(variables.attributes) + ' />';
-  }
-  catch (error) { console.log('theme_image - ' + error); }
-}
-
-
-/**
  * Implementation of theme_audio().
  * @param {Object} variables
  * @return {String}
@@ -240,19 +222,6 @@ function theme_video(variables) {
     '></video>';
   }
   catch (error) { console.log('theme_video - ' + error); }
-}
-
-/**
- * Implementation of theme_image_style().
- * @param {Object} variables
- * @return {String}
- */
-function theme_image_style(variables) {
-  try {
-    variables.path = image_style_url(variables.style_name, variables.path);
-    return theme_image(variables);
-  }
-  catch (error) { console.log('theme_image - ' + error); }
 }
 
 /**

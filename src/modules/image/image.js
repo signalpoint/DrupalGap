@@ -5,42 +5,6 @@
 var image_phonegap_camera_options = {};
 
 /**
- * Implements hook_field_formatter_view().
- /**
- * Implements hook_field_formatter_view().
- * @param {String} entity_type
- * @param {Object} entity
- * @param {Object} field
- * @param {Object} instance
- * @param {String} langcode
- * @param {Object} items
- * @param {*} display
- * @return {Object}
- */
-function image_field_formatter_view(entity_type, entity, field, instance,
-  langcode, items, display) {
-  try {
-    var element = {};
-    if (!empty(items)) {
-      for (var delta in items) {
-          if (!items.hasOwnProperty(delta)) { continue; }
-          var item = items[delta];
-          // @TODO - add support for image_style
-          element[delta] = {
-            theme: 'image',
-            alt: item.alt,
-            title: item.title,
-            path: drupalgap_image_path(item.uri)
-            /*image_style:display.settings.image_style*/
-          };
-      }
-    }
-    return element;
-  }
-  catch (error) { console.log('image_field_formatter_view - ' + error); }
-}
-
-/**
  * Implements hook_field_widget_form().
  * @param {Object} form
  * @param {Object} form_state
@@ -247,6 +211,8 @@ function image_fields_present_on_entity_type(entity_type, bundle) {
  */
 function image_form_alter(form, form_state, form_id) {
   try {
+    console.log('image_form_alter - disabled for now, turn me on later, rawr');
+    return;
     // Make potential alterations to any entity edit form that has an image
     // field element(s).
     if (form.entity_type) {
@@ -268,40 +234,6 @@ function image_form_alter(form, form_state, form_id) {
     }
   }
   catch (error) { console.log('image_form_alter - ' + error); }
-}
-
-/**
- * Given an image style name and image uri, this will return the absolute URL
- * that can be used as a src value for an img element.
- * @param {String} style_name
- * @param {String} path
- * @return {String}
- */
-function image_style_url(style_name, path) {
-  try {
-    var src =
-      Drupal.settings.site_path + Drupal.settings.base_path + path;
-    if (src.indexOf('public://') != -1) {
-      src = src.replace(
-        'public://',
-        Drupal.settings.file_public_path +
-          '/styles/' +
-          style_name +
-          '/public/'
-      );
-    }
-    else if (src.indexOf('private://') != -1) {
-      src = src.replace(
-        'private://',
-        Drupal.settings.file_private_path +
-          '/styles/' +
-          style_name +
-          '/private/'
-      );
-    }
-    return src;
-  }
-  catch (error) { console.log('image_style_url - ' + error); }
 }
 
 /**

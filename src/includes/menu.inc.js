@@ -55,23 +55,7 @@ function menu_execute_active_handler($compile, $injector) {
       // Are there any arguments to send to the page callback?
       if (drupalgap.menu_links[router_path].page_arguments) {
         console.log(drupalgap.menu_links[router_path].page_arguments);
-        // For each page argument, if the argument is an integer, grab the
-        // corresponding arg(#), otherwise just push the arg onto the page
-        // arguments. Then try to prepare any entity that may be present in
-        // the url so the entity is sent via the page arguments to the page
-        // callback, instead of just sending the integer.
-        var args = arg(null, path);
-        for (var index in drupalgap.menu_links[router_path].page_arguments) {
-            if (!drupalgap.menu_links[router_path].page_arguments.hasOwnProperty(index)) { continue; }
-            var object = drupalgap.menu_links[router_path].page_arguments[index];
-            if (is_int(object) && args[object]) {
-              page_arguments.push(args[object]);
-            }
-            else { page_arguments.push(object); }
-        }
-
-        // Call the page callback function with the page arguments.
-        content = fn.apply(null, Array.prototype.slice.call(page_arguments));
+        
       }
       else {
         // There are no arguments, just return the page callback result.

@@ -84,6 +84,9 @@ function node_add_page_by_type_title(callback, type) {
  */
 function node_edit(form, form_state, node) {
   try {
+    dpm('node_edit');
+    console.log(arguments);
+    
     // Setup form defaults.
     form.entity_type = 'node';
     form.bundle = node.type;

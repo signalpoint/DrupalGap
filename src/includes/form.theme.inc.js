@@ -152,20 +152,6 @@ function theme_hidden(variables) {
 }
 
 /**
- * Themes a password input.
- * @param {Object} variables
- * @return {String}
- */
-function theme_password(variables) {
-  try {
-    variables.attributes.type = 'password';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
-  }
-  catch (error) { console.log('theme_password - ' + error); }
-}
-
-/**
  * Themes radio buttons.
  * @param {Object} variables
  * @return {String}

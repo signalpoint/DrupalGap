@@ -1,27 +1,6 @@
 var _system_reload_page = null;
 var _system_reload_messages = null;
 
-dgApp.directive("dgMain", function($compile, $injector) {
-    dpm('dgMain');
-    return {
-      link: function(scope, element) {
-        
-        dpm('dgMain - link...');
-        
-        // Compile the template for Angular and append it to the directive's
-        // html element.
-        var linkFn = $compile(
-          drupalgap_render(
-            menu_execute_active_handler($compile, $injector)
-          )
-        );
-        var content = linkFn(scope);
-        element.append(content);
-
-      }
-    };
-});
-
 dgApp.directive("systemDashboardPage", function($compile) {
     dpm('systemDashboardPage');
     return {
@@ -72,59 +51,6 @@ dgApp.directive("systemDashboardPage", function($compile) {
       }
     };
 });
-
-
-
-/**
- * Implements hook_block_info().
- * @return {Object}
- */
-function system_block_info() {
-    // System blocks.
-    var blocks = {
-      'main': {
-        'delta': 'main',
-        'module': 'system'
-      },
-      messages: {
-        delta: 'messages',
-        module: 'system'
-      },
-      'logo': {
-        'delta': 'logo',
-        'module': 'system'
-      },
-      logout: {
-        delta: 'logout',
-        module: 'system'
-      },
-      'title': {
-        'delta': 'title',
-        'module': 'system'
-      },
-      'powered_by': {
-        'delta': 'powered_by',
-        'module': 'system'
-      },
-      'help': {
-        'delta': 'help',
-        'module': 'system'
-      }
-    };
-    // Make additional blocks for each system menu.
-    var system_menus = menu_list_system_menus();
-    for (var menu_name in system_menus) {
-        if (!system_menus.hasOwnProperty(menu_name)) { continue; }
-        var menu = system_menus[menu_name];
-        var block_delta = menu.menu_name;
-        blocks[block_delta] = {
-          name: block_delta,
-          delta: block_delta,
-          module: 'menu'
-        };
-    }
-    return blocks;
-}
 
 /**
  * Implements hook_block_view().
