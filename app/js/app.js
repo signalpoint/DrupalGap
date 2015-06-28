@@ -7,10 +7,6 @@ angular.module('angular-drupal').config(function($provide) {
         base_path: '/',
         endpoint: 'drupalgap',
         language: 'und',
-        theme: {
-          name: 'spi',
-          path: 'themes'
-        },
         file_public_path: 'sites/default/files', // use public or private
         //file_private_path: 'system/files',
     });
@@ -21,17 +17,20 @@ angular.module('angular-drupal').config(function($provide) {
 angular.module('drupalgap').config(function($provide) {
     $provide.constant('drupalgapSettings', {
         
+        // Front page.
+        front: 'dg',
+        
         // Modules.
         modules: {
           core: {
-            admin: {},
-            entity: {},
-            field: {},
-            image: {},
-            services: {},
-            system: {},
-            text: {},
-            user: {}
+            admin: { },
+            entity: { },
+            field: { },
+            image: { },
+            services: { },
+            system: { },
+            text: { },
+            user: { }
           },
           contrib: { },
           custom: { },
@@ -53,8 +52,35 @@ angular.module('drupalgap').config(function($provide) {
                 }
               },
               {
-                title: 'Create new account',
+                title: 'Register',
                 path: 'user/register',
+                options: {
+                  attributes: {
+                    
+                  }
+                }
+              }
+            ],
+            attributes: {
+              'class': 'nav navbar-nav'
+            }
+          },
+          
+          // Authenticated user menu.
+          user_menu_authenticated: {
+            links: [
+              {
+                title: 'My account',
+                path: 'user',
+                options: {
+                  attributes: {
+                    
+                  }
+                }
+              },
+              {
+                title: 'Logout',
+                path: 'user/logout',
                 options: {
                   attributes: {
                     
@@ -79,51 +105,73 @@ angular.module('drupalgap').config(function($provide) {
           // Regions.
           regions: {
             
-            // Header.
+            // Header region.
             header: {
+
               format: 'nav', // wrap in a nav element instead of a div
               attributes: {
                 'class': 'navbar navbar-inverse navbar-fixed-top'
               },
+
               blocks: {
                 
-                // Main menu.
-                user_menu_anonymous: { }
+                // Anonymous user menu block.
+                user_menu_anonymous: {
+                  roles: {
+                    value: ['anonymous user'],
+                    mode: 'include'
+                  }
+                },
+                
+                // Authenticated user menu block.
+                user_menu_authenticated: {
+                  roles: {
+                    value: ['authenticated user'],
+                    mode: 'include'
+                  }
+                },
                 
               }
+
             },
             
-            // Content.
+            // Content region.
             content: {
+              
               attributes: {
                 'class': 'container'
               },
+
               blocks: {
                 
-                // Page content.
+                // Main page content block..
                 main: { }
 
               }
+
             },
             
-            // Footer.
+            // Footer region.
             footer: {
+
               format: 'footer', // wrap in a footer element instead of a div
               attributes: {
                 'class': 'footer'
               }
+
             },
+
           }
 
-        }
+        } // ./theme
 
     });
 });
 
 // Run the App!
 dgApp.run(['drupal', function(drupal) {
-      /*drupal.connect().then(function(data) {
-          console.log(data);
-      });*/
+      
+      // Start building your app here...
+      
 }]);
 
