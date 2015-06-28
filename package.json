@@ -1,5 +1,5 @@
 {
-  "version": "0.0.2",
+  "version": "0.0.3",
   "name": "drupalgap",
   "description": "An application development kit for Drupal built with Angular JS.",
   "main": "index.js",
