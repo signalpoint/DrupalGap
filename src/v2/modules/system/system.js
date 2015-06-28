@@ -1,13 +1,19 @@
 angular.module('dgSystem', ['drupalgap'])
 
 // hook_menu()
-.config(['$routeProvider', function($routeProvider) {
+.config(['$routeProvider', 'drupalgapSettings',
+    function($routeProvider, drupalgapSettings) {
+      console.log(drupalgapSettings);
       $routeProvider.when('/dg', {
           templateUrl: 'themes/spi/page.tpl.html',
           controller: 'dg_page_controller',
           page_callback: 'dg_system_page'
+      })
+      .otherwise({
+        redirectTo: drupalgapSettings.front
       });
-}]);
+  }
+]);
 
 // @TODO attach to module instead of app.
 dgApp.directive("dgMain", function($compile, $injector) {
@@ -58,7 +64,9 @@ function dg_system_page() {
  */
 function system_block_info() {
   
-  // Set up default blocks.
+  try {
+    
+    // Set up default blocks.
     var blocks = {
       main: { },
       messages: { },
@@ -71,11 +79,9 @@ function system_block_info() {
 
     // Make additional blocks for each system menu.
     var system_menus = menu_list_system_menus();
-    console.log(system_menus);
     for (var menu_name in system_menus) {
         if (!system_menus.hasOwnProperty(menu_name)) { continue; }
         var menu = system_menus[menu_name];
-        console.log(menu);
         var block_delta = menu.menu_name;
         blocks[block_delta] = {
           //name: block_delta,
@@ -83,10 +89,11 @@ function system_block_info() {
           module: 'menu'
         };
     }
-    
-    dpm('system_block_info');
-    console.log(blocks);
+
     return blocks;
+    
+  }
+  catch (error) { console.log('system_block_info - ' + error); }
 }
 
 /**

@@ -15,6 +15,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           
           // We don't have a connection...
           
+          dpm('making an offline promise...');
+          
           // Make a promise to the offline link.
           $scope.offline = {
             data: dgOffline.connect()
@@ -24,6 +26,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
         else {
 
           // We have a connection...
+          
+          dpm('making an online promise...');
           
           // Make a promise to the connect link.
           $scope.connect = {
@@ -88,6 +92,8 @@ dgApp.controller('dg_page_controller', [
         // Place the route into the global dg ng, we don't do this in run()
         // because the route isn't fully initalized until this controller is
         // invoked.
+        dpm('going to:');
+        console.log($route);
         dg_ng_set('route', $route);
   
       }
@@ -100,14 +106,14 @@ dgApp.controller('dg_page_controller', [
  */
 function dg_page_link($compile, drupalgapSettings, scope, element, attrs) {
   try {
-    dpm('dg_page_link');
+    //dpm('dg_page_link');
     var theme = drupalgapSettings.theme;
     var template = '';
     for (var name in theme.regions) {
       if (!theme.regions.hasOwnProperty(name)) { continue; }
       var region = theme.regions[name];
-      dpm('region - ' + name);
-      console.log(region);
+      //dpm('region - ' + name);
+      //console.log(region);
       template += drupalgap_render_region(region);
     }
 

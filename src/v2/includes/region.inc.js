@@ -23,7 +23,9 @@ function drupalgap_render_region_blocks(region) {
     for (var delta in region.blocks) {
       if (!region.blocks.hasOwnProperty(delta)) { continue; }
       var block = region.blocks[delta];
-      html += drupalgap_render_block(delta, block);
+      if (dg_check_visibility(block)) {
+        html += drupalgap_render_block(delta, block);
+      }
     }
     return html;
   }

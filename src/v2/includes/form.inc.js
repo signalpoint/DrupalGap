@@ -3,6 +3,8 @@
  */
 function drupalgap_get_form(form_id) {
   try {
+    dpm('drupalgap_get_form');
+    console.log(form_id);
     return theme('form', { form_id: form_id });
     // Set up form defaults.
     /*var form = {

@@ -26,6 +26,18 @@ function drupalgap_check_connection() {
 
 /**
  * @deprecated
+ * @see dg_check_visibility().
+ */
+function drupalgap_check_visibility(type, data) {
+  console.log(
+    'DEPRECATED - drupalgap_check_visibility(): use dg_check_visibility() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_check_visibility(data);
+}
+
+/**
+ * @deprecated
  */
 function drupalgap_field_info_field(field_name) {
   try {
@@ -219,6 +231,21 @@ function drupal_user_defaults() {
     arguments.callee.caller.name + '()'
   );
   return dg_user_default();
+}
+
+/**
+ * @deprecated
+ * @see dg_user_has_role
+ */
+function drupalgap_user_has_role() {
+  console.log(
+    'DEPRECATED - drupalgap_user_has_role(): use dg_user_has_role() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  if (arguments.length == 1) { return dg_user_has_role(arguments[0]); }
+  else if (arguments.length == 2) {
+    return dg_user_has_role(arguments[0], arguments[0]);
+  }
 }
 
 /**

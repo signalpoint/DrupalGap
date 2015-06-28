@@ -49,8 +49,8 @@ function theme(hook, variables) {
  */
 function theme_item_list(variables) {
   try {
-    dpm('theme_item_list');
-    console.log(variables);
+    //dpm('theme_item_list');
+    //console.log(variables);
     // We'll theme an empty list unordered list by default, if there is a type
     // of list specified we'll use that, and if there are some items we'll
     // theme them too.

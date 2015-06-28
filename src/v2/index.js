@@ -70,10 +70,12 @@ function dg_ng_dependencies() {
         'angular-drupal',
         'drupalgap',
         'dgAdmin',
-        'dgEntity',
         'dgSystem',
         'dgText',
-        'dgUser'
+        'dgUser',
+        'dgEntity' // IMPORTANT - order matters here, e.g. user/login will get
+                   // routed to user/:uid if we put the dgEntity module before
+                   // the dgUser module.
     ];
   }
   catch (error) { console.log('dg_ng_dependencies - ' + error); }
@@ -105,11 +107,6 @@ function dgConnect($q, $http, drupalSettings) {
         return $q(function(resolve, reject) {
           setTimeout(function() {
               resolve(json);
-            /*if (okToGreet(name)) {
-              resolve('Hello, ' + name + '!');
-            } else {
-              reject('Greeting ' + name + ' is not allowed.');
-            }*/
           }, 100);
         });
       }

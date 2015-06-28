@@ -1,12 +1,9 @@
 angular.module('dgUser', ['drupalgap'])
 
-// hook_menu()
+// ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {
-      //dpm('dgUser - routeProvider');
       $routeProvider.when('/user/login', {
           templateUrl: 'themes/spi/page.tpl.html',
-          //template: drupalgap_get_form('user_login_form'),
-          //template: '<form user-login-form></form>',
           controller: 'dg_page_controller',
           page_callback: 'drupalgap_get_form',
           page_arguments: ['user_login_form']
@@ -67,8 +64,11 @@ dgApp.directive("userLoginForm", function($compile) {
               form_state.values.name,
               form_state.values.pass
             ).then(function(data) {
-                console.log(data);
-                //drupalgap_goto(drupalgap.settings.front);
+
+              var action = typeof form.action !== 'undefined' ?
+                form.action : 'user/' + data.user.uid;
+              drupalgap_goto(action);
+
             });
         });
 
@@ -95,6 +95,7 @@ dgApp.directive("userLoginForm", function($compile) {
  */
 function user_login_form(form) {
   try {
+    dpm('user_login_form');
     console.log(arguments);
     form.elements.name = {
       type: 'textfield',
@@ -157,4 +158,41 @@ function dg_user_set(user) {
   }
   catch (error) { console.log('dg_user_set - ' + error); }
 }
+
+/**
+ *
+ */
+function javascript_funk() {
+  try {
+  }
+  catch (error) { console.log(' - ' + error); }
+}
+
+/**
+ * Given a user role (string), this determines if the current user has the role.
+ * Returns true if the user has the role, false otherwise. You may pass in a
+ * user account object to check against a certain account, instead of the
+ * current user.
+ * @param {String} role
+ * @return {Boolean}
+ */
+function dg_user_has_role(role) {
+  try {
+    var has_role = false;
+    var account = null;
+    if (arguments[1]) { account = arguments[1]; }
+    else { account = dg_user_get(); }
+    for (var rid in account.roles) {
+        if (!account.roles.hasOwnProperty(rid)) { continue; }
+        var value = account.roles[rid];
+        if (role == value) {
+          has_role = true;
+          break;
+        }
+    }
+    return has_role;
+  }
+  catch (error) { console.log('dg_user_has_role - ' + error); }
+}
+
 

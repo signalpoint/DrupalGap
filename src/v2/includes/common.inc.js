@@ -66,6 +66,43 @@ function dg_attributes(attributes) {
 }
 
 /**
+ *
+ */
+function dg_check_visibility(data) {
+  try {
+    var visible = true;
+    
+    // Roles.
+    if (
+      typeof data.roles !== 'undefined' &&
+      data.roles &&
+      data.roles.value &&
+      data.roles.value.length != 0
+    ) {
+      for (var role_index in data.roles.value) {
+          if (!data.roles.value.hasOwnProperty(role_index)) { continue; }
+          var role = data.roles.value[role_index];
+          if (dg_user_has_role(role)) {
+            // User has role, show/hide the block accordingly.
+            if (data.roles.mode == 'include') { visible = true; }
+            if (data.roles.mode == 'exclude') { visible = false; }
+          }
+          else {
+            // User does not have role, show/hide the block accordingly.
+            if (data.roles.mode == 'include') { visible = false; }
+            if (data.roles.mode == 'exclude') { visible = true; }
+          }
+          // Break out of the loop if already determined to be visible.
+          if (visible) { break; }
+      }
+    }
+    
+    return visible;
+  }
+  catch (error) { console.log('dg_check_visibility - ' + error); }
+}
+
+/**
  * Given a JS function name, this returns true if the function exists in the
  * scope, false otherwise.
  * @param {String} name

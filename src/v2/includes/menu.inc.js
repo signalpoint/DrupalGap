@@ -13,8 +13,8 @@ function menu_execute_active_handler($compile, $injector) {
     //dpm('path: ' + path);
     
     var route = dg_route_get();
-    //dpm('route');
-    //console.log(route);
+    dpm('route');
+    console.log(route);
     
     // Determine the page_callback function.
     var page_callback = typeof route['$$route'].page_callback !== 'undefined' ?
@@ -30,6 +30,7 @@ function menu_execute_active_handler($compile, $injector) {
     // otherwise just push the arg onto the page arguments. Then try to prepare
     // any entity that may be present in the url so the entity is sent via the
     // page arguments to the page callback, instead of just sending the integer.
+    dpm(page_callback);
     if (!page_arguments) { return window[page_callback](); }
     var _page_args = [];
     var args = arg(null, path);

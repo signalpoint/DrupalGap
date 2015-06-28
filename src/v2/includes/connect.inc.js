@@ -18,13 +18,7 @@ function drupalgap_json_load() {
 function dg_check_connection() {
   try {
     
-    // OFFLINE FIRST DUDE!
-    return false;
-    
-    
-    
-    
-    
+    return true;
 
     // If we're not in PhoneGap (i.e. a web app environment, or Ripple), we'll
     // assume we have a connection. Is this a terrible assumption? Anybody out
