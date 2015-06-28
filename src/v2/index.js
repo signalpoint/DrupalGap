@@ -28,8 +28,8 @@ var dgApp = angular.module('dgApp', dg_ng_dependencies());
 
 // Run the app.
 dgApp.run([
-    '$rootScope', '$routeParams', '$location', '$http', 'drupalSettings',
-    function($rootScope, $routeParams, $location, $http, drupalSettings) {
+    '$rootScope', '$routeParams', '$location', '$http', 'drupal', 'drupalSettings', 'drupalgapSettings',
+    function($rootScope, $routeParams, $location, $http, drupal, drupalSettings, drupalgapSettings) {
 
       //dpm('dgApp.run()');
       //console.log(arguments);
@@ -37,7 +37,9 @@ dgApp.run([
       dg_ng_set('routeParams', $routeParams);
       dg_ng_set('location', $location);
       dg_ng_set('http', $http);
+      dg_ng_set('drupal', drupal);
       dg_ng_set('drupalSettings', drupalSettings);
+      dg_ng_set('drupalgapSettings', drupalgapSettings);
 
       // Watch for changes in the Angular route (this is fired twice per route change)...
       /*$rootScope.$on("$locationChangeStart", function(event, next, current) {
@@ -125,7 +127,7 @@ function dgOffline($q) {
       var anonymous_user = {
         "sessid": null,
         "session_name": null,
-        "user": dg_user_default()
+        "user": dg_user_defaults()
       };
       return $q(function(resolve, reject) {
         setTimeout(function() {

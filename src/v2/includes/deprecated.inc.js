@@ -223,18 +223,6 @@ function drupalgap_path_set(path) {
 
 /**
  * @deprecated
- * @see dg_user_default()
- */
-function drupal_user_defaults() {
-  console.log(
-    'DEPRECATED - drupal_user_defaults(): use dg_user_default() instead in ' +
-    arguments.callee.caller.name + '()'
-  );
-  return dg_user_default();
-}
-
-/**
- * @deprecated
  * @see dg_user_has_role
  */
 function drupalgap_user_has_role() {

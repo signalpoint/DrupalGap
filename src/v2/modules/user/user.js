@@ -8,15 +8,17 @@ angular.module('dgUser', ['drupalgap'])
           page_callback: 'drupalgap_get_form',
           page_arguments: ['user_login_form']
       });
-}]);
+      $routeProvider.when('/user/logout', {
+          templateUrl: 'themes/spi/page.tpl.html',
+          controller: 'dg_page_controller',
+          page_callback: 'dg_user_logout_callback'
+      });
+}])
 
-// @TODO this should be attached to the module, not the app.
-dgApp.directive("userLoginForm", function($compile) {
+.directive("userLoginForm", function($compile) {
     return {
 
       controller: function($scope, drupal) {
-        
-        dpm('userLoginForm - controller');
 
         // Set up form defaults.
         var form = dg_form_defaults("user_login_form", $scope);
@@ -78,8 +80,6 @@ dgApp.directive("userLoginForm", function($compile) {
       },
 
       link: function(scope, element) {
-        
-        dpm('userLoginForm - link');
 
         // Add the form to the element.
         element.append(dg_ng_compile_form($compile, scope));
@@ -89,54 +89,28 @@ dgApp.directive("userLoginForm", function($compile) {
     };
 });
 
-
 /**
  *
  */
-function user_login_form(form) {
+function dg_user_logout_callback() {
   try {
-    dpm('user_login_form');
-    console.log(arguments);
-    form.elements.name = {
-      type: 'textfield',
-      title: t('Username'),
-      title_placeholder: true,
-      required: true
-    };
-    form.elements.pass = {
-      type: 'password',
-      title: t('Password'),
-      title_placeholder: true,
-      required: true,
-      attributes: {
-        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
-      }
-    };
-    form.elements.submit = {
-      type: 'submit',
-      value: t('Login')
-    };
-    return form;
+    var drupal = dg_ng_get('drupal');
+    var drupalgapSettings = dg_ng_get('drupalgapSettings');
+    drupal.user_logout().then(function(data) {
+        drupalgap_goto(drupalgapSettings.front);
+    });
   }
-  catch (error) { console.log('user_login_form - ' + error); }
+  catch (error) { console.log('dg_user_logout_callback - ' + error); }
 }
 
 /**
  *
  */
-function dg_user_default() {
+function dg_user_defaults() {
   try {
-    return {
-      "uid": 0,
-      "hostname": null,
-      "roles": {
-          "1": "anonymous user"
-      },
-      "cache": 0,
-      "timestamp": Date.now() / 1000 | 0
-    };
+    return drupal_user_defaults();
   }
-  catch (error) { console.log('dg_user_default - ' + error); }
+  catch (error) { console.log('dg_user_defaults - ' + error); }
 }
 
 /**
@@ -157,15 +131,6 @@ function dg_user_set(user) {
     drupalgap.user = user;
   }
   catch (error) { console.log('dg_user_set - ' + error); }
-}
-
-/**
- *
- */
-function javascript_funk() {
-  try {
-  }
-  catch (error) { console.log(' - ' + error); }
 }
 
 /**
