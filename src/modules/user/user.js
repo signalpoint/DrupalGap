@@ -336,30 +336,3 @@ function user_view_title(callback, uid) {
   catch (error) { console.log('user_view_title - ' + error); }
 }
 
-/**
- * Given a user role (string), this determines if the current user has the role.
- * Returns true if the user has the role, false otherwise. You may pass in a
- * user account object to check against a certain account, instead of the
- * current user.
- * @param {String} role
- * @return {Boolean}
- */
-function drupalgap_user_has_role(role) {
-  try {
-    var has_role = false;
-    var account = null;
-    if (arguments[1]) { account = arguments[1]; }
-    else { account = Drupal.user; }
-    for (var rid in account.roles) {
-        if (!account.roles.hasOwnProperty(rid)) { continue; }
-        var value = account.roles[rid];
-        if (role == value) {
-          has_role = true;
-          break;
-        }
-    }
-    return has_role;
-  }
-  catch (error) { console.log('drupalgap_user_has_role - ' + error); }
-}
-

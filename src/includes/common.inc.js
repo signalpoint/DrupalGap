@@ -46,26 +46,6 @@ function drupalgap_check_visibility(type, data) {
         type + ')'
       );
     }
-    // Roles.
-    else if (typeof data.roles !== 'undefined' &&
-      data.roles && data.roles.value && data.roles.value.length != 0) {
-      for (var role_index in data.roles.value) {
-          if (!data.roles.value.hasOwnProperty(role_index)) { continue; }
-          var role = data.roles.value[role_index];
-          if (drupalgap_user_has_role(role)) {
-            // User has role, show/hide the block accordingly.
-            if (data.roles.mode == 'include') { visible = true; }
-            if (data.roles.mode == 'exclude') { visible = false; }
-          }
-          else {
-            // User does not have role, show/hide the block accordingly.
-            if (data.roles.mode == 'include') { visible = false; }
-            if (data.roles.mode == 'exclude') { visible = true; }
-          }
-          // Break out of the loop if already determined to be visible.
-          if (visible) { break; }
-      }
-    }
     // Pages.
     else if (typeof data.pages !== 'undefined' && data.pages &&
       data.pages.value && data.pages.value.length != 0) {
