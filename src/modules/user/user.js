@@ -114,22 +114,8 @@ function user_listing_pageshow() {
  */
 function user_menu() {
     var items = {
-      /*'user': {
+      'user': {
         'page_callback': 'user_page'
-      },*/
-      'user/login': {
-        title: t('Login'),
-        /*controller: 'drupalgap_get_form_controller',
-        resolve: {
-          form_id: function() { return 'user_login_form'; }
-        },*/
-        page_callback: 'user_login_form',
-        /*options: {reloadPage: true}*/
-      },
-      'user/logout': {
-        'title': t('Logout'),
-        'page_callback': 'user_logout_callback',
-        options: {reloadPage: true}
       },
       'user/register': {
         'title': t('Register'),
