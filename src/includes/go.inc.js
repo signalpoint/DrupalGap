@@ -394,6 +394,10 @@ function _drupalgap_back_exit(button) {
 
 $(window).on('navigate', function(event, data) {
 
+    // If we're already moving backwards (aka from a "soft" back button click),
+    // then don't do anything.
+    if (drupalgap.back) { return; }
+
     // In web-app mode, clicking the back button on your browser (or Android
     // device browser), does not actually fire drupalgap_back(), so we mimic
     // it here, but skip the history.back() call because that's already
