@@ -138,7 +138,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
                              // figure out how to handle the 'add another
                              // item' feature.
           }
-          if (entity && entity[name] && entity[name].length != 0) {
+          if (entity && entity[name] && entity[name].length != 0 && entity[name][language]) {
             for (var delta = 0; delta < cardinality; delta++) {
               // @TODO - is this where we need to use the idea of the
               // value_callback property present in Drupal's FAPI? That way
