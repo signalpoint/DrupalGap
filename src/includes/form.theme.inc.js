@@ -286,19 +286,4 @@ function theme_textfield(variables) {
   catch (error) { console.log('theme_textfield - ' + error); }
 }
 
-/**
- * Themes a textarea input.
- * @param {Object} variables
- * @return {String}
- */
-function theme_textarea(variables) {
-  try {
-    var output =
-      '<div><textarea ' + drupalgap_attributes(variables.attributes) + '>' +
-        variables.value +
-      '</textarea></div>';
-    return output;
-  }
-  catch (error) { console.log('theme_textarea - ' + error); }
-}
 
