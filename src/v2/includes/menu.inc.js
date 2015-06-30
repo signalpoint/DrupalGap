@@ -16,7 +16,10 @@ function menu_execute_active_handler($compile, $injector) {
     // Determine the page_callback function.
     var page_callback = typeof route['$$route'].page_callback !== 'undefined' ?
       route['$$route'].page_callback : null;
-    if (!page_callback || !dg_function_exists(page_callback)) { return '<p>404</p>'; }
+    if (!page_callback || !dg_function_exists(page_callback)) {
+      console.log('The ' + page_callback + '() page_callback does not exist!');
+      return '<p>404 - ' + t('Not Found') + '</p>';
+    }
     
     // Determine the page_arguments, if any.
     var page_arguments = typeof route['$$route'].page_arguments !== 'undefined' ?

@@ -202,3 +202,42 @@ function theme_link(variables) {
   catch (error) { console.log('theme_link - ' + error); }
 }
 
+/**
+ * Implementation of theme_table().
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_table(variables) {
+  try {
+    var html = '<table ' + dg_attributes(variables.attributes) + '>';
+    if (variables.header) {
+      html += '<thead><tr>';
+      for (var index in variables.header) {
+        if (!variables.header.hasOwnProperty(index)) { continue; }
+        var column = variables.header[index];
+        if (column.data) {
+          html += '<td>' + column.data + '</td>';
+        }
+      }
+      html += '</tr></thead>';
+    }
+    html += '<tbody>';
+    if (variables.rows) {
+      for (var row_index in variables.rows) {
+        if (!variables.rows.hasOwnProperty(row_index)) { continue; }
+        var row = variables.rows[row_index];
+        html += '<tr>';
+        if (row) {
+          for (var column_index in row) {
+            if (!row.hasOwnProperty(column_index)) { continue; }
+            var column = row[column_index];
+            html += '<td>' + column + '</td>';
+          }
+        }
+        html += '</tr>';
+      }
+    }
+    return html + '</tbody></table>';
+  }
+  catch (error) { console.log('theme_table - ' + error); }
+}

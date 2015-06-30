@@ -3,7 +3,6 @@ angular.module('dgSystem', ['drupalgap'])
 // hook_menu()
 .config(['$routeProvider', 'drupalgapSettings',
     function($routeProvider, drupalgapSettings) {
-      console.log(drupalgapSettings);
       $routeProvider.when('/dg', {
           templateUrl: 'themes/spi/page.tpl.html',
           controller: 'dg_page_controller',

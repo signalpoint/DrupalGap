@@ -29,14 +29,37 @@ angular.module('dgAdmin', ['drupalgap'])
       link: function(scope, element, attrs) {
         scope.dg_admin.content.then(function(nodes) {
           var html = '';
-          var items = [];
+          var rows = [];
           for (var i in nodes) {
             var node = nodes[i];
-            items.push(l(t(node.title), 'node/' + node.nid));
+            rows.push([
+              l(t(node.title), 'node/' + node.nid),
+              node.type,
+              l(node.uid, 'user/' + node.uid),
+              node.status,
+              node.changed,
+              theme('item_list', {
+                items: [
+                  l(t('edit'), 'node/' + node.nid + '/edit'),
+                  l(t('delete'), null)
+                ]
+              })
+            ]);
           }
-          if (!dg_empty(items)) {
-            html += theme('item_list', { items: items });
-          }
+          html += theme('table', {
+            header: [
+              { data: t('Title') },
+              { data: t('Type') },
+              { data: t('Author') },
+              { data: t('Status') },
+              { data: t('Updated') },
+              { data: t('Operations') },
+            ],
+            rows: rows,
+            attributes: {
+              'class': 'table' /* @TODO this is bootstrap specific */
+            }
+          });
           var linkFn = $compile(html);
           var content = linkFn(scope);
           element.append(content);

@@ -4,7 +4,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
     return {
       controller: function($scope, drupal, dgConnect, dgOffline) {
         
-        dpm('dgPage controller');
+        //dpm('dgPage controller');
 
         dg_ng_set('scope', $scope);
 
@@ -19,7 +19,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           
           // We don't have a connection...
           
-          dpm('making an offline promise...');
+          //dpm('making an offline promise...');
           
           // Make a promise to the offline link.
           $scope.loading++;
@@ -32,7 +32,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
 
           // We have a connection...
           
-          dpm('making an online promise...');
+          //dpm('making an online promise...');
           
           // Make a promise to the connect link.
           $scope.loading++;
@@ -44,22 +44,22 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
       },
       link: function(scope, element, attrs) {
         
-        dpm('dgPage link');
+        //dpm('dgPage link');
         
         if (scope.offline) {
           scope.offline.data.then(function(data) {
               
-              dpm('dgPage link offline');
+            //dpm('dgPage link offline');
               
-              // Offline...
+            // Offline...
 
             scope.loading--;
+
+            //dpm('fullfilled the offline promise!');
+            //console.log(data);
               
-              dpm('fullfilled the offline promise!');
-              console.log(data);
-              
-              // Set the drupalgap user and session info.
-              dg_session_set(data);
+            // Set the drupalgap user and session info.
+            dg_session_set(data);
 
             dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
               
@@ -69,29 +69,25 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           
           scope.connect.data.then(function (data) {
               
-              dpm('dgPage link online');
+            //dpm('dgPage link online');
               
-              // Online...
+            // Online...
 
             scope.loading--;
             
-              dpm('fullfilled the connection promise!');
-              console.log(data);
+            //dpm('fullfilled the connection promise!');
+            //console.log(data);
               
-              dg_session_set(data);
+            dg_session_set(data);
 
             // Does the user have access to this route?
             if (!dg_route_access()) {
-              dpm('You do not have access!');
             }
             else {
-              dpm('You have access!');
             }
 
-              
-              dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
-              
-              
+            dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
+
           });
 
         }
@@ -120,8 +116,6 @@ dgApp.controller('dg_page_controller', [
         // Place the route into the global dg ng, we don't do this in run()
         // because the route isn't fully initialized until this controller is
         // invoked.
-        dpm('going to:');
-        console.log($route);
         dg_ng_set('route', $route);
   
       }
