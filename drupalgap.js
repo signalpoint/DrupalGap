@@ -1,4 +1,4 @@
-/*! drupalgap 2015-06-29 */
+/*! drupalgap 2015-06-30 */
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
@@ -768,7 +768,7 @@ function drupalgap_path_set(path) {
 
 /**
  * @deprecated
- * @see dg_user_has_role
+ * @see dg_user_has_role()
  */
 function drupalgap_user_has_role() {
   console.log(
@@ -779,6 +779,30 @@ function drupalgap_user_has_role() {
   else if (arguments.length == 2) {
     return dg_user_has_role(arguments[0], arguments[0]);
   }
+}
+
+/**
+ * @deprecated
+ * @see drupal_entity_primary_key_title()
+ */
+function entity_primary_key(entity_type) {
+  console.log(
+    'DEPRECATED - entity_primary_key(): use drupal_entity_primary_key() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return drupal_entity_primary_key(entity_type);
+}
+
+/**
+ * @deprecated
+ * @see drupal_entity_primary_key_title()
+ */
+function entity_primary_key_title(entity_type) {
+  console.log(
+    'DEPRECATED - entity_primary_key_title(): use drupal_entity_primary_key_title() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return drupal_entity_primary_key_title(entity_type);
 }
 
 /**
@@ -1432,6 +1456,22 @@ function theme_submit(variables) {
 }
 
 /**
+ * Themes a textarea input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_textarea(variables) {
+  try {
+    var value = typeof variables.value !== 'undefined' ?
+      variables.value : '';
+    return '<textarea ' + drupalgap_attributes(variables.attributes) + '>' +
+      value +
+    '</textarea>';
+  }
+  catch (error) { console.log('theme_textarea - ' + error); }
+}
+
+/**
  * Themes a text input.
  * @param {Object} variables
  * @return {String}
@@ -1444,7 +1484,6 @@ function theme_textfield(variables) {
   }
   catch (error) { console.log('theme_textfield - ' + error); }
 }
-
 
 /**
  * Given a path, this will change the current page in the app.
@@ -1492,20 +1531,9 @@ dgApp.config(function(drupalgapSettings) {
   //console.log(arguments);
 
   // @WARNING only certain providers like constants are available here, no scope
-  // or value available here...
-
-  //console.log($provide.value('drupalgapSettings').$get());
+  // or values available here...
   
   drupalgap_onload(drupalgapSettings);
-
-  // @TODO this should be included via index.html as a script, if possible
-  // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated because of its
-  // detrimental effects to the end user's experience.
-  drupalgap_service_resource_extract_results({
-      service: 'system',
-      resource: 'connect',
-      data: drupalgap_json_load()
-  });
 
 });
 
@@ -1514,200 +1542,17 @@ dgApp.config(function(drupalgapSettings) {
  */
 function drupalgap_onload(drupalgapSettings) {
   try {
+    // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
+    var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
+    for (var name in json) {
+      if (!json.hasOwnProperty(name)) { continue; }
+      drupalgap[name] = json[name];
+    }
     drupalgap_load_blocks(drupalgapSettings);
     drupalgap_load_menus(drupalgapSettings);
   }
   catch (error) { console.log('drupalgap_onload - ' + error); }
 }
-
-dgApp.config(function() {
-    
-    return;
-  
-  dpm('config() - building entity views...');
-  
-  // For each entity type...
-  for (var entity_type in drupalgap.field_info_instances) {
-    if (!drupalgap.field_info_instances.hasOwnProperty(entity_type)) { continue; }
-    var entity_bundles = drupalgap.field_info_instances[entity_type];
-    
-    // Initialize a place for this entity type's view(s) templates.
-    drupalgap.views.templates[entity_type] = {};
-    
-    // For each bundle on the entity type...
-    for (var bundle in entity_bundles) {
-      if (!entity_bundles.hasOwnProperty(bundle)) { continue; }
-      
-      // Grab the field instances for this entity type and bundle.
-      var instances = entity_bundles[bundle];
-      //console.log(instances);
-
-      // If there are no fields on the bundle, skip it.
-      if (typeof instances !== 'object') {
-        dpm('skipping ' + entity_type + '/' + bundle + ', no fields on it...');
-        continue;
-      }
-      
-      // Make a view template for each entity mode.
-      drupalgap.views.templates[entity_type][bundle] = { };
-      var modes = ['view', 'edit'];
-      for (var i = 0; i < modes.length; i++) {
-        var mode = modes[i];
-        var template = '';
-        switch (mode) {
-        case 'view':
-          template = '{{' + entity_type + '.' + entity_primary_key_title(entity_type) + '}}';
-          break;
-        case 'edit':
-          template = '{{' + entity_type + '.' + entity_primary_key_title(entity_type) + '}}';
-          break;
-        }
-        drupalgap.views.templates[entity_type][bundle][mode] = {
-          template: '<div ng-model="' + entity_type + '">' + template + '</div>'
-        };
-      }
-
-      var field_weights = {};
-      var field_displays = {};
-      
-      // For each field on the instance...
-      for (var field_name in instances) {
-        if (!instances.hasOwnProperty(field_name)) { continue; }
-        var field = instances[field_name];
-        //console.log(field);
-        
-        // Determine which display mode to use. The default mode will be used
-        // if the drupalgap display mode is not present.
-        var display = drupalgap_field_display(field);
-        
-        // Skip hidden fields.
-        if (display.type == 'hidden') { continue; }
-        
-        // Save the field display and weight.
-        field_displays[field_name] = display;
-        field_weights[field_name] = display.weight;
-        
-      }
-      
-      //dpm('field_weights');
-      //console.log(field_weights);
-      //dpm('field_displays');
-      //console.log(field_displays);
-      
-      // Extract the field weights and sort them.
-      var extracted_weights = [];
-      for (var field_name in field_weights) {
-          if (!field_weights.hasOwnProperty(field_name)) { continue; }
-          var weight = field_weights[field_name];
-          extracted_weights.push(weight);
-      }
-      extracted_weights.sort(function(a, b) { return a - b; });
-
-      // For each sorted weight, locate the field with the corresponding weight,
-      // then render it's field content.
-      var completed_fields = [];
-      for (var weight_index in extracted_weights) {
-          if (!extracted_weights.hasOwnProperty(weight_index)) { continue; }
-          var target_weight = extracted_weights[weight_index];
-          for (var field_name in field_weights) {
-              if (!field_weights.hasOwnProperty(field_name)) { continue; }
-              var weight = field_weights[field_name];
-              if (target_weight == weight) {
-                if (completed_fields.indexOf(field_name) == -1) {
-                  completed_fields.push(field_name);
-                  
-                  var modes = ['view', 'edit'];
-                  for (var i = 0; i < modes.length; i++) {
-                    var mode = modes[i];
-                    var hook_name = mode == 'view' ?
-                      'hook_field_formatter_view' : 'hook_field_widget_form'
-                    var attrs = drupalgap_attributes({
-                      'ng-controller': hook_name,
-                      field_name: field_name
-                    });
-                    drupalgap.views.templates[entity_type][bundle][mode].template +=
-                      '<div ' + attrs + '>{{' + field_name + '}}</div>';
-                  }
-                  
-                  /*entity.content += drupalgap_entity_render_field(
-                    entity_type,
-                    entity,
-                    field_name,
-                    field_info[field_name],
-                    field_displays[field_name]
-                  );*/
-                  break;
-                }
-              }
-          }
-      }
-      
-      //console.log('views templates');
-      //console.log(drupalgap.views.templates);
-
-    }
-
-  }
-  
-});
-
-// CONFIGURE HOOK_MENU() ITEMS AS ANGULAR ROUTES
-dgApp.config(['$routeProvider',
-  function($routeProvider) {
-    
-    return;
-
-    dpm('config() - building route provider...');
-    //console.log(arguments);
-
-    // Attach hook_menu() paths to Angular's routeProvider.
-    for (var path in drupalgap.menu_links) {
-      if (!drupalgap.menu_links.hasOwnProperty(path)) { continue; }
-
-      // Extract the menu link.
-      var menu_link = drupalgap.menu_links[path];
-
-      // Skip 'MENU_DEFAULT_LOCAL_TASK' items.
-      if (menu_link.type == 'MENU_DEFAULT_LOCAL_TASK') {
-        console.log('WARNING: dgApp - deprecated | MENU_DEFAULT_LOCAL_TASK on path: ' + path);
-        continue;
-      }
-
-      // Use the active theme's page template as the templateUrl, if one wasn't
-      // provided.
-      // @TODO hard coded theme? bad bad bad
-      if (!menu_link.templateUrl) {
-        menu_link.templateUrl = 'themes/spi/page.tpl.html';
-      }
-
-      // Determine the menu link's controller, by first falling back to the
-      // page_callback property which we'll warn the developer about, otherwise
-      // we'll use menu_link object for the routeProvider.
-      if (!menu_link.controller && menu_link.page_callback) {
-        menu_link.controller = 'drupalgap_goto_controller';
-      }
-      else if (!menu_link.controller) {
-        console.log('WARNING: dgApp - routeProvider | no controller provided for path: ' + path);
-      }
-
-      // Add the menu link to Angular's routeProvider.
-      // @TODO apparently attaching all the controllers at once, instead of on
-      // demand is expensive, seek alternative routes in utilizing controllers.
-      //console.log(menu_link);
-      // @TODO by attaching the complete hook_menu item link here, DG stuff ends
-      // up in the same object as an Angular route, and we may or may not be
-      // colliding with how Angular does things.
-      $routeProvider.when('/' + path, menu_link);
-
-    }
-
-    // Set the otherwise ruling to load the front page.
-    $routeProvider.otherwise({
-        redirectTo: '/' + drupalgap.settings.front
-    });
-
-  }]);
-
 
 /**
  * Execute the page callback associated with the current path and return its
@@ -1833,6 +1678,10 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
       controller: function($scope, drupal, dgConnect, dgOffline) {
         
         dpm('dgPage controller');
+
+        dg_ng_set('scope', $scope);
+
+        $scope.loading = 0;
         
         /*dgConnect.json_load().then(function(json) {
             dpm('made it back!');
@@ -1846,6 +1695,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           dpm('making an offline promise...');
           
           // Make a promise to the offline link.
+          $scope.loading++;
           $scope.offline = {
             data: dgOffline.connect()
           };
@@ -1858,6 +1708,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           dpm('making an online promise...');
           
           // Make a promise to the connect link.
+          $scope.loading++;
           $scope.connect = {
             data: drupal.connect()
           };
@@ -1874,6 +1725,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               dpm('dgPage link offline');
               
               // Offline...
+
+            scope.loading--;
               
               dpm('fullfilled the offline promise!');
               console.log(data);
@@ -1892,6 +1745,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               dpm('dgPage link online');
               
               // Online...
+
+            scope.loading--;
             
               dpm('fullfilled the connection promise!');
               console.log(data);
@@ -2280,6 +2135,25 @@ function theme(hook, variables) {
 }
 
 /**
+ * Themes a header widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_header(variables) {
+  try {
+    var type = typeof variables.type !== 'undefined' ?
+      variables.type : 'h1';
+    var text = typeof variables.text !== 'undefined' ?
+      variables.text : '';
+    var html = '<' + type + ' ' + dg_attributes(variables.attributes) + '>' +
+      text +
+    '</' + type + '>';
+    return html;
+  }
+  catch (error) { console.log('theme_header - ' + error); }
+}
+
+/**
  * Implementation of theme_item_list().
  * @param {Object} variables
  * @return {String}
@@ -2481,13 +2355,21 @@ function dg_admin_page() {
 }
 
 function dg_admin_connect_page() {
+  var content = {};
+  content['connect'] = {
+    theme: 'textarea',
+    attributes: {
+      'ng-model': 'dg_connect'
+    }
+  };
   $http = dg_ng_get('http');
   drupalSettings = dg_ng_get('drupalSettings');
   var path = drupalSettings.site_path + drupalSettings.base_path + '?q=drupalgap/connect';
   $http.get(path).then(function(result) {
-      if (result.status != 200) { return; }
-      console.log(result);
+    if (result.status != 200) { return; }
+    dg_ng_get('scope').dg_connect = JSON.stringify(result.data);
   });
+  return content;
 }
 
 function dg_admin_content_page() {
@@ -2534,6 +2416,7 @@ angular.module('dgEntity', ['drupalgap'])
         var entity_id = arg(1);
         $scope.entity_type = entity_type;
         $scope.entity_id = entity_id;
+        $scope.loading++;
         $scope.entity_load = {
           entity: drupal[entity_type + '_load'](entity_id)
         };
@@ -2543,15 +2426,26 @@ angular.module('dgEntity', ['drupalgap'])
         scope.entity_load.entity.then(function (entity) {
             //console.log(scope);
             //console.log(entity);
+
+          scope.loading--;
+
+          var entity_type = scope.entity_type;
             
-            var content = { };
+          var content = { };
+
+          // Add the "title" of this entity to the content.
+          content[drupal_entity_primary_key(entity_type)] = {
+            theme: 'header',
+            text: entity[drupal_entity_primary_key_title(entity_type)]
+          };
             
-            // Grab this entity's field info instances.
-            var instances = drupalgap_field_info_instances(
-              scope.entity_type,
-              entity.type // @TODO support all entity types, not just nodes
-            );
-            //console.log(instances);
+          // Grab this entity's field info instances.
+          var instances = drupalgap_field_info_instances(
+            entity_type,
+            entity.type // @TODO support all entity type bundles, not just node content types
+          );
+          console.log(drupalgap.field_info_instances);
+          console.log(instances);
             
             // Render each field instance...
             for (var field_name in instances) {
@@ -2563,11 +2457,13 @@ angular.module('dgEntity', ['drupalgap'])
               var display = instance.display.drupalgap;
               var module = display.module;
               var hook = module + '_field_formatter_view';
+
+              dpm(hook);
               
               // Invoke the hook_field_formmater_view(), if it exists.
               if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
               content[field_name] = window[hook](
-                scope.entity_type,
+                entity_type,
                 entity,
                 dg_field_info_field(field_name),
                 instance,
@@ -2577,6 +2473,8 @@ angular.module('dgEntity', ['drupalgap'])
               );
               
             }
+
+          // @TODO great place for a hook
             
             element.replaceWith($compile(drupalgap_render(content))(scope));
         });
@@ -2617,7 +2515,7 @@ function dg_field_info_field(field_name) {
  */
 function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
-    var field_info_instances;
+    var field_info_instances = null;
     // If there is no bundle, pull the fields out of the wrapper.
     // @TODO there appears to be a special case with commerce_products, in that
     // they aren't wrapped like normal entities (see the else statement when a
@@ -2794,61 +2692,6 @@ function menu_block_view(delta) {
     };
   }
   catch (error) { console.log('menu_block_view - ' + error); }
-}
-
-/**
- * Given a json drupalgap options array from a service resource results call,
- * this extracts data based on the resource and populates necessary global vars.
- * @param {Object} options
- */
-function drupalgap_service_resource_extract_results(options) {
-  try {
-    if (options.service == 'system' && options.resource == 'connect') {
-      drupalgap.remote_addr = options.data.remote_addr;
-      drupalgap.entity_info = options.data.entity_info;
-      drupalgap.field_info_instances = options.data.field_info_instances;
-      drupalgap.field_info_fields = options.data.field_info_fields;
-      drupalgap.field_info_extra_fields = options.data.field_info_extra_fields;
-      
-      // @TODO uncomment once 7.x-2.x is more stable
-      /*drupalgap.taxonomy_vocabularies =
-        drupalgap_taxonomy_vocabularies_extract(
-          result.taxonomy_vocabularies
-        );*/
-
-      // The system connect resource's success function places what is in
-      // options.data.user to overwrite Drupal.user, so anything we want in
-      // the Drupal.user object must be added to options.data.user isntead.
-      // Extract and build the user's permissions.
-      /*options.data.user.permissions = [];
-      var permissions = options.data.user_permissions;
-      for (var permission in permissions) {
-        options.data.user.permissions.push(permissions[permission]);
-      }*/
-      // Pull out the content types, and set them by their type.
-      var content_types_list = options.data.content_types_list;
-      for (var index in content_types_list) {
-          if (!content_types_list.hasOwnProperty(index)) { continue; }
-          var object = content_types_list[index];
-          drupalgap.content_types_list[object.type] = object;
-      }
-      // Pull out the content types user permissions.
-      /*options.data.user.content_types_user_permissions =
-        options.data.content_types_user_permissions;*/
-      // Pull out the site settings.
-      drupalgap.site_settings = options.data.site_settings;
-      // Pull out the date formats and types.
-      if (typeof options.data.date_formats !== 'undefined') {
-        drupalgap.date_formats = options.data.date_formats;
-      }
-      if (typeof options.data.date_types !== 'undefined') {
-        drupalgap.date_types = options.data.date_types;
-      }
-    }
-  }
-  catch (error) {
-    console.log('drupalgap_service_resource_extract_results - ' + error);
-  }
 }
 
 
