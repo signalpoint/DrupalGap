@@ -72,6 +72,7 @@ function dg_ng_dependencies() {
         'angular-drupal',
         'drupalgap',
         'dgAdmin',
+      'dgMenu',
         'dgSystem',
         'dgText',
         'dgUser',

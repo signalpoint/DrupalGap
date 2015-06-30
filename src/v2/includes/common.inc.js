@@ -196,19 +196,6 @@ function dg_path_get() {
 }
 
 /**
- * Get the current Angular "route" object.
- * @see https://docs.angularjs.org/api/ngRoute/provider/$routeProvider
- * @return {Object}
- */
-function dg_route_get() {
-  try {
-    var $route = dg_ng_get('route');
-    return $route.current;
-  }
-  catch (error) { console.log('dg_route_get - ' + error); }
-}
-
-/**
  * Returns a link.
  * @return {String}
  */

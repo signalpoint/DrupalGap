@@ -50,6 +50,9 @@ function menu_execute_active_handler($compile, $injector) {
 function menu_list_system_menus() {
   try {
     var system_menus = {
+      admin_menu: {
+        title: t('Admin')
+      },
       user_menu_anonymous: {
         title: t('User menu authenticated')
       },

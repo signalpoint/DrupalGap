@@ -52,8 +52,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               
               // Set the drupalgap user and session info.
               dg_session_set(data);
-              
-              dg_page_link($compile, drupalgapSettings, scope, element, attrs);
+
+            dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
               
           });  
         }
@@ -69,8 +69,17 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               console.log(data);
               
               dg_session_set(data);
+
+            // Does the user have access to this route?
+            if (!dg_route_access()) {
+              dpm('You do not have access!');
+            }
+            else {
+              dpm('You have access!');
+            }
+
               
-              dg_page_link($compile, drupalgapSettings, scope, element, attrs);
+              dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
               
               
           });
@@ -81,6 +90,15 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
     };
 });
 
+function dg_page_access() {
+  try {
+
+  }
+  catch (error) {
+    console.log('dg_page_access - ' + error);
+  }
+}
+
 dgApp.controller('dg_page_controller', [
     '$scope', '$sce', '$route', '$location', '$routeParams',
     function($scope, $sce, $route, $location, $routeParams) {
@@ -90,7 +108,7 @@ dgApp.controller('dg_page_controller', [
         //console.log(arguments);
   
         // Place the route into the global dg ng, we don't do this in run()
-        // because the route isn't fully initalized until this controller is
+        // because the route isn't fully initialized until this controller is
         // invoked.
         dpm('going to:');
         console.log($route);
@@ -104,7 +122,7 @@ dgApp.controller('dg_page_controller', [
 /**
  *
  */
-function dg_page_link($compile, drupalgapSettings, scope, element, attrs) {
+function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
   try {
     //dpm('dg_page_link');
     var theme = drupalgapSettings.theme;
@@ -123,6 +141,6 @@ function dg_page_link($compile, drupalgapSettings, scope, element, attrs) {
     var content = linkFn(scope);
     element.append(content);
   }
-  catch (error) { console.log('dg_page_link - ' + error); }
+  catch (error) { console.log('dg_page_compile - ' + error); }
 }
 

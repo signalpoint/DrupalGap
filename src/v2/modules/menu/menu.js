@@ -1,3 +1,20 @@
+angular.module('dgMenu', [])
+  .service('dgMenuAccessCallback', ['$q', '$http', 'drupalSettings', dgMenuAccessCallback]);
+
+/**
+ *
+ * @param delta
+ * @returns {*}
+ */
+function dgMenuAccessCallback(route) {
+  try {
+
+  }
+  catch (error) {
+    console.log('dgMenuAccessCallback - ' + error);
+  }
+}
+
 /**
  * Implements hook_block_view().
  * @param {String} delta
@@ -5,13 +22,13 @@
  */
 function menu_block_view(delta) {
   try {
-    dpm('menu_block_view');
-    console.log(delta);
+    //dpm('menu_block_view');
+    //console.log(delta);
     var menu = dg_menu_get(delta);
-    console.log(menu);
     if (menu.links.length == 0) { return ''; }
     var items = [];
     for (var i = 0; i < menu.links.length; i++) {
+      // @TODO make sure user has access to path.
       items.push(theme('link', menu.links[i]));
     }
     return {
@@ -25,4 +42,3 @@ function menu_block_view(delta) {
   }
   catch (error) { console.log('menu_block_view - ' + error); }
 }
-

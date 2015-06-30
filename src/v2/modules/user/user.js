@@ -105,6 +105,35 @@ function dg_user_logout_callback() {
 
 /**
  *
+ * @returns {*|Object}
+ */
+
+function dg_user_access(permission) {
+  try {
+    dpm('dg_user_access');
+    console.log(arguments);
+    var access = false;
+    var account = typeof arguments[1] !== 'undefined' ?
+      arguments[1] : dg_user_get();
+    dpm('checking ' + account.name + ' for ' + permission);
+    if (account.uid == 1) { return true; }
+    if (!account.permissions) { return false; }
+    for (var delta in account.permissions) {
+      if (!account.permissions.hasOwnProperty(delta)) { continue; }
+      var item = account.permissions[delta];
+      if (item.permission == permission) {
+        access = true;
+        break;
+      }
+    }
+    return access;
+  }
+  catch (error) {
+    console.log('dg_user_access - ' + error);
+  }
+}
+/**
+ *
  */
 function dg_user_defaults() {
   try {

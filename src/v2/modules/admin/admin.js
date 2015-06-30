@@ -5,7 +5,8 @@ angular.module('dgAdmin', ['drupalgap'])
       $routeProvider.when('/admin', {
           templateUrl: 'themes/spi/page.tpl.html',
           controller: 'dg_page_controller',
-          page_callback: 'dg_admin_page'
+          page_callback: 'dg_admin_page',
+        access_arguments: ['administer drupalgap']
       });
       $routeProvider.when('/admin/connect', {
           templateUrl: 'themes/spi/page.tpl.html',
