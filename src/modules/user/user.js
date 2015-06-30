@@ -9,34 +9,6 @@ dgApp.directive("userLogoutCallback", function($compile, $injector) {
 });
 
 /**
- * Determine whether the user has a given privilege. Optionally pass in a user
- * account JSON object for the second paramater to check that particular
- * account.
- * @param {String} string The permission, such as "administer nodes", being
- *                        checked for.
- * @return {Boolean}
- */
-function user_access(string) {
-  try {
-    var account;
-    if (arguments[1]) { account = arguments[1]; }
-    else { account = Drupal.user; }
-    if (account.uid == 1) { return true; }
-    var access = false;
-    for (var index in account.permissions) {
-        if (!account.permissions.hasOwnProperty(index)) { continue; }
-        var object = account.permissions[index];
-        if (object.permission == string) {
-          access = true;
-          break;
-        }
-    }
-    return access;
-  }
-  catch (error) { console.log('user_access - ' + error); }
-}
-
-/**
  * The access callback for the user/%/edit page.
  * @param {Object} account
  * @return {Boolean}
