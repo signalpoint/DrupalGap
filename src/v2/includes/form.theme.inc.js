@@ -29,6 +29,22 @@ function theme_submit(variables) {
 }
 
 /**
+ * Themes a textarea input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_textarea(variables) {
+  try {
+    var value = typeof variables.value !== 'undefined' ?
+      variables.value : '';
+    return '<textarea ' + drupalgap_attributes(variables.attributes) + '>' +
+      value +
+    '</textarea>';
+  }
+  catch (error) { console.log('theme_textarea - ' + error); }
+}
+
+/**
  * Themes a text input.
  * @param {Object} variables
  * @return {String}
@@ -41,4 +57,3 @@ function theme_textfield(variables) {
   }
   catch (error) { console.log('theme_textfield - ' + error); }
 }
-

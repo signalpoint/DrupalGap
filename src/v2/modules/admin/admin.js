@@ -58,13 +58,21 @@ function dg_admin_page() {
 }
 
 function dg_admin_connect_page() {
+  var content = {};
+  content['connect'] = {
+    theme: 'textarea',
+    attributes: {
+      'ng-model': 'dg_connect'
+    }
+  };
   $http = dg_ng_get('http');
   drupalSettings = dg_ng_get('drupalSettings');
   var path = drupalSettings.site_path + drupalSettings.base_path + '?q=drupalgap/connect';
   $http.get(path).then(function(result) {
-      if (result.status != 200) { return; }
-      console.log(result);
+    if (result.status != 200) { return; }
+    dg_ng_get('scope').dg_connect = JSON.stringify(result.data);
   });
+  return content;
 }
 
 function dg_admin_content_page() {

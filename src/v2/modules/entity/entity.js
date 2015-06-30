@@ -26,6 +26,7 @@ angular.module('dgEntity', ['drupalgap'])
         var entity_id = arg(1);
         $scope.entity_type = entity_type;
         $scope.entity_id = entity_id;
+        $scope.loading++;
         $scope.entity_load = {
           entity: drupal[entity_type + '_load'](entity_id)
         };
@@ -35,15 +36,26 @@ angular.module('dgEntity', ['drupalgap'])
         scope.entity_load.entity.then(function (entity) {
             //console.log(scope);
             //console.log(entity);
+
+          scope.loading--;
+
+          var entity_type = scope.entity_type;
             
-            var content = { };
+          var content = { };
+
+          // Add the "title" of this entity to the content.
+          content[drupal_entity_primary_key(entity_type)] = {
+            theme: 'header',
+            text: entity[drupal_entity_primary_key_title(entity_type)]
+          };
             
-            // Grab this entity's field info instances.
-            var instances = drupalgap_field_info_instances(
-              scope.entity_type,
-              entity.type // @TODO support all entity types, not just nodes
-            );
-            //console.log(instances);
+          // Grab this entity's field info instances.
+          var instances = drupalgap_field_info_instances(
+            entity_type,
+            entity.type // @TODO support all entity type bundles, not just node content types
+          );
+          console.log(drupalgap.field_info_instances);
+          console.log(instances);
             
             // Render each field instance...
             for (var field_name in instances) {
@@ -55,11 +67,13 @@ angular.module('dgEntity', ['drupalgap'])
               var display = instance.display.drupalgap;
               var module = display.module;
               var hook = module + '_field_formatter_view';
+
+              dpm(hook);
               
               // Invoke the hook_field_formmater_view(), if it exists.
               if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
               content[field_name] = window[hook](
-                scope.entity_type,
+                entity_type,
                 entity,
                 dg_field_info_field(field_name),
                 instance,
@@ -69,6 +83,8 @@ angular.module('dgEntity', ['drupalgap'])
               );
               
             }
+
+          // @TODO great place for a hook
             
             element.replaceWith($compile(drupalgap_render(content))(scope));
         });

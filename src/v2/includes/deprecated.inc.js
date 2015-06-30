@@ -223,7 +223,7 @@ function drupalgap_path_set(path) {
 
 /**
  * @deprecated
- * @see dg_user_has_role
+ * @see dg_user_has_role()
  */
 function drupalgap_user_has_role() {
   console.log(
@@ -234,6 +234,30 @@ function drupalgap_user_has_role() {
   else if (arguments.length == 2) {
     return dg_user_has_role(arguments[0], arguments[0]);
   }
+}
+
+/**
+ * @deprecated
+ * @see drupal_entity_primary_key_title()
+ */
+function entity_primary_key(entity_type) {
+  console.log(
+    'DEPRECATED - entity_primary_key(): use drupal_entity_primary_key() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return drupal_entity_primary_key(entity_type);
+}
+
+/**
+ * @deprecated
+ * @see drupal_entity_primary_key_title()
+ */
+function entity_primary_key_title(entity_type) {
+  console.log(
+    'DEPRECATED - entity_primary_key_title(): use drupal_entity_primary_key_title() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return drupal_entity_primary_key_title(entity_type);
 }
 
 /**

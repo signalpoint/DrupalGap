@@ -6,6 +6,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
         
         dpm('dgPage controller');
 
+        dg_ng_set('scope', $scope);
+
         $scope.loading = 0;
         
         /*dgConnect.json_load().then(function(json) {

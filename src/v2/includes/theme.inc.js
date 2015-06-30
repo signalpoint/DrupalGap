@@ -43,6 +43,25 @@ function theme(hook, variables) {
 }
 
 /**
+ * Themes a header widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_header(variables) {
+  try {
+    var type = typeof variables.type !== 'undefined' ?
+      variables.type : 'h1';
+    var text = typeof variables.text !== 'undefined' ?
+      variables.text : '';
+    var html = '<' + type + ' ' + dg_attributes(variables.attributes) + '>' +
+      text +
+    '</' + type + '>';
+    return html;
+  }
+  catch (error) { console.log('theme_header - ' + error); }
+}
+
+/**
  * Implementation of theme_item_list().
  * @param {Object} variables
  * @return {String}

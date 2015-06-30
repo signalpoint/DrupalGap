@@ -19,7 +19,7 @@ function dg_field_info_field(field_name) {
  */
 function drupalgap_field_info_instances(entity_type, bundle_name) {
   try {
-    var field_info_instances;
+    var field_info_instances = null;
     // If there is no bundle, pull the fields out of the wrapper.
     // @TODO there appears to be a special case with commerce_products, in that
     // they aren't wrapped like normal entities (see the else statement when a
