@@ -73,6 +73,7 @@ function dg_ng_dependencies() {
         'angular-drupal',
         'drupalgap',
         'dgAdmin',
+      'dgMenu',
         'dgSystem',
         'dgText',
         'dgUser',
@@ -423,19 +424,6 @@ function dg_path_get() {
     return $location['$$path'].slice('1');
   }
   catch (error) { console.log('dg_path_get - ' + error); }
-}
-
-/**
- * Get the current Angular "route" object.
- * @see https://docs.angularjs.org/api/ngRoute/provider/$routeProvider
- * @return {Object}
- */
-function dg_route_get() {
-  try {
-    var $route = dg_ng_get('route');
-    return $route.current;
-  }
-  catch (error) { console.log('dg_route_get - ' + error); }
 }
 
 /**
@@ -1773,6 +1761,9 @@ function menu_execute_active_handler($compile, $injector) {
 function menu_list_system_menus() {
   try {
     var system_menus = {
+      admin_menu: {
+        title: t('Admin')
+      },
       user_menu_anonymous: {
         title: t('User menu authenticated')
       },
@@ -1889,8 +1880,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               
               // Set the drupalgap user and session info.
               dg_session_set(data);
-              
-              dg_page_link($compile, drupalgapSettings, scope, element, attrs);
+
+            dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
               
           });  
         }
@@ -1906,8 +1897,17 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               console.log(data);
               
               dg_session_set(data);
+
+            // Does the user have access to this route?
+            if (!dg_route_access()) {
+              dpm('You do not have access!');
+            }
+            else {
+              dpm('You have access!');
+            }
+
               
-              dg_page_link($compile, drupalgapSettings, scope, element, attrs);
+              dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
               
               
           });
@@ -1918,6 +1918,15 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
     };
 });
 
+function dg_page_access() {
+  try {
+
+  }
+  catch (error) {
+    console.log('dg_page_access - ' + error);
+  }
+}
+
 dgApp.controller('dg_page_controller', [
     '$scope', '$sce', '$route', '$location', '$routeParams',
     function($scope, $sce, $route, $location, $routeParams) {
@@ -1927,7 +1936,7 @@ dgApp.controller('dg_page_controller', [
         //console.log(arguments);
   
         // Place the route into the global dg ng, we don't do this in run()
-        // because the route isn't fully initalized until this controller is
+        // because the route isn't fully initialized until this controller is
         // invoked.
         dpm('going to:');
         console.log($route);
@@ -1941,7 +1950,7 @@ dgApp.controller('dg_page_controller', [
 /**
  *
  */
-function dg_page_link($compile, drupalgapSettings, scope, element, attrs) {
+function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
   try {
     //dpm('dg_page_link');
     var theme = drupalgapSettings.theme;
@@ -1960,7 +1969,7 @@ function dg_page_link($compile, drupalgapSettings, scope, element, attrs) {
     var content = linkFn(scope);
     element.append(content);
   }
-  catch (error) { console.log('dg_page_link - ' + error); }
+  catch (error) { console.log('dg_page_compile - ' + error); }
 }
 
 
@@ -2167,6 +2176,66 @@ function drupalgap_render(content) {
 
 
 /**
+ *
+ * @returns {Object}
+ */
+
+function dg_route_access() {
+  try {
+    dpm('dg_route_access');
+    console.log(arguments);
+    var access = false;
+    var route = typeof arguments[0] !== 'undefined' ?
+      arguments[0] : dg_route_get();
+    var account = typeof arguments[1] !== 'undefined' ?
+      arguments[1] : dg_user_get();
+    console.log(route);
+    console.log(account);
+    if (account.uid == 1) { return true; }
+    if (route['$$route'].access_callback) {
+      if (route['$$route'].access_arguments) {
+        // @TODO this isn't converting the page arguments to their potential
+        // path values (i.e. integers are converted to arg()), check out the
+        // route object, it may have parsed the args for us already.
+        access = window[route['$$route'].access_callback].apply(
+          null,
+          route['$$route'].access_arguments
+        );
+      }
+      else {
+        access = window[route['$$route'].access_callback]();
+      }
+    }
+    else if (route['$$route'].access_arguments) {
+      for (var i = 0; i < route['$$route'].access_arguments.length; i++) {
+        var access_argument = route['$$route'].access_arguments[i];
+        access = dg_user_access.apply(null, [access_argument, account]);
+        if (access) { break; }
+      }
+    }
+    return access;
+  }
+  catch (error) {
+    console.log('dg_route_access - ' + error);
+  }
+}
+/**
+ * Get the current Angular "route" object.
+ * @see https://docs.angularjs.org/api/ngRoute/provider/$routeProvider
+ * @return {Object}
+ */
+function dg_route_get() {
+  try {
+    dpm('dg_route_get');
+    var $route = dg_ng_get('route');
+    console.log($route);
+    return $route.current;
+  }
+  catch (error) { console.log('dg_route_get - ' + error); }
+}
+
+
+/**
  * Implementation of theme().
  * @param {String} hook
  * @param {Object} variables
@@ -2359,7 +2428,8 @@ angular.module('dgAdmin', ['drupalgap'])
       $routeProvider.when('/admin', {
           templateUrl: 'themes/spi/page.tpl.html',
           controller: 'dg_page_controller',
-          page_callback: 'dg_admin_page'
+          page_callback: 'dg_admin_page',
+        access_arguments: ['administer drupalgap']
       });
       $routeProvider.when('/admin/connect', {
           templateUrl: 'themes/spi/page.tpl.html',
@@ -2681,6 +2751,23 @@ function image_style_url(style_name, path) {
 }
 
 
+angular.module('dgMenu', [])
+  .service('dgMenuAccessCallback', ['$q', '$http', 'drupalSettings', dgMenuAccessCallback]);
+
+/**
+ *
+ * @param delta
+ * @returns {*}
+ */
+function dgMenuAccessCallback(route) {
+  try {
+
+  }
+  catch (error) {
+    console.log('dgMenuAccessCallback - ' + error);
+  }
+}
+
 /**
  * Implements hook_block_view().
  * @param {String} delta
@@ -2688,13 +2775,13 @@ function image_style_url(style_name, path) {
  */
 function menu_block_view(delta) {
   try {
-    dpm('menu_block_view');
-    console.log(delta);
+    //dpm('menu_block_view');
+    //console.log(delta);
     var menu = dg_menu_get(delta);
-    console.log(menu);
     if (menu.links.length == 0) { return ''; }
     var items = [];
     for (var i = 0; i < menu.links.length; i++) {
+      // @TODO make sure user has access to path.
       items.push(theme('link', menu.links[i]));
     }
     return {
@@ -2708,7 +2795,6 @@ function menu_block_view(delta) {
   }
   catch (error) { console.log('menu_block_view - ' + error); }
 }
-
 
 /**
  * Given a json drupalgap options array from a service resource results call,
@@ -3035,6 +3121,35 @@ function dg_user_logout_callback() {
   catch (error) { console.log('dg_user_logout_callback - ' + error); }
 }
 
+/**
+ *
+ * @returns {*|Object}
+ */
+
+function dg_user_access(permission) {
+  try {
+    dpm('dg_user_access');
+    console.log(arguments);
+    var access = false;
+    var account = typeof arguments[1] !== 'undefined' ?
+      arguments[1] : dg_user_get();
+    dpm('checking ' + account.name + ' for ' + permission);
+    if (account.uid == 1) { return true; }
+    if (!account.permissions) { return false; }
+    for (var delta in account.permissions) {
+      if (!account.permissions.hasOwnProperty(delta)) { continue; }
+      var item = account.permissions[delta];
+      if (item.permission == permission) {
+        access = true;
+        break;
+      }
+    }
+    return access;
+  }
+  catch (error) {
+    console.log('dg_user_access - ' + error);
+  }
+}
 /**
  *
  */
