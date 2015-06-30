@@ -1572,7 +1572,10 @@ function menu_execute_active_handler($compile, $injector) {
     // Determine the page_callback function.
     var page_callback = typeof route['$$route'].page_callback !== 'undefined' ?
       route['$$route'].page_callback : null;
-    if (!page_callback || !dg_function_exists(page_callback)) { return '<p>404</p>'; }
+    if (!page_callback || !dg_function_exists(page_callback)) {
+      console.log('The ' + page_callback + '() page_callback does not exist!');
+      return '<p>404 - ' + t('Not Found') + '</p>';
+    }
     
     // Determine the page_arguments, if any.
     var page_arguments = typeof route['$$route'].page_arguments !== 'undefined' ?
@@ -1677,7 +1680,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
     return {
       controller: function($scope, drupal, dgConnect, dgOffline) {
         
-        dpm('dgPage controller');
+        //dpm('dgPage controller');
 
         dg_ng_set('scope', $scope);
 
@@ -1692,7 +1695,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           
           // We don't have a connection...
           
-          dpm('making an offline promise...');
+          //dpm('making an offline promise...');
           
           // Make a promise to the offline link.
           $scope.loading++;
@@ -1705,7 +1708,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
 
           // We have a connection...
           
-          dpm('making an online promise...');
+          //dpm('making an online promise...');
           
           // Make a promise to the connect link.
           $scope.loading++;
@@ -1717,22 +1720,22 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
       },
       link: function(scope, element, attrs) {
         
-        dpm('dgPage link');
+        //dpm('dgPage link');
         
         if (scope.offline) {
           scope.offline.data.then(function(data) {
               
-              dpm('dgPage link offline');
+            //dpm('dgPage link offline');
               
-              // Offline...
+            // Offline...
 
             scope.loading--;
+
+            //dpm('fullfilled the offline promise!');
+            //console.log(data);
               
-              dpm('fullfilled the offline promise!');
-              console.log(data);
-              
-              // Set the drupalgap user and session info.
-              dg_session_set(data);
+            // Set the drupalgap user and session info.
+            dg_session_set(data);
 
             dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
               
@@ -1742,29 +1745,25 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           
           scope.connect.data.then(function (data) {
               
-              dpm('dgPage link online');
+            //dpm('dgPage link online');
               
-              // Online...
+            // Online...
 
             scope.loading--;
             
-              dpm('fullfilled the connection promise!');
-              console.log(data);
+            //dpm('fullfilled the connection promise!');
+            //console.log(data);
               
-              dg_session_set(data);
+            dg_session_set(data);
 
             // Does the user have access to this route?
             if (!dg_route_access()) {
-              dpm('You do not have access!');
             }
             else {
-              dpm('You have access!');
             }
 
-              
-              dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
-              
-              
+            dg_page_compile($compile, drupalgapSettings, scope, element, attrs);
+
           });
 
         }
@@ -1793,8 +1792,6 @@ dgApp.controller('dg_page_controller', [
         // Place the route into the global dg ng, we don't do this in run()
         // because the route isn't fully initialized until this controller is
         // invoked.
-        dpm('going to:');
-        console.log($route);
         dg_ng_set('route', $route);
   
       }
@@ -2037,15 +2034,13 @@ function drupalgap_render(content) {
 
 function dg_route_access() {
   try {
-    dpm('dg_route_access');
-    console.log(arguments);
+    //dpm('dg_route_access');
+    //console.log(arguments);
     var access = false;
     var route = typeof arguments[0] !== 'undefined' ?
       arguments[0] : dg_route_get();
     var account = typeof arguments[1] !== 'undefined' ?
       arguments[1] : dg_user_get();
-    console.log(route);
-    console.log(account);
     if (account.uid == 1) { return true; }
     if (route['$$route'].access_callback) {
       if (route['$$route'].access_arguments) {
@@ -2081,9 +2076,7 @@ function dg_route_access() {
  */
 function dg_route_get() {
   try {
-    dpm('dg_route_get');
     var $route = dg_ng_get('route');
-    console.log($route);
     return $route.current;
   }
   catch (error) { console.log('dg_route_get - ' + error); }
@@ -2294,6 +2287,45 @@ function theme_link(variables) {
   catch (error) { console.log('theme_link - ' + error); }
 }
 
+/**
+ * Implementation of theme_table().
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_table(variables) {
+  try {
+    var html = '<table ' + dg_attributes(variables.attributes) + '>';
+    if (variables.header) {
+      html += '<thead><tr>';
+      for (var index in variables.header) {
+        if (!variables.header.hasOwnProperty(index)) { continue; }
+        var column = variables.header[index];
+        if (column.data) {
+          html += '<td>' + column.data + '</td>';
+        }
+      }
+      html += '</tr></thead>';
+    }
+    html += '<tbody>';
+    if (variables.rows) {
+      for (var row_index in variables.rows) {
+        if (!variables.rows.hasOwnProperty(row_index)) { continue; }
+        var row = variables.rows[row_index];
+        html += '<tr>';
+        if (row) {
+          for (var column_index in row) {
+            if (!row.hasOwnProperty(column_index)) { continue; }
+            var column = row[column_index];
+            html += '<td>' + column + '</td>';
+          }
+        }
+        html += '</tr>';
+      }
+    }
+    return html + '</tbody></table>';
+  }
+  catch (error) { console.log('theme_table - ' + error); }
+}
 
 angular.module('dgAdmin', ['drupalgap'])
 
@@ -2326,14 +2358,37 @@ angular.module('dgAdmin', ['drupalgap'])
       link: function(scope, element, attrs) {
         scope.dg_admin.content.then(function(nodes) {
           var html = '';
-          var items = [];
+          var rows = [];
           for (var i in nodes) {
             var node = nodes[i];
-            items.push(l(t(node.title), 'node/' + node.nid));
+            rows.push([
+              l(t(node.title), 'node/' + node.nid),
+              node.type,
+              l(node.uid, 'user/' + node.uid),
+              node.status,
+              node.changed,
+              theme('item_list', {
+                items: [
+                  l(t('edit'), 'node/' + node.nid + '/edit'),
+                  l(t('delete'), null)
+                ]
+              })
+            ]);
           }
-          if (!dg_empty(items)) {
-            html += theme('item_list', { items: items });
-          }
+          html += theme('table', {
+            header: [
+              { data: t('Title') },
+              { data: t('Type') },
+              { data: t('Author') },
+              { data: t('Status') },
+              { data: t('Updated') },
+              { data: t('Operations') },
+            ],
+            rows: rows,
+            attributes: {
+              'class': 'table' /* @TODO this is bootstrap specific */
+            }
+          });
           var linkFn = $compile(html);
           var content = linkFn(scope);
           element.append(content);
@@ -2395,15 +2450,23 @@ angular.module('dgEntity', ['drupalgap'])
 
       var entity_types = drupal_entity_types();
       
-      // Add routes to view entities.
+      // Add routes to view and edit entities.
       for (var i = 0; i < entity_types.length; i++) {
         var entity_type = entity_types[i];
-        var view_route = '/' + entity_type + '/:' + drupal_entity_primary_key(entity_type);
-        $routeProvider.when(view_route, {
+        var route = '/' + entity_type + '/:' + drupal_entity_primary_key(entity_type);
+        // View.
+        $routeProvider.when(route, {
             templateUrl: 'themes/spi/page.tpl.html',
             controller: 'dg_page_controller',
             page_callback: 'dg_entity_page_view',
             page_arguments: [0, 1]
+        });
+        // Edit.
+        $routeProvider.when(route + '/edit', {
+          templateUrl: 'themes/spi/page.tpl.html',
+          controller: 'dg_page_controller',
+          page_callback: 'dg_entity_page_edit',
+          page_arguments: [0, 1]
         });
       }
       
@@ -2480,16 +2543,89 @@ angular.module('dgEntity', ['drupalgap'])
         });
       }
     };
-});
+})
+
+  .directive("entityEdit", function($compile, drupal) {
+    return {
+      controller: function($scope) {
+        var entity_type = arg(0);
+        var entity_id = arg(1);
+        $scope.entity_type = entity_type;
+        $scope.entity_id = entity_id;
+        $scope.loading++;
+        $scope.entity_load = {
+          entity: drupal[entity_type + '_load'](entity_id)
+        };
+      },
+      //replace: true,
+      link: function(scope, element, attrs) {
+        scope.entity_load.entity.then(function (entity) {
+          //console.log(scope);
+          //console.log(entity);
+
+          scope.loading--;
+
+          var content = { markup: '<p>Edit that shitty node with the title of ' + entity.title + '!</p>' };
+
+          var entity_type = scope.entity_type;
+
+          // Grab this entity's field info instances.
+          var instances = drupalgap_field_info_instances(
+            entity_type,
+            entity.type // @TODO support all entity type bundles, not just node content types
+          );
+          console.log(drupalgap.field_info_instances);
+          console.log(instances);
+
+          // Render each field instance...
+          for (var field_name in instances) {
+            if (!instances.hasOwnProperty(field_name)) { continue; }
+            var instance = instances[field_name];
+
+            // Extract the drupalgap display mode and the module name in
+            // charge of the field's formatter view hook.
+            /*var display = instance.display.drupalgap;
+            var module = display.module;
+            var hook = module + '_field_widget_form';*/
+
+            // Invoke the hook_field_widget_form(), if it exists.
+            //if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
+            /*content[field_name] = window[hook](
+              entity_type,
+              entity,
+              dg_field_info_field(field_name),
+              instance,
+              entity.language,
+              entity[field_name][entity.language],
+              display
+            );*/
+
+          }
+
+          // @TODO great place for a hook
+
+          element.replaceWith($compile(drupalgap_render(content))(scope));
+        });
+      }
+    };
+  });
 
 /**
  *
  */
 function dg_entity_page_view(entity_type, entity_id) {
   try {
-    return '<entity-view></entity';
-    //var directive_name = entity_type.replace(/_/g, '-') + '-view';
-    //return '<' + directive_name + '></' + directive_name + '>';
+    return '<entity-view></entity-view>';
+  }
+  catch (error) { console.log('dg_entity_page_view - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_entity_page_edit(entity_type, entity_id) {
+  try {
+    return '<entity-edit></entity-edit>';
   }
   catch (error) { console.log('dg_entity_page_view - ' + error); }
 }
@@ -2700,7 +2836,6 @@ angular.module('dgSystem', ['drupalgap'])
 // hook_menu()
 .config(['$routeProvider', 'drupalgapSettings',
     function($routeProvider, drupalgapSettings) {
-      console.log(drupalgapSettings);
       $routeProvider.when('/dg', {
           templateUrl: 'themes/spi/page.tpl.html',
           controller: 'dg_page_controller',
