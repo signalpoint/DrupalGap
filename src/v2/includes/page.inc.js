@@ -5,6 +5,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
       controller: function($scope, drupal, dgConnect, dgOffline) {
         
         dpm('dgPage controller');
+
+        $scope.loading = 0;
         
         /*dgConnect.json_load().then(function(json) {
             dpm('made it back!');
@@ -18,6 +20,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           dpm('making an offline promise...');
           
           // Make a promise to the offline link.
+          $scope.loading++;
           $scope.offline = {
             data: dgOffline.connect()
           };
@@ -30,6 +33,7 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
           dpm('making an online promise...');
           
           // Make a promise to the connect link.
+          $scope.loading++;
           $scope.connect = {
             data: drupal.connect()
           };
@@ -46,6 +50,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               dpm('dgPage link offline');
               
               // Offline...
+
+            scope.loading--;
               
               dpm('fullfilled the offline promise!');
               console.log(data);
@@ -64,6 +70,8 @@ dgApp.directive("dgPage", function($compile, drupalgapSettings) {
               dpm('dgPage link online');
               
               // Online...
+
+            scope.loading--;
             
               dpm('fullfilled the connection promise!');
               console.log(data);
