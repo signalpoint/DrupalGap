@@ -92,6 +92,18 @@ angular.module('drupalgap').config(function($provide) {
               'class': 'nav navbar-nav'
             }
           },
+
+          admin_menu: {
+            links: [
+              {
+                title: t('Administer'),
+                path: 'admin'
+              }
+            ],
+            attributes: {
+              'class': 'nav navbar-nav'
+            }
+          }
           
           
         },
@@ -157,6 +169,18 @@ angular.module('drupalgap').config(function($provide) {
               format: 'footer', // wrap in a footer element instead of a div
               attributes: {
                 'class': 'footer'
+              },
+
+              blocks: {
+
+                // Administration block.
+                admin_menu: {
+                  roles: {
+                    value: ['administrator'],
+                    mode: 'include'
+                  }
+                }
+
               }
 
             },
