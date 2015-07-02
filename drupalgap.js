@@ -1,4 +1,4 @@
-/*! drupalgap 2015-06-30 */
+/*! drupalgap 2015-07-02 */
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
@@ -22,7 +22,10 @@ var drupalgap = {
 angular.module('drupalgap', [])
   .value('drupalgapSettings', null)
   .service('dgConnect', ['$q', '$http', 'drupalSettings', dgConnect])
-  .service('dgOffline', ['$q', dgOffline]);
+  .service('dgOffline', ['$q', dgOffline])
+  /*.config(['drupalgapSettings', function(drupalgapSettings) {
+    drupalgap_onload(drupalgapSettings);
+  }])*/;
 
 // Create the app.
 var dgApp = angular.module('dgApp', dg_ng_dependencies());
@@ -223,7 +226,7 @@ function drupalgap_render_block(delta, block) {
       console.log('WARNING: ' + function_name + '() does not exist, so we are skipping this block: ' + delta);
       return '';
     }
-    return drupalgap_render(window[function_name](block.delta));
+    return dg_render(window[function_name](block.delta));
   }
   catch (error) { console.log('drupalgap_render_block - ' + error); }
 }
@@ -767,6 +770,20 @@ function drupalgap_path_set(path) {
 }
 
 /**
+ * @see dg_render()
+ * @deprecated
+ * @param content
+ * @returns {String}
+ */
+function drupalgap_render(content) {
+  console.log(
+    'DEPRECATED - drupalgap_render(): use dg_render() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_render(content);
+}
+
+/**
  * @deprecated
  * @see dg_user_has_role()
  */
@@ -851,10 +868,8 @@ function language_default() {
  */
 function dpm(data) {
   try {
-    // Show the caller name.
-    //var caller = arguments.callee.caller.name + '()';
-    //console.log(caller);
-    if (data) {
+
+    if (typeof data !== 'undefined') {
       if (typeof parent.window.ripple === 'function') {
         if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
           console.log(JSON.stringify(data));
@@ -864,17 +879,49 @@ function dpm(data) {
         }
       }
       else if (typeof data === 'object') { console.log(JSON.stringify(data)); }
+      if (data == '') { console.log('<empty-string>'); }
       else { console.log(data); }
     }
-    else {
-      if (data == '') { console.log('<empty-string>'); }
-      else { console.log('<null>'); }
-    }
+    else { console.log('<undefined>'); }
+
+    // Show the caller name.
+    //var caller = arguments.callee.caller.name + '()';
+    //console.log(caller);
+
   }
   catch (error) { console.log('dpm - ' + error); }
 }
 
 
+/**
+ * Returns an array of entity type names.
+ * @return {Array}
+ */
+function dg_entity_types() {
+  try {
+    var entity_types = [];
+    var entity_info = dg_entity_get_info();
+    for (var entity_type in entity_info) {
+      if (!entity_info.hasOwnProperty(entity_type)) { continue; }
+      entity_types.push(entity_type);
+    }
+    return entity_types;
+  }
+  catch (error) { console.log('dg_entity_types - ' + error); }
+}
+
+/**
+ * @see https://api.drupal.org/api/drupal/includes!common.inc/function/entity_get_info/7
+ * @param {String|null} entity_type
+ */
+function dg_entity_get_info() {
+  try {
+    var entity_type = typeof arguments[0] !== 'undefined' ? arguments[0] : null;
+    if (entity_type) { return drupalgap.entity_info[entity_type]; }
+    return drupalgap.entity_info;
+  }
+  catch (error) { console.log('dg_entity_get_info - ' + error); }
+}
 /**
  * Reads entire file into a string and returns the string. Returns false if
  * it fails.
@@ -1082,7 +1129,7 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
             form.bundle
           );
       }
-      form.elements[name].is_field = element_is_field;
+      form.elements[name].is_field = element_is_field; // @TODO Drupal does not use this boolean flag at all.
       // Set the name property on the element if it isn't already set.
       if (!form.elements[name].name) { form.elements[name].name = name; }
       // If the element is a field, we'll append a language code and delta
@@ -1446,8 +1493,8 @@ function theme_password(variables) {
  */
 function theme_submit(variables) {
   try {
-    dpm('theme_submit');
-    console.log(variables);
+    //dpm('theme_submit');
+    //console.log(variables);
     variables.attributes.type = 'submit';
     var output = '<input ' + dg_attributes(variables.attributes) + ' />';
     return output;
@@ -1464,7 +1511,7 @@ function theme_textarea(variables) {
   try {
     var value = typeof variables.value !== 'undefined' ?
       variables.value : '';
-    return '<textarea ' + drupalgap_attributes(variables.attributes) + '>' +
+    return '<textarea ' + dg_attributes(variables.attributes) + '>' +
       value +
     '</textarea>';
   }
@@ -1543,6 +1590,7 @@ dgApp.config(function(drupalgapSettings) {
 function drupalgap_onload(drupalgapSettings) {
   try {
     // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
+    // @TODO allow a developer mode to live sync the drupalgap.json contents using an api key
     var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
     for (var name in json) {
       if (!json.hasOwnProperty(name)) { continue; }
@@ -1883,12 +1931,12 @@ function theme_region(variables) {
  * @param {String|Object|Array} output The html string or render array to render.
  * @return {String}
  */
-function drupalgap_render(content) {
+function dg_render(content) {
   try {
-    //dpm('drupalgap_render');
+    //dpm('dg_render');
     //console.log(content);
 
-    var type = $.type(content);
+    var type = $.type(content); // @TODO jQuery dependency here.
     if (type === 'string') { return content; }
     var html = '';
     if (type === 'object') {
@@ -1898,12 +1946,17 @@ function drupalgap_render(content) {
         if (!content.hasOwnProperty(index)) { continue; }
         var piece = content[index];
         var _type = $.type(piece);
-        if (_type === 'object') { html += drupalgap_render(piece); }
+        if (_type === 'object') { html += dg_render(piece); }
         else if (_type === 'array') {
           for (var i = 0; i < piece.length; i++) {
-            html += drupalgap_render(piece[i]);
+            html += dg_render(piece[i]);
           }
         }
+      }
+    }
+    else if (type === 'array') {
+      for (var i = 0; i < content.length; i++) {
+        html += dg_render(content[i]);
       }
     }
     return html;
@@ -2023,7 +2076,7 @@ function drupalgap_render(content) {
     // return it.
     return content;
   }
-  catch (error) { console.log('drupalgap_render - ' + error); }
+  catch (error) { console.log('dg_render - ' + error); }
 }
 
 
@@ -2128,6 +2181,29 @@ function theme(hook, variables) {
 }
 
 /**
+ * Themes a fieldset widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_fieldset(variables) {
+  try {
+    var title = typeof variables.title !== 'undefined' ?
+      variables.title : null;
+    var description = typeof variables.description !== 'undefined' ?
+      variables.description : null;
+    var children = typeof variables.children !== 'undefined' ?
+      variables.children : null;
+    var html = '<fieldset ' + dg_attributes(variables.attributes) + '>';
+    if (title) { html += '<legend><span class="fieldset-legend">' + title + '</span></legend>'; }
+    html += '<div class="fieldset-wrapper">';
+    if (description) { html += '<div class="fieldset-description">' + description + '</div>'; }
+    if (children) { html += dg_render(children); }
+    return html + '</div></fieldset>';
+  }
+  catch (error) { console.log('theme_fieldset - ' + error); }
+}
+
+/**
  * Themes a header widget.
  * @param {Object} variables
  * @return {String}
@@ -2155,33 +2231,76 @@ function theme_item_list(variables) {
   try {
     //dpm('theme_item_list');
     //console.log(variables);
-    // We'll theme an empty list unordered list by default, if there is a type
-    // of list specified we'll use that, and if there are some items we'll
-    // theme them too.
-    var type = 'ul';
-    if (variables.type) { type = variables.type; }
-    var html = '';
-    if (variables.title) { html += '<h2>' + variables.title + '</h2>'; }
-    html += '<' + type + ' ' +
-      dg_attributes(variables.attributes) + '>';
-    if (variables.items && variables.items.length > 0) {
-      var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
-        variables.attributes['data-role'] == 'listview';
-      for (var index in variables.items) {
-          if (!variables.items.hasOwnProperty(index)) { continue; }
-          var item = variables.items[index];
-          var icon = null;
-          html += '<li';
-          if (listview && (icon = $(item).attr('data-icon'))) {
-            // If we're in a listview and the item specifies an icon,
-            // add the icon attribute to the list item element.
-            html += ' data-icon="' + icon + '"';
-          }
-          html += '>' + item + '</li>';
-      }
+
+
+    var items = variables['items'];
+    var title = variables['title'];
+    var type = typeof variables['type'] !== 'undefined' ?
+      variables['type'] : 'ul';
+    var attributes = variables['attributes'];
+
+    // Only output the list container and title, if there are any list items.
+    // Check to see whether the block title exists before adding a header.
+    // Empty headers are not semantic and present accessibility challenges.
+    var output = '<div class="item-list">';
+    if (title && title != '') {
+      output += '<h3>' + title + '</h3>';
     }
-    html += '</' + type + '>';
-    return html;
+
+    if (!dg_empty(items)) {
+      output += '<' + type + ' ' + dg_attributes(attributes) + '>';
+      var num_items = items.length;
+      var i = 0;
+      for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
+        attributes = {
+          'class': '' // @TODO need to support arrays!
+        };
+        var children = [];
+        var data = '';
+        i++;
+        if ($.type(item) !== 'string') { // @TODO jQuery dependency here!
+          for (var key in item) {
+            if (!item.hasOwnProperty(key)) { continue; }
+            var value = item[key];
+            if (key == 'data') {
+              data = value;
+            }
+            else if (key == 'children') {
+              children = value;
+            }
+            else {
+              attributes[key] = value;
+            }
+          }
+        }
+        else {
+          data = item;
+        }
+        if (children.length > 0) {
+          // Render nested list.
+          data += theme_item_list({
+            items: children,
+            title: null,
+            type: type,
+            attributes: attributes
+          });
+        }
+        if (i == 1) {
+          //attributes ['class'][] = 'first';
+          attributes['class'] += ' first ';
+        }
+        if (i == num_items) {
+          //attributes ['class'][] = 'last';
+          attributes ['class'] += ' last ';
+        }
+        output += '<li ' + dg_attributes(attributes) + '>' + data + "</li>\n";
+      }
+      output += '</' + type + '>';
+    }
+    output += '</div>';
+    return output;
   }
   catch (error) { console.log('theme_item_list - ' + error); }
 }
@@ -2260,11 +2379,8 @@ function theme_link(variables) {
 
       // Is this link active?
       if (variables.path == dg_path_get()) {
-        if (variables.attributes['class'].indexOf('ui-btn-active') == -1) {
-          variables.attributes['class'] += ' ui-btn-active ';
-        }
-        if (variables.attributes['class'].indexOf('ui-state-persist') == -1) {
-          variables.attributes['class'] += ' ui-state-persist ';
+        if (variables.attributes['class'].indexOf('active') == -1) {
+          variables.attributes['class'] += ' active ';
         }
       }
 
@@ -2401,11 +2517,29 @@ function dg_admin_page() {
   var content = {};
   content['links'] = {
     theme: 'item_list',
-    items: [
+    items: [ // @TODO these links should be render arrays and theme_item_list should allow for render array items!
       l(t('Connect'), 'admin/connect'),
       l(t('Content'), 'admin/content')
     ]
   };
+  var entity_info = dg_entity_get_info();
+  for (var entity_type in entity_info) {
+    if (!entity_info.hasOwnProperty(entity_type)) { continue; }
+    var entity = entity_info[entity_type];
+    content[entity_type] = {
+      theme: 'fieldset',
+      title: entity.plural_label,
+      children: [
+        {
+          theme: 'item_list',
+          items: [
+            l('List', 'admin/' + entity_type) // @TODO should be a render array.
+          ]
+        }
+
+      ]
+    }
+  }
   return content;
 }
 
@@ -2422,6 +2556,7 @@ function dg_admin_connect_page() {
   var path = drupalSettings.site_path + drupalSettings.base_path + '?q=drupalgap/connect';
   $http.get(path).then(function(result) {
     if (result.status != 200) { return; }
+    console.log(result.data);
     dg_ng_get('scope').dg_connect = JSON.stringify(result.data);
   });
   return content;
@@ -2440,20 +2575,26 @@ function dg_admin_content_page() {
   }
 }
 
-
-
-
 angular.module('dgEntity', ['drupalgap'])
 
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {
 
-      var entity_types = drupal_entity_types();
+    // @TODO we don't have access to this because this config runs before the app's config,
+    // maybe if we change it to a const instead of a value.
+    //var entity_types = dg_entity_types();
+    var entity_types = drupal_entity_types();
+    console.log(entity_types);
       
       // Add routes to view and edit entities.
       for (var i = 0; i < entity_types.length; i++) {
+
         var entity_type = entity_types[i];
+        // @TODO no access to entity type info yet! See above...
+        //var entity = dg_entity_get_info(entity_type);
+        //var route = '/' + entity_type + '/:' + entity.entity_keys.id;
         var route = '/' + entity_type + '/:' + drupal_entity_primary_key(entity_type);
+
         // View.
         $routeProvider.when(route, {
             templateUrl: 'themes/spi/page.tpl.html',
@@ -2461,12 +2602,24 @@ angular.module('dgEntity', ['drupalgap'])
             page_callback: 'dg_entity_page_view',
             page_arguments: [0, 1]
         });
+
+        // Add.
+        // @TODO
+
         // Edit.
         $routeProvider.when(route + '/edit', {
           templateUrl: 'themes/spi/page.tpl.html',
           controller: 'dg_page_controller',
           page_callback: 'dg_entity_page_edit',
           page_arguments: [0, 1]
+        });
+
+        // Admin list.
+        $routeProvider.when('/admin/' + entity_type, {
+          templateUrl: 'themes/spi/page.tpl.html',
+          controller: 'dg_page_controller',
+          page_callback: 'dg_entity_page_list',
+          page_arguments: [1]
         });
       }
       
@@ -2539,7 +2692,7 @@ angular.module('dgEntity', ['drupalgap'])
 
           // @TODO great place for a hook
             
-            element.replaceWith($compile(drupalgap_render(content))(scope));
+            element.replaceWith($compile(dg_render(content))(scope));
         });
       }
     };
@@ -2551,6 +2704,7 @@ angular.module('dgEntity', ['drupalgap'])
         var entity_type = arg(0);
         var entity_id = arg(1);
         $scope.entity_type = entity_type;
+        //$scope.bundle = null; // @TODO we need the bundle here!
         $scope.entity_id = entity_id;
         $scope.loading++;
         $scope.entity_load = {
@@ -2561,26 +2715,55 @@ angular.module('dgEntity', ['drupalgap'])
       link: function(scope, element, attrs) {
         scope.entity_load.entity.then(function (entity) {
           //console.log(scope);
-          //console.log(entity);
+          console.log(entity);
 
           scope.loading--;
 
-          var content = { markup: '<p>Edit that shitty node with the title of ' + entity.title + '!</p>' };
-
           var entity_type = scope.entity_type;
+          //var bundle = scope.bundle; // @TODO we need the bundle here!
+
+          // Set up form defaults.
+          var form = dg_form_defaults(entity_type + "_edit_form", scope);
+
+          // Build form elements.
+          form.entity = entity;
+          form.entity_type = entity_type;
+          //form.bundle = bundle; // @TODO we need the bundle here!
+          form.elements.submit = {
+            type: 'submit',
+            value: t('Save')
+          };
 
           // Grab this entity's field info instances.
           var instances = drupalgap_field_info_instances(
             entity_type,
             entity.type // @TODO support all entity type bundles, not just node content types
           );
-          console.log(drupalgap.field_info_instances);
-          console.log(instances);
+          //console.log(instances);
 
           // Render each field instance...
           for (var field_name in instances) {
             if (!instances.hasOwnProperty(field_name)) { continue; }
             var instance = instances[field_name];
+            console.log(instance);
+            var info = dg_field_info_field(field_name);
+            var module = instance.widget.module;
+            var cardinality = info.cardinality;
+            dpm(cardinality);
+
+            // Instantiate a form element for this field.
+            form[field_name] = {
+              field_name: field_name
+            };
+
+            // For each delta on the field...
+            var delta = 0;
+            while (delta !== null) {
+              dpm(delta);
+              delta = null; // break the loop.
+            }
+
+
 
             // Extract the drupalgap display mode and the module name in
             // charge of the field's formatter view hook.
@@ -2602,9 +2785,16 @@ angular.module('dgEntity', ['drupalgap'])
 
           }
 
+          // Place the form into the scope.
+          // @TODO placing the form directly into the scope without an id is going to be bad in the long run!
+          scope.form = form;
+
           // @TODO great place for a hook
 
-          element.replaceWith($compile(drupalgap_render(content))(scope));
+          //element.replaceWith($compile(dg_render(content))(scope));
+          element.append(dg_ng_compile_form($compile, scope));
+
+
         });
       }
     };
@@ -2629,6 +2819,18 @@ function dg_entity_page_edit(entity_type, entity_id) {
   }
   catch (error) { console.log('dg_entity_page_view - ' + error); }
 }
+
+
+/**
+ *
+ */
+function dg_entity_page_list(entity_type) {
+  try {
+    return '<p>' + entity_type + '</p>';
+  }
+  catch (error) { console.log('dg_entity_page_list - ' + error); }
+}
+
 
 /**
  * Given a field name, this will return its field info.
@@ -2851,14 +3053,8 @@ angular.module('dgSystem', ['drupalgap'])
 dgApp.directive("dgMain", function($compile, $injector) {
     return {
       link: function(scope, element) {
-        
-        // Compile the template for Angular and append it to the directive's
-        // html element.
-        var linkFn = $compile(
-          drupalgap_render(
-            menu_execute_active_handler($compile, $injector)
-          )
-        );
+
+        var linkFn = $compile(dg_render(menu_execute_active_handler($compile, $injector) ));
         var content = linkFn(scope);
         element.append(content);
 
@@ -2945,23 +3141,7 @@ function system_block_view(delta) {
 }
 
 
-angular.module('dgText', ['drupalgap'])
-.directive("textFieldFormatterView", function($compile) {
-    return {
-
-      controller: function($scope, drupal) {
-
-      },
-
-      link: function(scope, element, attrs) {
-
-        // Add the form to the element.
-        //element.append(dg_ng_compile_form($compile, scope));
-        element.append($compile(drupalgap_render('<p>TEXT FIELDING STILL!</p>'))(scope));
-      }
-
-    };
-});
+angular.module('dgText', ['drupalgap']);
 
 /**
  * Implements hook_field_formatter_view().
@@ -3071,6 +3251,7 @@ angular.module('dgUser', ['drupalgap'])
         });
 
         // Place the form into the scope.
+        // @TODO placing the form directly into the scope without an id is going to be bad in the long run!
         $scope.form = form;
 
       },
