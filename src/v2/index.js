@@ -21,7 +21,10 @@ var drupalgap = {
 angular.module('drupalgap', [])
   .value('drupalgapSettings', null)
   .service('dgConnect', ['$q', '$http', 'drupalSettings', dgConnect])
-  .service('dgOffline', ['$q', dgOffline]);
+  .service('dgOffline', ['$q', dgOffline])
+  /*.config(['drupalgapSettings', function(drupalgapSettings) {
+    drupalgap_onload(drupalgapSettings);
+  }])*/;
 
 // Create the app.
 var dgApp = angular.module('dgApp', dg_ng_dependencies());

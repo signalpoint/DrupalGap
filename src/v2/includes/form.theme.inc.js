@@ -19,8 +19,8 @@ function theme_password(variables) {
  */
 function theme_submit(variables) {
   try {
-    dpm('theme_submit');
-    console.log(variables);
+    //dpm('theme_submit');
+    //console.log(variables);
     variables.attributes.type = 'submit';
     var output = '<input ' + dg_attributes(variables.attributes) + ' />';
     return output;
@@ -37,7 +37,7 @@ function theme_textarea(variables) {
   try {
     var value = typeof variables.value !== 'undefined' ?
       variables.value : '';
-    return '<textarea ' + drupalgap_attributes(variables.attributes) + '>' +
+    return '<textarea ' + dg_attributes(variables.attributes) + '>' +
       value +
     '</textarea>';
   }

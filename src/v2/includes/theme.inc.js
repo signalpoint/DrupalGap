@@ -43,6 +43,29 @@ function theme(hook, variables) {
 }
 
 /**
+ * Themes a fieldset widget.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_fieldset(variables) {
+  try {
+    var title = typeof variables.title !== 'undefined' ?
+      variables.title : null;
+    var description = typeof variables.description !== 'undefined' ?
+      variables.description : null;
+    var children = typeof variables.children !== 'undefined' ?
+      variables.children : null;
+    var html = '<fieldset ' + dg_attributes(variables.attributes) + '>';
+    if (title) { html += '<legend><span class="fieldset-legend">' + title + '</span></legend>'; }
+    html += '<div class="fieldset-wrapper">';
+    if (description) { html += '<div class="fieldset-description">' + description + '</div>'; }
+    if (children) { html += dg_render(children); }
+    return html + '</div></fieldset>';
+  }
+  catch (error) { console.log('theme_fieldset - ' + error); }
+}
+
+/**
  * Themes a header widget.
  * @param {Object} variables
  * @return {String}
@@ -70,33 +93,76 @@ function theme_item_list(variables) {
   try {
     //dpm('theme_item_list');
     //console.log(variables);
-    // We'll theme an empty list unordered list by default, if there is a type
-    // of list specified we'll use that, and if there are some items we'll
-    // theme them too.
-    var type = 'ul';
-    if (variables.type) { type = variables.type; }
-    var html = '';
-    if (variables.title) { html += '<h2>' + variables.title + '</h2>'; }
-    html += '<' + type + ' ' +
-      dg_attributes(variables.attributes) + '>';
-    if (variables.items && variables.items.length > 0) {
-      var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
-        variables.attributes['data-role'] == 'listview';
-      for (var index in variables.items) {
-          if (!variables.items.hasOwnProperty(index)) { continue; }
-          var item = variables.items[index];
-          var icon = null;
-          html += '<li';
-          if (listview && (icon = $(item).attr('data-icon'))) {
-            // If we're in a listview and the item specifies an icon,
-            // add the icon attribute to the list item element.
-            html += ' data-icon="' + icon + '"';
-          }
-          html += '>' + item + '</li>';
-      }
+
+
+    var items = variables['items'];
+    var title = variables['title'];
+    var type = typeof variables['type'] !== 'undefined' ?
+      variables['type'] : 'ul';
+    var attributes = variables['attributes'];
+
+    // Only output the list container and title, if there are any list items.
+    // Check to see whether the block title exists before adding a header.
+    // Empty headers are not semantic and present accessibility challenges.
+    var output = '<div class="item-list">';
+    if (title && title != '') {
+      output += '<h3>' + title + '</h3>';
     }
-    html += '</' + type + '>';
-    return html;
+
+    if (!dg_empty(items)) {
+      output += '<' + type + ' ' + dg_attributes(attributes) + '>';
+      var num_items = items.length;
+      var i = 0;
+      for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
+        attributes = {
+          'class': '' // @TODO need to support arrays!
+        };
+        var children = [];
+        var data = '';
+        i++;
+        if ($.type(item) !== 'string') { // @TODO jQuery dependency here!
+          for (var key in item) {
+            if (!item.hasOwnProperty(key)) { continue; }
+            var value = item[key];
+            if (key == 'data') {
+              data = value;
+            }
+            else if (key == 'children') {
+              children = value;
+            }
+            else {
+              attributes[key] = value;
+            }
+          }
+        }
+        else {
+          data = item;
+        }
+        if (children.length > 0) {
+          // Render nested list.
+          data += theme_item_list({
+            items: children,
+            title: null,
+            type: type,
+            attributes: attributes
+          });
+        }
+        if (i == 1) {
+          //attributes ['class'][] = 'first';
+          attributes['class'] += ' first ';
+        }
+        if (i == num_items) {
+          //attributes ['class'][] = 'last';
+          attributes ['class'] += ' last ';
+        }
+        output += '<li ' + dg_attributes(attributes) + '>' + data + "</li>\n";
+      }
+      output += '</' + type + '>';
+    }
+    output += '</div>';
+    return output;
   }
   catch (error) { console.log('theme_item_list - ' + error); }
 }
@@ -175,11 +241,8 @@ function theme_link(variables) {
 
       // Is this link active?
       if (variables.path == dg_path_get()) {
-        if (variables.attributes['class'].indexOf('ui-btn-active') == -1) {
-          variables.attributes['class'] += ' ui-btn-active ';
-        }
-        if (variables.attributes['class'].indexOf('ui-state-persist') == -1) {
-          variables.attributes['class'] += ' ui-state-persist ';
+        if (variables.attributes['class'].indexOf('active') == -1) {
+          variables.attributes['class'] += ' active ';
         }
       }
 

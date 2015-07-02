@@ -75,6 +75,7 @@ angular.module('dgUser', ['drupalgap'])
         });
 
         // Place the form into the scope.
+        // @TODO placing the form directly into the scope without an id is going to be bad in the long run!
         $scope.form = form;
 
       },

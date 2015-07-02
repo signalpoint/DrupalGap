@@ -18,14 +18,8 @@ angular.module('dgSystem', ['drupalgap'])
 dgApp.directive("dgMain", function($compile, $injector) {
     return {
       link: function(scope, element) {
-        
-        // Compile the template for Angular and append it to the directive's
-        // html element.
-        var linkFn = $compile(
-          drupalgap_render(
-            menu_execute_active_handler($compile, $injector)
-          )
-        );
+
+        var linkFn = $compile(dg_render(menu_execute_active_handler($compile, $injector) ));
         var content = linkFn(scope);
         element.append(content);
 

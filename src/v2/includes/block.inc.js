@@ -79,7 +79,7 @@ function drupalgap_render_block(delta, block) {
       console.log('WARNING: ' + function_name + '() does not exist, so we are skipping this block: ' + delta);
       return '';
     }
-    return drupalgap_render(window[function_name](block.delta));
+    return dg_render(window[function_name](block.delta));
   }
   catch (error) { console.log('drupalgap_render_block - ' + error); }
 }

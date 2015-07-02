@@ -4,12 +4,12 @@
  * @param {String|Object|Array} output The html string or render array to render.
  * @return {String}
  */
-function drupalgap_render(content) {
+function dg_render(content) {
   try {
-    //dpm('drupalgap_render');
+    //dpm('dg_render');
     //console.log(content);
 
-    var type = $.type(content);
+    var type = $.type(content); // @TODO jQuery dependency here.
     if (type === 'string') { return content; }
     var html = '';
     if (type === 'object') {
@@ -19,12 +19,17 @@ function drupalgap_render(content) {
         if (!content.hasOwnProperty(index)) { continue; }
         var piece = content[index];
         var _type = $.type(piece);
-        if (_type === 'object') { html += drupalgap_render(piece); }
+        if (_type === 'object') { html += dg_render(piece); }
         else if (_type === 'array') {
           for (var i = 0; i < piece.length; i++) {
-            html += drupalgap_render(piece[i]);
+            html += dg_render(piece[i]);
           }
         }
+      }
+    }
+    else if (type === 'array') {
+      for (var i = 0; i < content.length; i++) {
+        html += dg_render(content[i]);
       }
     }
     return html;
@@ -144,6 +149,6 @@ function drupalgap_render(content) {
     // return it.
     return content;
   }
-  catch (error) { console.log('drupalgap_render - ' + error); }
+  catch (error) { console.log('dg_render - ' + error); }
 }
 

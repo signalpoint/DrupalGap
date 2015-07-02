@@ -222,6 +222,20 @@ function drupalgap_path_set(path) {
 }
 
 /**
+ * @see dg_render()
+ * @deprecated
+ * @param content
+ * @returns {String}
+ */
+function drupalgap_render(content) {
+  console.log(
+    'DEPRECATED - drupalgap_render(): use dg_render() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_render(content);
+}
+
+/**
  * @deprecated
  * @see dg_user_has_role()
  */

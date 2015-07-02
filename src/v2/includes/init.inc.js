@@ -16,6 +16,7 @@ dgApp.config(function(drupalgapSettings) {
 function drupalgap_onload(drupalgapSettings) {
   try {
     // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
+    // @TODO allow a developer mode to live sync the drupalgap.json contents using an api key
     var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
     for (var name in json) {
       if (!json.hasOwnProperty(name)) { continue; }

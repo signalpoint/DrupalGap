@@ -98,7 +98,7 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
             form.bundle
           );
       }
-      form.elements[name].is_field = element_is_field;
+      form.elements[name].is_field = element_is_field; // @TODO Drupal does not use this boolean flag at all.
       // Set the name property on the element if it isn't already set.
       if (!form.elements[name].name) { form.elements[name].name = name; }
       // If the element is a field, we'll append a language code and delta

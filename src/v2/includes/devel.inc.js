@@ -6,10 +6,8 @@
  */
 function dpm(data) {
   try {
-    // Show the caller name.
-    //var caller = arguments.callee.caller.name + '()';
-    //console.log(caller);
-    if (data) {
+
+    if (typeof data !== 'undefined') {
       if (typeof parent.window.ripple === 'function') {
         if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
           console.log(JSON.stringify(data));
@@ -19,12 +17,15 @@ function dpm(data) {
         }
       }
       else if (typeof data === 'object') { console.log(JSON.stringify(data)); }
+      if (data == '') { console.log('<empty-string>'); }
       else { console.log(data); }
     }
-    else {
-      if (data == '') { console.log('<empty-string>'); }
-      else { console.log('<null>'); }
-    }
+    else { console.log('<undefined>'); }
+
+    // Show the caller name.
+    //var caller = arguments.callee.caller.name + '()';
+    //console.log(caller);
+
   }
   catch (error) { console.log('dpm - ' + error); }
 }

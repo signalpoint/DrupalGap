@@ -72,11 +72,29 @@ function dg_admin_page() {
   var content = {};
   content['links'] = {
     theme: 'item_list',
-    items: [
+    items: [ // @TODO these links should be render arrays and theme_item_list should allow for render array items!
       l(t('Connect'), 'admin/connect'),
       l(t('Content'), 'admin/content')
     ]
   };
+  var entity_info = dg_entity_get_info();
+  for (var entity_type in entity_info) {
+    if (!entity_info.hasOwnProperty(entity_type)) { continue; }
+    var entity = entity_info[entity_type];
+    content[entity_type] = {
+      theme: 'fieldset',
+      title: entity.plural_label,
+      children: [
+        {
+          theme: 'item_list',
+          items: [
+            l('List', 'admin/' + entity_type) // @TODO should be a render array.
+          ]
+        }
+
+      ]
+    }
+  }
   return content;
 }
 
@@ -93,6 +111,7 @@ function dg_admin_connect_page() {
   var path = drupalSettings.site_path + drupalSettings.base_path + '?q=drupalgap/connect';
   $http.get(path).then(function(result) {
     if (result.status != 200) { return; }
+    console.log(result.data);
     dg_ng_get('scope').dg_connect = JSON.stringify(result.data);
   });
   return content;
@@ -110,6 +129,3 @@ function dg_admin_content_page() {
     console.log('dg_admin_content_page - ' + error);
   }
 }
-
-
-

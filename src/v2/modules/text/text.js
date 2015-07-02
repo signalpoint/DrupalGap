@@ -1,20 +1,4 @@
-angular.module('dgText', ['drupalgap'])
-.directive("textFieldFormatterView", function($compile) {
-    return {
-
-      controller: function($scope, drupal) {
-
-      },
-
-      link: function(scope, element, attrs) {
-
-        // Add the form to the element.
-        //element.append(dg_ng_compile_form($compile, scope));
-        element.append($compile(drupalgap_render('<p>TEXT FIELDING STILL!</p>'))(scope));
-      }
-
-    };
-});
+angular.module('dgText', ['drupalgap']);
 
 /**
  * Implements hook_field_formatter_view().
