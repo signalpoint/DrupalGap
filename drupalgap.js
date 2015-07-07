@@ -1,4 +1,4 @@
-/*! drupalgap 2015-07-02 */
+/*! drupalgap 2015-07-07 */
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
@@ -23,9 +23,15 @@ angular.module('drupalgap', [])
   .value('drupalgapSettings', null)
   .service('dgConnect', ['$q', '$http', 'drupalSettings', dgConnect])
   .service('dgOffline', ['$q', dgOffline])
-  /*.config(['drupalgapSettings', function(drupalgapSettings) {
-    drupalgap_onload(drupalgapSettings);
-  }])*/;
+  .config(function() {
+     // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
+     // @TODO allow a developer mode to live sync the drupalgap.json contents using an api key
+     var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
+     for (var name in json) {
+       if (!json.hasOwnProperty(name)) { continue; }
+       drupalgap[name] = json[name];
+     }
+  });
 
 // Create the app.
 var dgApp = angular.module('dgApp', dg_ng_dependencies());
@@ -1589,13 +1595,6 @@ dgApp.config(function(drupalgapSettings) {
  */
 function drupalgap_onload(drupalgapSettings) {
   try {
-    // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
-    // @TODO allow a developer mode to live sync the drupalgap.json contents using an api key
-    var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
-    for (var name in json) {
-      if (!json.hasOwnProperty(name)) { continue; }
-      drupalgap[name] = json[name];
-    }
     drupalgap_load_blocks(drupalgapSettings);
     drupalgap_load_menus(drupalgapSettings);
   }
@@ -2458,60 +2457,7 @@ angular.module('dgAdmin', ['drupalgap'])
           controller: 'dg_page_controller',
           page_callback: 'dg_admin_connect_page'
       });
-    $routeProvider.when('/admin/content', {
-      templateUrl: 'themes/spi/page.tpl.html',
-      controller: 'dg_page_controller',
-      page_callback: 'dg_admin_content_page'
-    });
-}])
-  .directive('dgAdminContentPage', function($compile) {
-    return {
-      controller: function($scope, drupal) {
-        $scope.dg_admin = {
-          content: drupal.node_index()
-        };
-      },
-      link: function(scope, element, attrs) {
-        scope.dg_admin.content.then(function(nodes) {
-          var html = '';
-          var rows = [];
-          for (var i in nodes) {
-            var node = nodes[i];
-            rows.push([
-              l(t(node.title), 'node/' + node.nid),
-              node.type,
-              l(node.uid, 'user/' + node.uid),
-              node.status,
-              node.changed,
-              theme('item_list', {
-                items: [
-                  l(t('edit'), 'node/' + node.nid + '/edit'),
-                  l(t('delete'), null)
-                ]
-              })
-            ]);
-          }
-          html += theme('table', {
-            header: [
-              { data: t('Title') },
-              { data: t('Type') },
-              { data: t('Author') },
-              { data: t('Status') },
-              { data: t('Updated') },
-              { data: t('Operations') },
-            ],
-            rows: rows,
-            attributes: {
-              'class': 'table' /* @TODO this is bootstrap specific */
-            }
-          });
-          var linkFn = $compile(html);
-          var content = linkFn(scope);
-          element.append(content);
-        });
-      }
-    };
-  });
+}]);
 
 function dg_admin_page() {
   var content = {};
@@ -2562,38 +2508,20 @@ function dg_admin_connect_page() {
   return content;
 }
 
-function dg_admin_content_page() {
-  try {
-    var content = {};
-    content['nodes'] = {
-      markup: '<dg-admin-content-page></dg-admin-content-page>'
-    };
-    return content;
-  }
-  catch (error) {
-    console.log('dg_admin_content_page - ' + error);
-  }
-}
-
 angular.module('dgEntity', ['drupalgap'])
 
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {
 
-    // @TODO we don't have access to this because this config runs before the app's config,
-    // maybe if we change it to a const instead of a value.
-    //var entity_types = dg_entity_types();
-    var entity_types = drupal_entity_types();
+    var entity_types = dg_entity_types();
     console.log(entity_types);
       
       // Add routes to view and edit entities.
       for (var i = 0; i < entity_types.length; i++) {
 
         var entity_type = entity_types[i];
-        // @TODO no access to entity type info yet! See above...
-        //var entity = dg_entity_get_info(entity_type);
-        //var route = '/' + entity_type + '/:' + entity.entity_keys.id;
-        var route = '/' + entity_type + '/:' + drupal_entity_primary_key(entity_type);
+        var entity = dg_entity_get_info(entity_type);
+        var route = '/' + entity_type + '/:' + entity.entity_keys.id;
 
         // View.
         $routeProvider.when(route, {
@@ -2621,6 +2549,7 @@ angular.module('dgEntity', ['drupalgap'])
           page_callback: 'dg_entity_page_list',
           page_arguments: [1]
         });
+
       }
       
 }])
@@ -2798,6 +2727,84 @@ angular.module('dgEntity', ['drupalgap'])
         });
       }
     };
+  })
+  .directive('entityList', function($compile, drupal) {
+    return {
+      controller: function($scope) {
+        var entity_type = arg(1);
+        $scope.entity_type = entity_type;
+        $scope.loading++;
+        $scope.entity_index = {
+          entities: drupal[entity_type + '_index']()
+        };
+      },
+      link: function(scope, element, attrs) {
+        scope.entity_index.entities.then(function (entities) {
+          scope.loading--;
+
+          var entity_type = attrs['entityType'];
+
+          // If someone is providing an index page for this entity type use it.
+          var fn = window[entity_type + '_index_page'];
+          if (dg_function_exists(fn)) {
+            var linkFn = $compile(dg_render(fn(entities)));
+            var content = linkFn(scope);
+            element.append(content);
+            return;
+          }
+
+          // Nobody is providing a listing page for this entity type, let's
+          // spit out a generic index listing for the entity type.
+
+          var entity_info = dg_entity_get_info(entity_type);
+
+          var rows = [];
+          for (var index in entities) {
+            if (!entities.hasOwnProperty(index)) { continue; }
+            var entity = entities[index];
+
+            rows.push([
+              l(t(entity[entity_info.entity_keys.label]), entity_type + '/' + entity[entity_info.entity_keys.id]),
+              theme('item_list', {
+                items: [
+                  l(t('edit'), entity_type + '/' + entity[entity_info.entity_keys.id] + '/edit'),
+                  l(t('delete'), null)
+                ]
+              })
+            ]);
+
+          }
+
+          var content = {};
+
+          content['label'] = {
+            markup: '<h2>' + t(entity_info.plural_label) + '</h2>'
+          };
+
+          content['entities'] = {
+            theme: 'table',
+            header: [
+              { data: t(entity_info.label) },
+              { data: t('Operations') }
+            ],
+            rows: rows,
+            attributes: {
+              'class': 'table' /* @TODO this is bootstrap specific */
+            }
+          };
+
+          var linkFn = $compile(dg_render(content));
+          var content = linkFn(scope);
+          element.append(content);
+
+
+
+
+        });
+
+
+      }
+    };
   });
 
 /**
@@ -2826,11 +2833,11 @@ function dg_entity_page_edit(entity_type, entity_id) {
  */
 function dg_entity_page_list(entity_type) {
   try {
-    return '<p>' + entity_type + '</p>';
+    // @NOTE - entity_type gets converted to entityType in Angular's eyes.
+    return '<entity-list entity_type="' + entity_type + '"></entity-list>';
   }
   catch (error) { console.log('dg_entity_page_list - ' + error); }
 }
-
 
 /**
  * Given a field name, this will return its field info.
@@ -3030,6 +3037,50 @@ function menu_block_view(delta) {
     };
   }
   catch (error) { console.log('menu_block_view - ' + error); }
+}
+
+/**
+ *
+ */
+function node_index_page(nodes) {
+  try {
+    var html = '';
+    var rows = [];
+    for (var i in nodes) {
+      var node = nodes[i];
+      rows.push([
+        l(t(node.title), 'node/' + node.nid),
+        node.type,
+        l(node.uid, 'user/' + node.uid),
+        node.status,
+        node.changed,
+        theme('item_list', {
+          items: [
+            l(t('edit'), 'node/' + node.nid + '/edit'),
+            l(t('delete'), null)
+          ]
+        })
+      ]);
+    }
+    html += theme('table', {
+      header: [
+        { data: t('Title') },
+        { data: t('Type') },
+        { data: t('Author') },
+        { data: t('Status') },
+        { data: t('Updated') },
+        { data: t('Operations') },
+      ],
+      rows: rows,
+      attributes: {
+        'class': 'table' /* @TODO this is bootstrap specific */
+      }
+    });
+    return html;
+  }
+  catch (error) {
+    console.log('node_index_page - ' + error);
+  }
 }
 
 
