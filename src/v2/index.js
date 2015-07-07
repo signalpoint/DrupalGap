@@ -22,9 +22,15 @@ angular.module('drupalgap', [])
   .value('drupalgapSettings', null)
   .service('dgConnect', ['$q', '$http', 'drupalSettings', dgConnect])
   .service('dgOffline', ['$q', dgOffline])
-  /*.config(['drupalgapSettings', function(drupalgapSettings) {
-    drupalgap_onload(drupalgapSettings);
-  }])*/;
+  .config(function() {
+     // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
+     // @TODO allow a developer mode to live sync the drupalgap.json contents using an api key
+     var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
+     for (var name in json) {
+       if (!json.hasOwnProperty(name)) { continue; }
+       drupalgap[name] = json[name];
+     }
+  });
 
 // Create the app.
 var dgApp = angular.module('dgApp', dg_ng_dependencies());

@@ -3,20 +3,15 @@ angular.module('dgEntity', ['drupalgap'])
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {
 
-    // @TODO we don't have access to this because this config runs before the app's config,
-    // maybe if we change it to a const instead of a value.
-    //var entity_types = dg_entity_types();
-    var entity_types = drupal_entity_types();
+    var entity_types = dg_entity_types();
     console.log(entity_types);
       
       // Add routes to view and edit entities.
       for (var i = 0; i < entity_types.length; i++) {
 
         var entity_type = entity_types[i];
-        // @TODO no access to entity type info yet! See above...
-        //var entity = dg_entity_get_info(entity_type);
-        //var route = '/' + entity_type + '/:' + entity.entity_keys.id;
-        var route = '/' + entity_type + '/:' + drupal_entity_primary_key(entity_type);
+        var entity = dg_entity_get_info(entity_type);
+        var route = '/' + entity_type + '/:' + entity.entity_keys.id;
 
         // View.
         $routeProvider.when(route, {
@@ -44,6 +39,7 @@ angular.module('dgEntity', ['drupalgap'])
           page_callback: 'dg_entity_page_list',
           page_arguments: [1]
         });
+
       }
       
 }])
@@ -221,6 +217,84 @@ angular.module('dgEntity', ['drupalgap'])
         });
       }
     };
+  })
+  .directive('entityList', function($compile, drupal) {
+    return {
+      controller: function($scope) {
+        var entity_type = arg(1);
+        $scope.entity_type = entity_type;
+        $scope.loading++;
+        $scope.entity_index = {
+          entities: drupal[entity_type + '_index']()
+        };
+      },
+      link: function(scope, element, attrs) {
+        scope.entity_index.entities.then(function (entities) {
+          scope.loading--;
+
+          var entity_type = attrs['entityType'];
+
+          // If someone is providing an index page for this entity type use it.
+          var fn = window[entity_type + '_index_page'];
+          if (dg_function_exists(fn)) {
+            var linkFn = $compile(dg_render(fn(entities)));
+            var content = linkFn(scope);
+            element.append(content);
+            return;
+          }
+
+          // Nobody is providing a listing page for this entity type, let's
+          // spit out a generic index listing for the entity type.
+
+          var entity_info = dg_entity_get_info(entity_type);
+
+          var rows = [];
+          for (var index in entities) {
+            if (!entities.hasOwnProperty(index)) { continue; }
+            var entity = entities[index];
+
+            rows.push([
+              l(t(entity[entity_info.entity_keys.label]), entity_type + '/' + entity[entity_info.entity_keys.id]),
+              theme('item_list', {
+                items: [
+                  l(t('edit'), entity_type + '/' + entity[entity_info.entity_keys.id] + '/edit'),
+                  l(t('delete'), null)
+                ]
+              })
+            ]);
+
+          }
+
+          var content = {};
+
+          content['label'] = {
+            markup: '<h2>' + t(entity_info.plural_label) + '</h2>'
+          };
+
+          content['entities'] = {
+            theme: 'table',
+            header: [
+              { data: t(entity_info.label) },
+              { data: t('Operations') }
+            ],
+            rows: rows,
+            attributes: {
+              'class': 'table' /* @TODO this is bootstrap specific */
+            }
+          };
+
+          var linkFn = $compile(dg_render(content));
+          var content = linkFn(scope);
+          element.append(content);
+
+
+
+
+        });
+
+
+      }
+    };
   });
 
 /**
@@ -249,8 +323,8 @@ function dg_entity_page_edit(entity_type, entity_id) {
  */
 function dg_entity_page_list(entity_type) {
   try {
-    return '<p>' + entity_type + '</p>';
+    // @NOTE - entity_type gets converted to entityType in Angular's eyes.
+    return '<entity-list entity_type="' + entity_type + '"></entity-list>';
   }
   catch (error) { console.log('dg_entity_page_list - ' + error); }
 }
-
