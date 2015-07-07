@@ -13,6 +13,20 @@ angular.module('dgEntity', ['drupalgap'])
         var entity = dg_entity_get_info(entity_type);
         var route = '/' + entity_type + '/:' + entity.entity_keys.id;
 
+        // Add.
+        $routeProvider.when('/' + entity_type + '/add', {
+          templateUrl: 'themes/spi/page.tpl.html',
+          controller: 'dg_page_controller',
+          page_callback: 'dg_entity_page_add',
+          page_arguments: [0]
+        });
+        $routeProvider.when('/' + entity_type + '/add/:bundle', {
+          templateUrl: 'themes/spi/page.tpl.html',
+          controller: 'dg_page_controller',
+          page_callback: 'dg_entity_page_edit',
+          page_arguments: [0, 2]
+        });
+
         // View.
         $routeProvider.when(route, {
             templateUrl: 'themes/spi/page.tpl.html',
@@ -20,9 +34,6 @@ angular.module('dgEntity', ['drupalgap'])
             page_callback: 'dg_entity_page_view',
             page_arguments: [0, 1]
         });
-
-        // Add.
-        // @TODO
 
         // Edit.
         $routeProvider.when(route + '/edit', {
@@ -122,99 +133,39 @@ angular.module('dgEntity', ['drupalgap'])
       controller: function($scope) {
         var entity_type = arg(0);
         var entity_id = arg(1);
+        var is_new = entity_id == 'add' ? true : false;
         $scope.entity_type = entity_type;
-        //$scope.bundle = null; // @TODO we need the bundle here!
-        $scope.entity_id = entity_id;
-        $scope.loading++;
-        $scope.entity_load = {
-          entity: drupal[entity_type + '_load'](entity_id)
-        };
+        $scope.bundle = is_new ? arg(2) : null;
+
+        // Existing entity.
+        if (!is_new) {
+          $scope.entity_id = entity_id;
+          $scope.loading++;
+          $scope.entity_load = {
+            entity: drupal[entity_type + '_load'](entity_id)
+          };
+          return;
+        }
+
       },
       //replace: true,
       link: function(scope, element, attrs) {
+
+        // New entity.
+        if (!scope.entity_load) {
+          dg_entity_form_builder($compile, scope, element, null);
+          return;
+        }
+
+        // Existing entity.
         scope.entity_load.entity.then(function (entity) {
           //console.log(scope);
-          console.log(entity);
-
+          //console.log(entity);
           scope.loading--;
-
-          var entity_type = scope.entity_type;
-          //var bundle = scope.bundle; // @TODO we need the bundle here!
-
-          // Set up form defaults.
-          var form = dg_form_defaults(entity_type + "_edit_form", scope);
-
-          // Build form elements.
-          form.entity = entity;
-          form.entity_type = entity_type;
-          //form.bundle = bundle; // @TODO we need the bundle here!
-          form.elements.submit = {
-            type: 'submit',
-            value: t('Save')
-          };
-
-          // Grab this entity's field info instances.
-          var instances = drupalgap_field_info_instances(
-            entity_type,
-            entity.type // @TODO support all entity type bundles, not just node content types
-          );
-          //console.log(instances);
-
-          // Render each field instance...
-          for (var field_name in instances) {
-            if (!instances.hasOwnProperty(field_name)) { continue; }
-            var instance = instances[field_name];
-            console.log(instance);
-            var info = dg_field_info_field(field_name);
-            var module = instance.widget.module;
-            var cardinality = info.cardinality;
-            dpm(cardinality);
-
-            // Instantiate a form element for this field.
-            form[field_name] = {
-              field_name: field_name
-            };
-
-            // For each delta on the field...
-            var delta = 0;
-            while (delta !== null) {
-              dpm(delta);
-              delta = null; // break the loop.
-            }
-
-
-
-            // Extract the drupalgap display mode and the module name in
-            // charge of the field's formatter view hook.
-            /*var display = instance.display.drupalgap;
-            var module = display.module;
-            var hook = module + '_field_widget_form';*/
-
-            // Invoke the hook_field_widget_form(), if it exists.
-            //if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
-            /*content[field_name] = window[hook](
-              entity_type,
-              entity,
-              dg_field_info_field(field_name),
-              instance,
-              entity.language,
-              entity[field_name][entity.language],
-              display
-            );*/
-
-          }
-
-          // Place the form into the scope.
-          // @TODO placing the form directly into the scope without an id is going to be bad in the long run!
-          scope.form = form;
-
-          // @TODO great place for a hook
-
-          //element.replaceWith($compile(dg_render(content))(scope));
-          element.append(dg_ng_compile_form($compile, scope));
-
-
+          scope.bundle = entity.type; // @TODO support all entity types!
+          dg_entity_form_builder($compile, scope, element, entity);
         });
+
       }
     };
   })
@@ -244,7 +195,7 @@ angular.module('dgEntity', ['drupalgap'])
           }
 
           // Nobody is providing a listing page for this entity type, let's
-          // spit out a generic index listing for the entity type.
+          // spit out a generic table listing for the entity type's index....
 
           var entity_info = dg_entity_get_info(entity_type);
 
@@ -266,11 +217,9 @@ angular.module('dgEntity', ['drupalgap'])
           }
 
           var content = {};
-
           content['label'] = {
             markup: '<h2>' + t(entity_info.plural_label) + '</h2>'
           };
-
           content['entities'] = {
             theme: 'table',
             header: [
@@ -300,11 +249,122 @@ angular.module('dgEntity', ['drupalgap'])
 /**
  *
  */
+function dg_entity_form_builder($compile, scope, element, entity) {
+  try {
+    var entity_type = scope.entity_type;
+    var bundle = scope.bundle;
+
+    // Set up form defaults.
+    var form = dg_form_defaults(entity_type + "_edit_form", scope);
+
+    // Build form elements.
+    form.entity = entity;
+    form.entity_type = entity_type;
+    form.bundle = bundle;
+    form.elements.submit = {
+      type: 'submit',
+      value: t('Save')
+    };
+
+    // Grab this entity's field info instances.
+    var instances = drupalgap_field_info_instances(
+      entity_type,
+      bundle
+    );
+    console.log(instances);
+
+    // Render each field instance...
+    for (var field_name in instances) {
+      if (!instances.hasOwnProperty(field_name)) { continue; }
+      var instance = instances[field_name];
+      console.log(instance);
+      var info = dg_field_info_field(field_name);
+      var module = instance.widget.module;
+      var cardinality = info.cardinality;
+      //dpm(cardinality);
+
+      // Instantiate a form element for this field.
+      form[field_name] = {
+        field_name: field_name
+      };
+
+      // For each delta on the field...
+      var delta = 0;
+      while (delta !== null) {
+        //dpm(delta);
+        delta = null; // break the loop.
+      }
+
+
+
+      // Extract the drupalgap display mode and the module name in
+      // charge of the field's formatter view hook.
+      /*var display = instance.display.drupalgap;
+       var module = display.module;
+       var hook = module + '_field_widget_form';*/
+
+      // Invoke the hook_field_widget_form(), if it exists.
+      //if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
+      /*content[field_name] = window[hook](
+       entity_type,
+       entity,
+       dg_field_info_field(field_name),
+       instance,
+       entity.language,
+       entity[field_name][entity.language],
+       display
+       );*/
+
+    }
+
+    // Place the form into the scope.
+    // @TODO placing the form directly into the scope without an id is going to be bad in the long run!
+    scope.form = form;
+
+    // @TODO great place for a hook
+
+    //element.replaceWith($compile(dg_render(content))(scope));
+    element.append(dg_ng_compile_form($compile, scope));
+  }
+  catch (error) {
+    console.log('dg_entity_form_builder - ' + error);
+  }
+}
+
+/**
+ *
+ */
 function dg_entity_page_view(entity_type, entity_id) {
   try {
     return '<entity-view></entity-view>';
   }
   catch (error) { console.log('dg_entity_page_view - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_entity_page_add(entity_type) {
+  try {
+    var entity_info = dg_entity_get_info(entity_type);
+    console.log(entity_info);
+    var content = {};
+    var items = [];
+    for (var bundle in entity_info.bundles) {
+      if (!entity_info.bundles.hasOwnProperty(bundle)) { continue; }
+      var bundle_object = entity_info.bundles[bundle];
+      items.push(l(t(bundle_object.label), entity_type + '/add/' + bundle));
+    }
+    content['bundles'] = {
+      theme: 'item_list',
+      items: items,
+      title: t('Create ' + entity_info.label)
+    };
+    return content;
+  }
+  catch (error) {
+    console.log('dg_entity_page_add - ' + error);
+  }
 }
 
 /**

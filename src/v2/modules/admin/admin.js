@@ -18,10 +18,10 @@ angular.module('dgAdmin', ['drupalgap'])
 function dg_admin_page() {
   var content = {};
   content['links'] = {
+    title: t('DrupalGap'),
     theme: 'item_list',
     items: [ // @TODO these links should be render arrays and theme_item_list should allow for render array items!
-      l(t('Connect'), 'admin/connect'),
-      l(t('Content'), 'admin/content')
+      l(t('Connect'), 'admin/connect')
     ]
   };
   var entity_info = dg_entity_get_info();
@@ -35,7 +35,8 @@ function dg_admin_page() {
         {
           theme: 'item_list',
           items: [
-            l('List', 'admin/' + entity_type) // @TODO should be a render array.
+            l(t('List'), 'admin/' + entity_type), // @TODO should be a render array
+            l(t('Add'), entity_type + '/add'), // @TODO should be a render array
           ]
         }
 
