@@ -4755,6 +4755,10 @@ function _drupalgap_back_exit(button) {
 
 $(window).on('navigate', function(event, data) {
 
+    // If we're already moving backwards (aka from a "soft" back button click),
+    // then don't do anything.
+    if (drupalgap.back) { return; }
+
     // In web-app mode, clicking the back button on your browser (or Android
     // device browser), does not actually fire drupalgap_back(), so we mimic
     // it here, but skip the history.back() call because that's already
@@ -8548,7 +8552,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
                              // figure out how to handle the 'add another
                              // item' feature.
           }
-          if (entity && entity[name] && entity[name].length != 0) {
+          if (entity && entity[name] && entity[name].length != 0 && entity[name][language]) {
             for (var delta = 0; delta < cardinality; delta++) {
               // @TODO - is this where we need to use the idea of the
               // value_callback property present in Drupal's FAPI? That way
@@ -9389,6 +9393,8 @@ function image_form_alter(form, form_state, form_id) {
  */
 function image_style_url(style_name, path) {
   try {
+    // @TODO - bug: the trailing slash on public and private is breaking images
+    // that don't live in a sub directory in sites/default/files.
     var src =
       Drupal.settings.site_path + Drupal.settings.base_path + path;
     if (src.indexOf('public://') != -1) {
@@ -13732,8 +13738,12 @@ function theme_views_view(variables) {
     }
 
     // Append the rendered rows and the pager to the html string according to
-    // the pager position.
-    if (pager_pos == 'top') {
+    // the pager position, unless the views infinite scroll module is enabled,
+    // then no pager at all.
+    // @TODO having this special case for views_infinite_scroll is a hack, we
+    // obviously need a hook or something around here...
+    if (module_exists('views_infinite_scroll')) { html += rows; }
+    else if (pager_pos == 'top') {
       html += pager;
       if (!empty(pager)) { html += theme('views_spacer', null); }
       html += rows;
@@ -13795,7 +13805,12 @@ function theme_pager(variables) {
       // navbar container for the pager. If we don't have one, generate a random
       // one.
       var id = 'theme_pager_' + user_password();
-      html += '<div id="' + id + '" data-role="navbar">' + theme('item_list', {
+      var attrs = {
+        id: id,
+        'class': 'pager',
+        'data-role': 'navbar'
+      };
+      html += '<div ' + drupalgap_attributes(attrs) + '>' + theme('item_list', {
           items: items
       }) + '</div>' +
       '<script type="text/javascript">' +

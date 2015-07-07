@@ -284,6 +284,8 @@ function image_form_alter(form, form_state, form_id) {
  */
 function image_style_url(style_name, path) {
   try {
+    // @TODO - bug: the trailing slash on public and private is breaking images
+    // that don't live in a sub directory in sites/default/files.
     var src =
       Drupal.settings.site_path + Drupal.settings.base_path + path;
     if (src.indexOf('public://') != -1) {
