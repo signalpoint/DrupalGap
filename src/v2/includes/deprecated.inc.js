@@ -52,6 +52,28 @@ function drupalgap_field_info_field(field_name) {
 
 /**
  * @deprecated
+ */
+function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
+  console.log(
+    'DEPRECATED - drupalgap_field_info_instance(): use dg_field_info_instance() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_field_info_instance(entity_type, field_name, bundle_name)
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_field_info_instances(entity_type, bundle_name) {
+  console.log(
+    'DEPRECATED - drupalgap_field_info_instances(): use dg_field_info_instances() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_field_info_instances(entity_type, bundle_name);
+}
+
+/**
+ * @deprecated
  * @see dg_file_exists()
  */
 function drupalgap_file_exists(path) {

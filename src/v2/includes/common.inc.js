@@ -145,7 +145,9 @@ function dg_kill_camel_case(str, separator) {
  */
 function dg_language_default() {
   try {
+    dpm('dg_language_default');
     var drupalSettings = dg_ng_get('drupalSettings');
+    console.log(drupalSettings);
     return typeof drupalSettings.language !== 'undefined' ?
       drupalSettings.language : 'und';
   }

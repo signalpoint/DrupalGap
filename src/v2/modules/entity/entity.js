@@ -267,7 +267,7 @@ function dg_entity_form_builder($compile, scope, element, entity) {
     };
 
     // Grab this entity's field info instances.
-    var instances = drupalgap_field_info_instances(
+    var instances = dg_field_info_instances(
       entity_type,
       bundle
     );
@@ -279,13 +279,21 @@ function dg_entity_form_builder($compile, scope, element, entity) {
       var instance = instances[field_name];
       console.log(instance);
       var info = dg_field_info_field(field_name);
+      console.log(info);
       var module = instance.widget.module;
       var cardinality = info.cardinality;
-      //dpm(cardinality);
 
       // Instantiate a form element for this field.
-      form[field_name] = {
-        field_name: field_name
+      var element_theme = cardinality == '1' ? null : 'field_multiple_value_form';
+      form.elements[field_name] = {
+        type: 'container',
+        field_name: field_name,
+        entity_type: entity_type,
+        bundle: bundle,
+        language: 'und', // @TODO hard coded language here
+        und: [{  // @TODO hard coded language here
+          theme: element_theme
+        }]
       };
 
       // For each delta on the field...

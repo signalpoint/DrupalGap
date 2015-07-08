@@ -3,6 +3,8 @@
  */
 function drupalgap_form_render_elements(form) {
   try {
+    dpm('drupalgap_form_render_elements');
+    console.log(form);
     var html = '';
     if (!form.elements) { return html; }
     for (var name in form.elements) {
@@ -19,28 +21,126 @@ function drupalgap_form_render_elements(form) {
  */
 function drupalgap_form_render_element(form, element) {
   try {
+    //dpm('drupalgap_form_render_element');
+    //console.log(form);
+    console.log(element.name);
+    console.log(element);
+
     // Preprocess element if necessary...
+
     // @TODO great spot for a hook.
-    
-    // Submit button.
-    if (element.type == 'submit') {
-      element.attributes['class'] += ' dg_form_submit_button ';
-      if (typeof element.attributes['data-ng-click'] === 'undefined') {
-        element.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
+
+
+    // There are two main "types" of form elements, "flat" elements like node title
+    // and node id, and many typical elements created on custom forms. Then there
+    // are "field" elements like a node body provided by Drupal's entity system.
+    // Flat elements will be rendered as is through the dg theme layer, field elements
+    // will be passed along to their hook_field_widget_form() implementer.
+
+    // FLAT ELEMENTS
+    if (typeof element.field_name === 'undefined') {
+
+      // Submit button.
+      if (element.type == 'submit') {
+        element.attributes['class'] += ' dg_form_submit_button ';
+        if (typeof element.attributes['data-ng-click'] === 'undefined') {
+          element.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
+        }
+        if (typeof element.attributes['value'] === 'undefined' && element.value) {
+          element.attributes['value'] = element.value;
+        }
       }
-      if (typeof element.attributes['value'] === 'undefined' && element.value) {
-        element.attributes['value'] = element.value;
+      else {
+        // All other elements should have an ng-model attached, which allows the
+        // form state values to be properly assembled and ready for validation and
+        // submission handlers.
+        if (typeof element.attributes['ng-model'] === 'undefined') {
+          element.attributes['ng-model'] = "form_state['values']['" + element.name + "']";
+        }
       }
+
+      return theme('form_element', { element: element });
+
     }
+
+    // FIELD ELEMENTS
     else {
-      // All other elements should have an ng-model attached, which allows the
-      // form state values to be properly assembled and ready for validation and
-      // submission handlers.
-      if (typeof element.attributes['ng-model'] === 'undefined') {
-        element.attributes['ng-model'] = "form_state['values']['" + element.name + "']";
+
+      console.log(form.entity);
+
+      var language = form.entity ? form.entity.language : dg_language_default();
+      dpm(language);
+
+      // Determine the hook_field_widget_form().
+      var hook = element.field_info_instance.widget.module + '_field_widget_form';
+      if (!dg_function_exists(hook)) {
+        console.log(hook + '() is missing!');
+        return '';
       }
+
+      // Prepare the container children and element items, if any.
+      var children = '';
+      var items = null;
+      if (form.entity) { items = form.entity[element.name][language]; }
+
+      // Field label.
+      children += theme('form_element_label', { element: element });
+
+      // New entity.
+      if (!items) {
+        var delta = 0;
+        element = window[hook](
+          form,
+          null, // form_state
+          element.field_info_field, // field
+          element.field_info_instance, // instance
+          language,
+          null, // items
+          delta, // delta
+          {
+            attributes: {
+              id: form.elements[element.name].attributes.id + '-' + language + '-' + delta + '-value',
+              name: form.elements[element.name].attributes.name + '[' + language + '][' + delta + '][value]'
+              // @TODO ng-model goes here, probably
+            }
+          } // element
+        );
+        console.log(element);
+        children += theme(element.type, element);
+      }
+
+      // Existing entity.
+      else {
+
+        for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
+          dpm(delta);
+          console.log(item);
+          element = window[hook](
+            form,
+            null, // form_state
+            element.field_info_field, // field
+            element.field_info_instance, // instance
+            language,
+            items, // items
+            delta, // delta
+            element // element
+          );
+          children += theme(element.type, element);
+        }
+      }
+
+      return theme('container', {
+        element: {
+          children: children
+        }
+      });
+
     }
-    return theme('form_element', { element: element });
+    
+
+
   }
   catch (error) { console.log('drupalgap_form_render_element - ' + error); }
 }
@@ -84,23 +184,51 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
     for (var name in form.elements) {
       if (!form.elements.hasOwnProperty(name)) { continue; }
       var element = form.elements[name];
-      // If this element is a field, load its field_info_field and
-      // field_info_instance onto the element.
-      var element_is_field = false;
-      var field_info_field = dg_field_info_field(name);
-      if (field_info_field) {
-        element_is_field = true;
-        form.elements[name].field_info_field = field_info_field;
-        form.elements[name].field_info_instance =
-          drupalgap_field_info_instance(
-            form.entity_type,
-            name,
-            form.bundle
-          );
+      var element_is_field = typeof element.field_name !== 'undefined' ? true : false;
+
+      if (!element.attributes) {
+        form.elements[name].attributes = { };
       }
-      form.elements[name].is_field = element_is_field; // @TODO Drupal does not use this boolean flag at all.
-      // Set the name property on the element if it isn't already set.
-      if (!form.elements[name].name) { form.elements[name].name = name; }
+      id = dg_form_get_element_id(name, form.id);
+      form.elements[name].id = id;
+      form.elements[name].name = name;
+      form.elements[name].attributes.id = id;
+
+      // Flat elements.
+      if (!element_is_field) {
+
+      }
+
+      // Field elements.
+      else {
+
+        // Load its field_info_field and field_info_instance onto the element.
+        form.elements[name].field_info_field = dg_field_info_field(name);
+        form.elements[name].field_info_instance = dg_field_info_instance(
+          form.entity_type,
+          name,
+          form.bundle
+        );
+
+        // Set the title property on the element if it isn't already set.
+        if (!form.elements[name].title) {
+          form.elements[name].title = t(form.elements[name].field_info_instance.label);
+        }
+
+      }
+
+      continue;
+
+
+
+
+
+
+
+      //form.elements[name].is_field = element_is_field; // @TODO Drupal does not use this boolean flag at all.
+
+
+
       // If the element is a field, we'll append a language code and delta
       // value to the element id, along with the field items appended
       // onto the element using the language code and delta values.
@@ -138,16 +266,6 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
           }
         }
       }
-      else {
-        // This element is not a field, setup default options if none
-        // have been provided. Then set the element id.
-        if (!element.attributes) {
-          form.elements[name].attributes = { };
-        }
-        id = dg_form_get_element_id(name, form.id);
-        form.elements[name].id = id;
-        form.elements[name].attributes.id = id;
-      }
     }
   }
   catch (error) { console.log('dg_form_element_set_empty_options_and_attributes - ' + error); }
@@ -167,7 +285,7 @@ function dg_form_get_element_id(name, form_id) {
     if (name == null || name == '') { return ''; }
     var id =
       'edit-' +
-      form_id.toLowerCase().replace(/_/g, '-') + '-' +
+      //form_id.toLowerCase().replace(/_/g, '-') + '-' +
       name.toLowerCase().replace(/_/g, '-');
     // Any language code to append to the id?
     if (arguments[2]) { id += '-' + arguments[2]; }
