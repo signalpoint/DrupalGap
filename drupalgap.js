@@ -1,4 +1,4 @@
-/*! drupalgap 2015-07-07 */
+/*! drupalgap 2015-07-08 */
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
@@ -385,7 +385,9 @@ function dg_kill_camel_case(str, separator) {
  */
 function dg_language_default() {
   try {
+    dpm('dg_language_default');
     var drupalSettings = dg_ng_get('drupalSettings');
+    console.log(drupalSettings);
     return typeof drupalSettings.language !== 'undefined' ?
       drupalSettings.language : 'und';
   }
@@ -602,6 +604,28 @@ function drupalgap_field_info_field(field_name) {
     return dg_field_info_field(field_name);
   }
   catch (error) { console.log('drupalgap_field_info_field - ' + error); }
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_field_info_instance(entity_type, field_name, bundle_name) {
+  console.log(
+    'DEPRECATED - drupalgap_field_info_instance(): use dg_field_info_instance() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_field_info_instance(entity_type, field_name, bundle_name)
+}
+
+/**
+ * @deprecated
+ */
+function drupalgap_field_info_instances(entity_type, bundle_name) {
+  console.log(
+    'DEPRECATED - drupalgap_field_info_instances(): use dg_field_info_instances() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_field_info_instances(entity_type, bundle_name);
 }
 
 /**
@@ -929,6 +953,86 @@ function dg_entity_get_info() {
   catch (error) { console.log('dg_entity_get_info - ' + error); }
 }
 /**
+ * Given a field name, this will return its field info.
+ * @param {String} field_name
+ * @return {Object}
+ */
+function dg_field_info_field(field_name) {
+  try {
+    return drupalgap.field_info_fields[field_name];
+  }
+  catch (error) { console.log('dg_field_info_field - ' + error); }
+}
+
+/**
+ * Given an entity type and/or a bundle name, this returns the field info
+ * instances for the entity or the bundle.
+ * @param {String} entity_type
+ * @param {String} bundle_name
+ * @return {Object}
+ */
+function dg_field_info_instances(entity_type, bundle_name) {
+  try {
+    var field_info_instances = null;
+    // If there is no bundle, pull the fields out of the wrapper.
+    // @TODO there appears to be a special case with commerce_products, in that
+    // they aren't wrapped like normal entities (see the else statement when a
+    // bundle name isn't present). Or do we have a bug here, and we shouldn't
+    // be expecting the wrapper in the first place?
+    if (!bundle_name) {
+      if (entity_type == 'commerce_product') {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type];
+      }
+      else if (
+        typeof drupalgap.field_info_instances[entity_type] !== 'undefined' &&
+        typeof drupalgap.field_info_instances[entity_type][entity_type] !== 'undefined'
+      ) {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type][entity_type];
+      }
+    }
+    else {
+      if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
+        field_info_instances =
+          drupalgap.field_info_instances[entity_type][bundle_name];
+      }
+    }
+    return field_info_instances;
+  }
+  catch (error) { console.log('dg_field_info_instances - ' + error); }
+}
+
+/**
+ * Given an entity type, field name, and bundle name this will return a JSON
+ * object with data for the specified field name.
+ * @param {String} entity_type
+ * @param {String} field_name
+ * @param {String} bundle_name
+ * @return {Object}
+ */
+function dg_field_info_instance(entity_type, field_name, bundle_name) {
+  try {
+    var instances = dg_field_info_instances(entity_type, bundle_name);
+    if (!instances) {
+      var msg = 'WARNING: dg_field_info_instance - instance was null ' +
+        'for entity (' + entity_type + ') bundle (' + bundle_name + ') using ' +
+        'field (' + field_name + ')';
+      console.log(msg);
+      return null;
+    }
+    if (!instances[field_name]) {
+      var msg = 'WARNING: dg_field_info_instance - ' +
+        '"' + field_name + '" does not exist for entity (' + entity_type + ')' +
+        ' bundle (' + bundle_name + ')';
+      console.log(msg);
+      return null;
+    }
+    return instances[field_name];
+  }
+  catch (error) { console.log('dg_field_info_instance - ' + error); }
+}
+/**
  * Reads entire file into a string and returns the string. Returns false if
  * it fails.
  * @param {String} path
@@ -1040,6 +1144,8 @@ function dg_delete(name) {
  */
 function drupalgap_form_render_elements(form) {
   try {
+    dpm('drupalgap_form_render_elements');
+    console.log(form);
     var html = '';
     if (!form.elements) { return html; }
     for (var name in form.elements) {
@@ -1056,28 +1162,126 @@ function drupalgap_form_render_elements(form) {
  */
 function drupalgap_form_render_element(form, element) {
   try {
+    //dpm('drupalgap_form_render_element');
+    //console.log(form);
+    console.log(element.name);
+    console.log(element);
+
     // Preprocess element if necessary...
+
     // @TODO great spot for a hook.
-    
-    // Submit button.
-    if (element.type == 'submit') {
-      element.attributes['class'] += ' dg_form_submit_button ';
-      if (typeof element.attributes['data-ng-click'] === 'undefined') {
-        element.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
+
+
+    // There are two main "types" of form elements, "flat" elements like node title
+    // and node id, and many typical elements created on custom forms. Then there
+    // are "field" elements like a node body provided by Drupal's entity system.
+    // Flat elements will be rendered as is through the dg theme layer, field elements
+    // will be passed along to their hook_field_widget_form() implementer.
+
+    // FLAT ELEMENTS
+    if (typeof element.field_name === 'undefined') {
+
+      // Submit button.
+      if (element.type == 'submit') {
+        element.attributes['class'] += ' dg_form_submit_button ';
+        if (typeof element.attributes['data-ng-click'] === 'undefined') {
+          element.attributes['data-ng-click'] = 'drupalgap_form_submit(\'' + form.id + '\', form_state);';
+        }
+        if (typeof element.attributes['value'] === 'undefined' && element.value) {
+          element.attributes['value'] = element.value;
+        }
       }
-      if (typeof element.attributes['value'] === 'undefined' && element.value) {
-        element.attributes['value'] = element.value;
+      else {
+        // All other elements should have an ng-model attached, which allows the
+        // form state values to be properly assembled and ready for validation and
+        // submission handlers.
+        if (typeof element.attributes['ng-model'] === 'undefined') {
+          element.attributes['ng-model'] = "form_state['values']['" + element.name + "']";
+        }
       }
+
+      return theme('form_element', { element: element });
+
     }
+
+    // FIELD ELEMENTS
     else {
-      // All other elements should have an ng-model attached, which allows the
-      // form state values to be properly assembled and ready for validation and
-      // submission handlers.
-      if (typeof element.attributes['ng-model'] === 'undefined') {
-        element.attributes['ng-model'] = "form_state['values']['" + element.name + "']";
+
+      console.log(form.entity);
+
+      var language = form.entity ? form.entity.language : dg_language_default();
+      dpm(language);
+
+      // Determine the hook_field_widget_form().
+      var hook = element.field_info_instance.widget.module + '_field_widget_form';
+      if (!dg_function_exists(hook)) {
+        console.log(hook + '() is missing!');
+        return '';
       }
+
+      // Prepare the container children and element items, if any.
+      var children = '';
+      var items = null;
+      if (form.entity) { items = form.entity[element.name][language]; }
+
+      // Field label.
+      children += theme('form_element_label', { element: element });
+
+      // New entity.
+      if (!items) {
+        var delta = 0;
+        element = window[hook](
+          form,
+          null, // form_state
+          element.field_info_field, // field
+          element.field_info_instance, // instance
+          language,
+          null, // items
+          delta, // delta
+          {
+            attributes: {
+              id: form.elements[element.name].attributes.id + '-' + language + '-' + delta + '-value',
+              name: form.elements[element.name].attributes.name + '[' + language + '][' + delta + '][value]'
+              // @TODO ng-model goes here, probably
+            }
+          } // element
+        );
+        console.log(element);
+        children += theme(element.type, element);
+      }
+
+      // Existing entity.
+      else {
+
+        for (var delta in items) {
+          if (!items.hasOwnProperty(delta)) { continue; }
+          var item = items[delta];
+          dpm(delta);
+          console.log(item);
+          element = window[hook](
+            form,
+            null, // form_state
+            element.field_info_field, // field
+            element.field_info_instance, // instance
+            language,
+            items, // items
+            delta, // delta
+            element // element
+          );
+          children += theme(element.type, element);
+        }
+      }
+
+      return theme('container', {
+        element: {
+          children: children
+        }
+      });
+
     }
-    return theme('form_element', { element: element });
+    
+
+
   }
   catch (error) { console.log('drupalgap_form_render_element - ' + error); }
 }
@@ -1121,23 +1325,51 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
     for (var name in form.elements) {
       if (!form.elements.hasOwnProperty(name)) { continue; }
       var element = form.elements[name];
-      // If this element is a field, load its field_info_field and
-      // field_info_instance onto the element.
-      var element_is_field = false;
-      var field_info_field = dg_field_info_field(name);
-      if (field_info_field) {
-        element_is_field = true;
-        form.elements[name].field_info_field = field_info_field;
-        form.elements[name].field_info_instance =
-          drupalgap_field_info_instance(
-            form.entity_type,
-            name,
-            form.bundle
-          );
+      var element_is_field = typeof element.field_name !== 'undefined' ? true : false;
+
+      if (!element.attributes) {
+        form.elements[name].attributes = { };
       }
-      form.elements[name].is_field = element_is_field; // @TODO Drupal does not use this boolean flag at all.
-      // Set the name property on the element if it isn't already set.
-      if (!form.elements[name].name) { form.elements[name].name = name; }
+      id = dg_form_get_element_id(name, form.id);
+      form.elements[name].id = id;
+      form.elements[name].name = name;
+      form.elements[name].attributes.id = id;
+
+      // Flat elements.
+      if (!element_is_field) {
+
+      }
+
+      // Field elements.
+      else {
+
+        // Load its field_info_field and field_info_instance onto the element.
+        form.elements[name].field_info_field = dg_field_info_field(name);
+        form.elements[name].field_info_instance = dg_field_info_instance(
+          form.entity_type,
+          name,
+          form.bundle
+        );
+
+        // Set the title property on the element if it isn't already set.
+        if (!form.elements[name].title) {
+          form.elements[name].title = t(form.elements[name].field_info_instance.label);
+        }
+
+      }
+
+      continue;
+
+
+
+
+
+
+
+      //form.elements[name].is_field = element_is_field; // @TODO Drupal does not use this boolean flag at all.
+
+
+
       // If the element is a field, we'll append a language code and delta
       // value to the element id, along with the field items appended
       // onto the element using the language code and delta values.
@@ -1175,16 +1407,6 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
           }
         }
       }
-      else {
-        // This element is not a field, setup default options if none
-        // have been provided. Then set the element id.
-        if (!element.attributes) {
-          form.elements[name].attributes = { };
-        }
-        id = dg_form_get_element_id(name, form.id);
-        form.elements[name].id = id;
-        form.elements[name].attributes.id = id;
-      }
     }
   }
   catch (error) { console.log('dg_form_element_set_empty_options_and_attributes - ' + error); }
@@ -1204,7 +1426,7 @@ function dg_form_get_element_id(name, form_id) {
     if (name == null || name == '') { return ''; }
     var id =
       'edit-' +
-      form_id.toLowerCase().replace(/_/g, '-') + '-' +
+      //form_id.toLowerCase().replace(/_/g, '-') + '-' +
       name.toLowerCase().replace(/_/g, '-');
     // Any language code to append to the id?
     if (arguments[2]) { id += '-' + arguments[2]; }
@@ -1477,6 +1699,51 @@ function dg_ng_compile_form($compile, $scope) {
 
 
 
+
+/**
+ * Themes a container.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_container(variables) {
+  try {
+    var element = variables.element;
+    var output = '<div ' + dg_attributes(variables.attributes) + '>' + element.children + '</div>';
+    return output;
+  }
+  catch (error) { console.log('theme_container - ' + error); }
+}
+
+/**
+ * Themes a form element label.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_form_element_label(variables) {
+  try {
+    dpm('theme_form_element_label');
+    console.log(variables);
+    var element = variables.element;
+    console.log(element.title);
+    if (dg_empty(element.title)) { return ''; }
+    // Any elements with a title_placeholder set to true
+    // By default, use the element id as the label for, unless the element is
+    // a radio, then use the name.
+    var label_for = '';
+    if (element.id) { label_for = element.id; }
+    else if (element.attributes && element.attributes['for']) {
+      label_for = element.attributes['for'];
+    }
+    if (element.type == 'radios') { label_for = element.name; }
+    // Render the label.
+    var html =
+      '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
+    if (element.required) { html += theme('form_required_marker', { }); }
+    html += '</label>';
+    return html;
+  }
+  catch (error) { console.log('theme_form_element_label - ' + error); }
+}
 
 /**
  * Themes a password input.
@@ -2778,7 +3045,7 @@ function dg_entity_form_builder($compile, scope, element, entity) {
     };
 
     // Grab this entity's field info instances.
-    var instances = drupalgap_field_info_instances(
+    var instances = dg_field_info_instances(
       entity_type,
       bundle
     );
@@ -2790,13 +3057,21 @@ function dg_entity_form_builder($compile, scope, element, entity) {
       var instance = instances[field_name];
       console.log(instance);
       var info = dg_field_info_field(field_name);
+      console.log(info);
       var module = instance.widget.module;
       var cardinality = info.cardinality;
-      //dpm(cardinality);
 
       // Instantiate a form element for this field.
-      form[field_name] = {
-        field_name: field_name
+      var element_theme = cardinality == '1' ? null : 'field_multiple_value_form';
+      form.elements[field_name] = {
+        type: 'container',
+        field_name: field_name,
+        entity_type: entity_type,
+        bundle: bundle,
+        language: 'und', // @TODO hard coded language here
+        und: [{  // @TODO hard coded language here
+          theme: element_theme
+        }]
       };
 
       // For each delta on the field...
@@ -2900,56 +3175,7 @@ function dg_entity_page_list(entity_type) {
   catch (error) { console.log('dg_entity_page_list - ' + error); }
 }
 
-/**
- * Given a field name, this will return its field info.
- * @param {String} field_name
- * @return {Object}
- */
-function dg_field_info_field(field_name) {
-  try {
-    return drupalgap.field_info_fields[field_name];
-  }
-  catch (error) { console.log('dg_field_info_field - ' + error); }
-}
 
-/**
- * Given an entity type and/or a bundle name, this returns the field info
- * instances for the entity or the bundle.
- * @param {String} entity_type
- * @param {String} bundle_name
- * @return {Object}
- */
-function drupalgap_field_info_instances(entity_type, bundle_name) {
-  try {
-    var field_info_instances = null;
-    // If there is no bundle, pull the fields out of the wrapper.
-    // @TODO there appears to be a special case with commerce_products, in that
-    // they aren't wrapped like normal entities (see the else statement when a
-    // bundle name isn't present). Or do we have a bug here, and we shouldn't
-    // be expecting the wrapper in the first place?
-    if (!bundle_name) {
-      if (entity_type == 'commerce_product') {
-        field_info_instances =
-          drupalgap.field_info_instances[entity_type];
-      }
-      else if (
-        typeof drupalgap.field_info_instances[entity_type] !== 'undefined' &&
-        typeof drupalgap.field_info_instances[entity_type][entity_type] !== 'undefined'
-      ) {
-        field_info_instances =
-          drupalgap.field_info_instances[entity_type][entity_type];
-      }
-    }
-    else {
-      if (typeof drupalgap.field_info_instances[entity_type] !== 'undefined') {
-        field_info_instances =
-          drupalgap.field_info_instances[entity_type][bundle_name];
-      }
-    }
-    return field_info_instances;
-  }
-  catch (error) { console.log('drupalgap_field_info_instances - ' + error); }
-}
 
 
 /**
@@ -3144,6 +3370,194 @@ function node_index_page(nodes) {
   }
 }
 
+/**
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
+ * @return {*}
+ */
+function options_field_widget_form(form, form_state, field, instance, langcode,
+                                   items, delta, element) {
+  try {
+    switch (element.type) {
+      case 'checkbox':
+        // If the checkbox has a default value of 1, check the box.
+        if (items[delta].default_value == 1) { items[delta].checked = true; }
+        break;
+      case 'radios':
+        break;
+      case 'list_boolean':
+        switch (instance.widget.type) {
+          case 'options_onoff':
+            // Switch an on/off boolean to a checkbox and place its on/off
+            // values as attributes. Depending on the allowed values, we may
+            // have to iterate over an array, or an object to get the on/off
+            // values.
+            items[delta].type = 'checkbox';
+            var off = null;
+            var on = null;
+            if ($.isArray(field.settings.allowed_values)) {
+              for (var key in field.settings.allowed_values) {
+                if (off === null) { off = key; }
+                else { on = key; }
+              }
+            }
+            else {
+              for (var value in field.settings.allowed_values) {
+                if (!field.settings.allowed_values.hasOwnProperty(value)) { continue; }
+                var label = field.settings.allowed_values[value];
+                if (off === null) { off = value; }
+                else { on = value; }
+              }
+            }
+            items[delta].options.attributes['off'] = off;
+            items[delta].options.attributes['on'] = on;
+            // If the value equals the on value, then check the box.
+            if (
+              typeof items[delta] !== 'undefined' && items[delta].value == on
+            ) { items[delta].options.attributes['checked'] = 'checked'; }
+            break;
+          default:
+            console.log(
+              'WARNING: options_field_widget_form list_boolean with ' +
+              'unsupported type (' + instance.widget.type + ')'
+            );
+            break;
+        }
+        break;
+      case 'select':
+      case 'list_text':
+      case 'list_float':
+      case 'list_integer':
+        if (instance) {
+          switch (instance.widget.type) {
+            case 'options_select':
+              items[delta].type = 'select';
+              // If the select list is required, add a 'Select' option and set
+              // it as the default.  If it is optional, place a "none" option
+              // for the user to choose from.
+              var text = '- None -';
+              if (items[delta].required) {
+                text = '- ' + t('Select a value') + ' -';
+              }
+              items[delta].options[''] = text;
+              if (empty(items[delta].value)) { items[delta].value = ''; }
+              // If more than one value is allowed, turn it into a multiple
+              // select list.
+              if (field.cardinality != 1) {
+                items[delta].options.attributes['data-native-menu'] = 'false';
+                items[delta].options.attributes['multiple'] = 'multiple';
+              }
+              break;
+            case 'options_buttons':
+              // If there is one value allowed, we turn this into radio
+              // button(s), otherwise they will become checkboxes.
+              var type = 'checkboxes';
+              if (field.cardinality == 1) { type = 'radios'; }
+              items[delta].type = type;
+              break;
+            default:
+              console.log(
+                'WARNING: options_field_widget_form - unsupported widget (' +
+                instance.widget.type + ')'
+              );
+              return false;
+              break;
+          }
+          // If there are any allowed values, place them on the options
+          // list. Then check for a default value, and set it if necessary.
+          if (field && field.settings.allowed_values) {
+            for (var key in field.settings.allowed_values) {
+              if (!field.settings.allowed_values.hasOwnProperty(key)) { continue; }
+              var value = field.settings.allowed_values[key];
+              // Don't place values that are objects onto the options
+              // (i.e. commerce taxonomy term reference fields).
+              if (typeof value === 'object') { continue; }
+              // If the value already exists in the options, then someone
+              // else has populated the list (e.g. commerce), so don't do
+              // any processing.
+              if (typeof items[delta].options[key] !== 'undefined') {
+                break;
+              }
+              // Set the key and value for the option.
+              items[delta].options[key] = value;
+            }
+            if (instance.default_value && instance.default_value[delta] &&
+              typeof instance.default_value[delta].value !== 'undefined') {
+              items[delta].value = instance.default_value[delta].value;
+            }
+          }
+        }
+        break;
+      /*case 'taxonomy_term_reference':
+        // Change the item type to a hidden input.
+        items[delta].type = 'hidden';
+        // What vocabulary are we using?
+        var machine_name = field.settings.allowed_values[0].vocabulary;
+        var taxonomy_vocabulary =
+          taxonomy_vocabulary_machine_name_load(machine_name);
+
+        var widget_type = false;
+        if (instance.widget.type == 'options_select') {
+          widget_type = 'select';
+        }
+        else {
+          console.log(
+            'WARNING: options_field_widget_form() - ' + instance.widget.type +
+            ' not yet supported for ' + element.type + ' form elements!'
+          );
+          return false;
+        }
+        var widget_id = items[delta].id + '-' + widget_type;
+        // If the select list is required, add a 'Select' option and set
+        // it as the default.  If it is optional, place a "none" option
+        // for the user to choose from.
+        var text = '- ' + t('None') + ' -';
+        if (items[delta].required) {
+          text = '- ' + t('Select a value') + ' -';
+        }
+        items[delta].children.push({
+          type: widget_type,
+          attributes: {
+            id: widget_id,
+            onchange: "_theme_taxonomy_term_reference_onchange(this, '" +
+            items[delta].id +
+            "');"
+          },
+          options: { '': text }
+        });
+        // Attach a pageshow handler to the current page that will load the
+        // terms into the widget.
+        var options = {
+          'page_id': drupalgap_get_page_id(drupalgap_path_get()),
+          'jqm_page_event': 'pageshow',
+          'jqm_page_event_callback':
+            '_theme_taxonomy_term_reference_load_items',
+          'jqm_page_event_args': JSON.stringify({
+            'taxonomy_vocabulary': taxonomy_vocabulary,
+            'widget_id': widget_id
+          })
+        };
+        // Pass the field name so the page event handler can be called for
+        // each item.
+        items[delta].children.push({
+          markup: drupalgap_jqm_page_event_script_code(
+            options,
+            field.field_name
+          )
+        });
+        break;*/
+    }
+  }
+  catch (error) { console.log('options_field_widget_form - ' + error); }
+}
+
 
 angular.module('dgSystem', ['drupalgap'])
 
@@ -3285,6 +3699,38 @@ function text_field_formatter_view(entity_type, entity, field, instance,
   catch (error) { console.log('text_field_formatter_view - ' + error); }
 }
 
+/**
+ * Implements hook_field_widget_form().
+ * @param {Object} form
+ * @param {Object} form_state
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Number} delta
+ * @param {Object} element
+ */
+function text_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
+  try {
+    dpm('text_field_widget_form');
+    //console.log(arguments);
+    console.log(instance);
+    var type = null;
+    switch (instance.widget.type) {
+      case 'search': type = 'search'; break;
+      case 'text': type = 'textfield'; break;
+      case 'textarea':
+      case 'text_long':
+      case 'text_with_summary':
+      case 'text_textarea':
+      case 'text_textarea_with_summary':
+        type = 'textarea';
+    }
+    element.type = type;
+    return element;
+  }
+  catch (error) { console.log('text_field_widget_form - ' + error); }
+}
 
 angular.module('dgUser', ['drupalgap'])
 
