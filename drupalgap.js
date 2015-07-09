@@ -1144,8 +1144,8 @@ function dg_delete(name) {
  */
 function drupalgap_form_render_elements(form) {
   try {
-    dpm('drupalgap_form_render_elements');
-    console.log(form);
+    //dpm('drupalgap_form_render_elements');
+    //console.log(form);
     var html = '';
     if (!form.elements) { return html; }
     for (var name in form.elements) {
@@ -1164,8 +1164,8 @@ function drupalgap_form_render_element(form, element) {
   try {
     //dpm('drupalgap_form_render_element');
     //console.log(form);
-    console.log(element.name);
-    console.log(element);
+    //console.log(element.name);
+    //console.log(element);
 
     // Preprocess element if necessary...
 
@@ -1207,10 +1207,7 @@ function drupalgap_form_render_element(form, element) {
     // FIELD ELEMENTS
     else {
 
-      console.log(form.entity);
-
       var language = form.entity ? form.entity.language : dg_language_default();
-      dpm(language);
 
       // Determine the hook_field_widget_form().
       var hook = element.field_info_instance.widget.module + '_field_widget_form';
@@ -1238,15 +1235,13 @@ function drupalgap_form_render_element(form, element) {
           language,
           null, // items
           delta, // delta
-          {
-            attributes: {
-              id: form.elements[element.name].attributes.id + '-' + language + '-' + delta + '-value',
-              name: form.elements[element.name].attributes.name + '[' + language + '][' + delta + '][value]'
-              // @TODO ng-model goes here, probably
-            }
-          } // element
+          dg_form_element_field_item_element_create(
+            form.elements[element.name].attributes.id,
+            element.name,
+            language,
+            delta
+          ) // element
         );
-        console.log(element);
         children += theme(element.type, element);
       }
 
@@ -1256,8 +1251,6 @@ function drupalgap_form_render_element(form, element) {
         for (var delta in items) {
           if (!items.hasOwnProperty(delta)) { continue; }
           var item = items[delta];
-          dpm(delta);
-          console.log(item);
           element = window[hook](
             form,
             null, // form_state
@@ -1266,11 +1259,20 @@ function drupalgap_form_render_element(form, element) {
             language,
             items, // items
             delta, // delta
-            element // element
+            dg_form_element_field_item_element_create(
+              form.elements[element.name].attributes.id,
+              element.name,
+              language,
+              delta
+            ) // element
           );
           children += theme(element.type, element);
         }
       }
+
+      /*if (element.field_info_field.cardinality == '-1') {
+        children += '';
+      }*/
 
       return theme('container', {
         element: {
@@ -1284,6 +1286,63 @@ function drupalgap_form_render_element(form, element) {
 
   }
   catch (error) { console.log('drupalgap_form_render_element - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_id_attribute(id, language, delta) {
+  try {
+    return id + '-' + language + '-' + delta + '-value';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_id_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_name_attribute(name, language, delta) {
+  try {
+    return name + '[' + language + '][' + delta + '][value]';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_name_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_ng_model_attribute(name, language, delta) {
+  try {
+    // The ng-model needs the language code and value wrapped in single quotes.
+    return 'form_state.values.' + name + "['" + language + "'][" + delta + "]['value']";
+  }
+  catch (error) {
+    console.log('dg_form_element_field_ng_model_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ * @param variables
+ * @returns {string}
+ */
+function dg_form_element_field_item_element_create(id, name, language, delta) {
+  try {
+    return {
+      attributes: {
+        id: dg_form_element_field_id_attribute(id, language, delta),
+        name: dg_form_element_field_name_attribute(name, language, delta),
+        'ng-model': dg_form_element_field_ng_model_attribute(name, language, delta)
+      }
+    }
+  }
+  catch (error) {
+    console.log('dg_form_element_field_item_element_create - ' + error);
+  }
 }
 
 /**
@@ -1634,13 +1693,10 @@ function dg_form_defaults(form_id, $scope) {
  */
 function dg_ng_compile_form($compile, $scope) {
   try {
-    //dpm('dg_ng_compile_form');
-    //console.log(arguments);
+    dpm('dg_ng_compile_form');
+    console.log(arguments);
     
     var drupalSettings = dg_ng_get('drupalSettings');
-    
-    // Pull out any optional arguments.
-    var hookFieldWidgetForm = arguments[2] ? arguments[2] : null;
     
     // @TODO sometime between dg_ng_compile_form() and dgFormElement.link, we
     // are losing the form state.
@@ -1661,19 +1717,17 @@ function dg_ng_compile_form($compile, $scope) {
       //dpm(name);
       //console.log(element);
       
-      if (!element.is_field) {
+      if (!element.field_name) {
         if (typeof element.attributes.name === 'undefined') {
           $scope.form.elements[name].attributes.name = element.name;
         }
         if (typeof element.default_value !== 'undefined') {
           // @TODO we shouldn't be dropping all these directly in scope, let's
           // put them in their own object instead. Although this may be possible
-          // to deprecate now because of our ng-model usage, needs testing...
+          // to deprecate now because of our ng-model and scope.form_state usage,
+          // needs testing...
           $scope[element.name] = element.default_value;
         }
-      }
-      else {
-        hookFieldWidgetForm.setField(element.name, element.field_info_field);
       }
 
       // Place any hidden input's value (if any) into the scope so it can be
@@ -1721,10 +1775,10 @@ function theme_container(variables) {
  */
 function theme_form_element_label(variables) {
   try {
-    dpm('theme_form_element_label');
-    console.log(variables);
+    //dpm('theme_form_element_label');
+    //console.log(element.title);
+    //console.log(variables);
     var element = variables.element;
-    console.log(element.title);
     if (dg_empty(element.title)) { return ''; }
     // Any elements with a title_placeholder set to true
     // By default, use the element id as the label for, unless the element is
@@ -2126,7 +2180,9 @@ function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
       var region = theme.regions[name];
       //dpm('region - ' + name);
       //console.log(region);
-      template += drupalgap_render_region(region);
+      // @TODO don't send a reference to the region here!
+      // @see https://github.com/signalpoint/DrupalGap/issues/586
+      template += drupalgap_render_region(angular.merge({}, region));
     }
 
     // Compile the template for Angular and append it to the directive's
@@ -2868,8 +2924,8 @@ angular.module('dgEntity', ['drupalgap'])
             entity_type,
             entity.type // @TODO support all entity type bundles, not just node content types
           );
-          console.log(drupalgap.field_info_instances);
-          console.log(instances);
+          //console.log(drupalgap.field_info_instances);
+          //console.log(instances);
             
             // Render each field instance...
             for (var field_name in instances) {
@@ -3029,8 +3085,13 @@ angular.module('dgEntity', ['drupalgap'])
  */
 function dg_entity_form_builder($compile, scope, element, entity) {
   try {
+    dpm('dg_entity_form_builder');
+
+    // Extract the entity type and bundle, then place the entity onto the form state values.
     var entity_type = scope.entity_type;
     var bundle = scope.bundle;
+    console.log(scope);
+    scope.form_state = { values: entity }; // @TODO don't drop it directly into the scope like this, use a form id key
 
     // Set up form defaults.
     var form = dg_form_defaults(entity_type + "_edit_form", scope);
@@ -3049,15 +3110,12 @@ function dg_entity_form_builder($compile, scope, element, entity) {
       entity_type,
       bundle
     );
-    console.log(instances);
 
     // Render each field instance...
     for (var field_name in instances) {
       if (!instances.hasOwnProperty(field_name)) { continue; }
       var instance = instances[field_name];
-      console.log(instance);
       var info = dg_field_info_field(field_name);
-      console.log(info);
       var module = instance.widget.module;
       var cardinality = info.cardinality;
 
@@ -3133,7 +3191,7 @@ function dg_entity_page_view(entity_type, entity_id) {
 function dg_entity_page_add(entity_type) {
   try {
     var entity_info = dg_entity_get_info(entity_type);
-    console.log(entity_info);
+    //console.log(entity_info);
     var content = {};
     var items = [];
     for (var bundle in entity_info.bundles) {
@@ -3713,8 +3771,11 @@ function text_field_formatter_view(entity_type, entity, field, instance,
 function text_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
     dpm('text_field_widget_form');
-    //console.log(arguments);
+    //console.log(arguments)
+    console.log(field);
     console.log(instance);
+    console.log(items);
+    console.log(element);
     var type = null;
     switch (instance.widget.type) {
       case 'search': type = 'search'; break;
@@ -3727,6 +3788,7 @@ function text_field_widget_form(form, form_state, field, instance, langcode, ite
         type = 'textarea';
     }
     element.type = type;
+    element.attributes.rows = instance.widget.settings.rows;
     return element;
   }
   catch (error) { console.log('text_field_widget_form - ' + error); }
