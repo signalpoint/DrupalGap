@@ -136,7 +136,9 @@ function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
       var region = theme.regions[name];
       //dpm('region - ' + name);
       //console.log(region);
-      template += drupalgap_render_region(region);
+      // @TODO don't send a reference to the region here!
+      // @see https://github.com/signalpoint/DrupalGap/issues/586
+      template += drupalgap_render_region(angular.merge({}, region));
     }
 
     // Compile the template for Angular and append it to the directive's

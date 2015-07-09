@@ -192,13 +192,10 @@ function dg_form_defaults(form_id, $scope) {
  */
 function dg_ng_compile_form($compile, $scope) {
   try {
-    //dpm('dg_ng_compile_form');
-    //console.log(arguments);
+    dpm('dg_ng_compile_form');
+    console.log(arguments);
     
     var drupalSettings = dg_ng_get('drupalSettings');
-    
-    // Pull out any optional arguments.
-    var hookFieldWidgetForm = arguments[2] ? arguments[2] : null;
     
     // @TODO sometime between dg_ng_compile_form() and dgFormElement.link, we
     // are losing the form state.
@@ -219,19 +216,17 @@ function dg_ng_compile_form($compile, $scope) {
       //dpm(name);
       //console.log(element);
       
-      if (!element.is_field) {
+      if (!element.field_name) {
         if (typeof element.attributes.name === 'undefined') {
           $scope.form.elements[name].attributes.name = element.name;
         }
         if (typeof element.default_value !== 'undefined') {
           // @TODO we shouldn't be dropping all these directly in scope, let's
           // put them in their own object instead. Although this may be possible
-          // to deprecate now because of our ng-model usage, needs testing...
+          // to deprecate now because of our ng-model and scope.form_state usage,
+          // needs testing...
           $scope[element.name] = element.default_value;
         }
-      }
-      else {
-        hookFieldWidgetForm.setField(element.name, element.field_info_field);
       }
 
       // Place any hidden input's value (if any) into the scope so it can be

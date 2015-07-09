@@ -19,10 +19,10 @@ function theme_container(variables) {
  */
 function theme_form_element_label(variables) {
   try {
-    dpm('theme_form_element_label');
-    console.log(variables);
+    //dpm('theme_form_element_label');
+    //console.log(element.title);
+    //console.log(variables);
     var element = variables.element;
-    console.log(element.title);
     if (dg_empty(element.title)) { return ''; }
     // Any elements with a title_placeholder set to true
     // By default, use the element id as the label for, unless the element is

@@ -90,8 +90,8 @@ angular.module('dgEntity', ['drupalgap'])
             entity_type,
             entity.type // @TODO support all entity type bundles, not just node content types
           );
-          console.log(drupalgap.field_info_instances);
-          console.log(instances);
+          //console.log(drupalgap.field_info_instances);
+          //console.log(instances);
             
             // Render each field instance...
             for (var field_name in instances) {
@@ -251,8 +251,13 @@ angular.module('dgEntity', ['drupalgap'])
  */
 function dg_entity_form_builder($compile, scope, element, entity) {
   try {
+    dpm('dg_entity_form_builder');
+
+    // Extract the entity type and bundle, then place the entity onto the form state values.
     var entity_type = scope.entity_type;
     var bundle = scope.bundle;
+    console.log(scope);
+    scope.form_state = { values: entity }; // @TODO don't drop it directly into the scope like this, use a form id key
 
     // Set up form defaults.
     var form = dg_form_defaults(entity_type + "_edit_form", scope);
@@ -271,15 +276,12 @@ function dg_entity_form_builder($compile, scope, element, entity) {
       entity_type,
       bundle
     );
-    console.log(instances);
 
     // Render each field instance...
     for (var field_name in instances) {
       if (!instances.hasOwnProperty(field_name)) { continue; }
       var instance = instances[field_name];
-      console.log(instance);
       var info = dg_field_info_field(field_name);
-      console.log(info);
       var module = instance.widget.module;
       var cardinality = info.cardinality;
 
@@ -355,7 +357,7 @@ function dg_entity_page_view(entity_type, entity_id) {
 function dg_entity_page_add(entity_type) {
   try {
     var entity_info = dg_entity_get_info(entity_type);
-    console.log(entity_info);
+    //console.log(entity_info);
     var content = {};
     var items = [];
     for (var bundle in entity_info.bundles) {

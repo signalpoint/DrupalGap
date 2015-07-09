@@ -3,8 +3,8 @@
  */
 function drupalgap_form_render_elements(form) {
   try {
-    dpm('drupalgap_form_render_elements');
-    console.log(form);
+    //dpm('drupalgap_form_render_elements');
+    //console.log(form);
     var html = '';
     if (!form.elements) { return html; }
     for (var name in form.elements) {
@@ -23,8 +23,8 @@ function drupalgap_form_render_element(form, element) {
   try {
     //dpm('drupalgap_form_render_element');
     //console.log(form);
-    console.log(element.name);
-    console.log(element);
+    //console.log(element.name);
+    //console.log(element);
 
     // Preprocess element if necessary...
 
@@ -66,10 +66,7 @@ function drupalgap_form_render_element(form, element) {
     // FIELD ELEMENTS
     else {
 
-      console.log(form.entity);
-
       var language = form.entity ? form.entity.language : dg_language_default();
-      dpm(language);
 
       // Determine the hook_field_widget_form().
       var hook = element.field_info_instance.widget.module + '_field_widget_form';
@@ -97,15 +94,13 @@ function drupalgap_form_render_element(form, element) {
           language,
           null, // items
           delta, // delta
-          {
-            attributes: {
-              id: form.elements[element.name].attributes.id + '-' + language + '-' + delta + '-value',
-              name: form.elements[element.name].attributes.name + '[' + language + '][' + delta + '][value]'
-              // @TODO ng-model goes here, probably
-            }
-          } // element
+          dg_form_element_field_item_element_create(
+            form.elements[element.name].attributes.id,
+            element.name,
+            language,
+            delta
+          ) // element
         );
-        console.log(element);
         children += theme(element.type, element);
       }
 
@@ -115,8 +110,6 @@ function drupalgap_form_render_element(form, element) {
         for (var delta in items) {
           if (!items.hasOwnProperty(delta)) { continue; }
           var item = items[delta];
-          dpm(delta);
-          console.log(item);
           element = window[hook](
             form,
             null, // form_state
@@ -125,11 +118,20 @@ function drupalgap_form_render_element(form, element) {
             language,
             items, // items
             delta, // delta
-            element // element
+            dg_form_element_field_item_element_create(
+              form.elements[element.name].attributes.id,
+              element.name,
+              language,
+              delta
+            ) // element
           );
           children += theme(element.type, element);
         }
       }
+
+      /*if (element.field_info_field.cardinality == '-1') {
+        children += '';
+      }*/
 
       return theme('container', {
         element: {
@@ -143,6 +145,63 @@ function drupalgap_form_render_element(form, element) {
 
   }
   catch (error) { console.log('drupalgap_form_render_element - ' + error); }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_id_attribute(id, language, delta) {
+  try {
+    return id + '-' + language + '-' + delta + '-value';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_id_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_name_attribute(name, language, delta) {
+  try {
+    return name + '[' + language + '][' + delta + '][value]';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_name_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_ng_model_attribute(name, language, delta) {
+  try {
+    // The ng-model needs the language code and value wrapped in single quotes.
+    return 'form_state.values.' + name + "['" + language + "'][" + delta + "]['value']";
+  }
+  catch (error) {
+    console.log('dg_form_element_field_ng_model_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ * @param variables
+ * @returns {string}
+ */
+function dg_form_element_field_item_element_create(id, name, language, delta) {
+  try {
+    return {
+      attributes: {
+        id: dg_form_element_field_id_attribute(id, language, delta),
+        name: dg_form_element_field_name_attribute(name, language, delta),
+        'ng-model': dg_form_element_field_ng_model_attribute(name, language, delta)
+      }
+    }
+  }
+  catch (error) {
+    console.log('dg_form_element_field_item_element_create - ' + error);
+  }
 }
 
 /**
