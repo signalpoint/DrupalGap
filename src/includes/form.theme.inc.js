@@ -107,23 +107,6 @@ function theme_number(variables) {
 }
 
 /**
- * Themes a hidden input.
- * @param {Object} variables
- * @return {String}
- */
-function theme_hidden(variables) {
-  try {
-    variables.attributes.type = 'hidden';
-    if (!variables.attributes.value && variables.value != null) {
-      variables.attributes.value = variables.value;
-    }
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
-  }
-  catch (error) { console.log('theme_hidden - ' + error); }
-}
-
-/**
  * Themes radio buttons.
  * @param {Object} variables
  * @return {String}
