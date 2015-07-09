@@ -148,6 +148,18 @@ function drupalgap_form_render_element(form, element) {
 }
 
 /**
+  * @param {Object} element
+  */
+function dg_form_element_ng_model_attribute(element) {
+  try {
+    return "form_state.values['" + element.name + "']";
+  }
+  catch (error) {
+    console.log('dg_form_element_ng_model_attribute - ' + error);
+  }
+}
+
+/**
  *
  */
 function dg_form_element_field_id_attribute(id, language, delta) {

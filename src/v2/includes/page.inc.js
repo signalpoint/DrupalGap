@@ -128,25 +128,16 @@ dgApp.controller('dg_page_controller', [
  */
 function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
   try {
-    //dpm('dg_page_link');
     var theme = drupalgapSettings.theme;
     var template = '';
     for (var name in theme.regions) {
       if (!theme.regions.hasOwnProperty(name)) { continue; }
       var region = theme.regions[name];
-      //dpm('region - ' + name);
-      //console.log(region);
-      // @TODO don't send a reference to the region here!
-      // @see https://github.com/signalpoint/DrupalGap/issues/586
       template += drupalgap_render_region(angular.merge({}, region));
     }
-
-    // Compile the template for Angular and append it to the directive's
-    // html element.
     var linkFn = $compile(template);
     var content = linkFn(scope);
     element.append(content);
   }
   catch (error) { console.log('dg_page_compile - ' + error); }
 }
-

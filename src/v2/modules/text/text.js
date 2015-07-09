@@ -43,12 +43,12 @@ function text_field_formatter_view(entity_type, entity, field, instance,
  */
 function text_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
-    dpm('text_field_widget_form');
+    //dpm('text_field_widget_form');
     //console.log(arguments)
-    console.log(field);
-    console.log(instance);
-    console.log(items);
-    console.log(element);
+    //console.log(field);
+    //console.log(instance);
+    //console.log(items);
+    //console.log(element);
     var type = null;
     switch (instance.widget.type) {
       case 'search': type = 'search'; break;

@@ -251,35 +251,77 @@ angular.module('dgEntity', ['drupalgap'])
  */
 function dg_entity_form_builder($compile, scope, element, entity) {
   try {
-    dpm('dg_entity_form_builder');
+    //dpm('dg_entity_form_builder');
+    //console.log(scope);
 
     // Extract the entity type and bundle, then place the entity onto the form state values.
     var entity_type = scope.entity_type;
     var bundle = scope.bundle;
-    console.log(scope);
     scope.form_state = { values: entity }; // @TODO don't drop it directly into the scope like this, use a form id key
+
 
     // Set up form defaults.
     var form = dg_form_defaults(entity_type + "_edit_form", scope);
-
-    // Build form elements.
     form.entity = entity;
     form.entity_type = entity_type;
     form.bundle = bundle;
-    form.elements.submit = {
-      type: 'submit',
-      value: t('Save')
+
+    // Place entity keys as hidden elements on the form.
+    // @TODO this is pretty static, can we be more dynamic here?
+    var entity_info = dg_entity_get_info(entity_type);
+    var entity_keys = entity_info.entity_keys;
+    //dpm('entity_info');
+    //console.log(entity_info);
+    if (!dg_empty(entity_keys.bundle)) {
+      form.elements[entity_keys.bundle] = {
+        type: 'hidden',
+        default_value: bundle
+      };
+    }
+    var default_value = null;
+    if (entity && entity[entity_keys.id]) { default_value = entity[entity_keys.id]; }
+    form.elements[entity_keys.id] = {
+      type: 'hidden',
+      default_value: default_value
     };
+    if (entity_keys.language) {
+      var default_value = dg_language_default();
+      if (entity && entity[entity_keys.language]) { default_value = entity[entity_keys.language]; }
+      form.elements[entity_keys.language] = {
+        type: 'hidden',
+        default_value: default_value
+      };
+    }
+
+    // Grab this entity's extra fields and add them as form elements.
+    var extras = dg_field_info_extra_fields(entity_type, bundle, 'form');
+    //dpm('extras');
+    //console.log(extras);
+    for (var name in extras) {
+      if (!extras.hasOwnProperty(name)) { continue; }
+      var extra = extras[name];
+      var default_value = null;
+      if (entity && entity[entity_keys.label]) { default_value = entity[entity_keys.label]; }
+      form.elements[name] = {
+        title: t(extra.label),
+        type: 'textfield',
+        default_value: default_value
+      };
+    }
 
     // Grab this entity's field info instances.
     var instances = dg_field_info_instances(
       entity_type,
       bundle
     );
+    //dpm('instances');
+    //console.log(instances);
 
     // Render each field instance...
     for (var field_name in instances) {
       if (!instances.hasOwnProperty(field_name)) { continue; }
+      //dpm(field_name);
+
       var instance = instances[field_name];
       var info = dg_field_info_field(field_name);
       var module = instance.widget.module;
@@ -326,6 +368,12 @@ function dg_entity_form_builder($compile, scope, element, entity) {
        );*/
 
     }
+
+    // Submit button.
+    form.elements.submit = {
+      type: 'submit',
+      value: t('Save')
+    };
 
     // Place the form into the scope.
     // @TODO placing the form directly into the scope without an id is going to be bad in the long run!

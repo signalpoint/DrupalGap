@@ -44,6 +44,23 @@ function theme_form_element_label(variables) {
 }
 
 /**
+ * Themes a hidden input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_hidden(variables) {
+  try {
+    variables.attributes.type = 'hidden';
+    if (!variables.attributes.value && variables.value != null) {
+      variables.attributes.value = variables.value;
+    }
+    var output = '<input ' + dg_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_hidden - ' + error); }
+}
+
+/**
  * Themes a password input.
  * @param {Object} variables
  * @return {String}

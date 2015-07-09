@@ -1,4 +1,16 @@
 /**
+ * @see https://api.drupal.org/api/drupal/modules!field!field.info.inc/function/field_info_extra_fields/7
+ */
+function dg_field_info_extra_fields(entity_type, bundle, context) {
+  try {
+    return drupalgap.field_info_extra_fields[entity_type][bundle][context];
+  }
+  catch (error) {
+    console.log('dg_field_info_extra_fields - ' + error);
+  }
+}
+
+/**
  * Given a field name, this will return its field info.
  * @param {String} field_name
  * @return {Object}

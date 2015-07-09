@@ -238,7 +238,7 @@ function dg_ng_compile_form($compile, $scope) {
           $scope[element.name] = element.default_value;
         }
         var ng_model = typeof element.attributes['ng-model'] !== 'undefined' ?
-          element.attributes['ng-model'] : dg_form_element_ng_model(element);
+          element.attributes['ng-model'] : dg_form_element_ng_model_attribute(element);
         $scope.form.elements[name].attributes['ng-init'] = ng_model + " = " + element.attributes.name;
       }
 
