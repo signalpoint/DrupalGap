@@ -1,4 +1,4 @@
-/*! drupalgap 2015-07-08 */
+/*! drupalgap 2015-07-09 */
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
@@ -385,9 +385,7 @@ function dg_kill_camel_case(str, separator) {
  */
 function dg_language_default() {
   try {
-    dpm('dg_language_default');
     var drupalSettings = dg_ng_get('drupalSettings');
-    console.log(drupalSettings);
     return typeof drupalSettings.language !== 'undefined' ?
       drupalSettings.language : 'und';
   }
@@ -953,6 +951,18 @@ function dg_entity_get_info() {
   catch (error) { console.log('dg_entity_get_info - ' + error); }
 }
 /**
+ * @see https://api.drupal.org/api/drupal/modules!field!field.info.inc/function/field_info_extra_fields/7
+ */
+function dg_field_info_extra_fields(entity_type, bundle, context) {
+  try {
+    return drupalgap.field_info_extra_fields[entity_type][bundle][context];
+  }
+  catch (error) {
+    console.log('dg_field_info_extra_fields - ' + error);
+  }
+}
+
+/**
  * Given a field name, this will return its field info.
  * @param {String} field_name
  * @return {Object}
@@ -1286,6 +1296,18 @@ function drupalgap_form_render_element(form, element) {
 
   }
   catch (error) { console.log('drupalgap_form_render_element - ' + error); }
+}
+
+/**
+  * @param {Object} element
+  */
+function dg_form_element_ng_model_attribute(element) {
+  try {
+    return "form_state.values['" + element.name + "']";
+  }
+  catch (error) {
+    console.log('dg_form_element_ng_model_attribute - ' + error);
+  }
 }
 
 /**
@@ -1739,7 +1761,7 @@ function dg_ng_compile_form($compile, $scope) {
           $scope[element.name] = element.default_value;
         }
         var ng_model = typeof element.attributes['ng-model'] !== 'undefined' ?
-          element.attributes['ng-model'] : dg_form_element_ng_model(element);
+          element.attributes['ng-model'] : dg_form_element_ng_model_attribute(element);
         $scope.form.elements[name].attributes['ng-init'] = ng_model + " = " + element.attributes.name;
       }
 
@@ -1797,6 +1819,23 @@ function theme_form_element_label(variables) {
     return html;
   }
   catch (error) { console.log('theme_form_element_label - ' + error); }
+}
+
+/**
+ * Themes a hidden input.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_hidden(variables) {
+  try {
+    variables.attributes.type = 'hidden';
+    if (!variables.attributes.value && variables.value != null) {
+      variables.attributes.value = variables.value;
+    }
+    var output = '<input ' + dg_attributes(variables.attributes) + ' />';
+    return output;
+  }
+  catch (error) { console.log('theme_hidden - ' + error); }
 }
 
 /**
@@ -2172,28 +2211,19 @@ dgApp.controller('dg_page_controller', [
  */
 function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
   try {
-    //dpm('dg_page_link');
     var theme = drupalgapSettings.theme;
     var template = '';
     for (var name in theme.regions) {
       if (!theme.regions.hasOwnProperty(name)) { continue; }
       var region = theme.regions[name];
-      //dpm('region - ' + name);
-      //console.log(region);
-      // @TODO don't send a reference to the region here!
-      // @see https://github.com/signalpoint/DrupalGap/issues/586
       template += drupalgap_render_region(angular.merge({}, region));
     }
-
-    // Compile the template for Angular and append it to the directive's
-    // html element.
     var linkFn = $compile(template);
     var content = linkFn(scope);
     element.append(content);
   }
   catch (error) { console.log('dg_page_compile - ' + error); }
 }
-
 
 /**
  *
@@ -3085,35 +3115,77 @@ angular.module('dgEntity', ['drupalgap'])
  */
 function dg_entity_form_builder($compile, scope, element, entity) {
   try {
-    dpm('dg_entity_form_builder');
+    //dpm('dg_entity_form_builder');
+    //console.log(scope);
 
     // Extract the entity type and bundle, then place the entity onto the form state values.
     var entity_type = scope.entity_type;
     var bundle = scope.bundle;
-    console.log(scope);
     scope.form_state = { values: entity }; // @TODO don't drop it directly into the scope like this, use a form id key
+
 
     // Set up form defaults.
     var form = dg_form_defaults(entity_type + "_edit_form", scope);
-
-    // Build form elements.
     form.entity = entity;
     form.entity_type = entity_type;
     form.bundle = bundle;
-    form.elements.submit = {
-      type: 'submit',
-      value: t('Save')
+
+    // Place entity keys as hidden elements on the form.
+    // @TODO this is pretty static, can we be more dynamic here?
+    var entity_info = dg_entity_get_info(entity_type);
+    var entity_keys = entity_info.entity_keys;
+    //dpm('entity_info');
+    //console.log(entity_info);
+    if (!dg_empty(entity_keys.bundle)) {
+      form.elements[entity_keys.bundle] = {
+        type: 'hidden',
+        default_value: bundle
+      };
+    }
+    var default_value = null;
+    if (entity && entity[entity_keys.id]) { default_value = entity[entity_keys.id]; }
+    form.elements[entity_keys.id] = {
+      type: 'hidden',
+      default_value: default_value
     };
+    if (entity_keys.language) {
+      var default_value = dg_language_default();
+      if (entity && entity[entity_keys.language]) { default_value = entity[entity_keys.language]; }
+      form.elements[entity_keys.language] = {
+        type: 'hidden',
+        default_value: default_value
+      };
+    }
+
+    // Grab this entity's extra fields and add them as form elements.
+    var extras = dg_field_info_extra_fields(entity_type, bundle, 'form');
+    //dpm('extras');
+    //console.log(extras);
+    for (var name in extras) {
+      if (!extras.hasOwnProperty(name)) { continue; }
+      var extra = extras[name];
+      var default_value = null;
+      if (entity && entity[entity_keys.label]) { default_value = entity[entity_keys.label]; }
+      form.elements[name] = {
+        title: t(extra.label),
+        type: 'textfield',
+        default_value: default_value
+      };
+    }
 
     // Grab this entity's field info instances.
     var instances = dg_field_info_instances(
       entity_type,
       bundle
     );
+    //dpm('instances');
+    //console.log(instances);
 
     // Render each field instance...
     for (var field_name in instances) {
       if (!instances.hasOwnProperty(field_name)) { continue; }
+      //dpm(field_name);
+
       var instance = instances[field_name];
       var info = dg_field_info_field(field_name);
       var module = instance.widget.module;
@@ -3160,6 +3232,12 @@ function dg_entity_form_builder($compile, scope, element, entity) {
        );*/
 
     }
+
+    // Submit button.
+    form.elements.submit = {
+      type: 'submit',
+      value: t('Save')
+    };
 
     // Place the form into the scope.
     // @TODO placing the form directly into the scope without an id is going to be bad in the long run!
@@ -3770,12 +3848,12 @@ function text_field_formatter_view(entity_type, entity, field, instance,
  */
 function text_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
-    dpm('text_field_widget_form');
+    //dpm('text_field_widget_form');
     //console.log(arguments)
-    console.log(field);
-    console.log(instance);
-    console.log(items);
-    console.log(element);
+    //console.log(field);
+    //console.log(instance);
+    //console.log(items);
+    //console.log(element);
     var type = null;
     switch (instance.widget.type) {
       case 'search': type = 'search'; break;
