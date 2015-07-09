@@ -1,26 +1,17 @@
 /**
  * Splash Screen
  */
- #_drupalgap_splash .ui-content {
-   position: absolute; top: 40px; right: 0; bottom: 0; left: 0;
- }
- #_drupalgap_splash_content {
-   width: 100%; height: 100%; position: relative;
- }
 
 /**
  * Logo
  */
-.logo {
-  text-align: center;
-}
+
 
 /**
  * Forms
  */
-
-div.form-item {
-  margin-bottom: 1em;
+textarea {
+    width: 100%;
 }
 
 /**
@@ -88,38 +79,11 @@ div.messages ul li {
 /**
  * Lists
  */
-.dg_empty_list_header {
-  line-height: 0em;
-  margin: 0em 0em 1.3em 0em;
-}
 
 /**
  * Images
  */
 
 /**
- * Don't let images stretch out of their parent container in the main content
- * div. Ignore google images.
- */ 
-div[role="main"] img,
-div[role="banner"] img,
-#_drupalgap_splash_content img {
-  width: auto !important; 
-  width: 100%;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-/**
  * Menus
  */
-div[data-role="header"] div[data-role="controlgroup"] .ui-controlgroup-controls .ui-btn-icon-notext {
-  padding: .45em 1em;
-}
-@-moz-document url-prefix() {
-    div[data-role="header"] div[data-role="controlgroup"] .ui-controlgroup-controls .ui-btn-icon-notext {
-      padding: .4em 1em;
-    }
-}
-
-
