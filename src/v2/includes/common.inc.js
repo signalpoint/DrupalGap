@@ -156,6 +156,10 @@ function dg_is_array(obj) {
   return Array.isArray(obj);
 }
 
+function dg_is_object(obj) {
+  return obj !== null && typeof obj === 'object';
+}
+
 /**
  *
  */

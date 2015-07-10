@@ -6,15 +6,6 @@ function drupalgap_get_form(form_id) {
     dpm('drupalgap_get_form');
     console.log(form_id);
     return theme('form', { form_id: form_id });
-    // Set up form defaults.
-    /*var form = {
-      attributes: {
-        id: form_id,
-        'class': []
-      }
-    };*/
-    // Set up a directive attribute to handle this form, then theme and return.
-    //form.attributes[] = '';
   }
   catch (error) { console.log('drupalgap_get_form - ' + error); }
 }
@@ -27,7 +18,6 @@ function theme_form(variables) {
     // Theme the form as an Angular directive based on the form's id.
     var directive = variables.form_id.replace(/_/g, '-')
     return '<' + directive + '></' + directive + '>';
-    //return '<form ' + dg_attributes(variables.form.attributes) + '></form>';
   }
   catch (error) { console.log('theme_form - ' + error); }
 }
@@ -244,6 +234,8 @@ function dg_ng_compile_form($compile, $scope) {
       }
 
     }
+
+    dg_module_invoke_all('form_alter', $scope.form, $scope.form_state, $scope.form.id);
 
     // Finally compile the rendered form.
     return dg_ng_compile($compile, $scope, dg_form_render($scope.form));

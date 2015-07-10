@@ -13,6 +13,29 @@ function theme_container(variables) {
 }
 
 /**
+ *
+ */
+function theme_form_element(variables) {
+  try {
+    return '<div ' + dg_attributes(variables.attributes) + '>' +
+      variables.children +
+    '</div>';
+  }
+  catch (error) { console.log('theme_form_element - ' + error); }
+}
+
+/**
+ *
+ */
+/*function theme_form_element_label(variables) {
+  try {
+    return typeof variables.element.title !== 'undefined' ?
+      variables.element.title : '';
+  }
+  catch (error) { console.log('theme_form_element_label - ' + error); }
+}*/
+
+/**
  * Themes a form element label.
  * @param {Object} variables
  * @return {String}
@@ -24,7 +47,6 @@ function theme_form_element_label(variables) {
     //console.log(variables);
     var element = variables.element;
     if (dg_empty(element.title)) { return ''; }
-    // Any elements with a title_placeholder set to true
     // By default, use the element id as the label for, unless the element is
     // a radio, then use the name.
     var label_for = '';
@@ -33,9 +55,7 @@ function theme_form_element_label(variables) {
       label_for = element.attributes['for'];
     }
     if (element.type == 'radios') { label_for = element.name; }
-    // Render the label.
-    var html =
-      '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
+    var html = '<label for="' + label_for + '">' + element.title;
     if (element.required) { html += theme('form_required_marker', { }); }
     html += '</label>';
     return html;

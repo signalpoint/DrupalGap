@@ -59,7 +59,21 @@ function drupalgap_form_render_element(form, element) {
         }
       }
 
-      return theme('form_element', { element: element });
+      // @TODO we need to employ #theme_wrappers here so i.e. dg_bootstrap can wrap form elements properly
+      // @see http://themery.com/dgd7/advanced-theming/forms/generated-markup
+      var theme_wrapper = element.theme_wrappers[0];
+      var theme_wrapper_vars = {};
+      if (dg_is_object(theme_wrapper)) {
+        theme_wrapper_vars = theme_wrapper;
+        theme_wrapper = theme_wrapper.theme;
+      }
+      theme_wrapper_vars.children =
+        theme('form_element_label', { element: element } ) +
+        theme(element.type, {
+          attributes: element.attributes,
+          element: element
+        });
+      return theme(theme_wrapper, theme_wrapper_vars);
 
     }
 
@@ -148,102 +162,6 @@ function drupalgap_form_render_element(form, element) {
 }
 
 /**
-  * @param {Object} element
-  */
-function dg_form_element_ng_model_attribute(element) {
-  try {
-    return "form_state.values['" + element.name + "']";
-  }
-  catch (error) {
-    console.log('dg_form_element_ng_model_attribute - ' + error);
-  }
-}
-
-/**
- *
- */
-function dg_form_element_field_id_attribute(id, language, delta) {
-  try {
-    return id + '-' + language + '-' + delta + '-value';
-  }
-  catch (error) {
-    console.log('dg_form_element_field_id_attribute - ' + error);
-  }
-}
-
-/**
- *
- */
-function dg_form_element_field_name_attribute(name, language, delta) {
-  try {
-    return name + '[' + language + '][' + delta + '][value]';
-  }
-  catch (error) {
-    console.log('dg_form_element_field_name_attribute - ' + error);
-  }
-}
-
-/**
- *
- */
-function dg_form_element_field_ng_model_attribute(name, language, delta) {
-  try {
-    // The ng-model needs the language code and value wrapped in single quotes.
-    return 'form_state.values.' + name + "['" + language + "'][" + delta + "]['value']";
-  }
-  catch (error) {
-    console.log('dg_form_element_field_ng_model_attribute - ' + error);
-  }
-}
-
-/**
- *
- * @param variables
- * @returns {string}
- */
-function dg_form_element_field_item_element_create(id, name, language, delta) {
-  try {
-    return {
-      attributes: {
-        id: dg_form_element_field_id_attribute(id, language, delta),
-        name: dg_form_element_field_name_attribute(name, language, delta),
-        'ng-model': dg_form_element_field_ng_model_attribute(name, language, delta)
-      }
-    }
-  }
-  catch (error) {
-    console.log('dg_form_element_field_item_element_create - ' + error);
-  }
-}
-
-/**
- *
- */
-function theme_form_element(variables) {
-  try {
-    return '<div>' +
-      theme('form_element_label', { element: variables.element } ) +
-      theme(variables.element.type, {
-          attributes: variables.element.attributes,
-          element: variables.element
-      }) +
-    '</div>';
-  }
-  catch (error) { console.log('theme_form_element - ' + error); }
-}
-
-/**
- *
- */
-function theme_form_element_label(variables) {
-  try {
-    return typeof variables.element.title !== 'undefined' ?
-      variables.element.title : '';
-  }
-  catch (error) { console.log('theme_form_element_label - ' + error); }
-}
-
-/**
  *
  */
 function dg_form_element_set_empty_options_and_attributes(form, language) {
@@ -264,6 +182,9 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
       form.elements[name].id = id;
       form.elements[name].name = name;
       form.elements[name].attributes.id = id;
+      if (!form.elements[name].attributes['class']) { form.elements[name].attributes['class'] = ''; }
+      if (!form.elements[name].theme_wrappers) { form.elements[name].theme_wrappers = ['form_element']; }
+
 
       // Flat elements.
       if (!element_is_field) {
@@ -340,6 +261,75 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
     }
   }
   catch (error) { console.log('dg_form_element_set_empty_options_and_attributes - ' + error); }
+}
+
+/**
+  * @param {Object} element
+  */
+function dg_form_element_ng_model_attribute(element) {
+  try {
+    return "form_state.values['" + element.name + "']";
+  }
+  catch (error) {
+    console.log('dg_form_element_ng_model_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_id_attribute(id, language, delta) {
+  try {
+    return id + '-' + language + '-' + delta + '-value';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_id_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_name_attribute(name, language, delta) {
+  try {
+    return name + '[' + language + '][' + delta + '][value]';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_name_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_ng_model_attribute(name, language, delta) {
+  try {
+    // The ng-model needs the language code and value wrapped in single quotes.
+    return 'form_state.values.' + name + "['" + language + "'][" + delta + "]['value']";
+  }
+  catch (error) {
+    console.log('dg_form_element_field_ng_model_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ * @param variables
+ * @returns {string}
+ */
+function dg_form_element_field_item_element_create(id, name, language, delta) {
+  try {
+    return {
+      attributes: {
+        id: dg_form_element_field_id_attribute(id, language, delta),
+        name: dg_form_element_field_name_attribute(name, language, delta),
+        'ng-model': dg_form_element_field_ng_model_attribute(name, language, delta)
+      }
+    }
+  }
+  catch (error) {
+    console.log('dg_form_element_field_item_element_create - ' + error);
+  }
 }
 
 /**
