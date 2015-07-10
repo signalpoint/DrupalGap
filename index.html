@@ -20,12 +20,47 @@
   <!-- angular-drupal -->
   <script src="node_modules/angular-drupal/build/angular-drupal.min.js"></script>
 
+    <!-- Specify DrupalGap Dependencies -->
+    <script type="text/javascript">
+        function dg_ng_dependencies() {
+            return {
+
+                // Angular JS
+                angular: {
+                    ngRoute: {},
+                    ngSanitize: {},
+                    'angular-drupal': {},
+                    drupalgap: {}
+                },
+
+                // DrupalGap
+                drupalgap: {
+
+                    // Core
+
+                    // @TODO these modules should be prefixed with 'dg_' and not use camel case for Drupal's sake.
+                    dgAdmin: {},
+                    dgMenu: {},
+                    dgSystem: {},
+                    dgText: {},
+                    dgUser: {},
+                    dgEntity: {}, // IMPORTANT - order matters here, e.g. user/login will get
+                                // routed to user/:uid if we put the dgEntity module before
+                                // the dgUser module.
+
+                    // Contrib
+
+                    // Custom
+                    my_module: {}
+
+                }
+            };
+        }
+    </script>
+
   <!-- DrupalGap -->
   <script src="drupalgap.js"></script>
   <link rel="stylesheet" href="drupalgap.css">
-
-  <!-- DrupalGap Settings -->
-  <!--<script src="app/settings.js"></script>-->
 
   <!-- DrupalGap Theme -->
   <script src="themes/spi/spi.js"></script>

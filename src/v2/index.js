@@ -1,20 +1,21 @@
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
-  content_types_list: { }, /* holds info about each content type */
-  date_formats: { }, /* @see system_get_date_formats() in Drupal core */
-  date_types: { }, /* @see system_get_date_types() in Drupal core */
-  entity_info: { },
-  field_info_fields: { },
-  field_info_instances: { },
-  field_info_extra_fields: { },
-  menus: { },
-  ng: { }, /* holds onto angular stuff */
+  content_types_list: {}, /* holds info about each content type */
+  date_formats: {}, /* @see system_get_date_formats() in Drupal core */
+  date_types: {}, /* @see system_get_date_types() in Drupal core */
+  entity_info: {},
+  field_info_fields: {},
+  field_info_instances: {},
+  field_info_extra_fields: {},
+  menus: {},
+  modules: {},
+  ng: {}, /* holds onto angular stuff */
   remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
   sessid: null,
   session_name: null,
-  site_settings: { }, /* holds variable settings from the Drupal site */
-  user: { } /* holds onto the current user's account object */
+  site_settings: {}, /* holds variable settings from the Drupal site */
+  user: {} /* holds onto the current user's account object */
 };
 
 // Create the drupalgap module for Angular.
@@ -24,7 +25,7 @@ angular.module('drupalgap', [])
   .service('dgOffline', ['$q', dgOffline])
   .config(function() {
      // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
-     // @TODO allow a developer mode to live sync the drupalgap.json contents using an api key
+     // @TODO allow a developer mode to live sync the drupalgap.json content using an api key
      var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
      for (var name in json) {
        if (!json.hasOwnProperty(name)) { continue; }
@@ -32,8 +33,27 @@ angular.module('drupalgap', [])
      }
   });
 
-// Create the app.
-var dgApp = angular.module('dgApp', dg_ng_dependencies());
+// Grab the app's dependencies from the index.html file.
+var dg_dependencies = [];
+var _dg_dependencies = dg_ng_dependencies();
+for (var parent in _dg_dependencies) {
+  if (!_dg_dependencies.hasOwnProperty(parent)) { continue; }
+  var dg_parent = _dg_dependencies[parent];
+  for (var module_name in dg_parent) {
+    if (!dg_parent.hasOwnProperty(module_name)) { continue; }
+    var module = dg_parent[module_name];
+    if (!module.name) { module.name = module_name; }
+    dg_dependencies.push(module_name);
+    if (parent == 'drupalgap') {
+      drupalgap.modules[module_name] = module;
+    }
+
+  }
+}
+dpm(drupalgap.modules);
+
+// Create the app with its dependencies.
+var dgApp = angular.module('dgApp', dg_dependencies);
 
 // Run the app.
 dgApp.run([
@@ -55,7 +75,7 @@ dgApp.run([
 
           // Extract the current menu path from the Angular route, and warn
           // about any uncrecognized routes.
-          // @TODO this doesn't do anything, but it a good placeholder for
+          // @TODO this doesn't do anything, but it's a good placeholder for
           // future needs/hooks while pages are changing. Revisit these two
           // function's implementations now that we have a better understanding
           // of Angular's routing.
@@ -69,29 +89,6 @@ dgApp.run([
       });*/
   }
 ]);
-
-/**
- *
- */
-function dg_ng_dependencies() {
-  try {
-    return [
-        'ngRoute',
-        'ngSanitize',
-        'angular-drupal',
-        'drupalgap',
-        'dgAdmin',
-      'dgMenu',
-        'dgSystem',
-        'dgText',
-        'dgUser',
-        'dgEntity' // IMPORTANT - order matters here, e.g. user/login will get
-                   // routed to user/:uid if we put the dgEntity module before
-                   // the dgUser module.
-    ];
-  }
-  catch (error) { console.log('dg_ng_dependencies - ' + error); }
-}
 
 /**
  *

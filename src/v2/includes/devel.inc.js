@@ -8,7 +8,7 @@ function dpm(data) {
   try {
 
     if (typeof data !== 'undefined') {
-      if (typeof parent.window.ripple === 'function') {
+      if (typeof parent.window !== 'undefined' && typeof parent.window.ripple === 'function') {
         if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
           console.log(JSON.stringify(data));
         }
@@ -16,8 +16,8 @@ function dpm(data) {
           console.log(data);
         }
       }
-      else if (typeof data === 'object') { console.log(JSON.stringify(data)); }
-      if (data == '') { console.log('<empty-string>'); }
+      else if (typeof data === 'object') { console.log(data); }
+      else if (data == '') { console.log('<empty-string>'); }
       else { console.log(data); }
     }
     else { console.log('<undefined>'); }

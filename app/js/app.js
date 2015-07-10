@@ -7,7 +7,7 @@ angular.module('angular-drupal').config(function($provide) {
         base_path: '/',
         endpoint: 'drupalgap',
         language: 'und',
-        file_public_path: 'sites/default/files', // use public or private
+        file_public_path: 'sites/default/files' // use public or private
         //file_private_path: 'system/files',
     });
     
@@ -15,6 +15,7 @@ angular.module('angular-drupal').config(function($provide) {
 
 // Configure the drupalgap module.
 angular.module('drupalgap').config(function($provide) {
+  dpm('drupalgap config');
     $provide.constant('drupalgapSettings', {
         
         // Front page.
@@ -23,17 +24,22 @@ angular.module('drupalgap').config(function($provide) {
         // Modules.
         modules: {
           core: {
-            admin: { },
-            entity: { },
-            field: { },
-            image: { },
-            services: { },
-            system: { },
-            text: { },
-            user: { }
+            admin: {},
+            entity: {},
+            field: {},
+            image: {},
+            menu: {},
+            node: {},
+            options: {},
+            services: {},
+            system: {},
+            text: {},
+            user: {}
           },
-          contrib: { },
-          custom: { },
+          contrib: {},
+          custom: {
+            my_module: {}
+          }
         },
         
         // Menus.
@@ -141,7 +147,7 @@ angular.module('drupalgap').config(function($provide) {
                     value: ['authenticated user'],
                     mode: 'include'
                   }
-                },
+                }
                 
               }
 

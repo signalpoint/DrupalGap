@@ -83,24 +83,6 @@ function menu_list_system_menus() {
 /**
  *
  */
-function drupalgap_load_menus(drupalgapSettings) {
-  try {
-    if (!drupalgapSettings.menus) { return; } 
-    var menus = drupalgapSettings.menus;
-    for (var name in menus) {
-      if (!menus.hasOwnProperty(name)) { continue; }
-      var menu = menus[name];
-      if (!menu.links) { menu.links = []; }
-      if (!menu.attributes) { menu.attributes = {}; }
-      dg_menu_set(name, menu);
-    }
-  }
-  catch (error) { console.log('drupalgap_load_menus - ' + error); }
-}
-
-/**
- *
- */
 function dg_menu_get(name) {
   try {
     return drupalgap.menus[name];

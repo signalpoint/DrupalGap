@@ -162,7 +162,8 @@ angular.module('dgEntity', ['drupalgap'])
           //console.log(scope);
           //console.log(entity);
           scope.loading--;
-          scope.bundle = entity.type; // @TODO support all entity types!
+          var entity_info = dg_entity_get_info(scope.entity_type);
+          scope.bundle = entity[entity_info.entity_keys.bundle];
           dg_entity_form_builder($compile, scope, element, entity);
         });
 
@@ -294,6 +295,7 @@ function dg_entity_form_builder($compile, scope, element, entity) {
     }
 
     // Grab this entity's extra fields and add them as form elements.
+    // @TODO users and vocabularies don't have bundles from Drupal!
     var extras = dg_field_info_extra_fields(entity_type, bundle, 'form');
     //dpm('extras');
     //console.log(extras);
