@@ -1,4 +1,4 @@
-angular.module('dgText', ['drupalgap']);
+angular.module('dg_text', ['drupalgap']);
 
 /**
  * Implements hook_field_formatter_view().

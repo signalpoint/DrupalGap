@@ -1,4 +1,4 @@
-angular.module('dgMenu', [])
+angular.module('dg_menu', [])
   .service('dgMenuAccessCallback', ['$q', '$http', 'drupalSettings', dgMenuAccessCallback]);
 
 /**

@@ -1,3 +1,5 @@
+angular.module('dg_options', ['drupalgap']);
+
 /**
  * Implements hook_field_widget_form().
  * @param {Object} form

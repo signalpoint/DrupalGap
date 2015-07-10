@@ -1,3 +1,5 @@
+angular.module('dg_node', ['drupalgap']);
+
 /**
  *
  */

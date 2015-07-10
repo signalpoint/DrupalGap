@@ -15,6 +15,7 @@ dgApp.config(function(drupalgapSettings) {
  */
 function drupalgap_onload(drupalgapSettings) {
   try {
+    dg_module_invoke_all('install');
     drupalgap_load_blocks(drupalgapSettings);
     drupalgap_load_menus(drupalgapSettings);
   }

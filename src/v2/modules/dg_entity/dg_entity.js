@@ -1,4 +1,4 @@
-angular.module('dgEntity', ['drupalgap'])
+angular.module('dg_entity', ['drupalgap'])
 
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {

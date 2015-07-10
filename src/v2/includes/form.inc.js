@@ -146,9 +146,10 @@ function dg_form_defaults(form_id, $scope) {
         try {
           // Call the form's submit function(s), if any.
           for (var index in form.submit) {
-              if (!form.submit.hasOwnProperty(index)) { continue; }
-              var fn = form.submit[index];
-              fn.apply(null, Array.prototype.slice.call([form, form_state]));
+            if (!form.submit.hasOwnProperty(index)) { continue; }
+            var fn = form.submit[index];
+            // @TODO we probably don't need to use an apply here, just call it directly since there are 2 args
+            fn.apply(null, Array.prototype.slice.call([form, form_state]));
           }
         }
         catch (error) {

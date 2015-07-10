@@ -1,4 +1,4 @@
-angular.module('dgSystem', ['drupalgap'])
+angular.module('dg_system', ['drupalgap'])
 
 // hook_menu()
 .config(['$routeProvider', 'drupalgapSettings',

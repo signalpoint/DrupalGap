@@ -1,4 +1,4 @@
-angular.module('dgUser', ['drupalgap'])
+angular.module('dg_user', ['drupalgap'])
 
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {

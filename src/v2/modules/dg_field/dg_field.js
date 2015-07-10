@@ -1,2 +1,1 @@
-
-
+angular.module('dg_field', ['drupalgap']);

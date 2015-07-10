@@ -1,0 +1,1 @@
+angular.module('dg_services', ['drupalgap']);

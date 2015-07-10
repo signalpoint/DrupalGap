@@ -1,3 +1,5 @@
+angular.module('dg_image', ['drupalgap']);
+
 /**
  * Implements hook_field_formatter_view().
  * @param {String} entity_type

@@ -152,6 +152,10 @@ function dg_language_default() {
   catch (error) { console.log('dg_language_default - ' + error); }
 }
 
+function dg_is_array(obj) {
+  return Array.isArray(obj);
+}
+
 /**
  *
  */

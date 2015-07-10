@@ -333,3 +333,39 @@ function language_default() {
   }
   catch (error) { console.log('language_default - ' + error); }
 }
+
+/**
+ * @deprecated
+ * @see dg_module_implements()
+ */
+function module_implements(hook) {
+  console.log(
+    'DEPRECATED - module_implements(): use dg_module_implements() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_module_implements(hook);
+}
+
+/**
+ * @see https://api.drupal.org/api/drupal/includes!module.inc/function/module_invoke/7
+ */
+function module_invoke(module, hook) {
+  console.log(
+    'DEPRECATED - module_invoke(): use dg_module_invoke() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_module_invoke.apply(null, Array.prototype.slice.call(arguments));
+}
+
+/**
+ * @deprecated
+ * @see module_invoke_all()
+ */
+function module_invoke_all(hook) {
+  console.log(
+    'DEPRECATED - module_invoke_all(): use dg_module_invoke_all() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  if (arguments.length == 1) { return dg_module_invoke_all(hook); }
+  return dg_module_invoke_all.apply(null, Array.prototype.slice.call(arguments));
+}

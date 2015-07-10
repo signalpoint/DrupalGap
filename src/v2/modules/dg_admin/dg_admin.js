@@ -1,18 +1,17 @@
-angular.module('dgAdmin', ['drupalgap'])
-
-// hook_menu()
+angular.module('dg_admin', ['drupalgap'])
 .config(['$routeProvider', function($routeProvider) {
-      $routeProvider.when('/admin', {
-          templateUrl: 'themes/spi/page.tpl.html',
-          controller: 'dg_page_controller',
-          page_callback: 'dg_admin_page',
-        access_arguments: ['administer drupalgap']
-      });
-      $routeProvider.when('/admin/connect', {
-          templateUrl: 'themes/spi/page.tpl.html',
-          controller: 'dg_page_controller',
-          page_callback: 'dg_admin_connect_page'
-      });
+    $routeProvider.when('/admin', {
+      templateUrl: 'themes/spi/page.tpl.html',
+      controller: 'dg_page_controller',
+      page_callback: 'dg_admin_page',
+      access_arguments: ['administer drupalgap']
+    });
+    $routeProvider.when('/admin/connect', {
+      templateUrl: 'themes/spi/page.tpl.html',
+      controller: 'dg_page_controller',
+      page_callback: 'dg_admin_connect_page'
+
+    });
 }]);
 
 function dg_admin_page() {

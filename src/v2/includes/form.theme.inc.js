@@ -44,6 +44,15 @@ function theme_form_element_label(variables) {
 }
 
 /**
+ * Themes a marker for a required form element label.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_form_required_marker(variables) {
+  return '*';
+}
+
+/**
  * Themes a hidden input.
  * @param {Object} variables
  * @return {String}
