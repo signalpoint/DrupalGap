@@ -340,6 +340,10 @@ function dg_is_array(obj) {
   return Array.isArray(obj);
 }
 
+function dg_is_object(obj) {
+  return obj !== null && typeof obj === 'object';
+}
+
 /**
  *
  */
@@ -1194,7 +1198,21 @@ function drupalgap_form_render_element(form, element) {
         }
       }
 
-      return theme('form_element', { element: element });
+      // @TODO we need to employ #theme_wrappers here so i.e. dg_bootstrap can wrap form elements properly
+      // @see http://themery.com/dgd7/advanced-theming/forms/generated-markup
+      var theme_wrapper = element.theme_wrappers[0];
+      var theme_wrapper_vars = {};
+      if (dg_is_object(theme_wrapper)) {
+        theme_wrapper_vars = theme_wrapper;
+        theme_wrapper = theme_wrapper.theme;
+      }
+      theme_wrapper_vars.children =
+        theme('form_element_label', { element: element } ) +
+        theme(element.type, {
+          attributes: element.attributes,
+          element: element
+        });
+      return theme(theme_wrapper, theme_wrapper_vars);
 
     }
 
@@ -1283,102 +1301,6 @@ function drupalgap_form_render_element(form, element) {
 }
 
 /**
-  * @param {Object} element
-  */
-function dg_form_element_ng_model_attribute(element) {
-  try {
-    return "form_state.values['" + element.name + "']";
-  }
-  catch (error) {
-    console.log('dg_form_element_ng_model_attribute - ' + error);
-  }
-}
-
-/**
- *
- */
-function dg_form_element_field_id_attribute(id, language, delta) {
-  try {
-    return id + '-' + language + '-' + delta + '-value';
-  }
-  catch (error) {
-    console.log('dg_form_element_field_id_attribute - ' + error);
-  }
-}
-
-/**
- *
- */
-function dg_form_element_field_name_attribute(name, language, delta) {
-  try {
-    return name + '[' + language + '][' + delta + '][value]';
-  }
-  catch (error) {
-    console.log('dg_form_element_field_name_attribute - ' + error);
-  }
-}
-
-/**
- *
- */
-function dg_form_element_field_ng_model_attribute(name, language, delta) {
-  try {
-    // The ng-model needs the language code and value wrapped in single quotes.
-    return 'form_state.values.' + name + "['" + language + "'][" + delta + "]['value']";
-  }
-  catch (error) {
-    console.log('dg_form_element_field_ng_model_attribute - ' + error);
-  }
-}
-
-/**
- *
- * @param variables
- * @returns {string}
- */
-function dg_form_element_field_item_element_create(id, name, language, delta) {
-  try {
-    return {
-      attributes: {
-        id: dg_form_element_field_id_attribute(id, language, delta),
-        name: dg_form_element_field_name_attribute(name, language, delta),
-        'ng-model': dg_form_element_field_ng_model_attribute(name, language, delta)
-      }
-    }
-  }
-  catch (error) {
-    console.log('dg_form_element_field_item_element_create - ' + error);
-  }
-}
-
-/**
- *
- */
-function theme_form_element(variables) {
-  try {
-    return '<div>' +
-      theme('form_element_label', { element: variables.element } ) +
-      theme(variables.element.type, {
-          attributes: variables.element.attributes,
-          element: variables.element
-      }) +
-    '</div>';
-  }
-  catch (error) { console.log('theme_form_element - ' + error); }
-}
-
-/**
- *
- */
-function theme_form_element_label(variables) {
-  try {
-    return typeof variables.element.title !== 'undefined' ?
-      variables.element.title : '';
-  }
-  catch (error) { console.log('theme_form_element_label - ' + error); }
-}
-
-/**
  *
  */
 function dg_form_element_set_empty_options_and_attributes(form, language) {
@@ -1399,6 +1321,9 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
       form.elements[name].id = id;
       form.elements[name].name = name;
       form.elements[name].attributes.id = id;
+      if (!form.elements[name].attributes['class']) { form.elements[name].attributes['class'] = ''; }
+      if (!form.elements[name].theme_wrappers) { form.elements[name].theme_wrappers = ['form_element']; }
+
 
       // Flat elements.
       if (!element_is_field) {
@@ -1478,6 +1403,75 @@ function dg_form_element_set_empty_options_and_attributes(form, language) {
 }
 
 /**
+  * @param {Object} element
+  */
+function dg_form_element_ng_model_attribute(element) {
+  try {
+    return "form_state.values['" + element.name + "']";
+  }
+  catch (error) {
+    console.log('dg_form_element_ng_model_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_id_attribute(id, language, delta) {
+  try {
+    return id + '-' + language + '-' + delta + '-value';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_id_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_name_attribute(name, language, delta) {
+  try {
+    return name + '[' + language + '][' + delta + '][value]';
+  }
+  catch (error) {
+    console.log('dg_form_element_field_name_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ */
+function dg_form_element_field_ng_model_attribute(name, language, delta) {
+  try {
+    // The ng-model needs the language code and value wrapped in single quotes.
+    return 'form_state.values.' + name + "['" + language + "'][" + delta + "]['value']";
+  }
+  catch (error) {
+    console.log('dg_form_element_field_ng_model_attribute - ' + error);
+  }
+}
+
+/**
+ *
+ * @param variables
+ * @returns {string}
+ */
+function dg_form_element_field_item_element_create(id, name, language, delta) {
+  try {
+    return {
+      attributes: {
+        id: dg_form_element_field_id_attribute(id, language, delta),
+        name: dg_form_element_field_name_attribute(name, language, delta),
+        'ng-model': dg_form_element_field_ng_model_attribute(name, language, delta)
+      }
+    }
+  }
+  catch (error) {
+    console.log('dg_form_element_field_item_element_create - ' + error);
+  }
+}
+
+/**
  * Given a form element name and the form_id, this generates an html id
  * attribute value to be used in the DOM. An optional third argument is a
  * string language code to use. An optional fourth argument is an integer delta
@@ -1513,15 +1507,6 @@ function drupalgap_get_form(form_id) {
     dpm('drupalgap_get_form');
     console.log(form_id);
     return theme('form', { form_id: form_id });
-    // Set up form defaults.
-    /*var form = {
-      attributes: {
-        id: form_id,
-        'class': []
-      }
-    };*/
-    // Set up a directive attribute to handle this form, then theme and return.
-    //form.attributes[] = '';
   }
   catch (error) { console.log('drupalgap_get_form - ' + error); }
 }
@@ -1534,7 +1519,6 @@ function theme_form(variables) {
     // Theme the form as an Angular directive based on the form's id.
     var directive = variables.form_id.replace(/_/g, '-')
     return '<' + directive + '></' + directive + '>';
-    //return '<form ' + dg_attributes(variables.form.attributes) + '></form>';
   }
   catch (error) { console.log('theme_form - ' + error); }
 }
@@ -1752,6 +1736,8 @@ function dg_ng_compile_form($compile, $scope) {
 
     }
 
+    dg_module_invoke_all('form_alter', $scope.form, $scope.form_state, $scope.form.id);
+
     // Finally compile the rendered form.
     return dg_ng_compile($compile, $scope, dg_form_render($scope.form));
   }
@@ -1776,6 +1762,29 @@ function theme_container(variables) {
 }
 
 /**
+ *
+ */
+function theme_form_element(variables) {
+  try {
+    return '<div ' + dg_attributes(variables.attributes) + '>' +
+      variables.children +
+    '</div>';
+  }
+  catch (error) { console.log('theme_form_element - ' + error); }
+}
+
+/**
+ *
+ */
+/*function theme_form_element_label(variables) {
+  try {
+    return typeof variables.element.title !== 'undefined' ?
+      variables.element.title : '';
+  }
+  catch (error) { console.log('theme_form_element_label - ' + error); }
+}*/
+
+/**
  * Themes a form element label.
  * @param {Object} variables
  * @return {String}
@@ -1787,7 +1796,6 @@ function theme_form_element_label(variables) {
     //console.log(variables);
     var element = variables.element;
     if (dg_empty(element.title)) { return ''; }
-    // Any elements with a title_placeholder set to true
     // By default, use the element id as the label for, unless the element is
     // a radio, then use the name.
     var label_for = '';
@@ -1796,9 +1804,7 @@ function theme_form_element_label(variables) {
       label_for = element.attributes['for'];
     }
     if (element.type == 'radios') { label_for = element.name; }
-    // Render the label.
-    var html =
-      '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
+    var html = '<label for="' + label_for + '">' + element.title;
     if (element.required) { html += theme('form_required_marker', { }); }
     html += '</label>';
     return html;
@@ -2977,12 +2983,41 @@ function dg_admin_connect_page() {
   return content;
 }
 
+angular.module('dg_bootstrap', ['drupalgap']);
+
 /**
  * Implements hook_form_alter().
  */
 function dg_bootstrap_form_alter(form, form_state, form_id) {
-  dpm('dg_bootstrap_form_alter');
-  dpm(arguments);
+  //dpm('dg_bootstrap_form_alter');
+  //dpm(arguments);
+  if (!form.attributes.role) { form.attributes.role = 'form'; }
+  for (var name in form.elements) {
+    if (!form.elements.hasOwnProperty(name)) { continue; }
+    var element = form.elements[name];
+
+    // Add class name to element wrapper.
+    element.theme_wrappers[0] = {
+      theme: 'form_element',
+      attributes: {
+        'class': 'form-group'
+      }
+    };
+
+    // Add class names to elements.
+    switch (element.type) {
+      case 'password':
+      case 'textfield':
+      case 'textarea':
+      case 'select':
+        form.elements[name].attributes['class'] += ' form-control ';
+        break;
+      case 'submit':
+        form.elements[name].attributes['class'] += ' btn btn-default ';
+        break;
+    }
+
+  }
 }
 
 angular.module('dg_entity', ['drupalgap'])
