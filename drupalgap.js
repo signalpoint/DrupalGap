@@ -1,21 +1,22 @@
-/*! drupalgap 2015-07-09 */
+/*! drupalgap 2015-07-10 */
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
-  content_types_list: { }, /* holds info about each content type */
-  date_formats: { }, /* @see system_get_date_formats() in Drupal core */
-  date_types: { }, /* @see system_get_date_types() in Drupal core */
-  entity_info: { },
-  field_info_fields: { },
-  field_info_instances: { },
-  field_info_extra_fields: { },
-  menus: { },
-  ng: { }, /* holds onto angular stuff */
+  content_types_list: {}, /* holds info about each content type */
+  date_formats: {}, /* @see system_get_date_formats() in Drupal core */
+  date_types: {}, /* @see system_get_date_types() in Drupal core */
+  entity_info: {},
+  field_info_fields: {},
+  field_info_instances: {},
+  field_info_extra_fields: {},
+  menus: {},
+  modules: {},
+  ng: {}, /* holds onto angular stuff */
   remote_addr: null, /* php's $_SERVER['REMOTE_ADDR'] via system connect */
   sessid: null,
   session_name: null,
-  site_settings: { }, /* holds variable settings from the Drupal site */
-  user: { } /* holds onto the current user's account object */
+  site_settings: {}, /* holds variable settings from the Drupal site */
+  user: {} /* holds onto the current user's account object */
 };
 
 // Create the drupalgap module for Angular.
@@ -25,7 +26,7 @@ angular.module('drupalgap', [])
   .service('dgOffline', ['$q', dgOffline])
   .config(function() {
      // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
-     // @TODO allow a developer mode to live sync the drupalgap.json contents using an api key
+     // @TODO allow a developer mode to live sync the drupalgap.json content using an api key
      var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
      for (var name in json) {
        if (!json.hasOwnProperty(name)) { continue; }
@@ -33,8 +34,27 @@ angular.module('drupalgap', [])
      }
   });
 
-// Create the app.
-var dgApp = angular.module('dgApp', dg_ng_dependencies());
+// Grab the app's dependencies from the index.html file.
+var dg_dependencies = [];
+var _dg_dependencies = dg_ng_dependencies();
+for (var parent in _dg_dependencies) {
+  if (!_dg_dependencies.hasOwnProperty(parent)) { continue; }
+  var dg_parent = _dg_dependencies[parent];
+  for (var module_name in dg_parent) {
+    if (!dg_parent.hasOwnProperty(module_name)) { continue; }
+    var module = dg_parent[module_name];
+    if (!module.name) { module.name = module_name; }
+    dg_dependencies.push(module_name);
+    if (parent == 'drupalgap') {
+      drupalgap.modules[module_name] = module;
+    }
+
+  }
+}
+dpm(drupalgap.modules);
+
+// Create the app with its dependencies.
+var dgApp = angular.module('dgApp', dg_dependencies);
 
 // Run the app.
 dgApp.run([
@@ -56,7 +76,7 @@ dgApp.run([
 
           // Extract the current menu path from the Angular route, and warn
           // about any uncrecognized routes.
-          // @TODO this doesn't do anything, but it a good placeholder for
+          // @TODO this doesn't do anything, but it's a good placeholder for
           // future needs/hooks while pages are changing. Revisit these two
           // function's implementations now that we have a better understanding
           // of Angular's routing.
@@ -70,29 +90,6 @@ dgApp.run([
       });*/
   }
 ]);
-
-/**
- *
- */
-function dg_ng_dependencies() {
-  try {
-    return [
-        'ngRoute',
-        'ngSanitize',
-        'angular-drupal',
-        'drupalgap',
-        'dgAdmin',
-      'dgMenu',
-        'dgSystem',
-        'dgText',
-        'dgUser',
-        'dgEntity' // IMPORTANT - order matters here, e.g. user/login will get
-                   // routed to user/:uid if we put the dgEntity module before
-                   // the dgUser module.
-    ];
-  }
-  catch (error) { console.log('dg_ng_dependencies - ' + error); }
-}
 
 /**
  *
@@ -150,59 +147,6 @@ function dgOffline($q) {
   catch (error) { console.log('dgOffline - ' + error); }
 }
 
-
-/**
- *
- */
-function drupalgap_load_blocks(drupalgapSettings) {
-  try {
-    //dpm('drupalgap_load_blocks');
-    //console.log(drupalgapSettings);
-    
-    // For each module type specified in drupalgapSettings (core, contrib,
-    // custom)...
-    var modules = drupalgapSettings.modules;
-    for (var type in modules) {
-      if (!modules.hasOwnProperty(type)) { continue; }
-      
-      // For each module within the type...
-      var _modules = modules[type];
-      for (var name in _modules) {
-        if (!_modules.hasOwnProperty(name)) { continue; }
-        
-        var function_name = name + '_block_info';
-        
-        // Skip any modules that don't implement hook_block_info().
-        if (!dg_function_exists(function_name)) { continue; }
-        
-        // Call the implementation of hook_block_info() for the current module,
-        // then iterate over each of its blocks, placing them onto
-        // drupalgap.blocks one by one.
-        var module = _modules[name];
-        var blocks = window[function_name]();
-        //console.log(name);
-        //console.log(blocks);
-        for (var delta in blocks) {
-          if (!blocks.hasOwnProperty(delta)) { continue; }
-          var block = blocks[delta];
-          if (!block.delta) { block.delta = delta; }
-          if (!block.module) { block.module = name; }
-          
-          // Merge in any block settings.
-          //angular.merge(block);
-          
-          // Add the block to drupalgap.blocks.
-          drupalgap.blocks.push(block);
-        }
-
-      }
-
-    }
-    //dpm('BLOCKS!');
-    //console.log(drupalgap.blocks);
-  }
-  catch (error) { console.log('drupalgap_load_blocks - ' + error); }
-}
 
 /**
  *
@@ -390,6 +334,10 @@ function dg_language_default() {
       drupalSettings.language : 'und';
   }
   catch (error) { console.log('dg_language_default - ' + error); }
+}
+
+function dg_is_array(obj) {
+  return Array.isArray(obj);
 }
 
 /**
@@ -889,6 +837,42 @@ function language_default() {
 }
 
 /**
+ * @deprecated
+ * @see dg_module_implements()
+ */
+function module_implements(hook) {
+  console.log(
+    'DEPRECATED - module_implements(): use dg_module_implements() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_module_implements(hook);
+}
+
+/**
+ * @see https://api.drupal.org/api/drupal/includes!module.inc/function/module_invoke/7
+ */
+function module_invoke(module, hook) {
+  console.log(
+    'DEPRECATED - module_invoke(): use dg_module_invoke() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  return dg_module_invoke.apply(null, Array.prototype.slice.call(arguments));
+}
+
+/**
+ * @deprecated
+ * @see module_invoke_all()
+ */
+function module_invoke_all(hook) {
+  console.log(
+    'DEPRECATED - module_invoke_all(): use dg_module_invoke_all() instead in ' +
+    arguments.callee.caller.name + '()'
+  );
+  if (arguments.length == 1) { return dg_module_invoke_all(hook); }
+  return dg_module_invoke_all.apply(null, Array.prototype.slice.call(arguments));
+}
+
+/**
  * Given a JSON object or string, this will print it to the console. It accepts
  * an optional boolean as second argument, if it is false the output sent to the
  * console will not use pretty printing in a Chrome/Ripple environment.
@@ -898,7 +882,7 @@ function dpm(data) {
   try {
 
     if (typeof data !== 'undefined') {
-      if (typeof parent.window.ripple === 'function') {
+      if (typeof parent.window !== 'undefined' && typeof parent.window.ripple === 'function') {
         if (typeof arguments[1] !== 'undefined' && arguments[1] == false) {
           console.log(JSON.stringify(data));
         }
@@ -906,8 +890,8 @@ function dpm(data) {
           console.log(data);
         }
       }
-      else if (typeof data === 'object') { console.log(JSON.stringify(data)); }
-      if (data == '') { console.log('<empty-string>'); }
+      else if (typeof data === 'object') { console.log(data); }
+      else if (data == '') { console.log('<empty-string>'); }
       else { console.log(data); }
     }
     else { console.log('<undefined>'); }
@@ -1669,9 +1653,10 @@ function dg_form_defaults(form_id, $scope) {
         try {
           // Call the form's submit function(s), if any.
           for (var index in form.submit) {
-              if (!form.submit.hasOwnProperty(index)) { continue; }
-              var fn = form.submit[index];
-              fn.apply(null, Array.prototype.slice.call([form, form_state]));
+            if (!form.submit.hasOwnProperty(index)) { continue; }
+            var fn = form.submit[index];
+            // @TODO we probably don't need to use an apply here, just call it directly since there are 2 args
+            fn.apply(null, Array.prototype.slice.call([form, form_state]));
           }
         }
         catch (error) {
@@ -1822,6 +1807,15 @@ function theme_form_element_label(variables) {
 }
 
 /**
+ * Themes a marker for a required form element label.
+ * @param {Object} variables
+ * @return {String}
+ */
+function theme_form_required_marker(variables) {
+  return '*';
+}
+
+/**
  * Themes a hidden input.
  * @param {Object} variables
  * @return {String}
@@ -1955,10 +1949,82 @@ dgApp.config(function(drupalgapSettings) {
  */
 function drupalgap_onload(drupalgapSettings) {
   try {
+    dg_module_invoke_all('install');
     drupalgap_load_blocks(drupalgapSettings);
     drupalgap_load_menus(drupalgapSettings);
   }
   catch (error) { console.log('drupalgap_onload - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_load_blocks(drupalgapSettings) {
+  try {
+    //dpm('drupalgap_load_blocks');
+    //console.log(drupalgapSettings);
+
+    // For each module type specified in drupalgapSettings (core, contrib,
+    // custom)...
+    var modules = drupalgapSettings.modules;
+    for (var type in modules) {
+      if (!modules.hasOwnProperty(type)) { continue; }
+
+      // For each module within the type...
+      var _modules = modules[type];
+      for (var name in _modules) {
+        if (!_modules.hasOwnProperty(name)) { continue; }
+
+        var function_name = name + '_block_info';
+
+        // Skip any modules that don't implement hook_block_info().
+        if (!dg_function_exists(function_name)) { continue; }
+
+        // Call the implementation of hook_block_info() for the current module,
+        // then iterate over each of its blocks, placing them onto
+        // drupalgap.blocks one by one.
+        var module = _modules[name];
+        var blocks = window[function_name]();
+        //console.log(name);
+        //console.log(blocks);
+        for (var delta in blocks) {
+          if (!blocks.hasOwnProperty(delta)) { continue; }
+          var block = blocks[delta];
+          if (!block.delta) { block.delta = delta; }
+          if (!block.module) { block.module = name; }
+
+          // Merge in any block settings.
+          //angular.merge(block);
+
+          // Add the block to drupalgap.blocks.
+          drupalgap.blocks.push(block);
+        }
+
+      }
+
+    }
+    //dpm('BLOCKS!');
+    //console.log(drupalgap.blocks);
+  }
+  catch (error) { console.log('drupalgap_load_blocks - ' + error); }
+}
+
+/**
+ *
+ */
+function drupalgap_load_menus(drupalgapSettings) {
+  try {
+    if (!drupalgapSettings.menus) { return; }
+    var menus = drupalgapSettings.menus;
+    for (var name in menus) {
+      if (!menus.hasOwnProperty(name)) { continue; }
+      var menu = menus[name];
+      if (!menu.links) { menu.links = []; }
+      if (!menu.attributes) { menu.attributes = {}; }
+      dg_menu_set(name, menu);
+    }
+  }
+  catch (error) { console.log('drupalgap_load_menus - ' + error); }
 }
 
 /**
@@ -2046,24 +2112,6 @@ function menu_list_system_menus() {
 /**
  *
  */
-function drupalgap_load_menus(drupalgapSettings) {
-  try {
-    if (!drupalgapSettings.menus) { return; } 
-    var menus = drupalgapSettings.menus;
-    for (var name in menus) {
-      if (!menus.hasOwnProperty(name)) { continue; }
-      var menu = menus[name];
-      if (!menu.links) { menu.links = []; }
-      if (!menu.attributes) { menu.attributes = {}; }
-      dg_menu_set(name, menu);
-    }
-  }
-  catch (error) { console.log('drupalgap_load_menus - ' + error); }
-}
-
-/**
- *
- */
 function dg_menu_get(name) {
   try {
     return drupalgap.menus[name];
@@ -2079,6 +2127,74 @@ function dg_menu_set(name, menu) {
     drupalgap.menus[name] = menu;
   }
   catch (error) { console.log('dg_menu_set - ' + error); }
+}
+
+/**
+ * @see https://api.drupal.org/api/drupal/includes!module.inc/function/module_implements/7
+ */
+function dg_module_implements(hook) {
+  var modules = [];
+  for (var module_name in drupalgap.modules) {
+    if (!drupalgap.modules.hasOwnProperty(module_name)) { continue; }
+    var module = drupalgap.modules[module_name];
+    if (dg_function_exists(module_name + '_' + hook)) { modules.push(module_name); }
+  }
+  return modules;
+}
+
+/**
+ * @see https://api.drupal.org/api/drupal/includes!module.inc/function/module_invoke/7
+ */
+function dg_module_invoke(module, hook) {
+  try {
+    //dpm('dg_module_invoke');
+    //dpm(arguments);
+    var module_invocation_results = null;
+    var module_arguments = Array.prototype.slice.call(arguments);
+    var function_name = module + '_' + hook;
+    if (dg_function_exists(function_name)) {
+      var fn = window[function_name];
+      module_arguments.splice(0, 2);
+      if (module_arguments.length == 0) { module_invocation_results = fn(); }
+      else { module_invocation_results = fn.apply(null, module_arguments); }
+    }
+    return module_invocation_results;
+  }
+  catch (error) { console.log('dg_module_invoke - ' + error); }
+}
+
+/**
+ * @see https://api.drupal.org/api/drupal/includes!module.inc/function/module_invoke_all/7
+ */
+function dg_module_invoke_all(hook) {
+  try {
+    //dpm('dg_module_invoke_all');
+    //dpm(arguments);
+    var hook_args = Array.prototype.slice.call(arguments);
+    hook_args.splice(0, 1);
+    var results = [];
+    for (var module_name in drupalgap.modules) {
+      if (!drupalgap.modules.hasOwnProperty(module_name)) { continue; }
+      var module = drupalgap.modules[module_name];
+      var function_name = module_name + '_' + hook;
+      if (dg_function_exists(function_name)) {
+        var fn = window[function_name];
+        var invocation_results = null;
+        if (hook_args.length) { invocation_results = fn.apply(null, hook_args); }
+        else { invocation_results = fn(); }
+        if (dg_is_array(invocation_results)) {
+          for (var i = 0; i < invocation_results.length; i++) {
+            results.push(invocation_results[i]);
+          }
+        }
+        else { results.push(invocation_results); }
+      }
+    }
+    return results;
+  }
+  catch (error) {
+    console.log('dg_module_invoke_all - ' + error);
+  }
 }
 
 // Used to render the "dg-page" directive attribute from the theme's
@@ -2795,21 +2911,20 @@ function theme_table(variables) {
   catch (error) { console.log('theme_table - ' + error); }
 }
 
-angular.module('dgAdmin', ['drupalgap'])
-
-// hook_menu()
+angular.module('dg_admin', ['drupalgap'])
 .config(['$routeProvider', function($routeProvider) {
-      $routeProvider.when('/admin', {
-          templateUrl: 'themes/spi/page.tpl.html',
-          controller: 'dg_page_controller',
-          page_callback: 'dg_admin_page',
-        access_arguments: ['administer drupalgap']
-      });
-      $routeProvider.when('/admin/connect', {
-          templateUrl: 'themes/spi/page.tpl.html',
-          controller: 'dg_page_controller',
-          page_callback: 'dg_admin_connect_page'
-      });
+    $routeProvider.when('/admin', {
+      templateUrl: 'themes/spi/page.tpl.html',
+      controller: 'dg_page_controller',
+      page_callback: 'dg_admin_page',
+      access_arguments: ['administer drupalgap']
+    });
+    $routeProvider.when('/admin/connect', {
+      templateUrl: 'themes/spi/page.tpl.html',
+      controller: 'dg_page_controller',
+      page_callback: 'dg_admin_connect_page'
+
+    });
 }]);
 
 function dg_admin_page() {
@@ -2862,7 +2977,15 @@ function dg_admin_connect_page() {
   return content;
 }
 
-angular.module('dgEntity', ['drupalgap'])
+/**
+ * Implements hook_form_alter().
+ */
+function dg_bootstrap_form_alter(form, form_state, form_id) {
+  dpm('dg_bootstrap_form_alter');
+  dpm(arguments);
+}
+
+angular.module('dg_entity', ['drupalgap'])
 
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {
@@ -3026,7 +3149,8 @@ angular.module('dgEntity', ['drupalgap'])
           //console.log(scope);
           //console.log(entity);
           scope.loading--;
-          scope.bundle = entity.type; // @TODO support all entity types!
+          var entity_info = dg_entity_get_info(scope.entity_type);
+          scope.bundle = entity[entity_info.entity_keys.bundle];
           dg_entity_form_builder($compile, scope, element, entity);
         });
 
@@ -3158,6 +3282,7 @@ function dg_entity_form_builder($compile, scope, element, entity) {
     }
 
     // Grab this entity's extra fields and add them as form elements.
+    // @TODO users and vocabularies don't have bundles from Drupal!
     var extras = dg_field_info_extra_fields(entity_type, bundle, 'form');
     //dpm('extras');
     //console.log(extras);
@@ -3311,8 +3436,8 @@ function dg_entity_page_list(entity_type) {
   catch (error) { console.log('dg_entity_page_list - ' + error); }
 }
 
-
-
+angular.module('dg_field', ['drupalgap']);
+angular.module('dg_image', ['drupalgap']);
 
 /**
  * Implements hook_field_formatter_view().
@@ -3417,7 +3542,7 @@ function image_style_url(style_name, path) {
 }
 
 
-angular.module('dgMenu', [])
+angular.module('dg_menu', [])
   .service('dgMenuAccessCallback', ['$q', '$http', 'drupalSettings', dgMenuAccessCallback]);
 
 /**
@@ -3462,6 +3587,8 @@ function menu_block_view(delta) {
   catch (error) { console.log('menu_block_view - ' + error); }
 }
 
+angular.module('dg_node', ['drupalgap']);
+
 /**
  *
  */
@@ -3505,6 +3632,8 @@ function node_index_page(nodes) {
     console.log('node_index_page - ' + error);
   }
 }
+
+angular.module('dg_options', ['drupalgap']);
 
 /**
  * Implements hook_field_widget_form().
@@ -3694,8 +3823,8 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
   catch (error) { console.log('options_field_widget_form - ' + error); }
 }
 
-
-angular.module('dgSystem', ['drupalgap'])
+angular.module('dg_services', ['drupalgap']);
+angular.module('dg_system', ['drupalgap'])
 
 // hook_menu()
 .config(['$routeProvider', 'drupalgapSettings',
@@ -3803,7 +3932,7 @@ function system_block_view(delta) {
 }
 
 
-angular.module('dgText', ['drupalgap']);
+angular.module('dg_text', ['drupalgap']);
 
 /**
  * Implements hook_field_formatter_view().
@@ -3872,7 +4001,7 @@ function text_field_widget_form(form, form_state, field, instance, langcode, ite
   catch (error) { console.log('text_field_widget_form - ' + error); }
 }
 
-angular.module('dgUser', ['drupalgap'])
+angular.module('dg_user', ['drupalgap'])
 
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {
