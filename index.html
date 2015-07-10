@@ -39,12 +39,17 @@
                     // Core
 
                     // @TODO these modules should be prefixed with 'dg_' and not use camel case for Drupal's sake.
-                    dgAdmin: {},
-                    dgMenu: {},
-                    dgSystem: {},
-                    dgText: {},
-                    dgUser: {},
-                    dgEntity: {}, // IMPORTANT - order matters here, e.g. user/login will get
+                    dg_admin: {},
+                    dg_field: {},
+                    dg_image: {},
+                    dg_menu: {},
+                    dg_node: {},
+                    dg_options: {},
+                    dg_services: {},
+                    dg_system: {},
+                    dg_text: {},
+                    dg_user: {},
+                    dg_entity: {}, // IMPORTANT - order matters here, e.g. user/login will get
                                 // routed to user/:uid if we put the dgEntity module before
                                 // the dgUser module.
 
