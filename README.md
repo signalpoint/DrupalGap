@@ -25,8 +25,8 @@ On your Drupal site, enable the DrupalGap 7.x-2.x module:
 
 ## 2. Install the DrupalGap 2 SDK
 
- 1. Download the SDK: https://github.com/signalpoint/DrupalGap/archive/7.x-2.x.zip
- 2. Extract the zip file's contents to the folder you wish to run the app in
+ a. Download the SDK: https://github.com/signalpoint/DrupalGap/archive/7.x-2.x.zip
+ b. Extract the zip file's contents to the folder you wish to run the app in
 
 The app runs using the DrupalGap SDK's `index.html` file, so where you extract
 the SDK typically depends on what type of application you're building. For
@@ -78,6 +78,18 @@ http://example.com
 // The Drupal site lives here.
 http://example.com/application
 
+```
+
+## 3. Run the install command
+
+### Node JS Package Manager - npm (recommended)
+
+### Install Script (for developers without npm)
+
+From the DrupalGap SDK directory:
+```
+chmod +x install-dg
+./install-dg
 ```
 
 ## 3. app.js
