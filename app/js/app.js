@@ -3,8 +3,8 @@
 // Configure the angular-drupal module.
 angular.module('angular-drupal').config(function($provide) {
     $provide.value('drupalSettings', {
-        site_path: 'http://localhost/drupal-7',
-        base_path: '/',
+        sitePath: 'http://localhost/drupal-7',
+        basePath: '/',
         endpoint: 'drupalgap',
         language: 'und',
         file_public_path: 'sites/default/files' // use public or private
@@ -15,12 +15,13 @@ angular.module('angular-drupal').config(function($provide) {
 
 // Configure the drupalgap module.
 angular.module('drupalgap').config(function($provide) {
-  dpm('drupalgap config');
+
     $provide.constant('drupalgapSettings', {
         
         // Front page.
         front: 'dg',
-        
+
+      // @TODO are these modules deprecated now because of the dg_ng_dependencies() in index.html?
         // Modules.
         modules: {
           core: {
@@ -189,13 +190,13 @@ angular.module('drupalgap').config(function($provide) {
 
               }
 
-            },
+            }
 
           }
 
-        } // ./theme
+        } // theme
 
-    });
+    }); // drupalgapSettings
 });
 
 // Run the App!
