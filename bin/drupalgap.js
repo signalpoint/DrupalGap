@@ -9123,20 +9123,13 @@ function text_field_widget_form(form, form_state, field, instance, langcode,
  */
 function file_entity_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
   try {
-
-    // Use this hook to render a field's content on an entity. Use dpm() to
-    // inspect the incoming arguments. The arguments contain field display
-    // settings from Drupal.
-
-    //if (field.field_name == 'field_attachments') {
-      //console.log(entity_type);
-      //console.log(entity);
-      //console.log(field);
-      //console.log(instance);
-      //console.log(langcode);
-      //console.log(items);
-      //console.log(display);
-    //}
+    //console.log(entity_type);
+    //console.log(entity);
+    //console.log(field);
+    //console.log(instance);
+    //console.log(langcode);
+    //console.log(items);
+    //console.log(display);
 
     // Special case for media module.
     if (display.type == 'file_rendered') {
