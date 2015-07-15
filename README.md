@@ -94,10 +94,10 @@ chmod +x install-dg
 
 ## 3. app.js
 
-Open the `app/js/app.js` file and enter the `site_path` to your Drupal website:
+Open the `app/js/app.js` file and enter the `sitePath` to your Drupal website:
 
 ```
-site_path: 'http://localhost/drupal-7',
+sitePath: 'http://example.com',
 ```
 
 This value is for the `drupalSettings` of the `angular-drupal` config function.
