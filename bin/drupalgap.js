@@ -7542,6 +7542,9 @@ function drupalgap_entity_render_content(entity_type, entity) {
     // them in order onto the entity's content.
     var bundle = entity.type;
     if (entity_type == 'comment') { bundle = entity.bundle; }
+    else if (entity_type == 'taxonomy_term') {
+      bundle = entity.vocabulary_machine_name;
+    }
     var field_info = drupalgap_field_info_instances(entity_type, bundle);
     if (!field_info) { return; }
     var field_weights = {};
@@ -9108,6 +9111,54 @@ function text_field_widget_form(form, form_state, field, instance, langcode,
   catch (error) { console.log('text_field_widget_form - ' + error); }
 }
 
+/**
+ * Implements hook_field_formatter_view().
+ * @param {String} entity_type
+ * @param {Object} entity
+ * @param {Object} field
+ * @param {Object} instance
+ * @param {String} langcode
+ * @param {Object} items
+ * @param {Object} display
+ */
+function file_entity_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
+  try {
+
+    // Use this hook to render a field's content on an entity. Use dpm() to
+    // inspect the incoming arguments. The arguments contain field display
+    // settings from Drupal.
+
+    //if (field.field_name == 'field_attachments') {
+      //console.log(entity_type);
+      //console.log(entity);
+      //console.log(field);
+      //console.log(instance);
+      //console.log(langcode);
+      //console.log(items);
+      //console.log(display);
+    //}
+
+    // Special case for media module.
+    if (display.type == 'file_rendered') {
+      return media_field_formatter_view(entity_type, entity, field, instance, langcode, items, display);
+    }
+
+    // Iterate over each item, and place a widget onto the render array.
+    var content = {};
+    for (var delta in items) {
+        if (!items.hasOwnProperty(delta)) { continue; }
+        var item = items[delta];
+
+        switch (display.type) {
+          default:
+            console.log('file_entity_field_formatter_view() - unsupported display type: ' + display.type);
+            break;
+        }
+    }
+    return content;
+  }
+  catch (error) { console.log('file_entity_field_formatter_view - ' + error); }
+}
 
 
 
