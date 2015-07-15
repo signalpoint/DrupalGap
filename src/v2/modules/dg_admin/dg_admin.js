@@ -27,9 +27,10 @@ function dg_admin_page() {
   for (var entity_type in entity_info) {
     if (!entity_info.hasOwnProperty(entity_type)) { continue; }
     var entity = entity_info[entity_type];
+    var title = typeof entity.plural_label !== 'undefined' ? entity.plural_label : entity.label;
     content[entity_type] = {
       theme: 'fieldset',
-      title: entity.plural_label,
+      title: title,
       children: [
         {
           theme: 'item_list',
@@ -55,7 +56,7 @@ function dg_admin_connect_page() {
   };
   $http = dg_ng_get('http');
   drupalSettings = dg_ng_get('drupalSettings');
-  var path = drupalSettings.site_path + drupalSettings.base_path + '?q=drupalgap/connect';
+  var path = drupalSettings.sitePath + drupalSettings.basePath + '?q=drupalgap/connect';
   $http.get(path).then(function(result) {
     if (result.status != 200) { return; }
     console.log(result.data);
