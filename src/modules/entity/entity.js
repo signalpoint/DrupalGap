@@ -134,7 +134,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
     // them in order onto the entity's content.
     var bundle = entity.type;
     if (entity_type == 'comment') { bundle = entity.bundle; }
-    if (entity_type == 'taxonomy_term') {
+    else if (entity_type == 'taxonomy_term') {
       bundle = entity.vocabulary_machine_name;
     }
     var field_info = drupalgap_field_info_instances(entity_type, bundle);
