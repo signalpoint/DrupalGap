@@ -71,6 +71,9 @@ function drupalgap_module_create() {
   
   MODULE_NAME="$1";
   MODULE_DIRECTORY="$APP_MODULES_CUSTOM_DIRECTORY/$MODULE_NAME"
+  PAGE_CALLBACK="$MODULE_NAME"
+  PAGE_CALLBACK+="_hello_page"
+  FILE_URI="$MODULE_DIRECTORY/$MODULE_NAME.js"
   
   # Create the app/modules directory if it doesn't exist.
   if [ ! -d "$APP_MODULES_DIRECTORY" ]; then
@@ -87,22 +90,35 @@ function drupalgap_module_create() {
     echo "$MODULE_NAME already exists..."
     exit
   fi
-  
+
   mkdir $MODULE_DIRECTORY
   echo "angular.module('$MODULE_NAME', ['drupalgap'])
 
 // Configure module route provider, which is similar to hook_menu() in Drupal.
 .config(['\$routeProvider', function(\$routeProvider) {
-      $routeProvider.when('/$MODULE_NAME/hello', {
-          templateUrl: 'themes/spi/page.tpl.html',
+      \$routeProvider.when('/$MODULE_NAME/hello', {
+          templateUrl: dg_templateUrl(),
           controller: 'dg_page_controller',
-          page_callback: '$MODULE_NAME_hello_page'
+          page_callback: '$PAGE_CALLBACK'
       });
 }])
 
-;" > "$MODULE_DIRECTORY/$MODULE_NAME.js"
-  echo "Created module successfully!
-Next, add $MODULE_NAME to dg_ng_depencencies() in the index.html file."
+;
+
+function $PAGE_CALLBACK() {
+  var content = {};
+  content['my_paragraph'] = {
+    markup: '<p>Hello world!</p>'
+  };
+  return content;
+}
+
+" > "$FILE_URI"
+  echo "
+Created module in $MODULE_DIRECTORY, next make these changes to index.html:
+
+1. Add \"$MODULE_NAME: {},\" in dg_ng_depencencies() function
+2. Add <script src=\"$FILE_URI\"></script> in the <head>...</head>"
   
 }
 
