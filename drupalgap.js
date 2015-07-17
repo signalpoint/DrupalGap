@@ -2409,10 +2409,24 @@ function dg_render(content) {
     if (type === 'string') { return content; }
     var html = '';
     if (type === 'object') {
-      if (content.markup) { return content.markup; }
-      if (content.theme) { return theme(content.theme, content); }
+      if (content.markup) {
+        var _html = content.markup;
+        if (content.prefix) { _html = content.prefix + _html; }
+        if (content.suffix) { _html += content.suffix; }
+        return _html;
+      }
+      if (content.theme) {
+        var _html = theme(content.theme, content);
+        if (content.prefix) { _html = content.prefix + _html; }
+        if (content.suffix) { _html += content.suffix; }
+        return _html;
+      }
+      if (content.prefix) { html = content.prefix + html; }
       for (var index in content) {
-        if (!content.hasOwnProperty(index)) { continue; }
+        if (
+          !content.hasOwnProperty(index) ||
+          index == 'prefix' || index == 'suffix'
+        ) { continue; }
         var piece = content[index];
         var _type = $.type(piece);
         if (_type === 'object') { html += dg_render(piece); }
@@ -2422,6 +2436,7 @@ function dg_render(content) {
           }
         }
       }
+      if (content.suffix) { html += content.suffix; }
     }
     else if (type === 'array') {
       for (var i = 0; i < content.length; i++) {
@@ -3116,8 +3131,6 @@ angular.module('dg_entity', ['drupalgap'])
               var display = instance.display.drupalgap;
               var module = display.module;
               var hook = module + '_field_formatter_view';
-
-              dpm(hook);
               
               // Invoke the hook_field_formmater_view(), if it exists.
               if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
@@ -3130,6 +3143,9 @@ angular.module('dg_entity', ['drupalgap'])
                 entity[field_name][entity.language],
                 display
               );
+              content[field_name].prefix = '<div class="' + field_name + '">';
+              content[field_name].suffix = '</div>';
+              dpm(content[field_name]);
               
             }
 
