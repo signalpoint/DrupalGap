@@ -141,3 +141,14 @@ function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
   }
   catch (error) { console.log('dg_page_compile - ' + error); }
 }
+
+/**
+ *
+ */
+function dg_templateUrl() {
+  try {
+    return 'themes/spi/page.tpl.html';
+  }
+  catch (error) { console.log('dg_templateUrl - ' + error); }
+}
+
