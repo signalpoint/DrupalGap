@@ -50,7 +50,6 @@ for (var parent in _dg_dependencies) {
 
   }
 }
-dpm(drupalgap.modules);
 
 // Create the app with its dependencies.
 var dgApp = angular.module('dgApp', dg_dependencies);
