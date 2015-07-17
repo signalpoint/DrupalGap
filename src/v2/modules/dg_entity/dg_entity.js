@@ -218,8 +218,10 @@ angular.module('dg_entity', ['drupalgap'])
           }
 
           var content = {};
+          var label = typeof entity_info.plural_label !== 'undefined' ?
+            entity_info.plural_label : entity_info.label;
           content['label'] = {
-            markup: '<h2>' + t(entity_info.plural_label) + '</h2>'
+            markup: '<h2>' + t(label) + '</h2>'
           };
           content['entities'] = {
             theme: 'table',
