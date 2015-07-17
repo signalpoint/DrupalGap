@@ -33,14 +33,13 @@ dgApp.directive("dgMain", function($compile, $injector) {
 function dg_system_page() {
   try {
     var user = dg_user_get();
-    if (user.uid) {
-      // User is authenticated...
-      return '<p>Hello ' + user.name + '!</p>';
-    }
-    else {
-      // User is anonymous...
-      return '<p>Welcome visitor...</p>';
-    }
+    var salutation = t('Hello world!');
+    if (user.uid) { salutation = t('Hello') + ' ' + user.name; }
+    var content = {};
+    content['my_widget'] = {
+      markup: '<p>' + salutation + '</p>'
+    };
+    return content;
   }
   catch (error) { console.log('dg_system_page - ' + error); }
 }
