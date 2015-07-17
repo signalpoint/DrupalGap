@@ -1,4 +1,18 @@
 #!/bin/bash
+
+# Globals
+APP_MODULES_DIRECTORY="app/modules"
+#function app_modules_directory() {
+#  APP_MODULES_DIRECTORY="app/modules"
+#}
+#app_modules_directory
+
+APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
+#function app_modules_custom_directory() {
+#  APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
+#}
+#app_modules_custom_directory
+
 function drupalgap_install() {
   mkdir node_modules
   cd node_modules/
@@ -51,10 +65,87 @@ function drupalgap_install() {
   wget https://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css
   mv bootstrap.min.css bootstrap.css
 }
+
+function drupalgap_module_create() {
+  # $1 = module name
+  
+  MODULE_NAME="$1";
+  MODULE_DIRECTORY="$APP_MODULES_CUSTOM_DIRECTORY/$MODULE_NAME"
+  
+  # Create the app/modules directory if it doesn't exist.
+  if [ ! -d "$APP_MODULES_DIRECTORY" ]; then
+    mkdir $APP_MODULES_DIRECTORY
+  fi
+  
+  # Create the app/modules directory if it doesn't exist.
+  if [ ! -d "$APP_MODULES_CUSTOM_DIRECTORY" ]; then
+    mkdir $APP_MODULES_CUSTOM_DIRECTORY
+  fi
+  
+  # Create the module's directory, or warn if it already exists.
+  if [ -d "$MODULE_DIRECTORY" ]; then
+    echo "$MODULE_NAME already exists..."
+    exit
+  fi
+  
+  mkdir $MODULE_DIRECTORY
+  echo "angular.module('$MODULE_NAME', ['drupalgap'])
+
+// Configure module route provider, which is similar to hook_menu() in Drupal.
+.config(['\$routeProvider', function(\$routeProvider) {
+      $routeProvider.when('/$MODULE_NAME/hello', {
+          templateUrl: 'themes/spi/page.tpl.html',
+          controller: 'dg_page_controller',
+          page_callback: '$MODULE_NAME_hello_page'
+      });
+}])
+
+;" > "$MODULE_DIRECTORY/$MODULE_NAME.js"
+  echo "Created module successfully!
+Next, add $MODULE_NAME to dg_ng_depencencies() in the index.html file."
+  
+}
+
+# @TODO support Macs with curl instead of wget
+function drupalgap_download_project() {
+  PROJECT="$1"
+  MODULE_DIR="$APP_MODULES_DIRECTORY/$PROJECT"
+  if [ -d "$MODULE_DIR" ]; then
+    read -p "The $PROJECT project already exists, overwrite it? " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ ! $REPLY =~ ^[Yy]$ ]]
+    then
+      exit 1
+    else
+      rm -rf "$MODULE_DIR"
+      echo "Removed $MODULE_DIR directory"
+    fi
+  fi
+  BRANCH="7.x-1.x-angular"
+  if [ $# -eq 2 ]; then
+    BRANCH=$2
+  fi
+  ZIP_FILE_NAME="$BRANCH.zip"
+  USER_NAME="signalpoint"
+  URL="https://github.com/$USER_NAME/$PROJECT/archive/$ZIP_FILE_NAME"
+  cd "$APP_MODULES_DIRECTORY"
+  wget "$URL" --no-check-certificate
+  unzip "$BRANCH"
+  rm "$BRANCH"
+  mv "$PROJECT-$BRANCH" "$PROJECT"
+  echo "Downloaded $PROJECT to $MODULE_DIR"
+}
+
+#module) drupalgap_module $2 $3;;
+
 case "$1" in
--a|-A) echo you picked A;;
--b|-B) echo you picked B;;
--c|-C) echo you picked C;;
 install) drupalgap_install;;
+module)    
+  case "$2" in
+    create) drupalgap_module_create $3;;
+  esac
+  ;;
+download|dl) drupalgap_download_project $2 $3;;
 -*) usage "bad argument $1";;
 esac
+
