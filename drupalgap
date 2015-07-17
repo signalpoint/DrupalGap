@@ -106,13 +106,15 @@ function drupalgap_module_create() {
 ;
 
 function $PAGE_CALLBACK() {
+  var user = dg_user_get();
+  var salutation = t('Hello world');
+  if (user.uid) { salutation = t('Hello') + ' ' + user.name; }
   var content = {};
-  content['my_paragraph'] = {
-    markup: '<p>Hello world!</p>'
+  content['my_widget'] = {
+    markup: '<p>' + salutation + '</p>'
   };
   return content;
 }
-
 " > "$FILE_URI"
   echo "
 Created module in $MODULE_DIRECTORY, next make these changes to index.html:
