@@ -50,7 +50,6 @@ for (var parent in _dg_dependencies) {
 
   }
 }
-dpm(drupalgap.modules);
 
 // Create the app with its dependencies.
 var dgApp = angular.module('dgApp', dg_dependencies);
@@ -3544,14 +3543,14 @@ function image_style_url(style_name, path) {
   try {
     var drupalSettings = dg_ng_get('drupalSettings');
     var src =
-      drupalSettings.site_path + drupalSettings.base_path + path;
+      drupalSettings.sitePath + drupalSettings.basePath + path;
     if (src.indexOf('public://') != -1) {
       src = src.replace(
         'public://',
         drupalSettings.file_public_path +
           '/styles/' +
           style_name +
-          '/public'
+          '/public/'
       );
     }
     else if (src.indexOf('private://') != -1) {
@@ -3560,7 +3559,7 @@ function image_style_url(style_name, path) {
         drupalSettings.file_private_path +
           '/styles/' +
           style_name +
-          '/private'
+          '/private/'
       );
     }
     return src;
