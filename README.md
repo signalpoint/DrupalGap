@@ -86,10 +86,10 @@ http://example.com/application
 
 ### Install Script (for developers without npm)
 
-From the DrupalGap SDK directory:
+From the DrupalGap SDK directory, run these terminal commands:
 ```
-chmod +x install-dg
-./install-dg
+chmod +x drupalgap
+./drupalgap install
 ```
 
 ## 4. app.js
