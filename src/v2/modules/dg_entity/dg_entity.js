@@ -4,7 +4,7 @@ angular.module('dg_entity', ['drupalgap'])
 .config(['$routeProvider', function($routeProvider) {
 
     var entity_types = dg_entity_types();
-    console.log(entity_types);
+    //console.log(entity_types);
       
       // Add routes to view and edit entities.
       for (var i = 0; i < entity_types.length; i++) {
