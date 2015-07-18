@@ -5,7 +5,7 @@
  */
 function drupalgap_goto(path) {
   try {
-    $location = drupalgap_ng_get('location');
+    $location = dg_ng_get('location');
     $location.path('/' + path);
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }

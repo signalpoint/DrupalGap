@@ -4,7 +4,7 @@ angular.module('dg_entity', ['drupalgap'])
 .config(['$routeProvider', function($routeProvider) {
 
     var entity_types = dg_entity_types();
-    console.log(entity_types);
+    //console.log(entity_types);
       
       // Add routes to view and edit entities.
       for (var i = 0; i < entity_types.length; i++) {
@@ -103,8 +103,6 @@ angular.module('dg_entity', ['drupalgap'])
               var display = instance.display.drupalgap;
               var module = display.module;
               var hook = module + '_field_formatter_view';
-
-              dpm(hook);
               
               // Invoke the hook_field_formmater_view(), if it exists.
               if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
@@ -117,6 +115,8 @@ angular.module('dg_entity', ['drupalgap'])
                 entity[field_name][entity.language],
                 display
               );
+              content[field_name].prefix = '<div class="' + field_name + '">';
+              content[field_name].suffix = '</div>';
               
             }
 
@@ -218,8 +218,10 @@ angular.module('dg_entity', ['drupalgap'])
           }
 
           var content = {};
+          var label = typeof entity_info.plural_label !== 'undefined' ?
+            entity_info.plural_label : entity_info.label;
           content['label'] = {
-            markup: '<h2>' + t(entity_info.plural_label) + '</h2>'
+            markup: '<h2>' + t(label) + '</h2>'
           };
           content['entities'] = {
             theme: 'table',

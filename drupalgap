@@ -1,0 +1,169 @@
+#!/bin/bash
+
+# Globals
+APP_MODULES_DIRECTORY="app/modules"
+#function app_modules_directory() {
+#  APP_MODULES_DIRECTORY="app/modules"
+#}
+#app_modules_directory
+
+APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
+#function app_modules_custom_directory() {
+#  APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
+#}
+#app_modules_custom_directory
+
+function drupalgap_install() {
+  mkdir node_modules
+  cd node_modules/
+  mkdir angular-drupal
+  cd angular-drupal/
+  mkdir build
+  cd build/
+  wget https://raw.githubusercontent.com/easystreet3/angular-drupal/7.x-1.x/build/angular-drupal.min.js --no-check-certificate
+  cd ../../../app/
+  mkdir bower_components
+  cd bower_components/
+  mkdir jquery
+  cd jquery/
+  mkdir dist
+  cd dist/
+  wget http://code.jquery.com/jquery-2.1.1.min.js
+  mv jquery-2.1.1.min.js jquery.js
+  cd ../../
+  mkdir angular
+  cd angular/
+  wget https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js
+  mv angular.min.js angular.js
+  cd ../
+  mkdir angular-animate
+  cd angular-animate/
+  wget https://code.angularjs.org/1.4.2/angular-animate.min.js
+  mv angular-animate.min.js angular-animate.js
+  cd ../
+  mkdir angular-route
+  cd angular-route/
+  wget https://code.angularjs.org/1.4.2/angular-route.min.js
+  mv angular-route.min.js angular-route.js
+  cd ../
+  mkdir angular-resource
+  cd angular-resource/
+  wget https://code.angularjs.org/1.4.2/angular-resource.min.js
+  mv angular-resource.min.js angular-resource.js
+  cd ../
+  mkdir angular-sanitize
+  cd angular-sanitize/
+  wget https://code.angularjs.org/1.4.2/angular-sanitize.min.js
+  mv angular-sanitize.min.js angular-sanitize.js
+  cd ../
+  mkdir bootstrap
+  cd bootstrap/
+  mkdir dist
+  cd dist/
+  mkdir css
+  cd css/
+  wget https://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css
+  mv bootstrap.min.css bootstrap.css
+}
+
+function drupalgap_module_create() {
+  # $1 = module name
+  
+  MODULE_NAME="$1";
+  MODULE_DIRECTORY="$APP_MODULES_CUSTOM_DIRECTORY/$MODULE_NAME"
+  PAGE_CALLBACK="$MODULE_NAME"
+  PAGE_CALLBACK+="_hello_page"
+  FILE_URI="$MODULE_DIRECTORY/$MODULE_NAME.js"
+  
+  # Create the app/modules directory if it doesn't exist.
+  if [ ! -d "$APP_MODULES_DIRECTORY" ]; then
+    mkdir $APP_MODULES_DIRECTORY
+  fi
+  
+  # Create the app/modules directory if it doesn't exist.
+  if [ ! -d "$APP_MODULES_CUSTOM_DIRECTORY" ]; then
+    mkdir $APP_MODULES_CUSTOM_DIRECTORY
+  fi
+  
+  # Create the module's directory, or warn if it already exists.
+  if [ -d "$MODULE_DIRECTORY" ]; then
+    echo "$MODULE_NAME already exists..."
+    exit
+  fi
+
+  mkdir $MODULE_DIRECTORY
+  echo "angular.module('$MODULE_NAME', ['drupalgap'])
+
+// Configure module route provider, which is similar to hook_menu() in Drupal.
+.config(['\$routeProvider', function(\$routeProvider) {
+      \$routeProvider.when('/$MODULE_NAME/hello', {
+          templateUrl: dg_templateUrl(),
+          controller: 'dg_page_controller',
+          page_callback: '$PAGE_CALLBACK'
+      });
+}])
+
+;
+
+function $PAGE_CALLBACK() {
+  var user = dg_user_get();
+  var salutation = t('Hello world');
+  if (user.uid) { salutation = t('Hello') + ' ' + user.name; }
+  var content = {};
+  content['my_widget'] = {
+    markup: '<p>' + salutation + '</p>'
+  };
+  return content;
+}
+" > "$FILE_URI"
+  echo "
+Created module in $MODULE_DIRECTORY, next make these changes to index.html:
+
+1. Add \"$MODULE_NAME: {},\" in dg_ng_depencencies() function
+2. Add <script src=\"$FILE_URI\"></script> in the <head>...</head>"
+  
+}
+
+# @TODO support Macs with curl instead of wget
+function drupalgap_download_project() {
+  PROJECT="$1"
+  MODULE_DIR="$APP_MODULES_DIRECTORY/$PROJECT"
+  if [ -d "$MODULE_DIR" ]; then
+    read -p "The $PROJECT project already exists, overwrite it? " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ ! $REPLY =~ ^[Yy]$ ]]
+    then
+      exit 1
+    else
+      rm -rf "$MODULE_DIR"
+      echo "Removed $MODULE_DIR directory"
+    fi
+  fi
+  BRANCH="7.x-1.x-angular"
+  if [ $# -eq 2 ]; then
+    BRANCH=$2
+  fi
+  ZIP_FILE_NAME="$BRANCH.zip"
+  USER_NAME="signalpoint"
+  URL="https://github.com/$USER_NAME/$PROJECT/archive/$ZIP_FILE_NAME"
+  cd "$APP_MODULES_DIRECTORY"
+  wget "$URL" --no-check-certificate
+  unzip "$BRANCH"
+  rm "$BRANCH"
+  mv "$PROJECT-$BRANCH" "$PROJECT"
+  echo "Downloaded $PROJECT to $MODULE_DIR"
+}
+
+#module) drupalgap_module $2 $3;;
+
+case "$1" in
+install) drupalgap_install;;
+module)    
+  case "$2" in
+    create) drupalgap_module_create $3;;
+  esac
+  ;;
+download|dl) drupalgap_download_project $2 $3;;
+-*) usage "bad argument $1";;
+esac
+

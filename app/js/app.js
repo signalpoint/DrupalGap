@@ -3,7 +3,7 @@
 // Configure the angular-drupal module.
 angular.module('angular-drupal').config(function($provide) {
     $provide.value('drupalSettings', {
-        sitePath: 'http://localhost/drupal-7',
+        sitePath: '', // Example: 'http://example.com' with no trailing slash
         basePath: '/',
         endpoint: 'drupalgap',
         language: 'und',

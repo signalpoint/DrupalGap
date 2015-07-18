@@ -1,4 +1,3 @@
-/*! drupalgap 2015-07-10 */
 // Create the drupalgap object.
 var drupalgap = {
   blocks: [],
@@ -51,7 +50,6 @@ for (var parent in _dg_dependencies) {
 
   }
 }
-dpm(drupalgap.modules);
 
 // Create the app with its dependencies.
 var dgApp = angular.module('dgApp', dg_dependencies);
@@ -60,6 +58,12 @@ var dgApp = angular.module('dgApp', dg_dependencies);
 dgApp.run([
     '$rootScope', '$routeParams', '$location', '$http', 'drupal', 'drupalSettings', 'drupalgapSettings',
     function($rootScope, $routeParams, $location, $http, drupal, drupalSettings, drupalgapSettings) {
+      
+      // Warn if there is no sitePath specified.
+      if (typeof drupalSettings.sitePath === 'undefined' || dg_empty(drupalSettings.sitePath)) {
+        alert(t('You must specify a sitePath for the drupalSettings in the app.js file!'));
+        return;
+      }
 
       //dpm('dgApp.run()');
       //console.log(arguments);
@@ -147,7 +151,6 @@ function dgOffline($q) {
   catch (error) { console.log('dgOffline - ' + error); }
 }
 
-
 /**
  *
  */
@@ -180,7 +183,6 @@ function drupalgap_render_block(delta, block) {
   }
   catch (error) { console.log('drupalgap_render_block - ' + error); }
 }
-
 
 /**
  * Implementation of arg(index = null, path = null).
@@ -421,7 +423,6 @@ function t(str) {
   return str;
 }
 
-
 /**
  *
  */
@@ -502,7 +503,6 @@ function dg_session_set(data) {
   }
   catch (error) { console.log('dg_session_set - ' + error); }
 }
-
 
 /**
  * @deprecated
@@ -875,7 +875,6 @@ function module_invoke_all(hook) {
   if (arguments.length == 1) { return dg_module_invoke_all(hook); }
   return dg_module_invoke_all.apply(null, Array.prototype.slice.call(arguments));
 }
-
 /**
  * Given a JSON object or string, this will print it to the console. It accepts
  * an optional boolean as second argument, if it is false the output sent to the
@@ -908,7 +907,6 @@ function dpm(data) {
   catch (error) { console.log('dpm - ' + error); }
 }
 
-
 /**
  * Returns an array of entity type names.
  * @return {Array}
@@ -937,8 +935,7 @@ function dg_entity_get_info() {
     return drupalgap.entity_info;
   }
   catch (error) { console.log('dg_entity_get_info - ' + error); }
-}
-/**
+}/**
  * @see https://api.drupal.org/api/drupal/modules!field!field.info.inc/function/field_info_extra_fields/7
  */
 function dg_field_info_extra_fields(entity_type, bundle, context) {
@@ -1029,8 +1026,7 @@ function dg_field_info_instance(entity_type, field_name, bundle_name) {
     return instances[field_name];
   }
   catch (error) { console.log('dg_field_info_instance - ' + error); }
-}
-/**
+}/**
  * Reads entire file into a string and returns the string. Returns false if
  * it fails.
  * @param {String} path
@@ -1135,7 +1131,6 @@ function dg_delete(name) {
     console.log('dg_delete - ' + error);
   }
 }
-
 
 /**
  *
@@ -1498,7 +1493,6 @@ function dg_form_get_element_id(name, form_id) {
   catch (error) { console.log('dg_form_get_element_id - ' + error); }
 }
 
-
 /**
  *
  */
@@ -1745,8 +1739,6 @@ function dg_ng_compile_form($compile, $scope) {
 }
 
 
-
-
 /**
  * Themes a container.
  * @param {Object} variables
@@ -1897,7 +1889,6 @@ function theme_textfield(variables) {
   }
   catch (error) { console.log('theme_textfield - ' + error); }
 }
-
 /**
  * Given a path, this will change the current page in the app.
  * @param {String} path
@@ -1905,12 +1896,11 @@ function theme_textfield(variables) {
  */
 function drupalgap_goto(path) {
   try {
-    $location = drupalgap_ng_get('location');
+    $location = dg_ng_get('location');
     $location.path('/' + path);
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
 }
-
 
 /**
  * Given an argument, this will return true if it is an int, false otherwise.
@@ -1936,7 +1926,6 @@ function dg_empty(value) {
   }
   catch (error) { console.log('dg_empty - ' + error); }
 }
-
 
 dgApp.config(function(drupalgapSettings) {
 
@@ -2032,7 +2021,6 @@ function drupalgap_load_menus(drupalgapSettings) {
   }
   catch (error) { console.log('drupalgap_load_menus - ' + error); }
 }
-
 /**
  * Execute the page callback associated with the current path and return its
  * content.
@@ -2134,7 +2122,6 @@ function dg_menu_set(name, menu) {
   }
   catch (error) { console.log('dg_menu_set - ' + error); }
 }
-
 /**
  * @see https://api.drupal.org/api/drupal/includes!module.inc/function/module_implements/7
  */
@@ -2202,7 +2189,6 @@ function dg_module_invoke_all(hook) {
     console.log('dg_module_invoke_all - ' + error);
   }
 }
-
 // Used to render the "dg-page" directive attribute from the theme's
 // page.tpl.html file.
 dgApp.directive("dgPage", function($compile, drupalgapSettings) {
@@ -2350,6 +2336,16 @@ function dg_page_compile($compile, drupalgapSettings, scope, element, attrs) {
 /**
  *
  */
+function dg_templateUrl() {
+  try {
+    return 'themes/spi/page.tpl.html';
+  }
+  catch (error) { console.log('dg_templateUrl - ' + error); }
+}
+
+/**
+ *
+ */
 function drupalgap_render_region(region) {
   try {
     return theme('region', {
@@ -2398,7 +2394,6 @@ function theme_region(variables) {
   catch (error) { console.log('theme_region - ' + error); }
 }
 
-
 /**
  * Given a html string, a render object or render array, this return the html
  * representing the content's output.
@@ -2414,10 +2409,24 @@ function dg_render(content) {
     if (type === 'string') { return content; }
     var html = '';
     if (type === 'object') {
-      if (content.markup) { return content.markup; }
-      if (content.theme) { return theme(content.theme, content); }
+      if (content.markup) {
+        var _html = content.markup;
+        if (content.prefix) { _html = content.prefix + _html; }
+        if (content.suffix) { _html += content.suffix; }
+        return _html;
+      }
+      if (content.theme) {
+        var _html = theme(content.theme, content);
+        if (content.prefix) { _html = content.prefix + _html; }
+        if (content.suffix) { _html += content.suffix; }
+        return _html;
+      }
+      if (content.prefix) { html = content.prefix + html; }
       for (var index in content) {
-        if (!content.hasOwnProperty(index)) { continue; }
+        if (
+          !content.hasOwnProperty(index) ||
+          index == 'prefix' || index == 'suffix'
+        ) { continue; }
         var piece = content[index];
         var _type = $.type(piece);
         if (_type === 'object') { html += dg_render(piece); }
@@ -2427,6 +2436,7 @@ function dg_render(content) {
           }
         }
       }
+      if (content.suffix) { html += content.suffix; }
     }
     else if (type === 'array') {
       for (var i = 0; i < content.length; i++) {
@@ -2553,7 +2563,6 @@ function dg_render(content) {
   catch (error) { console.log('dg_render - ' + error); }
 }
 
-
 /**
  *
  * @returns {Object}
@@ -2608,7 +2617,6 @@ function dg_route_get() {
   }
   catch (error) { console.log('dg_route_get - ' + error); }
 }
-
 
 /**
  * Implementation of theme().
@@ -2916,7 +2924,6 @@ function theme_table(variables) {
   }
   catch (error) { console.log('theme_table - ' + error); }
 }
-
 angular.module('dg_admin', ['drupalgap'])
 .config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/admin', {
@@ -2946,9 +2953,10 @@ function dg_admin_page() {
   for (var entity_type in entity_info) {
     if (!entity_info.hasOwnProperty(entity_type)) { continue; }
     var entity = entity_info[entity_type];
+    var title = typeof entity.plural_label !== 'undefined' ? entity.plural_label : entity.label;
     content[entity_type] = {
       theme: 'fieldset',
-      title: entity.plural_label,
+      title: title,
       children: [
         {
           theme: 'item_list',
@@ -2974,7 +2982,7 @@ function dg_admin_connect_page() {
   };
   $http = dg_ng_get('http');
   drupalSettings = dg_ng_get('drupalSettings');
-  var path = drupalSettings.site_path + drupalSettings.base_path + '?q=drupalgap/connect';
+  var path = drupalSettings.sitePath + drupalSettings.basePath + '?q=drupalgap/connect';
   $http.get(path).then(function(result) {
     if (result.status != 200) { return; }
     console.log(result.data);
@@ -2982,7 +2990,6 @@ function dg_admin_connect_page() {
   });
   return content;
 }
-
 angular.module('dg_bootstrap', ['drupalgap']);
 
 /**
@@ -3019,14 +3026,13 @@ function dg_bootstrap_form_alter(form, form_state, form_id) {
 
   }
 }
-
 angular.module('dg_entity', ['drupalgap'])
 
 // ~ hook_menu()
 .config(['$routeProvider', function($routeProvider) {
 
     var entity_types = dg_entity_types();
-    console.log(entity_types);
+    //console.log(entity_types);
       
       // Add routes to view and edit entities.
       for (var i = 0; i < entity_types.length; i++) {
@@ -3125,8 +3131,6 @@ angular.module('dg_entity', ['drupalgap'])
               var display = instance.display.drupalgap;
               var module = display.module;
               var hook = module + '_field_formatter_view';
-
-              dpm(hook);
               
               // Invoke the hook_field_formmater_view(), if it exists.
               if (!dg_function_exists(hook)) { console.log(hook + '() missing!'); continue; }
@@ -3139,6 +3143,8 @@ angular.module('dg_entity', ['drupalgap'])
                 entity[field_name][entity.language],
                 display
               );
+              content[field_name].prefix = '<div class="' + field_name + '">';
+              content[field_name].suffix = '</div>';
               
             }
 
@@ -3240,8 +3246,10 @@ angular.module('dg_entity', ['drupalgap'])
           }
 
           var content = {};
+          var label = typeof entity_info.plural_label !== 'undefined' ?
+            entity_info.plural_label : entity_info.label;
           content['label'] = {
-            markup: '<h2>' + t(entity_info.plural_label) + '</h2>'
+            markup: '<h2>' + t(label) + '</h2>'
           };
           content['entities'] = {
             theme: 'table',
@@ -3470,9 +3478,7 @@ function dg_entity_page_list(entity_type) {
   }
   catch (error) { console.log('dg_entity_page_list - ' + error); }
 }
-
-angular.module('dg_field', ['drupalgap']);
-angular.module('dg_image', ['drupalgap']);
+angular.module('dg_field', ['drupalgap']);angular.module('dg_image', ['drupalgap']);
 
 /**
  * Implements hook_field_formatter_view().
@@ -3552,14 +3558,14 @@ function image_style_url(style_name, path) {
   try {
     var drupalSettings = dg_ng_get('drupalSettings');
     var src =
-      drupalSettings.site_path + drupalSettings.base_path + path;
+      drupalSettings.sitePath + drupalSettings.basePath + path;
     if (src.indexOf('public://') != -1) {
       src = src.replace(
         'public://',
         drupalSettings.file_public_path +
           '/styles/' +
           style_name +
-          '/public'
+          '/public/'
       );
     }
     else if (src.indexOf('private://') != -1) {
@@ -3568,14 +3574,13 @@ function image_style_url(style_name, path) {
         drupalSettings.file_private_path +
           '/styles/' +
           style_name +
-          '/private'
+          '/private/'
       );
     }
     return src;
   }
   catch (error) { console.log('image_style_url - ' + error); }
 }
-
 
 angular.module('dg_menu', [])
   .service('dgMenuAccessCallback', ['$q', '$http', 'drupalSettings', dgMenuAccessCallback]);
@@ -3621,7 +3626,6 @@ function menu_block_view(delta) {
   }
   catch (error) { console.log('menu_block_view - ' + error); }
 }
-
 angular.module('dg_node', ['drupalgap']);
 
 /**
@@ -3667,7 +3671,6 @@ function node_index_page(nodes) {
     console.log('node_index_page - ' + error);
   }
 }
-
 angular.module('dg_options', ['drupalgap']);
 
 /**
@@ -3857,9 +3860,7 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
   }
   catch (error) { console.log('options_field_widget_form - ' + error); }
 }
-
-angular.module('dg_services', ['drupalgap']);
-angular.module('dg_system', ['drupalgap'])
+angular.module('dg_services', ['drupalgap']);angular.module('dg_system', ['drupalgap'])
 
 // hook_menu()
 .config(['$routeProvider', 'drupalgapSettings',
@@ -3894,14 +3895,13 @@ dgApp.directive("dgMain", function($compile, $injector) {
 function dg_system_page() {
   try {
     var user = dg_user_get();
-    if (user.uid) {
-      // User is authenticated...
-      return '<p>Hello ' + user.name + '!</p>';
-    }
-    else {
-      // User is anonymous...
-      return '<p>Welcome visitor...</p>';
-    }
+    var salutation = t('Hello world!');
+    if (user.uid) { salutation = t('Hello') + ' ' + user.name; }
+    var content = {};
+    content['my_widget'] = {
+      markup: '<p>' + salutation + '</p>'
+    };
+    return content;
   }
   catch (error) { console.log('dg_system_page - ' + error); }
 }
@@ -3965,7 +3965,6 @@ function system_block_view(delta) {
   }
   catch (error) { console.log('system_block_info - ' + error); }
 }
-
 
 angular.module('dg_text', ['drupalgap']);
 
@@ -4035,7 +4034,6 @@ function text_field_widget_form(form, form_state, field, instance, langcode, ite
   }
   catch (error) { console.log('text_field_widget_form - ' + error); }
 }
-
 angular.module('dg_user', ['drupalgap'])
 
 // ~ hook_menu()

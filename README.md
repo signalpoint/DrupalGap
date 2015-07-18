@@ -25,8 +25,8 @@ On your Drupal site, enable the DrupalGap 7.x-2.x module:
 
 ## 2. Install the DrupalGap 2 SDK
 
- 1. Download the SDK: https://github.com/signalpoint/DrupalGap/archive/7.x-2.x.zip
- 2. Extract the zip file's contents to the folder you wish to run the app in
+ a. Download the SDK: https://github.com/signalpoint/DrupalGap/archive/7.x-2.x.zip
+ b. Extract the zip file's contents to the folder you wish to run the app in
 
 The app runs using the DrupalGap SDK's `index.html` file, so where you extract
 the SDK typically depends on what type of application you're building. For
@@ -80,27 +80,32 @@ http://example.com/application
 
 ```
 
-## 3. app.js
+## 3. Run the install command
 
-Open the `app/js/app.js` file and enter the `site_path` to your Drupal website:
+### Node JS Package Manager - npm (recommended)
+
+### Install Script (for developers without npm)
+
+From the DrupalGap SDK directory, run these terminal commands:
+```
+chmod +x drupalgap
+./drupalgap install
+```
+
+## 4. app.js
+
+Open the `app/js/app.js` file and enter the `sitePath` to your Drupal website:
 
 ```
-site_path: 'http://localhost/drupal-7',
+sitePath: 'http://example.com',
 ```
 
 This value is for the `drupalSettings` of the `angular-drupal` config function.
 
-## 4. drupalgap.json
-
-On your Drupal site, navigate to `http://example.com/drupalgap/connect` as an
-admin. Then in your browser, click File -> Save, and then save this JSON output
-to a file in your app's directory:
-
-```
-app/js/drupalgap.json
-```
-
 ## 5. Run the app
+
+This is an exciting step, so don't forget about step # 6 afterwards. Here are
+the various ways to launch your app:
 
 **Web App**
 
@@ -126,3 +131,20 @@ modern browser:
 ```
 http://example.com
 ```
+
+## 6. drupalgap.json
+
+Open your application in a browser, then login to the app as an admin. Click the
+"Administer" link, then click the "Connect" link. Copy all the text in the text
+area and save it to this file:
+
+```
+app/js/drupalgap.json
+```
+
+This allows DrupalGap to better understand many things about your Drupal
+website. Alternatively, this value can be retrieve on your Drupal site, just
+navigate to `http://example.com/drupalgap/connect` as an admin. Then in your
+browser, click File -> Save, and then save this JSON output to the file
+mentioned above.
+

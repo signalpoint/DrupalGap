@@ -50,7 +50,6 @@ for (var parent in _dg_dependencies) {
 
   }
 }
-dpm(drupalgap.modules);
 
 // Create the app with its dependencies.
 var dgApp = angular.module('dgApp', dg_dependencies);
@@ -59,6 +58,12 @@ var dgApp = angular.module('dgApp', dg_dependencies);
 dgApp.run([
     '$rootScope', '$routeParams', '$location', '$http', 'drupal', 'drupalSettings', 'drupalgapSettings',
     function($rootScope, $routeParams, $location, $http, drupal, drupalSettings, drupalgapSettings) {
+      
+      // Warn if there is no sitePath specified.
+      if (typeof drupalSettings.sitePath === 'undefined' || dg_empty(drupalSettings.sitePath)) {
+        alert(t('You must specify a sitePath for the drupalSettings in the app.js file!'));
+        return;
+      }
 
       //dpm('dgApp.run()');
       //console.log(arguments);
