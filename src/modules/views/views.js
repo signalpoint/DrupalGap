@@ -688,7 +688,10 @@ function theme_pager_previous(variables) {
 }
 
 /**
- *
+ * A helper function used to retrieve the various open and closing tags for
+ * views results, depending on their format.
+ * @param {Object} variables
+ * @return {Object}
  */
 function drupalgap_views_get_result_formats(variables) {
   try {
