@@ -780,7 +780,14 @@ function drupalgap_views_get_result_formats(variables) {
 }
 
 /**
- *
+ * A helper function used to render a views result's rows.
+ * @param {Object}
+ * @param {Object}
+ * @param {String}
+ * @param {String}
+ * @param {String}
+ * @param {String}
+ * @return {String}
  */
 function drupalgap_views_render_rows(variables, results, root, child, open_row, close_row) {
   try {
