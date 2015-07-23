@@ -9176,6 +9176,17 @@ function image_field_formatter_view(entity_type, entity, field, instance,
   langcode, items, display) {
   try {
     var element = {};
+    // Toss on the default image if we one is specified and we have no items.
+    // "In addition, any code which programmatically generates a link to an
+    // image derivative without using the standard image_style_url() API
+    // function will no longer work correctly if the image does not already
+    // exist in the file system, since the necessary token will not be present
+    // in the URL." @see http://drupal.stackexchange.com/a/76827/10645
+    if (empty(items) && instance.settings.default_image) {
+      items = [{
+          uri: instance.settings.default_image_uri
+      }];
+    }
     if (!empty(items)) {
       for (var delta in items) {
           if (!items.hasOwnProperty(delta)) { continue; }
@@ -9187,7 +9198,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
             alt: item.alt,
             title: item.title
           };
-          if (!empty(theme)) {
+          if (theme == 'image_style') {
             image.style_name = display.settings.image_style;
             image.path = item.uri;
           }
