@@ -26,11 +26,11 @@ angular.module('drupalgap', [])
   .config(function() {
      // @WARNING Synchronous XMLHttpRequest on the main thread is deprecated.
      // @TODO allow a developer mode to live sync the drupalgap.json content using an api key
-     var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
+     /*var json = JSON.parse(dg_file_get_contents('app/js/drupalgap.json'));
      for (var name in json) {
        if (!json.hasOwnProperty(name)) { continue; }
        drupalgap[name] = json[name];
-     }
+     }*/
   });
 
 // Grab the app's dependencies from the index.html file.
@@ -336,6 +336,31 @@ function dg_language_default() {
       drupalSettings.language : 'und';
   }
   catch (error) { console.log('dg_language_default - ' + error); }
+}
+
+/**
+ * Checks if the needle string, is in the haystack array. Returns true if it is
+ * found, false otherwise. Credit: http://stackoverflow.com/a/15276975/763010
+ * @param {String|Number} needle
+ * @param {Array} haystack
+ * @return {Boolean}
+ */
+function dg_in_array(needle, haystack) {
+  try {
+    if (typeof haystack === 'undefined') { return false; }
+    if (typeof needle === 'string') { return (haystack.indexOf(needle) > -1); }
+    else {
+      var found = false;
+      for (var i = 0; i < haystack.length; i++) {
+        if (haystack[i] == needle) {
+          found = true;
+          break;
+        }
+      }
+      return found;
+    }
+  }
+  catch (error) { console.log('dg_in_array - ' + error); }
 }
 
 function dg_is_array(obj) {
@@ -4209,19 +4234,8 @@ function dg_user_set(user) {
  */
 function dg_user_has_role(role) {
   try {
-    var has_role = false;
-    var account = null;
-    if (arguments[1]) { account = arguments[1]; }
-    else { account = dg_user_get(); }
-    for (var rid in account.roles) {
-        if (!account.roles.hasOwnProperty(rid)) { continue; }
-        var value = account.roles[rid];
-        if (role == value) {
-          has_role = true;
-          break;
-        }
-    }
-    return has_role;
+    var account = arguments[1] ? arguments[1] : dg_user_get();
+    return dg_in_array(role, account.roles);
   }
   catch (error) { console.log('dg_user_has_role - ' + error); }
 }
