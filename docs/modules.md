@@ -1,4 +1,13 @@
-# Create a DrupalGap Module
+# DrupalGap Modules
 
-  1. Create the `app/modules` directory, if it hasn't been already
-  2. Create a directory for your
+## Create a Module
+
+1. Use the DrupalGap CLI:
+
+```
+./drupalgap module create my_module
+```
+
+2. Follow any additional instructions printed to the terminal after executing
+the command listed in step #1.
+
