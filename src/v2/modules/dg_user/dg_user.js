@@ -173,19 +173,8 @@ function dg_user_set(user) {
  */
 function dg_user_has_role(role) {
   try {
-    var has_role = false;
-    var account = null;
-    if (arguments[1]) { account = arguments[1]; }
-    else { account = dg_user_get(); }
-    for (var rid in account.roles) {
-        if (!account.roles.hasOwnProperty(rid)) { continue; }
-        var value = account.roles[rid];
-        if (role == value) {
-          has_role = true;
-          break;
-        }
-    }
-    return has_role;
+    var account = arguments[1] ? arguments[1] : dg_user_get();
+    return dg_in_array(role, account.roles);
   }
   catch (error) { console.log('dg_user_has_role - ' + error); }
 }
