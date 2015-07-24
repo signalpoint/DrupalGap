@@ -152,6 +152,31 @@ function dg_language_default() {
   catch (error) { console.log('dg_language_default - ' + error); }
 }
 
+/**
+ * Checks if the needle string, is in the haystack array. Returns true if it is
+ * found, false otherwise. Credit: http://stackoverflow.com/a/15276975/763010
+ * @param {String|Number} needle
+ * @param {Array} haystack
+ * @return {Boolean}
+ */
+function dg_in_array(needle, haystack) {
+  try {
+    if (typeof haystack === 'undefined') { return false; }
+    if (typeof needle === 'string') { return (haystack.indexOf(needle) > -1); }
+    else {
+      var found = false;
+      for (var i = 0; i < haystack.length; i++) {
+        if (haystack[i] == needle) {
+          found = true;
+          break;
+        }
+      }
+      return found;
+    }
+  }
+  catch (error) { console.log('dg_in_array - ' + error); }
+}
+
 function dg_is_array(obj) {
   return Array.isArray(obj);
 }
