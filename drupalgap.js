@@ -4234,6 +4234,22 @@ function dg_user_set(user) {
  */
 function dg_user_has_role(role) {
   try {
+    // Provide some backwards compatability.
+    if (role == 'anonymous user') {
+      console.log(
+        'WARNING - dg_user_has_role(): use "anonymous" instead of "anonymous user" in ' +
+        arguments.callee.caller.name + '()'
+      );
+      role = 'anonymous';
+    }
+    else if (role == 'authenticated user') {
+      console.log(
+        'WARNING - dg_user_has_role(): use "authenticated" instead of "authenticated user" in ' +
+        arguments.callee.caller.name + '()'
+      );
+      role = 'authenticated';
+    }
+    // Finally check for the role.
     var account = arguments[1] ? arguments[1] : dg_user_get();
     return dg_in_array(role, account.roles);
   }
