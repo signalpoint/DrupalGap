@@ -1,0 +1,8 @@
+<div class="tags-wrapper">
+    <div id="tagsList" class="tags-cloud">
+        <input type="text" placeholder="Start typing" id="searchInput" ng-keydown="checkKeyDown($event)" class="form-control" ng-model="searchText" ng-change="search()"/>
+    </div>
+    <ul id="suggestions" class="suggestions-list">
+       <li ng-repeat="suggestion in suggestions" class="blockSpan" ng-click="resultClicked($index)" ng-mouseover="$parent.selectedIndex=$index" ng-class="{active : selectedIndex===$index}">{{suggestion.title}}</li>
+    </ul>
+</div>

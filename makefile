@@ -23,6 +23,7 @@ files = src/v2/index.js\
                                 src/v2/includes/route.inc.js\
                                 src/v2/includes/theme.inc.js\
                                 src/v2/modules/dg_admin/dg_admin.js\
+                                src/v2/modules/dg_autocomplete/dg_autocomplete.js\
                                 src/v2/modules/dg_bootstrap/dg_bootstrap.js\
                                 src/v2/modules/dg_entity/dg_entity.js\
                                 src/v2/modules/dg_field/dg_field.js\
