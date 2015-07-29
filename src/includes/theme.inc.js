@@ -226,6 +226,13 @@ function theme_video(variables) {
     if (variables.path) { variables.attributes.src = variables.path; }
     if (variables.alt) { variables.attributes.alt = variables.alt; }
     if (variables.title) { variables.attributes.title = variables.title; }
+    // Add the 'webkit-playsinline' attribute on iOS devices if no one made a
+    // decision about it being there or not.
+    if (
+      typeof device !== 'undefined' &&
+      device.platform == 'iOS' &&
+      typeof variables.attributes['webkit-playsinline'] === 'undefined'
+    ) { variables.attributes['webkit-playsinline'] = ''; }
     // Render the video player.
     return '<video ' + drupalgap_attributes(variables.attributes) +
     '></video>';
