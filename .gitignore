@@ -1,7 +1,7 @@
 cordova*js
 app/modules/*
 app/themes/*
-app/settings.js
+app/js/app.js
 app/.gitignore
 app/README.*
 res
