@@ -18,9 +18,9 @@ function drupalgap_install() {
   cd node_modules/
   mkdir angular-drupal
   cd angular-drupal/
-  mkdir build
-  cd build/
-  wget https://raw.githubusercontent.com/easystreet3/angular-drupal/7.x-1.x/build/angular-drupal.min.js --no-check-certificate
+  mkdir src
+  cd src/
+  wget https://raw.githubusercontent.com/easystreet3/angular-drupal/8.x-1.x/src/angular-drupal.js --no-check-certificate
   cd ../../../app/
   mkdir bower_components
   cd bower_components/
