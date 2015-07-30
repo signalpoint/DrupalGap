@@ -5,7 +5,6 @@ angular.module('angular-drupal').config(function($provide) {
     $provide.value('drupalSettings', {
         sitePath: '', // Example: 'http://example.com' with no trailing slash
         basePath: '/',
-        endpoint: 'drupalgap',
         language: 'und',
         file_public_path: 'sites/default/files' // use public or private
         //file_private_path: 'system/files',
@@ -39,7 +38,7 @@ angular.module('drupalgap').config(function($provide) {
           },
           contrib: {},
           custom: {
-            my_module: {}
+            //my_module: {}
           }
         },
         
@@ -137,7 +136,7 @@ angular.module('drupalgap').config(function($provide) {
                 // Anonymous user menu block.
                 user_menu_anonymous: {
                   roles: {
-                    value: ['anonymous user'],
+                    value: ['anonymous'],
                     mode: 'include'
                   }
                 },
@@ -145,7 +144,7 @@ angular.module('drupalgap').config(function($provide) {
                 // Authenticated user menu block.
                 user_menu_authenticated: {
                   roles: {
-                    value: ['authenticated user'],
+                    value: ['authenticated'],
                     mode: 'include'
                   }
                 }
