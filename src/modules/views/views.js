@@ -463,11 +463,11 @@ function theme_views_view(variables) {
         }
       );
     }
-    
+
     // Determine the views container selector and set it aside globally.
     var selector = '#' + drupalgap_get_page_id() +
         ' #' + variables.attributes.id;
-    _views_embed_view_selector = selector
+    _views_embed_view_selector = selector;
 
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
@@ -688,12 +688,15 @@ function theme_pager_previous(variables) {
 }
 
 /**
- *
+ * A helper function used to retrieve the various open and closing tags for
+ * views results, depending on their format.
+ * @param {Object} variables
+ * @return {Object}
  */
 function drupalgap_views_get_result_formats(variables) {
   try {
     var result_formats = {};
-    
+
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
     if (!variables.format) { variables.format = 'unformatted_list'; }
@@ -701,7 +704,7 @@ function drupalgap_views_get_result_formats(variables) {
     var close = '';
     var open_row = '';
     var close_row = '';
-    
+
     // Prepare the format's container attributes.
     var format_attributes = {};
     if (typeof variables.format_attributes !== 'undefined') {
@@ -711,13 +714,13 @@ function drupalgap_views_get_result_formats(variables) {
         variables.format_attributes
       );
     }
-    
+
     // Add a views-results class
     if (typeof format_attributes['class'] === 'undefined') {
       format_attributes['class'] = '';
     }
     format_attributes['class'] += ' views-results ';
-    
+
     switch (variables.format) {
       case 'ul':
         if (typeof format_attributes['data-role'] === 'undefined') {
@@ -777,7 +780,14 @@ function drupalgap_views_get_result_formats(variables) {
 }
 
 /**
- *
+ * A helper function used to render a views result's rows.
+ * @param {Object}
+ * @param {Object}
+ * @param {String}
+ * @param {String}
+ * @param {String}
+ * @param {String}
+ * @return {String}
  */
 function drupalgap_views_render_rows(variables, results, root, child, open_row, close_row) {
   try {

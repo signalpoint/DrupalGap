@@ -160,9 +160,11 @@ function template_process_page(variables) {
     for (var index in drupalgap.theme.regions) {
         if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
         var region = drupalgap.theme.regions[index];
+        var _region = {};
+        $.extend(true, _region, region);
         page_html = page_html.replace(
           '{:' + region.name + ':}',
-          drupalgap_render_region(region)
+          drupalgap_render_region(_region)
         );
     }
     $('#' + page_id).html(page_html);

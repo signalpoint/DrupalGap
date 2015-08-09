@@ -134,6 +134,9 @@ function drupalgap_entity_render_content(entity_type, entity) {
     // them in order onto the entity's content.
     var bundle = entity.type;
     if (entity_type == 'comment') { bundle = entity.bundle; }
+    else if (entity_type == 'taxonomy_term') {
+      bundle = entity.vocabulary_machine_name;
+    }
     var field_info = drupalgap_field_info_instances(entity_type, bundle);
     if (!field_info) { return; }
     var field_weights = {};
@@ -200,11 +203,13 @@ function drupalgap_entity_render_content(entity_type, entity) {
       bundle
     );
     // Update this entity in local storage so the content property sticks.
-    _entity_local_storage_save(
-      entity_type,
-      entity[entity_primary_key(entity_type)],
-      entity
-    );
+    if (Drupal.settings.cache.entity.enabled) {
+      _entity_local_storage_save(
+        entity_type,
+        entity[entity_primary_key(entity_type)],
+        entity
+      );
+    }
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
@@ -345,13 +350,13 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
     for (var name in form_state.values) {
         if (!form_state.values.hasOwnProperty(name)) { continue; }
         var value = form_state.values[name];
-  
+
         // Skip elements with restricted access.
         if (
           typeof form.elements[name].access !== 'undefined' &&
           !form.elements[name].access
         ) { continue; }
-  
+
         // Determine wether or not this element is a field. If it is, determine
         // it's module and field assembly hook.
         var is_field = false;
@@ -363,26 +368,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           hook = module + '_assemble_form_state_into_field';
           if (!function_exists(hook)) { hook = false; }
         }
-  
+
         // Retrieve the potential key for the element, if we don't get one
         // then it is a flat field that should be attached as a property to the
         // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-  
+
           // Determine how many allowed values for this field.
           var allowed_values = form.elements[name].field_info_field.cardinality;
-  
+
           // Convert unlimited value fields to one, for now...
           if (allowed_values == -1) { allowed_values = 1; }
-  
+
           // Make sure there is at least one value before creating the form
           // element on the entity.
           if (typeof value[language][0] === 'undefined') { continue; }
-  
+
           // Create an empty object to house the field on the entity.
           entity[name] = {};
-  
+
           // Some fields do not use a delta value in the service call, so we
           // prepare for that here.
           // @todo - Do all options_select widgets really have no delta value?
@@ -399,12 +404,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             entity[name][language] = {};
           }
           else { entity[name][language] = []; }
-  
+
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
             if (typeof value[language][delta] !== 'undefined') {
-  
+
               // @TODO - the way values are determined here is turning into
               // spaghetti code. Every form element needs its own
               // value_callback, just like Drupal's FAPI. Right now DG has
@@ -419,10 +424,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // drupalgap_field_info_instances_add_to_form(), that function
               // should use the value_callback idea to properly map entity data
               // to the form element's value.
-  
+
               // Extract the value.
               var field_value = value[language][delta];
-  
+
               // By default, we'll assume we'll be attaching this element item's
               // value according to a key (usually 'value' is the default key
               // used by Drupal fields). However, we'll give modules that
@@ -442,7 +447,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 form_id: form.id,
                 element_id: form.elements[name][language][delta].id
               };
-  
+
               // If this element is a field, give the field's module an
               // opportunity to assemble its own value, otherwise we'll just
               // use the field value extracted above.
@@ -458,10 +463,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   field_key
                 );
               }
-  
+
               // If someone updated the key, use it.
               if (key != field_key.value) { key = field_key.value; }
-  
+
               // If we don't need a delta value, place the field value using the
               // key, if posible. If we're using a delta value, push the key
               // and value onto the field to indicate the delta.
@@ -491,7 +496,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   entity[name][language].push(field_value);
                 }
               }
-  
+
               // If the field value was null, we won't send along the field, so
               // just remove it. Except for list_boolean fields, they need a
               // null value to set the field value to false.
@@ -503,7 +508,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 typeof entity[name] !== 'undefined' &&
                 form.elements[name].type != 'list_boolean'
               ) { delete entity[name]; }
-  
+
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
               // @TODO - will this cause multi value issues?
@@ -513,7 +518,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   'options_select' && !form.elements[name].required &&
                 field_value === '' && typeof entity[name] !== 'undefined'
               ) { delete entity[name]; }
-  
+
             }
           }
       }

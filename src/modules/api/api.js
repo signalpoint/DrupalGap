@@ -232,13 +232,13 @@ function hook_field_formatter_view(entity_type, entity, field, instance, langcod
     // inspect the incoming arguments. The arguments contain field display
     // settings from Drupal.
     
-    /*dpm(entity_type);
-    dpm(entity);
-    dpm(field);
-    dpm(instance);
-    dpm(langcode);
-    dpm(items);
-    dpm(display);*/
+    //console.log(entity_type);
+    //console.log(entity);
+    //console.log(field);
+    //console.log(instance);
+    //console.log(langcode);
+    //console.log(items);
+    //console.log(display);
     
     // Iterate over each item, and place a widget onto the render array.
     var content = {};

@@ -190,7 +190,7 @@ function theme_radios(variables) {
       for (var value in variables.options) {
           if (!variables.options.hasOwnProperty(value)) { continue; }
           var label = variables.options[value];
-          if (value == 'attributes') { return; } // Skip the attributes.
+          if (value == 'attributes') { continue; } // Skip the attributes.
           var checked = '';
           if (variables.value && variables.value == value) {
             checked = ' checked="checked" ';
