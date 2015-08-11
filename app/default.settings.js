@@ -119,7 +119,8 @@ drupalgap.settings.menus['user_menu_anonymous'] = {
       path: 'user/login',
       options: {
         attributes: {
-          'data-icon': 'lock'
+          'data-icon': 'lock',
+          'class': 'ui-btn ui-btn-icon-right'
         }
       }
     },
@@ -144,7 +145,8 @@ drupalgap.settings.menus['user_menu_authenticated'] = {
       path: 'user',
       options: {
         attributes: {
-          'data-icon': 'user'
+          'data-icon': 'user',
+          'class': 'ui-btn ui-btn-icon-right'
         }
       }
     },
@@ -168,8 +170,9 @@ drupalgap.settings.menus['main_menu'] = {
       title:'Content',
       path:'node',
       options:{
-        attributes:{
-          'data-icon':'star'
+        attributes: {
+          'data-icon': 'star',
+          'class': 'ui-btn ui-btn-icon-right'
         }
       }
     },
