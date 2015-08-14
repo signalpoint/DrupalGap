@@ -137,7 +137,10 @@ function _drupalgap_form_render_elements(form) {
               content_weighted[weight] =
               _drupalgap_form_render_element(form, element);
             }
-            else { content += _drupalgap_form_render_element(form, element); }
+            else {
+              var _content = _drupalgap_form_render_element(form, element);
+              if (typeof _content !== 'undefined') { content += _content; }
+            }
           }
         }
     }
