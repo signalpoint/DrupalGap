@@ -1389,6 +1389,16 @@ function drupalgap_remove_page_from_dom(page_id) {
 }
 
 /**
+ * Restart the app.
+ */
+function drupalgap_restart() {
+  try {
+    location.reload();
+  }
+  catch (error) { console.log('drupalgap_restart - ' + error); }
+}
+
+/**
  * Sets a message to display to the user. Optionally pass in a second argument
  * to specify the message type: status, warning, error
  * @param {String} message
