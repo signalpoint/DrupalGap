@@ -390,6 +390,20 @@ function hook_node_page_view_alter_TYPE(node, options) {
 }
 
 /**
+ * Implements hook_page_build().
+ * @param {Object} output The page build output object.
+ */
+function hook_page_build(output) {
+  try {
+    // Remove all titles from article node pages.
+    if (output.node && output.node.type == 'article') {
+      delete output.title;
+    }
+  }
+  catch (error) { console.log('hook_page_build - ' + error); }
+}
+
+/**
  * Implements hook_views_exposed_filter().
  * @param {Object} form
  * @param {Object} form_state

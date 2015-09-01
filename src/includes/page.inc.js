@@ -356,6 +356,9 @@ function drupalgap_jqm_active_page_url() {
  */
 function drupalgap_render_page() {
   try {
+
+    module_invoke_all('page_build', drupalgap.output);
+
     // Since the page output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.
