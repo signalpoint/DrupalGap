@@ -73,6 +73,8 @@ function drupalgap_render_region(region) {
 
           // Grab the link and its data.
           var region_link = region.links[i];
+          if (typeof region_link.prefix === 'undefined') { region_link.prefix = ''; }
+          if (typeof region_link.suffix === 'undefined') { region_link.suffix = ''; }
           var data = menu_region_link_get_data(region_link);
 
           // Check link's region visiblity settings. Links will not be rendered
@@ -139,7 +141,9 @@ function drupalgap_render_region(region) {
             // Render the link on the proper side.
             var css_class = drupalgap_link_get_class(region_link);
             var side = menu_region_link_get_side(css_class);
-            var link_html = l(link_text, link_path, data.options);
+            var link_html = region_link.prefix +
+              l(link_text, link_path, data.options) +
+            region_link.suffix;
             if (side == 'left') { ui_btn_left_html += link_html; }
             else if (side == 'right') { ui_btn_right_html += link_html; }
 
