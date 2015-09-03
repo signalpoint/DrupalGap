@@ -473,7 +473,11 @@ function theme_views_view(variables) {
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
     // the creation of the content area.
-    if (results.view.count == 0) {
+    var views_litepager_present = module_exists('views_litepager');
+    if (
+      (results.view.count == 0 && !views_litepager_present) ||
+      (views_litepager_present && results.view.pages == null)
+    ) {
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
@@ -487,6 +491,9 @@ function theme_views_view(variables) {
       }
       return html + views_exposed_form_html;
     }
+
+    // The results are not empty...
+
     // Append the exposed filter html.
     html += views_exposed_form_html;
 
@@ -568,11 +575,18 @@ function theme_pager(variables) {
     var limit = view.limit;
     var page = view.page;
     // If we don't have any results, return.
-    if (count == 0) { return html; }
+    var views_litepager_present = module_exists('views_litepager');
+    if (
+      (count == 0 && !views_litepager_present) ||
+      (views_litepager_present && variables.results.view.pages == null)
+    ) { return html; }
     // Add the pager items to the list.
     var items = [];
     if (page != 0) { items.push(theme('pager_previous', variables)); }
-    if (page != pages - 1) { items.push(theme('pager_next', variables)); }
+    if (
+      (page != pages - 1 && !module_exists('views_litepager')) ||
+      module_exists('views_litepager')
+    ) { items.push(theme('pager_next', variables)); }
     if (items.length > 0) {
       // Make sure we have an id to use since we need to dynamically build the
       // navbar container for the pager. If we don't have one, generate a random
@@ -653,7 +667,7 @@ function _theme_pager_link_click(variables) {
 function theme_pager_next(variables) {
   try {
     var html;
-    variables.page = variables.results.view.page + 1;
+    variables.page = parseInt(variables.results.view.page) + 1;
     var link_vars = {
       text: '&raquo;',
       attributes: {
@@ -674,7 +688,7 @@ function theme_pager_next(variables) {
 function theme_pager_previous(variables) {
   try {
     var html;
-    variables.page = variables.results.view.page - 1;
+    variables.page = parseInt(variables.results.view.page) - 1;
     var link_vars = {
       text: '&laquo;',
       attributes: {

@@ -275,14 +275,37 @@ function menu_block_view_pageshow(options) {
             // If there are no link options, set up defaults.
             if (!link.options) { link.options = {attributes: {}}; }
             else if (!link.options.attributes) { link.options.attributes = {}; }
+            if (!link.options.attributes['class']) {
+              link.options.attributes['class'] = '';
+            }
+            // Extract the link's class attribute.
+            var class_names = link.options.attributes['class'];
             // If the link points to the current path, set it as active.
             if (link.path == path) {
-              if (!link.options.attributes['class']) {
-                link.options.attributes['class'] = '';
+              if (class_names.indexOf('ui-btn') == -1) {
+                class_names += ' ui-btn';
               }
-              link.options.attributes['class'] +=
-                ' ui-btn ui-btn-active ui-state-persist ';
+              if (class_names.indexOf('ui-btn-active') == -1) {
+                class_names += ' ui-btn-active';
+              }
+              if (class_names.indexOf('ui-state-persist') == -1) {
+                class_names += ' ui-state-persist';
+              }
             }
+            // If there was a data-icon attibute on the link, let's add its
+            // equivalent css class name to the link (if it isn't already
+            // present), otherwise jQM won't render the icon properly. Sounds
+            // like a jQM bug.
+            if (
+              link.options.attributes['data-icon'] &&
+              class_names.indexOf(link.options.attributes['data-icon']) == -1
+            ) {
+              class_names +=
+                ' ui-icon-' + link.options.attributes['data-icon'] + ' ';
+            }
+            // Finally toss the class attribute back on the link and add the
+            // link to the items array.
+            link.options.attributes['class'] = class_names + ' ';
             items.push(l(t(link.title), link.path, link.options));
         }
         if (items.length > 0) {

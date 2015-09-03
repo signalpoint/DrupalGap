@@ -1389,6 +1389,16 @@ function drupalgap_remove_page_from_dom(page_id) {
 }
 
 /**
+ * Restart the app.
+ */
+function drupalgap_restart() {
+  try {
+    location.reload();
+  }
+  catch (error) { console.log('drupalgap_restart - ' + error); }
+}
+
+/**
  * Sets a message to display to the user. Optionally pass in a second argument
  * to specify the message type: status, warning, error
  * @param {String} message
@@ -2836,7 +2846,10 @@ function _drupalgap_form_render_elements(form) {
               content_weighted[weight] =
               _drupalgap_form_render_element(form, element);
             }
-            else { content += _drupalgap_form_render_element(form, element); }
+            else {
+              var _content = _drupalgap_form_render_element(form, element);
+              if (typeof _content !== 'undefined') { content += _content; }
+            }
           }
         }
     }
@@ -9882,14 +9895,37 @@ function menu_block_view_pageshow(options) {
             // If there are no link options, set up defaults.
             if (!link.options) { link.options = {attributes: {}}; }
             else if (!link.options.attributes) { link.options.attributes = {}; }
+            if (!link.options.attributes['class']) {
+              link.options.attributes['class'] = '';
+            }
+            // Extract the link's class attribute.
+            var class_names = link.options.attributes['class'];
             // If the link points to the current path, set it as active.
             if (link.path == path) {
-              if (!link.options.attributes['class']) {
-                link.options.attributes['class'] = '';
+              if (class_names.indexOf('ui-btn') == -1) {
+                class_names += ' ui-btn';
               }
-              link.options.attributes['class'] +=
-                ' ui-btn ui-btn-active ui-state-persist ';
+              if (class_names.indexOf('ui-btn-active') == -1) {
+                class_names += ' ui-btn-active';
+              }
+              if (class_names.indexOf('ui-state-persist') == -1) {
+                class_names += ' ui-state-persist';
+              }
             }
+            // If there was a data-icon attibute on the link, let's add its
+            // equivalent css class name to the link (if it isn't already
+            // present), otherwise jQM won't render the icon properly. Sounds
+            // like a jQM bug.
+            if (
+              link.options.attributes['data-icon'] &&
+              class_names.indexOf(link.options.attributes['data-icon']) == -1
+            ) {
+              class_names +=
+                ' ui-icon-' + link.options.attributes['data-icon'] + ' ';
+            }
+            // Finally toss the class attribute back on the link and add the
+            // link to the items array.
+            link.options.attributes['class'] = class_names + ' ';
             items.push(l(t(link.title), link.path, link.options));
         }
         if (items.length > 0) {
@@ -13766,7 +13802,11 @@ function theme_views_view(variables) {
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
     // the creation of the content area.
-    if (results.view.count == 0) {
+    var views_litepager_present = module_exists('views_litepager');
+    if (
+      (results.view.count == 0 && !views_litepager_present) ||
+      (views_litepager_present && results.view.pages == null)
+    ) {
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
@@ -13780,6 +13820,9 @@ function theme_views_view(variables) {
       }
       return html + views_exposed_form_html;
     }
+
+    // The results are not empty...
+
     // Append the exposed filter html.
     html += views_exposed_form_html;
 
@@ -13861,11 +13904,18 @@ function theme_pager(variables) {
     var limit = view.limit;
     var page = view.page;
     // If we don't have any results, return.
-    if (count == 0) { return html; }
+    var views_litepager_present = module_exists('views_litepager');
+    if (
+      (count == 0 && !views_litepager_present) ||
+      (views_litepager_present && variables.results.view.pages == null)
+    ) { return html; }
     // Add the pager items to the list.
     var items = [];
     if (page != 0) { items.push(theme('pager_previous', variables)); }
-    if (page != pages - 1) { items.push(theme('pager_next', variables)); }
+    if (
+      (page != pages - 1 && !module_exists('views_litepager')) ||
+      module_exists('views_litepager')
+    ) { items.push(theme('pager_next', variables)); }
     if (items.length > 0) {
       // Make sure we have an id to use since we need to dynamically build the
       // navbar container for the pager. If we don't have one, generate a random
@@ -13946,7 +13996,7 @@ function _theme_pager_link_click(variables) {
 function theme_pager_next(variables) {
   try {
     var html;
-    variables.page = variables.results.view.page + 1;
+    variables.page = parseInt(variables.results.view.page) + 1;
     var link_vars = {
       text: '&raquo;',
       attributes: {
@@ -13967,7 +14017,7 @@ function theme_pager_next(variables) {
 function theme_pager_previous(variables) {
   try {
     var html;
-    variables.page = variables.results.view.page - 1;
+    variables.page = parseInt(variables.results.view.page) - 1;
     var link_vars = {
       text: '&laquo;',
       attributes: {
