@@ -4722,7 +4722,8 @@ function _drupalgap_goto_prepare_path(path) {
  */
 function drupalgap_back() {
   try {
-    if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
+    var active_page_id = $('.ui-page-active').attr('id');
+    if (active_page_id == drupalgap.settings.front) {
       var msg = t('Exit') + ' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
@@ -4731,6 +4732,7 @@ function drupalgap_back() {
           confirmCallback: _drupalgap_back_exit
       });
     }
+    else if (active_page_id == '_drupalgap_splash') { return; }
     else { _drupalgap_back(); }
   }
   catch (error) { console.log('drupalgap_back' + error); }
