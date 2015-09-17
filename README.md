@@ -118,10 +118,7 @@ http://example.com/application
 
 **Mobile App**
 
-To compile a mobile application, see here for more information:
-
-```
-http://drupalgap.org/node/126
+To compile a mobile application, see here for more information: http://drupalgap.org/node/126
 
 **Headless/Decoupled Drupal**
 
