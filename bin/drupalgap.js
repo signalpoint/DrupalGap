@@ -5153,6 +5153,9 @@ function drupalgap_jqm_active_page_url() {
  */
 function drupalgap_render_page() {
   try {
+
+    module_invoke_all('page_build', drupalgap.output);
+
     // Since the page output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.
@@ -13802,10 +13805,12 @@ function theme_views_view(variables) {
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
     // the creation of the content area.
+    // @TODO putting views_litepager support here is a hack, we should be
+    // implementing views_litepager_views_view for theme_views_view() instead.
     var views_litepager_present = module_exists('views_litepager');
     if (
       (results.view.count == 0 && !views_litepager_present) ||
-      (views_litepager_present && results.view.pages == null)
+      (views_litepager_present && results.view.pages == null && results.view.count == 0)
     ) {
       $(selector).hide();
       setTimeout(function() {
@@ -13904,6 +13909,8 @@ function theme_pager(variables) {
     var limit = view.limit;
     var page = view.page;
     // If we don't have any results, return.
+    // @TODO putting views_litepager support here is a hack, we should be
+    // implementing views_litepager_pager() for theme_pager() instead.
     var views_litepager_present = module_exists('views_litepager');
     if (
       (count == 0 && !views_litepager_present) ||
@@ -13913,8 +13920,8 @@ function theme_pager(variables) {
     var items = [];
     if (page != 0) { items.push(theme('pager_previous', variables)); }
     if (
-      (page != pages - 1 && !module_exists('views_litepager')) ||
-      module_exists('views_litepager')
+      (page != pages - 1 && !views_litepager_present) ||
+      views_litepager_present
     ) { items.push(theme('pager_next', variables)); }
     if (items.length > 0) {
       // Make sure we have an id to use since we need to dynamically build the
