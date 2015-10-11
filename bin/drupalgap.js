@@ -586,6 +586,7 @@ function drupalgap_toast(html) {
     var open = arguments[2] ? arguments[2] : 750;
     var close = arguments[1] ? arguments[1] : 1500;
     setTimeout(function() {
+        $.mobile.loading().show();
         $.mobile.loading('show', {
             textVisible: true,
             html: html
@@ -1272,7 +1273,7 @@ function drupalgap_menu_access(path) {
 }
 
 /**
- * @deprecated Use drupal_module_load() instead.
+ * @deprecated Use module_load() instead.
  * @param {String} name
  * @return {Object}
  */
