@@ -404,7 +404,7 @@ function _drupalgap_form_render_element(form, element) {
 
     // Add element description.
     if (element.description && element.type != 'hidden') {
-      html += '<div>' + t(element.description) + '</div>';
+      html += '<div class="description">' + t(element.description) + '</div>';
     }
 
     // Close the element container.
