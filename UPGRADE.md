@@ -36,9 +36,12 @@ The following internal global string variables have been replaced:
  - `_views_embed_view_selector`
  - `_views_embed_view_results`
  - `_views_embed_view_options`
+ - `_views_exposed_filter_query`
+ - `_views_exposed_filter_reset`
+ - `_views_exposed_filter_submit_variables`
  
-If you used those values or set those values in any way, there are now getter
-and setter functions to use instead:
+If you used those values or set those values in any way (very unlikely), there
+are now getter and setter functions to use instead:
 
 **OLD WAY**
 ```
@@ -47,11 +50,17 @@ and setter functions to use instead:
 var selector = _views_embed_view_selector;
 var results = _views_embed_view_results;
 var options = _views_embed_view_options;
+var query = _views_exposed_filter_query;
+var reset = _views_exposed_filter_reset;
+var submit_variables = _views_exposed_filter_submit_variables;
 
 // Setting.
 _views_embed_view_selector = selector;
 _views_embed_view_results = results;
 _views_embed_view_options = options;
+_views_exposed_filter_query = query;
+_views_exposed_filter_reset = reset;
+_views_exposed_filter_submit_variables = submit_variables;
 
 ```
 
@@ -62,11 +71,17 @@ _views_embed_view_options = options;
 var selector = views_embedded_view_get(page_id, 'selector');
 var results = views_embedded_view_get(page_id, 'results');
 var options = views_embedded_view_get(page_id, 'options');
+var query = views_embedded_view_get(page_id, 'exposed_filter_query');
+var reset = views_embedded_view_get(page_id, 'exposed_filter_reset');
+var submit_variables = views_embedded_view_get(page_id, 'exposed_filter_submit_variables');
 
 // Setting.
-views_embedded_view_get(page_id, 'selector', selector);
-views_embedded_view_get(page_id, 'results', results);
-views_embedded_view_get(page_id, 'options', options);
+views_embedded_view_set(page_id, 'selector', selector);
+views_embedded_view_set(page_id, 'results', results);
+views_embedded_view_set(page_id, 'options', options);
+views_embedded_view_set(page_id, 'exposed_filter_query', query);
+views_embedded_view_set(page_id, 'exposed_filter_reset', reset);
+views_embedded_view_set(page_id, 'exposed_filter_submit_variables', submit_variables);
 
 ```
 
