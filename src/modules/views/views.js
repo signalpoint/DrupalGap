@@ -7,11 +7,36 @@ var _views_exposed_filter_reset = false;
 // Used to hold onto the current views' exposed filter submit's theme variables.
 var _views_exposed_filter_submit_variables = null;
 
-// Global variables used to hold the onto various things during a views embed
-// view call.
-var _views_embed_view_selector = null;
-var _views_embed_view_results = null;
-var _views_embed_view_options = null;
+// Holds onto views contexts on a per page basis.
+var _views_embedded_views = {};
+
+/**
+ *
+ */
+function views_embedded_view_get(page_id) {
+  try {
+    if (!_views_embedded_views[page_id]) { return null; }
+    // Are they asking for a property? If not, just give them back the whole
+    // object.
+    var property = arguments[1];
+    if (!property) { return _views_embedded_views[page_id]; }
+    return _views_embedded_views[page_id][property];
+  }
+  catch (error) { console.log('views_embedded_view_get - ' + error); }
+}
+
+/**
+ *
+ */
+function views_embedded_view_set(page_id, property, value) {
+  try {
+    if (!_views_embedded_views[page_id]) {
+      _views_embedded_views[page_id] = {};
+    }
+    _views_embedded_views[page_id][property] = value;
+  }
+  catch (error) { console.log('views_embedded_view_set - ' + error); }
+}
 
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
@@ -335,13 +360,18 @@ function theme_view(variables) {
       }
     }
     else { drupalgap.views.ids.push(variables.attributes.id); }
+
+    // Keep track of the page id for context.
+    var page_id = drupalgap_get_page_id();
+    variables.page_id = page_id;
+
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
     variables.attributes['class'] += 'view ';
     var html =
       '<div ' + drupalgap_attributes(variables.attributes) + ' ></div>';
     var options = {
-      page_id: drupalgap_get_page_id(),
+      page_id: page_id,
       jqm_page_event: 'pageshow',
       jqm_page_event_callback: '_theme_view',
       jqm_page_event_args: JSON.stringify(variables)
@@ -392,8 +422,8 @@ function views_embed_view(path, options) {
     views_datasource_get_view_result(path, {
         success: function(results) {
           try {
-            _views_embed_view_results = results;
-            _views_embed_view_options = options;
+            views_embedded_view_set(options.page_id, 'results', results);
+            views_embedded_view_set(options.page_id, 'options', options);
             if (!options.success) { return; }
             options.results = results;
             var html = theme('views_view', options);
@@ -405,7 +435,7 @@ function views_embed_view(path, options) {
         },
         error: function(xhr, status, message) {
           try {
-            _views_embed_view_results = null;
+            views_embedded_view_set(options.page_id, 'results', null);
             if (options.error) { options.error(xhr, status, message); }
           }
           catch (error) {
@@ -427,7 +457,7 @@ function theme_views_view(variables) {
     var html = '';
 
     // Extract the results.
-    var results = _views_embed_view_results;
+    var results = views_embedded_view_get(variables.page_id, 'results');
     if (!results) { return html; }
 
     // Figure out the format.
@@ -464,10 +494,9 @@ function theme_views_view(variables) {
       );
     }
 
-    // Determine the views container selector and set it aside globally.
-    var selector = '#' + drupalgap_get_page_id() +
-        ' #' + variables.attributes.id;
-    _views_embed_view_selector = selector;
+    // Determine views container selector and place it in the global context.
+    var selector = '#' + variables.page_id + ' #' + variables.attributes.id;
+    views_embedded_view_set(variables.page_id, 'selector', selector);
 
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
@@ -503,7 +532,7 @@ function theme_views_view(variables) {
     var result_formats = drupalgap_views_get_result_formats(variables);
     var rows = '' + result_formats.open + drupalgap_views_render_rows(
       variables,
-      _views_embed_view_results,
+      results,
       root,
       child,
       result_formats.open_row,
