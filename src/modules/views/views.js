@@ -16,8 +16,6 @@ var _views_embedded_views = {};
 function views_embedded_view_get(page_id) {
   try {
     if (!_views_embedded_views[page_id]) { return null; }
-    // Are they asking for a property? If not, just give them back the whole
-    // object.
     var property = arguments[1];
     if (!property) { return _views_embedded_views[page_id]; }
     return _views_embedded_views[page_id][property];
@@ -36,6 +34,20 @@ function views_embedded_view_set(page_id, property, value) {
     _views_embedded_views[page_id][property] = value;
   }
   catch (error) { console.log('views_embedded_view_set - ' + error); }
+}
+
+/**
+ *
+ */
+function views_embedded_view_delete(page_id) {
+  try {
+    if (!_views_embedded_views[page_id]) { return false; }
+    var property = arguments[1];
+    if (!property) { delete _views_embedded_views[page_id]; }
+    else { delete _views_embedded_views[page_id][property]; }
+    return true;
+  }
+  catch (error) { console.log('views_embedded_view_delete - ' + error); }
 }
 
 /**
@@ -134,7 +146,6 @@ function views_datasource_get_view_result(path, options) {
  */
 function views_exposed_form(form, form_state, options) {
   try {
-
     // @TODO we tried to make the filters collapsible, but jQM doesn't seem to
     // like collapsibles with form inputs in them... weird.
     //var title = form.title ? form.title : 'Filter';
@@ -230,7 +241,10 @@ function views_exposed_form(form, form_state, options) {
     };
 
     // Add the reset button, if necessary.
-    if (options.exposed_data.reset && _views_exposed_filter_reset) {
+    if (
+      options.exposed_data.reset &&
+      views_embedded_view_get(form.variables.page_id, 'exposed_filter_reset')
+    ) {
       form.buttons['reset'] = {
         title: options.exposed_data.reset,
         attributes: {
@@ -254,7 +268,7 @@ function views_exposed_form(form, form_state, options) {
  */
 function views_exposed_form_submit(form, form_state) {
   try {
-
+    var page_id = form.variables.page_id;
     // Assemble the query string from the form state values.
     var query = '';
     for (var key in form_state.values) {
@@ -268,29 +282,32 @@ function views_exposed_form_submit(form, form_state) {
     // If there is a query set aside from previous requests, and it is equal to
     // the submitted query, then stop the submission. Otherwise remove it from
     // the path.
-    if (_views_exposed_filter_query) {
-      if (_views_exposed_filter_query == query) { return; }
-      if (
-        form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1
-      ) {
+    var _query = views_embedded_view_get(page_id, 'exposed_filter_query');
+    if (_query) {
+      if (_query == query) { return; }
+      if (form.variables.path.indexOf('&' + _query) != -1) {
         form.variables.path =
-        form.variables.path.replace('&' + _views_exposed_filter_query, '');
+          form.variables.path.replace('&' + _query, '');
       }
     }
 
     // Set aside a copy of the query string, so it can be removed from the path
     // upon subsequent submissions of the form.
-    _views_exposed_filter_query = query;
+    views_embedded_view_set(page_id, 'exposed_filter_query', query);
 
     // Indicate that we have an exposed filter, so the reset button can easily
     // be shown/hidden.
-    _views_exposed_filter_reset = true;
+    views_embedded_view_set(page_id, 'exposed_filter_reset', true);
 
     // Update the path for the view, reset the pager, hold onto the variables,
     // then theme the view.
     form.variables.path += '&' + query;
     form.variables.page = 0;
-    _views_exposed_filter_submit_variables = form.variables;
+    views_embedded_view_set(
+      page_id,
+      'exposed_filter_submit_variables',
+      form.variables
+    );
     _theme_view(form.variables);
 
   }
@@ -302,18 +319,25 @@ function views_exposed_form_submit(form, form_state) {
  */
 function views_exposed_form_reset() {
   try {
+    var page_id = drupalgap_get_page_id();
     // Reset the path to the view, the page, and the global vars, then re-theme
     // the view.
-    _views_exposed_filter_submit_variables.path =
-      _views_exposed_filter_submit_variables.path.replace(
-        '&' + _views_exposed_filter_query,
+    var exposed_filter_submit_variables =
+      views_embedded_view_get(page_id, 'exposed_filter_submit_variables');
+    exposed_filter_submit_variables.path =
+      exposed_filter_submit_variables.path.replace(
+        '&' + views_embedded_view_get(page_id, 'exposed_filter_query'),
         ''
       );
-
-    _views_exposed_filter_submit_variables.page = 0;
-    _views_exposed_filter_reset = false;
-    _views_exposed_filter_query = null;
-    _theme_view(_views_exposed_filter_submit_variables);
+    exposed_filter_submit_variables.page = 0;
+    views_embedded_view_set(
+      page_id,
+      'exposed_filter_submit_variables',
+      exposed_filter_submit_variables
+    );
+    views_embedded_view_set(page_id, 'exposed_filter_reset', false);
+    views_embedded_view_set(page_id, 'exposed_filter_query', null);
+    _theme_view(exposed_filter_submit_variables);
   }
   catch (error) { console.log('views_exposed_form_reset - ' + error); }
 }
