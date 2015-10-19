@@ -10,8 +10,8 @@ version of DrupalGap to another.
 # index.html
 
   Whenever updating DrupalGap, be sure to make a backup of your index.html file
-  then replace it with the default.index.html file. Then you must re-add any
-  modifications you made to your index.html file.
+  then replace it with the contents of the newest default.index.html file. Then
+  you must re-add any modifications you made to your index.html file.
 
 # Clear Local Storage Cache
 
@@ -28,6 +28,47 @@ version of DrupalGap to another.
   DrupalGap module alongside it.
 
 # Version Change Notes for Developers
+
+## 7.x-1.2 => 7.x-1.3
+
+The following internal global string variables have been replaced:
+
+ - `_views_embed_view_selector`
+ - `_views_embed_view_results`
+ - `_views_embed_view_options`
+ 
+If you used those values or set those values in any way, there are now getter
+and setter functions to use instead:
+
+**OLD WAY**
+```
+
+// Getting.
+var selector = _views_embed_view_selector;
+var results = _views_embed_view_results;
+var options = _views_embed_view_options;
+
+// Setting.
+_views_embed_view_selector = selector;
+_views_embed_view_results = results;
+_views_embed_view_options = options;
+
+```
+
+**NEW WAY**
+```
+
+// Getting.
+var selector = views_embedded_view_get(page_id, 'selector');
+var results = views_embedded_view_get(page_id, 'results');
+var options = views_embedded_view_get(page_id, 'options');
+
+// Setting.
+views_embedded_view_get(page_id, 'selector', selector);
+views_embedded_view_get(page_id, 'results', results);
+views_embedded_view_get(page_id, 'options', options);
+
+```
 
 ## 7.x-1.0-rc4 => 7.x-1.0-rc5
 
