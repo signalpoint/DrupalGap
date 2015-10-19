@@ -246,6 +246,8 @@ function drupalgap_remove_page_from_dom(page_id) {
         typeof _dg_GET[page_id] !== 'undefined' &&
         (typeof options.leaveQuery === 'undefined' || !options.leaveQuery)
       ) { delete _dg_GET[page_id]; }
+      // Remove any embedded view for the page.
+      views_embedded_view_delete(page_id);
     }
     else {
       console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
