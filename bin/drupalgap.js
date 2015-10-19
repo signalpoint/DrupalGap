@@ -5046,6 +5046,8 @@ function drupalgap_remove_page_from_dom(page_id) {
         typeof _dg_GET[page_id] !== 'undefined' &&
         (typeof options.leaveQuery === 'undefined' || !options.leaveQuery)
       ) { delete _dg_GET[page_id]; }
+      // Remove any embedded view for the page.
+      views_embedded_view_delete(page_id);
     }
     else {
       console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
@@ -13342,11 +13344,48 @@ var _views_exposed_filter_reset = false;
 // Used to hold onto the current views' exposed filter submit's theme variables.
 var _views_exposed_filter_submit_variables = null;
 
-// Global variables used to hold the onto various things during a views embed
-// view call.
-var _views_embed_view_selector = null;
-var _views_embed_view_results = null;
-var _views_embed_view_options = null;
+// Holds onto views contexts on a per page basis.
+var _views_embedded_views = {};
+
+/**
+ *
+ */
+function views_embedded_view_get(page_id) {
+  try {
+    if (!_views_embedded_views[page_id]) { return null; }
+    var property = arguments[1];
+    if (!property) { return _views_embedded_views[page_id]; }
+    return _views_embedded_views[page_id][property];
+  }
+  catch (error) { console.log('views_embedded_view_get - ' + error); }
+}
+
+/**
+ *
+ */
+function views_embedded_view_set(page_id, property, value) {
+  try {
+    if (!_views_embedded_views[page_id]) {
+      _views_embedded_views[page_id] = {};
+    }
+    _views_embedded_views[page_id][property] = value;
+  }
+  catch (error) { console.log('views_embedded_view_set - ' + error); }
+}
+
+/**
+ *
+ */
+function views_embedded_view_delete(page_id) {
+  try {
+    if (!_views_embedded_views[page_id]) { return false; }
+    var property = arguments[1];
+    if (!property) { delete _views_embedded_views[page_id]; }
+    else { delete _views_embedded_views[page_id][property]; }
+    return true;
+  }
+  catch (error) { console.log('views_embedded_view_delete - ' + error); }
+}
 
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
@@ -13444,7 +13483,6 @@ function views_datasource_get_view_result(path, options) {
  */
 function views_exposed_form(form, form_state, options) {
   try {
-
     // @TODO we tried to make the filters collapsible, but jQM doesn't seem to
     // like collapsibles with form inputs in them... weird.
     //var title = form.title ? form.title : 'Filter';
@@ -13540,7 +13578,10 @@ function views_exposed_form(form, form_state, options) {
     };
 
     // Add the reset button, if necessary.
-    if (options.exposed_data.reset && _views_exposed_filter_reset) {
+    if (
+      options.exposed_data.reset &&
+      views_embedded_view_get(form.variables.page_id, 'exposed_filter_reset')
+    ) {
       form.buttons['reset'] = {
         title: options.exposed_data.reset,
         attributes: {
@@ -13564,7 +13605,7 @@ function views_exposed_form(form, form_state, options) {
  */
 function views_exposed_form_submit(form, form_state) {
   try {
-
+    var page_id = form.variables.page_id;
     // Assemble the query string from the form state values.
     var query = '';
     for (var key in form_state.values) {
@@ -13578,29 +13619,32 @@ function views_exposed_form_submit(form, form_state) {
     // If there is a query set aside from previous requests, and it is equal to
     // the submitted query, then stop the submission. Otherwise remove it from
     // the path.
-    if (_views_exposed_filter_query) {
-      if (_views_exposed_filter_query == query) { return; }
-      if (
-        form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1
-      ) {
+    var _query = views_embedded_view_get(page_id, 'exposed_filter_query');
+    if (_query) {
+      if (_query == query) { return; }
+      if (form.variables.path.indexOf('&' + _query) != -1) {
         form.variables.path =
-        form.variables.path.replace('&' + _views_exposed_filter_query, '');
+          form.variables.path.replace('&' + _query, '');
       }
     }
 
     // Set aside a copy of the query string, so it can be removed from the path
     // upon subsequent submissions of the form.
-    _views_exposed_filter_query = query;
+    views_embedded_view_set(page_id, 'exposed_filter_query', query);
 
     // Indicate that we have an exposed filter, so the reset button can easily
     // be shown/hidden.
-    _views_exposed_filter_reset = true;
+    views_embedded_view_set(page_id, 'exposed_filter_reset', true);
 
     // Update the path for the view, reset the pager, hold onto the variables,
     // then theme the view.
     form.variables.path += '&' + query;
     form.variables.page = 0;
-    _views_exposed_filter_submit_variables = form.variables;
+    views_embedded_view_set(
+      page_id,
+      'exposed_filter_submit_variables',
+      form.variables
+    );
     _theme_view(form.variables);
 
   }
@@ -13612,18 +13656,25 @@ function views_exposed_form_submit(form, form_state) {
  */
 function views_exposed_form_reset() {
   try {
+    var page_id = drupalgap_get_page_id();
     // Reset the path to the view, the page, and the global vars, then re-theme
     // the view.
-    _views_exposed_filter_submit_variables.path =
-      _views_exposed_filter_submit_variables.path.replace(
-        '&' + _views_exposed_filter_query,
+    var exposed_filter_submit_variables =
+      views_embedded_view_get(page_id, 'exposed_filter_submit_variables');
+    exposed_filter_submit_variables.path =
+      exposed_filter_submit_variables.path.replace(
+        '&' + views_embedded_view_get(page_id, 'exposed_filter_query'),
         ''
       );
-
-    _views_exposed_filter_submit_variables.page = 0;
-    _views_exposed_filter_reset = false;
-    _views_exposed_filter_query = null;
-    _theme_view(_views_exposed_filter_submit_variables);
+    exposed_filter_submit_variables.page = 0;
+    views_embedded_view_set(
+      page_id,
+      'exposed_filter_submit_variables',
+      exposed_filter_submit_variables
+    );
+    views_embedded_view_set(page_id, 'exposed_filter_reset', false);
+    views_embedded_view_set(page_id, 'exposed_filter_query', null);
+    _theme_view(exposed_filter_submit_variables);
   }
   catch (error) { console.log('views_exposed_form_reset - ' + error); }
 }
@@ -13670,13 +13721,18 @@ function theme_view(variables) {
       }
     }
     else { drupalgap.views.ids.push(variables.attributes.id); }
+
+    // Keep track of the page id for context.
+    var page_id = drupalgap_get_page_id();
+    variables.page_id = page_id;
+
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
     variables.attributes['class'] += 'view ';
     var html =
       '<div ' + drupalgap_attributes(variables.attributes) + ' ></div>';
     var options = {
-      page_id: drupalgap_get_page_id(),
+      page_id: page_id,
       jqm_page_event: 'pageshow',
       jqm_page_event_callback: '_theme_view',
       jqm_page_event_args: JSON.stringify(variables)
@@ -13727,8 +13783,8 @@ function views_embed_view(path, options) {
     views_datasource_get_view_result(path, {
         success: function(results) {
           try {
-            _views_embed_view_results = results;
-            _views_embed_view_options = options;
+            views_embedded_view_set(options.page_id, 'results', results);
+            views_embedded_view_set(options.page_id, 'options', options);
             if (!options.success) { return; }
             options.results = results;
             var html = theme('views_view', options);
@@ -13740,7 +13796,7 @@ function views_embed_view(path, options) {
         },
         error: function(xhr, status, message) {
           try {
-            _views_embed_view_results = null;
+            views_embedded_view_set(options.page_id, 'results', null);
             if (options.error) { options.error(xhr, status, message); }
           }
           catch (error) {
@@ -13762,7 +13818,7 @@ function theme_views_view(variables) {
     var html = '';
 
     // Extract the results.
-    var results = _views_embed_view_results;
+    var results = views_embedded_view_get(variables.page_id, 'results');
     if (!results) { return html; }
 
     // Figure out the format.
@@ -13799,10 +13855,9 @@ function theme_views_view(variables) {
       );
     }
 
-    // Determine the views container selector and set it aside globally.
-    var selector = '#' + drupalgap_get_page_id() +
-        ' #' + variables.attributes.id;
-    _views_embed_view_selector = selector;
+    // Determine views container selector and place it in the global context.
+    var selector = '#' + variables.page_id + ' #' + variables.attributes.id;
+    views_embedded_view_set(variables.page_id, 'selector', selector);
 
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
@@ -13838,7 +13893,7 @@ function theme_views_view(variables) {
     var result_formats = drupalgap_views_get_result_formats(variables);
     var rows = '' + result_formats.open + drupalgap_views_render_rows(
       variables,
-      _views_embed_view_results,
+      results,
       root,
       child,
       result_formats.open_row,
