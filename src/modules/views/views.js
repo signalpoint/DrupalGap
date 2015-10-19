@@ -1,12 +1,3 @@
-// Used to hold onto the current views' exposed filter query string.
-var _views_exposed_filter_query = null;
-
-// Used to mark if the exposed filter's reset button is shown or not.
-var _views_exposed_filter_reset = false;
-
-// Used to hold onto the current views' exposed filter submit's theme variables.
-var _views_exposed_filter_submit_variables = null;
-
 // Holds onto views contexts on a per page basis.
 var _views_embedded_views = {};
 
