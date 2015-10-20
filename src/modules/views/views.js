@@ -568,7 +568,10 @@ function theme_views_view(variables) {
     // then no pager at all.
     // @TODO having this special case for views_infinite_scroll is a hack, we
     // obviously need a hook or something around here...
-    if (module_exists('views_infinite_scroll')) { html += rows; }
+    if (
+      module_exists('views_infinite_scroll') &&
+      views_infinite_scroll_ok()
+    ) { html += rows; }
     else if (pager_pos == 'top') {
       html += pager;
       if (!empty(pager)) { html += theme('views_spacer', null); }
