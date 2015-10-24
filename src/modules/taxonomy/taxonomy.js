@@ -889,19 +889,36 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
 function taxonomy_views_exposed_filter(
   form, form_state, element, filter, field) {
   try {
-    /*dpm('taxonomy_views_exposed_filter');
-    dpm(element);
-    dpm(filter);
-    dpm(field);*/
+    //dpm('taxonomy_views_exposed_filter');
+    //console.log(element);
+    //console.log(filter);
+    //console.log(field);
 
     // @TODO this filter loses its value after one submission, aka the next
     // submission will submit it as 'All' eventhough we have a term selected in
     // the widget from the previous submission.
 
-    // Change the input to hidden, then iterate over each vocabulary and inject
-    // them into the widget. We'll just use a taxonomy term reference field and
-    // fake its instance.
-    element.type = 'hidden';
+    // Autocomplete.
+    if (filter.options.type == 'textfield') {
+      element.type = 'autocomplete';
+      element.remote = true;
+      element.custom = true;
+      element.handler = 'index';
+      element.entity_type = 'taxonomy_term';
+      if (typeof filter.options.vocabulary !== 'undefined') {
+        element.vid =
+          taxonomy_vocabulary_get_vid_from_name(filter.options.vocabulary);
+      }
+      element.value = 'name';
+      element.label = 'name';
+      element.filter = 'name';
+    }
+    // Dropdown.
+    else {
+      // Change the input to hidden, then iterate over each vocabulary and inject
+      // them into the widget. We'll just use a taxonomy term reference field and
+      // fake its instance.
+      element.type = 'hidden';
     for (var index in field.settings.allowed_values) {
         if (!field.settings.allowed_values.hasOwnProperty(index)) { continue; }
         var object = field.settings.allowed_values[index];
@@ -939,6 +956,7 @@ function taxonomy_views_exposed_filter(
         child += theme('taxonomy_term_reference', variables);
         element.children.push({ markup: child });
 
+    }
     }
   }
   catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
