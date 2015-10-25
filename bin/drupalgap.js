@@ -586,14 +586,32 @@ function drupalgap_toast(html) {
     var open = arguments[2] ? arguments[2] : 750;
     var close = arguments[1] ? arguments[1] : 1500;
     setTimeout(function() {
-        $.mobile.loading().show();
+        //$.mobile.loading().show();
         $.mobile.loading('show', {
             textVisible: true,
             html: html
         });
-        setTimeout(function() {
-            $.mobile.loading().hide();
+        //$.mobile.showPageLoadingMsg();
+        //$.mobile.loading( "show", {
+        //  text: "foo",
+        //  textVisible: true,
+        //  html: html
+        //});
+        var interval = setInterval(function () {
+            $.mobile.loading('hide');
+            clearInterval(interval);
         }, close);
+        //setTimeout(function() {
+            //$.mobile.loading().hide();
+            //$.mobile.loading().remove();
+            //$('body').removeClass('ui-loading');
+            //$.mobile.hidePageLoadingMsg();
+            //$.mobile.loader().hide();
+            //$.mobile.loader( "loading" );
+            //$.mobile.loading('hide', {});
+            //$.mobile.loading('hide');
+            //$.mobile.loader( "hide" );
+        //}, close);
     }, open);
   }
   catch (error) {
