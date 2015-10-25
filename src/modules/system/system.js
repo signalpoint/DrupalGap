@@ -96,7 +96,7 @@ function system_block_view(delta) {
         break;
       case 'title':
         var title_id = system_title_block_id(drupalgap_path_get());
-        return '<h1 id="' + title_id + '"></h1>';
+        return '<h1 id="' + title_id + '" class="page-title"></h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">' + t('Powered by') + ': ' +
