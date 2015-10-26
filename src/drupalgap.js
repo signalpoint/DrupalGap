@@ -240,7 +240,7 @@ function _drupalgap_deviceready_options() {
       error: function(jqXHR, textStatus, errorThrown) {
         // Build an informative error message and display it.
         var msg = t('Failed connection to') + ' ' +
-          drupalgap.settings.site_path;
+          Drupal.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
         msg += ' - ' + t('Check your device\'s connection and check that') +
           ' ' + Drupal.settings.site_path + ' ' + t('is online.');
