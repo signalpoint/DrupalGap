@@ -203,7 +203,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
       bundle
     );
     // Update this entity in local storage so the content property sticks.
-    if (Drupal.settings.cache.entity.enabled) {
+    if (entity_caching_enabled(entity_type, bundle)) {
       _entity_local_storage_save(
         entity_type,
         entity[entity_primary_key(entity_type)],
