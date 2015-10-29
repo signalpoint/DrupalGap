@@ -2445,33 +2445,15 @@ function drupalgap_check_visibility(type, data) {
 }
 
 /**
- * Given an entity type and entity, this will return the bundle name as a
- * string for the given entity, or null if the bundle is N/A.
- * @param {String} entity_type The entity type.
- * @param {Object} entity The entity JSON object.
- * @return {*}
+ * @deprecated
+ * @ see entity_get_bundle()
  */
 function drupalgap_get_bundle(entity_type, entity) {
   try {
-    var bundle = null;
-    switch (entity_type) {
-      case 'node': bundle = entity.type; break;
-      case 'comment':
-      case 'file':
-      case 'user':
-      case 'taxonomy_vocabulary':
-      case 'taxonomy_term':
-        // These entity types don't have a bundle.
-        break;
-      default:
-        console.log(
-          'WARNING: drupalgap_get_bundle - unsupported entity type (' +
-            entity_type +
-          ')'
-        );
-        break;
-    }
-    return bundle;
+    var msg = 'WARNING - drupalgap_get_bundle() is deprecated, use ' +
+      'entity_get_bundle() instead!';
+    console.log(msg);
+    return entity_get_bundle(entity_type, entity);
   }
   catch (error) { console.log('drupalgap_get_bundle - ' + error); }
 }
@@ -7674,7 +7656,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
       bundle
     );
     // Update this entity in local storage so the content property sticks.
-    if (Drupal.settings.cache.entity.enabled) {
+    if (entity_caching_enabled(entity_type, bundle)) {
       _entity_local_storage_save(
         entity_type,
         entity[entity_primary_key(entity_type)],
