@@ -11,8 +11,8 @@ Drupal.settings.debug = true;
 /****************************************|
  * Drupal Settings (provided by jDrupal) |
  ****************************************/
- 
-/* Drupal Paths */
+
+/* DRUPAL PATHS */
  
 // Site Path (do not use a trailing slash)
 Drupal.settings.site_path = ''; // e.g. http://www.example.com
@@ -27,16 +27,73 @@ Drupal.settings.file_public_path = 'sites/default/files';
 // The Default Language Code
 Drupal.settings.language_default = 'und';
 
-/* Drupal Caching */
+/* CACHING AND PERFORMANCE */
 
-// Set to true to enable local storage caching.
-Drupal.settings.cache.entity.enabled = false;
-Drupal.settings.cache.views.enabled = false;
+// Entity Caching
+Drupal.settings.cache.entity = {
 
-// Number of seconds before cached copy expires. Set to 0 to cache forever, set
-// to 60 for one minute, etc.
-Drupal.settings.cache.entity.expiration = 3600;
-Drupal.settings.cache.views.expiration = 3600;
+  /* Globals (will be used if not overwritten below) */
+  enabled: true,
+  expiration: 60, // # of seconds to cache, set to 0 to cache forever
+
+  /* Entity types */
+  entity_types: {
+
+    /* Comments */
+    /*comment: {
+     bundles: {}
+     },*/
+
+    /* Files */
+    /*file: {
+     bundles: {}
+     },*/
+
+    /* Nodes */
+    node: {
+
+      /* Node Globals (will be used if not overwritten below) */
+      enabled: true,
+      expiration: 120,
+
+      /* Content types (aka bundles) */
+      bundles: {
+
+        articles: {
+          expiration: 3600
+        },
+        page: {
+          enabled: false
+        }
+
+      }
+    },
+
+    /* Terms */
+    /*taxonomy_term: {
+     bundles: {}
+     },*/
+
+    /* Vocabularies */
+    /*taxonomy_vocabulary: {
+     bundles: {}
+     },*/
+
+    /* Users */
+    /*user: {
+     bundles: {}
+     }*/
+
+  }
+
+};
+
+/* Views Caching */
+
+Drupal.settings.cache.views = {
+  enabled: true,
+  expiration: 3600
+};
 
 /*********************|
  * DrupalGap Settings |
