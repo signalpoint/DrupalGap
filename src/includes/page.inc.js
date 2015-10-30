@@ -125,16 +125,17 @@ $(document).on('pagebeforechange', function(e, data) {
  */
 function template_preprocess_page(variables) {
   try {
-    // Set up default attribute's for the page's div container.
+    // Set up default attributes for the page's div container.
     if (typeof variables.attributes === 'undefined') {
       variables.attributes = {};
     }
 
     // @todo - is this needed?
+    // @UPDATE - this should be used, but these page attributes are ignored
+    // by drupalgap_add_page_to_dom()!
     variables.attributes['data-role'] = 'page';
 
-    // Call all hook_preprocess_page functions.
-    module_invoke_all('preprocess_page');
+    module_invoke_all('preprocess_page', variables);
 
     // Place the variables into drupalgap.page
     drupalgap.page.variables = variables;
@@ -155,7 +156,8 @@ function template_process_page(variables) {
     // For each region, render it, then replace the placeholder in the page's
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap_path);
-    var page_html = $('#' + page_id).html();
+    var page = $('#' + page_id);
+    var page_html = $(page).html();
     if (!page_html) { return; }
     for (var index in drupalgap.theme.regions) {
         if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
@@ -167,7 +169,8 @@ function template_process_page(variables) {
           drupalgap_render_region(_region)
         );
     }
-    $('#' + page_id).html(page_html);
+    $(page).html(page_html);
+    module_invoke_all('post_process_page', variables);
   }
   catch (error) { console.log('template_process_page - ' + error); }
 }
