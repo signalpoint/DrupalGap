@@ -102,7 +102,7 @@ function drupalgap_goto(path) {
 
     // Return if we are trying to go to the path we are already on, unless this
     // was a form submission, then we'll let the page rebuild itself. For
-    // accurracy we compare the jQM active page url with the destination page
+    // accuracy we compare the jQM active page url with the destination page
     // id.
     // @todo - this boolean doesn't match the comment description of the code
     // block, i.e. the form_submission check is opposite of what it says
