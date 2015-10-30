@@ -404,6 +404,34 @@ function hook_page_build(output) {
 }
 
 /**
+ * Implements hook_preprocess_page().
+ * Take action before the page is processed and shown to the user.
+ * @param {Object} variables The page variables.
+ */
+function hook_preprocess_page(variables) {
+  try {
+
+  }
+  catch (error) {
+    console.log('hook_preprocess_page - ' + error);
+  }
+}
+
+/**
+ * Implements hook_post_process_page().
+ * Take action after the page is processed and shown to the user.
+ * @param {Object} variables The page variables.
+ */
+function hook_post_process_page(variables) {
+  try {
+
+  }
+  catch (error) {
+    console.log('hook_post_process_page - ' + error);
+  }
+}
+
+/**
  * Implements hook_views_exposed_filter().
  * @param {Object} form
  * @param {Object} form_state
