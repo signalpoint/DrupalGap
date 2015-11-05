@@ -995,13 +995,20 @@ function entity_services_request_pre_postprocess_alter(options, result) {
       if (typeof result.content !== 'undefined') { return; }
       drupalgap_entity_render_content(options.service, result);
     }
-    // If we're indexing comments, render its content, if it isn't already set.
-    else if (options.service == 'comment' && options.resource == 'index') {
+    // If we're nodes or comments, render its content, if it isn't already set.
+    else if (
+      (options.service == 'node' || options.service == 'comment') &&
+      options.resource == 'index'
+    ) {
       for (var index in result) {
           if (!result.hasOwnProperty(index)) { continue; }
           var object = result[index];
           // @TODO - does this condition ever evaluate to true?
-          if (typeof object.content !== 'undefined') { continue; }
+          if (
+            typeof object.content !== 'undefined' ||
+            (typeof object.content === 'string' && object.content != '')
+          ) { continue; }
+          dpm('rendering after index!');
           drupalgap_entity_render_content(options.service, result[index]);
       }
     }

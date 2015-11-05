@@ -354,6 +354,11 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
             query.fields = fields;
             query.parameters[autocomplete.filter] = '%' + value + '%';
             query.parameters_op[autocomplete.filter] = 'like';
+            dpm('_theme_autocomplete');
+            dpm(autocomplete);
+            if (autocomplete.options) {
+              query.options = autocomplete.options;
+            }
           }
           fn.apply(null, [query, {
               success: function(results) {
@@ -399,25 +404,24 @@ function _theme_autocomplete_prepare_items(variables) {
       for (var index in items) {
           if (!items.hasOwnProperty(index)) { continue; }
           var item = items[index];
-          var value = '';
           var label = '';
-          if (typeof item === 'string') {
-            value = item;
-            label = item;
-          }
-          else {
-            value = item.value;
-            label = item.label;
-          }
-          var options = {
-            attributes: {
-              value: value,
-              onclick: '_theme_autocomplete_click(\'' +
+          var attrs = {
+            onclick: '_theme_autocomplete_click(\'' +
                 variables.attributes.id +
               '\', this, \'' + variables.autocomplete_id + '\')'
-            }
           };
-          var _item = l(label, null, options);
+          if (typeof item === 'string') {
+            label = item;
+            attrs.value = item;
+          }
+          else {
+            label = item.label;
+            attrs.value = item.value;
+            if (typeof item.attributes !== 'undefined') {
+              $.extend(true, attrs, item.attributes);
+            }
+          }
+          var _item = l(label, null, { attributes: attrs });
           _items.push(_item);
       }
     }
