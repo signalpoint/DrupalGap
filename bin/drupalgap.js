@@ -13377,7 +13377,9 @@ function taxonomy_views_exposed_filter(
 var _views_embedded_views = {};
 
 /**
- *
+ * Gets an embedded view for the given page id.
+ * @param {String} page_id
+ * @returns {Object}
  */
 function views_embedded_view_get(page_id) {
   try {
@@ -13390,7 +13392,11 @@ function views_embedded_view_get(page_id) {
 }
 
 /**
- *
+ * Given a page id, property name and value, this will set the value for the
+ * embedded view.
+ * @param {String} page_id
+ * @param {String} property
+ * @param {*} value
  */
 function views_embedded_view_set(page_id, property, value) {
   try {
@@ -13403,7 +13409,10 @@ function views_embedded_view_set(page_id, property, value) {
 }
 
 /**
- *
+ * Given a page id, this will delete the embedded view for the page from
+ * memory. Returns true if successful, false otherwise.
+ * @param page_id
+ * @returns {boolean}
  */
 function views_embedded_view_delete(page_id) {
   try {
@@ -14269,4 +14278,3 @@ drupalgap.views_datasource = {
     catch (error) { console.log('drupalgap.views_datasource - ' + error); }
   }
 };
-

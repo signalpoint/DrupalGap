@@ -240,7 +240,7 @@ function _drupalgap_deviceready_options() {
       error: function(jqXHR, textStatus, errorThrown) {
         // Build an informative error message and display it.
         var msg = t('Failed connection to') + ' ' +
-          drupalgap.settings.site_path;
+          Drupal.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
         msg += ' - ' + t('Check your device\'s connection and check that') +
           ' ' + Drupal.settings.site_path + ' ' + t('is online.');
@@ -590,8 +590,9 @@ function drupalgap_toast(html) {
             textVisible: true,
             html: html
         });
-        setTimeout(function() {
-            $.mobile.loading().hide();
+        var interval = setInterval(function () {
+            $.mobile.loading('hide');
+            clearInterval(interval);
         }, close);
     }, open);
   }
@@ -1272,7 +1273,7 @@ function drupalgap_menu_access(path) {
 }
 
 /**
- * @deprecated Use drupal_module_load() instead.
+ * @deprecated Use module_load() instead.
  * @param {String} name
  * @return {Object}
  */
@@ -1386,6 +1387,16 @@ function drupalgap_remove_page_from_dom(page_id) {
     $('#' + page_id).empty().remove();
   }
   catch (error) { console.log('drupalgap_remove_page_from_dom - ' + error); }
+}
+
+/**
+ * Restart the app.
+ */
+function drupalgap_restart() {
+  try {
+    location.reload();
+  }
+  catch (error) { console.log('drupalgap_restart - ' + error); }
 }
 
 /**
@@ -2434,33 +2445,15 @@ function drupalgap_check_visibility(type, data) {
 }
 
 /**
- * Given an entity type and entity, this will return the bundle name as a
- * string for the given entity, or null if the bundle is N/A.
- * @param {String} entity_type The entity type.
- * @param {Object} entity The entity JSON object.
- * @return {*}
+ * @deprecated
+ * @ see entity_get_bundle()
  */
 function drupalgap_get_bundle(entity_type, entity) {
   try {
-    var bundle = null;
-    switch (entity_type) {
-      case 'node': bundle = entity.type; break;
-      case 'comment':
-      case 'file':
-      case 'user':
-      case 'taxonomy_vocabulary':
-      case 'taxonomy_term':
-        // These entity types don't have a bundle.
-        break;
-      default:
-        console.log(
-          'WARNING: drupalgap_get_bundle - unsupported entity type (' +
-            entity_type +
-          ')'
-        );
-        break;
-    }
-    return bundle;
+    var msg = 'WARNING - drupalgap_get_bundle() is deprecated, use ' +
+      'entity_get_bundle() instead!';
+    console.log(msg);
+    return entity_get_bundle(entity_type, entity);
   }
   catch (error) { console.log('drupalgap_get_bundle - ' + error); }
 }
@@ -2820,10 +2813,31 @@ function _drupalgap_form_render_elements(form) {
                 form.bundle.indexOf('comment_node_') != -1
               ) { bundle = form.bundle.replace('comment_node_', ''); }
             }
-            // This is not a field, if it has a weight in
-            // field_info_extra_fields use it, otherwise just append it to the
-            // content.
-            if (
+
+            // This is not a field, if it has it's own weight use it, or see if
+            // there is a weight in field_info_extra_fields, otherwise just
+            // append it to the element content.
+
+            // Elements with a weight defined.
+            if (typeof element.weight !== 'undefined') {
+              if (content_weighted[element.weight]) {
+                var msg = 'WARNING: _drupalgap_form_render_elements - the ' +
+                'weight of ' + element.weight + ' for ' + element.name +
+                ' is already in use by ' +
+                content_weighted[element.weight].name;
+                console.log(msg);
+                // Just render it.
+                var _content = _drupalgap_form_render_element(form, element);
+                if (typeof _content !== 'undefined') { content += _content; }
+              }
+              else {
+                content_weighted[element.weight] =
+                  _drupalgap_form_render_element(form, element);
+              }
+            }
+
+            // Extra fields.
+            else if (
               form.entity_type && bundle &&
               typeof drupalgap.field_info_extra_fields[bundle][name] !==
                 'undefined' &&
@@ -2833,10 +2847,27 @@ function _drupalgap_form_render_elements(form) {
             ) {
               var weight =
                 drupalgap.field_info_extra_fields[bundle][name].weight;
-              content_weighted[weight] =
-              _drupalgap_form_render_element(form, element);
+              if (content_weighted[weight]) {
+                var msg = 'WARNING: _drupalgap_form_render_elements - the ' + 
+                'weight of ' + weight + ' for ' + element.name + ' is ' +
+                'already in use by ' + content_weighted[weight].name;
+                console.log(msg);
+                // Just render it.
+                var _content = _drupalgap_form_render_element(form, element);
+                if (typeof _content !== 'undefined') { content += _content; }
+              }
+              else {
+                content_weighted[weight] =
+                  _drupalgap_form_render_element(form, element);
+              }
             }
-            else { content += _drupalgap_form_render_element(form, element); }
+
+            // No weight, just render it.
+            else {
+              var _content = _drupalgap_form_render_element(form, element);
+              if (typeof _content !== 'undefined') { content += _content; }
+            }
+
           }
         }
     }
@@ -3100,7 +3131,7 @@ function _drupalgap_form_render_element(form, element) {
 
     // Add element description.
     if (element.description && element.type != 'hidden') {
-      html += '<div>' + t(element.description) + '</div>';
+      html += '<div class="description">' + t(element.description) + '</div>';
     }
 
     // Close the element container.
@@ -4233,7 +4264,7 @@ function theme_radios(variables) {
       for (var value in variables.options) {
           if (!variables.options.hasOwnProperty(value)) { continue; }
           var label = variables.options[value];
-          if (value == 'attributes') { return; } // Skip the attributes.
+          if (value == 'attributes') { continue; } // Skip the attributes.
           var checked = '';
           if (variables.value && variables.value == value) {
             checked = ' checked="checked" ';
@@ -4463,7 +4494,7 @@ function drupalgap_goto(path) {
 
     // Return if we are trying to go to the path we are already on, unless this
     // was a form submission, then we'll let the page rebuild itself. For
-    // accurracy we compare the jQM active page url with the destination page
+    // accuracy we compare the jQM active page url with the destination page
     // id.
     // @todo - this boolean doesn't match the comment description of the code
     // block, i.e. the form_submission check is opposite of what it says
@@ -4709,7 +4740,8 @@ function _drupalgap_goto_prepare_path(path) {
  */
 function drupalgap_back() {
   try {
-    if ($('.ui-page-active').attr('id') == drupalgap.settings.front) {
+    var active_page_id = $('.ui-page-active').attr('id');
+    if (active_page_id == drupalgap.settings.front) {
       var msg = t('Exit') + ' ' + drupalgap.settings.title + '?';
       if (drupalgap.settings.exit_message) {
         msg = drupalgap.settings.exit_message;
@@ -4718,6 +4750,7 @@ function drupalgap_back() {
           confirmCallback: _drupalgap_back_exit
       });
     }
+    else if (active_page_id == '_drupalgap_splash') { return; }
     else { _drupalgap_back(); }
   }
   catch (error) { console.log('drupalgap_back' + error); }
@@ -4909,16 +4942,17 @@ $(document).on('pagebeforechange', function(e, data) {
  */
 function template_preprocess_page(variables) {
   try {
-    // Set up default attribute's for the page's div container.
+    // Set up default attributes for the page's div container.
     if (typeof variables.attributes === 'undefined') {
       variables.attributes = {};
     }
 
     // @todo - is this needed?
+    // @UPDATE - this should be used, but these page attributes are ignored
+    // by drupalgap_add_page_to_dom()!
     variables.attributes['data-role'] = 'page';
 
-    // Call all hook_preprocess_page functions.
-    module_invoke_all('preprocess_page');
+    module_invoke_all('preprocess_page', variables);
 
     // Place the variables into drupalgap.page
     drupalgap.page.variables = variables;
@@ -4939,7 +4973,8 @@ function template_process_page(variables) {
     // For each region, render it, then replace the placeholder in the page's
     // html with the rendered region.
     var page_id = drupalgap_get_page_id(drupalgap_path);
-    var page_html = $('#' + page_id).html();
+    var page = $('#' + page_id);
+    var page_html = $(page).html();
     if (!page_html) { return; }
     for (var index in drupalgap.theme.regions) {
         if (!drupalgap.theme.regions.hasOwnProperty(index)) { continue; }
@@ -4951,7 +4986,8 @@ function template_process_page(variables) {
           drupalgap_render_region(_region)
         );
     }
-    $('#' + page_id).html(page_html);
+    $(page).html(page_html);
+    module_invoke_all('post_process_page', variables);
   }
   catch (error) { console.log('template_process_page - ' + error); }
 }
@@ -5030,6 +5066,8 @@ function drupalgap_remove_page_from_dom(page_id) {
         typeof _dg_GET[page_id] !== 'undefined' &&
         (typeof options.leaveQuery === 'undefined' || !options.leaveQuery)
       ) { delete _dg_GET[page_id]; }
+      // Remove any embedded view for the page.
+      views_embedded_view_delete(page_id);
     }
     else {
       console.log('WARNING: drupalgap_remove_page_from_dom() - not removing ' +
@@ -5140,6 +5178,9 @@ function drupalgap_jqm_active_page_url() {
  */
 function drupalgap_render_page() {
   try {
+
+    module_invoke_all('page_build', drupalgap.output);
+
     // Since the page output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.
@@ -6331,8 +6372,15 @@ function theme_video(variables) {
     if (variables.path) { variables.attributes.src = variables.path; }
     if (variables.alt) { variables.attributes.alt = variables.alt; }
     if (variables.title) { variables.attributes.title = variables.title; }
+    // Add the 'webkit-playsinline' attribute on iOS devices if no one made a
+    // decision about it being there or not.
+    if (
+      typeof device !== 'undefined' &&
+      device.platform == 'iOS' &&
+      typeof variables.attributes['webkit-playsinline'] === 'undefined'
+    ) { variables.attributes['webkit-playsinline'] = ''; }
     // Render the video player.
-    return '<video controls ' + drupalgap_attributes(variables.attributes) +
+    return '<video ' + drupalgap_attributes(variables.attributes) +
     '></video>';
   }
   catch (error) { console.log('theme_video - ' + error); }
@@ -7611,11 +7659,13 @@ function drupalgap_entity_render_content(entity_type, entity) {
       bundle
     );
     // Update this entity in local storage so the content property sticks.
-    _entity_local_storage_save(
-      entity_type,
-      entity[entity_primary_key(entity_type)],
-      entity
-    );
+    if (entity_caching_enabled(entity_type, bundle)) {
+      _entity_local_storage_save(
+        entity_type,
+        entity[entity_primary_key(entity_type)],
+        entity
+      );
+    }
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
@@ -7756,13 +7806,13 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
     for (var name in form_state.values) {
         if (!form_state.values.hasOwnProperty(name)) { continue; }
         var value = form_state.values[name];
-  
+
         // Skip elements with restricted access.
         if (
           typeof form.elements[name].access !== 'undefined' &&
           !form.elements[name].access
         ) { continue; }
-  
+
         // Determine wether or not this element is a field. If it is, determine
         // it's module and field assembly hook.
         var is_field = false;
@@ -7774,26 +7824,26 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           hook = module + '_assemble_form_state_into_field';
           if (!function_exists(hook)) { hook = false; }
         }
-  
+
         // Retrieve the potential key for the element, if we don't get one
         // then it is a flat field that should be attached as a property to the
         // entity. Otherwise attach the key and value to the entity.
         var key = drupalgap_field_key(name); // e.g. value, fid, tid, nid, etc.
         if (key) {
-  
+
           // Determine how many allowed values for this field.
           var allowed_values = form.elements[name].field_info_field.cardinality;
-  
+
           // Convert unlimited value fields to one, for now...
           if (allowed_values == -1) { allowed_values = 1; }
-  
+
           // Make sure there is at least one value before creating the form
           // element on the entity.
           if (typeof value[language][0] === 'undefined') { continue; }
-  
+
           // Create an empty object to house the field on the entity.
           entity[name] = {};
-  
+
           // Some fields do not use a delta value in the service call, so we
           // prepare for that here.
           // @todo - Do all options_select widgets really have no delta value?
@@ -7810,12 +7860,12 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
             entity[name][language] = {};
           }
           else { entity[name][language] = []; }
-  
+
           // Now iterate over each delta on the form element, and add the value
           // to the entity.
           for (var delta = 0; delta < allowed_values; delta++) {
             if (typeof value[language][delta] !== 'undefined') {
-  
+
               // @TODO - the way values are determined here is turning into
               // spaghetti code. Every form element needs its own
               // value_callback, just like Drupal's FAPI. Right now DG has
@@ -7830,10 +7880,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // drupalgap_field_info_instances_add_to_form(), that function
               // should use the value_callback idea to properly map entity data
               // to the form element's value.
-  
+
               // Extract the value.
               var field_value = value[language][delta];
-  
+
               // By default, we'll assume we'll be attaching this element item's
               // value according to a key (usually 'value' is the default key
               // used by Drupal fields). However, we'll give modules that
@@ -7853,7 +7903,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 form_id: form.id,
                 element_id: form.elements[name][language][delta].id
               };
-  
+
               // If this element is a field, give the field's module an
               // opportunity to assemble its own value, otherwise we'll just
               // use the field value extracted above.
@@ -7869,10 +7919,10 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   field_key
                 );
               }
-  
+
               // If someone updated the key, use it.
               if (key != field_key.value) { key = field_key.value; }
-  
+
               // If we don't need a delta value, place the field value using the
               // key, if posible. If we're using a delta value, push the key
               // and value onto the field to indicate the delta.
@@ -7902,7 +7952,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   entity[name][language].push(field_value);
                 }
               }
-  
+
               // If the field value was null, we won't send along the field, so
               // just remove it. Except for list_boolean fields, they need a
               // null value to set the field value to false.
@@ -7914,7 +7964,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                 typeof entity[name] !== 'undefined' &&
                 form.elements[name].type != 'list_boolean'
               ) { delete entity[name]; }
-  
+
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
               // @TODO - will this cause multi value issues?
@@ -7924,7 +7974,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   'options_select' && !form.elements[name].required &&
                 field_value === '' && typeof entity[name] !== 'undefined'
               ) { delete entity[name]; }
-  
+
             }
           }
       }
@@ -9176,6 +9226,17 @@ function image_field_formatter_view(entity_type, entity, field, instance,
   langcode, items, display) {
   try {
     var element = {};
+    // Toss on the default image if we one is specified and we have no items.
+    // "In addition, any code which programmatically generates a link to an
+    // image derivative without using the standard image_style_url() API
+    // function will no longer work correctly if the image does not already
+    // exist in the file system, since the necessary token will not be present
+    // in the URL." @see http://drupal.stackexchange.com/a/76827/10645
+    if (empty(items) && instance.settings.default_image) {
+      items = [{
+          uri: instance.settings.default_image_uri
+      }];
+    }
     if (!empty(items)) {
       for (var delta in items) {
           if (!items.hasOwnProperty(delta)) { continue; }
@@ -9187,7 +9248,7 @@ function image_field_formatter_view(entity_type, entity, field, instance,
             alt: item.alt,
             title: item.title
           };
-          if (!empty(theme)) {
+          if (theme == 'image_style') {
             image.style_name = display.settings.image_style;
             image.path = item.uri;
           }
@@ -9862,14 +9923,37 @@ function menu_block_view_pageshow(options) {
             // If there are no link options, set up defaults.
             if (!link.options) { link.options = {attributes: {}}; }
             else if (!link.options.attributes) { link.options.attributes = {}; }
+            if (!link.options.attributes['class']) {
+              link.options.attributes['class'] = '';
+            }
+            // Extract the link's class attribute.
+            var class_names = link.options.attributes['class'];
             // If the link points to the current path, set it as active.
             if (link.path == path) {
-              if (!link.options.attributes['class']) {
-                link.options.attributes['class'] = '';
+              if (class_names.indexOf('ui-btn') == -1) {
+                class_names += ' ui-btn';
               }
-              link.options.attributes['class'] +=
-                ' ui-btn ui-btn-active ui-state-persist ';
+              if (class_names.indexOf('ui-btn-active') == -1) {
+                class_names += ' ui-btn-active';
+              }
+              if (class_names.indexOf('ui-state-persist') == -1) {
+                class_names += ' ui-state-persist';
+              }
             }
+            // If there was a data-icon attibute on the link, let's add its
+            // equivalent css class name to the link (if it isn't already
+            // present), otherwise jQM won't render the icon properly. Sounds
+            // like a jQM bug.
+            if (
+              link.options.attributes['data-icon'] &&
+              class_names.indexOf(link.options.attributes['data-icon']) == -1
+            ) {
+              class_names +=
+                ' ui-icon-' + link.options.attributes['data-icon'] + ' ';
+            }
+            // Finally toss the class attribute back on the link and add the
+            // link to the items array.
+            link.options.attributes['class'] = class_names + ' ';
             items.push(l(t(link.title), link.path, link.options));
         }
         if (items.length > 0) {
@@ -11222,7 +11306,7 @@ function system_block_view(delta) {
         break;
       case 'title':
         var title_id = system_title_block_id(drupalgap_path_get());
-        return '<h1 id="' + title_id + '"></h1>';
+        return '<h1 id="' + title_id + '" class="page-title"></h1>';
         break;
       case 'powered_by':
         return '<p style="text-align: center;">' + t('Powered by') + ': ' +
@@ -13216,19 +13300,36 @@ function _theme_taxonomy_term_reference_onchange(input, id) {
 function taxonomy_views_exposed_filter(
   form, form_state, element, filter, field) {
   try {
-    /*dpm('taxonomy_views_exposed_filter');
-    dpm(element);
-    dpm(filter);
-    dpm(field);*/
+    //dpm('taxonomy_views_exposed_filter');
+    //console.log(element);
+    //console.log(filter);
+    //console.log(field);
 
     // @TODO this filter loses its value after one submission, aka the next
     // submission will submit it as 'All' eventhough we have a term selected in
     // the widget from the previous submission.
 
-    // Change the input to hidden, then iterate over each vocabulary and inject
-    // them into the widget. We'll just use a taxonomy term reference field and
-    // fake its instance.
-    element.type = 'hidden';
+    // Autocomplete.
+    if (filter.options.type == 'textfield') {
+      element.type = 'autocomplete';
+      element.remote = true;
+      element.custom = true;
+      element.handler = 'index';
+      element.entity_type = 'taxonomy_term';
+      if (typeof filter.options.vocabulary !== 'undefined') {
+        element.vid =
+          taxonomy_vocabulary_get_vid_from_name(filter.options.vocabulary);
+      }
+      element.value = 'name';
+      element.label = 'name';
+      element.filter = 'name';
+    }
+    // Dropdown.
+    else {
+      // Change the input to hidden, then iterate over each vocabulary and inject
+      // them into the widget. We'll just use a taxonomy term reference field and
+      // fake its instance.
+      element.type = 'hidden';
     for (var index in field.settings.allowed_values) {
         if (!field.settings.allowed_values.hasOwnProperty(index)) { continue; }
         var object = field.settings.allowed_values[index];
@@ -13267,24 +13368,53 @@ function taxonomy_views_exposed_filter(
         element.children.push({ markup: child });
 
     }
+    }
   }
   catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
 }
 
-// Used to hold onto the current views' exposed filter query string.
-var _views_exposed_filter_query = null;
+// Holds onto views contexts on a per page basis.
+var _views_embedded_views = {};
 
-// Used to mark if the exposed filter's reset button is shown or not.
-var _views_exposed_filter_reset = false;
+/**
+ *
+ */
+function views_embedded_view_get(page_id) {
+  try {
+    if (!_views_embedded_views[page_id]) { return null; }
+    var property = arguments[1];
+    if (!property) { return _views_embedded_views[page_id]; }
+    return _views_embedded_views[page_id][property];
+  }
+  catch (error) { console.log('views_embedded_view_get - ' + error); }
+}
 
-// Used to hold onto the current views' exposed filter submit's theme variables.
-var _views_exposed_filter_submit_variables = null;
+/**
+ *
+ */
+function views_embedded_view_set(page_id, property, value) {
+  try {
+    if (!_views_embedded_views[page_id]) {
+      _views_embedded_views[page_id] = {};
+    }
+    _views_embedded_views[page_id][property] = value;
+  }
+  catch (error) { console.log('views_embedded_view_set - ' + error); }
+}
 
-// Global variables used to hold the onto various things during a views embed
-// view call.
-var _views_embed_view_selector = null;
-var _views_embed_view_results = null;
-var _views_embed_view_options = null;
+/**
+ *
+ */
+function views_embedded_view_delete(page_id) {
+  try {
+    if (!_views_embedded_views[page_id]) { return false; }
+    var property = arguments[1];
+    if (!property) { delete _views_embedded_views[page_id]; }
+    else { delete _views_embedded_views[page_id][property]; }
+    return true;
+  }
+  catch (error) { console.log('views_embedded_view_delete - ' + error); }
+}
 
 /**
  * Given a path to a Views Datasource (Views JSON) view, this will get the
@@ -13382,7 +13512,6 @@ function views_datasource_get_view_result(path, options) {
  */
 function views_exposed_form(form, form_state, options) {
   try {
-
     // @TODO we tried to make the filters collapsible, but jQM doesn't seem to
     // like collapsibles with form inputs in them... weird.
     //var title = form.title ? form.title : 'Filter';
@@ -13478,7 +13607,10 @@ function views_exposed_form(form, form_state, options) {
     };
 
     // Add the reset button, if necessary.
-    if (options.exposed_data.reset && _views_exposed_filter_reset) {
+    if (
+      options.exposed_data.reset &&
+      views_embedded_view_get(form.variables.page_id, 'exposed_filter_reset')
+    ) {
       form.buttons['reset'] = {
         title: options.exposed_data.reset,
         attributes: {
@@ -13502,7 +13634,7 @@ function views_exposed_form(form, form_state, options) {
  */
 function views_exposed_form_submit(form, form_state) {
   try {
-
+    var page_id = form.variables.page_id;
     // Assemble the query string from the form state values.
     var query = '';
     for (var key in form_state.values) {
@@ -13516,29 +13648,32 @@ function views_exposed_form_submit(form, form_state) {
     // If there is a query set aside from previous requests, and it is equal to
     // the submitted query, then stop the submission. Otherwise remove it from
     // the path.
-    if (_views_exposed_filter_query) {
-      if (_views_exposed_filter_query == query) { return; }
-      if (
-        form.variables.path.indexOf('&' + _views_exposed_filter_query) != -1
-      ) {
+    var _query = views_embedded_view_get(page_id, 'exposed_filter_query');
+    if (_query) {
+      if (_query == query) { return; }
+      if (form.variables.path.indexOf('&' + _query) != -1) {
         form.variables.path =
-        form.variables.path.replace('&' + _views_exposed_filter_query, '');
+          form.variables.path.replace('&' + _query, '');
       }
     }
 
     // Set aside a copy of the query string, so it can be removed from the path
     // upon subsequent submissions of the form.
-    _views_exposed_filter_query = query;
+    views_embedded_view_set(page_id, 'exposed_filter_query', query);
 
     // Indicate that we have an exposed filter, so the reset button can easily
     // be shown/hidden.
-    _views_exposed_filter_reset = true;
+    views_embedded_view_set(page_id, 'exposed_filter_reset', true);
 
     // Update the path for the view, reset the pager, hold onto the variables,
     // then theme the view.
     form.variables.path += '&' + query;
     form.variables.page = 0;
-    _views_exposed_filter_submit_variables = form.variables;
+    views_embedded_view_set(
+      page_id,
+      'exposed_filter_submit_variables',
+      form.variables
+    );
     _theme_view(form.variables);
 
   }
@@ -13550,18 +13685,25 @@ function views_exposed_form_submit(form, form_state) {
  */
 function views_exposed_form_reset() {
   try {
+    var page_id = drupalgap_get_page_id();
     // Reset the path to the view, the page, and the global vars, then re-theme
     // the view.
-    _views_exposed_filter_submit_variables.path =
-      _views_exposed_filter_submit_variables.path.replace(
-        '&' + _views_exposed_filter_query,
+    var exposed_filter_submit_variables =
+      views_embedded_view_get(page_id, 'exposed_filter_submit_variables');
+    exposed_filter_submit_variables.path =
+      exposed_filter_submit_variables.path.replace(
+        '&' + views_embedded_view_get(page_id, 'exposed_filter_query'),
         ''
       );
-
-    _views_exposed_filter_submit_variables.page = 0;
-    _views_exposed_filter_reset = false;
-    _views_exposed_filter_query = null;
-    _theme_view(_views_exposed_filter_submit_variables);
+    exposed_filter_submit_variables.page = 0;
+    views_embedded_view_set(
+      page_id,
+      'exposed_filter_submit_variables',
+      exposed_filter_submit_variables
+    );
+    views_embedded_view_set(page_id, 'exposed_filter_reset', false);
+    views_embedded_view_set(page_id, 'exposed_filter_query', null);
+    _theme_view(exposed_filter_submit_variables);
   }
   catch (error) { console.log('views_exposed_form_reset - ' + error); }
 }
@@ -13608,13 +13750,18 @@ function theme_view(variables) {
       }
     }
     else { drupalgap.views.ids.push(variables.attributes.id); }
+
+    // Keep track of the page id for context.
+    var page_id = drupalgap_get_page_id();
+    variables.page_id = page_id;
+
     // Since we'll by making an asynchronous call to load the view, we'll just
     // return an empty div container, with a script snippet to load the view.
     variables.attributes['class'] += 'view ';
     var html =
       '<div ' + drupalgap_attributes(variables.attributes) + ' ></div>';
     var options = {
-      page_id: drupalgap_get_page_id(),
+      page_id: page_id,
       jqm_page_event: 'pageshow',
       jqm_page_event_callback: '_theme_view',
       jqm_page_event_args: JSON.stringify(variables)
@@ -13665,8 +13812,8 @@ function views_embed_view(path, options) {
     views_datasource_get_view_result(path, {
         success: function(results) {
           try {
-            _views_embed_view_results = results;
-            _views_embed_view_options = options;
+            views_embedded_view_set(options.page_id, 'results', results);
+            views_embedded_view_set(options.page_id, 'options', options);
             if (!options.success) { return; }
             options.results = results;
             var html = theme('views_view', options);
@@ -13678,7 +13825,7 @@ function views_embed_view(path, options) {
         },
         error: function(xhr, status, message) {
           try {
-            _views_embed_view_results = null;
+            views_embedded_view_set(options.page_id, 'results', null);
             if (options.error) { options.error(xhr, status, message); }
           }
           catch (error) {
@@ -13700,7 +13847,7 @@ function theme_views_view(variables) {
     var html = '';
 
     // Extract the results.
-    var results = _views_embed_view_results;
+    var results = views_embedded_view_get(variables.page_id, 'results');
     if (!results) { return html; }
 
     // Figure out the format.
@@ -13736,17 +13883,22 @@ function theme_views_view(variables) {
         }
       );
     }
-    
-    // Determine the views container selector and set it aside globally.
-    var selector = '#' + drupalgap_get_page_id() +
-        ' #' + variables.attributes.id;
-    _views_embed_view_selector = selector
+
+    // Determine views container selector and place it in the global context.
+    var selector = '#' + variables.page_id + ' #' + variables.attributes.id;
+    views_embedded_view_set(variables.page_id, 'selector', selector);
 
     // Are the results empty? If so, return the empty callback's html, if it
     // exists. Often times, the empty callback will want to place html that
     // needs to be enhanced by jQM, therefore we'll set a timeout to trigger
     // the creation of the content area.
-    if (results.view.count == 0) {
+    // @TODO putting views_litepager support here is a hack, we should be
+    // implementing views_litepager_views_view for theme_views_view() instead.
+    var views_litepager_present = module_exists('views_litepager');
+    if (
+      (results.view.count == 0 && !views_litepager_present) ||
+      (views_litepager_present && results.view.pages == null && results.view.count == 0)
+    ) {
       $(selector).hide();
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
@@ -13760,6 +13912,9 @@ function theme_views_view(variables) {
       }
       return html + views_exposed_form_html;
     }
+
+    // The results are not empty...
+
     // Append the exposed filter html.
     html += views_exposed_form_html;
 
@@ -13767,7 +13922,7 @@ function theme_views_view(variables) {
     var result_formats = drupalgap_views_get_result_formats(variables);
     var rows = '' + result_formats.open + drupalgap_views_render_rows(
       variables,
-      _views_embed_view_results,
+      results,
       root,
       child,
       result_formats.open_row,
@@ -13788,7 +13943,10 @@ function theme_views_view(variables) {
     // then no pager at all.
     // @TODO having this special case for views_infinite_scroll is a hack, we
     // obviously need a hook or something around here...
-    if (module_exists('views_infinite_scroll')) { html += rows; }
+    if (
+      module_exists('views_infinite_scroll') &&
+      views_infinite_scroll_ok()
+    ) { html += rows; }
     else if (pager_pos == 'top') {
       html += pager;
       if (!empty(pager)) { html += theme('views_spacer', null); }
@@ -13841,11 +13999,20 @@ function theme_pager(variables) {
     var limit = view.limit;
     var page = view.page;
     // If we don't have any results, return.
-    if (count == 0) { return html; }
+    // @TODO putting views_litepager support here is a hack, we should be
+    // implementing views_litepager_pager() for theme_pager() instead.
+    var views_litepager_present = module_exists('views_litepager');
+    if (
+      (count == 0 && !views_litepager_present) ||
+      (views_litepager_present && variables.results.view.pages == null)
+    ) { return html; }
     // Add the pager items to the list.
     var items = [];
     if (page != 0) { items.push(theme('pager_previous', variables)); }
-    if (page != pages - 1) { items.push(theme('pager_next', variables)); }
+    if (
+      (page != pages - 1 && !views_litepager_present) ||
+      views_litepager_present
+    ) { items.push(theme('pager_next', variables)); }
     if (items.length > 0) {
       // Make sure we have an id to use since we need to dynamically build the
       // navbar container for the pager. If we don't have one, generate a random
@@ -13926,7 +14093,7 @@ function _theme_pager_link_click(variables) {
 function theme_pager_next(variables) {
   try {
     var html;
-    variables.page = variables.results.view.page + 1;
+    variables.page = parseInt(variables.results.view.page) + 1;
     var link_vars = {
       text: '&raquo;',
       attributes: {
@@ -13947,7 +14114,7 @@ function theme_pager_next(variables) {
 function theme_pager_previous(variables) {
   try {
     var html;
-    variables.page = variables.results.view.page - 1;
+    variables.page = parseInt(variables.results.view.page) - 1;
     var link_vars = {
       text: '&laquo;',
       attributes: {
@@ -13961,12 +14128,15 @@ function theme_pager_previous(variables) {
 }
 
 /**
- *
+ * A helper function used to retrieve the various open and closing tags for
+ * views results, depending on their format.
+ * @param {Object} variables
+ * @return {Object}
  */
 function drupalgap_views_get_result_formats(variables) {
   try {
     var result_formats = {};
-    
+
     // Depending on the format, let's render the container opening and closing,
     // and then render the rows.
     if (!variables.format) { variables.format = 'unformatted_list'; }
@@ -13974,7 +14144,7 @@ function drupalgap_views_get_result_formats(variables) {
     var close = '';
     var open_row = '';
     var close_row = '';
-    
+
     // Prepare the format's container attributes.
     var format_attributes = {};
     if (typeof variables.format_attributes !== 'undefined') {
@@ -13984,13 +14154,13 @@ function drupalgap_views_get_result_formats(variables) {
         variables.format_attributes
       );
     }
-    
+
     // Add a views-results class
     if (typeof format_attributes['class'] === 'undefined') {
       format_attributes['class'] = '';
     }
     format_attributes['class'] += ' views-results ';
-    
+
     switch (variables.format) {
       case 'ul':
         if (typeof format_attributes['data-role'] === 'undefined') {
@@ -14050,7 +14220,14 @@ function drupalgap_views_get_result_formats(variables) {
 }
 
 /**
- *
+ * A helper function used to render a views result's rows.
+ * @param {Object}
+ * @param {Object}
+ * @param {String}
+ * @param {String}
+ * @param {String}
+ * @param {String}
+ * @return {String}
  */
 function drupalgap_views_render_rows(variables, results, root, child, open_row, close_row) {
   try {

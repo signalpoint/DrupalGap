@@ -43,5 +43,5 @@ The following command can be used to make the minifed JS file:
 
 ```
 cd ~/Desktop/github-code/closure-compiler/
-java -jar compiler.jar --js /var/www/drupal-7/mobile-application/bin/drupalgap.js --js_output_file /var/www/drupal-7/mobile-application/bin/drupalgap.min.js
+java -jar compiler.jar --js /var/www/headless-drupal/drupal/mobile-application/bin/drupalgap.js --js_output_file /var/www/headless-drupal/drupal/mobile-application/bin/drupalgap.min.js
 ```
