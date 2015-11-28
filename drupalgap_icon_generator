@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# usage: ./drupalgap_icon_generator android source.png "#f56800"
+
+function drupalgap_android() {
+  IMAGE="$1";
+  BG="$2";
+  DIRECTORY="app-icons";
+
+  if [ ! -d "$DIRECTORY" ]; then
+    mkdir $DIRECTORY
+  fi
+
+  cd "$DIRECTORY"
+
+  DIR="drawable";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 96x96 "$DIR/icon.png"
+
+  DIR="drawable-hdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 72x72 "$DIR/icon.png"
+
+  DIR="drawable-ldpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 36x36 "$DIR/icon.png"
+
+  DIR="drawable-mdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 48x48 "$DIR/icon.png"
+
+  DIR="drawable-xhdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 96x96 "$DIR/icon.png"
+
+  DIR="drawable-land-hdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 800x480  "$DIR/screen.png"
+
+  DIR="drawable-land-ldpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 320x200  "$DIR/screen.png"
+
+  DIR="drawable-land-mdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 480x320  "$DIR/screen.png"
+
+  DIR="drawable-land-xhdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 1280x720  "$DIR/screen.png"
+
+  DIR="drawable-port-hdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 480x800  "$DIR/screen.png"
+
+  DIR="drawable-port-ldpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 200x320  "$DIR/screen.png"
+
+  DIR="drawable-port-mdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 320x480  "$DIR/screen.png"
+
+  DIR="drawable-port-xhdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 720x1280  "$DIR/screen.png"
+
+}
+
+case "$1" in
+android) drupalgap_android $2 $3;;    
+esac
+
