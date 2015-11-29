@@ -4,6 +4,7 @@ app/themes/*
 app/settings.js
 app/.gitignore
 app/README.*
+node_modules
 res
 config.xml
 
