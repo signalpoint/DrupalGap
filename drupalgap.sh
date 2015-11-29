@@ -3,6 +3,9 @@
 # Globals
 APP_MODULES_DIRECTORY="app/modules"
 APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
+APP_BACKUPS_DIRECTORY=".drupalgap-backups"
+DRUPALGAP_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/7.x-1.x/bin/drupalgap.js"
+DRUPALGAP_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/7.x-1.x/bin/drupalgap.min.js"
 
 # DL | DOWNLOAD
 function drupalgap_download_project() {
@@ -55,6 +58,67 @@ function drupalgap_download_project() {
 
 }
 
+# UPDATE
+function drupalgap_update() {
+
+  # Create the drupalgap_backups directory if it doesn't already exit.
+  if [ ! -d "$APP_BACKUPS_DIRECTORY" ]
+    then
+      mkdir $APP_BACKUPS_DIRECTORY
+  fi
+
+  # Create a directory to store this round of backups.
+  TEMP_DIR="$APP_BACKUPS_DIRECTORY/"
+  TEMP_DIR+=$(date +%Y%m%d%H%M%S)
+  mkdir $TEMP_DIR
+
+  # Ask them if they're sure?
+  read -p "Are you sure you want to update the DrupalGap SDK? " -n 1 -r
+  echo    # (optional) move to a new line
+  if [[ ! $REPLY =~ ^[Yy]$ ]]
+  then
+    rmdir $TEMP_DIR
+    exit 1
+  fi
+
+  # Make a copy of the current bin directory.
+  cp -r bin $TEMP_DIR
+
+  # If drupalgap.js or drupalgap.min.js exist in the bin directory, remove them.
+  if [ -f bin/drupalgap.js ]; then
+    rm bin/drupalgap.js
+  fi
+  if [ -f bin/drupalgap.min.js ]; then
+    rm bin/drupalgap.min.js
+  fi
+
+  # Download the latest binaries.
+  cd bin
+  wget "$DRUPALGAP_JS_URL" --no-check-certificate
+  wget "$DRUPALGAP_MIN_JS_URL" --no-check-certificate
+  cd ..
+
+  # Let the developer know what happened.
+  echo -e "Backups saved to: $TEMP_DIR\nDrupalGap SDK update complete!"
+
+  # Warn the developer if their index.html file needs to be updated.
+  FOUND_BIN=false
+  if grep -Fq "bin/drupalgap.js"  index.html
+  then
+      FOUND_BIN=true
+  fi
+  if ! $FOUND_BIN && grep -Fq "bin/drupalgap.min.js" index.html
+  then
+      FOUND_BIN=true
+  fi
+  if ! $FOUND_BIN
+  then
+    echo "NOTE, update the index.html file to load: bin/drupalgap.min.js"
+  fi
+
+}
+
+# MODULE CREATE
 function drupalgap_module_create() {
 
   MODULE_NAME="$1";
@@ -135,5 +199,6 @@ module)
   esac
   ;;
 download|dl) drupalgap_download_project $2 $3;;
+update|up) drupalgap_update;;
 -*) usage "bad argument $1";;
 esac
