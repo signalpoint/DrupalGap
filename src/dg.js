@@ -87,6 +87,9 @@ function drupalgap_init() {
       theme_path: '',
       themes: [],
       theme_registry: {},
+      toast: {
+        shown: false
+      },
       views: {
         ids: []
       },
@@ -482,123 +485,6 @@ function drupalgap_add_css() {
     $('<link/>', {rel: 'stylesheet', href: data}).appendTo('head');
   }
   catch (error) { console.log('drupalgap_add_css - ' + error); }
-}
-
-/**
- * Alerts a message to the user using PhoneGap's alert. It is important to
- * understand this is an async function, so code will continue to execute while
- * the alert is displayed to the user.
- * You may optionally pass in a second argument as a JSON object with the
- * following properties:
- *   alertCallback - the function to call after the user presses OK
- *   title - the title to use on the alert box, defaults to 'Alert'
- *   buttonName - the text to place on the button, default to 'OK'
- * @param {String} message
- */
-function drupalgap_alert(message) {
-  try {
-    var options = null;
-    if (arguments[1]) { options = arguments[1]; }
-    var alertCallback = function() { };
-    var title = t('Alert');
-    var buttonName = t('OK');
-    if (options) {
-      if (options.alertCallback) { alertCallback = options.alertCallback; }
-      if (options.title) { title = options.title; }
-      if (options.buttonName) { buttonName = options.buttonName; }
-    }
-    if (
-      drupalgap.settings.mode != 'phonegap' ||
-      typeof navigator.notification === 'undefined'
-    ) {
-      alert(message);
-      alertCallback();
-    }
-    else {
-      navigator.notification.alert(message, alertCallback, title, buttonName);
-    }
-  }
-  catch (error) { console.log('drupalgap_alert - ' + error); }
-}
-
-/**
- * Displays a confirmation message to the user using PhoneGap's confirm. It is
- * important to understand this is an async function, so code will continue to
- * execute while the confirmation is displayed to the user.
- * You may optionally pass in a second argument as a JSON object with the
- * following properties:
- *   confirmCallback - the function to call after the user presses a button, the
- *               button's label is passed to this function.
- *   title - the title to use on the alert box, defaults to 'Confirm'
- *   buttonLabels - the text to place on the OK, and Cancel buttons, separated
- *                  by comma.
- * @param {String} message
- * @return {Boolean}
- */
-function drupalgap_confirm(message) {
-  try {
-    var options = null;
-    if (arguments[1]) { options = arguments[1]; }
-    var confirmCallback = function(button) { };
-    var title = t('Confirm');
-    var buttonLabels = [t('OK'), t('Cancel')];
-    if (options) {
-      if (options.confirmCallback) {
-        confirmCallback = options.confirmCallback;
-      }
-      if (options.title) { title = options.title; }
-      if (options.buttonLabels) { buttonLabels = options.buttonLabels; }
-    }
-    // The phonegap confirm dialog doesn't seem to work in Ripple, so just use
-    // the default one, and it definitely doesn't work in a web app, so
-    // otherwise just use the default confirm.
-    if (
-      typeof parent.window.ripple === 'function' ||
-      drupalgap.settings.mode == 'web-app'
-    ) {
-      var r = confirm(message);
-      if (r == true) { confirmCallback(1); } // OK button.
-      else { confirmCallback(2); } // Cancel button.
-    }
-    else {
-      navigator.notification.confirm(
-          message,
-          confirmCallback,
-          title,
-          buttonLabels
-      );
-    }
-    return false;
-  }
-  catch (error) { console.log('drupalgap_confirm - ' + error); }
-}
-
-/**
- * Show a non intrusive alert message. You may optionally pass in an
- * integer value as the second argument to specify how many milliseconds
- * to wait before closing the message. Likewise, you can pass in a
- * third argument to specify how long to wait before opening the
- * message.
- * @param {string} html - The html to display.
- */
-function drupalgap_toast(html) {
-  try {
-    var open = arguments[2] ? arguments[2] : 750;
-    var close = arguments[1] ? arguments[1] : 1500;
-    setTimeout(function() {
-        $.mobile.loading('show', {
-            textVisible: true,
-            html: html
-        });
-        var interval = setInterval(function () {
-            $.mobile.loading('hide');
-            clearInterval(interval);
-        }, close);
-    }, open);
-  }
-  catch (error) {
-    console.log('drupalgap_toast - ' + error);
-  }
 }
 
 /**
