@@ -1,4 +1,4 @@
-/*! drupalgap 2015-11-28 */
+/*! drupalgap 2015-11-29 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -169,6 +169,12 @@ function drupalgap_onload() {
  */
 function _drupalgap_deviceready() {
   try {
+
+    // Set some jQM properties to better handle the back button on iOS9.
+    if (device.platform === "iOS" && parseInt(device.version) === 9) {
+      $.mobile.hashListeningEnabled = false;
+      $.mobile.pushStateEnabled = false;
+    }
 
     // The device is now ready, it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
@@ -4542,13 +4548,21 @@ function _drupalgap_back() {
     // @WARNING - any changes here (except the history.back() call) need to be
     // reflected into the window "navigate" handler below
     drupalgap.back = true;
-    history.back();
+
+    // Properly handle iOS9 back button clicks, and default back button clicks.
+    if (device.platform === "iOS" && parseInt(device.version) === 9) {
+      $.mobile.back();
+    }
+    else { history.back(); }
+
+    // Update the path and router path.
     drupalgap_path_set(drupalgap.back_path.pop());
     drupalgap_router_path_set(
       drupalgap_get_menu_link_router_path(
         drupalgap_path_get()
       )
     );
+
   }
   catch (error) { console.log('drupalgap_back' + error); }
 }
@@ -4582,6 +4596,7 @@ $(window).on('navigate', function(event, data) {
         // @WARNING - any changes here should be reflected into
         // _drupalgap_back().
         drupalgap.back = true;
+        // Update the path and router path.
         drupalgap_path_set(drupalgap.back_path[drupalgap.back_path.length - 1]);
         drupalgap_router_path_set(
           drupalgap_get_menu_link_router_path(
