@@ -1,20 +1,17 @@
 # DrupalGap CLI - Command Line Interface
 
+To help automate application development, DrupalGap comes with a command line
+interface, more commonly referred to as a CLI. With the DrupalGap CLI we can
+quickly take care of typical development and maintenance tasks.
+
 ## Setup
 
-To utilize the DrupalGap CLI (command line interface), use your terminal window
-to make the `drupalgap` bash script executable:
+To utilize the DrupalGap CLI, use your terminal window to make the `drupalgap`
+bash script executable:
 
 ```
 cd mobile-application
 chmod +x drupalgap.sh
-```
-
-Without adding the executable permission mentioned above, you'll most likely
-get this error:
-
-```
-bash: ./drupalgap.sh: Permission denied
 ```
 
 ## Usage
@@ -24,12 +21,28 @@ app's directory:
 
 ```
 cd mobile-application
+./drupalgap.sh
 ```
 
 ### Download
 
-```
+Use the download command to quickly grab a DrupalGap module or theme:
 
+```
+./drupalgap.sh dl telephone
 ```
 
 ### Create
+
+Use the create command to quickly create a custom module:
+
+./drupalgap.sh module create my_module
+
+## Troubleshooting
+
+Without adding the executable permission mentioned above in the *Setup*, you'll
+most likely get this error:
+
+```
+bash: ./drupalgap.sh: Permission denied
+```
