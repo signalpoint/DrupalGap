@@ -169,6 +169,12 @@ function drupalgap_onload() {
 function _drupalgap_deviceready() {
   try {
 
+    // Set some jQM properties to better handle the back button on iOS9.
+    if (device.platform === "iOS" && parseInt(device.version) === 9) {
+      $.mobile.hashListeningEnabled = false;
+      $.mobile.pushStateEnabled = false;
+    }
+
     // The device is now ready, it is now safe for DrupalGap to start...
     drupalgap_bootstrap();
 
