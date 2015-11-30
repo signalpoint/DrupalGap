@@ -1,0 +1,29 @@
+{
+  "title": "DrupalGap Docs",
+  "tagline": "The open source application development kit for Drupal.",
+  "author": "Tyler Frankenstein",
+  "image": "app.png",
+  "ignore": {
+    "files": ["Work_In_Progress.md"],
+    "folders": ["99_Not_Ready"]
+  },
+  "live": {
+    "inherit_index": true,
+    "clean_urls": true
+  },
+  "html": {
+    "theme": "daux-navy",
+    "breadcrumbs": true,
+    "breadcrumb_separator": "Chevrons",
+    "toggle_code": false,
+    "date_modified": true,
+    "float": false,
+    "repo": "signalpoint/DrupalGap",
+    "links": {
+      "Download": "http://drupalgap.org/download",
+      "API": "http://api.drupalgap.org",
+      "GitHub Repo": "https://github.com/signalpoint/DrupalGap",
+      "Support": "http://drupalgap.org/support"
+    }
+  }
+}
