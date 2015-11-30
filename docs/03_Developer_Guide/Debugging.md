@@ -50,7 +50,7 @@ https://developer.chrome.com/devtools/docs/remote-debugging
 1. Build the DG app apk with debugging enabled
 2. Enable USB debugging on the device
 3. Connect to the PC
-4. Visit chrome://inspect (on PC)
+4. Visit `chrome://inspect` (in your browser)
 5. Click the Webview 'inspect' button
 6. Accept the request to debug (on the device)
 
