@@ -53,6 +53,8 @@ drupalgap.settings.front = 'hello_world';
 
 Now when we run the app, we'll have a "Hello World" button widget that will say "Hi" when clicked:
 
+![Hello World](http://www.drupalgap.org/sites/default/files/hello-world_0.png)
+
 That's it, you've now got the basic tools to build a custom mobile application for a Drupal website!
 
-Next, try placing an additional widget or two on your page or head back to the getting started guide for more topics and features within DrupalGap.
+Next, try placing an additional [widget](Widgets) or two on your page or head back to the getting started guide for more topics and features within DrupalGap.
