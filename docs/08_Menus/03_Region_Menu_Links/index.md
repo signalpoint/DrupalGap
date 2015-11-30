@@ -16,6 +16,7 @@ We can add menu links to regions in using our `settings.js` file or by using `ho
 
 For example, we could place a menu link in the header region using the settings.js file:
 
+```
 drupalgap.settings.menus.regions['header'] = {  
   links:[
     /* ... other region links ... */
@@ -35,11 +36,13 @@ drupalgap.settings.menus.regions['header'] = {
     }
   ]
 };
+```
 
 ### Using hook_menu()
 
 Alternatively, we can declare region menu links inside a module using `hook_menu()`:
 
+```
 /**
  * Implements hook_menu().
  */
@@ -70,5 +73,6 @@ function my_module_menu() {
   return items;
 
 }
+```
 
 Check out the [Home Button](../Widgets/Buttons/Home_Button) and [Back Button](../Widgets/Buttons/Back_Button) examples, and [Popup Menus](Popup_Menus_Drop_Down_Menus) for typical uses of region menu links.
