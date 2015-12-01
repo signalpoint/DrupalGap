@@ -1,6 +1,6 @@
 ## Supported Fields
 
-DrupalGap aims to provide support for all core fields, and many popular contributed module fields. Check out the DrupalGap modules listing to add support for a contributed field in your app.
+DrupalGap aims to provide support for all core fields, and many popular contributed module fields. Check out the [DrupalGap modules listing](http://drupalgap.org/project/modules) to add support for a contributed field in your app.
 
 ## Adding Support for a Field / Widget
 
