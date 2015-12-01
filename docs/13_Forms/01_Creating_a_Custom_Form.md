@@ -1,4 +1,4 @@
-To create a custom form in DrupalGap, place code like this in your [custom DrupalGap module](../Modules/Create_a_Custom_Module).
+To create a custom form in DrupalGap, place code like this in your [custom DrupalGap module](../Modules/Create_a_Custom_Module). We can add as many [Form Elements](Form_Elements) to the form as we'd like.
 
 ## Building the Form
 
@@ -80,4 +80,4 @@ function my_module_menu() {
 }
 ```
 
-Now when the `my_form` page is visited, it will automatically display your form! Visit the [Links page](../Links) to learn more about linking to custom pages.
+Now when the `my_form` page is visited, it will automatically display your form! Visit [Navigating Pages](../Pages/Navigating_Pages) to learn more about linking to custom pages.
