@@ -21,4 +21,4 @@ We're now ready to build an application! When the app loads, it should look some
 
 ![DrupalGap Dashboard](http://drupalgap.org/sites/default/files/dashboard_2.png)
 
-If you haven't already, we'd recommend completing the [Hello World](../Hello_World) for DrupalGap next.
+If you haven't already, we'd recommend completing the [Hello World](Hello_World) for DrupalGap next.
