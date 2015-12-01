@@ -1,11 +1,12 @@
-Not to be confused with Drupal Panels, instead a [jQuery Mobile Panel](http://demos.jquerymobile.com/1.4.5/panel/) allows us to add some great UX features to our apps.
-
-- [DrupalGap Slide menus](../Menus/Slide_Menus)
-- [jQuery Mobile Panel API](http://demos.jquerymobile.com/1.4.5/panel/)
+Not to be confused with the Drupal [Panels module](https://drupal.org/project/panels), instead a [jQuery Mobile Panel](http://demos.jquerymobile.com/1.4.5/panel/) allows us to add some great UX features to our apps.
 
 ![jQuery Mobile External Panel](http://drupalgap.org/sites/default/files/external-panel.png)
 
-## Panels outside of pages
+## Panels across pages
+
+- [DrupalGap Slide menus](../Menus/Slide_Menus)
+
+## Re-use single panel
 
 If you want to use the same panel on multiple pages you can place the markup outside the page. This can be accomplished using [jQuery Mobile External Panels](http://demos.jquerymobile.com/1.4.5/panel-external/).
 
