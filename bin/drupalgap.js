@@ -1,4 +1,4 @@
-/*! drupalgap 2015-11-29 */
+/*! drupalgap 2015-12-01 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
