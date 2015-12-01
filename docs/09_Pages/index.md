@@ -30,6 +30,4 @@ DrupalGap generates the HTML output for the page, which utilizes jQuery Mobile t
 </div>
 ```
 
-The HTML for the page is pretty simple. jQuery Mobile uses the data-role attribute to automatically style the page for us.
-
-To learn more about creating and using pages in DrupalGap, visit the topics listed below.
+The HTML for the page is pretty simple. jQuery Mobile uses the `data-role` attribute to automatically style the page for us.

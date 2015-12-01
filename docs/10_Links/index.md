@@ -1,0 +1,1 @@
+There are a few different ways to create links in DrupalGap. See also, [Navigating Pages](../Pages/Navigating_Pages).
