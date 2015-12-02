@@ -12,7 +12,7 @@ node_load(123, {
 
 ## node_save()
 
-### Save a New Node
+**Save a New Node**
 
 ```
 var node = {
@@ -26,7 +26,7 @@ node_save(node, {
 });
 ```
 
-### Update an Existing Node
+**Update an Existing Node**
 
 ```
 var node = {
@@ -54,7 +54,7 @@ node_delete(123, {
 
 ## node_index()
 
-### Get the Most Recent Nodes of Type Article
+**Get the Most Recent Nodes of Type Article**
 
 ```
 var query = {

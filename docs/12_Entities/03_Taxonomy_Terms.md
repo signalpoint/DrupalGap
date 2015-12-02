@@ -12,17 +12,17 @@ taxonomy_term_load(1, {
 
 ## taxonomy_term_save()
 
-### Save a New Term
+**Save a New Term**
 
 ...
 
-### Update an Existing Term
+**Update an Existing Term**
 
 ...
 
 ## taxonomy_term_index()
 
-### Get Terms from a Given Vocabulary ID
+**Get Terms from a Given Vocabulary ID**
 
 ```
 var query = {

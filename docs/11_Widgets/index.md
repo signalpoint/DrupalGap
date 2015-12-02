@@ -72,6 +72,10 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 [![Slider Widget](http://drupalgap.com/sites/default/files/slider.png)](Widgets/Slider_Widget)
 
+## Table Widget
+
+[Click here](Widgets/Table_Widget) to see the Table Widget docs.
+
 ## Text Widget
 
 [![Text Widget](http://drupalgap.com/sites/default/files/textarea-widget.png)](Widgets/)

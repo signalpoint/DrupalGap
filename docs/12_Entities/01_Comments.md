@@ -12,7 +12,7 @@ comment_load(456, {
 
 ## comment_save()
 
-### Save a New Comment
+**Save a New Comment**
 
 ```
 var comment = {
@@ -31,7 +31,7 @@ comment_save(comment, {
 });
 ```
 
-### Update an Existing Comment
+**Update an Existing Comment**
 
 ```
 var comment = {
@@ -64,7 +64,7 @@ comment_delete(456, {
 
 ## comment_index()
 
-### Get Comments from a Node
+**Get Comments from a Node**
 
 ```
 var query = {

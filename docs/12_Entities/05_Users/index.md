@@ -28,7 +28,7 @@ user_load(1, {
 
 ## user_save()
 
-### Save a New User
+**Save a New User**
 
 ```
 var account = {
@@ -43,7 +43,7 @@ user_save(account, {
 });
 ```
 
-### Update an Existing User
+**Update an Existing User**
 
 ...
 

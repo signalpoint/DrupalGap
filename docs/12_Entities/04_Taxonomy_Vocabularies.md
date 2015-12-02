@@ -12,7 +12,7 @@ taxonomy_vocabulary_load(1, {
 
 ## taxonomy_vocabulary_save()
 
-### Save a New Vocabulary
+**Save a New Vocabulary**
 
 ```
 var taxonomy_vocabulary = {
@@ -29,7 +29,7 @@ taxonomy_vocabulary_save(taxonomy_vocabulary, {
 });
 ```
 
-### Update an Existing Vocabulary
+**Update an Existing Vocabulary**
 
 ```
 var taxonomy_vocabulary = {
@@ -62,7 +62,7 @@ taxonomy_vocabulary_delete(vid, {
 
 ## taxonomy_vocabulary_index()
 
-### Load all Vocabularies (default limits to 20 results)
+**Load all Vocabularies (default limits to 20 results)**
 
 ```
 taxonomy_vocabulary_index(null, {
@@ -72,7 +72,7 @@ taxonomy_vocabulary_index(null, {
 });
 ```
 
-### Get ID of Vocabulary with the Name "Tags"
+**Get ID of Vocabulary with the Name "Tags"**
 
 ```
 var query = {
