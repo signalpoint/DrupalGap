@@ -1,4 +1,4 @@
-Also check out the [Buttons on Forms](../../Forms/Buttons_on_Forms) page.
+Also check out the [Buttons on Forms](../Forms/Buttons_on_Forms) page.
 
 ## Button
 
