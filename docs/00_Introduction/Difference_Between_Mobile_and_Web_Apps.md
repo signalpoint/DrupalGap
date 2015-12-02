@@ -1,4 +1,4 @@
-# What's the difference between a mobile application and a web application?
+># What's the difference between a mobile application and a web application?
 
 A mobile application is downloaded by the user (typically from the [App Store](https://itunes.apple.com/) or [Google Play](https://play.google.com/)) and installed directly onto their mobile device. Once installed, the user can launch the app from a shortcut on their phone.
 
