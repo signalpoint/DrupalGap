@@ -6,7 +6,7 @@
 <h3>Features</h3>
 <hr/>
 
-<!--<img src="app-thumbs.png" alt="alt text" class="img-responsive pull-right"  style="margin-bottom:20px;">-->
+<img src="http://drupalgap.org/sites/default/files/logo-64x64.jpg" alt="alt text" class="img-responsive pull-right"  style="margin-bottom:20px;">
 
 * ...
 

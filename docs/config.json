@@ -2,7 +2,7 @@
   "title": "DrupalGap Docs",
   "tagline": "The open source application development kit for Drupal.",
   "author": "Tyler Frankenstein",
-  "image": "app.png",
+  "image": "app.jpg",
   "ignore": {
     "files": ["Work_In_Progress.md"],
     "folders": ["99_Not_Ready"]
