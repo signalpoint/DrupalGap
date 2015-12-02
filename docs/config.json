@@ -21,9 +21,10 @@
     "float": true,
     "repo": "signalpoint/DrupalGap",
     "links": {
-      "Download": "http://drupalgap.org/download",
-      "API": "http://api.drupalgap.org",
-      "Support": "http://drupalgap.org/support"
+      "drupalgap.org": "http://drupalgap.org/download",
+      "download": "http://drupalgap.org/download",
+      "support": "http://drupalgap.org/support",
+      "API": "http://api.drupalgap.org"
     }
   }
 }
