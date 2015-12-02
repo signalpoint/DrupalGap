@@ -27,3 +27,9 @@
 ## Articles
 
 - [Extending Drupal 7 Services into an E-commerce App](http://drupalwatchdog.com/volume-4/issue-2/extending-drupal-7-services-e-commerce-app) (Drupal Watchdog - September 2014)
+
+## E-Commerce
+
+- [Build a Mobile App to Sell Products with Drupal](http://tylerfrankenstein.com/code/build-mobile-app-sell-products-with-drupal)
+- [Commerce In-App Purchases: Sell Products with a Custom Mobile App](https://www.youtube.com/watch?v=dsBbPBcdPiY) (DrupalCon Austin 2014)
+- [Accept mobile donations with Stripe](http://bortolete-popovic.com/blog/mobile-donations-using-drupalgap-and-stripe)
