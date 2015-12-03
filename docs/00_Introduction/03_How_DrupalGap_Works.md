@@ -14,3 +14,20 @@ The DrupalGap module uses the [Services](https://drupal.org/project/services) an
 The DrupalGap application development kit uses [jQuery Mobile](http://jquerymobile.com/) to build the user interface, and uses [PhoneGap](http://phonegap.com) to compile the app for installation as a mobile application on devices.
 
 ![DrupalGap Tools](http://drupalgap.org/sites/default/files/drupalgap-tools_0.png)
+
+## Now What?
+
+> DrupalGap utilizes familiar Drupal concepts like:
+
+- Themes
+- Regions
+- Blocks
+- Menus
+- Pages
+
+> And techniques for customization such as:
+
+- Modules
+- Hooks
+- Themes
+- Templates
