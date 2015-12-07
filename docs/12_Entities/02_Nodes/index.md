@@ -62,7 +62,7 @@ var query = {
     'type': 'article'
   }
 };
-node_index({
+node_index(query, {
     success:function(nodes){
       alert('Indexed ' + nodes.length + ' node(s)!');
     }
