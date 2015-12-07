@@ -6,6 +6,7 @@ Since the `settings.js` file is loaded before the DrupalGap bootstrap, we can't 
 
 Here's an example block that lives in a `header` region and it simulates a popup menu, and has a dynamic link path that contains the current user's id:
 
+```
 /**
  * Implements hook_block_info().
  */
@@ -54,6 +55,7 @@ function my_module_block_view(delta, region) {
   }
   catch (error) { console.log('my_module_block_view - ' + error); }
 }
+```
 
 A common mistake is to place the `Drupal.user.uid` in a menu created via the `settings.js` file. This unfortunately won't work (for now). But we can easily get around this problem by [creating a custom block](../Blocks/Create_a_Custom_Block) like we did above.
 
