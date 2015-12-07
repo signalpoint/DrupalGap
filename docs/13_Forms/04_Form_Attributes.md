@@ -15,6 +15,8 @@ function my_module_custom_form(form, form_state) {
       type: 'submit',
       value: 'Submit'
     };
+    
+    return form;
   }
   catch (error) { console.log('my_module_custom_form - ' + error); }
 }
