@@ -60,7 +60,7 @@ If using Method 1 from the previous page, you will need to add a new function to
 function my_module_get_user_email(options) {
   try {
     options.method = 'POST';
-    options.path = 'my_module_resources/get_user_mail.json';
+    options.path = 'my_module_resources/get_user_email.json';
     options.service = 'my_module';
     options.resource = 'get_user_email';
     Drupal.services.call(options);
