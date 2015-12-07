@@ -7,9 +7,9 @@ This page describes how to display a View using a `pageshow` callback from a `ho
 function my_module_menu() {
   var items = {};
   items['articles'] = {
-    title': 'My Custom Page',
-    page_callback': 'my_module_articles_page',
-    pageshow': 'my_module_articles_pageshow'
+    title: 'My Custom Page',
+    page_callback: 'my_module_articles_page',
+    pageshow: 'my_module_articles_pageshow'
   };
   return items;
 }
