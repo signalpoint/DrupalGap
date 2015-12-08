@@ -149,7 +149,7 @@ function drupalgap_ios() {
 
   convert "$1" -gravity center -background "$BG" -extent 640x1136 "Default-568h@2x~iphone.png"
   convert "$1" -gravity center -background "$BG" -extent 640x1136 "Default-667h.png"
-  convert "$1" -gravity center -background "$BG" -extent 1242x2208 "Default-736.png"
+  convert "$1" -gravity center -background "$BG" -extent 1242x2208 "Default-736h.png"
   convert "$1" -gravity center -background "$BG" -extent 2208x1242 "Default-Landscape-736h.png"
   convert "$1" -gravity center -background "$BG" -extent 2208x1242 "Default-Landscape@2x~ipad.png"
   convert "$1" -gravity center -background "$BG" -extent 1024x768 "Default-Landscape~ipad.png"
