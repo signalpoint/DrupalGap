@@ -28,6 +28,23 @@ We recommend creating the the splash screen images without transparency:
     Default-Portrait~ipad.png (768x1004)
     Default@2x~iphone.png (640x960)
     Default~iphone.png (320x480)
+    
+#3 2a. Set up iO7 Status Bar (optional)
+
+For more information, [see here](http://devgirl.org/2014/07/31/phonegap-developers-guid/).
+
+First add the plugin with the terminal:
+
+`cordova plugin add org.apache.cordova.statusbar`
+
+Then add preferences like this inside the `<widget>...</widget>`in your
+`config.xml` file:
+
+```
+<preference name="StatusBarOverlaysWebView" value="false" /> 
+<preference name="StatusBarBackgroundColor" value="#000000" />
+<preference name="StatusBarStyle" value="lightcontent" />
+```
 
 ## 3. Set up App for Release
 

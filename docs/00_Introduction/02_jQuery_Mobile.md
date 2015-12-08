@@ -1,6 +1,6 @@
 ### Applying jQueryMobile to the Mobile App
 
-By using jQuery Mobile, a few div containers, and the "data-role" attribute, our simple page is transformed into a slick mobile app interface:
+By using jQuery Mobile, a few div containers, and the `data-role` attribute, our simple page is transformed into a slick mobile app interface:
 
 ![A simple jQuery Mobile app](http://drupalgap.org/sites/default/files/jquerymobile-transformation.png)
 

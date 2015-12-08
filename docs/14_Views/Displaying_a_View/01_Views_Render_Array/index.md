@@ -54,7 +54,7 @@ function my_module_articles_page() {
  */
 function my_module_articles_list_row(view, row) {
   try {
-    return l(row.title, 'node/' + row.nid);
+    return l(t(row.title), 'node/' + row.nid);
   }
   catch (error) { console.log('my_module_articles_list_row - ' + error); }
 }
@@ -64,7 +64,7 @@ function my_module_articles_list_row(view, row) {
  */
 function my_module_articles_list_empty(view) {
   try {
-    return 'Sorry, no articles were found.';
+    return t('Sorry, no articles were found.');
   }
   catch (error) { console.log('my_module_articles_list_empty - ' + error); }
 }

@@ -26,6 +26,4 @@ If we know the basics of web development, then we can build applications. This a
 
 ![A simple PhoneGap app](http://drupalgap.org/sites/default/files/simple-phonegap-app_0.png)
 
-PhoneGap take this and compiles it into mobile applications for us, it will look something like the screen shot above.
-
-It doesn't look amazing, but if we stop and think about that, it is pretty amazing. Kudos to the PhoneGap team. Let's use another amazing tool to spice things up a bit, jQuery Mobile.
+PhoneGap takes our HTML, CSS and JavaScript and compiles it into mobile applications for us, it will look something like the screen shot above. It doesn't look amazing, but if we stop and think about that, it is pretty amazing. Kudos to the PhoneGap team. Let's use another amazing tool to spice things up a bit, jQuery Mobile.
