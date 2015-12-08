@@ -29,7 +29,7 @@ We recommend creating the the splash screen images without transparency:
     Default@2x~iphone.png (640x960)
     Default~iphone.png (320x480)
     
-#3 2a. Set up iO7 Status Bar (optional)
+## 2a. Set up iO7 Status Bar (optional)
 
 For more information, [see here](http://devgirl.org/2014/07/31/phonegap-developers-guid/).
 
