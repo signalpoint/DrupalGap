@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-01 */
+/*! drupalgap 2015-12-08 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -171,7 +171,11 @@ function _drupalgap_deviceready() {
   try {
 
     // Set some jQM properties to better handle the back button on iOS9.
-    if (device.platform === "iOS" && parseInt(device.version) === 9) {
+    if (
+      typeof device !== 'undefined' &&
+      device.platform === "iOS" &&
+      parseInt(device.version) === 9
+    ) {
       $.mobile.hashListeningEnabled = false;
       $.mobile.pushStateEnabled = false;
     }
