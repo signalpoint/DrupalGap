@@ -6,7 +6,7 @@ Follow the [DrupalGap Install](Install) documentation.
 
 ## 2. Create a Custom DrupalGap Module
 
-Follow the Create a Custom DrupalGap Module documentation.
+Follow the [Create a Custom DrupalGap Module](Modules/Create_a_Custom_Module) documentation.
 
 ## 3. Create the "Hello World" App Page
 
