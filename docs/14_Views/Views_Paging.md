@@ -2,7 +2,7 @@ When using a Render Array to Display a View, if we have paging enabled on a View
 
 For example, in the Drupal Views' UI, we could have **PAGER** settings like this on our Views JSON page:
 
-![Drupal Views Pager UI](http://drupalgap.org/sites/default/files/drupal-views-pager-ui.png
+![Drupal Views Pager UI](http://drupalgap.org/sites/default/files/drupal-views-pager-ui.png)
 
 DrupalGap will then automatically respond and provide paging for the View inside the app:
 
