@@ -25,17 +25,21 @@ drupalgap.router = {
   clearSlashes: function(path) {
     return path.toString().replace(/\/$/, '').replace(/^\//, '');
   },
-  add: function(re, handler) {
-    if(typeof re == 'function') {
-      handler = re;
-      re = '';
-    }
-    this.routes.push({ re: re, handler: handler});
+  //add: function(re, handler) {
+  //  if(typeof re == 'function') {
+  //    handler = re;
+  //    re = '';
+  //  }
+  //  this.routes.push({ re: re, handler: handler });
+  //  return this;
+  //},
+  add: function(item) {
+    this.routes.push(item);
     return this;
   },
   remove: function(param) {
     for(var i=0, r; i<this.routes.length, r = this.routes[i]; i++) {
-      if(r.handler === param || r.re.toString() === param.toString()) {
+      if(r.path.toString() === param.toString()) {
         this.routes.splice(i, 1);
         return this;
       }
@@ -53,17 +57,29 @@ drupalgap.router = {
     var fragment = f || this.getFragment();
     fragment = this.root + fragment;
     for(var i=0; i<this.routes.length; i++) {
-      var match = fragment.match(this.routes[i].re);
+      var match = fragment.match(this.routes[i].path);
       if(match) {
         match.shift();
-        //this.routes[i].handler.apply({}, match, {
-        this.routes[i].handler.apply({}, [
-          {
-            success: function(content) {
-              document.getElementById('dg-app').innerHTML = content;
+
+        console.log(this.routes[i]);
+
+        // Handle forms.
+        if (this.routes[i].defaults._form) {
+          var form = new window[this.routes[i].defaults._form];
+          console.log(form);
+        }
+
+        // Default routing.
+        else {
+          this.routes[i].defaults._controller.apply({}, [
+            {
+              success: function(content) {
+                document.getElementById('dg-app').innerHTML = content;
+              }
             }
-          }
-        ]);
+          ]);
+        }
+
         return this;
       }
     }
