@@ -1,4 +1,4 @@
-var drupalgap_grunt_src = ['src/*.js', 'src/includes/*.inc.js', 'src/modules/*/*.js'];
+var drupalgap_grunt_src = ['src/*.js', 'src/includes/*.inc.js', 'src/modules/*/*.js', 'src/modules/*/*.*.js'];
 
 module.exports = function(grunt) {
 
