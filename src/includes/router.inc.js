@@ -114,5 +114,8 @@ drupalgap.router = {
   },
   getRoutes: function() {
     return this.routes;
+  },
+  getRoute: function() {
+
   }
 };

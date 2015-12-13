@@ -1,12 +1,35 @@
 // Initialize the DrupalGap JSON object and run the bootstrap.
-var drupalgap = {};
+var drupalgap = { };
+
+// Configuration setting defaults.
+drupalgap.settings = {
+  mode: 'web-app',
+  front: null
+};
+
+/**
+ * Get or set a drupalgap configuration setting.
+ * @param name
+ * @returns {*}
+ */
+drupalgap.config = function(name) {
+  var value = arguments[1] ? arguments[1] : null;
+  if (value) {
+    drupalgap.settings[name] = value;
+    return;
+  }
+  return drupalgap.settings[name];
+};
 
 // Mode.
 drupalgap.getMode = function() {
-  return typeof drupalgap.settings.mode !== 'undefined' ?
-    drupalgap.settings.mode : 'web-app';
+  return this.config('mode');
+  //typeof drupalgap.settings.mode !== 'undefined' ?
+    //drupalgap.settings.mode : 'web-app';
 };
-drupalgap.setMode = function(mode) { drupalgap.settings.mode = mode; };
+drupalgap.setMode = function(mode) {
+  this.config('mode', mode);
+};
 
 // Start.
 drupalgap.start = function() {
@@ -35,7 +58,7 @@ drupalgap.devicereadyOptions = function() {
   return {
     success: function() {
       jDrupal.moduleInvokeAll('device_connected');
-      drupalgap.goto('');
+      drupalgap.router.check(drupalgap.router.getFragment());
     },
     error: function(xhr, status, msg) {
       var note = 'Failed connection to ' + jDrupal.sitePath();
@@ -59,6 +82,8 @@ drupalgap.bootstrap = function() {
   });
 
   // Build the routes.
+  // @TODO turn the outer portion of this procedure into a re-usable function
+  // that can iterate over modules and functions within that module.
   var modules = jDrupal.modulesLoad();
   for (var module in modules) {
     if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
@@ -72,13 +97,6 @@ drupalgap.bootstrap = function() {
     }
   }
 
-  //var routing = jDrupal.moduleInvokeAll('routing');
-  //for (var i = 0; i < routing.length; i++) {
-  //  for (var route in routing[i]) {
-  //    if (!routing[i].hasOwnProperty(route)) { continue; }
-  //    drupalgap.router.add(routing[i][route].path + '/');
-  //  }
-  //}
   // Add the default route, and start listening.
   this.router.add(function() {
     console.log('default');
