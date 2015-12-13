@@ -9,7 +9,7 @@
  *   buttonName - the text to place on the button, default to 'OK'
  * @param {String} message
  */
-drupalgap.alert = function(message) {
+dg.alert = function(message) {
   var options = null;
   if (arguments[1]) { options = arguments[1]; }
   var alertCallback = function() { };
@@ -21,7 +21,7 @@ drupalgap.alert = function(message) {
     if (options.buttonName) { buttonName = options.buttonName; }
   }
   if (
-    drupalgap.getMode() != 'phonegap' ||
+    dg.config('mode') != 'phonegap' ||
     typeof navigator.notification === 'undefined'
   ) { alert(message); alertCallback(); }
   else {

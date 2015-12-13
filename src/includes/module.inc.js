@@ -1,15 +1,15 @@
-drupalgap.Module = function() {
+dg.Module = function() {
 
 };
 
 // Extend the jDrupal Module prototype.
-drupalgap.Module.prototype = new jDrupal.Module;
-drupalgap.Module.prototype.constructor = drupalgap.Node;
+dg.Module.prototype = new jDrupal.Module;
+dg.Module.prototype.constructor = dg.Module;
 
 /**
  *
  * @returns {null}
  */
-drupalgap.Module.prototype.routing = function() {
+dg.Module.prototype.routing = function() {
   return null;
 };

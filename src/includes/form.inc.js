@@ -1,13 +1,13 @@
-drupalgap.Form = function(id) {
+dg.Form = function(id) {
   this.id = id;
   this.form = null;
 };
 
-drupalgap.Form.prototype.getFormId = function() {
+dg.Form.prototype.getFormId = function() {
   return this.id;
 };
 
-drupalgap.Form.prototype.getForm = function(options) {
+dg.Form.prototype.getForm = function(options) {
   this.buildForm({}, {}, {
     success: function() {
       for (var element in this.form) {
@@ -26,6 +26,6 @@ drupalgap.Form.prototype.getForm = function(options) {
   });
 };
 
-drupalgap.Form.prototype.buildForm = function(form, form_state, options) {
+dg.Form.prototype.buildForm = function(form, form_state, options) {
   options.success();
 };

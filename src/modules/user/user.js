@@ -1,4 +1,4 @@
-dgUser = new drupalgap.Module();
+var dgUser = new dg.Module();
 
 dgUser.routing = function() {
   var routes = {};

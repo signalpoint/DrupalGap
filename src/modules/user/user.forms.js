@@ -16,5 +16,5 @@ var UserLoginForm = function() {
 };
 
 // Extend the form prototype and attach our constructor.
-UserLoginForm.prototype = new drupalgap.Form('UserLoginForm');
+UserLoginForm.prototype = new dg.Form('UserLoginForm');
 UserLoginForm.constructor = UserLoginForm;
