@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-12 */
+/*! drupalgap 2015-12-13 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var drupalgap = {};
 
@@ -52,6 +52,8 @@ drupalgap.devicereadyOptions = function() {
 // Bootstrap.
 drupalgap.bootstrap = function() {
 
+  jDrupal.modules['dgUser'] = { };
+
   this.router.config({
     //mode: 'history',
     //root: 'discasaurus.com'
@@ -60,13 +62,14 @@ drupalgap.bootstrap = function() {
   // Build the routes.
   var modules = jDrupal.modulesLoad();
   for (var module in modules) {
-    if (!modules.hasOwnProperty(module)) { continue; }
+    if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
     var routes = window[module].routing();
     if (!routes) { continue; }
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
       var item = routes[route];
-      this.router.add(item.path, item.defaults._controller);
+      //this.router.add(item.path, item.defaults._controller, item);
+      this.router.add(item);
     }
   }
 
@@ -82,6 +85,15 @@ drupalgap.bootstrap = function() {
     console.log('default');
   }).listen();
 
+  console.log(this.router.getRoutes());
+
+};
+drupalgap.Form = function() {
+  this.form_id = null;
+};
+
+drupalgap.Form.prototype.getFormId = function() {
+  return null;
 };
 drupalgap.goto = function(path) {
   //this.router.navigate('/about');
@@ -158,17 +170,21 @@ drupalgap.router = {
   clearSlashes: function(path) {
     return path.toString().replace(/\/$/, '').replace(/^\//, '');
   },
-  add: function(re, handler) {
-    if(typeof re == 'function') {
-      handler = re;
-      re = '';
-    }
-    this.routes.push({ re: re, handler: handler});
+  //add: function(re, handler) {
+  //  if(typeof re == 'function') {
+  //    handler = re;
+  //    re = '';
+  //  }
+  //  this.routes.push({ re: re, handler: handler });
+  //  return this;
+  //},
+  add: function(item) {
+    this.routes.push(item);
     return this;
   },
   remove: function(param) {
     for(var i=0, r; i<this.routes.length, r = this.routes[i]; i++) {
-      if(r.handler === param || r.re.toString() === param.toString()) {
+      if(r.path.toString() === param.toString()) {
         this.routes.splice(i, 1);
         return this;
       }
@@ -186,17 +202,29 @@ drupalgap.router = {
     var fragment = f || this.getFragment();
     fragment = this.root + fragment;
     for(var i=0; i<this.routes.length; i++) {
-      var match = fragment.match(this.routes[i].re);
+      var match = fragment.match(this.routes[i].path);
       if(match) {
         match.shift();
-        //this.routes[i].handler.apply({}, match, {
-        this.routes[i].handler.apply({}, [
-          {
-            success: function(content) {
-              document.getElementById('dg-app').innerHTML = content;
+
+        console.log(this.routes[i]);
+
+        // Handle forms.
+        if (this.routes[i].defaults._form) {
+          var form = new window[this.routes[i].defaults._form];
+          console.log(form);
+        }
+
+        // Default routing.
+        else {
+          this.routes[i].defaults._controller.apply({}, [
+            {
+              success: function(content) {
+                document.getElementById('dg-app').innerHTML = content;
+              }
             }
-          }
-        ]);
+          ]);
+        }
+
         return this;
       }
     }
@@ -232,4 +260,39 @@ drupalgap.router = {
   getRoutes: function() {
     return this.routes;
   }
+};
+var UserLoginForm = function() {
+  this.id = 'UserLoginForm';
+
+  this.buildForm = function(form, form_state) {
+    form.name = {
+      _type: 'textfield',
+      _required: true
+    };
+  };
+
+  this.submitForm = function(form, form_state) {
+
+  };
+
+};
+
+// Extend the form prototype and attach our constructor.
+UserLoginForm.prototype = new drupalgap.Form;
+UserLoginForm.constructor = UserLoginForm;
+dgUser = new drupalgap.Module();
+
+dgUser.routing = function() {
+  var routes = {};
+  routes["user.login"] = {
+    "path": "/user/login",
+    "defaults": {
+      "_form": 'UserLoginForm',
+      "_title": "Log in"
+    },
+    "requirements": {
+      "_user_is_logged_in": true
+    }
+  };
+  return routes;
 };
