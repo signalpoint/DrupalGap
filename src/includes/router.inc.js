@@ -63,7 +63,7 @@ dg.router = {
 
         var options = {
           success: function(content) {
-            document.getElementById('dg-app').innerHTML = content;
+            document.getElementById('dg-app').innerHTML = dg.render(content);
           }
         };
 
