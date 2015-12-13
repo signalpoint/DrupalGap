@@ -51,6 +51,8 @@ drupalgap.devicereadyOptions = function() {
 // Bootstrap.
 drupalgap.bootstrap = function() {
 
+  jDrupal.modules['dgUser'] = { };
+
   this.router.config({
     //mode: 'history',
     //root: 'discasaurus.com'
@@ -59,13 +61,14 @@ drupalgap.bootstrap = function() {
   // Build the routes.
   var modules = jDrupal.modulesLoad();
   for (var module in modules) {
-    if (!modules.hasOwnProperty(module)) { continue; }
+    if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
     var routes = window[module].routing();
     if (!routes) { continue; }
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
       var item = routes[route];
-      this.router.add(item.path, item.defaults._controller);
+      //this.router.add(item.path, item.defaults._controller, item);
+      this.router.add(item);
     }
   }
 
@@ -80,5 +83,7 @@ drupalgap.bootstrap = function() {
   this.router.add(function() {
     console.log('default');
   }).listen();
+
+  console.log(this.router.getRoutes());
 
 };
