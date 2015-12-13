@@ -61,23 +61,23 @@ drupalgap.router = {
       if(match) {
         match.shift();
 
+        var options = {
+          success: function(content) {
+            document.getElementById('dg-app').innerHTML = content;
+          }
+        };
+
         console.log(this.routes[i]);
 
         // Handle forms.
         if (this.routes[i].defaults._form) {
           var form = new window[this.routes[i].defaults._form];
-          console.log(form);
+          form.getForm(options);
         }
 
         // Default routing.
         else {
-          this.routes[i].defaults._controller.apply({}, [
-            {
-              success: function(content) {
-                document.getElementById('dg-app').innerHTML = content;
-              }
-            }
-          ]);
+          this.routes[i].defaults._controller.apply({}, [options]);
         }
 
         return this;
