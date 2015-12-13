@@ -12,7 +12,7 @@ module.exports = function(grunt) {
       },
       dist: {
         src: drupalgap_grunt_src,
-        dest: 'bin/<%= pkg.name %>.js'
+        dest: '<%= pkg.name %>.js'
       }
     },
     uglify: {
@@ -21,7 +21,7 @@ module.exports = function(grunt) {
       },
       build: {
         src: drupalgap_grunt_src,
-        dest: 'bin/<%= pkg.name %>.min.js'
+        dest: '<%= pkg.name %>.min.js'
       }
     },
     watch: {
