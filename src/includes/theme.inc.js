@@ -1,3 +1,28 @@
+dg.attributes = function(attributes) {
+  var attrs = '';
+  if (attributes) {
+    for (var name in attributes) {
+      if (!attributes.hasOwnProperty(name)) { continue; }
+      var value = attributes[name];
+      if (value != '') {
+        // @todo - if someone passes in a value with double quotes, this
+        // will break. e.g.
+        // 'onclick':'_drupalgap_form_submit("' + form.id + "');'
+        // will break, but
+        // 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
+        // will work.
+        attrs += name + '="' + value + '" ';
+      }
+      else {
+        // The value was empty, just place the attribute name on the
+        // element, unless it was an empty class.
+        if (name != 'class') { attrs += name + ' '; }
+      }
+    }
+  }
+  return attrs;
+};
+
 /**
  * Implementation of theme().
  * @param {String} hook
@@ -10,7 +35,7 @@ dg.theme = function(hook, variables) {
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
     if (!variables) { variables = {}; }
-    if (variables.markup) { return variables.markup; }
+    if (variables._markup) { return variables._markup; }
     var content = '';
 
     // First see if the current theme implements the hook, if it does use it, if
@@ -18,7 +43,7 @@ dg.theme = function(hook, variables) {
     //var theme_function = drupalgap.settings.theme + '_' + hook;
     //if (!function_exists(theme_function)) {
       var theme_function = 'theme_' + hook;
-      if (!dg.functionExists(theme_function)) {
+      if (!jDrupal.functionExists(theme_function)) {
         var caller = null;
         if (arguments.callee.caller) {
           caller = arguments.callee.caller.name;
@@ -31,10 +56,10 @@ dg.theme = function(hook, variables) {
     //}
 
     // Set default attributes.
-    if (!variables.attributes) { variables.attributes = {}; }
+    if (!variables._attributes) { variables._attributes = {}; }
 
     // If there is no class name array, set an empty one.
-    if (!variables.attributes['class']) { variables.attributes['class'] = []; }
+    if (!variables._attributes['class']) { variables._attributes['class'] = []; }
     return window[theme_function].call(null, variables);
   }
   catch (error) { console.log('dg.theme - ' + error); }
