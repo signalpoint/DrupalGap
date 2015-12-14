@@ -92,7 +92,6 @@ dg.bootstrap = function() {
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
       var item = routes[route];
-      //this.router.add(item.path, item.defaults._controller, item);
       this.router.add(item);
     }
   }
