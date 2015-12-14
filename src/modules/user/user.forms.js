@@ -4,9 +4,25 @@ var UserLoginForm = function() {
   this.buildForm = function(form, form_state, options) {
     form.name = {
       _type: 'textfield',
-      _required: true
+      _title: 'Username',
+      _required: true,
+      _title_placeholder: true
     };
-    options.success();
+    form.pass = {
+      _type: 'textfield',
+      _title: 'Password',
+      _required: true,
+      _title_placeholder: true
+    };
+    form.actions = {
+      _type: 'actions',
+      submit: {
+        _type: 'submit',
+        _value: 'Log in',
+        _button_type: 'primary'
+      }
+    };
+    options.success(form);
   };
 
   this.submitForm = function(form, form_state) {
