@@ -1,6 +1,7 @@
 dg.Form = function(id) {
   this.id = id;
-  this.form = null;
+  this.form = {};
+  this.form_state = {};
 };
 
 dg.Form.prototype.getFormId = function() {
@@ -8,20 +9,14 @@ dg.Form.prototype.getFormId = function() {
 };
 
 dg.Form.prototype.getForm = function(options) {
-  this.buildForm({}, {}, {
+  var self = this;
+  self.buildForm(self.form, self.form_state, {
     success: function() {
-      for (var element in this.form) {
-        if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
-        var routes = window[module].routing();
-        if (!routes) { continue; }
-        for (route in routes) {
-          if (!routes.hasOwnProperty(route)) { continue; }
-          var item = routes[route];
-          //this.router.add(item.path, item.defaults._controller, item);
-          this.router.add(item);
-        }
+      for (var element in self.form) {
+        if (!self.form.hasOwnProperty(element)) { continue; }
+        console.log(self.form[element]);
       }
-      options.success('here is your form ya jerk');
+      options.success(dg.render(self.form));
     }
   });
 };
