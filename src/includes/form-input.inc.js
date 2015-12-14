@@ -15,9 +15,19 @@ function theme_actions(variables) {
   }
   return html;
 }
+function theme_password(variables) {
+  variables._attributes.type = 'password';
+  return '<input ' + dg.attributes(variables._attributes) + ' />';
+}
 function theme_submit(variables) {
   variables._attributes.type = 'submit';
-  if (!variables._attributes.value) { variables._attributes.value = 'Submit'; }
+  var value = 'Submit';
+  if (!variables._attributes.value) {
+    if (typeof variables._value !== 'undefined') {
+      value = variables._value
+    }
+  }
+  variables._attributes.value = value;
   return '<input ' + dg.attributes(variables._attributes) + '/>';
 }
 function theme_textfield(variables) {

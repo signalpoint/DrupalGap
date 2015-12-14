@@ -9,7 +9,7 @@ var UserLoginForm = function() {
       _title_placeholder: true
     };
     form.pass = {
-      _type: 'textfield',
+      _type: 'password',
       _title: 'Password',
       _required: true,
       _title_placeholder: true
@@ -26,7 +26,7 @@ var UserLoginForm = function() {
   };
 
   this.submitForm = function(form, form_state) {
-
+    console.log('submit town!');
   };
 
 };

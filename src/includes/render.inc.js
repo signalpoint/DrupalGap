@@ -1,7 +1,6 @@
 dg.render = function(content) {
   try {
     var type = typeof content;
-    console.log('content: ' + type);
     if (type === 'string') { return content; }
     var html = '';
     var _html = null;
@@ -25,7 +24,6 @@ dg.render = function(content) {
         ) { continue; }
         var piece = content[index];
         var _type = typeof piece;
-        console.log('piece: ' + _type);
         if (_type === 'object') { html += dg.render(piece); }
         else if (_type === 'array') {
           for (var i = 0; i < piece.length; i++) {
