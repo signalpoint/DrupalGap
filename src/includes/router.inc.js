@@ -64,12 +64,36 @@ dg.router = {
     var route = this.load(f);
     if (route) {
 
+      dg.removeForms();
+
       //match.shift();
 
       // Route completion callback.
       var options = {
         success: function(content) {
+
+          // Render the content into the app container.
           document.getElementById('dg-app').innerHTML = dg.render(content);
+
+          // Handle forms.
+          var forms = dg.loadForms();
+          for (var id in forms) {
+            if (!forms.hasOwnProperty(id)) { continue; }
+            var form = document.getElementById(dg.killCamelCase(id, '-'));
+            function processForm(e) {
+              if (e.preventDefault) e.preventDefault();
+              var _form = dg.loadForm(id);
+              _form._submit({
+                success: function() { },
+                error: function(xhr, status, msg) { }
+              });
+              return false; // Prevent default form behavior.
+            }
+            if (form.attachEvent) { form.attachEvent("submit", processForm); }
+            else { form.addEventListener("submit", processForm); }
+          }
+
+
         }
       };
 
@@ -78,8 +102,8 @@ dg.router = {
       if (route.defaults) {
         // Handle forms.
         if (route.defaults._form) {
-          var form = new window[route.defaults._form];
-          form.getForm(options);
+          var id = route.defaults._form;
+          dg.addForm(id, new window[id]).getForm(options);
         }
 
         // All other routes.
