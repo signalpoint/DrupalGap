@@ -59,26 +59,39 @@ dg.router = {
     for(var i=0; i<this.routes.length; i++) {
       var match = fragment.match(this.routes[i].path);
       if(match) {
+        console.log('match');
+        console.log(JSON.stringify(match));
         match.shift();
 
+        // Route completion callback.
         var options = {
           success: function(content) {
             document.getElementById('dg-app').innerHTML = dg.render(content);
           }
         };
 
+        console.log('going to: ' + fragment);
         console.log(this.routes[i]);
 
-        // Handle forms.
-        if (this.routes[i].defaults._form) {
-          var form = new window[this.routes[i].defaults._form];
-          form.getForm(options);
+        if (this.routes[i].defaults) {
+          // Handle forms.
+          if (this.routes[i].defaults._form) {
+            var form = new window[this.routes[i].defaults._form];
+            form.getForm(options);
+          }
+
+          // All other routes.
+          else {
+            this.routes[i].defaults._controller.apply({}, [options]);
+          }
         }
 
-        // Default routing.
+        // The default route, aka front page.
         else {
-          this.routes[i].defaults._controller.apply({}, [options]);
+          console.log(dg.config('front'));
         }
+
+
 
         return this;
       }
