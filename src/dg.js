@@ -83,7 +83,8 @@ dg.bootstrap = function() {
 
   // Build the routes.
   // @TODO turn the outer portion of this procedure into a re-usable function
-  // that can iterate over modules and functions within that module.
+  // that can iterate over modules and call a specific function within that
+  // module.
   var modules = jDrupal.modulesLoad();
   for (var module in modules) {
     if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
