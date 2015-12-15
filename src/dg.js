@@ -96,11 +96,7 @@ dg.bootstrap = function() {
     }
   }
 
-  // Add the default route, and start listening.
-  this.router.add(function() {
-    console.log('default');
-  }).listen();
-
-  console.log(this.router.getRoutes());
+  // Add a default route, and start listening.
+  this.router.add(function() { }).listen();
 
 };
