@@ -22,6 +22,11 @@ dg.router = {
     }
     return this.clearSlashes(fragment);
   },
+  prepFragment: function(f) {
+    //var fragment = f || this.getFragment();
+    var frag = f || this.getFragment();
+    return this.root + frag;
+  },
   clearSlashes: function(path) {
     return path.toString().replace(/\/$/, '').replace(/^\//, '');
   },
@@ -52,49 +57,37 @@ dg.router = {
     this.root = '/';
     return this;
   },
+
   check: function(f) {
-    //var fragment = f || this.getFragment();
-    var fragment = f || this.getFragment();
-    fragment = this.root + fragment;
-    for(var i=0; i<this.routes.length; i++) {
-      var match = fragment.match(this.routes[i].path);
-      if(match) {
-        console.log('match');
-        console.log(JSON.stringify(match));
-        match.shift();
 
-        // Route completion callback.
-        var options = {
-          success: function(content) {
-            document.getElementById('dg-app').innerHTML = dg.render(content);
-          }
-        };
 
-        console.log('going to: ' + fragment);
-        console.log(this.routes[i]);
+    var route = this.load(f);
+    if (route) {
 
-        if (this.routes[i].defaults) {
-          // Handle forms.
-          if (this.routes[i].defaults._form) {
-            var form = new window[this.routes[i].defaults._form];
-            form.getForm(options);
-          }
+      //match.shift();
 
-          // All other routes.
-          else {
-            this.routes[i].defaults._controller.apply({}, [options]);
-          }
+      // Route completion callback.
+      var options = {
+        success: function(content) {
+          document.getElementById('dg-app').innerHTML = dg.render(content);
+        }
+      };
+
+      if (!route.defaults) { route = this.load(dg.config('front')); }
+
+      if (route.defaults) {
+        // Handle forms.
+        if (route.defaults._form) {
+          var form = new window[route.defaults._form];
+          form.getForm(options);
         }
 
-        // The default route, aka front page.
+        // All other routes.
         else {
-          console.log(dg.config('front'));
+          route.defaults._controller.apply({}, [options]);
         }
-
-
-
-        return this;
       }
+
     }
     return this;
   },
@@ -110,6 +103,14 @@ dg.router = {
     clearInterval(this.interval);
     this.interval = setInterval(fn, 50);
     return this;
+  },
+  load: function(frag) {
+    var f = this.prepFragment(frag);
+    for(var i=0; i<this.routes.length; i++) {
+      var match = f.match(this.routes[i].path);
+      if (match) { return this.routes[i]; }
+    }
+    return null;
   },
   navigate: function(path) {
     path = path ? path : '';
