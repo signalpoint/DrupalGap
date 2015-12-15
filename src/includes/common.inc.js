@@ -12,5 +12,5 @@ dg.getCamelCase = function(str) {
  *
  */
 dg.killCamelCase = function(str, separator) {
-  return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1');
+  return str.replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
