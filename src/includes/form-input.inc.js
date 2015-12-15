@@ -1,15 +1,7 @@
 function theme_actions(variables) {
   var html = '';
   for (prop in variables) {
-
-    // Skip properties.
-    if (
-      !variables.hasOwnProperty(prop) ||
-        prop.charAt(0) == '_'
-    ) { continue; }
-
-    console.log(prop);
-    console.log(variables[prop]);
+    if (!dg.isFormElement(prop, variables)) { continue; }
     html += dg.render(variables[prop]);
 
   }
