@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-14 */
+/*! drupalgap 2015-12-15 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -84,7 +84,8 @@ dg.bootstrap = function() {
 
   // Build the routes.
   // @TODO turn the outer portion of this procedure into a re-usable function
-  // that can iterate over modules and functions within that module.
+  // that can iterate over modules and call a specific function within that
+  // module.
   var modules = jDrupal.modulesLoad();
   for (var module in modules) {
     if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
@@ -115,7 +116,7 @@ dg.getCamelCase = function(str) {
  *
  */
 dg.killCamelCase = function(str, separator) {
-  return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1');
+  return str.replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
 function theme_actions(variables) {
@@ -146,6 +147,23 @@ function theme_textfield(variables) {
   variables._attributes.type = 'text';
   return '<input ' + dg.attributes(variables._attributes) + '/>';
 }
+dg.forms = {}; // A global storage for active forms.
+dg.addForm = function(id, form) {
+  this.forms[id] = form;
+  return this.forms[id];
+};
+dg.loadForm = function(id) {
+  return this.forms[id] ? this.forms[id] : null;
+};
+dg.loadForms = function() { return this.forms; }
+dg.removeForm = function(id) { delete this.forms[id]; };
+dg.removeForms = function() { this.forms = {}; };
+
+/**
+ * The Form prototype.
+ * @param id
+ * @constructor
+ */
 dg.Form = function(id) {
   this.id = id;
   this.form = {
@@ -164,12 +182,12 @@ dg.Form.prototype.getForm = function(options) {
   var self = this;
   self.buildForm(self.form, self.form_state, {
     success: function() {
-      for (var element in self.form) {
-        if (!dg.isFormElement(element, self.form)) { continue; }
-        var attrs = self.form[element]._attributes ? self.form[element]._attributes : {};
-        if (!attrs.id) { attrs.id = 'edit-' + element; }
-        if (!attrs.name) { attrs.name = element; }
-        self.form[element]._attributes = attrs;
+      for (var name in self.form) {
+        if (!dg.isFormElement(name, self.form)) { continue; }
+        var attrs = self.form[name]._attributes ? self.form[name]._attributes : {};
+        if (!attrs.id) { attrs.id = 'edit-' + name; }
+        if (!attrs.name) { attrs.name = name; }
+        self.form[name]._attributes = attrs;
       }
       options.success('<form ' + dg.attributes(self.form._attributes) + '>' +
         dg.render(self.form) +
@@ -178,7 +196,46 @@ dg.Form.prototype.getForm = function(options) {
   });
 };
 
+dg.Form.prototype.getFormState = function() { return this.form_state; };
+
 dg.Form.prototype.buildForm = function(form, form_state, options) {
+  // abstract
+};
+dg.Form.prototype.validateForm = function(options) {
+  options.success();
+};
+dg.Form.prototype.submitForm = function(form, form_state, options) {
+  // abstract
+};
+dg.Form.prototype._submit = function(options) {
+  var self = this;
+  this.formStateAssemble({
+    success: function() {
+      self.validateForm({
+        success: function() {
+          self.submitForm({
+            success: function() {
+              if (self.form._action) { dg.goto(self._action); }
+              dg.removeForm(self.getFormId());
+              options.success();
+            }
+          })
+        },
+        error: function (xhr, status, msg) {
+
+        }
+      })
+    }
+  });
+};
+dg.Form.prototype.formStateAssemble = function(options) {
+  this.form_state = { values: {} };
+  for (var name in this.form) {
+    if (!dg.isFormElement(name, this.form)) { continue; }
+    var element = this.form[name];
+    var el = document.getElementById(element._attributes.id);
+    if (el) { this.form_state.values[name] = el.value; }
+  }
   options.success();
 };
 
@@ -189,7 +246,8 @@ dg.isFormProperty = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
 };
 dg.goto = function(path) {
-  //this.router.navigate('/about');
+  this.router.navigate(path);
+  //this.router.check('/' + path);
 };
 /**
  * Alerts a message to the user using PhoneGap's alert. It is important to
@@ -346,12 +404,36 @@ dg.router = {
     var route = this.load(f);
     if (route) {
 
+      dg.removeForms();
+
       //match.shift();
 
       // Route completion callback.
       var options = {
         success: function(content) {
+
+          // Render the content into the app container.
           document.getElementById('dg-app').innerHTML = dg.render(content);
+
+          // Handle forms.
+          var forms = dg.loadForms();
+          for (var id in forms) {
+            if (!forms.hasOwnProperty(id)) { continue; }
+            var form = document.getElementById(dg.killCamelCase(id, '-'));
+            function processForm(e) {
+              if (e.preventDefault) e.preventDefault();
+              var _form = dg.loadForm(id);
+              _form._submit({
+                success: function() { },
+                error: function(xhr, status, msg) { }
+              });
+              return false; // Prevent default form behavior.
+            }
+            if (form.attachEvent) { form.attachEvent("submit", processForm); }
+            else { form.addEventListener("submit", processForm); }
+          }
+
+
         }
       };
 
@@ -360,8 +442,8 @@ dg.router = {
       if (route.defaults) {
         // Handle forms.
         if (route.defaults._form) {
-          var form = new window[route.defaults._form];
-          form.getForm(options);
+          var id = route.defaults._form;
+          dg.addForm(id, new window[id]).getForm(options);
         }
 
         // All other routes.
@@ -481,23 +563,25 @@ dg.theme = function(hook, variables) {
   }
   catch (error) { console.log('dg.theme - ' + error); }
 };
+dg.currentUser = function() { return jDrupal.currentUser(); };
 var UserLoginForm = function() {
   //this.id = 'UserLoginForm';
 
   this.buildForm = function(form, form_state, options) {
-    form.name = {
+    this.form._action = dg.config('front'),
+    this.form.name = {
       _type: 'textfield',
       _title: 'Username',
       _required: true,
       _title_placeholder: true
     };
-    form.pass = {
+    this.form.pass = {
       _type: 'password',
       _title: 'Password',
       _required: true,
       _title_placeholder: true
     };
-    form.actions = {
+    this.form.actions = {
       _type: 'actions',
       submit: {
         _type: 'submit',
@@ -508,8 +592,9 @@ var UserLoginForm = function() {
     options.success(form);
   };
 
-  this.submitForm = function(form, form_state) {
-    console.log('submit town!');
+  this.submitForm = function(options) {
+    var form_state = this.getFormState();
+    jDrupal.userLogin(form_state.values['name'], form_state.values['pass'], options);
   };
 
 };
