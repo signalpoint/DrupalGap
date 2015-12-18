@@ -22,53 +22,38 @@ dg.config = function(name) {
 };
 
 // Mode.
-dg.getMode = function() {
-  return this.config('mode');
-  //typeof dg.settings.mode !== 'undefined' ?
-    //dg.settings.mode : 'web-app';
-};
-dg.setMode = function(mode) {
-  this.config('mode', mode);
-};
+dg.getMode = function() { return this.config('mode'); };
+dg.setMode = function(mode) { this.config('mode', mode); };
 
 // Start.
 dg.start = function() {
-  // If we're using PhoneGap then attach their listener, otherwise proceed
-  // as a web app.
   if (dg.getMode() == 'phonegap') {
-    document.addEventListener('deviceready', this.deviceready, false);
+    document.addEventListener('deviceready', dg.deviceready, false);
   }
-  else { this.deviceready(); }
+  else { dg.deviceready(); } // web-app
 };
 
 // Device ready.
 dg.deviceready = function() {
-  this.bootstrap();
+  dg.bootstrap();
   if (!jDrupal.isReady()) {
-    this.alert('Set the sitePath in the settings.js file!');
+    dg.alert('Set the sitePath in the settings.js file!');
     return;
   }
-  jDrupal.moduleInvokeAll('deviceready');
-  var options = this.devicereadyOptions();
-  jDrupal.connect(options);
+  //jDrupal.moduleInvokeAll('deviceready');
+  jDrupal.connect().then(this.devicereadyGood, this.devicereadyBad);
 };
-
-// Device ready options.
-dg.devicereadyOptions = function() {
-  return {
-    success: function() {
-      jDrupal.moduleInvokeAll('device_connected');
-      dg.router.check(dg.router.getFragment());
-    },
-    error: function(xhr, status, msg) {
-      var note = 'Failed connection to ' + jDrupal.sitePath();
-      if (msg != '') { note += ' - ' + msg; }
-      dg.alert(note, {
-        title: 'Unable to Connect',
-        alertCallback: function() { }
-      });
-    }
-  };
+dg.devicereadyGood = function() {
+  //jDrupal.moduleInvokeAll('device_connected');
+  dg.router.check(dg.router.getFragment());
+};
+dg.devicereadyBad = function() {
+  var note = 'Failed connection to ' + jDrupal.sitePath();
+  if (msg != '') { note += ' - ' + msg; }
+  dg.alert(note, {
+    title: 'Unable to Connect',
+    alertCallback: function() { }
+  });
 };
 
 // Bootstrap.

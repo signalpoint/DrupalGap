@@ -1,3 +1,5 @@
+// @TODO form elements need to be turned into prototypes!
+
 dg.forms = {}; // A global storage for active forms.
 dg.addForm = function(id, form) {
   this.forms[id] = form;
