@@ -1,3 +1,6 @@
+dg.appRender = function(content) {
+  document.getElementById('dg-app').innerHTML = dg.render(content);
+};
 dg.render = function(content) {
   try {
     var type = typeof content;
