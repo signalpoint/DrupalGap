@@ -103,9 +103,7 @@ dg.router = {
         // All other routes.
         else {
           // @TODO no need for the extra function, just "then it"
-          route.defaults._controller().then(function(content) {
-            dg.appRender(content);
-          });
+          route.defaults._controller().then(dg.appRender);
         }
       }
 
