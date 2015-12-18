@@ -68,47 +68,44 @@ dg.router = {
 
       //match.shift();
 
-      // Route completion callback.
-      var options = {
-        success: function(content) {
-
-          // Render the content into the app container.
-          document.getElementById('dg-app').innerHTML = dg.render(content);
-
-          // Handle forms.
-          var forms = dg.loadForms();
-          for (var id in forms) {
-            if (!forms.hasOwnProperty(id)) { continue; }
-            var form = document.getElementById(dg.killCamelCase(id, '-'));
-            function processForm(e) {
-              if (e.preventDefault) e.preventDefault();
-              var _form = dg.loadForm(id);
-              _form._submit({
-                success: function() { },
-                error: function(xhr, status, msg) { }
-              });
-              return false; // Prevent default form behavior.
-            }
-            if (form.attachEvent) { form.attachEvent("submit", processForm); }
-            else { form.addEventListener("submit", processForm); }
-          }
-
-
-        }
-      };
-
       if (!route.defaults) { route = this.load(dg.config('front')); }
 
       if (route.defaults) {
         // Handle forms.
         if (route.defaults._form) {
           var id = route.defaults._form;
-          dg.addForm(id, new window[id]).getForm(options);
+          dg.addForm(id, new window[id]).getForm().then(function(content) {
+
+            dg.appRender(content);
+
+            // Attach UI submit handler for each form on the page.
+            var forms = dg.loadForms();
+            for (var id in forms) {
+              if (!forms.hasOwnProperty(id)) { continue; }
+              var form = document.getElementById(dg.killCamelCase(id, '-'));
+              function processForm(e) {
+                if (e.preventDefault) e.preventDefault();
+                var _form = dg.loadForm(id);
+                _form._submit().then(function() {
+
+                }, function() {
+
+                });
+                return false; // Prevent default form behavior.
+              }
+              if (form.attachEvent) { form.attachEvent("submit", processForm); }
+              else { form.addEventListener("submit", processForm); }
+            }
+
+          });
         }
 
         // All other routes.
         else {
-          route.defaults._controller.apply({}, [options]);
+          // @TODO no need for the extra function, just "then it"
+          route.defaults._controller().then(function(content) {
+            dg.appRender(content);
+          });
         }
       }
 
