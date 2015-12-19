@@ -29,11 +29,13 @@ var UserLoginForm = function() {
     });
   };
 
-  this.submitForm = function() {
+  this.submitForm = function(form, formState) {
     var self = this;
     return new Promise(function(ok, err) {
-      var form_state = self.getFormState();
-      jDrupal.userLogin(form_state.values['name'], form_state.values['pass']).then(ok);
+      jDrupal.userLogin(
+        formState.getValue('name'),
+        formState.getValue('pass')
+      ).then(ok);
     });
 
   };

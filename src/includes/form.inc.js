@@ -1,16 +1,4 @@
-// @TODO form elements need to be turned into prototypes!
-
 dg.forms = {}; // A global storage for active forms.
-dg.addForm = function(id, form) {
-  this.forms[id] = form;
-  return this.forms[id];
-};
-dg.loadForm = function(id) {
-  return this.forms[id] ? this.forms[id] : null;
-};
-dg.loadForms = function() { return this.forms; };
-dg.removeForm = function(id) { delete this.forms[id]; };
-dg.removeForms = function() { this.forms = {}; };
 
 /**
  * The Form prototype.
@@ -24,9 +12,9 @@ dg.Form = function(id) {
       id: dg.killCamelCase(id, '-').toLowerCase()
     }
   };
-  this.form_state = {};
+  this.form_state = new dg.FormStateInterface(this);
+  this.elements = {}; // Holds FormElement instances.
 };
-
 dg.Form.prototype.getFormId = function() {
   return this.id;
 };
@@ -37,10 +25,7 @@ dg.Form.prototype.getForm = function() {
     self.buildForm(self.form, self.form_state).then(function() {
       for (var name in self.form) {
         if (!dg.isFormElement(name, self.form)) { continue; }
-        var attrs = self.form[name]._attributes ? self.form[name]._attributes : {};
-        if (!attrs.id) { attrs.id = 'edit-' + name; }
-        if (!attrs.name) { attrs.name = name; }
-        self.form[name]._attributes = attrs;
+        self.elements[name] = new dg.FormElement(name, self.form[name], self);
       }
       var html = '<form ' + dg.attributes(self.form._attributes) + '>' +
         dg.render(self.form) +
@@ -50,7 +35,9 @@ dg.Form.prototype.getForm = function() {
   });
 };
 
-dg.Form.prototype.getFormState = function() { return this.form_state; };
+dg.Form.prototype.getFormState = function() {
+  return this.form_state;
+};
 
 dg.Form.prototype.buildForm = function(form, form_state, options) {
   // abstract
@@ -75,30 +62,47 @@ dg.Form.prototype.submitForm = function(form, form_state, options) {
 dg.Form.prototype._submit = function() {
   var self = this;
   return new Promise(function(ok, err) {
-    self.formStateAssemble().then(function() {
-      self.validateForm().then(function() {
-        self.submitForm().then(function() {
-          if (self.form._action) { dg.goto(self._action); }
-          dg.removeForm(self.getFormId());
-          ok();
-        });
+    var formState = self.getFormState();
+    //formState.setFormState().then(function() {
+    //  console.log('done fulfilling promises!');
+    //  console.log(formState.getValues());
+    //});
+    formState.setFormState().then(function() {
+      self.submitForm(self, formState).then(function() {
+        if (self.form._action) { dg.goto(self._action); }
+        dg.removeForm(self.getFormId());
+        ok();
       });
     });
+
+    //formState.setFormState().then(function() {
+    //  console.log('validate time');
+    //  self.validateForm(self).then(function() {
+    //    console.log('submit time');
+    //    self.submitForm(self).then(function() {
+
+    //    });
+    //  });
+    //});
+    //self.formStateAssemble().then(function() {
+    //
+    //});
   });
 };
-dg.Form.prototype.formStateAssemble = function(options) {
-  var self = this;
-  self.form_state = { values: {} };
-  return new Promise(function(ok, err) {
-    for (var name in self.form) {
-      if (!dg.isFormElement(name, self.form)) { continue; }
-      var element = self.form[name];
-      var el = document.getElementById(element._attributes.id);
-      if (el) { self.form_state.values[name] = el.value; }
-    }
-    ok();
-  });
+//dg.Form.prototype.formStateAssemble = function() {
+//
+//};
+
+dg.addForm = function(id, form) {
+  this.forms[id] = form;
+  return this.forms[id];
 };
+dg.loadForm = function(id) {
+  return this.forms[id] ? this.forms[id] : null;
+};
+dg.loadForms = function() { return this.forms; };
+dg.removeForm = function(id) { delete this.forms[id]; };
+dg.removeForms = function() { this.forms = {}; };
 
 dg.isFormElement = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) != '_';
