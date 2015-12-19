@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-18 */
+/*! drupalgap 2015-12-19 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -104,6 +104,40 @@ dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
+/**
+ * The Form Element prototype.
+ * @param {String} name
+ * @param {Object} element
+ * @param {Object} form
+ * @constructor
+ */
+dg.FormElement = function(name, element, form) {
+  this.name = name;
+  this.element = element;
+  this.form = form;
+  var attrs = element._attributes ? element._attributes : {};
+  if (!attrs.id) { attrs.id = 'edit-' + name; }
+  if (!attrs.name) { attrs.name = name; }
+  element._attributes = attrs;
+};
+dg.FormElement.prototype.id = function() { return this.element._attributes.id; };
+dg.FormElement.prototype.getForm = function() { return this.form; };
+dg.FormElement.prototype.get = function(property) {
+  return typeof this[property] ? this[property] : null;
+};
+
+dg.FormElement.prototype.valueCallback = function() {
+  var self = this;
+  return new Promise(function(ok, err) {
+    var value = null;
+    var el = document.getElementById(self.id());
+    if (el) { value = el.value; }
+    ok({
+      name: self.get('name'),
+      value: value
+    });
+  });
+};
 function theme_actions(variables) {
   var html = '';
   for (prop in variables) {
@@ -132,19 +166,69 @@ function theme_textfield(variables) {
   variables._attributes.type = 'text';
   return '<input ' + dg.attributes(variables._attributes) + '/>';
 }
-// @TODO form elements need to be turned into prototypes!
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Form!FormStateInterface.php/interface/FormStateInterface/8
 
+/**
+ *
+ * @constructor
+ */
+dg.FormStateInterface = function(form) {
+  this.form = form;
+  this.values = {};
+};
+
+dg.FormStateInterface.prototype.get = function(property) {
+  return typeof this[property] !== 'undefined' ? this[property] : null;
+};
+dg.FormStateInterface.prototype.set = function(property, value) {
+  this[property] = value;
+};
+dg.FormStateInterface.prototype.setFormState = function() {
+  var self = this;
+  var form = self.get('form');
+  var promises = [];
+  for (var name in form.elements) {
+    promises.push(form.elements[name].valueCallback());
+  }
+  return Promise.all(promises).then(function(values) {
+    for (var i = 0; i < values.length; i++) {
+      self.setValue(values[i].name, values[i].value);
+    }
+  });
+};
+
+//dg.FormStateInterface.prototype.setFormState = function() {
+//  var promises = [];
+//  var foo = {
+//    bar: 123,
+//    baz: 456
+//  };
+//  for (var name in foo) {
+//    promises.push(new Promise(function(ok, err) {
+//      form.elements[name].valueCallback().then(function(value) {
+//        console.log('setting: ' + name);
+//        self.setValue(name, value);
+//        ok();
+//      });
+//    }));
+//  }
+//  return Promise.all(promises);
+//};
+
+dg.FormStateInterface.prototype.getValue = function(key, default_value) {
+  return typeof this.get('values')[key] !== 'undefined' ?
+    this.get('values')[key] : default_value;
+};
+dg.FormStateInterface.prototype.setValue = function(key, value) {
+  this.values[key] = value;
+};
+dg.FormStateInterface.prototype.getValues = function() {
+  return this.get('values');
+};
+dg.FormStateInterface.prototype.setValues = function(values) {
+  this.values = values;
+};
 dg.forms = {}; // A global storage for active forms.
-dg.addForm = function(id, form) {
-  this.forms[id] = form;
-  return this.forms[id];
-};
-dg.loadForm = function(id) {
-  return this.forms[id] ? this.forms[id] : null;
-};
-dg.loadForms = function() { return this.forms; };
-dg.removeForm = function(id) { delete this.forms[id]; };
-dg.removeForms = function() { this.forms = {}; };
 
 /**
  * The Form prototype.
@@ -158,9 +242,9 @@ dg.Form = function(id) {
       id: dg.killCamelCase(id, '-').toLowerCase()
     }
   };
-  this.form_state = {};
+  this.form_state = new dg.FormStateInterface(this);
+  this.elements = {}; // Holds FormElement instances.
 };
-
 dg.Form.prototype.getFormId = function() {
   return this.id;
 };
@@ -171,10 +255,7 @@ dg.Form.prototype.getForm = function() {
     self.buildForm(self.form, self.form_state).then(function() {
       for (var name in self.form) {
         if (!dg.isFormElement(name, self.form)) { continue; }
-        var attrs = self.form[name]._attributes ? self.form[name]._attributes : {};
-        if (!attrs.id) { attrs.id = 'edit-' + name; }
-        if (!attrs.name) { attrs.name = name; }
-        self.form[name]._attributes = attrs;
+        self.elements[name] = new dg.FormElement(name, self.form[name], self);
       }
       var html = '<form ' + dg.attributes(self.form._attributes) + '>' +
         dg.render(self.form) +
@@ -184,7 +265,9 @@ dg.Form.prototype.getForm = function() {
   });
 };
 
-dg.Form.prototype.getFormState = function() { return this.form_state; };
+dg.Form.prototype.getFormState = function() {
+  return this.form_state;
+};
 
 dg.Form.prototype.buildForm = function(form, form_state, options) {
   // abstract
@@ -209,30 +292,47 @@ dg.Form.prototype.submitForm = function(form, form_state, options) {
 dg.Form.prototype._submit = function() {
   var self = this;
   return new Promise(function(ok, err) {
-    self.formStateAssemble().then(function() {
-      self.validateForm().then(function() {
-        self.submitForm().then(function() {
-          if (self.form._action) { dg.goto(self._action); }
-          dg.removeForm(self.getFormId());
-          ok();
-        });
+    var formState = self.getFormState();
+    //formState.setFormState().then(function() {
+    //  console.log('done fulfilling promises!');
+    //  console.log(formState.getValues());
+    //});
+    formState.setFormState().then(function() {
+      self.submitForm(self, formState).then(function() {
+        if (self.form._action) { dg.goto(self._action); }
+        dg.removeForm(self.getFormId());
+        ok();
       });
     });
+
+    //formState.setFormState().then(function() {
+    //  console.log('validate time');
+    //  self.validateForm(self).then(function() {
+    //    console.log('submit time');
+    //    self.submitForm(self).then(function() {
+
+    //    });
+    //  });
+    //});
+    //self.formStateAssemble().then(function() {
+    //
+    //});
   });
 };
-dg.Form.prototype.formStateAssemble = function(options) {
-  var self = this;
-  self.form_state = { values: {} };
-  return new Promise(function(ok, err) {
-    for (var name in self.form) {
-      if (!dg.isFormElement(name, self.form)) { continue; }
-      var element = self.form[name];
-      var el = document.getElementById(element._attributes.id);
-      if (el) { self.form_state.values[name] = el.value; }
-    }
-    ok();
-  });
+//dg.Form.prototype.formStateAssemble = function() {
+//
+//};
+
+dg.addForm = function(id, form) {
+  this.forms[id] = form;
+  return this.forms[id];
 };
+dg.loadForm = function(id) {
+  return this.forms[id] ? this.forms[id] : null;
+};
+dg.loadForms = function() { return this.forms; };
+dg.removeForm = function(id) { delete this.forms[id]; };
+dg.removeForms = function() { this.forms = {}; };
 
 dg.isFormElement = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) != '_';
@@ -335,6 +435,16 @@ dg.render = function(content) {
     return html;
   }
   catch (error) { console.log('dg.render - ' + error); }
+};
+// Entity load proxies.
+dg.commentLoad = function() {
+  return jDrupal.commentLoad.apply(jDrupal, arguments);
+};
+dg.nodeLoad = function() {
+  return jDrupal.nodeLoad.apply(jDrupal, arguments);
+};
+dg.userLoad = function() {
+  return jDrupal.userLoad.apply(jDrupal, arguments);
 };
 // @see http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
@@ -441,9 +551,7 @@ dg.router = {
         // All other routes.
         else {
           // @TODO no need for the extra function, just "then it"
-          route.defaults._controller().then(function(content) {
-            dg.appRender(content);
-          });
+          route.defaults._controller().then(dg.appRender);
         }
       }
 
@@ -590,11 +698,13 @@ var UserLoginForm = function() {
     });
   };
 
-  this.submitForm = function() {
+  this.submitForm = function(form, formState) {
     var self = this;
     return new Promise(function(ok, err) {
-      var form_state = self.getFormState();
-      jDrupal.userLogin(form_state.values['name'], form_state.values['pass']).then(ok);
+      jDrupal.userLogin(
+        formState.getValue('name'),
+        formState.getValue('pass')
+      ).then(ok);
     });
 
   };
