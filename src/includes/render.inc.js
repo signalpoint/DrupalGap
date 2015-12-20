@@ -1,5 +1,34 @@
 dg.appRender = function(content) {
-  document.getElementById('dg-app').innerHTML = dg.render(content);
+  dg.themeLoad().then(function(theme) {
+    var innerHTML = '';
+
+    // Process regions.
+    var regions = theme.getRegions();
+    for (var region in regions) {
+      if (!regions.hasOwnProperty(region)) { continue; }
+      innerHTML += '<div ' + dg.attributes(regions[region]._attributes) + '></div>';
+    }
+    innerHTML += dg.render(content);
+    document.getElementById('dg-app').innerHTML = innerHTML;
+
+    // Attach UI submit handler for each form on the page, if any.
+    var forms = dg.loadForms();
+    for (var id in forms) {
+      if (!forms.hasOwnProperty(id)) { continue; }
+      var form = document.getElementById(dg.killCamelCase(id, '-'));
+      function processForm(e) {
+        if (e.preventDefault) e.preventDefault();
+        var _form = dg.loadForm(id);
+        _form._submission().then(
+          function() { },
+          function() { }
+        );
+        return false; // Prevent default form behavior.
+      }
+      if (form.attachEvent) { form.attachEvent("submit", processForm); }
+      else { form.addEventListener("submit", processForm); }
+    }
+  });
 };
 dg.render = function(content) {
   try {

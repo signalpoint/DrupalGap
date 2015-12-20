@@ -24,6 +24,31 @@ dg.attributes = function(attributes) {
 };
 
 /**
+ *
+ * @constructor
+ */
+dg.Theme = function() {
+  this.regions = null;
+};
+dg.Theme.prototype.get = function(property) {
+  return typeof this[property] !== 'undefined' ? this[property] : null;
+};
+dg.Theme.prototype.getRegions = function() {
+  return this.get('regions');
+};
+
+dg.themeLoad = function() {
+  return new Promise(function(ok, err) {
+    if (!dg.activeTheme) {
+      var config = dg.config('theme');
+      var class_name = jDrupal.ucfirst(dg.getCamelCase(config.name));
+      dg.activeTheme = new window[class_name];
+    }
+    ok(dg.activeTheme);
+  });
+};
+
+/**
  * Implementation of theme().
  * @param {String} hook
  * @param {Object} variables

@@ -78,24 +78,6 @@ dg.router = {
 
             dg.appRender(content);
 
-            // Attach UI submit handler for each form on the page.
-            var forms = dg.loadForms();
-            for (var id in forms) {
-              if (!forms.hasOwnProperty(id)) { continue; }
-              var form = document.getElementById(dg.killCamelCase(id, '-'));
-              function processForm(e) {
-                if (e.preventDefault) e.preventDefault();
-                var _form = dg.loadForm(id);
-                _form._submission().then(
-                  function() { },
-                  function() { }
-                );
-                return false; // Prevent default form behavior.
-              }
-              if (form.attachEvent) { form.attachEvent("submit", processForm); }
-              else { form.addEventListener("submit", processForm); }
-            }
-
           });
         }
 

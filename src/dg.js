@@ -1,6 +1,8 @@
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
+dg.activeTheme = null;
+
 // Configuration setting defaults.
 dg.settings = {
   mode: 'web-app',
@@ -61,12 +63,13 @@ dg.bootstrap = function() {
 
   jDrupal.modules['dgUser'] = { };
 
-  this.router.config({
+  dg.router.config({
     //mode: 'history',
     //root: 'discasaurus.com'
   });
 
   // Build the routes.
+  // @TODO turn route building into promises.
   // @TODO turn the outer portion of this procedure into a re-usable function
   // that can iterate over modules and call a specific function within that
   // module.
@@ -82,7 +85,12 @@ dg.bootstrap = function() {
     }
   }
 
-  // Add a default route, and start listening.
-  this.router.add(function() { }).listen();
+  // Load the theme.
+  this.themeLoad().then(function() {
+
+    // Add a default route, and start listening.
+    dg.router.add(function() { }).listen();
+
+  });
 
 };
