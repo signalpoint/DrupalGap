@@ -2,6 +2,8 @@
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
+dg.activeTheme = null;
+
 // Configuration setting defaults.
 dg.settings = {
   mode: 'web-app',
@@ -62,12 +64,13 @@ dg.bootstrap = function() {
 
   jDrupal.modules['dgUser'] = { };
 
-  this.router.config({
+  dg.router.config({
     //mode: 'history',
     //root: 'discasaurus.com'
   });
 
   // Build the routes.
+  // @TODO turn route building into promises.
   // @TODO turn the outer portion of this procedure into a re-usable function
   // that can iterate over modules and call a specific function within that
   // module.
@@ -83,9 +86,20 @@ dg.bootstrap = function() {
     }
   }
 
-  // Add a default route, and start listening.
-  this.router.add(function() { }).listen();
+  // Load the theme.
+  this.themeLoad().then(function() {
 
+    // Add a default route, and start listening.
+    dg.router.add(function() { }).listen();
+
+  });
+
+};
+/**
+ * The Form Element prototype.
+ * @constructor
+ */
+dg.Block = function() {
 };
 /**
  * Given a string separated by underscores or hyphens, this will return the
@@ -103,6 +117,8 @@ dg.getCamelCase = function(str) {
 dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
+
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
 /**
  * The Form Element prototype.
@@ -429,8 +445,43 @@ dg.Module.prototype.constructor = dg.Module;
 dg.Module.prototype.routing = function() {
   return null;
 };
+/**
+ * The Form Element prototype.
+ * @constructor
+ */
+dg.Region = function() {
+};
 dg.appRender = function(content) {
-  document.getElementById('dg-app').innerHTML = dg.render(content);
+  dg.themeLoad().then(function(theme) {
+    var innerHTML = '';
+
+    // Process regions.
+    var regions = theme.getRegions();
+    for (var region in regions) {
+      if (!regions.hasOwnProperty(region)) { continue; }
+      innerHTML += '<div ' + dg.attributes(regions[region]._attributes) + '></div>';
+    }
+    innerHTML += dg.render(content);
+    document.getElementById('dg-app').innerHTML = innerHTML;
+
+    // Attach UI submit handler for each form on the page, if any.
+    var forms = dg.loadForms();
+    for (var id in forms) {
+      if (!forms.hasOwnProperty(id)) { continue; }
+      var form = document.getElementById(dg.killCamelCase(id, '-'));
+      function processForm(e) {
+        if (e.preventDefault) e.preventDefault();
+        var _form = dg.loadForm(id);
+        _form._submission().then(
+          function() { },
+          function() { }
+        );
+        return false; // Prevent default form behavior.
+      }
+      if (form.attachEvent) { form.attachEvent("submit", processForm); }
+      else { form.addEventListener("submit", processForm); }
+    }
+  });
 };
 dg.render = function(content) {
   try {
@@ -567,24 +618,6 @@ dg.router = {
 
             dg.appRender(content);
 
-            // Attach UI submit handler for each form on the page.
-            var forms = dg.loadForms();
-            for (var id in forms) {
-              if (!forms.hasOwnProperty(id)) { continue; }
-              var form = document.getElementById(dg.killCamelCase(id, '-'));
-              function processForm(e) {
-                if (e.preventDefault) e.preventDefault();
-                var _form = dg.loadForm(id);
-                _form._submission().then(
-                  function() { },
-                  function() { }
-                );
-                return false; // Prevent default form behavior.
-              }
-              if (form.attachEvent) { form.attachEvent("submit", processForm); }
-              else { form.addEventListener("submit", processForm); }
-            }
-
           });
         }
 
@@ -663,6 +696,31 @@ dg.attributes = function(attributes) {
     }
   }
   return attrs;
+};
+
+/**
+ *
+ * @constructor
+ */
+dg.Theme = function() {
+  this.regions = null;
+};
+dg.Theme.prototype.get = function(property) {
+  return typeof this[property] !== 'undefined' ? this[property] : null;
+};
+dg.Theme.prototype.getRegions = function() {
+  return this.get('regions');
+};
+
+dg.themeLoad = function() {
+  return new Promise(function(ok, err) {
+    if (!dg.activeTheme) {
+      var config = dg.config('theme');
+      var class_name = jDrupal.ucfirst(dg.getCamelCase(config.name));
+      dg.activeTheme = new window[class_name];
+    }
+    ok(dg.activeTheme);
+  });
 };
 
 /**
