@@ -45,6 +45,18 @@ dg.FormStateInterface.prototype.hasAnyErrors = function() {
   }
   return hasError;
 };
+dg.FormStateInterface.prototype.getErrorMessages = function() {
+  var msg = '';
+  var errors = this.getErrors();
+  for (error in errors) {
+    if (!errors.hasOwnProperty(error)) { continue; }
+    msg += error + ' - ' + errors[error];
+  }
+  return msg;
+};
+dg.FormStateInterface.prototype.displayErrors = function() {
+  dg.alert(this.getErrorMessages());
+};
 
 //dg.FormStateInterface.prototype.setFormState = function() {
 //  var promises = [];
