@@ -24,14 +24,16 @@ dg.Form.prototype.getForm = function() {
   var self = this;
   return new Promise(function(ok, err) {
     self.buildForm(self.form, self.form_state).then(function() {
-      for (var name in self.form) {
-        if (!dg.isFormElement(name, self.form)) { continue; }
-        self.elements[name] = new dg.FormElement(name, self.form[name], self);
-      }
-      var html = '<form ' + dg.attributes(self.form._attributes) + '>' +
-        dg.render(self.form) +
-        '</form>';
-      ok(html);
+      jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId()).then(function() {
+        for (var name in self.form) {
+          if (!dg.isFormElement(name, self.form)) { continue; }
+          self.elements[name] = new dg.FormElement(name, self.form[name], self);
+        }
+        var html = '<form ' + dg.attributes(self.form._attributes) + '>' +
+          dg.render(self.form) +
+          '</form>';
+        ok(html);
+      });
     });
   });
 };
@@ -69,13 +71,7 @@ dg.Form.prototype._submitForm = function() {
       self._validateForm().then(function() {
 
         if (formState.hasAnyErrors()) {
-          var msg = '';
-          var errors = formState.getErrors();
-          for (error in errors) {
-            if (!errors.hasOwnProperty(error)) { continue; }
-            msg += error + ' - ' + errors[error];
-          }
-          dg.alert(msg);
+          formState.displayErrors();
           err();
         }
         else {
@@ -103,7 +99,6 @@ dg.Form.prototype._validateForm = function() {
   var promises = [];
   for (var i = 0; i < self.form._validate.length; i++) {
     var parts = self.form._validate[i].split('.');
-    console.log(parts);
     var obj = parts[0];
     var method = parts[1];
     if (!window[obj] || !window[obj][method]) { continue; }
