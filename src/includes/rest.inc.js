@@ -8,3 +8,4 @@ dg.nodeLoad = function() {
 dg.userLoad = function() {
   return jDrupal.userLoad.apply(jDrupal, arguments);
 };
+dg.token = function() { return jDrupal.token(); };
