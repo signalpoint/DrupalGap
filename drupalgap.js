@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-19 */
+/*! drupalgap 2015-12-20 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -113,7 +113,7 @@ dg.killCamelCase = function(str, separator) {
  */
 dg.FormElement = function(name, element, form) {
   this.name = name;
-  this.element = element;
+  this.element = element; // Holds the form element JSON object provided by the form builder.
   this.form = form;
   var attrs = element._attributes ? element._attributes : {};
   if (!attrs.id) { attrs.id = 'edit-' + name; }
@@ -175,6 +175,7 @@ function theme_textfield(variables) {
 dg.FormStateInterface = function(form) {
   this.form = form;
   this.values = {};
+  this.errors = {};
 };
 
 dg.FormStateInterface.prototype.get = function(property) {
@@ -195,6 +196,22 @@ dg.FormStateInterface.prototype.setFormState = function() {
       self.setValue(values[i].name, values[i].value);
     }
   });
+};
+dg.FormStateInterface.prototype.setErrorByName = function(name, msg) {
+  this.errors[name] = msg;
+};
+dg.FormStateInterface.prototype.getErrors = function() {
+  return this.errors;
+};
+dg.FormStateInterface.prototype.hasAnyErrors = function() {
+  var hasError = false;
+  var errors = this.getErrors();
+  for (error in errors) {
+    if (!errors.hasOwnProperty(error)) { continue; }
+    hasError = true;
+    break;
+  }
+  return hasError;
 };
 
 //dg.FormStateInterface.prototype.setFormState = function() {
@@ -240,14 +257,15 @@ dg.Form = function(id) {
   this.form = {
     _attributes: {
       id: dg.killCamelCase(id, '-').toLowerCase()
-    }
+    },
+    _validate: [id + '.validateForm'],
+    _submit: [id + '.submitForm']
   };
   this.form_state = new dg.FormStateInterface(this);
   this.elements = {}; // Holds FormElement instances.
 };
-dg.Form.prototype.getFormId = function() {
-  return this.id;
-};
+
+dg.Form.prototype.getFormId = function() { return this.id; };
 
 dg.Form.prototype.getForm = function() {
   var self = this;
@@ -288,40 +306,60 @@ dg.Form.prototype.submitForm = function(form, form_state, options) {
   });
 };
 
-// dg core form submit handler
-dg.Form.prototype._submit = function() {
+// dg core form submission handler
+dg.Form.prototype._submitForm = function() {
   var self = this;
   return new Promise(function(ok, err) {
     var formState = self.getFormState();
-    //formState.setFormState().then(function() {
-    //  console.log('done fulfilling promises!');
-    //  console.log(formState.getValues());
-    //});
     formState.setFormState().then(function() {
-      self.submitForm(self, formState).then(function() {
-        if (self.form._action) { dg.goto(self._action); }
-        dg.removeForm(self.getFormId());
-        ok();
+
+      self._validateForm().then(function() {
+
+        if (formState.hasAnyErrors()) {
+          var msg = '';
+          var errors = formState.getErrors();
+          for (error in errors) {
+            if (!errors.hasOwnProperty(error)) { continue; }
+            msg += error + ' - ' + errors[error];
+          }
+          dg.alert(msg);
+          err();
+        }
+        else {
+          console.log('holy smokes!');
+        }
+
+
       });
+
+      //self.validateForm(self, formState).then(function() {
+      //  self.submitForm(self, formState).then(function() {
+      //    if (self.form._action) { dg.goto(self._action); }
+      //    dg.removeForm(self.getFormId());
+      //    ok();
+      //  });
+      //});
+
     });
-
-    //formState.setFormState().then(function() {
-    //  console.log('validate time');
-    //  self.validateForm(self).then(function() {
-    //    console.log('submit time');
-    //    self.submitForm(self).then(function() {
-
-    //    });
-    //  });
-    //});
-    //self.formStateAssemble().then(function() {
-    //
-    //});
   });
 };
-//dg.Form.prototype.formStateAssemble = function() {
-//
-//};
+
+// dg core form validation handler
+dg.Form.prototype._validateForm = function() {
+  var self = this;
+  var promises = [];
+  for (var i = 0; i < self.form._validate.length; i++) {
+    var parts = self.form._validate[i].split('.');
+    console.log(parts);
+    var obj = parts[0];
+    var method = parts[1];
+    if (!window[obj] || !window[obj][method]) { continue; }
+    promises.push(window[obj][method].apply(self, [self, self.getFormState()]));
+  }
+  return Promise.all(promises).then(function() {
+    console.log('All promises fulfilled dude');
+  });
+};
 
 dg.addForm = function(id, form) {
   this.forms[id] = form;
@@ -534,11 +572,10 @@ dg.router = {
               function processForm(e) {
                 if (e.preventDefault) e.preventDefault();
                 var _form = dg.loadForm(id);
-                _form._submit().then(function() {
-
-                }, function() {
-
-                });
+                _form._submitForm().then(
+                  function() { },
+                  function() { }
+                );
                 return false; // Prevent default form behavior.
               }
               if (form.attachEvent) { form.attachEvent("submit", processForm); }
