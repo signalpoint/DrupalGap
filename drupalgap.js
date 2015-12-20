@@ -225,25 +225,6 @@ dg.FormStateInterface.prototype.getErrorMessages = function() {
 dg.FormStateInterface.prototype.displayErrors = function() {
   dg.alert(this.getErrorMessages());
 };
-
-//dg.FormStateInterface.prototype.setFormState = function() {
-//  var promises = [];
-//  var foo = {
-//    bar: 123,
-//    baz: 456
-//  };
-//  for (var name in foo) {
-//    promises.push(new Promise(function(ok, err) {
-//      form.elements[name].valueCallback().then(function(value) {
-//        console.log('setting: ' + name);
-//        self.setValue(name, value);
-//        ok();
-//      });
-//    }));
-//  }
-//  return Promise.all(promises);
-//};
-
 dg.FormStateInterface.prototype.getValue = function(key, default_value) {
   return typeof this.get('values')[key] !== 'undefined' ?
     this.get('values')[key] : default_value;
@@ -320,34 +301,24 @@ dg.Form.prototype.submitForm = function(form, form_state, options) {
   });
 };
 
-// dg core form submission handler
-dg.Form.prototype._submitForm = function() {
+// dg core form UX submission handler
+dg.Form.prototype._submission = function() {
   var self = this;
   return new Promise(function(ok, err) {
     var formState = self.getFormState();
     formState.setFormState().then(function() {
-
       self._validateForm().then(function() {
-
         if (formState.hasAnyErrors()) {
           formState.displayErrors();
           err();
+          return;
         }
-        else {
-          console.log('holy smokes!');
-        }
-
-
+        self._submitForm(self, formState).then(function() {
+          if (self.form._action) { dg.goto(self._action); }
+          dg.removeForm(self.getFormId());
+          ok();
+        });
       });
-
-      //self.validateForm(self, formState).then(function() {
-      //  self.submitForm(self, formState).then(function() {
-      //    if (self.form._action) { dg.goto(self._action); }
-      //    dg.removeForm(self.getFormId());
-      //    ok();
-      //  });
-      //});
-
     });
   });
 };
@@ -360,12 +331,36 @@ dg.Form.prototype._validateForm = function() {
     var parts = self.form._validate[i].split('.');
     var obj = parts[0];
     var method = parts[1];
+    // Handle prototype validation handler, if any.
+    if (obj == this.getFormId() && method == 'validateForm') {
+      promises.push(this[method].apply(self, [self, self.getFormState()]));
+      continue;
+    }
+    // Handle external validation handlers, if any.
     if (!window[obj] || !window[obj][method]) { continue; }
     promises.push(window[obj][method].apply(self, [self, self.getFormState()]));
   }
-  return Promise.all(promises).then(function() {
-    console.log('All promises fulfilled dude');
-  });
+  return Promise.all(promises);
+};
+
+// dg core form submit handler
+dg.Form.prototype._submitForm = function() {
+  var self = this;
+  var promises = [];
+  for (var i = 0; i < self.form._submit.length; i++) {
+    var parts = self.form._submit[i].split('.');
+    var obj = parts[0];
+    var method = parts[1];
+    // Handle prototype submission handler, if any.
+    if (obj == this.getFormId() && method == 'submitForm') {
+      promises.push(this[method].apply(self, [self, self.getFormState()]));
+      continue;
+    }
+    // Handle external submission handlers, if any.
+    if (!window[obj] || !window[obj][method]) { continue; }
+    promises.push(window[obj][method].apply(self, [self, self.getFormState()]));
+  }
+  return Promise.all(promises);
 };
 
 dg.addForm = function(id, form) {
@@ -491,6 +486,7 @@ dg.nodeLoad = function() {
 dg.userLoad = function() {
   return jDrupal.userLoad.apply(jDrupal, arguments);
 };
+dg.token = function() { return jDrupal.token(); };
 // @see http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
 dg.router = {
@@ -579,7 +575,7 @@ dg.router = {
               function processForm(e) {
                 if (e.preventDefault) e.preventDefault();
                 var _form = dg.loadForm(id);
-                _form._submitForm().then(
+                _form._submission().then(
                   function() { },
                   function() { }
                 );
