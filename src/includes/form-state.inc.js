@@ -57,25 +57,6 @@ dg.FormStateInterface.prototype.getErrorMessages = function() {
 dg.FormStateInterface.prototype.displayErrors = function() {
   dg.alert(this.getErrorMessages());
 };
-
-//dg.FormStateInterface.prototype.setFormState = function() {
-//  var promises = [];
-//  var foo = {
-//    bar: 123,
-//    baz: 456
-//  };
-//  for (var name in foo) {
-//    promises.push(new Promise(function(ok, err) {
-//      form.elements[name].valueCallback().then(function(value) {
-//        console.log('setting: ' + name);
-//        self.setValue(name, value);
-//        ok();
-//      });
-//    }));
-//  }
-//  return Promise.all(promises);
-//};
-
 dg.FormStateInterface.prototype.getValue = function(key, default_value) {
   return typeof this.get('values')[key] !== 'undefined' ?
     this.get('values')[key] : default_value;
