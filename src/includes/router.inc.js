@@ -86,11 +86,10 @@ dg.router = {
               function processForm(e) {
                 if (e.preventDefault) e.preventDefault();
                 var _form = dg.loadForm(id);
-                _form._submit().then(function() {
-
-                }, function() {
-
-                });
+                _form._submitForm().then(
+                  function() { },
+                  function() { }
+                );
                 return false; // Prevent default form behavior.
               }
               if (form.attachEvent) { form.attachEvent("submit", processForm); }

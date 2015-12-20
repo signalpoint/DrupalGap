@@ -7,6 +7,7 @@
 dg.FormStateInterface = function(form) {
   this.form = form;
   this.values = {};
+  this.errors = {};
 };
 
 dg.FormStateInterface.prototype.get = function(property) {
@@ -27,6 +28,22 @@ dg.FormStateInterface.prototype.setFormState = function() {
       self.setValue(values[i].name, values[i].value);
     }
   });
+};
+dg.FormStateInterface.prototype.setErrorByName = function(name, msg) {
+  this.errors[name] = msg;
+};
+dg.FormStateInterface.prototype.getErrors = function() {
+  return this.errors;
+};
+dg.FormStateInterface.prototype.hasAnyErrors = function() {
+  var hasError = false;
+  var errors = this.getErrors();
+  for (error in errors) {
+    if (!errors.hasOwnProperty(error)) { continue; }
+    hasError = true;
+    break;
+  }
+  return hasError;
 };
 
 //dg.FormStateInterface.prototype.setFormState = function() {
