@@ -74,16 +74,11 @@ dg.router = {
         // Handle forms.
         if (route.defaults._form) {
           var id = route.defaults._form;
-          dg.addForm(id, new window[id]).getForm().then(function(content) {
-
-            dg.appRender(content);
-
-          });
+          dg.addForm(id, new window[id]).getForm().then(dg.appRender);
         }
 
         // All other routes.
         else {
-          // @TODO no need for the extra function, just "then it"
           route.defaults._controller().then(dg.appRender);
         }
       }

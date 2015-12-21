@@ -2,11 +2,13 @@
 var dg = {}; var drupalgap = dg;
 
 dg.activeTheme = null;
+dg.blocks = null;
 
 // Configuration setting defaults.
 dg.settings = {
   mode: 'web-app',
-  front: null
+  front: null,
+  blocks: {}
 };
 
 /**
@@ -61,6 +63,7 @@ dg.devicereadyBad = function() {
 // Bootstrap.
 dg.bootstrap = function() {
 
+  jDrupal.modules['dgSystem'] = { };
   jDrupal.modules['dgUser'] = { };
 
   dg.router.config({
@@ -81,15 +84,21 @@ dg.bootstrap = function() {
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
       var item = routes[route];
-      this.router.add(item);
+      dg.router.add(item);
     }
   }
 
   // Load the theme.
-  this.themeLoad().then(function() {
+  dg.themeLoad().then(function() {
 
-    // Add a default route, and start listening.
-    dg.router.add(function() { }).listen();
+    dg.blocksLoad().then(function(blocks) {
+
+      // Add a default route, and start listening.
+      dg.router.add(function() { }).listen();
+
+    });
+
+
 
   });
 

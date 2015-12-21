@@ -2,11 +2,19 @@ dg.appRender = function(content) {
   dg.themeLoad().then(function(theme) {
     var innerHTML = '';
 
+    // START HERE, turn regions into a prototype, then make a function
+    // that can get all the blocks for that region, then it'll be easier
+    // to control what happens in each.
+
     // Process regions.
     var regions = theme.getRegions();
     for (var region in regions) {
       if (!regions.hasOwnProperty(region)) { continue; }
-      innerHTML += '<div ' + dg.attributes(regions[region]._attributes) + '></div>';
+      for (var block in regions[region]) {
+        if (!regions[region].hasOwnProperty(block)) { continue; }
+        if (block.indexOf('_') == 0) { continue; } // Skip properties.
+        console.log(block);
+      }
     }
     innerHTML += dg.render(content);
     document.getElementById('dg-app').innerHTML = innerHTML;
