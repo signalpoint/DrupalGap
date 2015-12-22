@@ -1,3 +1,6 @@
+// @TODO change region properties to use an underscore prefix.
+// This will allow us to easily separate properties from blocks within settings.js
+
 /**
  * The Form Element prototype.
  * @constructor

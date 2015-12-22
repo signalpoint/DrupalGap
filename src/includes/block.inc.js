@@ -2,6 +2,8 @@
 
 // @see https://www.drupal.org/node/2101565
 
+// @TODO change block properties to use an underscore prefix.
+
 /**
  * The BLock prototype.
  * @constructor
