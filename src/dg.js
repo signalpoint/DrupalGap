@@ -633,6 +633,7 @@ function drupalgap_file_exists(path) {
     jQuery.ajax({
       async: false,
       type: 'HEAD',
+      dataType: 'text',
       url: path,
       success: function() { file_exists = true; },
       error: function(xhr, textStatus, errorThrown) { }
