@@ -68,7 +68,7 @@ dg.theme = function(hook, variables) {
     //var theme_function = drupalgap.settings.theme + '_' + hook;
     //if (!function_exists(theme_function)) {
       var theme_function = 'theme_' + hook;
-      if (!jDrupal.functionExists(theme_function)) {
+      if (!jDrupal.functionExists(dg[theme_function])) {
         var caller = null;
         if (arguments.callee.caller) {
           caller = arguments.callee.caller.name;
@@ -85,7 +85,7 @@ dg.theme = function(hook, variables) {
 
     // If there is no class name array, set an empty one.
     if (!variables._attributes['class']) { variables._attributes['class'] = []; }
-    return window[theme_function].call(null, variables);
+    return dg[theme_function].call(null, variables);
   }
   catch (error) { console.log('dg.theme - ' + error); }
 };
