@@ -68,18 +68,23 @@ dg.router = {
 
       //match.shift();
 
+      var menu_execute_active_handler = function(content) {
+        dg.content = content;
+        dg.appRender();
+      };
+
       if (!route.defaults) { route = this.load(dg.config('front')); }
 
       if (route.defaults) {
         // Handle forms.
         if (route.defaults._form) {
           var id = route.defaults._form;
-          dg.addForm(id, new window[id]).getForm().then(dg.appRender);
+          dg.addForm(id, new window[id]).getForm().then(menu_execute_active_handler);
         }
 
         // All other routes.
         else {
-          route.defaults._controller().then(dg.appRender);
+          route.defaults._controller().then(menu_execute_active_handler);
         }
       }
 

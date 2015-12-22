@@ -3,16 +3,15 @@
 // @see https://www.drupal.org/node/2101565
 
 /**
- * The Form Element prototype.
+ * The BLock prototype.
  * @constructor
  */
 dg.Block = function(config) {
-  console.log('config');
-  console.log(config);
-  console.log(this);
-  this.id = config.id;
-  this.module = config.module;
-  //this.region = null;
+  this.format = 'div';
+  for (var setting in config) {
+    if (!config.hasOwnProperty(setting)) { continue; }
+    this[setting] = config[setting];
+  }
 };
 
 dg.Block.prototype.get = function(property) {
@@ -21,15 +20,22 @@ dg.Block.prototype.get = function(property) {
 dg.Block.prototype.set = function(property, value) {
   this[property] = value;
 };
+dg.Block.prototype.buildWrapper = function() {
+  var self = this;
+  return new Promise(function(ok, err) {
+    self.build().then(function(content) {
+      self.set('content', content);
+      ok(self);
+    });
+  });
+};
 dg.Block.prototype.build = function() {
   // abstract
-  return new Promise(function(ok, err) {
-    ok('<p>block content</p>');
-  });
+  return new Promise(function(ok, err) { ok(''); });
 };
 
 dg.blocksLoad = function() {
-  return new Promise(function(ok, err) {
+  //return new Promise(function(ok, err) {
     if (!dg.blocks) {
 
       dg.blocks = {};
@@ -50,9 +56,8 @@ dg.blocksLoad = function() {
         }
       }
 
-      console.log('loaded the blocks from settings.js');
-      console.log(appBlocks);
-
+      //console.log('loaded the blocks from settings.js');
+      //console.log(appBlocks);
 
       // Gather all the blocks defined by modules, and then instantiate only
       // the blocks defined by the app.
@@ -75,11 +80,11 @@ dg.blocksLoad = function() {
           var config = blocks[block];
           if (!config.id) { config.id = block; }
           if (!config.module) { config.module = module; }
+          if (!config.attributes) { config.attributes = {}; }
+          if (!config.attributes.id) { config.attributes.id = block; }
 
           // Create an instance of the block, warn if someone overwrites somebody
           // else's block.
-          console.log('creating new block: ' + block);
-          console.log(config);
           if (dg.blocks[block]) {
             var msg = 'WARNING - The "' + block + '" block provided by the "' + dg.blocks[block].get('module') + '" ' +
               'module has been overwritten by the "' + config.module + '" module.';
@@ -87,7 +92,7 @@ dg.blocksLoad = function() {
           }
           dg.blocks[block] = new dg.Block(config);
 
-          // Merge the block settings into the block.
+          // Merge the block config from settings.js into the block instance.
           // @TODO turn this into dg.extend().
           for (var setting in appBlocks[block]) {
             if (!appBlocks[block].hasOwnProperty(setting)) { continue; }
@@ -96,60 +101,19 @@ dg.blocksLoad = function() {
         }
       }
 
-      console.log('blocks have been loaded');
-      console.log(dg.blocks);
+      //console.log('blocks have been loaded');
+      //console.log(dg.blocks);
 
-      ok(dg.blocks);
-
-      return;
-
-      jDrupal.moduleInvokeAll('block_info').then(function(modules) {
-        // Grab the current theme's block settings.
-        var blockSettings = drupalgap.settings.blocks[dg.config('theme').name];
-        // Iterate over each module that has a block(s)...
-        for (var i = 0; i < modules.length; i++) {
-          // Iterate over the block(s)...
-          for (block in modules[i]) {
-            if (!modules[i].hasOwnProperty(block)) { continue; }
-            var _block = modules[i][block];
-            // Iterate over each region mentioned in the theme settings...
-            for (var region in blockSettings) {
-              if (!blockSettings.hasOwnProperty(region)) { continue; }
-              // Iterate over each block mentioned in the theme's region settings...
-              for (var themeBlock in blockSettings[region]) {
-                if (!blockSettings[region].hasOwnProperty(themeBlock)) { continue; }
-                if (themeBlock == _block.delta) {
-                  // Merge the block settings into the block.
-                  // @TODO turn this into dg.extend().
-                  for (var setting in blockSettings[region][themeBlock]) {
-                    if (!blockSettings[region][themeBlock].hasOwnProperty(setting)) { continue; }
-                    _block[setting] = blockSettings[region][themeBlock][setting];
-                  }
-                  break;
-                }
-              }
-            }
-            dg.blocks.push(_block);
-          }
-        }
-        ok(dg.blocks);
-      });
+      //ok(dg.blocks);
+      return dg.blocks;
     }
-    else { ok(dg.blocks); }
-  });
+    else {
+      //ok(dg.blocks);
+      return dg.blocks;
+    }
+  //});
 };
 
-dg.blockLoad = function(module, delta) {
-  return new Promise(function(ok, err) {
-    var block = null;
-    dg.blocksLoad().then(function(blocks) {
-      for (var i = 0; i < blocks.length; i++) {
-        if (blocks[i].module == module && blocks[i].delta == delta) {
-          block = blocks[i];
-          break;
-        }
-      }
-    });
-    ok(block);
-  });
+dg.blockLoad = function(id) {
+  return dg.blocks[id] ? dg.blocks[id] : null;
 };

@@ -2,7 +2,8 @@
 var dg = {}; var drupalgap = dg;
 
 dg.activeTheme = null;
-dg.blocks = null;
+dg.regions = null; // Holds instances of regions.
+dg.blocks = null; // Holds instances of blocks.
 
 // Configuration setting defaults.
 dg.settings = {
@@ -91,12 +92,14 @@ dg.bootstrap = function() {
   // Load the theme.
   dg.themeLoad().then(function() {
 
-    dg.blocksLoad().then(function(blocks) {
+    //dg.blocksLoad().then(function(blocks) {
+
+      var blocks = dg.blocksLoad();
 
       // Add a default route, and start listening.
       dg.router.add(function() { }).listen();
 
-    });
+    //});
 
 
 

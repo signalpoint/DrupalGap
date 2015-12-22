@@ -2,22 +2,43 @@ dg.appRender = function(content) {
   dg.themeLoad().then(function(theme) {
     var innerHTML = '';
 
-    // START HERE, turn regions into a prototype, then make a function
-    // that can get all the blocks for that region, then it'll be easier
-    // to control what happens in each.
-
     // Process regions.
+    // @TODO move this to dg.loadRegions().
+    dg.regions = {};
     var regions = theme.getRegions();
-    for (var region in regions) {
-      if (!regions.hasOwnProperty(region)) { continue; }
-      for (var block in regions[region]) {
-        if (!regions[region].hasOwnProperty(block)) { continue; }
-        if (block.indexOf('_') == 0) { continue; } // Skip properties.
-        console.log(block);
+    for (var id in regions) {
+      if (!regions.hasOwnProperty(id)) { continue; }
+
+      var region = new dg.Region({
+        id: id,
+        attributes: { id: id }
+      });
+      dg.regions[id] = region;
+
+      var blocks = dg.regions[id].getBlocks();
+      if (blocks.length == 0) { continue; }
+
+      innerHTML += '<' + region.get('format')  + ' ' + dg.attributes(region.get('attributes')) + '>';
+      for (var i = 0; i < blocks.length; i++) {
+        var block = dg.blockLoad(blocks[i]);
+        innerHTML += '<' + block.get('format')  + ' ' + dg.attributes(block.get('attributes')) + '>';
+        innerHTML += '</' + block.get('format') + '>';
       }
+      innerHTML += '</' + region.get('format') + '>';
+
     }
     innerHTML += dg.render(content);
     document.getElementById('dg-app').innerHTML = innerHTML;
+
+    // Run the build promise for each block, then inject their content as the respond.
+    var blocks = dg.blocksLoad();
+    for (id in blocks) {
+      if (!blocks.hasOwnProperty(id)) { continue; }
+      var block = blocks[id];
+      block.buildWrapper().then(function(_block) {
+        document.getElementById(_block.get('id')).innerHTML = dg.render(_block.get('content'));
+      });
+    }
 
     // Attach UI submit handler for each form on the page, if any.
     var forms = dg.loadForms();
