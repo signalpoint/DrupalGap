@@ -1,16 +1,16 @@
-function theme_actions(variables) {
+dg.theme_actions = function(variables) {
   var html = '';
   for (prop in variables) {
     if (!dg.isFormElement(prop, variables)) { continue; }
     html += dg.render(variables[prop]);
   }
   return html;
-}
-function theme_password(variables) {
+};
+dg.theme_password = function(variables) {
   variables._attributes.type = 'password';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
-}
-function theme_submit(variables) {
+};
+dg.theme_submit = function(variables) {
   variables._attributes.type = 'submit';
   var value = 'Submit';
   if (!variables._attributes.value) {
@@ -20,8 +20,8 @@ function theme_submit(variables) {
   }
   variables._attributes.value = value;
   return '<input ' + dg.attributes(variables._attributes) + '/>';
-}
-function theme_textfield(variables) {
+};
+dg.theme_textfield = function(variables) {
   variables._attributes.type = 'text';
   return '<input ' + dg.attributes(variables._attributes) + '/>';
-}
+};
