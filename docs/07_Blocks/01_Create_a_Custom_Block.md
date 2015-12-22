@@ -1,36 +1,26 @@
-To create a custom block, implement the following two hooks in a custom module.
+To create a custom block, add the following function to your module's object:
 
 ```
 /**
- * Implements hook_block_info().
+ * Defines blocks for my module.
  */
-function my_module_block_info() {
-  try {
-    var blocks = {};
-    blocks['my_custom_block'] = {
-      delta: 'my_custom_block',
-      module: 'my_module'
-    };
-    return blocks;
-  }
-  catch (error) { console.log('my_module_block_info - ' + error); }
-}
-
-/**
- * Implements hook_block_view().
- */
-function my_module_block_view(delta, region) {
-  try {
-    var content = '';
-    if (delta == 'my_custom_block') {
-      // Show today's date for the block's content.
-      var d = new Date();
-      content = '<h2><center>' + d.toDateString() + '</center></h2>';
+my_module.blocks = function() {
+  var blocks = {};
+  
+  blocks['my_module_custom_block'] = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        var content = {};
+        content['my_markup'] = {
+          markup: '<p>Hello World</p>'
+        };
+        ok(content);
+      });
     }
-    return content;
-  }
-  catch (error) { console.log('my_module_block_view - ' + error); }
-}
+  };
+  
+  return blocks;
+};
 ```
 
 Next, if we [add the block](Blocks/Adding_Block_Region) to a region the `app/settings.js` file, we'll be able to see the custom block. For example, if we placed the block in the `footer` region above the `powered_by` block, it may look something like this:

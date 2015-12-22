@@ -9,7 +9,7 @@ drupalgap.settings.blocks.my_theme = {
   footer:{
 
     /* My Custom Block */
-    my_custom_block:{},
+    my_module_custom_block:{},
 
     /* Powered by DrupalGap Block */
     powered_by:{},

@@ -11,6 +11,9 @@ To create a custom page in our DrupalGap mobile application, follow these steps:
 ## 2. Add a route
 
 ```
+/**
+ * Defines custom routes for my module.
+ */
 my_module.routing = function() {
   var routes = {};
 
@@ -20,18 +23,18 @@ my_module.routing = function() {
     "defaults": {
       "_controller": function() {
         return new Promise(function(ok, err) {
+        
+          // Build and resolve the content for the page.
           var text = 'Hello World';
           var account = dg.currentUser();
           if (account.isAuthenticated()) {
             text = 'Hello ' + account.getAccountName();
           }
           ok(text);
+
         });
       },
       "_title": "Hello World"
-    },
-    "requirements": {
-      "_permission": "access content"
     }
   };
   

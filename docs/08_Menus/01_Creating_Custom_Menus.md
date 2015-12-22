@@ -1,4 +1,4 @@
-Creating custom menus in DrupalGap is done with the `app/settings.js` file. Here's an example menu with a link to a Food page, and a link to a Beverage page:
+Creating custom menus in DrupalGap is done with custom blocks. Here's an example menu with a link to a Food page, and a link to a Beverage page:
 
 ![Food Page](http://drupalgap.org/sites/default/files/food-page.png)
 
@@ -6,37 +6,38 @@ Creating custom menus in DrupalGap is done with the `app/settings.js` file. Here
 
 ## Creating the Menu
 
-To create a custom menu like this, just add an entry to the menu settings in the `app/settings.js` file:
+To create a custom menu like this, first [create a custom block](../Blocks/Create_a_Custom_Block). Then implement its `build` function with something like this:
 
 ```
-drupalgap.settings.menus['my_menu'] = {
-  links:[
-    {
-      title: 'Food',
-      path: 'food'
+return new Promise(function(ok, err) {
+  var content = {};
+  content['my_markup'] = {
+    _theme: 'item_list',
+    _attributes: {
+      'class': 'menu'
     },
-    {
-      title: 'Beverage',
-      path: 'beverage'
-    }
-  ]
-};
+    _items: [
+      dg.l('Food', 'food'),
+      dg.l('Beverage', 'beverage')]
+  };
+  ok(content);
+});
 ```
 
 ## Displaying the Menu's Block
 
-Now when DrupalGap runs, it will automatically create a `my_menu` block for the custom menu. The block can then be added to a region for display. For example, if we wanted to put the `my_menu` block in the `navigation` region of `my_theme`, we would do this in the `app/settings.js` file:
+For example, if we wanted to put the `my_module_custom_block` block in the `header` region of `my_theme`, we would do this in the `app/settings.js` file:
 
 ```
 drupalgap.settings.blocks.my_theme = {
 
   /* ... */
 
-  navigation:{
+  header: {
 
     /* ... other blocks ... */
 
-    my_menu:{},
+    my_module_custom_block:{},
 
     /* ... other blocks ... */
 
@@ -55,34 +56,40 @@ When creating custom menus, we'll typically need some pages to go along with the
 
 ```
 /**
- * Implements hook_menu().
+ * Defines custom routes for my module.
  */
-function my_module_menu() {
-  var items = { };
-  items['food'] = {
-    title: 'Food',
-    page_callback: 'my_module_food_page'
-  };
-  items['beverage'] = {
-    title: 'Beverage',
-    page_callback: 'my_module_beverage_page'
-  };
-  return items;
-}
+my_module.routing = function() {
+  var routes = {};
 
-/**
- * The food page callback function.
- */
-function my_module_food_page() {
-  return 'What would you like to eat?';
-}
+  // My example food page route.
+  routes["my_module.food"] = {
+    "path": "/food",
+    "defaults": {
+      "_controller": function() {
+        return new Promise(function(ok, err) {
+          ok('What would you like to eat?');
+        });
+      },
+      "_title": "Food"
+    }
+  };
+  
+  // My example beverage page route.
+    routes["my_module.beverage"] = {
+      "path": "/beverage",
+      "defaults": {
+        "_controller": function() {
+          return new Promise(function(ok, err) {
+            ok('What would you like to drink?');
+          });
+        },
+        "_title": "Beverage"
+      }
+    };
 
-/**
- * The beverage page callback function.
- */
-function my_module_beverage_page() {
-  return 'What would you like to drink?';
-}
+  // Returns the routes.
+  return routes;
+};
 ```
 
 [Learn More About Pages](../Pages)
