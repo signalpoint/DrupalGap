@@ -1,13 +1,16 @@
-/*! drupalgap 2015-12-20 */
+/*! drupalgap 2015-12-21 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
 dg.activeTheme = null;
+dg.regions = null; // Holds instances of regions.
+dg.blocks = null; // Holds instances of blocks.
 
 // Configuration setting defaults.
 dg.settings = {
   mode: 'web-app',
-  front: null
+  front: null,
+  blocks: {}
 };
 
 /**
@@ -62,6 +65,7 @@ dg.devicereadyBad = function() {
 // Bootstrap.
 dg.bootstrap = function() {
 
+  jDrupal.modules['dgSystem'] = { };
   jDrupal.modules['dgUser'] = { };
 
   dg.router.config({
@@ -82,24 +86,145 @@ dg.bootstrap = function() {
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
       var item = routes[route];
-      this.router.add(item);
+      dg.router.add(item);
     }
   }
 
   // Load the theme.
-  this.themeLoad().then(function() {
+  dg.themeLoad().then(function() {
 
-    // Add a default route, and start listening.
-    dg.router.add(function() { }).listen();
+    //dg.blocksLoad().then(function(blocks) {
+
+      var blocks = dg.blocksLoad();
+
+      // Add a default route, and start listening.
+      dg.router.add(function() { }).listen();
+
+    //});
+
+
 
   });
 
 };
+// @see https://api.drupal.org/api/drupal/core!modules!block!src!Entity!Block.php/class/Block/8
+
+// @see https://www.drupal.org/node/2101565
+
 /**
- * The Form Element prototype.
+ * The BLock prototype.
  * @constructor
  */
-dg.Block = function() {
+dg.Block = function(config) {
+  this.format = 'div';
+  for (var setting in config) {
+    if (!config.hasOwnProperty(setting)) { continue; }
+    this[setting] = config[setting];
+  }
+};
+
+dg.Block.prototype.get = function(property) {
+  return typeof this[property] !== 'undefined' ? this[property] : null;
+};
+dg.Block.prototype.set = function(property, value) {
+  this[property] = value;
+};
+dg.Block.prototype.buildWrapper = function() {
+  var self = this;
+  return new Promise(function(ok, err) {
+    self.build().then(function(content) {
+      self.set('content', content);
+      ok(self);
+    });
+  });
+};
+dg.Block.prototype.build = function() {
+  // abstract
+  return new Promise(function(ok, err) { ok(''); });
+};
+
+dg.blocksLoad = function() {
+  //return new Promise(function(ok, err) {
+    if (!dg.blocks) {
+
+      dg.blocks = {};
+
+      // First, figure out what blocks are defined in the settings.js file and
+      // set them aside.
+      var appBlocks = {};
+      var blockSettings = drupalgap.settings.blocks[dg.config('theme').name];
+      // Iterate over each region mentioned in the theme settings...
+      for (var region in blockSettings) {
+        if (!blockSettings.hasOwnProperty(region)) { continue; }
+        // Iterate over each block mentioned in the theme's region settings...
+        for (var themeBlock in blockSettings[region]) {
+          if (!blockSettings[region].hasOwnProperty(themeBlock)) { continue; }
+          var block = blockSettings[region][themeBlock];
+          block.region = region;
+          appBlocks[themeBlock] = block;
+        }
+      }
+
+      //console.log('loaded the blocks from settings.js');
+      //console.log(appBlocks);
+
+      // Gather all the blocks defined by modules, and then instantiate only
+      // the blocks defined by the app.
+
+      // For each module that overwrites the "blocks" function on their prototype...
+      var modules = jDrupal.modulesLoad();
+      for (var module in modules) {
+
+        // Skip modules without blocks.
+        if (!modules.hasOwnProperty(module) || !window[module].blocks) { continue; }
+        var blocks = window[module].blocks();
+        if (!blocks) { continue; }
+
+        // For each block provided by the module (skipping any blocks not
+        // mentioned by the app)...
+        for (block in blocks) {
+          if (!blocks.hasOwnProperty(block) || !appBlocks[block]) { continue; }
+
+          // Extract the block's config from the module and set any defaults.
+          var config = blocks[block];
+          if (!config.id) { config.id = block; }
+          if (!config.module) { config.module = module; }
+          if (!config.attributes) { config.attributes = {}; }
+          if (!config.attributes.id) { config.attributes.id = block; }
+
+          // Create an instance of the block, warn if someone overwrites somebody
+          // else's block.
+          if (dg.blocks[block]) {
+            var msg = 'WARNING - The "' + block + '" block provided by the "' + dg.blocks[block].get('module') + '" ' +
+              'module has been overwritten by the "' + config.module + '" module.';
+            console.log(msg);
+          }
+          dg.blocks[block] = new dg.Block(config);
+
+          // Merge the block config from settings.js into the block instance.
+          // @TODO turn this into dg.extend().
+          for (var setting in appBlocks[block]) {
+            if (!appBlocks[block].hasOwnProperty(setting)) { continue; }
+            dg.blocks[block].set(setting, appBlocks[block][setting]);
+          }
+        }
+      }
+
+      //console.log('blocks have been loaded');
+      //console.log(dg.blocks);
+
+      //ok(dg.blocks);
+      return dg.blocks;
+    }
+    else {
+      //ok(dg.blocks);
+      return dg.blocks;
+    }
+  //});
+};
+
+dg.blockLoad = function(id) {
+  return dg.blocks[id] ? dg.blocks[id] : null;
 };
 /**
  * Given a string separated by underscores or hyphens, this will return the
@@ -280,16 +405,23 @@ dg.Form.prototype.getForm = function() {
   var self = this;
   return new Promise(function(ok, err) {
     self.buildForm(self.form, self.form_state).then(function() {
-      jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId()).then(function() {
-        for (var name in self.form) {
-          if (!dg.isFormElement(name, self.form)) { continue; }
-          self.elements[name] = new dg.FormElement(name, self.form[name], self);
-        }
+      var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
+      var render = function() {
         var html = '<form ' + dg.attributes(self.form._attributes) + '>' +
           dg.render(self.form) +
           '</form>';
         ok(html);
-      });
+      };
+      if (!alters) { render(); }
+      else {
+        alters.then(function() {
+          for (var name in self.form) {
+            if (!dg.isFormElement(name, self.form)) { continue; }
+            self.elements[name] = new dg.FormElement(name, self.form[name], self);
+          }
+          render();
+        });
+      }
     });
   });
 };
@@ -430,39 +562,96 @@ dg.alert = function(message) {
     navigator.notification.alert(message, alertCallback, title, buttonName);
   }
 };
-dg.Module = function() {
-
-};
+dg.Module = function() { };
 
 // Extend the jDrupal Module prototype.
 dg.Module.prototype = new jDrupal.Module;
 dg.Module.prototype.constructor = dg.Module;
 
-/**
- *
- * @returns {null}
- */
+
 dg.Module.prototype.routing = function() {
   return null;
 };
+
+//dg.Module.prototype.blocks = function() {
+//  return null;
+//};
 /**
  * The Form Element prototype.
  * @constructor
  */
-dg.Region = function() {
+dg.Region = function(config) {
+  this.format = 'div';
+  for (var setting in config) {
+    if (!config.hasOwnProperty(setting)) { continue; }
+    this[setting] = config[setting];
+  }
 };
+
+dg.Region.prototype.get = function(property) {
+  return typeof this[property] !== 'undefined' ? this[property] : null;
+};
+dg.Region.prototype.set = function(property, value) {
+  this[property] = value;
+};
+
+dg.loadRegions = function() {
+
+};
+
+dg.Region.prototype.getBlocks = function() {
+  var blocks = dg.blocksLoad();
+  var result = [];
+  for (var block in blocks) {
+    if (!blocks.hasOwnProperty(block)) { continue; }
+    if (blocks[block].get('region') == this.get('id')) {
+      result.push(block);
+    }
+  }
+  return result;
+};
+
 dg.appRender = function(content) {
   dg.themeLoad().then(function(theme) {
     var innerHTML = '';
 
     // Process regions.
+    // @TODO move this to dg.loadRegions().
+    dg.regions = {};
     var regions = theme.getRegions();
-    for (var region in regions) {
-      if (!regions.hasOwnProperty(region)) { continue; }
-      innerHTML += '<div ' + dg.attributes(regions[region]._attributes) + '></div>';
+    for (var id in regions) {
+      if (!regions.hasOwnProperty(id)) { continue; }
+
+      var region = new dg.Region({
+        id: id,
+        attributes: { id: id }
+      });
+      dg.regions[id] = region;
+
+      var blocks = dg.regions[id].getBlocks();
+      if (blocks.length == 0) { continue; }
+
+      innerHTML += '<' + region.get('format')  + ' ' + dg.attributes(region.get('attributes')) + '>';
+      for (var i = 0; i < blocks.length; i++) {
+        var block = dg.blockLoad(blocks[i]);
+        innerHTML += '<' + block.get('format')  + ' ' + dg.attributes(block.get('attributes')) + '>';
+        innerHTML += '</' + block.get('format') + '>';
+      }
+      innerHTML += '</' + region.get('format') + '>';
+
     }
     innerHTML += dg.render(content);
     document.getElementById('dg-app').innerHTML = innerHTML;
+
+    // Run the build promise for each block, then inject their content as the respond.
+    var blocks = dg.blocksLoad();
+    for (id in blocks) {
+      if (!blocks.hasOwnProperty(id)) { continue; }
+      var block = blocks[id];
+      block.buildWrapper().then(function(_block) {
+        document.getElementById(_block.get('id')).innerHTML = dg.render(_block.get('content'));
+      });
+    }
 
     // Attach UI submit handler for each form on the page, if any.
     var forms = dg.loadForms();
@@ -608,23 +797,23 @@ dg.router = {
 
       //match.shift();
 
+      var menu_execute_active_handler = function(content) {
+        dg.content = content;
+        dg.appRender();
+      };
+
       if (!route.defaults) { route = this.load(dg.config('front')); }
 
       if (route.defaults) {
         // Handle forms.
         if (route.defaults._form) {
           var id = route.defaults._form;
-          dg.addForm(id, new window[id]).getForm().then(function(content) {
-
-            dg.appRender(content);
-
-          });
+          dg.addForm(id, new window[id]).getForm().then(menu_execute_active_handler);
         }
 
         // All other routes.
         else {
-          // @TODO no need for the extra function, just "then it"
-          route.defaults._controller().then(dg.appRender);
+          route.defaults._controller().then(menu_execute_active_handler);
         }
       }
 
@@ -765,6 +954,19 @@ dg.theme = function(hook, variables) {
   catch (error) { console.log('dg.theme - ' + error); }
 };
 dg.currentUser = function() { return jDrupal.currentUser(); };
+var dgSystem = new dg.Module();
+
+dgSystem.blocks = function() {
+  var blocks = {};
+  blocks.main = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        ok(dg.content);
+      });
+    }
+  };
+  return blocks;
+};
 var UserLoginForm = function() {
   //this.id = 'UserLoginForm';
 
