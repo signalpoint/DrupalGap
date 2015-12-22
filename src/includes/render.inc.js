@@ -9,11 +9,17 @@ dg.appRender = function(content) {
     for (var id in regions) {
       if (!regions.hasOwnProperty(id)) { continue; }
 
-      // Instantiate the region and load its blocks.
-      var region = new dg.Region({
+      // Instantiate the region, merge the theme's configuration for the region into it,
+      // place the region into the dg scope and then load its blocks.
+      var config = {
         id: id,
         attributes: { id: id }
-      });
+      };
+      var region = new dg.Region(config);
+      for (var setting in regions[id]) {
+        if (!regions[id].hasOwnProperty(setting)) { continue; }
+        region.set(setting, regions[id][setting]);
+      }
       dg.regions[id] = region;
       var blocks = dg.regions[id].getBlocks();
       if (blocks.length == 0) { continue; }
