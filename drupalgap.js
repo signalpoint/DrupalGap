@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-21 */
+/*! drupalgap 2015-12-22 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -110,6 +110,8 @@ dg.bootstrap = function() {
 // @see https://api.drupal.org/api/drupal/core!modules!block!src!Entity!Block.php/class/Block/8
 
 // @see https://www.drupal.org/node/2101565
+
+// @TODO change block properties to use an underscore prefix.
 
 /**
  * The BLock prototype.
@@ -405,23 +407,20 @@ dg.Form.prototype.getForm = function() {
   var self = this;
   return new Promise(function(ok, err) {
     self.buildForm(self.form, self.form_state).then(function() {
+
+      // Allow form alterations, and set up the resolve to instantiate the form
+      // elements and resolve the rendered form.
       var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
       var render = function() {
-        var html = '<form ' + dg.attributes(self.form._attributes) + '>' +
-          dg.render(self.form) +
-          '</form>';
-        ok(html);
+        for (var name in self.form) {
+          if (!dg.isFormElement(name, self.form)) { continue; }
+          self.elements[name] = new dg.FormElement(name, self.form[name], self);
+        }
+        ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
       };
       if (!alters) { render(); }
-      else {
-        alters.then(function() {
-          for (var name in self.form) {
-            if (!dg.isFormElement(name, self.form)) { continue; }
-            self.elements[name] = new dg.FormElement(name, self.form[name], self);
-          }
-          render();
-        });
-      }
+      else { alters.then(render); }
+
     });
   });
 };
@@ -576,6 +575,9 @@ dg.Module.prototype.routing = function() {
 //dg.Module.prototype.blocks = function() {
 //  return null;
 //};
+// @TODO change region properties to use an underscore prefix.
+// This will allow us to easily separate properties from blocks within settings.js
+
 /**
  * The Form Element prototype.
  * @constructor
@@ -622,15 +624,17 @@ dg.appRender = function(content) {
     for (var id in regions) {
       if (!regions.hasOwnProperty(id)) { continue; }
 
+      // Instantiate the region and load its blocks.
       var region = new dg.Region({
         id: id,
         attributes: { id: id }
       });
       dg.regions[id] = region;
-
       var blocks = dg.regions[id].getBlocks();
       if (blocks.length == 0) { continue; }
 
+      // Open the region, render the placeholder for each of its block(s), then
+      // close the region.
       innerHTML += '<' + region.get('format')  + ' ' + dg.attributes(region.get('attributes')) + '>';
       for (var i = 0; i < blocks.length; i++) {
         var block = dg.blockLoad(blocks[i]);
@@ -641,35 +645,52 @@ dg.appRender = function(content) {
 
     }
     innerHTML += dg.render(content);
+
+    // Place the region, and block placeholders, into the app's div.
     document.getElementById('dg-app').innerHTML = innerHTML;
 
-    // Run the build promise for each block, then inject their content as the respond.
+    // Run the build promise for each block, then inject their content as they respond.
+    // Keep a tally of all the blocks, and once their promises have all completed, then
+    // if there are any forms on the page, attach their UI submit handlers. We don't use
+    // a promise all, so blocks can render one by one.
     var blocks = dg.blocksLoad();
+    var blocksToRender = [];
     for (id in blocks) {
       if (!blocks.hasOwnProperty(id)) { continue; }
-      var block = blocks[id];
-      block.buildWrapper().then(function(_block) {
+      blocksToRender.push(id);
+      blocks[id].buildWrapper().then(function(_block) {
+
+        // Inject the block content and mark the block as rendered.
         document.getElementById(_block.get('id')).innerHTML = dg.render(_block.get('content'));
+        blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
+
+        // If we're all done with every block, process the form(s), if any.
+        // @TODO form should be processed as they're injected, because waiting
+        // until all promises have resolved like this means a form can't be used
+        // until they've all resolved.
+        if (blocksToRender.length == 0) {
+          var forms = dg.loadForms();
+          for (var id in forms) {
+            if (!forms.hasOwnProperty(id)) { continue; }
+            var form_html_id = dg.killCamelCase(id, '-');
+            var form = document.getElementById(form_html_id);
+            function processForm(e) {
+              if (e.preventDefault) e.preventDefault();
+              var _form = dg.loadForm(id);
+              _form._submission().then(
+                function() { },
+                function() { }
+              );
+              return false; // Prevent default form behavior.
+            }
+            if (form.attachEvent) { form.attachEvent("submit", processForm); }
+            else { form.addEventListener("submit", processForm); }
+          }
+        }
+
       });
     }
 
-    // Attach UI submit handler for each form on the page, if any.
-    var forms = dg.loadForms();
-    for (var id in forms) {
-      if (!forms.hasOwnProperty(id)) { continue; }
-      var form = document.getElementById(dg.killCamelCase(id, '-'));
-      function processForm(e) {
-        if (e.preventDefault) e.preventDefault();
-        var _form = dg.loadForm(id);
-        _form._submission().then(
-          function() { },
-          function() { }
-        );
-        return false; // Prevent default form behavior.
-      }
-      if (form.attachEvent) { form.attachEvent("submit", processForm); }
-      else { form.addEventListener("submit", processForm); }
-    }
   });
 };
 dg.render = function(content) {
