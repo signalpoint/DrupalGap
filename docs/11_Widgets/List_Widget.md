@@ -1,4 +1,4 @@
-Using the [jQuery Mobile Listview widget] (https://api.jquerymobile.com/listview/), we can create lists within our app. These examples show how to display a static list of items in your app.
+We can create lists within our app. These examples show how to display a static list of items in your app.
 
 Refer to the [Image Lists](../Views/Displaying_a_View/Views_Render_Array/Image_Lists) page for an example of a dynamic list that use remote data set.
 
@@ -9,28 +9,9 @@ Refer to the [Image Lists](../Views/Displaying_a_View/Views_Render_Array/Image_L
 ```
 var content = {};
 content['my_item_list'] = {
-  theme: 'item_list',
-  title: 'Colors',
-  items: ['Red', 'Green', 'Blue']
-};
-return content;
-```
-
-### jQuery Mobile Unordered Lists
-
-Using jQuery Mobile, we can easily make our list look much better:
-
-![jQuery Mobile Unordered List](http://drupalgap.org/sites/default/files/jquerymobile-unordered-list.png)
-
-```
-var content = {};
-content['my_item_list'] = {
-  theme: 'jqm_item_list',
-  title: 'Colors',
-  items: ['Red', 'Green', 'Blue'],
-  attributes: {
-    'data-inset': true
-  }
+  _theme: 'item_list',
+  _title: 'Colors',
+  _items: ['Red', 'Green', 'Blue']
 };
 return content;
 ```
@@ -44,28 +25,10 @@ Creating an ordered list is very similar to the unordered list example above, ex
 ```
 var content = {};
 content['my_item_list'] = {
-  theme: 'item_list',
-  type: 'ol',
-  title: 'Instructions',
-  items: ['Stop', 'Drop', 'Roll']
-};
-return content;
-```
-
-### jQuery Mobile Ordered Lists
-
-![jQuery Mobile Ordered List](http://drupalgap.org/sites/default/files/jquerymobile-ordered-list.png)
-
-```
-var content = {};
-content['my_item_list'] = {
-  theme: 'jqm_item_list',
-  type: 'ol',
-  title: 'Instructions',
-  items: ['Stop', 'Drop', 'Roll'],
-  attributes: {
-    'data-inset': true
-  }
+  _theme: 'item_list',
+  _type: 'ol',
+  _title: 'Instructions',
+  _items: ['Stop', 'Drop', 'Roll']
 };
 return content;
 ```
