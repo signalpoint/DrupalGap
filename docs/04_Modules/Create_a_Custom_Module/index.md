@@ -1,22 +1,20 @@
-To create custom modules in DrupalGap, follow these steps:
+To create a custom module in DrupalGap, follow these steps:
 
-**1.** Create a directory for the custom module in app/modules/custom (not in app/modules), for example:
-
-`app/modules/custom/my_module`
-
-**2.** Create a javascript file for the module, the javascript file name must match the name of the module directory:
-
-`app/modules/custom/my_module/my_module.js`
-
-**3.** Tell DrupalGap about the custom module by adding it to the www/app/settings.js file:
-
+## 1. Create the module skeleton
+Use the `DrupalGap CLI` to create a module skeleton:
 ```
-/** Custom Modules - www/app/modules/custom **/
-Drupal.modules.custom['my_module'] = {};
+./drupalgap.sh create module my_module
 ```
 
-Adding more than one custom module just repeat the above line and change the `my_module` to `my_additional_module`.
+## 2.Add it to index.html
+Open the `index.html` file and include your module's `.js` file *after* the `drupalgap.js` (or `drupalgap.min.js`) file:
+```
+<script type="text/javascript" charset="utf-8" src="app/modules/custom/my_module/my_module.js"></script>
+```
 
-**4.** Add custom code to the module's javascript file.
+## 3.Add it to settings.js
+Tell jDrupal about the custom module by adding it to the `app/settings.js` file:
 
-For example, try [creating a custom page]() in the App using `hook_menu()`.
+```
+jDrupal.modules.custom['my_module'] = {};
+```

@@ -8,53 +8,49 @@ To create a custom page in our DrupalGap mobile application, follow these steps:
 
 [Learn how to create a DrupalGap Module](../Modules/Create_a_Custom_Module)
 
-## 2. Implement hook_menu()
+## 2. Add a route
 
 ```
-/**
- * Implements hook_menu().
- */
-function my_module_menu() {
-  try {
-    var items = {};
-    items['hello_world'] = {
-      title: 'Hello DrupalGap',
-      page_callback: 'my_module_hello_world_page'
-    };
-    return items;
-  }
-  catch (error) { console.log('my_module_menu - ' + error); }
-}
+my_module.routing = function() {
+  var routes = {};
+
+  // My example page route.
+  routes["my_module.example"] = {
+    "path": "/hello-world",
+    "defaults": {
+      "_controller": function() {
+        return new Promise(function(ok, err) {
+          var text = 'Hello World';
+          var account = dg.currentUser();
+          if (account.isAuthenticated()) {
+            text = 'Hello ' + account.getAccountName();
+          }
+          ok(text);
+        });
+      },
+      "_title": "Hello World"
+    },
+    "requirements": {
+      "_permission": "access content"
+    }
+  };
+  
+  // Add another route here, if you want...
+
+  // Returns the routes.
+  return routes;
+};
 ```
 
-## 3. Add the Page Callback Function
+## 3. View the Custom Page
 
-```
-function my_module_hello_world_page() {
-  try {
-    var content = {};
-    content['my_intro_text'] = {
-      markup: '<p>Hello App World!</p>'
-    };
-    return content;
-  }
-  catch (error) { console.log('my_module_hello_world_page - ' + error); }
-}
-```
-
-The above example uses an [HTML Widget](../Widgets/HTML_Widget) to place a simple paragraph on the page.
-
-See the Widgets page for examples of many other available widgets.
-
-## 4. View the Custom Page (optional)
-
-To view the newly created custom page, we could set our App's front page to the path of the custom page. For example, in the `app/settings.js` file, set the `front` variable to the `hello_world` page path:
+To view the newly created custom page, we could set our App's front page to the path of the custom page. For example, in the `app/settings.js` file, set the `front` variable to the `hello-world` page path:
 
 ```
 // App Front Page
-drupalgap.settings.front = 'hello_world';
+drupalgap.settings.front = 'hello-world';
 ```
 
 Now when we load the App, we should see our custom page:
 
-![Hello World Page](http://drupalgap.org/sites/default/files/hello-app-world.png)
+*Screenshot needed*

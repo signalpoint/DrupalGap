@@ -9,22 +9,13 @@ For example the code below will modify an input label and the submit button's th
  * Implements hook_form_alter().
  */
 function my_module_form_alter(form, form_state, form_id) {
-  try {
-
-    //console.log(form_id); // Use to see the form id.
-    //console.log(form);    // Use to inspect the form.
-
-    if (form_id == 'user_login_form') {
-    
-      // Change the label for the name,
-      form.elements.name.title = 'Your name';
-      
-      // the theme of the button on the login form.
-      form.elements.submit.options.attributes['data-theme'] = 'a';
+  return new Promise(function(ok, err) {
+    if (form_id == 'UserLoginForm') {
+      form._validate.push('my_module.user_login_form_validate');
+      form._submit.push('my_module.user_login_form_submit');
     }
-
-  }
-  catch (error) { console.log('my_module_form_alter - ' + error); }
+    ok();
+  });
 }
 ```
 
@@ -37,20 +28,22 @@ Sometimes we want to add our own validation logic to a pre-existing form. We can
  * Implements hook_form_alter().
  */
 function my_module_form_alter(form, form_state, form_id) {
-  if (form_id == 'user_login_form') {
-    form.validate.push('my_module_user_login_validate');
-  }
+  return new Promise(function(ok, err) {
+    if (form_id == 'UserLoginForm') {
+      form._validate.push('my_module.user_login_form_validate');
+    }
+    ok();
+  });
 }
 
-/**
- * Custom validation handler for user login form.
- */
-function my_module_user_login_validate(form, form_state) {
-  // Prevent the joker from logging in.
-  if (form.state.values.name == 'joker') {
-    drupalgap_form_set_error('name', 'Sorry, no jokers allowed.');
-  }
-}
+my_module.user_login_form_validate = function(form, form_state) {
+  return new Promise(function(ok, err) {
+    if (form_state.getValue('name') == 'jerk') {
+      form_state.setErrorByName('name', 'No jerks allowed!');
+    }
+    ok();
+  });
+};
 ```
 
 ## Attach a Custom Submit Handler
@@ -62,17 +55,22 @@ Sometimes we want to add our own submission logic to a pre-existing form. We can
  * Implements hook_form_alter().
  */
 function my_module_form_alter(form, form_state, form_id) {
-  if (form_id == 'user_login_form') {
-    form.submit.push('my_module_user_login_submit');
-  }
+  return new Promise(function(ok, err) {
+    if (form_id == 'UserLoginForm') {
+      form._submit.push('my_module.user_login_form_submit');
+    }
+    ok();
+  });
 }
 
-/**
- * Custom submit handler for user login form.
- */
-function my_module_user_login_submit(form, form_state) {
-  alert('Buckle your seat belt ' + form_state.values.name + '!');
-}
+my_module.user_login_form_submit = function(form, form_state) {
+  return new Promise(function(ok, err) {
+    dg.nodeLoad(1).then(function(node) {
+      console.log(node.getTitle());
+      ok();
+    });
+  });
+};
 ```
 
 ## Redirect After a Form Submission
