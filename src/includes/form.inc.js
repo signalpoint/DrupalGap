@@ -25,6 +25,19 @@ dg.Form.prototype.getForm = function() {
   return new Promise(function(ok, err) {
     self.buildForm(self.form, self.form_state).then(function() {
 
+      // Set up default values across each element.
+      for (name in self.form) {
+        if (!dg.isFormElement(name, self.form)) { continue; }
+        var el = self.form[name];
+        if (el._type == 'actions') {
+          for (_name in el) {
+            if (!dg.isFormElement(_name, el)) { continue; }
+            dg.setFormElementDefaults(_name, el[_name]);
+          }
+        }
+        else { dg.setFormElementDefaults(name, el); }
+      }
+
       // Allow form alterations, and set up the resolve to instantiate the form
       // elements and resolve the rendered form.
       var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
@@ -143,4 +156,11 @@ dg.isFormElement = function(prop, obj) {
 };
 dg.isFormProperty = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
+};
+dg.setFormElementDefaults = function(name, el) {
+  var attrs = el._attributes ? el._attributes : {};
+  if (!attrs.id) { attrs.id = 'edit-' + name; }
+  if (!attrs.name) { attrs.name = name; }
+  if (!attrs.class) { attrs.class = []; }
+  el._attributes = attrs;
 };

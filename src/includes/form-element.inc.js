@@ -11,10 +11,6 @@ dg.FormElement = function(name, element, form) {
   this.name = name;
   this.element = element; // Holds the form element JSON object provided by the form builder.
   this.form = form;
-  var attrs = element._attributes ? element._attributes : {};
-  if (!attrs.id) { attrs.id = 'edit-' + name; }
-  if (!attrs.name) { attrs.name = name; }
-  element._attributes = attrs;
 };
 dg.FormElement.prototype.id = function() { return this.element._attributes.id; };
 dg.FormElement.prototype.getForm = function() { return this.form; };

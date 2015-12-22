@@ -3,7 +3,6 @@ function theme_actions(variables) {
   for (prop in variables) {
     if (!dg.isFormElement(prop, variables)) { continue; }
     html += dg.render(variables[prop]);
-
   }
   return html;
 }
