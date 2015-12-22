@@ -284,19 +284,19 @@ dg.FormElement.prototype.valueCallback = function() {
     });
   });
 };
-function theme_actions(variables) {
+dg.theme_actions = function(variables) {
   var html = '';
   for (prop in variables) {
     if (!dg.isFormElement(prop, variables)) { continue; }
     html += dg.render(variables[prop]);
   }
   return html;
-}
-function theme_password(variables) {
+};
+dg.theme_password = function(variables) {
   variables._attributes.type = 'password';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
-}
-function theme_submit(variables) {
+};
+dg.theme_submit = function(variables) {
   variables._attributes.type = 'submit';
   var value = 'Submit';
   if (!variables._attributes.value) {
@@ -306,11 +306,11 @@ function theme_submit(variables) {
   }
   variables._attributes.value = value;
   return '<input ' + dg.attributes(variables._attributes) + '/>';
-}
-function theme_textfield(variables) {
+};
+dg.theme_textfield = function(variables) {
   variables._attributes.type = 'text';
   return '<input ' + dg.attributes(variables._attributes) + '/>';
-}
+};
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Form!FormStateInterface.php/interface/FormStateInterface/8
 
 /**
@@ -981,7 +981,7 @@ dg.theme = function(hook, variables) {
     //var theme_function = drupalgap.settings.theme + '_' + hook;
     //if (!function_exists(theme_function)) {
       var theme_function = 'theme_' + hook;
-      if (!jDrupal.functionExists(theme_function)) {
+      if (!jDrupal.functionExists(dg[theme_function])) {
         var caller = null;
         if (arguments.callee.caller) {
           caller = arguments.callee.caller.name;
@@ -998,11 +998,50 @@ dg.theme = function(hook, variables) {
 
     // If there is no class name array, set an empty one.
     if (!variables._attributes['class']) { variables._attributes['class'] = []; }
-    return window[theme_function].call(null, variables);
+    return dg[theme_function].call(null, variables);
   }
   catch (error) { console.log('dg.theme - ' + error); }
 };
 dg.currentUser = function() { return jDrupal.currentUser(); };
+dg.l = function(text, path, options) {
+  if (!options) { options = {}; }
+  if (!options._text) { options._text = text; }
+  if (!options._path) { options._path = path; }
+  return dg.theme('link', options);
+};
+/**
+ * Implementation of theme_link().
+ * @param {Object} variables
+ * @return {String}
+ */
+dg.theme_link = function(variables) {
+  var text = variables._text ? variables._text : '';
+  if (typeof variables._attributes.href === 'undefined' && variables._path) {
+    variables._attributes.href = '#' + variables._path;
+  }
+  return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
+};
+
+/**
+ * Implementation of theme_item_list().
+ * @param {Object} variables
+ * @return {String}
+ */
+dg.theme_item_list = function(variables) {
+  var html = '';
+  var type = variables._type ? variables._type : 'ul';
+  if (variables._title) { html += '<h2>' + variables._title + '</h2>'; }
+  html += '<' + type + ' ' + dg.attributes(variables._attributes) + '>';
+  if (variables._items && variables._items.length > 0) {
+    for (var i in variables._items) {
+      if (!variables._items.hasOwnProperty(i)) { continue; }
+      var item = variables._items[i];
+      html += '<li>' + item + '</li>';
+    }
+  }
+  return html += '</' + type + '>';
+};
+
 var dgSystem = new dg.Module();
 
 dgSystem.blocks = function() {
