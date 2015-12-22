@@ -24,23 +24,20 @@ dg.Form.prototype.getForm = function() {
   var self = this;
   return new Promise(function(ok, err) {
     self.buildForm(self.form, self.form_state).then(function() {
+
+      // Allow form alterations, and set up the resolve to instantiate the form
+      // elements and resolve the rendered form.
       var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
       var render = function() {
-        var html = '<form ' + dg.attributes(self.form._attributes) + '>' +
-          dg.render(self.form) +
-          '</form>';
-        ok(html);
+        for (var name in self.form) {
+          if (!dg.isFormElement(name, self.form)) { continue; }
+          self.elements[name] = new dg.FormElement(name, self.form[name], self);
+        }
+        ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
       };
       if (!alters) { render(); }
-      else {
-        alters.then(function() {
-          for (var name in self.form) {
-            if (!dg.isFormElement(name, self.form)) { continue; }
-            self.elements[name] = new dg.FormElement(name, self.form[name], self);
-          }
-          render();
-        });
-      }
+      else { alters.then(render); }
+
     });
   });
 };
