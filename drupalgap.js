@@ -152,9 +152,11 @@ dg.blocksLoad = function() {
       dg.blocks = {};
 
       // First, figure out what blocks are defined in the settings.js file and
-      // set them aside.
+      // set them aside. Warn the developer if there are no blocks defined.
       var appBlocks = {};
-      var blockSettings = drupalgap.settings.blocks[dg.config('theme').name];
+      var themeName = dg.config('theme').name;
+      var blockSettings = drupalgap.settings.blocks[themeName];
+      var blockCount = 0;
       // Iterate over each region mentioned in the theme settings...
       for (var region in blockSettings) {
         if (!blockSettings.hasOwnProperty(region)) { continue; }
@@ -164,7 +166,12 @@ dg.blocksLoad = function() {
           var block = blockSettings[region][themeBlock];
           block.region = region;
           appBlocks[themeBlock] = block;
+          blockCount++;
         }
+      }
+      if (blockCount == 0) {
+        var msg = 'WARNING: No blocks were found for the "' + themeName + '" theme in settings.js';
+        console.log(msg);
       }
 
       //console.log('loaded the blocks from settings.js');
@@ -624,11 +631,17 @@ dg.appRender = function(content) {
     for (var id in regions) {
       if (!regions.hasOwnProperty(id)) { continue; }
 
-      // Instantiate the region and load its blocks.
-      var region = new dg.Region({
+      // Instantiate the region, merge the theme's configuration for the region into it,
+      // place the region into the dg scope and then load its blocks.
+      var config = {
         id: id,
         attributes: { id: id }
-      });
+      };
+      var region = new dg.Region(config);
+      for (var setting in regions[id]) {
+        if (!regions[id].hasOwnProperty(setting)) { continue; }
+        region.set(setting, regions[id][setting]);
+      }
       dg.regions[id] = region;
       var blocks = dg.regions[id].getBlocks();
       if (blocks.length == 0) { continue; }
