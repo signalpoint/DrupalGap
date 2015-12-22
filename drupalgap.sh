@@ -134,7 +134,7 @@ function drupalgap_module_create() {
     mkdir $APP_MODULES_DIRECTORY
   fi
 
-  # Create the app/modules directory if it doesn't exist.
+  # Create the app/modules/custom directory if it doesn't exist.
   if [ ! -d "$APP_MODULES_CUSTOM_DIRECTORY" ]; then
     mkdir $APP_MODULES_CUSTOM_DIRECTORY
   fi
@@ -146,36 +146,34 @@ function drupalgap_module_create() {
   fi
 
   mkdir $MODULE_DIRECTORY
-  echo "/**
- * Implements hook_menu(),
- */
-function $HOOK_MENU() {
-  var items = {};
-  items['hello'] = {
-    title: 'Hello',
-    page_callback: '$PAGE_CALLBACK'
-  };
-  return items;
-}
+  echo "var $MODULE_NAME = new dg.Module();
 
-/**
- *
- */
-function $PAGE_CALLBACK() {
-  try {
-    var content = {};
-    content['my_button'] = {
-      theme: 'button',
-      text: 'Hello World',
-      attributes: {
-        onclick: \"drupalgap_alert(t('Hi!'))\"
-      }
-    };
-    return content;
-  }
-  catch (error) { console.log('$PAGE_CALLBACK - ' + error); }
-}
-" > "$FILE_URI"
+$MODULE_NAME.routing = function() {
+  var routes = {};
+
+  // My example page route.
+  routes[\"$MODULE_NAME.example\"] = {
+    \"path\": \"/hello-world\",
+    \"defaults\": {
+      \"_controller\": function() {
+        return new Promise(function(ok, err) {
+          var text = 'Hello World';
+          var account = dg.currentUser();
+          if (account.isAuthenticated()) {
+            text = 'Hello ' + account.getAccountName();
+          }
+          ok(text);
+        });
+      },
+      \"_title\": \"Hello World\"
+    },
+    \"requirements\": {
+      \"_permission\": \"access content\"
+    }
+  };
+
+  return routes;
+};" > "$FILE_URI"
   echo "
 Created module in $MODULE_DIRECTORY"
 
