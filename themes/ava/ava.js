@@ -1,11 +1,13 @@
 Ava = function() {
   this.regions = {
     header: {
-      _attributes: {
+      attributes: {
         foo: 'bar'
       }
     },
-    content: {},
+    content: {
+      format: 'article'
+    },
     footer: {}
   };
 };
