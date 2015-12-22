@@ -1,0 +1,1 @@
+A simple theme with no assumptions.
