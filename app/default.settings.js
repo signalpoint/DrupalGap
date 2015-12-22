@@ -24,9 +24,7 @@ drupalgap.settings.blocks.ava = {
   content: {
 
     // DrupalGap's "main" content block.
-    main: {
-      format: 'article'
-    }
+    main: { }
 
   },
   footer: { }
