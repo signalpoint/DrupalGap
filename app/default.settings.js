@@ -14,6 +14,23 @@ jDrupal.settings = {
 drupalgap.settings = {
   mode: 'web-app'
 };
+drupalgap.front = null;
+drupalgap.settings.theme = {
+  name: 'ava',
+  path: 'themes/ava'
+};
+drupalgap.settings.blocks.ava = {
+  header: { },
+  content: {
+
+    // DrupalGap's "main" content block.
+    main: {
+      format: 'article'
+    }
+
+  },
+  footer: { }
+};
 
 // Contrib modules.
 //jDrupal.modules['example'] = {
