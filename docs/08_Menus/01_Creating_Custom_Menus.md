@@ -13,9 +13,6 @@ return new Promise(function(ok, err) {
   var content = {};
   content['my_markup'] = {
     _theme: 'item_list',
-    _attributes: {
-      'class': 'menu'
-    },
     _items: [
       dg.l('Food', 'food'),
       dg.l('Beverage', 'beverage')]

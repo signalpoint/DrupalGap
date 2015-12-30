@@ -1,47 +1,37 @@
 
 
-In this example, we'll create a View JSON Page Display to return recent article nodes:
+In this example, we'll create a **REST export** to return recent article node JSON data:
 
 ```
-{
-  "nodes" : [
-    {
-      "node" : {
-        "title" : "Hello",
-        "nid" : "1"
-      }
-    }
-  ]
-}
+[
+ {
+  "nid":[{"value":"1"}],
+  "type":[{"target_id":"article"}],
+  "title":[{"value":"Hello World"}]
+ },
+ {
+   "nid":[{"value":"2"}],
+   "type":[{"target_id":"article"}],
+   "title":[{"value":"Goodbye World"}]
+  }
+]
 ```
+
+## Build the REST export View
 
 In Drupal, go to `admin/structure/views/add`, then on the **Add new view** form, enter values like this:
 
 - View name: **My Articles**
-- Show **Content** of type **Article** sorted by **Unsorted**
-- Check the **Create a page** checkbox
-- Path: `my-articles`
-- Display format: **JSON data document**
-- Items to display: **2**
-- Uncheck the **Use a pager** checkbox
+- Show **Content** of type **Article** sorted by **Newest first**
+- Check the **Provide a REST export** checkbox
+- REST export path: `my-articles`
 
-Then click the **Continue & edit** button.
+Then click the **Save & edit** button.
 
-### Fields
-
-By default, our view should come with a Node Title field. Let's also add a Node ID field to our view. To do this:
-
-1. click the **Add** button next to **Fields**
-2. type **nid** into the **Search** text box
-3. select **Content: Nid** when it shows up in the search results list
-4. click the **Apply (all displays)** button.
-5. change the label from **Nid** to **nid**
-6. click the **Apply (all displays)** button
-
-### Preview View Results in JSON
+### Preview View Results as JSON
 
 Now when we preview the results of our view, we should see something like the JSON listed above.
 
 ### Save the View
 
-Our view is ready to go, click the **Save** button to save the view.
+Our view is ready to go!

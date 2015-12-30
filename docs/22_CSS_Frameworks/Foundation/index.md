@@ -11,7 +11,7 @@ When creating a custom menu, add the `menu` Foundation classes to the menu:
 content['my_main_menu'] = {
   _theme: 'item_list',
   _attributes: {
-    'class': 'menu'
+    'class': ['menu']
   },
   _items: [
     dg.l('hello', 'hello-world'),
