@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-22 */
+/*! drupalgap 2015-12-30 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -236,6 +236,39 @@ dg.blockLoad = function(id) {
   return dg.blocks[id] ? dg.blocks[id] : null;
 };
 /**
+ *
+ * @param attributes
+ * @returns {string}
+ */
+dg.attributes = function(attributes) {
+  var attrs = '';
+  if (attributes) {
+    for (var name in attributes) {
+      if (!attributes.hasOwnProperty(name)) { continue; }
+      var value = attributes[name];
+      if (Array.isArray(value)) {
+        attrs += name + '="' + value.join(' ') + '" ';
+      }
+      else if (value != '') {
+        // @todo - if someone passes in a value with double quotes, this
+        // will break. e.g.
+        // 'onclick':'_drupalgap_form_submit("' + form.id + "');'
+        // will break, but
+        // 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
+        // will work.
+        attrs += name + '="' + value + '" ';
+      }
+      else {
+        // The value was empty, just place the attribute name on the
+        // element, unless it was an empty class.
+        if (name != 'class') { attrs += name + ' '; }
+      }
+    }
+  }
+  return attrs;
+};
+
+/**
  * Given a string separated by underscores or hyphens, this will return the
  * camel case version of a string. For example, given "foo_bar" or "foo-bar",
  * this will return "fooBar".
@@ -252,6 +285,9 @@ dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
+dg.Node = function(nid_or_node) {
+  return new jDrupal.Node(nid_or_node);
+};
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
 /**
@@ -776,6 +812,7 @@ dg.userLoad = function() {
   return jDrupal.userLoad.apply(jDrupal, arguments);
 };
 dg.token = function() { return jDrupal.token(); };
+dg.restPath = function() { return jDrupal.restPath(); };
 // @see http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
 dg.router = {
@@ -911,31 +948,6 @@ dg.router = {
 
   }
 };
-dg.attributes = function(attributes) {
-  var attrs = '';
-  if (attributes) {
-    for (var name in attributes) {
-      if (!attributes.hasOwnProperty(name)) { continue; }
-      var value = attributes[name];
-      if (value != '') {
-        // @todo - if someone passes in a value with double quotes, this
-        // will break. e.g.
-        // 'onclick':'_drupalgap_form_submit("' + form.id + "');'
-        // will break, but
-        // 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
-        // will work.
-        attrs += name + '="' + value + '" ';
-      }
-      else {
-        // The value was empty, just place the attribute name on the
-        // element, unless it was an empty class.
-        if (name != 'class') { attrs += name + ' '; }
-      }
-    }
-  }
-  return attrs;
-};
-
 /**
  *
  * @constructor
@@ -998,11 +1010,59 @@ dg.theme = function(hook, variables) {
 
     // If there is no class name array, set an empty one.
     if (!variables._attributes['class']) { variables._attributes['class'] = []; }
-    return dg[theme_function].call(null, variables);
+
+    var html = dg[theme_function].call(null, variables);
+    if (html instanceof Promise) {
+      html.then(function(data) {
+        document.getElementById(data.variables._attributes.id).innerHTML = dg.render(data.content);
+      });
+      return '<div ' + dg.attributes(variables._attributes) + '>hmmm...</div>';
+    }
+    return html;
   }
   catch (error) { console.log('dg.theme - ' + error); }
 };
 dg.currentUser = function() { return jDrupal.currentUser(); };
+dg.userPassword = function() { return jDrupal.userPassword.apply(jDrupal, arguments); };
+dg.theme_view = function(variables) {
+  if (!variables._attributes.id) {
+    var msg = 'WARNING: dg.theme_view - no attribute id was provided, so a ' +
+      'random one was generated for the following View widget: ' +
+      dg.restPath() + variables._path;
+    console.log(msg);
+    variables._attributes.id = dg.userPassword();
+  }
+  return new Promise(function(ok) {
+    jDrupal.viewsLoad(variables._path).then(function(data) {
+      var format = variables._format ? variables._format : 'div';
+      var attrs = variables._format_attributes ? variables._format_attributes : null;
+      var content = '<' + format + ' ' + dg.attributes(attrs) + '>';
+      if (data.results.length > 0) {
+        for (var i = 0; i < data.results.length; i++) {
+          var open, close = '';
+          switch (format) {
+            case 'ul':
+            case 'ol':
+              open = '<li>';
+              close = '</li>';
+              break;
+            case 'table':
+              open = '<tr>';
+              close = '</tr>';
+              break;
+            default: break;
+          }
+          content += open + variables._row_callback(data.results[i]) + close;
+        }
+      }
+      content += '</' + format + '>';
+      ok({
+        variables: variables,
+        content: content
+      });
+    });
+  });
+};
 dg.l = function(text, path, options) {
   if (!options) { options = {}; }
   if (!options._text) { options._text = text; }
