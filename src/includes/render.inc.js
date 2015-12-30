@@ -93,6 +93,11 @@ dg.render = function(content) {
     if (type === 'object') {
       var prefix = content._prefix ? content._prefix : '';
       var suffix = content._suffix ? content._suffix : '';
+      if (content.markup) {
+        console.log('DEPRECATED: Use "_markup" instead of "markup" in this render array:');
+        console.log(content);
+        content._markup = content.markup;
+      }
       if (content._markup) {
         return prefix + content._markup + suffix;
       }
