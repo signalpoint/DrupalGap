@@ -66,7 +66,7 @@ dg.theme = function(hook, variables) {
       html.then(function(data) {
         document.getElementById(data.variables._attributes.id).innerHTML = dg.render(data.content);
       });
-      return '<div ' + dg.attributes(variables._attributes) + '>hmmm...</div>';
+      return '<div ' + dg.attributes(variables._attributes) + '></div>';
     }
     return html;
   }
