@@ -64,6 +64,8 @@ dg.devicereadyBad = function() {
 // Bootstrap.
 dg.bootstrap = function() {
 
+  // Core modules.
+  jDrupal.modules['dgNode'] = { };
   jDrupal.modules['dgSystem'] = { };
   jDrupal.modules['dgUser'] = { };
 
