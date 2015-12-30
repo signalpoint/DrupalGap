@@ -1,4 +1,4 @@
-// @see http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
+// @inspiration http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
 dg.router = {
   routes: [],
@@ -66,7 +66,7 @@ dg.router = {
 
       dg.removeForms();
 
-      //match.shift();
+      var matches = this.matches(f).match;
 
       var menu_execute_active_handler = function(content) {
         dg.content = content;
@@ -84,7 +84,17 @@ dg.router = {
 
         // All other routes.
         else {
-          route.defaults._controller().then(menu_execute_active_handler);
+
+          // Apply page arguments.
+          if (matches.length > 1) {
+            matches.shift();
+            route.defaults._controller.apply(null, matches).then(menu_execute_active_handler);
+          }
+          // No page arguments.
+          else {
+            route.defaults._controller().then(menu_execute_active_handler);
+          }
+
         }
       }
 
@@ -105,10 +115,20 @@ dg.router = {
     return this;
   },
   load: function(frag) {
+    var matches = this.matches(frag);
+    if (matches) { return this.routes[matches.i]; }
+    return null;
+  },
+  matches: function(frag) {
     var f = this.prepFragment(frag);
     for(var i=0; i<this.routes.length; i++) {
       var match = f.match(this.routes[i].path);
-      if (match) { return this.routes[i]; }
+      if (match) {
+        return {
+          match: match,
+          i: i
+        };
+      }
     }
     return null;
   },
