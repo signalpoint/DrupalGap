@@ -65,6 +65,8 @@ dg.devicereadyBad = function() {
 // Bootstrap.
 dg.bootstrap = function() {
 
+  // Core modules.
+  jDrupal.modules['dgNode'] = { };
   jDrupal.modules['dgSystem'] = { };
   jDrupal.modules['dgUser'] = { };
 
@@ -285,9 +287,13 @@ dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
-dg.Node = function(nid_or_node) {
-  return new jDrupal.Node(nid_or_node);
-};
+/**
+ * A proxy to create an instance of a jDrupal Node object.
+ * @param nid_or_node
+ * @returns {jDrupal.Node}
+ * @constructor
+ */
+dg.Node = function(nid_or_node) { return new jDrupal.Node(nid_or_node); };
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
 /**
@@ -766,6 +772,11 @@ dg.render = function(content) {
     if (type === 'object') {
       var prefix = content._prefix ? content._prefix : '';
       var suffix = content._suffix ? content._suffix : '';
+      if (content.markup) {
+        console.log('DEPRECATED: Use "_markup" instead of "markup" in this render array:');
+        console.log(content);
+        content._markup = content.markup;
+      }
       if (content._markup) {
         return prefix + content._markup + suffix;
       }
@@ -813,7 +824,7 @@ dg.userLoad = function() {
 };
 dg.token = function() { return jDrupal.token(); };
 dg.restPath = function() { return jDrupal.restPath(); };
-// @see http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
+// @inspiration http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
 dg.router = {
   routes: [],
@@ -881,7 +892,7 @@ dg.router = {
 
       dg.removeForms();
 
-      //match.shift();
+      var matches = this.matches(f).match;
 
       var menu_execute_active_handler = function(content) {
         dg.content = content;
@@ -899,7 +910,17 @@ dg.router = {
 
         // All other routes.
         else {
-          route.defaults._controller().then(menu_execute_active_handler);
+
+          // Apply page arguments.
+          if (matches.length > 1) {
+            matches.shift();
+            route.defaults._controller.apply(null, matches).then(menu_execute_active_handler);
+          }
+          // No page arguments.
+          else {
+            route.defaults._controller().then(menu_execute_active_handler);
+          }
+
         }
       }
 
@@ -920,10 +941,20 @@ dg.router = {
     return this;
   },
   load: function(frag) {
+    var matches = this.matches(frag);
+    if (matches) { return this.routes[matches.i]; }
+    return null;
+  },
+  matches: function(frag) {
     var f = this.prepFragment(frag);
     for(var i=0; i<this.routes.length; i++) {
       var match = f.match(this.routes[i].path);
-      if (match) { return this.routes[i]; }
+      if (match) {
+        return {
+          match: match,
+          i: i
+        };
+      }
     }
     return null;
   },
@@ -1016,7 +1047,7 @@ dg.theme = function(hook, variables) {
       html.then(function(data) {
         document.getElementById(data.variables._attributes.id).innerHTML = dg.render(data.content);
       });
-      return '<div ' + dg.attributes(variables._attributes) + '>hmmm...</div>';
+      return '<div ' + dg.attributes(variables._attributes) + '></div>';
     }
     return html;
   }
@@ -1102,6 +1133,32 @@ dg.theme_item_list = function(variables) {
   return html += '</' + type + '>';
 };
 
+var dgNode = new dg.Module();
+
+dgNode.routing = function() {
+  var routes = {};
+  routes["node"] = {
+    "path": "/node\/(.*)",
+    "defaults": {
+      "_controller": function(nid) {
+        return new Promise(function(ok, err) {
+
+          dg.nodeLoad(nid).then(function(node) {
+            var content = {};
+            content['nid'] = {
+              _markup: '<h2>' + node.getTitle() + '</h2>'
+            };
+            ok(content);
+          });
+
+        });
+      },
+      "_title": "Node"
+    }
+  };
+  return routes;
+};
+
 var dgSystem = new dg.Module();
 
 dgSystem.blocks = function() {
@@ -1173,7 +1230,7 @@ dgUser.routing = function() {
       "_title": "Log in"
     },
     "requirements": {
-      "_user_is_logged_in": true
+      "_user_is_logged_in": false
     }
   };
   return routes;
