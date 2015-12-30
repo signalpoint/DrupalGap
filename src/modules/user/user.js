@@ -9,7 +9,7 @@ dgUser.routing = function() {
       "_title": "Log in"
     },
     "requirements": {
-      "_user_is_logged_in": true
+      "_user_is_logged_in": false
     }
   };
   return routes;
