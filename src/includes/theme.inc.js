@@ -1,28 +1,3 @@
-dg.attributes = function(attributes) {
-  var attrs = '';
-  if (attributes) {
-    for (var name in attributes) {
-      if (!attributes.hasOwnProperty(name)) { continue; }
-      var value = attributes[name];
-      if (value != '') {
-        // @todo - if someone passes in a value with double quotes, this
-        // will break. e.g.
-        // 'onclick':'_drupalgap_form_submit("' + form.id + "');'
-        // will break, but
-        // 'onclick':'_drupalgap_form_submit(\'' + form.id + '\');'
-        // will work.
-        attrs += name + '="' + value + '" ';
-      }
-      else {
-        // The value was empty, just place the attribute name on the
-        // element, unless it was an empty class.
-        if (name != 'class') { attrs += name + ' '; }
-      }
-    }
-  }
-  return attrs;
-};
-
 /**
  *
  * @constructor
@@ -85,7 +60,15 @@ dg.theme = function(hook, variables) {
 
     // If there is no class name array, set an empty one.
     if (!variables._attributes['class']) { variables._attributes['class'] = []; }
-    return dg[theme_function].call(null, variables);
+
+    var html = dg[theme_function].call(null, variables);
+    if (html instanceof Promise) {
+      html.then(function(data) {
+        document.getElementById(data.variables._attributes.id).innerHTML = dg.render(data.content);
+      });
+      return '<div ' + dg.attributes(variables._attributes) + '>hmmm...</div>';
+    }
+    return html;
   }
   catch (error) { console.log('dg.theme - ' + error); }
 };
