@@ -7,9 +7,36 @@ dgUser.routing = function() {
     "defaults": {
       "_form": 'UserLoginForm',
       "_title": "Log in"
-    },
-    "requirements": {
-      "_user_is_logged_in": false
+    }
+  };
+  routes["user.logout"] = {
+    "path": "/user/logout",
+    "defaults": {
+      "_title": "Log out",
+      _controller: function() {
+        return new Promise(function(ok, err) {
+          ok('Logging out...');
+          jDrupal.userLogout().then(function() {
+            dg.goto(dg.config('front'));
+          });
+        });
+
+      }
+    }
+  };
+  routes["user"] = {
+    "path": "/user\/(.*)",
+    "defaults": {
+      "_controller": function(uid) {
+        return new Promise(function(ok, err) {
+
+          dg.userLoad(uid).then(function(user) {
+            ok(dg.entityRenderContent(user));
+          });
+
+        });
+      },
+      "_title": "user"
     }
   };
   return routes;
