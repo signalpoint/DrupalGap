@@ -1,0 +1,9 @@
+#dgSpinner {
+    width: 150px;height: 150px;
+    -webkit-animation: sweep 1s infinite linear;
+    border-radius:75px;
+    border-bottom:5px solid #ccc;
+    z-index: 9999;
+    position: absolute;
+}
+@-webkit-keyframes sweep { to { -webkit-transform: rotate(360deg); } }
