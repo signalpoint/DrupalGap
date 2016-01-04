@@ -1,4 +1,4 @@
-/*! drupalgap 2015-12-30 */
+/*! drupalgap 2016-01-04 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -294,6 +294,13 @@ dg.killCamelCase = function(str, separator) {
  * @constructor
  */
 dg.Node = function(nid_or_node) { return new jDrupal.Node(nid_or_node); };
+
+dg.entityRenderContent = function(entity) {
+  var content = {};
+  var label = entity.getEntityKey('label');
+  content[label] = { _markup: '<h2>' + entity.label() + '</h2>' };
+  return content;
+};
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
 /**
@@ -1144,11 +1151,7 @@ dgNode.routing = function() {
         return new Promise(function(ok, err) {
 
           dg.nodeLoad(nid).then(function(node) {
-            var content = {};
-            content['nid'] = {
-              _markup: '<h2>' + node.getTitle() + '</h2>'
-            };
-            ok(content);
+            ok(dg.entityRenderContent(node));
           });
 
         });
@@ -1228,9 +1231,36 @@ dgUser.routing = function() {
     "defaults": {
       "_form": 'UserLoginForm',
       "_title": "Log in"
-    },
-    "requirements": {
-      "_user_is_logged_in": false
+    }
+  };
+  routes["user.logout"] = {
+    "path": "/user/logout",
+    "defaults": {
+      "_title": "Log out",
+      _controller: function() {
+        return new Promise(function(ok, err) {
+          ok('Logging out...');
+          jDrupal.userLogout().then(function() {
+            dg.goto(dg.config('front'));
+          });
+        });
+
+      }
+    }
+  };
+  routes["user"] = {
+    "path": "/user\/(.*)",
+    "defaults": {
+      "_controller": function(uid) {
+        return new Promise(function(ok, err) {
+
+          dg.userLoad(uid).then(function(user) {
+            ok(dg.entityRenderContent(user));
+          });
+
+        });
+      },
+      "_title": "user"
     }
   };
   return routes;
