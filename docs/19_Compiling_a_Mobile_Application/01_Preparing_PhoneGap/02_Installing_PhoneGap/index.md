@@ -23,7 +23,7 @@ After installing node.js, use this terminal command to install Cordova:
 
 ## 3. Complete a PhoneGap Platform Guide
 
-Complete a [platform guide](http://docs.phonegap.com/en/edge/guide_platforms_index.md.html#Platform%20Guides) for your first desired platform. We recommend following the platform guide for whichever platform runs on your personal mobile device (Android, iOS, etc).
+Complete a [platform guide](https://cordova.apache.org/docs/en/latest/guide/platforms/index.html) for your first desired platform. We recommend following the platform guide for whichever platform runs on your personal mobile device (Android, iOS, etc).
 
 Be sure to follow the complete platform guide your first time. If you've already completed the platform guide, then you can go ahead with these terminal commands:
 

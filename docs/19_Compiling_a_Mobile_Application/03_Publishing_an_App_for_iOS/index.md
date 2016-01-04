@@ -53,90 +53,40 @@ Next we need to set up the mobile application for release:
 1. Go to [https://developer.apple.com](https://developer.apple.com/)
 2. Go to "Member Center"
 3. Login with your Developer credentials (if prompted)
-4. Go to: Developer Program Resources => iTunes Connect => Submit and manage your apps on the App store
+4. Click on iTunes Connect
 5. Login with your Developer credentials (if prompted, again)
 
 ### 3a. Create a Bundle ID
 
-Now that we're at the 'Member Center', we need to create a Bundle ID:
+Now that we're at `iTunes Connect`, we need to create a `Bundle ID`:
 
-1. Click 'Manage Your Apps'
-2. Click 'Add New App'
-3. Under the 'Bundle ID' drop down menu, click the link to register a new 'Bundle ID'.
-4. Now that we're on the 'Registering an App ID' page, [Click here to learn how to Create a Bundle ID](Publishing_an_App_for_iOS/Registering_a_new_Bundle_ID).
+1. Click `My Apps`
+2. Click `+` -> `New App`
+3. Click `Register one here` to create a new `Bundle ID`
+4. Follow [these instructions](Publishing_an_App_for_iOS/Registering_a_new_Bundle_ID)
 
 ### 3b. Create a New App and Enter Information
 
-Now that we've created a Bundle ID, go back to the Member Center home page and then:
+Now that we've created a Bundle ID, go back to `iTunes Connect` and then:
 
-1. Under 'App Store Distribution' and 'iTunes Connect' click on 'Submit and manage your apps on the App store' link
-2. Click 'Manage Your Apps'
-3. Click 'Add New App'
-4. Select the 'Default Language'
-5. Enter the 'App Name'
-6. Enter the 'SKU Number'
-7. Select the 'Bundle ID' we created earlier
-8. Click 'Continue'
+1. Click `My Apps`
+2. Click `+` -> `New App`
+3. Enter info in all the fields
+7. Select the `Bundle ID` we created earlier
+8. Click `Create`
 
-### 3c. Select Availability Date and Pricing Options
+### 3c. Select Availability and Pricing Options
 
-1. Select your App's "Availability Date"
-2. Select your App's "Price Tier"
-3. Check/Uncheck the "Discount for Educational Institutions" depending on your App's needs
-4. Click 'Continue'
+1. Click on `Pricing and Availability`
+2. Select the App's `Price Schedule`
+3. `Edit` the availability of the app, if necessary
+4. Choose the appropriate radio button for the `Volume Purchase Program`
+5. Click `Save`
 
-### 3d. Specify the Version Information
+## 4. Prepare for Submission
 
-1. Enter 'Version Number', for example: 1.0
-2. Enter 'Copyright' info
-3. Select the 'Primary Category' for your App
-4. Select the 'Secondary Category for your App (optional)
-5. Under 'Rating', select the appropriate 'Apple Content Descriptions' radio buttons for your App
-6. Check the "Made for Kids" box if your app is designed for children
-
-### 3e. Enter Meta Data
-
-Under the 'Metadata' section, enter the:
-
-1. Description
-2. Keywords
-3. Support URL
-4. Marketing URL (optional)
-5. Privacy Policy URL (optional)
-
-### 3f. Enter Contact Information
-
-Under 'Contact Information', enter:
-
-1. First Name
-2. Last Name
-3. Email Address
-4. Phone Number
-5. Optionally enter any 'Review Notes' and/or 'Demo Account Information' for your App
-6. If you have an 'EULA', you may add it now
-
-### 3g. Upload App Icons and Screenshot(s)
-
-Next up, under the 'Uploads' section press the 'Choose File' button for each item and select the appropriate file(s). You must upload at least one screen shot for 3.5 inch and 4 inch retina displays.
-
-1. Large App Icon
-2. 3.5 Inch Retina Display Screenshots
-3. 4 Inch Retina Display Screenshots
-4. iPad Screenshots
-5. Routing App Coverage File (optional)
-6. Click 'Save'
-
-Finally we'll be at the 'App Information' screen with a summary of everything we've just done. Our App Status should be 'Prepare for Upload', now go ahead and click the 'Done' button.
-
-## 4. Ready to Upload Binary
-
-1. Inside of iTunes Connect and under 'Manage Your Apps', click on the application icon for the app.
-2. Then click the "View Details" button inside the "Versions" section.
-3. Click the 'Ready to Upload Binary' button.
-4. Select Yes/No for the "Export Compliance"
-5. Select Yes/No for the "Content Rights"
-6. Click "Save"
-7. Then click "Continue" after reading the paragraphs of text
+1. Click on `1.0 Prepare for Submission`
+2. Fill out this page in its entirety, clicking `Save` along the way
 
 The mobile application is now ready to be uploaded. Next, we'll create a certificate.
 
@@ -155,17 +105,12 @@ At this point, you may be prompted to "Create a Certificate Signing Request (CSR
 1. On your Mac, go to: Finder -> Applications -> Utilities
 2. Launch the "Keychain Access.app"
 3. Go to: Keychain Access -> Certificate Assistant -> Request a Certificate From a Certificate Authority
-4. Enter your e-mail address you use for your Apple developer account
-5. Enter the "Comman Name" field (e.g., John Doe Dev Key)
+4. Enter your e-mail address you use for your **Apple Developer Account** (not your iTunesConnect developer account email address, which may be different if you release apps on a client's behalf)
+5. Enter the "Common Name" field (e.g., John Doe Dev Key)
 6. Select the "Saved to disk" radio button
 7. Click "Continue"
 8. Save the certificate to your Desktop
-9. With the Finder, double click the CSR on your Desktop
-10. Under "File", select "Open CSR"
-11. For "Issuing CA" select "Let me choose", then click "Continue"
-12. Select "Request a certificate from an existing CA", then click "Continue"
-13. Click "Create"
-14. Click "Done"
+9. Click **done**
 
 Now that the CSR has been generated and saved to the Desktop, go back to the "Create a Certificate Signing Request" in your browser's window.
 
@@ -192,7 +137,7 @@ Next, we'll create a provisioning profile.
 8. Enter a Profile Name, then click the 'Generate' button
 9. Click the 'Download' button
 10. Click Done
-11. Make sure xCode is already open
+11. Make sure xCode project is already open
 12. Then go to your Downloads folder and open the ".mobileprovision" file, this will open it in the "Organizer" in xCode
 13. Verify the certificate is valid (you should see a green check icon if it is valid)
 
@@ -201,8 +146,7 @@ Next, we'll create a provisioning profile.
 We're finally ready to upload our app to Apple.
 
 1. Open xCode
-2. Next to the "Run" and "Stop" buttons, locate a drop down menu
-3. Select "MyProject -> iOS Device"
+2. Go to Product -> Destination -> iOS Device
 4. Go to Product -> Archive
 5. Wait for the archival to complete...
 6. Click the "Distribute" button (in the Organizer - Archives)
@@ -212,6 +156,6 @@ We're finally ready to upload our app to Apple.
 10. Select your "Code Signing Identity"
 11. Click "Next"
 
-At this point, if the Apple folks agree, your app will move into the "Waiting For Review" stage. Now just sit back, relax, and give yourself a pat on the back for making it this far! :)
+At this point, if the Apple folks agree, your app will move into the "Waiting For Review" stage. Now just sit back, relax, and give yourself a pat on the back for making it this far!
 
 Congratulations, your app is in review, keep your fingers crossed that Apple likes your app ;)
