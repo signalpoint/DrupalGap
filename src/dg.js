@@ -53,6 +53,11 @@ dg.devicereadyBad = function() {
 dg.bootstrap = function() {
 
   // Core modules.
+  // @TODO in jDrupal I think we need to have contrib/custom modules live within
+  // the jDrupal namespace, because if Drupal is reporting e.g. "image" as the module
+  // that handles an image field, then it'll be a huge pain in the ass to try to infer
+  // "dgImage" out of that.
+  jDrupal.modules['dgImage'] = { };
   jDrupal.modules['dgNode'] = { };
   jDrupal.modules['dgSystem'] = { };
   jDrupal.modules['dgUser'] = { };
