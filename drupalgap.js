@@ -13,24 +13,6 @@ dg.settings = {
   blocks: {}
 };
 
-/**
- * Get or set a drupalgap configuration setting.
- * @param name
- * @returns {*}
- */
-dg.config = function(name) {
-  var value = arguments[1] ? arguments[1] : null;
-  if (value) {
-    dg.settings[name] = value;
-    return;
-  }
-  return dg.settings[name];
-};
-
-// Mode.
-dg.getMode = function() { return this.config('mode'); };
-dg.setMode = function(mode) { this.config('mode', mode); };
-
 // Start.
 dg.start = function() {
   if (dg.getMode() == 'phonegap') {
@@ -49,8 +31,14 @@ dg.deviceready = function() {
   //jDrupal.moduleInvokeAll('deviceready');
   jDrupal.connect().then(this.devicereadyGood, this.devicereadyBad);
 };
-dg.devicereadyGood = function() {
-  //jDrupal.moduleInvokeAll('device_connected');
+dg.devicereadyGood = function(data) {
+  // Pull out any important data from the Connect resource results.
+  for (var d in data.drupalgap) {
+    if (!data.drupalgap.hasOwnProperty(d)) { continue; }
+    drupalgap[d] = data.drupalgap[d];
+  }
+  // Force a check on the router (which is already listening at this point), to
+  // refresh the current page or navigate to the current path.
   dg.router.check(dg.router.getFragment());
 };
 dg.devicereadyBad = function() {
@@ -66,6 +54,11 @@ dg.devicereadyBad = function() {
 dg.bootstrap = function() {
 
   // Core modules.
+  // @TODO in jDrupal I think we need to have contrib/custom modules live within
+  // the jDrupal namespace, because if Drupal is reporting e.g. "image" as the module
+  // that handles an image field, then it'll be a huge pain in the ass to try to infer
+  // "dgImage" out of that.
+  jDrupal.modules['dgImage'] = { };
   jDrupal.modules['dgNode'] = { };
   jDrupal.modules['dgSystem'] = { };
   jDrupal.modules['dgUser'] = { };
@@ -238,6 +231,24 @@ dg.blockLoad = function(id) {
   return dg.blocks[id] ? dg.blocks[id] : null;
 };
 /**
+ * Get or set a drupalgap configuration setting.
+ * @param name
+ * @returns {*}
+ */
+dg.config = function(name) {
+  var value = arguments[1] ? arguments[1] : null;
+  if (value) {
+    dg.settings[name] = value;
+    return;
+  }
+  return dg.settings[name];
+};
+
+// Mode.
+dg.getMode = function() { return this.config('mode'); };
+dg.setMode = function(mode) { this.config('mode', mode); };
+
+/**
  *
  * @param attributes
  * @returns {string}
@@ -296,10 +307,48 @@ dg.killCamelCase = function(str, separator) {
 dg.Node = function(nid_or_node) { return new jDrupal.Node(nid_or_node); };
 
 dg.entityRenderContent = function(entity) {
-  var content = {};
+  var entityType = entity.getEntityType();
+  var bundle = entity.getBundle();
   var label = entity.getEntityKey('label');
-  content[label] = { _markup: '<h2>' + entity.label() + '</h2>' };
+
+  // Build the render array for the entity...
+  var content = {};
+
+  // Add the entity label.
+  content[label] = {
+    _theme: 'entity_label',
+    _entity: entity,
+    _attributes: {
+      'class': [entityType + '-title']
+    }
+  };
+
+  console.log(dg);
+  console.log(dg.entity_view_mode);
+
+  // Iterate over each field in the drupalgap entity view mode.
+  for (var fieldName in dg.entity_view_mode[entityType][bundle]) {
+    if (!dg.entity_view_mode[entityType][bundle].hasOwnProperty(fieldName)) { continue; }
+    console.log(fieldName);
+    console.log(dg.entity_view_mode[entityType][bundle][fieldName]);
+
+    // Grab the field storage config and the module in charge of the field.
+    var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
+    if (!fieldStorageConfig) { continue; }
+    console.log(fieldStorageConfig);
+    var module = fieldStorageConfig.module;
+    if (!jDrupal.moduleExists(module)) {
+      var msg = 'WARNING - entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
+      console.log(msg);
+      continue;
+    }
+    console.log('COOl!');
+  }
   return content;
+};
+
+dg.theme_entity_label = function(variables) {
+  return '<h2 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h2>';
 };
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
@@ -1140,6 +1189,7 @@ dg.theme_item_list = function(variables) {
   return html += '</' + type + '>';
 };
 
+var dgImage = new dg.Module();
 var dgNode = new dg.Module();
 
 dgNode.routing = function() {
