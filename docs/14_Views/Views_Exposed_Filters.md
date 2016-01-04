@@ -1,6 +1,6 @@
 As of DrupalGap SDK 7.x-1.0-rc4, we now have the option to include Views Exposed Filters in our mobile applications.
 
-Please note, the Views Exposed Filters in DrupalGap is designed to work in conjunction with [Views Render Arrays](Views Render Array) (it's of course possible to build your own forms and construct your own URL parameters to filter your Views, this feature is meant to simplify that entire process in a dynamic way).
+Please note, the Views Exposed Filters in DrupalGap is designed to work in conjunction with [Views Render Arrays](Displaying_a_View/Views_Render_Array) (it's of course possible to build your own forms and construct your own URL parameters to filter your Views, this feature is meant to simplify that entire process in a dynamic way).
 Currently Supported Field Types and Widgets (*as of 2014-10-31*)
 
 - Published (aka node status)

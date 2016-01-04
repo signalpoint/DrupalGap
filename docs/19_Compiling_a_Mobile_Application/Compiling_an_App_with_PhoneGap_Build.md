@@ -26,7 +26,7 @@ Change the DrupalGap mode in your `settings.js` file:
 
 Create a filed called config.xml in your root mobile application directory (the same place as index.html).
 
-Copy the [example config.xml code from github](https://github.com/phonegap/phonegap-app-developer/blob/master/www/config.xml) directly into your config.xml.
+Copy the [example config.xml code from github](https://github.com/phonegap/phonegap-app-developer/blob/master/config.xml) directly into your config.xml.
 
 Modify the config.xml file to change the Hello World text with your own app name. Modify any settings in the config.xml file to meet your needs.
 
