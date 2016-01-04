@@ -1,49 +1,36 @@
 <!DOCTYPE html>
 <html>
-    <head>
-    
-      <title>DrupalGap</title>
+<head>
 
-      <meta charset="utf-8" />
-      <meta name="format-detection" content="telephone=no" />
-      <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
-      <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
-      <link rel="shortcut icon" href="favicon.ico" />
-      
-      <!-- jQuery Mobile -->
-      <link rel="stylesheet" href="jquery.mobile-1.4.5.min.css" />
-      <script src="jquery-1.9.1.min.js"></script>
-      <script src="jquery.mobile-1.4.5.min.js"></script>
-      
-      <!-- jDrupal -->
-      <script type="text/javascript" charset="utf-8" src="jdrupal-7.0.2.min.js"></script>
-      
-      <!-- DrupalGap -->
-      <script type="text/javascript" charset="utf-8" src="bin/drupalgap.min.js"></script>
-      <script type="text/javascript" charset="utf-8" src="app/settings.js"></script>
-      <link rel="stylesheet" href="css/drupalgap.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DrupalGap</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="favicon.ico" />
 
-    </head>
-    <body>
+    <!-- jDrupal and DrupalGap-->
+    <script type="text/javascript" charset="utf-8" src="jdrupal.js"></script>
+    <script type="text/javascript" charset="utf-8" src="drupalgap.js"></script>
 
-      <!-- Mobile Application Splash Screen -->
-      <div id="_drupalgap_splash" data-role="page">
-         <div data-role="header" data-theme="b"><h2>DrupalGap</h2></div>
-         <div class="ui-content" data-role="content">
-            <div id="_drupalgap_splash_content">
-              <img src="images/drupalgap.jpg" alt="DrupalGap" style="position: absolute; top: 50%; left: 50%; margin-left: -64px; margin-top: -64px;" />
-            </div>
-         </div>
-      </div>
+    <!-- App Settings -->
+    <script type="text/javascript" charset="utf-8" src="app/settings.js"></script>
 
-      <!-- Load PhoneGap (Cordova) -->
-      <script type="text/javascript" src="cordova.js"></script>
+    <!-- Load Custom Modules (and configure each module in settings.js) -->
+    <!--<script src="app/modules/custom/my_module/my_module.js"></script>-->
 
-      <!-- Load DrupalGap -->
-      <script type="text/javascript">
-        drupalgap_onload();
-      </script>
+    <!-- Load Theme -->
+    <script src="themes/ava/ava.js"></script>
 
-    </body>
+</head>
+<body>
+
+    <!-- Load PhoneGap (Cordova) -->
+    <script type="text/javascript" src="cordova.js"></script>
+
+    <!-- The DrupalGap App Container -->
+    <div id="dg-app"></div>
+
+    <!-- Start DrupalGap -->
+    <script type="text/javascript">drupalgap.start();</script>
+
+</body>
 </html>
-
