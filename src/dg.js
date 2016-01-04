@@ -12,24 +12,6 @@ dg.settings = {
   blocks: {}
 };
 
-/**
- * Get or set a drupalgap configuration setting.
- * @param name
- * @returns {*}
- */
-dg.config = function(name) {
-  var value = arguments[1] ? arguments[1] : null;
-  if (value) {
-    dg.settings[name] = value;
-    return;
-  }
-  return dg.settings[name];
-};
-
-// Mode.
-dg.getMode = function() { return this.config('mode'); };
-dg.setMode = function(mode) { this.config('mode', mode); };
-
 // Start.
 dg.start = function() {
   if (dg.getMode() == 'phonegap') {
@@ -48,8 +30,14 @@ dg.deviceready = function() {
   //jDrupal.moduleInvokeAll('deviceready');
   jDrupal.connect().then(this.devicereadyGood, this.devicereadyBad);
 };
-dg.devicereadyGood = function() {
-  //jDrupal.moduleInvokeAll('device_connected');
+dg.devicereadyGood = function(data) {
+  // Pull out any important data from the Connect resource results.
+  for (var d in data.drupalgap) {
+    if (!data.drupalgap.hasOwnProperty(d)) { continue; }
+    drupalgap[d] = data.drupalgap[d];
+  }
+  // Force a check on the router (which is already listening at this point), to
+  // refresh the current page or navigate to the current path.
   dg.router.check(dg.router.getFragment());
 };
 dg.devicereadyBad = function() {
