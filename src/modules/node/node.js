@@ -9,11 +9,7 @@ dgNode.routing = function() {
         return new Promise(function(ok, err) {
 
           dg.nodeLoad(nid).then(function(node) {
-            var content = {};
-            content['nid'] = {
-              _markup: '<h2>' + node.getTitle() + '</h2>'
-            };
-            ok(content);
+            ok(dg.entityRenderContent(node));
           });
 
         });
