@@ -125,5 +125,7 @@ div[data-role="header"] div[data-role="controlgroup"] .ui-controlgroup-controls 
       padding: .4em 1em;
     }
 }
-
+div[data-role="footer"] a.ui-btn.ui-btn-icon-notext {
+    margin-top: 0.1em;
+}
 
