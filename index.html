@@ -1,31 +1,47 @@
 <!DOCTYPE html>
 <html>
     <head>
-    
-        <title>DrupalGap</title>
+
         <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DrupalGap</title>
         <link rel="shortcut icon" href="favicon.ico" />
+        <link rel="stylesheet" href="css/foundation.css" />
+        <link rel="stylesheet" href="css/app.css" />
       
         <!-- jDrupal and DrupalGap-->
         <script type="text/javascript" charset="utf-8" src="jdrupal.js"></script>
         <script type="text/javascript" charset="utf-8" src="drupalgap.js"></script>
+        <link rel="stylesheet" href="css/dg.css" />
       
         <!-- App Settings -->
         <script type="text/javascript" charset="utf-8" src="app/settings.js"></script>
 
-        <!-- Load Custom Modules (and configure each module in settings.js) -->
-        <!--<script src="app/modules/custom/my_module/my_module.js"></script>-->
+        <!-- Load DrupalGap Modules -->
+        <script src="app/modules/contrib/foundation/foundation.js"></script>
+        <script src="app/modules/custom/my_module/my_module.js"></script>
+        <script src="app/modules/custom/disc/disc.js"></script>
+
+        <!-- Load Theme -->
+        <script src="themes/frank/frank.js"></script>
 
     </head>
     <body>
 
+        <!--<div id="dgSpinner"></div>-->
+
         <!-- The DrupalGap App Container -->
         <div id="dg-app"></div>
 
+        <!-- Foundation 6 Assets -->
+        <script src="js/vendor/jquery.min.js"></script>
+        <script src="js/vendor/what-input.min.js"></script>
+        <script src="js/foundation.min.js"></script>
+        <script src="js/app.js"></script>
+
         <!-- Start DrupalGap -->
-        <script type="text/javascript">
-            drupalgap.start();
-        </script>
+        <script type="text/javascript">drupalgap.start();</script>
 
     </body>
 </html>
