@@ -1,4 +1,22 @@
 /**
+ * Get or set a drupalgap configuration setting.
+ * @param name
+ * @returns {*}
+ */
+dg.config = function(name) {
+  var value = arguments[1] ? arguments[1] : null;
+  if (value) {
+    dg.settings[name] = value;
+    return;
+  }
+  return dg.settings[name];
+};
+
+// Mode.
+dg.getMode = function() { return this.config('mode'); };
+dg.setMode = function(mode) { this.config('mode', mode); };
+
+/**
  *
  * @param attributes
  * @returns {string}
