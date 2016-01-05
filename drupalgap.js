@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-04 */
+/*! drupalgap 2016-01-05 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -327,10 +327,11 @@ dg.entityRenderContent = function(entity) {
   console.log(dg.entity_view_mode);
 
   // Iterate over each field in the drupalgap entity view mode.
-  for (var fieldName in dg.entity_view_mode[entityType][bundle]) {
-    if (!dg.entity_view_mode[entityType][bundle].hasOwnProperty(fieldName)) { continue; }
+  var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
+  for (var fieldName in viewMode) {
+    if (!viewMode.hasOwnProperty(fieldName)) { continue; }
     console.log(fieldName);
-    console.log(dg.entity_view_mode[entityType][bundle][fieldName]);
+    console.log(viewMode[fieldName]);
 
     // Grab the field storage config and the module in charge of the field.
     var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
