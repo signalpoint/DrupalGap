@@ -77,13 +77,13 @@ Now that we've created and tested an empty app. Let's add some plugins.
 
 Since PhoneGap 3.x was released, many core features we need are now packaged as [Cordova plugins](http://plugins.cordova.io/#/_browse/all). Here are the required plugins, install them with this single terminal command:
 
-`cordova plugin add org.apache.cordova.console org.apache.cordova.device org.apache.cordova.dialogs org.apache.cordova.file org.apache.cordova.inappbrowser org.apache.cordova.network-information`
+`cordova plugin add cordova-plugin-console cordova-plugin-device cordova-plugin-dialogs cordova-plugin-file cordova-plugin-inappbrowser cordova-plugin-network-information`
 
 ### Other recommended Plugins
 
 There are a few other plugins that are common to many mobile apps, feel free to install them like we did above:
 
-`cordova plugin add org.apache.cordova.camera org.apache.cordova.geolocation`
+`cordova plugin add cordova-plugin-camera cordova-plugin-geolocation`
 
 Once we've successfully completed the platform guide for PhoneGap, we're now ready to place DrupalGap on top of the app.
 
