@@ -53,16 +53,6 @@ dg.devicereadyBad = function() {
 // Bootstrap.
 dg.bootstrap = function() {
 
-  // Core modules.
-  // @TODO in jDrupal I think we need to have contrib/custom modules live within
-  // the jDrupal namespace, because if Drupal is reporting e.g. "image" as the module
-  // that handles an image field, then it'll be a huge pain in the ass to try to infer
-  // "dgImage" out of that.
-  jDrupal.modules['dgImage'] = { };
-  jDrupal.modules['dgNode'] = { };
-  jDrupal.modules['dgSystem'] = { };
-  jDrupal.modules['dgUser'] = { };
-
   dg.router.config({
     //mode: 'history',
     //root: 'discasaurus.com'
@@ -75,8 +65,8 @@ dg.bootstrap = function() {
   // module.
   var modules = jDrupal.modulesLoad();
   for (var module in modules) {
-    if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
-    var routes = window[module].routing();
+    if (!modules.hasOwnProperty(module) || !modules[module].routing) { continue; }
+    var routes = modules[module].routing();
     if (!routes) { continue; }
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
@@ -180,8 +170,8 @@ dg.blocksLoad = function() {
       for (var module in modules) {
 
         // Skip modules without blocks.
-        if (!modules.hasOwnProperty(module) || !window[module].blocks) { continue; }
-        var blocks = window[module].blocks();
+        if (!modules.hasOwnProperty(module) || !modules[module].blocks) { continue; }
+        var blocks = modules[module].blocks();
         if (!blocks) { continue; }
 
         // For each block provided by the module (skipping any blocks not
@@ -323,8 +313,8 @@ dg.entityRenderContent = function(entity) {
     }
   };
 
-  console.log(dg);
-  console.log(dg.entity_view_mode);
+  //console.log(dg);
+  //console.log(dg.entity_view_mode);
 
   // Iterate over each field in the drupalgap entity view mode.
   var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
@@ -343,7 +333,6 @@ dg.entityRenderContent = function(entity) {
       console.log(msg);
       continue;
     }
-    console.log('COOl!');
   }
   return content;
 };
@@ -599,6 +588,7 @@ dg.Form.prototype._validateForm = function() {
     }
     // Handle external validation handlers, if any.
     if (!window[obj] || !window[obj][method]) { continue; }
+    console.log(obj + ' / ' + method);
     promises.push(window[obj][method].apply(self, [self, self.getFormState()]));
   }
   return Promise.all(promises);
@@ -682,6 +672,8 @@ dg.alert = function(message) {
     navigator.notification.alert(message, alertCallback, title, buttonName);
   }
 };
+dg.modules = jDrupal.modules;
+
 dg.Module = function() { };
 
 // Extend the jDrupal Module prototype.
@@ -959,6 +951,7 @@ dg.router = {
       if (!route.defaults) { route = this.load(dg.config('front')); }
 
       if (route.defaults) {
+
         // Handle forms.
         if (route.defaults._form) {
           var id = route.defaults._form;
@@ -979,6 +972,7 @@ dg.router = {
           }
 
         }
+
       }
 
     }
@@ -1190,10 +1184,10 @@ dg.theme_item_list = function(variables) {
   return html += '</' + type + '>';
 };
 
-var dgImage = new dg.Module();
-var dgNode = new dg.Module();
+dg.modules.image = new dg.Module();
+dg.modules.node = new dg.Module();
 
-dgNode.routing = function() {
+dg.modules.node.routing = function() {
   var routes = {};
   routes["node"] = {
     "path": "/node\/(.*)",
@@ -1213,9 +1207,9 @@ dgNode.routing = function() {
   return routes;
 };
 
-var dgSystem = new dg.Module();
+dg.modules.system = new dg.Module();
 
-dgSystem.blocks = function() {
+dg.modules.system.blocks = function() {
   var blocks = {};
   blocks.main = {
     build: function () {
@@ -1273,9 +1267,9 @@ var UserLoginForm = function() {
 // Extend the form prototype and attach our constructor.
 UserLoginForm.prototype = new dg.Form('UserLoginForm');
 UserLoginForm.constructor = UserLoginForm;
-var dgUser = new dg.Module();
+dg.modules.user = new dg.Module();
 
-dgUser.routing = function() {
+dg.modules.user.routing = function() {
   var routes = {};
   routes["user.login"] = {
     "path": "/user/login",
