@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-05 */
+/*! drupalgap 2016-01-06 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -395,6 +395,10 @@ dg.theme_submit = function(variables) {
   variables._attributes.value = value;
   return '<input ' + dg.attributes(variables._attributes) + '/>';
 };
+dg.theme_textarea = function(variables) {
+  var value = variables._value ? variables._value : '';
+  return '<textarea ' + dg.attributes(variables._attributes) + '>' + value + '</textarea>';
+};
 dg.theme_textfield = function(variables) {
   variables._attributes.type = 'text';
   return '<input ' + dg.attributes(variables._attributes) + '/>';
@@ -588,7 +592,6 @@ dg.Form.prototype._validateForm = function() {
     }
     // Handle external validation handlers, if any.
     if (!window[obj] || !window[obj][method]) { continue; }
-    console.log(obj + ' / ' + method);
     promises.push(window[obj][method].apply(self, [self, self.getFormState()]));
   }
   return Promise.all(promises);
@@ -636,6 +639,7 @@ dg.setFormElementDefaults = function(name, el) {
   if (!attrs.id) { attrs.id = 'edit-' + name; }
   if (!attrs.name) { attrs.name = name; }
   if (!attrs.class) { attrs.class = []; }
+  if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
 };
 dg.goto = function(path) {
