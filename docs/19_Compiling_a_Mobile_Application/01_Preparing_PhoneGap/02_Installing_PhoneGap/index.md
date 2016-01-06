@@ -85,11 +85,23 @@ Now that we've created and tested an empty app. Let's add some plugins.
 
 Since PhoneGap 3.x was released, many core features we need are now packaged as [Cordova plugins](http://plugins.cordova.io/#/_browse/all). Here are the required plugins, install them with this single terminal command:
 
+#### Cordova 3.x
+
+`cordova plugin add org.apache.cordova.console org.apache.cordova.device org.apache.cordova.dialogs org.apache.cordova.file org.apache.cordova.inappbrowser org.apache.cordova.network-information`
+
+#### Cordova 5.x
+
 `cordova plugin add cordova-plugin-console cordova-plugin-device cordova-plugin-dialogs cordova-plugin-file cordova-plugin-inappbrowser cordova-plugin-network-information`
 
 ### Other recommended Plugins
 
 There are a few other plugins that are common to many mobile apps, feel free to install them like we did above:
+
+#### Cordova 3.x
+
+`cordova plugin add org.apache.cordova.camera org.apache.cordova.geolocation`
+
+#### Cordova 5.x
 
 `cordova plugin add cordova-plugin-camera cordova-plugin-geolocation`
 
