@@ -23,8 +23,8 @@ dg.entityRenderContent = function(entity) {
     }
   };
 
-  console.log(dg);
-  console.log(dg.entity_view_mode);
+  //console.log(dg);
+  //console.log(dg.entity_view_mode);
 
   // Iterate over each field in the drupalgap entity view mode.
   var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
@@ -43,7 +43,6 @@ dg.entityRenderContent = function(entity) {
       console.log(msg);
       continue;
     }
-    console.log('COOl!');
   }
   return content;
 };
