@@ -146,7 +146,8 @@ function drupalgap_module_create() {
   fi
 
   mkdir $MODULE_DIRECTORY
-  echo "var $MODULE_NAME = new dg.Module();
+  echo "var $MODULE_NAME = new dg.Module(); // Create the module.
+        dg.modules.$MODULE_NAME = $MODULE_NAME; // Attach it to DrupalGap.
 
 $MODULE_NAME.routing = function() {
   var routes = {};
