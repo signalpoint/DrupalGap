@@ -11,10 +11,3 @@ Open the `index.html` file and include your module's `.js` file *after* the `dru
 ```
 <script type="text/javascript" charset="utf-8" src="app/modules/custom/my_module/my_module.js"></script>
 ```
-
-## 3.Add it to settings.js
-Tell jDrupal about the custom module by adding it to the `app/settings.js` file:
-
-```
-jDrupal.modules.custom['my_module'] = {};
-```

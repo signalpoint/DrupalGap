@@ -1,83 +1,76 @@
 To create a custom form in DrupalGap, place code like this in your [custom DrupalGap module](../Modules/Create_a_Custom_Module). We can add as many [Form Elements](Form_Elements) to the form as we'd like.
 
+## Create a Custom Route to View the Form
+
+```
+routes["my_module.say-hello"] = {
+  "path": "/say-hello",
+  "defaults": {
+    "_form": 'MyModuleSayHelloForm',
+    "_title": "Say hello"
+  }
+};
+```
+
 ## Building the Form
 
 ```
-/**
- * Define the form.
- */
-function my_module_custom_form(form, form_state) {
-  try {
-    form.elements['name'] = {
-      type: 'textfield',
-      title: 'Your name',
-      required: true
-    };
-    form.elements['submit'] = {
-      type: 'submit',
-      value: 'Say Hello'
-    };
-    return form;
-  }
-  catch (error) { console.log('my_module_custom_form - ' + error); }
-}
+var MyModuleSayHelloForm = function() {
+
+  this.buildForm = function(form, formState) {
+    return new Promise(function(ok, err) {
+      form.name = {
+        _type: 'textfield',
+        _title: 'Name',
+        _required: true,
+        _title_placeholder: true
+      };
+      form.actions = {
+        _type: 'actions',
+        submit: {
+          _type: 'submit',
+          _value: 'Say hello',
+          _button_type: 'primary'
+        }
+      };
+      ok(form);
+    });
+  };
+  
+  this.validateForm = function(form, formState) {
+    return new Promise(function(ok, err) {
+      if (formState.getValue('name') == 'bob') {
+        formState.setErrorByName('name', 'Sorry bob!');
+      }
+      ok();
+    });
+  };
+
+  this.submitForm = function(form, formState) {
+    return new Promise(function(ok, err) {
+      var msg = 'Hello ' + formState.getValue('name');
+      dg.alert(msg);
+      ok();
+    });
+  };
+
+};
+
+// Extend the DrupalGap form prototype and attach our form's constructor.
+DiscAddCourseForm.prototype = new dg.Form('DiscAddCourseForm');
+DiscAddCourseForm.constructor = DiscAddCourseForm;
 ```
 
 ## Form Validation
 
-Since we specified the `required` property to be `true` on our form's `textfield` above, DrupalGap will automatically validate this form input element. If the user's input is null, the form's submission handler will not be called.
+Since we specified the `_required` property to be `true` on our form's `textfield` above, DrupalGap will automatically validate this form input element. If the user's input is null, the form's submission handler will not be called.
 
-To handle any custom form validation, we can implement the form's validation function. Notice the function name below is the same as our form builder function name, except our validation function has `_validate` appended to it? This informs DrupalGap to automatically call this function for any additional form validation needs.
-
-```
-/**
- * Define the form's validation function (optional).
- */
-function my_module_custom_form_validate(form, form_state) {
-  try {
-    // Inform the user that Bob is out to lunch.
-    if (form_state.values['name'] == 'Bob') {
-      drupalgap_form_set_error('name', 'Sorry, Bob is out to lunch!');
-    }
-  }
-  catch (error) { console.log('my_module_custom_form_validate - ' + error); }
-}
-```
+To handle any custom form validation, we can implement the form's validation function. Notice the `validateForm` function above, this informs DrupalGap to automatically call this function for any additional form validation needs.
 
 ## Form Submission
 
-To handle our form's submission, we implement the form's submit function. Notice the function name below is the same as our form builder function name, except our submission function has `_submit` appended to it? This informs DrupalGap to automatically call this function to handle the form's submission.
+To handle our form's submission, we implement the form's submit function. Notice the `submitForm` function above, this informs DrupalGap to automatically call this function to handle the form's submission.
 
-```
-/**
- * Define the form's submit function.
- */
-function my_module_custom_form_submit(form, form_state) {
-  try {
-    drupalgap_alert('Hello ' + form_state.values['name'] + '!');
-  }
-  catch (error) { console.log('my_module_custom_form_submit - ' + error); }
-}
-```
+## Viewing the Form
 
-## Create a Custom Page to View the Form
-
-```
-/**
- * Implements hook_menu().
- */
-function my_module_menu() {
-  try {
-    var items = {};
-    items['my_form'] = {
-      title: 'Hello World',
-      page_callback: 'drupalgap_get_form',
-      page_arguments: ['my_module_custom_form']
-    };
-    return items;
-  }
-  catch (error) { console.log('my_module_menu - ' + error); }
-}
-```
-
-Now when the `my_form` page is visited, it will automatically display your form! Visit [Navigating Pages](../Pages/Navigating_Pages) to learn more about linking to custom pages.
+Now when the `say-hello` page is visited, it will automatically display your form! Visit [Navigating Pages](../Pages/Navigating_Pages) to learn more about linking to custom pages.
