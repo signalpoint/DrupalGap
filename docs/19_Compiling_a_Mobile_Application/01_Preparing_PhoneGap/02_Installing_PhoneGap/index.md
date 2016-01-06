@@ -19,7 +19,7 @@ See [here](https://github.com/joyent/node) and [here](https://github.com/joyent/
 
 After installing node.js, use this terminal command to install Cordova:
 
-`npm install -g cordova`
+`npm install -g cordova@3.6.3-0.2.13`
 
 ## 3. Complete a PhoneGap Platform Guide
 
