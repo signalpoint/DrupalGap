@@ -162,5 +162,6 @@ dg.setFormElementDefaults = function(name, el) {
   if (!attrs.id) { attrs.id = 'edit-' + name; }
   if (!attrs.name) { attrs.name = name; }
   if (!attrs.class) { attrs.class = []; }
+  if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
 };
