@@ -76,6 +76,7 @@ dg.router = {
       if (!route.defaults) { route = this.load(dg.config('front')); }
 
       if (route.defaults) {
+
         // Handle forms.
         if (route.defaults._form) {
           var id = route.defaults._form;
@@ -96,6 +97,7 @@ dg.router = {
           }
 
         }
+
       }
 
     }
