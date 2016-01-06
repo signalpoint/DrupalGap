@@ -1,6 +1,6 @@
-var dgUser = new dg.Module();
+dg.modules.user = new dg.Module();
 
-dgUser.routing = function() {
+dg.modules.user.routing = function() {
   var routes = {};
   routes["user.login"] = {
     "path": "/user/login",

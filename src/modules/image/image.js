@@ -1,1 +1,1 @@
-var dgImage = new dg.Module();
+dg.modules.image = new dg.Module();

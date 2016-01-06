@@ -76,8 +76,8 @@ dg.blocksLoad = function() {
       for (var module in modules) {
 
         // Skip modules without blocks.
-        if (!modules.hasOwnProperty(module) || !window[module].blocks) { continue; }
-        var blocks = window[module].blocks();
+        if (!modules.hasOwnProperty(module) || !modules[module].blocks) { continue; }
+        var blocks = modules[module].blocks();
         if (!blocks) { continue; }
 
         // For each block provided by the module (skipping any blocks not

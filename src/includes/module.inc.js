@@ -1,3 +1,5 @@
+dg.modules = jDrupal.modules;
+
 dg.Module = function() { };
 
 // Extend the jDrupal Module prototype.

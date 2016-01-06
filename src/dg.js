@@ -52,16 +52,6 @@ dg.devicereadyBad = function() {
 // Bootstrap.
 dg.bootstrap = function() {
 
-  // Core modules.
-  // @TODO in jDrupal I think we need to have contrib/custom modules live within
-  // the jDrupal namespace, because if Drupal is reporting e.g. "image" as the module
-  // that handles an image field, then it'll be a huge pain in the ass to try to infer
-  // "dgImage" out of that.
-  jDrupal.modules['dgImage'] = { };
-  jDrupal.modules['dgNode'] = { };
-  jDrupal.modules['dgSystem'] = { };
-  jDrupal.modules['dgUser'] = { };
-
   dg.router.config({
     //mode: 'history',
     //root: 'discasaurus.com'
@@ -74,8 +64,8 @@ dg.bootstrap = function() {
   // module.
   var modules = jDrupal.modulesLoad();
   for (var module in modules) {
-    if (!modules.hasOwnProperty(module) || !window[module].routing) { continue; }
-    var routes = window[module].routing();
+    if (!modules.hasOwnProperty(module) || !modules[module].routing) { continue; }
+    var routes = modules[module].routing();
     if (!routes) { continue; }
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }

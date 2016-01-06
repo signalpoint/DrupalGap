@@ -1,6 +1,6 @@
-var dgSystem = new dg.Module();
+dg.modules.system = new dg.Module();
 
-dgSystem.blocks = function() {
+dg.modules.system.blocks = function() {
   var blocks = {};
   blocks.main = {
     build: function () {

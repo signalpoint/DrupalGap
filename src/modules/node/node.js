@@ -1,6 +1,6 @@
-var dgNode = new dg.Module();
+dg.modules.node = new dg.Module();
 
-dgNode.routing = function() {
+dg.modules.node.routing = function() {
   var routes = {};
   routes["node"] = {
     "path": "/node\/(.*)",
