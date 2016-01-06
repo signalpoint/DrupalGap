@@ -21,6 +21,10 @@ dg.theme_submit = function(variables) {
   variables._attributes.value = value;
   return '<input ' + dg.attributes(variables._attributes) + '/>';
 };
+dg.theme_textarea = function(variables) {
+  var value = variables._value ? variables._value : '';
+  return '<textarea ' + dg.attributes(variables._attributes) + '>' + value + '</textarea>';
+};
 dg.theme_textfield = function(variables) {
   variables._attributes.type = 'text';
   return '<input ' + dg.attributes(variables._attributes) + '/>';
