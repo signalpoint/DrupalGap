@@ -46,6 +46,14 @@ You may have to run this command to get the cordova build command to work proper
 
 `source ~/.bash_profile`
 
+A typical `.bash_profile` will have things look a bit like this:
+
+```
+export ANDROID_HOME=/home/tyler/android-sdk-linux
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+export PATH=${PATH}:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:/usr/share/npm
+```
+
 #### iOS
 
 ```
