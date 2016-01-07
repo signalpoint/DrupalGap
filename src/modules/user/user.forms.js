@@ -1,10 +1,8 @@
 var UserLoginForm = function() {
-  //this.id = 'UserLoginForm';
 
-  this.buildForm = function(form, form_state, options) {
-    //var self = this;
+  this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
-      form._action = dg.config('front'),
+      form._action = dg.config('front');
       form.name = {
         _type: 'textfield',
         _title: 'Username',
