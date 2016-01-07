@@ -1,4 +1,10 @@
-var drupalgap_grunt_src = ['src/*.js', 'src/includes/*.inc.js', 'src/modules/*/*.js', 'src/modules/*/*.*.js'];
+var drupalgap_grunt_src = [
+  'src/*.js',
+  'src/includes/*.inc.js',
+  'src/modules/*/*.js',
+  'src/modules/*/*.*.js',
+  '!src/modules/*/*.api.js'
+];
 
 module.exports = function(grunt) {
 
@@ -7,8 +13,8 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     concat: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-        /*separator: ';',*/
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+        separator: '\n'
       },
       dist: {
         src: drupalgap_grunt_src,
