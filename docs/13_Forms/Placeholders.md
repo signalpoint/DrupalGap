@@ -21,11 +21,11 @@ By using `hook_form_alter()` we can change a form element to use a placeholder i
  * Implements hook_form_alter().
  */
 function my_module_form_alter(form, form_state, form_id) {
-  try {
-    if (form_id == 'node_edit') {
-      form.elements['title'].title_placeholder = true;
+  return new Promise(function(ok, err) {
+    if (form_id == 'NodeEdit') {
+      form['title']._title_placeholder = true;
     }
-  }
-  catch (error) { console.log('my_module_form_alter - ' + error); }
+    ok();
+  });
 }
 ```
