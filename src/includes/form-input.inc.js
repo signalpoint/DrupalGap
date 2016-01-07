@@ -6,6 +6,10 @@ dg.theme_actions = function(variables) {
   }
   return html;
 };
+dg.theme_number = function(variables) {
+  variables._attributes.type = 'number';
+  return '<input ' + dg.attributes(variables._attributes) + '/>';
+};
 dg.theme_password = function(variables) {
   variables._attributes.type = 'password';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
