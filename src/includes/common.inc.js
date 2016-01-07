@@ -50,6 +50,19 @@ dg.attributes = function(attributes) {
 };
 
 /**
+ *
+ * @param constructor
+ * @param argArray
+ * @returns {*}
+ * @credit http://stackoverflow.com/a/14378462/763010
+ */
+dg.applyToConstructor = function(constructor, argArray) {
+  var args = [null].concat(argArray);
+  var factoryFunction = constructor.bind.apply(constructor, args);
+  return new factoryFunction();
+};
+
+/**
  * Given a string separated by underscores or hyphens, this will return the
  * camel case version of a string. For example, given "foo_bar" or "foo-bar",
  * this will return "fooBar".
