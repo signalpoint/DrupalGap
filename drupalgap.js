@@ -272,6 +272,19 @@ dg.attributes = function(attributes) {
 };
 
 /**
+ *
+ * @param constructor
+ * @param argArray
+ * @returns {*}
+ * @credit http://stackoverflow.com/a/14378462/763010
+ */
+dg.applyToConstructor = function(constructor, argArray) {
+  var args = [null].concat(argArray);
+  var factoryFunction = constructor.bind.apply(constructor, args);
+  return new factoryFunction();
+};
+
+/**
  * Given a string separated by underscores or hyphens, this will return the
  * camel case version of a string. For example, given "foo_bar" or "foo-bar",
  * this will return "fooBar".
@@ -297,48 +310,89 @@ dg.killCamelCase = function(str, separator) {
 dg.Node = function(nid_or_node) { return new jDrupal.Node(nid_or_node); };
 
 dg.entityRenderContent = function(entity) {
-  var entityType = entity.getEntityType();
-  var bundle = entity.getBundle();
-  var label = entity.getEntityKey('label');
 
-  // Build the render array for the entity...
-  var content = {};
+  return new Promise(function(ok, err) {
 
-  // Add the entity label.
-  content[label] = {
-    _theme: 'entity_label',
-    _entity: entity,
-    _attributes: {
-      'class': [entityType + '-title']
+    var entityType = entity.getEntityType();
+    var bundle = entity.getBundle();
+    var label = entity.getEntityKey('label');
+
+    // Build the render array for the entity...
+    var content = {};
+
+    // Add the entity label.
+    content[label] = {
+      _theme: 'entity_label',
+      _entity: entity,
+      _attributes: {
+        'class': [entityType + '-title']
+      }
+    };
+
+    //console.log(dg);
+    //console.log(dg.entity_view_mode);
+
+    // Iterate over each field in the drupalgap entity view mode.
+    var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
+    for (var fieldName in viewMode) {
+      if (!viewMode.hasOwnProperty(fieldName)) { continue; }
+      //console.log(fieldName);
+      //console.log(viewMode[fieldName]);
+
+      // Grab the field storage config and the module in charge of the field.
+      var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
+      if (!fieldStorageConfig) { continue; }
+      //console.log(fieldStorageConfig);
+      var module = fieldStorageConfig.module;
+      if (!jDrupal.moduleExists(module)) {
+        var msg = 'WARNING - entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
+        console.log(msg);
+        continue;
+      }
     }
-  };
+    jDrupal.moduleInvokeAll('entity_view', content, entity).then(ok(content));
 
-  //console.log(dg);
-  //console.log(dg.entity_view_mode);
+  });
 
-  // Iterate over each field in the drupalgap entity view mode.
-  var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
-  for (var fieldName in viewMode) {
-    if (!viewMode.hasOwnProperty(fieldName)) { continue; }
-    console.log(fieldName);
-    console.log(viewMode[fieldName]);
-
-    // Grab the field storage config and the module in charge of the field.
-    var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
-    if (!fieldStorageConfig) { continue; }
-    console.log(fieldStorageConfig);
-    var module = fieldStorageConfig.module;
-    if (!jDrupal.moduleExists(module)) {
-      var msg = 'WARNING - entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
-      console.log(msg);
-      continue;
-    }
-  }
-  return content;
 };
 
 dg.theme_entity_label = function(variables) {
   return '<h2 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h2>';
+};
+dg.FieldDefinitionInterface = function(entityType, bundle, fieldName) {
+  this.entityType = entityType;
+  this.bundle = bundle;
+  this.fieldName = fieldName;
+  this.fieldDefinition = dg.fieldDefinitions[entityType][bundle][fieldName];
+};
+dg.FieldDefinitionInterface.prototype.get = function(prop) {
+  return typeof this.fieldDefinition[prop] ? this.fieldDefinition[prop] : null;
+};
+dg.FieldDefinitionInterface.prototype.getLabel = function() {
+  return this.get('label');
+};
+// @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
+// @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
+dg.FieldWidget = function(entityType, bundle, fieldName) {
+
+  // DON"T DELETE THESE, THEY ARE NEEDED FOR EACH FIELD
+  //this.entityType = entityType;
+  //this.bundle = bundle;
+  //this.fieldName = fieldName;
+  //this.fieldDefinition = new dg.FieldDefinitionInterface(entityType, bundle, fieldName);
+
+};
+dg.FieldWidget.prototype.getSetting = function(prop) {
+  return typeof this.settings[prop] ? this.settings[prop] : null;
+};
+dg.FieldWidget.prototype.setSetting = function(prop, val) {
+  this.settings[property] = val;
+};
+dg.FieldWidget.prototype.getSettings = function() {
+  return this.settings;
+};
+dg.FieldWidget.prototype.setSettings = function(val) {
+  this.settings = val;
 };
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
@@ -379,6 +433,10 @@ dg.theme_actions = function(variables) {
     html += dg.render(variables[prop]);
   }
   return html;
+};
+dg.theme_number = function(variables) {
+  variables._attributes.type = 'number';
+  return '<input ' + dg.attributes(variables._attributes) + '/>';
 };
 dg.theme_password = function(variables) {
   variables._attributes.type = 'password';
@@ -956,21 +1014,25 @@ dg.router = {
 
       if (route.defaults) {
 
-        // Handle forms.
+        // Handle forms, apply page arguments or no arguments.
         if (route.defaults._form) {
           var id = route.defaults._form;
-          dg.addForm(id, new window[id]).getForm().then(menu_execute_active_handler);
+          if (matches.length > 1) {
+            matches.shift();
+            dg.addForm(id, dg.applyToConstructor(window[id], matches)).getForm().then(menu_execute_active_handler);
+          }
+          else {
+            dg.addForm(id, new window[id]).getForm().then(menu_execute_active_handler);
+          }
         }
 
-        // All other routes.
+        // All other routes, apply page arguments or no arguments.
         else {
 
-          // Apply page arguments.
           if (matches.length > 1) {
             matches.shift();
             route.defaults._controller.apply(null, matches).then(menu_execute_active_handler);
           }
-          // No page arguments.
           else {
             route.defaults._controller().then(menu_execute_active_handler);
           }
@@ -1188,11 +1250,104 @@ dg.theme_item_list = function(variables) {
   return html += '</' + type + '>';
 };
 
+dg.modules.core = new dg.Module();
+
+// Let DrupalGap know we have a FieldWidget.
+dg.modules.core.FieldWidget = {};
+
+// Integer field.
+dg.modules.core.FieldWidget.integer = function(entityType, bundle, fieldName) {
+
+  this.entityType = entityType;
+  this.bundle = bundle;
+  this.fieldName = fieldName;
+  this.fieldDefinition = new dg.FieldDefinitionInterface(entityType, bundle, fieldName);
+
+  this.form = function(items, form, formState) {
+    return {
+      _type: 'number',
+      _title: this.fieldDefinition.getLabel(),
+      _title_placeholder: true
+    };
+  };
+
+};
+// Extend the FieldWidget prototype for the Integer field.
+dg.modules.core.FieldWidget.integer.prototype = new dg.FieldWidget;
+dg.modules.core.FieldWidget.integer.prototype.constructor = dg.modules.core.FieldWidget.integer;
 dg.modules.image = new dg.Module();
+var NodeEdit = function(bundle) {
+
+  this.bundle = bundle;
+  var self = this;
+
+  this.buildForm = function(form, formState) {
+    return new Promise(function(ok, err) {
+      var entityType = 'node';
+      var bundle = self.bundle;
+      var entityFormMode = dg.entity_form_mode[entityType][bundle];
+      // Place each field from the entity form mode's display onto the form.
+      for (var fieldName in entityFormMode) {
+        if (!entityFormMode.hasOwnProperty(fieldName)) { continue; }
+
+        // Grab the field storage config and the module in charge of the field.
+        var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
+        if (!fieldStorageConfig) { continue; }
+        var module = fieldStorageConfig.module;
+
+        // Make sure the module and the corresponding field widget implementation is available.
+        if (!module) { continue; }
+        if (!jDrupal.moduleExists(module)) {
+          var msg = 'WARNING - buildForm - The "' + module + '" module is not present for the widget on the "' + fieldName + '" field.';
+          console.log(msg);
+          continue;
+        }
+        if (!dg.modules[module].FieldWidget || !dg.modules[module].FieldWidget[fieldStorageConfig.type]) {
+          var msg = 'WARNING - buildForm - There is no "' + fieldStorageConfig.type + '" widget in the "' + module + '" module to handle the "' + fieldName + '" field.';
+          console.log(msg);
+          continue;
+        }
+        //console.log(fieldStorageConfig);
+
+        // Create a new field widget and then attach its form element to the form.
+        var FieldWidget = new dg.modules[module].FieldWidget[fieldStorageConfig.type](entityType, bundle, fieldName);
+        form[fieldName] = FieldWidget.form(null, form, formState);
+      }
+      form.actions = {
+        _type: 'actions',
+        submit: {
+          _type: 'submit',
+          _value: 'Save',
+          _button_type: 'primary'
+        }
+      };
+      ok(form);
+    });
+  };
+
+  this.submitForm = function(form, formState) {
+    var self = this;
+    return new Promise(function(ok, err) {
+      console.log(formState.getValue());
+      ok();
+    });
+
+  };
+
+};
+NodeEdit.prototype = new dg.Form('NodeEdit');
+NodeEdit.constructor = NodeEdit;
 dg.modules.node = new dg.Module();
 
 dg.modules.node.routing = function() {
   var routes = {};
+  routes["node.add"] = {
+    "path": "/node\/add\/(.*)",
+    "defaults": {
+      "_form": 'NodeEdit',
+      "_title": "Create content"
+    }
+  };
   routes["node"] = {
     "path": "/node\/(.*)",
     "defaults": {
@@ -1200,7 +1355,7 @@ dg.modules.node.routing = function() {
         return new Promise(function(ok, err) {
 
           dg.nodeLoad(nid).then(function(node) {
-            ok(dg.entityRenderContent(node));
+            dg.entityRenderContent(node).then(ok);
           });
 
         });
@@ -1225,12 +1380,10 @@ dg.modules.system.blocks = function() {
   return blocks;
 };
 var UserLoginForm = function() {
-  //this.id = 'UserLoginForm';
 
-  this.buildForm = function(form, form_state, options) {
-    //var self = this;
+  this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
-      form._action = dg.config('front'),
+      form._action = dg.config('front');
       form.name = {
         _type: 'textfield',
         _title: 'Username',
@@ -1304,7 +1457,7 @@ dg.modules.user.routing = function() {
         return new Promise(function(ok, err) {
 
           dg.userLoad(uid).then(function(user) {
-            ok(dg.entityRenderContent(user));
+            dg.entityRenderContent(user).then(ok);
           });
 
         });
