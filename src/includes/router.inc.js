@@ -77,21 +77,25 @@ dg.router = {
 
       if (route.defaults) {
 
-        // Handle forms.
+        // Handle forms, apply page arguments or no arguments.
         if (route.defaults._form) {
           var id = route.defaults._form;
-          dg.addForm(id, new window[id]).getForm().then(menu_execute_active_handler);
+          if (matches.length > 1) {
+            matches.shift();
+            dg.addForm(id, dg.applyToConstructor(window[id], matches)).getForm().then(menu_execute_active_handler);
+          }
+          else {
+            dg.addForm(id, new window[id]).getForm().then(menu_execute_active_handler);
+          }
         }
 
-        // All other routes.
+        // All other routes, apply page arguments or no arguments.
         else {
 
-          // Apply page arguments.
           if (matches.length > 1) {
             matches.shift();
             route.defaults._controller.apply(null, matches).then(menu_execute_active_handler);
           }
-          // No page arguments.
           else {
             route.defaults._controller().then(menu_execute_active_handler);
           }
