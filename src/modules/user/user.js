@@ -31,7 +31,7 @@ dg.modules.user.routing = function() {
         return new Promise(function(ok, err) {
 
           dg.userLoad(uid).then(function(user) {
-            ok(dg.entityRenderContent(user));
+            dg.entityRenderContent(user).then(ok);
           });
 
         });
