@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-06 */
+/*! drupalgap 2016-01-07 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -249,7 +249,7 @@ dg.attributes = function(attributes) {
     for (var name in attributes) {
       if (!attributes.hasOwnProperty(name)) { continue; }
       var value = attributes[name];
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && value.length) {
         attrs += name + '="' + value.join(' ') + '" ';
       }
       else if (value != '') {
@@ -371,16 +371,31 @@ dg.FieldDefinitionInterface.prototype.get = function(prop) {
 dg.FieldDefinitionInterface.prototype.getLabel = function() {
   return this.get('label');
 };
+dg.FieldFormMode = function(fieldFormMode) {
+  this.fieldFormMode = fieldFormMode;
+  console.log(fieldFormMode);
+};
 // @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
 // @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
 dg.FieldWidget = function(entityType, bundle, fieldName) {
-
-  // DON"T DELETE THESE, THEY ARE NEEDED FOR EACH FIELD
-  //this.entityType = entityType;
-  //this.bundle = bundle;
-  //this.fieldName = fieldName;
-  //this.fieldDefinition = new dg.FieldDefinitionInterface(entityType, bundle, fieldName);
-
+  // Any default constructor behavior lives in FieldWidgetPrepare
+};
+/**
+ * Used to prepare a Field Widget default constructor.
+ * @param FieldWidget
+ * @param args
+ * @constructor
+ */
+dg.FieldWidgetPrepare = function(FieldWidget, args) {
+  FieldWidget.entityType = args[0];
+  FieldWidget.bundle = args[1];
+  FieldWidget.fieldName = args[2];
+  FieldWidget.fieldDefinition = new dg.FieldDefinitionInterface(
+      FieldWidget.entityType,
+      FieldWidget.bundle,
+      FieldWidget.fieldName
+  );
+  FieldWidget.fieldFormMode = args[3];
 };
 dg.FieldWidget.prototype.getSetting = function(prop) {
   return typeof this.settings[prop] ? this.settings[prop] : null;
@@ -394,6 +409,7 @@ dg.FieldWidget.prototype.getSettings = function() {
 dg.FieldWidget.prototype.setSettings = function(val) {
   this.settings = val;
 };
+
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
 /**
@@ -532,6 +548,21 @@ dg.FormStateInterface.prototype.getValues = function() {
 };
 dg.FormStateInterface.prototype.setValues = function(values) {
   this.values = values;
+};
+dg.FormWidget = function(entityType, bundle, fieldName) {
+  // Any default constructor behavior lives in FormWidgetPrepare
+};
+/**
+ * Used to prepare a Form Widget default constructor.
+ * @param FormWidget
+ * @param args
+ * @constructor
+ */
+dg.FormWidgetPrepare = function(FormWidget, args) {
+  FormWidget.entityType = args[0];
+  FormWidget.bundle = args[1];
+  FormWidget.fieldName = args[2];
+  FormWidget.fieldFormMode = args[3];
 };
 dg.forms = {}; // A global storage for active forms.
 
@@ -694,7 +725,7 @@ dg.isFormProperty = function(prop, obj) {
 };
 dg.setFormElementDefaults = function(name, el) {
   var attrs = el._attributes ? el._attributes : {};
-  if (!attrs.id) { attrs.id = 'edit-' + name; }
+  if (!attrs.id) { attrs.id = 'edit-' + name.toLowerCase().replace(/_/g, '-'); }
   if (!attrs.name) { attrs.name = name; }
   if (!attrs.class) { attrs.class = []; }
   if (el._title_placeholder) { attrs.placeholder = el._title; }
@@ -1252,16 +1283,13 @@ dg.theme_item_list = function(variables) {
 
 dg.modules.core = new dg.Module();
 
-// Let DrupalGap know we have a FieldWidget.
+// Let DrupalGap know we have a FieldWidget(s).
 dg.modules.core.FieldWidget = {};
 
 // Integer field.
-dg.modules.core.FieldWidget.integer = function(entityType, bundle, fieldName) {
+dg.modules.core.FieldWidget.integer = function(entityType, bundle, fieldName, fieldFormMode) {
 
-  this.entityType = entityType;
-  this.bundle = bundle;
-  this.fieldName = fieldName;
-  this.fieldDefinition = new dg.FieldDefinitionInterface(entityType, bundle, fieldName);
+  dg.FieldWidgetPrepare(this, arguments);
 
   this.form = function(items, form, formState) {
     return {
@@ -1275,6 +1303,46 @@ dg.modules.core.FieldWidget.integer = function(entityType, bundle, fieldName) {
 // Extend the FieldWidget prototype for the Integer field.
 dg.modules.core.FieldWidget.integer.prototype = new dg.FieldWidget;
 dg.modules.core.FieldWidget.integer.prototype.constructor = dg.modules.core.FieldWidget.integer;
+
+// String field.
+dg.modules.core.FieldWidget.string = function(entityType, bundle, fieldName, fieldFormMode) {
+
+  dg.FieldWidgetPrepare(this, arguments);
+
+  this.form = function(items, form, formState) {
+    return {
+      _type: 'textfield',
+      _title: this.fieldDefinition.getLabel(),
+      _title_placeholder: true
+    };
+  };
+
+};
+// Extend the FieldWidget prototype for the String field.
+dg.modules.core.FieldWidget.string.prototype = new dg.FieldWidget;
+dg.modules.core.FieldWidget.string.prototype.constructor = dg.modules.core.FieldWidget.string;
+
+// Let DrupalGap know we have a FormWidget(s).
+dg.modules.core.FormWidget = {};
+
+// String textfield field.
+dg.modules.core.FormWidget.string_textfield = function(entityType, bundle, fieldName, fieldFormMode) {
+
+  dg.FormWidgetPrepare(this, arguments);
+
+  this.form = function(items, form, formState) {
+    return {
+      _type: 'textfield',
+      _title: this.fieldName,
+      _title_placeholder: true
+    };
+  };
+
+};
+// Extend the FormWidget prototype for the string_textfield field.
+dg.modules.core.FormWidget.string_textfield.prototype = new dg.FormWidget;
+dg.modules.core.FormWidget.string_textfield.prototype.constructor = dg.modules.core.FormWidget.string_textfield;
+
 dg.modules.image = new dg.Module();
 var NodeEdit = function(bundle) {
 
@@ -1283,35 +1351,65 @@ var NodeEdit = function(bundle) {
 
   this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
+
       var entityType = 'node';
       var bundle = self.bundle;
       var entityFormMode = dg.entity_form_mode[entityType][bundle];
+
       // Place each field from the entity form mode's display onto the form.
       for (var fieldName in entityFormMode) {
         if (!entityFormMode.hasOwnProperty(fieldName)) { continue; }
 
-        // Grab the field storage config and the module in charge of the field.
+        var FieldWidget = null;
+
+        // Grab the field storage config, if any.
         var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
-        if (!fieldStorageConfig) { continue; }
-        var module = fieldStorageConfig.module;
+        if (!fieldStorageConfig) {
 
-        // Make sure the module and the corresponding field widget implementation is available.
-        if (!module) { continue; }
-        if (!jDrupal.moduleExists(module)) {
-          var msg = 'WARNING - buildForm - The "' + module + '" module is not present for the widget on the "' + fieldName + '" field.';
-          console.log(msg);
-          continue;
-        }
-        if (!dg.modules[module].FieldWidget || !dg.modules[module].FieldWidget[fieldStorageConfig.type]) {
-          var msg = 'WARNING - buildForm - There is no "' + fieldStorageConfig.type + '" widget in the "' + module + '" module to handle the "' + fieldName + '" field.';
-          console.log(msg);
-          continue;
-        }
-        //console.log(fieldStorageConfig);
+          // There was no config, so this is probably an "extra" field, e.g. node title, uid, etc...
 
-        // Create a new field widget and then attach its form element to the form.
-        var FieldWidget = new dg.modules[module].FieldWidget[fieldStorageConfig.type](entityType, bundle, fieldName);
-        form[fieldName] = FieldWidget.form(null, form, formState);
+          var type = entityFormMode[fieldName].type;
+          if (!dg.modules.core.FormWidget[type]) {
+            console.log('WARNING - buildForm - There is no "' + type + '" widget in the core module to handle the "' + fieldName + '" element.');
+            continue;
+          }
+          var FormWidget = new dg.modules.core.FormWidget[type](
+              entityType,
+              bundle,
+              fieldName,
+              new dg.FieldFormMode(entityFormMode[fieldName])
+          );
+          form[fieldName] = FormWidget.form(null, form, formState);
+
+        }
+        else {
+
+          // There was a field config, therefore we're dealing with a field...
+
+          // Pull out the module in charge of the field.
+          var module = fieldStorageConfig.module;
+
+          // Make sure the module and the corresponding field widget implementation is available.
+          if (!module) { continue; }
+          if (!jDrupal.moduleExists(module)) {
+            console.log('WARNING - buildForm - The "' + module + '" module is not present for the widget on the "' + fieldName + '" field.');
+            continue;
+          }
+          if (!dg.modules[module].FieldWidget || !dg.modules[module].FieldWidget[fieldStorageConfig.type]) {
+            console.log('WARNING - buildForm - There is no "' + fieldStorageConfig.type + '" widget in the "' + module + '" module to handle the "' + fieldName + '" field.');
+            continue;
+          }
+
+          // Create a new field widget and attach its element to the form.
+          FieldWidget = new dg.modules[module].FieldWidget[fieldStorageConfig.type](
+              entityType,
+              bundle,
+              fieldName,
+              new dg.FieldFormMode(entityFormMode[fieldName])
+          );
+          form[fieldName] = FieldWidget.form(null, form, formState);
+
+        }
       }
       form.actions = {
         _type: 'actions',
@@ -1328,7 +1426,7 @@ var NodeEdit = function(bundle) {
   this.submitForm = function(form, formState) {
     var self = this;
     return new Promise(function(ok, err) {
-      console.log(formState.getValue());
+      console.log(formState.getValues());
       ok();
     });
 
@@ -1341,10 +1439,31 @@ dg.modules.node = new dg.Module();
 
 dg.modules.node.routing = function() {
   var routes = {};
-  routes["node.add"] = {
+  routes["node.add.type"] = {
     "path": "/node\/add\/(.*)",
     "defaults": {
       "_form": 'NodeEdit',
+      "_title": "Create content"
+    }
+  };
+  routes["node.add"] = {
+    "path": "/node\/add",
+    "defaults": {
+      "_controller": function() {
+        return new Promise(function(ok, err) {
+          var items = [];
+          for (var bundle in dg.allBundleInfo.node) {
+            if (!dg.allBundleInfo.node.hasOwnProperty(bundle)) { continue; }
+            items.push(dg.l(dg.allBundleInfo.node[bundle].label, 'node/add/' + bundle));
+          }
+          var content = {};
+          content['types'] = {
+            _theme: 'item_list',
+            _items: items
+          };
+          ok(content);
+        });
+      },
       "_title": "Create content"
     }
   };
