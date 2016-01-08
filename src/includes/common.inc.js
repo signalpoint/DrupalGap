@@ -27,7 +27,7 @@ dg.attributes = function(attributes) {
     for (var name in attributes) {
       if (!attributes.hasOwnProperty(name)) { continue; }
       var value = attributes[name];
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && value.length) {
         attrs += name + '="' + value.join(' ') + '" ';
       }
       else if (value != '') {
