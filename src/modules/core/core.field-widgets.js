@@ -2,7 +2,7 @@
 dg.modules.core.FieldWidget = {};
 
 // Integer field.
-dg.modules.core.FieldWidget.integer = function(entityType, bundle, fieldName) {
+dg.modules.core.FieldWidget.integer = function(entityType, bundle, fieldName, fieldFormMode) {
 
   dg.FieldWidgetPrepare(this, arguments);
 
@@ -20,7 +20,7 @@ dg.modules.core.FieldWidget.integer.prototype = new dg.FieldWidget;
 dg.modules.core.FieldWidget.integer.prototype.constructor = dg.modules.core.FieldWidget.integer;
 
 // String field.
-dg.modules.core.FieldWidget.string = function(entityType, bundle, fieldName) {
+dg.modules.core.FieldWidget.string = function(entityType, bundle, fieldName, fieldFormMode) {
 
   dg.FieldWidgetPrepare(this, arguments);
 
