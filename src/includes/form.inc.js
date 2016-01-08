@@ -159,7 +159,7 @@ dg.isFormProperty = function(prop, obj) {
 };
 dg.setFormElementDefaults = function(name, el) {
   var attrs = el._attributes ? el._attributes : {};
-  if (!attrs.id) { attrs.id = 'edit-' + name; }
+  if (!attrs.id) { attrs.id = 'edit-' + name.toLowerCase().replace(/_/g, '-'); }
   if (!attrs.name) { attrs.name = name; }
   if (!attrs.class) { attrs.class = []; }
   if (el._title_placeholder) { attrs.placeholder = el._title; }
