@@ -40,7 +40,7 @@ function my_module_block_view(delta, region) {
                 ]
             }),
             attributes: {
-              id: drupalgap_get_page_id() + '_fq_user_menu'
+              id: drupalgap_get_page_id() + '_my_module_user_menu'
             },
             button_attributes: {
               'data-icon': 'bars',
