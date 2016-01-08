@@ -1,13 +1,24 @@
 // @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
 // @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
 dg.FieldWidget = function(entityType, bundle, fieldName) {
-
-  // DON"T DELETE THESE, THEY ARE NEEDED FOR EACH FIELD
-  //this.entityType = entityType;
-  //this.bundle = bundle;
-  //this.fieldName = fieldName;
-  //this.fieldDefinition = new dg.FieldDefinitionInterface(entityType, bundle, fieldName);
-
+  // Any default constructor behavior lives in FieldWidgetPrepare
+};
+/**
+ * Used to prepare a Field Widget default constructor.
+ * @param FieldWidget
+ * @param args
+ * @constructor
+ */
+dg.FieldWidgetPrepare = function(FieldWidget, args) {
+  FieldWidget.entityType = args[0];
+  FieldWidget.bundle = args[1];
+  FieldWidget.fieldName = args[2];
+  FieldWidget.fieldDefinition = new dg.FieldDefinitionInterface(
+      FieldWidget.entityType,
+      FieldWidget.bundle,
+      FieldWidget.fieldName
+  );
+  FieldWidget.fieldFormMode = args[3];
 };
 dg.FieldWidget.prototype.getSetting = function(prop) {
   return typeof this.settings[prop] ? this.settings[prop] : null;
