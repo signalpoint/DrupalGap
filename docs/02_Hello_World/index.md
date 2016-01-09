@@ -43,7 +43,7 @@ function my_module_hello_world_page() {
 
 ## 4. Set the App's Front Page
 
-Open the `www/app/settings.js` file and set the app's front page path:
+Open the `settings.js` file and set the app's front page path:
 
 ```
 drupalgap.settings.front = 'hello_world';
