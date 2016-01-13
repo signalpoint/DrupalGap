@@ -10,11 +10,23 @@ var NodeEdit = function(bundle) {
       var bundle = self.bundle;
       var entityFormMode = dg.entity_form_mode[entityType][bundle];
 
+      form._entityType = entityType;
+      form._bundle = bundle;
+
+      // Place the bundle name and value as a hidden element on the form.
+      var fakeEntity = new dg[jDrupal.ucfirst(entityType)](null);
+      form[fakeEntity.getEntityKey('bundle')] = {
+        _type: 'bundle',
+        _widgetType: 'FormWidget',
+        _module: 'core',
+        _entityType: entityType,
+        _bundle: bundle,
+        _value: bundle
+      };
+
       // Place each field from the entity form mode's display onto the form.
       for (var fieldName in entityFormMode) {
         if (!entityFormMode.hasOwnProperty(fieldName)) { continue; }
-
-        var FieldWidget = null;
 
         // Grab the field storage config, if any.
         var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
@@ -27,13 +39,16 @@ var NodeEdit = function(bundle) {
             console.log('WARNING - buildForm - There is no "' + type + '" widget in the core module to handle the "' + fieldName + '" element.');
             continue;
           }
-          var FormWidget = new dg.modules.core.FormWidget[type](
-              entityType,
-              bundle,
-              fieldName,
-              new dg.FieldFormMode(entityFormMode[fieldName])
-          );
-          form[fieldName] = FormWidget.form(null, form, formState);
+
+          form[fieldName] = {
+            _type: type,
+            _widgetType: 'FormWidget',
+            _module: 'core',
+            _entityType: entityType,
+            _bundle: bundle,
+            _fieldName: fieldName,
+            _fieldFormMode: new dg.FieldFormMode(entityFormMode[fieldName])
+          };
 
         }
         else {
@@ -54,14 +69,15 @@ var NodeEdit = function(bundle) {
             continue;
           }
 
-          // Create a new field widget and attach its element to the form.
-          FieldWidget = new dg.modules[module].FieldWidget[fieldStorageConfig.type](
-              entityType,
-              bundle,
-              fieldName,
-              new dg.FieldFormMode(entityFormMode[fieldName])
-          );
-          form[fieldName] = FieldWidget.form(null, form, formState);
+          form[fieldName] = {
+            _type: fieldStorageConfig.type,
+            _widgetType: 'FieldWidget',
+            _module: module,
+            _entityType: entityType,
+            _bundle: bundle,
+            _fieldName: fieldName,
+            _fieldFormMode: new dg.FieldFormMode(entityFormMode[fieldName])
+          };
 
         }
       }
@@ -80,8 +96,8 @@ var NodeEdit = function(bundle) {
   this.submitForm = function(form, formState) {
     var self = this;
     return new Promise(function(ok, err) {
-      console.log(formState.getValues());
-      ok();
+      var entity = new jDrupal[jDrupal.ucfirst(form._entityType)](formState.getValues());
+      entity.save().then(ok);
     });
 
   };
