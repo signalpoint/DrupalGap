@@ -1,6 +1,9 @@
 The [camera plugin](https://github.com/apache/cordova-plugin-camera) only works in `phonegap` mode (configured via `settings.js`) and requires this plugin be installed:
 
-`cordova plugin add org.apache.cordova.camera`
+```
+cordova plugin add cordova-plugin-camera
+cordova plugin save
+```
 
 DrupalGap has built in support for image fields provided by Drupal Core. Otherwise, you can manually invoke the camera using the following techniques:
 

@@ -9,7 +9,10 @@ Refer to [PhoneGap's Geolocation](https://github.com/apache/cordova-plugin-geolo
 
 To use Geo Location features on your mobile device, an Android Emulator, or an iOS Simulator, make sure you have the plugin installed within your PhoneGap environment:
 
-`cordova plugin add org.apache.cordova.geolocation`
+```
+cordova plugin add cordova-plugin-geolocation
+cordova plugin save
+```
 
 If you're using Ripple for development, you can [simulate a Geo Location with Ripple](Geo_Location/Simulate_Geo_Location_in_Ripple), without the plugin mentioned above.
 
