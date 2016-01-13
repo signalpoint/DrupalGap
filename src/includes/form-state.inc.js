@@ -21,6 +21,7 @@ dg.FormStateInterface.prototype.setFormState = function() {
   var form = self.get('form');
   var promises = [];
   for (var name in form.elements) {
+    if (name == 'actions') { continue; }
     promises.push(form.elements[name].valueCallback());
   }
   return Promise.all(promises).then(function(values) {
