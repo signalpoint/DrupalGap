@@ -6,6 +6,7 @@ dg.forms = {}; // A global storage for active forms.
  * @constructor
  */
 dg.Form = function(id) {
+
   this.id = id;
   this.form = {
     _attributes: {
@@ -16,6 +17,7 @@ dg.Form = function(id) {
   };
   this.form_state = new dg.FormStateInterface(this);
   this.elements = {}; // Holds FormElement instances.
+
 };
 
 dg.Form.prototype.getFormId = function() { return this.id; };
@@ -30,6 +32,7 @@ dg.Form.prototype.getForm = function() {
         if (!dg.isFormElement(name, self.form)) { continue; }
         var el = self.form[name];
         if (el._type == 'actions') {
+          dg.setFormElementDefaults(name, el);
           for (_name in el) {
             if (!dg.isFormElement(_name, el)) { continue; }
             dg.setFormElementDefaults(_name, el[_name]);
@@ -44,7 +47,30 @@ dg.Form.prototype.getForm = function() {
       var render = function() {
         for (var name in self.form) {
           if (!dg.isFormElement(name, self.form)) { continue; }
-          self.elements[name] = new dg.FormElement(name, self.form[name], self);
+          var element = self.form[name];
+          switch (element._widgetType) {
+            case 'FieldWidget':
+            case 'FormWidget':
+                // Instantiate the widget using the element's module, then build the element form and then merge in
+                // default field values.
+                self.elements[name] = new dg.modules[element._module][element._widgetType][element._type](
+                    self.form._entityType,
+                    self.form._bundle,
+                    name,
+                    element
+                );
+                var elementForm = self.elements[name].form();
+                for (var prop in elementForm) {
+                  if (!elementForm.hasOwnProperty(prop)) { continue; }
+                  self.form[name][prop] = elementForm[prop];
+                }
+              break;
+            case 'FormElement':
+            default:
+                // Instantiate a new form element.
+                self.elements[name] = new dg[element._widgetType](name, element, self);
+              break;
+          }
         }
         ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
       };
@@ -110,12 +136,12 @@ dg.Form.prototype._validateForm = function() {
     var method = parts[1];
     // Handle prototype validation handler, if any.
     if (obj == this.getFormId() && method == 'validateForm') {
-      promises.push(this[method].apply(self, [self, self.getFormState()]));
+      promises.push(this[method].apply(self, [self.form, self.getFormState()]));
       continue;
     }
     // Handle external validation handlers, if any.
     if (!window[obj] || !window[obj][method]) { continue; }
-    promises.push(window[obj][method].apply(self, [self, self.getFormState()]));
+    promises.push(window[obj][method].apply(self, [self.form, self.getFormState()]));
   }
   return Promise.all(promises);
 };
@@ -130,12 +156,12 @@ dg.Form.prototype._submitForm = function() {
     var method = parts[1];
     // Handle prototype submission handler, if any.
     if (obj == this.getFormId() && method == 'submitForm') {
-      promises.push(this[method].apply(self, [self, self.getFormState()]));
+      promises.push(this[method].apply(self, [self.form, self.getFormState()]));
       continue;
     }
     // Handle external submission handlers, if any.
     if (!window[obj] || !window[obj][method]) { continue; }
-    promises.push(window[obj][method].apply(self, [self, self.getFormState()]));
+    promises.push(window[obj][method].apply(self, [self.form, self.getFormState()]));
   }
   return Promise.all(promises);
 };
@@ -162,6 +188,8 @@ dg.setFormElementDefaults = function(name, el) {
   if (!attrs.id) { attrs.id = 'edit-' + name.toLowerCase().replace(/_/g, '-'); }
   if (!attrs.name) { attrs.name = name; }
   if (!attrs.class) { attrs.class = []; }
+  if (!attrs.value && el._value) { attrs.value = el._value; }
+  if (!el._widgetType) { el._widgetType = 'FormElement'; }
   if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
 };
