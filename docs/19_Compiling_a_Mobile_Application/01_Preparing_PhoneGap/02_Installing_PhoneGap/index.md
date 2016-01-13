@@ -99,7 +99,11 @@ There are a few other plugins that are common to many mobile apps, feel free to 
 
 `cordova plugin add cordova-plugin-camera cordova-plugin-geolocation`
 
-Once we've successfully completed the platform guide for PhoneGap, we're now ready to place DrupalGap on top of the app.
+Again, update your `config.xml` file with this command:
+
+`cordova plugin save`
+
+Now that we've successfully completed the platform guide for PhoneGap, we're now ready to place DrupalGap on top of the app.
 
 ## 5. Install the DrupalGap SDK over PhoneGap
 
