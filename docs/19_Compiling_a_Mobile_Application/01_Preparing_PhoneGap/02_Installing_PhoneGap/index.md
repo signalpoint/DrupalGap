@@ -19,7 +19,7 @@ See [here](https://github.com/joyent/node) and [here](https://github.com/joyent/
 
 After installing node.js, use this terminal command to install Cordova:
 
-`npm install -g cordova@3.6.3-0.2.13`
+`npm install -g cordova`
 
 ## 3. Complete a PhoneGap Platform Guide
 
@@ -81,27 +81,21 @@ In xCode, select an "iPhone" simulator, then click the "Run" button to open the 
 
 ## 4. Install PhoneGap (Cordova) Plugins
 
-Now that we've created and tested an empty app. Let's add some plugins.
+Now that we've created and tested an empty app. Let's add some [Cordova plugins](http://plugins.cordova.io/#/_browse/all).
 
-Since PhoneGap 3.x was released, many core features we need are now packaged as [Cordova plugins](http://plugins.cordova.io/#/_browse/all). Here are the required plugins, install them with this single terminal command:
-
-#### Cordova 3.x
-
-`cordova plugin add org.apache.cordova.console org.apache.cordova.device org.apache.cordova.dialogs org.apache.cordova.file org.apache.cordova.inappbrowser org.apache.cordova.network-information`
-
-#### Cordova 5.x
+Here are the required plugins, install them with this single terminal command:
 
 `cordova plugin add cordova-plugin-console cordova-plugin-device cordova-plugin-dialogs cordova-plugin-file cordova-plugin-inappbrowser cordova-plugin-network-information`
+
+Then to update your `config.xml` file, run this terminal command:
+
+`cordova plugin save`
+
+Anytime you add or remove plugins from your app, be sure to run this command again.
 
 ### Other recommended Plugins
 
 There are a few other plugins that are common to many mobile apps, feel free to install them like we did above:
-
-#### Cordova 3.x
-
-`cordova plugin add org.apache.cordova.camera org.apache.cordova.geolocation`
-
-#### Cordova 5.x
 
 `cordova plugin add cordova-plugin-camera cordova-plugin-geolocation`
 
