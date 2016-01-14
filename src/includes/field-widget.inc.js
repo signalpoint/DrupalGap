@@ -1,6 +1,6 @@
 // @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
 // @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
-dg.FieldWidget = function(entityType, bundle, fieldName, element) {
+dg.FieldWidget = function(entityType, bundle, fieldName, element, items, delta) {
   // Any default constructor behavior lives in FieldWidgetPrepare
 };
 // Extend the FormElement prototype.
@@ -19,6 +19,8 @@ dg.FieldWidgetPrepare = function(FieldWidget, args) {
   FieldWidget.fieldName = args[2];
   FieldWidget.name = FieldWidget.fieldName;
   FieldWidget.element = args[3];
+  FieldWidget.items = args[4];
+  FieldWidget.delta = args[5];
   FieldWidget.fieldDefinition = new dg.FieldDefinitionInterface(
       FieldWidget.entityType,
       FieldWidget.bundle,
