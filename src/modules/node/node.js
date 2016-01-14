@@ -30,6 +30,13 @@ dg.modules.node.routing = function() {
       "_title": "Create content"
     }
   };
+  routes["node.edit"] = {
+    "path": "/node\/(.*)\/edit",
+    "defaults": {
+      "_form": 'NodeEdit',
+      "_title": "Node edit"
+    }
+  };
   routes["node"] = {
     "path": "/node\/(.*)",
     "defaults": {
