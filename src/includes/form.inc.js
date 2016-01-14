@@ -53,17 +53,17 @@ dg.Form.prototype.getForm = function() {
             case 'FormWidget':
                 // Instantiate the widget using the element's module, then build the element form and then merge in
                 // default field values.
+                var items = self.form._entity.get(name);
+                var delta = 0;
                 self.elements[name] = new dg.modules[element._module][element._widgetType][element._type](
                     self.form._entityType,
                     self.form._bundle,
                     name,
-                    element
+                    element,
+                    items,
+                    delta
                 );
-                var elementForm = self.elements[name].form();
-                for (var prop in elementForm) {
-                  if (!elementForm.hasOwnProperty(prop)) { continue; }
-                  self.form[name][prop] = elementForm[prop];
-                }
+                self.elements[name].form(items, delta, element, self.form, self.form_state);
               break;
             case 'FormElement':
             default:
