@@ -1,4 +1,4 @@
-dg.FormWidget = function(entityType, bundle, fieldName) {
+dg.FormWidget = function(entityType, bundle, fieldName, element, items, delta) {
   // Any default constructor behavior lives in FormWidgetPrepare
 };
 // Extend the FormElement prototype.
@@ -18,6 +18,8 @@ dg.FormWidgetPrepare = function(FormWidget, args) {
   FormWidget.fieldName = args[2];
   FormWidget.name = FormWidget.fieldName;
   FormWidget.element = args[3];
+  FormWidget.items = args[4];
+  FormWidget.delta = args[5];
   FormWidget.fieldFormMode = FormWidget.element._fieldFormMode;
 };
 
