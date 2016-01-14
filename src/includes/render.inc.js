@@ -87,6 +87,7 @@ dg.appRender = function(content) {
 dg.render = function(content) {
   try {
     var type = typeof content;
+    if (!content) { return ''; }
     if (type === 'string') { return content; }
     var html = '';
     var _html = null;
