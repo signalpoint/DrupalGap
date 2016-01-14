@@ -21,12 +21,9 @@ dg.theme_password = function(variables) {
 dg.theme_submit = function(variables) {
   variables._attributes.type = 'submit';
   var value = 'Submit';
-  if (!variables._attributes.value) {
-    if (typeof variables._value !== 'undefined') {
-      value = variables._value
-    }
+  if (!variables._attributes.value && variables._value) {
+    variables._attributes.value = variables._value;
   }
-  variables._attributes.value = value;
   return '<input ' + dg.attributes(variables._attributes) + '/>';
 };
 dg.theme_textarea = function(variables) {
