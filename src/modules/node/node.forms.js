@@ -108,11 +108,18 @@ var NodeEdit = function() {
         ok(form);
       };
 
-      // If we have an entity id, load the entity. Then either way, build the form.
+      // If we have an entity id, load the entity and place the id as an element onto the form. Then either way, build
+      // the form.
       if (self.entityID) {
-        dg.nodeLoad(self.entityID).then(function(node) {
-          self.entity = node;
-          self.bundle = node.getType();
+        dg.nodeLoad(self.entityID).then(function(entity) {
+          self.entity = entity;
+          self.bundle = entity.getBundle();
+          form[entity.getEntityKey('id')] = {
+            _type: 'entityID',
+            _widgetType: 'FormWidget',
+            _module: 'core',
+            _value: self.entityID
+          };
           buildEntityForm();
         });
       }
@@ -124,10 +131,14 @@ var NodeEdit = function() {
   this.submitForm = function(form, formState) {
     var self = this;
     return new Promise(function(ok, err) {
-      var entity = new jDrupal[jDrupal.ucfirst(form._entityType)](formState.getValues());
-      entity.save().then(ok);
+      // Save the entity, then redirect to the entity page view if no form action has been set.
+      var values = formState.getValues();
+      var entity = new jDrupal[jDrupal.ucfirst(form._entityType)](values);
+      entity.save().then(function() {
+        if (!form._action) { form._action = form._entityType + '/' + entity.id(); }
+        ok();
+      });
     });
-
   };
 
 };
