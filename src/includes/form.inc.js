@@ -117,7 +117,7 @@ dg.Form.prototype._submission = function() {
           return;
         }
         self._submitForm(self, formState).then(function() {
-          if (self.form._action) { dg.goto(self._action); }
+          if (self.form._action) { dg.goto(self.form._action); }
           dg.removeForm(self.getFormId());
           ok();
         });
