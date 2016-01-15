@@ -21,6 +21,8 @@ dg.modules.core.FormWidget.string_textfield.prototype.form = function(items, del
   }
 };
 
+// @TODO Move the bundle and entityID widgets to the entity module.
+
 // Bundle widget.
 // Extend the FormWidget prototype for the bundle widget.
 dg.modules.core.FormWidget.bundle = function(entityType, bundle, fieldName, element, items, delta) {
@@ -42,4 +44,20 @@ dg.modules.core.FormWidget.bundle.prototype.valueCallback = function(items, form
     name: fakeEntity.getEntityKey('bundle'),
     value: [ { target_id: this.get('bundle') } ]
   };
+};
+
+// entityID widget.
+// Extend the FormWidget prototype for the entityID widget.
+dg.modules.core.FormWidget.entityID = function(entityType, bundle, fieldName, element, items, delta) {
+  dg.FormWidgetPrepare(this, arguments);
+};
+dg.modules.core.FormWidget.entityID.prototype = new dg.FormWidget;
+dg.modules.core.FormWidget.entityID.prototype.constructor = dg.modules.core.FormWidget.entityID;
+
+dg.modules.core.FormWidget.entityID.prototype.form = function(items, delta, element, form, formState) {
+  element._type = 'hidden';
+  if (items && items[delta] !== 'undefined') {
+    element._value = items[delta].value;
+    element._attributes.value = element._value;
+  }
 };
