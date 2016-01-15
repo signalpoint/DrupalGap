@@ -132,8 +132,7 @@ var NodeEdit = function() {
     var self = this;
     return new Promise(function(ok, err) {
       // Save the entity, then redirect to the entity page view if no form action has been set.
-      var values = formState.getValues();
-      var entity = new jDrupal[jDrupal.ucfirst(form._entityType)](values);
+      var entity = new jDrupal[jDrupal.ucfirst(form._entityType)](formState.getValues());
       entity.save().then(function() {
         if (!form._action) { form._action = form._entityType + '/' + entity.id(); }
         ok();
