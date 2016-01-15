@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-14 */
+/*! drupalgap 2016-01-15 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -731,7 +731,7 @@ dg.Form.prototype._submission = function() {
           return;
         }
         self._submitForm(self, formState).then(function() {
-          if (self.form._action) { dg.goto(self._action); }
+          if (self.form._action) { dg.goto(self.form._action); }
           dg.removeForm(self.getFormId());
           ok();
         });
@@ -1426,6 +1426,8 @@ dg.modules.core.FormWidget.string_textfield.prototype.form = function(items, del
   }
 };
 
+// @TODO Move the bundle and entityID widgets to the entity module.
+
 // Bundle widget.
 // Extend the FormWidget prototype for the bundle widget.
 dg.modules.core.FormWidget.bundle = function(entityType, bundle, fieldName, element, items, delta) {
@@ -1447,6 +1449,22 @@ dg.modules.core.FormWidget.bundle.prototype.valueCallback = function(items, form
     name: fakeEntity.getEntityKey('bundle'),
     value: [ { target_id: this.get('bundle') } ]
   };
+};
+
+// entityID widget.
+// Extend the FormWidget prototype for the entityID widget.
+dg.modules.core.FormWidget.entityID = function(entityType, bundle, fieldName, element, items, delta) {
+  dg.FormWidgetPrepare(this, arguments);
+};
+dg.modules.core.FormWidget.entityID.prototype = new dg.FormWidget;
+dg.modules.core.FormWidget.entityID.prototype.constructor = dg.modules.core.FormWidget.entityID;
+
+dg.modules.core.FormWidget.entityID.prototype.form = function(items, delta, element, form, formState) {
+  element._type = 'hidden';
+  if (items && items[delta] !== 'undefined') {
+    element._value = items[delta].value;
+    element._attributes.value = element._value;
+  }
 };
 
 dg.modules.image = new dg.Module();
@@ -1560,11 +1578,18 @@ var NodeEdit = function() {
         ok(form);
       };
 
-      // If we have an entity id, load the entity. Then either way, build the form.
+      // If we have an entity id, load the entity and place the id as an element onto the form. Then either way, build
+      // the form.
       if (self.entityID) {
-        dg.nodeLoad(self.entityID).then(function(node) {
-          self.entity = node;
-          self.bundle = node.getType();
+        dg.nodeLoad(self.entityID).then(function(entity) {
+          self.entity = entity;
+          self.bundle = entity.getBundle();
+          form[entity.getEntityKey('id')] = {
+            _type: 'entityID',
+            _widgetType: 'FormWidget',
+            _module: 'core',
+            _value: self.entityID
+          };
           buildEntityForm();
         });
       }
@@ -1576,10 +1601,13 @@ var NodeEdit = function() {
   this.submitForm = function(form, formState) {
     var self = this;
     return new Promise(function(ok, err) {
+      // Save the entity, then redirect to the entity page view if no form action has been set.
       var entity = new jDrupal[jDrupal.ucfirst(form._entityType)](formState.getValues());
-      entity.save().then(ok);
+      entity.save().then(function() {
+        if (!form._action) { form._action = form._entityType + '/' + entity.id(); }
+        ok();
+      });
     });
-
   };
 
 };
