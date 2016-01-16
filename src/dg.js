@@ -4,6 +4,7 @@ var dg = {}; var drupalgap = dg;
 dg.activeTheme = null;
 dg.regions = null; // Holds instances of regions.
 dg.blocks = null; // Holds instances of blocks.
+dg.spinner = 0; // Holds onto how many spinners have been thrown up.
 
 // Configuration setting defaults.
 dg.settings = {
@@ -90,4 +91,13 @@ dg.bootstrap = function() {
 
   });
 
+};
+
+dg.spinnerShow = function() {
+  dg.spinner++;
+  if (dg.spinner == 1) { document.getElementById('dgSpinner').style.display = 'block'; }
+};
+dg.spinnerHide = function() {
+  dg.spinner--;
+  if (!dg.spinner) { document.getElementById('dgSpinner').style.display = 'none'; }
 };
