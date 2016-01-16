@@ -1,10 +1,11 @@
-/*! drupalgap 2016-01-15 */
+/*! drupalgap 2016-01-16 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
 dg.activeTheme = null;
 dg.regions = null; // Holds instances of regions.
 dg.blocks = null; // Holds instances of blocks.
+dg.spinner = 0; // Holds onto how many spinners have been thrown up.
 
 // Configuration setting defaults.
 dg.settings = {
@@ -91,6 +92,15 @@ dg.bootstrap = function() {
 
   });
 
+};
+
+dg.spinnerShow = function() {
+  dg.spinner++;
+  if (dg.spinner == 1) { document.getElementById('dgSpinner').style.display = 'block'; }
+};
+dg.spinnerHide = function() {
+  dg.spinner--;
+  if (!dg.spinner) { document.getElementById('dgSpinner').style.display = 'none'; }
 };
 // We prefixed this file name with an underscore so that dg.FormElement is available quickly. This is our cheap fix
 // until we figure out a better Gruntfile to handle this.
@@ -657,6 +667,8 @@ dg.Form.prototype.getForm = function() {
 
       // Allow form alterations, and set up the resolve to instantiate the form
       // elements and resolve the rendered form.
+      // @TODO should this alter be moved after the widget assembly? Then we won't have to pass the element by reference
+      // to its widget form builder.
       var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
       var render = function() {
         for (var name in self.form) {
@@ -1359,6 +1371,19 @@ dg.theme_item_list = function(variables) {
 };
 
 dg.modules.core = new dg.Module();
+
+/**
+ * Implements hook_rest_preprocess().
+ * @param xhr
+ * @param data
+ */
+function core_rest_preprocess(xhr, data) { dg.spinnerShow(); }
+
+/**
+ * Implements hook_rest_post_process().
+ * @param xhr
+ */
+function core_rest_post_process(xhr) { dg.spinnerHide(); }
 
 // Let DrupalGap know we have a FieldWidget(s).
 dg.modules.core.FieldWidget = {};
