@@ -58,8 +58,16 @@ dg.entityRenderContent = function(entity) {
           continue;
         }
 
-        var FieldFormatter = new dg.modules[module].FieldFormatter[type](); // viewMode, fieldStorageConfig
-        content[fieldName] = FieldFormatter.viewElements(entity[fieldName], entity.language());
+        var FieldItemListInterface = new dg.FieldItemListInterface(entity.get(fieldName));
+        var FieldDefinitionInterface = new dg.FieldDefinitionInterface(entityType, bundle, fieldName); // @TODO reinstantiating this is stupid. they should be globally instantiated once
+        var FieldFormatter = new dg.modules[module].FieldFormatter[type](
+            FieldDefinitionInterface,
+            viewMode[fieldName].settings, // settings
+            viewMode[fieldName].label, // label
+            viewMode[fieldName], // viewMode
+            viewMode[fieldName].third_party_settings // thirdPartySettings
+        );
+        content[fieldName] = FieldFormatter.viewElements(FieldItemListInterface, entity.language());
 
       }
 
