@@ -406,8 +406,16 @@ dg.entityRenderContent = function(entity) {
           continue;
         }
 
-        var FieldFormatter = new dg.modules[module].FieldFormatter[type](); // viewMode, fieldStorageConfig
-        content[fieldName] = FieldFormatter.viewElements(entity[fieldName], entity.language());
+        var FieldItemListInterface = new dg.FieldItemListInterface(entity.get(fieldName));
+        var FieldDefinitionInterface = new dg.FieldDefinitionInterface(entityType, bundle, fieldName); // @TODO reinstantiating this is stupid. they should be globally instantiated once
+        var FieldFormatter = new dg.modules[module].FieldFormatter[type](
+            FieldDefinitionInterface,
+            viewMode[fieldName].settings, // settings
+            viewMode[fieldName].label, // label
+            viewMode[fieldName], // viewMode
+            viewMode[fieldName].third_party_settings // thirdPartySettings
+        );
+        content[fieldName] = FieldFormatter.viewElements(FieldItemListInterface, entity.language());
 
       }
 
@@ -439,7 +447,13 @@ dg.FieldFormMode = function(fieldFormMode) {
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FormatterBase.php/class/FormatterBase/8
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!Annotation!FieldFormatter.php/class/FieldFormatter/8
 
-dg.FieldFormatter = function() { };
+dg.FieldFormatter = function() {
+  this._fieldDefinition = null;
+  this._settings = null;
+  this._label = null;
+  this._viewMode = null;
+  this._thirdPartySettings = null;
+};
 
 /**
  * Used to prepare a field formatter default constructor.
@@ -447,18 +461,32 @@ dg.FieldFormatter = function() { };
  * @param args
  * @constructor
  */
-dg.FieldFormatterPrepare = function(FieldFormatter, args) { };
+dg.FieldFormatterPrepare = function(FieldFormatter, args) {
+  this._fieldDefinition = args[0];
+  this._settings = args[1];
+  this._label = args[2];
+  this._viewMode = args[3];
+  this._thirdPartySettings = args[4];
+};
 
 // Builds a renderable array for a field value.
-dg.FieldFormatter.prototype.viewElements = function(items, langcode) {
+dg.FieldFormatter.prototype.viewElements = function(FieldItemListInterface, langcode) {
+  var items = FieldItemListInterface.getItems();
   var element = {};
   if (items.length == 0) { return element; }
   for (var delta = 0; delta < items.length; delta++) {
-    element[delta] = items[delta];
+    element[delta] = { _markup: items[delta].value };
   }
   return element;
 };
 
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FieldItemListInterface.php/interface/FieldItemListInterface/8
+
+dg.FieldItemListInterface = function(items) {
+  this._items = items;
+};
+
+dg.FieldItemListInterface.prototype.getItems = function() { return this._items; };
 
 // @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
 // @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
@@ -1751,6 +1779,26 @@ dg.modules.system.blocks = function() {
 };
 dg.modules.text = new dg.Module();
 
+dg.modules.text = new dg.Module();
+
+// Let DrupalGap know we have a FieldFormatter(s).
+dg.modules.text.FieldFormatter = {};
+
+// text default field formatter.
+// Extend the FieldFormatter prototype for the text_default field.
+dg.modules.text.FieldFormatter.text_default = function() { dg.FieldFormatterPrepare(this, arguments); };
+dg.modules.text.FieldFormatter.text_default.prototype = new dg.FieldFormatter;
+dg.modules.text.FieldFormatter.text_default.prototype.constructor = dg.modules.text.FieldFormatter.text_default;
+
+dg.modules.text.FieldFormatter.text_default.prototype.viewElements = function(FieldItemListInterface, langcode) {
+  var items = FieldItemListInterface.getItems();
+  var element = {};
+  if (items.length == 0) { return element; }
+  for (var delta = 0; delta < items.length; delta++) {
+    element[delta] = { _markup: items[delta].value };
+  }
+  return element;
+};
 // Let DrupalGap know we have a FieldWidget(s).
 dg.modules.text.FieldWidget = {};
 
