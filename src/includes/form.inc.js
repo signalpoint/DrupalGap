@@ -43,6 +43,8 @@ dg.Form.prototype.getForm = function() {
 
       // Allow form alterations, and set up the resolve to instantiate the form
       // elements and resolve the rendered form.
+      // @TODO should this alter be moved after the widget assembly? Then we won't have to pass the element by reference
+      // to its widget form builder.
       var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
       var render = function() {
         for (var name in self.form) {
