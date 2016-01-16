@@ -386,14 +386,31 @@ dg.entityRenderContent = function(entity) {
 
       // Grab the field storage config and the module in charge of the field.
       var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
-      if (!fieldStorageConfig) { continue; }
-      //console.log(fieldStorageConfig);
-      var module = fieldStorageConfig.module;
-      if (!jDrupal.moduleExists(module)) {
-        var msg = 'WARNING - entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
-        console.log(msg);
-        continue;
+      if (!fieldStorageConfig) {
+        console.log('WARNING - entityRenderContent - No field storage config for "' + fieldName + '"');
       }
+      else {
+
+        var module = fieldStorageConfig.module;
+        var type = viewMode[fieldName].type;
+        //console.log(module);
+        //console.log(fieldStorageConfig);
+
+        if (!jDrupal.moduleExists(module)) {
+          var msg = 'WARNING - entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
+          console.log(msg);
+          continue;
+        }
+        if (!dg.modules[module].FieldFormatter || !dg.modules[module].FieldFormatter[type]) {
+          console.log('WARNING - entityRenderContent - There is no "' + type + '" formatter in the "' + module + '" module to handle the "' + fieldName + '" field.');
+          continue;
+        }
+
+        var FieldFormatter = new dg.modules[module].FieldFormatter[type](); // viewMode, fieldStorageConfig
+        content[fieldName] = FieldFormatter.viewElements(entity[fieldName], entity.language());
+
+      }
+
     }
     jDrupal.moduleInvokeAll('entity_view', content, entity).then(ok(content));
 
@@ -419,6 +436,30 @@ dg.FieldDefinitionInterface.prototype.getLabel = function() {
 dg.FieldFormMode = function(fieldFormMode) {
   this.fieldFormMode = fieldFormMode;
 };
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FormatterBase.php/class/FormatterBase/8
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!Annotation!FieldFormatter.php/class/FieldFormatter/8
+
+dg.FieldFormatter = function() { };
+
+/**
+ * Used to prepare a field formatter default constructor.
+ * @param FieldFormatter
+ * @param args
+ * @constructor
+ */
+dg.FieldFormatterPrepare = function(FieldFormatter, args) { };
+
+// Builds a renderable array for a field value.
+dg.FieldFormatter.prototype.viewElements = function(items, langcode) {
+  var element = {};
+  if (items.length == 0) { return element; }
+  for (var delta = 0; delta < items.length; delta++) {
+    element[delta] = items[delta];
+  }
+  return element;
+};
+
+
 // @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
 // @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
 dg.FieldWidget = function(entityType, bundle, fieldName, element, items, delta) {
