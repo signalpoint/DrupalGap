@@ -35,6 +35,28 @@ dg.Block.prototype.build = function() {
   // abstract
   return new Promise(function(ok, err) { ok(''); });
 };
+dg.Block.prototype.getVisibility = function() {
+  var self = this;
+  var account = dg.currentUser();
+  return new Promise(function(ok, err) {
+    var visible = true;
+    if (self.roles) {
+      for (var i = 0; i < self.roles.length; i++) {
+        if (account.hasRole(self.roles[i].target_id)) {
+          visible = self.roles[i].visible;
+        }
+        else {
+          visible = !self.roles[i].visible;
+        }
+        if (!visible) { break; }
+      }
+    }
+    ok({
+      visible: visible,
+      block: self
+    });
+  });
+};
 
 dg.blocksLoad = function() {
   //return new Promise(function(ok, err) {
