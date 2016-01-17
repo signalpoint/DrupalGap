@@ -1,3 +1,9 @@
+/**
+ *
+ * @param variables
+ * @returns {string}
+ * @see https://api.drupal.org/api/drupal/core!themes!stable!templates!form!container.html.twig/8
+ */
 dg.theme_container = function(variables) {
   return '<div ' + dg.attributes(variables._attributes) + '>' +
       dg.render(variables._children) +
