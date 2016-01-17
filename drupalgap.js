@@ -138,6 +138,12 @@ dg.FormElement.prototype.valueCallback = function() {
   });
 };
 
+/**
+ * Theme's a form element label.
+ * @param variables
+ * @returns {string}
+ * @see https://api.drupal.org/api/drupal/core!modules!system!templates!form-element-label.html.twig/8
+ */
 dg.theme_form_element_label = function(variables) {
   return '<label ' + dg.attributes(variables._attributes) + '>' + variables._title + '</label>';
 };
@@ -1120,6 +1126,13 @@ dg.appRender = function(content) {
 
   });
 };
+
+/**
+ *
+ * @param content
+ * @returns {*}
+ * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!RenderElement.php/class/RenderElement/8
+ */
 dg.render = function(content) {
   try {
     var type = typeof content;
@@ -1716,6 +1729,12 @@ dg.modules.core.FormWidget.entityID.prototype.form = function(items, delta, elem
   }
 };
 
+/**
+ *
+ * @param variables
+ * @returns {string}
+ * @see https://api.drupal.org/api/drupal/core!themes!stable!templates!form!container.html.twig/8
+ */
 dg.theme_container = function(variables) {
   return '<div ' + dg.attributes(variables._attributes) + '>' +
       dg.render(variables._children) +
