@@ -33,3 +33,7 @@ dg.FormElement.prototype.valueCallback = function() {
     });
   });
 };
+
+dg.theme_form_element_label = function(variables) {
+  return '<label ' + dg.attributes(variables._attributes) + '>' + variables._title + '</label>';
+};
