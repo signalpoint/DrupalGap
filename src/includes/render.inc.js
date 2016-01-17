@@ -116,6 +116,8 @@ dg.render = function(content) {
       if (content._type) {
         return prefix + dg.theme(content._type, content) + suffix;
       }
+      var weighted = {};
+      var weightedCount = 0;
       html += prefix;
       for (var index in content) {
         if (
@@ -124,10 +126,23 @@ dg.render = function(content) {
         ) { continue; }
         var piece = content[index];
         var _type = typeof piece;
-        if (_type === 'object') { html += dg.render(piece); }
+        if (_type === 'object') {
+          var weight = typeof piece._weight !== 'undefined' ? piece._weight : 0;
+          if (typeof weighted[weight] === 'undefined') { weighted[weight] = []; }
+          weighted[weight].push(dg.render(piece));
+          weightedCount++;
+        }
         else if (_type === 'array') {
           for (var i = 0; i < piece.length; i++) {
             html += dg.render(piece[i]);
+          }
+        }
+      }
+      if (weightedCount) {
+        for (var weight in weighted) {
+          if (!weighted.hasOwnProperty(weight)) { continue; }
+          for (var i = 0; i < weighted[weight].length; i++) {
+            html += weighted[weight][i];
           }
         }
       }
