@@ -15,7 +15,8 @@ return new Promise(function(ok, err) {
     _theme: 'item_list',
     _items: [
       dg.l('Food', 'food'),
-      dg.l('Beverage', 'beverage')]
+      dg.l('Beverage', 'beverage')
+    ]
   };
   ok(content);
 });
