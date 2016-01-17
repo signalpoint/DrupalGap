@@ -500,6 +500,10 @@ dg.FieldDefinitionInterface.prototype.getLabel = function() {
 dg.FieldFormMode = function(fieldFormMode) {
   this.fieldFormMode = fieldFormMode;
 };
+dg.FieldFormMode.prototype.getWeight = function() {
+  return this.fieldFormMode.weight;
+};
+
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FormatterBase.php/class/FormatterBase/8
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!Annotation!FieldFormatter.php/class/FieldFormatter/8
 
@@ -802,19 +806,38 @@ dg.Form.prototype.getForm = function() {
           switch (element._widgetType) {
             case 'FieldWidget':
             case 'FormWidget':
-                // Instantiate the widget using the element's module, then build the element form and then merge in
-                // default field values.
+                // Instantiate the widget using the element's module, then build the element form and then add it to the
+                // form as a container.
                 var items = self.form._entity.get(name);
                 var delta = 0;
-                self.elements[name] = new dg.modules[element._module][element._widgetType][element._type](
-                    self.form._entityType,
-                    self.form._bundle,
-                    name,
-                    element,
-                    items,
-                    delta
+                var widget = new dg.modules[element._module][element._widgetType][element._type](
+                  self.form._entityType,
+                  self.form._bundle,
+                  name,
+                  element,
+                  items,
+                  delta
                 );
-                self.elements[name].form(items, delta, element, self.form, self.form_state);
+                self.elements[name] = widget;
+                widget.form(items, delta, element, self.form, self.form_state);
+                // Wrap elements in containers, except for hidden elements.
+                if (element._type == 'hidden') { self.form[name] = element; }
+                else {
+                  var children = {};
+                  if (element._title) {
+                    children.label = {
+                      _theme: 'form_element_label',
+                      _title: element._title
+                    }
+                  }
+                  children.element = element;
+                  var container = {
+                    _theme: 'container',
+                    _children: children,
+                    _weight: element._weight
+                  };
+                  self.form[name] = container;
+                }
               break;
             case 'FormElement':
             default:
@@ -1134,7 +1157,6 @@ dg.appRender = function(content) {
  * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!RenderElement.php/class/RenderElement/8
  */
 dg.render = function(content) {
-  try {
     var type = typeof content;
     if (!content) { return ''; }
     if (type === 'string') { return content; }
@@ -1157,7 +1179,7 @@ dg.render = function(content) {
       if (content._type) {
         return prefix + dg.theme(content._type, content) + suffix;
       }
-      var weighted = {};
+      var weighted = {}; // @TODO properly handle negative weights
       var weightedCount = 0;
       html += prefix;
       for (var index in content) {
@@ -1167,7 +1189,7 @@ dg.render = function(content) {
         ) { continue; }
         var piece = content[index];
         var _type = typeof piece;
-        if (_type === 'object') {
+        if (_type === 'object' && piece !== null) {
           var weight = typeof piece._weight !== 'undefined' ? piece._weight : 0;
           if (typeof weighted[weight] === 'undefined') { weighted[weight] = []; }
           weighted[weight].push(dg.render(piece));
@@ -1195,8 +1217,6 @@ dg.render = function(content) {
       }
     }
     return html;
-  }
-  catch (error) { console.log('dg.render - ' + error); }
 };
 // Proxies.
 dg.token = function() { return jDrupal.token(); };
@@ -1668,14 +1688,14 @@ dg.modules.core.FieldWidget.string.prototype.form = function(items, delta, eleme
 // Let DrupalGap know we have a FormWidget(s).
 dg.modules.core.FormWidget = {};
 
+// @TODO the "items" args here should be prototypes of field-item-list-interface
+
 // String textfield widget.
-// Extend the FormWidget prototype for the string_textfield widget.
 dg.modules.core.FormWidget.string_textfield = function(entityType, bundle, fieldName, element, items, delta) {
   dg.FormWidgetPrepare(this, arguments);
 };
 dg.modules.core.FormWidget.string_textfield.prototype = new dg.FormWidget;
 dg.modules.core.FormWidget.string_textfield.prototype.constructor = dg.modules.core.FormWidget.string_textfield;
-
 dg.modules.core.FormWidget.string_textfield.prototype.form = function(items, delta, element, form, formState) {
   element._type = 'textfield';
   element._title = this.fieldName;
@@ -1691,13 +1711,11 @@ dg.modules.core.FormWidget.string_textfield.prototype.form = function(items, del
 // @TODO Move the bundle and entityID widgets to the entity module.
 
 // Bundle widget.
-// Extend the FormWidget prototype for the bundle widget.
 dg.modules.core.FormWidget.bundle = function(entityType, bundle, fieldName, element, items, delta) {
   dg.FormWidgetPrepare(this, arguments);
 };
 dg.modules.core.FormWidget.bundle.prototype = new dg.FormWidget;
 dg.modules.core.FormWidget.bundle.prototype.constructor = dg.modules.core.FormWidget.bundle;
-
 dg.modules.core.FormWidget.bundle.prototype.form = function(items, delta, element, form, formState) {
   element._type = 'hidden';
   if (items && items[delta] !== 'undefined') {
@@ -1714,13 +1732,11 @@ dg.modules.core.FormWidget.bundle.prototype.valueCallback = function(items, form
 };
 
 // entityID widget.
-// Extend the FormWidget prototype for the entityID widget.
 dg.modules.core.FormWidget.entityID = function(entityType, bundle, fieldName, element, items, delta) {
   dg.FormWidgetPrepare(this, arguments);
 };
 dg.modules.core.FormWidget.entityID.prototype = new dg.FormWidget;
 dg.modules.core.FormWidget.entityID.prototype.constructor = dg.modules.core.FormWidget.entityID;
-
 dg.modules.core.FormWidget.entityID.prototype.form = function(items, delta, element, form, formState) {
   element._type = 'hidden';
   if (items && items[delta] !== 'undefined') {
@@ -1797,6 +1813,8 @@ var NodeEdit = function() {
         for (var fieldName in entityFormMode) {
           if (!entityFormMode.hasOwnProperty(fieldName)) { continue; }
 
+          //console.log(fieldName);
+
           // Grab the field storage config, if any.
           var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
           if (!fieldStorageConfig) {
@@ -1809,6 +1827,10 @@ var NodeEdit = function() {
               continue;
             }
 
+            // Create a new field form mode.
+            var FieldFormMode = new dg.FieldFormMode(entityFormMode[fieldName]);
+            //console.log(FieldFormMode);
+
             form[fieldName] = {
               _type: type,
               _widgetType: 'FormWidget',
@@ -1816,7 +1838,8 @@ var NodeEdit = function() {
               _entityType: entityType,
               _bundle: bundle,
               _fieldName: fieldName,
-              _fieldFormMode: new dg.FieldFormMode(entityFormMode[fieldName])
+              _fieldFormMode: FieldFormMode,
+              _weight: FieldFormMode.getWeight()
             };
 
           }
@@ -1838,6 +1861,12 @@ var NodeEdit = function() {
               continue;
             }
 
+            // Create a new field form mode.
+            var FieldFormMode = new dg.FieldFormMode(entityFormMode[fieldName]);
+            //console.log(fieldStorageConfig);
+            //console.log(FieldFormMode);
+
+            // Create the element.
             form[fieldName] = {
               _type: fieldStorageConfig.type,
               _widgetType: 'FieldWidget',
@@ -1845,7 +1874,8 @@ var NodeEdit = function() {
               _entityType: entityType,
               _bundle: bundle,
               _fieldName: fieldName,
-              _fieldFormMode: new dg.FieldFormMode(entityFormMode[fieldName])
+              _fieldFormMode: FieldFormMode,
+              _weight: FieldFormMode.getWeight()
             };
 
           }
@@ -1856,7 +1886,8 @@ var NodeEdit = function() {
             _type: 'submit',
             _value: 'Save',
             _button_type: 'primary'
-          }
+          },
+          _weight: 999
         };
         ok(form);
       };
