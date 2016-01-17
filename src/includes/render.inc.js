@@ -40,45 +40,53 @@ dg.appRender = function(content) {
     // Place the region, and block placeholders, into the app's div.
     document.getElementById('dg-app').innerHTML = innerHTML;
 
+
+
     // Run the build promise for each block, then inject their content as they respond.
     // Keep a tally of all the blocks, and once their promises have all completed, then
     // if there are any forms on the page, attach their UI submit handlers. We don't use
     // a promise all, so blocks can render one by one.
     var blocks = dg.blocksLoad();
     var blocksToRender = [];
+
+    var finish = function(_block) {
+      blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
+      // If we're all done with every block, process the form(s), if any.
+      // @TODO form should be processed as they're injected, because waiting
+      // until all promises have resolved like this means a form can't be used
+      // until they've all resolved.
+      if (blocksToRender.length == 0) {
+        var forms = dg.loadForms();
+        for (var id in forms) {
+          if (!forms.hasOwnProperty(id)) { continue; }
+          var form_html_id = dg.killCamelCase(id, '-');
+          var form = document.getElementById(form_html_id);
+          function processForm(e) {
+            if (e.preventDefault) e.preventDefault();
+            var _form = dg.loadForm(id);
+            _form._submission().then(
+                function() { },
+                function() { }
+            );
+            return false; // Prevent default form behavior.
+          }
+          if (form.attachEvent) { form.attachEvent("submit", processForm); }
+          else { form.addEventListener("submit", processForm); }
+        }
+      }
+    };
+
     for (id in blocks) {
       if (!blocks.hasOwnProperty(id)) { continue; }
       blocksToRender.push(id);
-      blocks[id].buildWrapper().then(function(_block) {
-
-        // Inject the block content and mark the block as rendered.
-        document.getElementById(_block.get('id')).innerHTML = dg.render(_block.get('content'));
-        blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
-
-        // If we're all done with every block, process the form(s), if any.
-        // @TODO form should be processed as they're injected, because waiting
-        // until all promises have resolved like this means a form can't be used
-        // until they've all resolved.
-        if (blocksToRender.length == 0) {
-          var forms = dg.loadForms();
-          for (var id in forms) {
-            if (!forms.hasOwnProperty(id)) { continue; }
-            var form_html_id = dg.killCamelCase(id, '-');
-            var form = document.getElementById(form_html_id);
-            function processForm(e) {
-              if (e.preventDefault) e.preventDefault();
-              var _form = dg.loadForm(id);
-              _form._submission().then(
-                function() { },
-                function() { }
-              );
-              return false; // Prevent default form behavior.
-            }
-            if (form.attachEvent) { form.attachEvent("submit", processForm); }
-            else { form.addEventListener("submit", processForm); }
-          }
+      blocks[id].getVisibility().then(function(visibility) {
+        if (visibility.visible) {
+          visibility.block.buildWrapper().then(function(_block) {
+            document.getElementById(_block.get('id')).innerHTML = dg.render(_block.get('content'));
+            finish(_block);
+          });
         }
-
+        else { finish(visibility.block); }
       });
     }
 
