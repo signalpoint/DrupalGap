@@ -34,6 +34,12 @@ dg.FormElement.prototype.valueCallback = function() {
   });
 };
 
+/**
+ * Theme's a form element label.
+ * @param variables
+ * @returns {string}
+ * @see https://api.drupal.org/api/drupal/core!modules!system!templates!form-element-label.html.twig/8
+ */
 dg.theme_form_element_label = function(variables) {
   return '<label ' + dg.attributes(variables._attributes) + '>' + variables._title + '</label>';
 };
