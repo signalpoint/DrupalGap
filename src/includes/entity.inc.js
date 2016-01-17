@@ -33,6 +33,8 @@ dg.entityRenderContent = function(entity) {
     var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
     for (var fieldName in viewMode) {
       if (!viewMode.hasOwnProperty(fieldName)) { continue; }
+
+      // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
       //console.log(fieldName);
       //console.log(viewMode[fieldName]);
 
@@ -67,7 +69,24 @@ dg.entityRenderContent = function(entity) {
             viewMode[fieldName], // viewMode
             viewMode[fieldName].third_party_settings // thirdPartySettings
         );
-        content[fieldName] = FieldFormatter.viewElements(FieldItemListInterface, entity.language());
+        var elements = FieldFormatter.viewElements(FieldItemListInterface, entity.language());
+        if (jDrupal.isEmpty(elements)) { continue; }
+        var children = {
+          label: {
+            _theme: 'form_element_label',
+            _title: FieldDefinitionInterface.getLabel(),
+            _title_display: 'before'
+          },
+          elements: elements
+        };
+        content[fieldName] = {
+          _theme: 'container',
+          _children: children,
+          _attributes: {
+            'class': [fieldName.replace(/_/g,'-')]
+          },
+          _weight: viewMode[fieldName].weight
+        };
 
       }
 
@@ -79,5 +98,5 @@ dg.entityRenderContent = function(entity) {
 };
 
 dg.theme_entity_label = function(variables) {
-  return '<h2 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h2>';
+  return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h1>';
 };
