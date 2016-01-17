@@ -27,7 +27,16 @@ drupalgap.settings.blocks.ava = {
     main: { }
 
   },
-  footer: { }
+  footer: {
+
+    // DrupalGap's administration menu block.
+    admin_menu: {
+      roles: [
+        { role: 'administrator', mode: 'include' }
+      ]
+    }
+
+  }
 };
 
 // Contrib modules.
