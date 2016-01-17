@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-16 */
+/*! drupalgap 2016-01-17 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -1142,7 +1142,10 @@ dg.render = function(content) {
   }
   catch (error) { console.log('dg.render - ' + error); }
 };
-// Entity load proxies.
+// Proxies.
+dg.token = function() { return jDrupal.token(); };
+dg.restPath = function() { return jDrupal.restPath(); };
+dg.path = function() { return jDrupal.path(); };
 dg.commentLoad = function() {
   return jDrupal.commentLoad.apply(jDrupal, arguments);
 };
@@ -1152,8 +1155,9 @@ dg.nodeLoad = function() {
 dg.userLoad = function() {
   return jDrupal.userLoad.apply(jDrupal, arguments);
 };
-dg.token = function() { return jDrupal.token(); };
-dg.restPath = function() { return jDrupal.restPath(); };
+dg.viewsLoad = function() {
+  return jDrupal.viewsLoad.apply(jDrupal, arguments);
+};
 // @inspiration http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
 dg.router = {
@@ -1504,6 +1508,64 @@ function core_rest_preprocess(xhr, data) { dg.spinnerShow(); }
  */
 function core_rest_post_process(xhr) { dg.spinnerHide(); }
 
+dg.modules.core = new dg.Module();
+
+// Let DrupalGap know we have a FieldFormatter(s).
+dg.modules.core.FieldFormatter = {};
+
+// Number integer field formatter.
+// Extend the FieldFormatter prototype for the number_integer field.
+dg.modules.core.FieldFormatter.entity_reference_label = function() { dg.FieldFormatterPrepare(this, arguments); };
+dg.modules.core.FieldFormatter.entity_reference_label.prototype = new dg.FieldFormatter;
+dg.modules.core.FieldFormatter.entity_reference_label.prototype.constructor = dg.modules.core.FieldFormatter.entity_reference_label;
+dg.modules.core.FieldFormatter.entity_reference_label.prototype.viewElements = function(FieldItemListInterface, langcode) {
+  var items = FieldItemListInterface.getItems();
+  var element = {};
+  if (items.length == 0) { return element; }
+  for (var delta = 0; delta < items.length; delta++) {
+    element[delta] = {
+      _theme: 'entity_reference_label',
+      _item: items[delta]
+    };
+  }
+  return element;
+};
+
+// Number integer field formatter.
+// Extend the FieldFormatter prototype for the number_integer field.
+dg.modules.core.FieldFormatter.number_integer = function() { dg.FieldFormatterPrepare(this, arguments); };
+dg.modules.core.FieldFormatter.number_integer.prototype = new dg.FieldFormatter;
+dg.modules.core.FieldFormatter.number_integer.prototype.constructor = dg.modules.core.FieldFormatter.number_integer;
+dg.modules.core.FieldFormatter.number_integer.prototype.viewElements = function(FieldItemListInterface, langcode) {
+  var items = FieldItemListInterface.getItems();
+  var element = {};
+  if (items.length == 0) { return element; }
+  for (var delta = 0; delta < items.length; delta++) {
+    element[delta] = {
+      _theme: 'number_integer',
+      _item: items[delta]
+    };
+  }
+  return element;
+};
+
+// String field formatter.
+// Extend the FieldFormatter prototype for the number_integer field.
+dg.modules.core.FieldFormatter.string = function() { dg.FieldFormatterPrepare(this, arguments); };
+dg.modules.core.FieldFormatter.string.prototype = new dg.FieldFormatter;
+dg.modules.core.FieldFormatter.string.prototype.constructor = dg.modules.core.FieldFormatter.string;
+dg.modules.core.FieldFormatter.string.prototype.viewElements = function(FieldItemListInterface, langcode) {
+  var items = FieldItemListInterface.getItems();
+  var element = {};
+  if (items.length == 0) { return element; }
+  for (var delta = 0; delta < items.length; delta++) {
+    element[delta] = {
+      _theme: 'string',
+      _item: items[delta]
+    };
+  }
+  return element;
+};
 // Let DrupalGap know we have a FieldWidget(s).
 dg.modules.core.FieldWidget = {};
 
@@ -1611,6 +1673,18 @@ dg.modules.core.FormWidget.entityID.prototype.form = function(items, delta, elem
   }
 };
 
+dg.theme_entity_reference_label = function(variables) {
+  var item = variables._item;
+  console.log(item);
+  console.log(dg.path());
+  return dg.l(item.target_id, item.url.replace(dg.path(), ''));
+};
+dg.theme_string = function(variables) {
+  return variables._item.value;
+};
+dg.theme_number_integer = function(variables) {
+  return variables._item.value;
+};
 dg.modules.image = new dg.Module();
 var NodeEdit = function() {
 
@@ -1834,12 +1908,11 @@ dg.modules.text = new dg.Module();
 // Let DrupalGap know we have a FieldFormatter(s).
 dg.modules.text.FieldFormatter = {};
 
-// text default field formatter.
+// Text default field formatter.
 // Extend the FieldFormatter prototype for the text_default field.
 dg.modules.text.FieldFormatter.text_default = function() { dg.FieldFormatterPrepare(this, arguments); };
 dg.modules.text.FieldFormatter.text_default.prototype = new dg.FieldFormatter;
 dg.modules.text.FieldFormatter.text_default.prototype.constructor = dg.modules.text.FieldFormatter.text_default;
-
 dg.modules.text.FieldFormatter.text_default.prototype.viewElements = function(FieldItemListInterface, langcode) {
   var items = FieldItemListInterface.getItems();
   var element = {};
