@@ -1,4 +1,7 @@
-// Entity load proxies.
+// Proxies.
+dg.token = function() { return jDrupal.token(); };
+dg.restPath = function() { return jDrupal.restPath(); };
+dg.path = function() { return jDrupal.path(); };
 dg.commentLoad = function() {
   return jDrupal.commentLoad.apply(jDrupal, arguments);
 };
@@ -8,5 +11,6 @@ dg.nodeLoad = function() {
 dg.userLoad = function() {
   return jDrupal.userLoad.apply(jDrupal, arguments);
 };
-dg.token = function() { return jDrupal.token(); };
-dg.restPath = function() { return jDrupal.restPath(); };
+dg.viewsLoad = function() {
+  return jDrupal.viewsLoad.apply(jDrupal, arguments);
+};
