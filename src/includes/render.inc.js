@@ -92,6 +92,13 @@ dg.appRender = function(content) {
 
   });
 };
+
+/**
+ *
+ * @param content
+ * @returns {*}
+ * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!RenderElement.php/class/RenderElement/8
+ */
 dg.render = function(content) {
   try {
     var type = typeof content;
