@@ -44,6 +44,8 @@ var NodeEdit = function() {
         for (var fieldName in entityFormMode) {
           if (!entityFormMode.hasOwnProperty(fieldName)) { continue; }
 
+          //console.log(fieldName);
+
           // Grab the field storage config, if any.
           var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
           if (!fieldStorageConfig) {
@@ -56,6 +58,10 @@ var NodeEdit = function() {
               continue;
             }
 
+            // Create a new field form mode.
+            var FieldFormMode = new dg.FieldFormMode(entityFormMode[fieldName]);
+            //console.log(FieldFormMode);
+
             form[fieldName] = {
               _type: type,
               _widgetType: 'FormWidget',
@@ -63,7 +69,8 @@ var NodeEdit = function() {
               _entityType: entityType,
               _bundle: bundle,
               _fieldName: fieldName,
-              _fieldFormMode: new dg.FieldFormMode(entityFormMode[fieldName])
+              _fieldFormMode: FieldFormMode,
+              _weight: FieldFormMode.getWeight()
             };
 
           }
@@ -85,6 +92,12 @@ var NodeEdit = function() {
               continue;
             }
 
+            // Create a new field form mode.
+            var FieldFormMode = new dg.FieldFormMode(entityFormMode[fieldName]);
+            //console.log(fieldStorageConfig);
+            //console.log(FieldFormMode);
+
+            // Create the element.
             form[fieldName] = {
               _type: fieldStorageConfig.type,
               _widgetType: 'FieldWidget',
@@ -92,7 +105,8 @@ var NodeEdit = function() {
               _entityType: entityType,
               _bundle: bundle,
               _fieldName: fieldName,
-              _fieldFormMode: new dg.FieldFormMode(entityFormMode[fieldName])
+              _fieldFormMode: FieldFormMode,
+              _weight: FieldFormMode.getWeight()
             };
 
           }
@@ -103,7 +117,8 @@ var NodeEdit = function() {
             _type: 'submit',
             _value: 'Save',
             _button_type: 'primary'
-          }
+          },
+          _weight: 999
         };
         ok(form);
       };
