@@ -137,6 +137,11 @@ dg.FormElement.prototype.valueCallback = function() {
     });
   });
 };
+
+dg.theme_form_element_label = function(variables) {
+  return '<label ' + dg.attributes(variables._attributes) + '>' + variables._title + '</label>';
+};
+
 // @see https://api.drupal.org/api/drupal/core!modules!block!src!Entity!Block.php/class/Block/8
 
 // @see https://www.drupal.org/node/2101565
@@ -403,6 +408,8 @@ dg.entityRenderContent = function(entity) {
     var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
     for (var fieldName in viewMode) {
       if (!viewMode.hasOwnProperty(fieldName)) { continue; }
+
+      // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
       //console.log(fieldName);
       //console.log(viewMode[fieldName]);
 
@@ -437,7 +444,24 @@ dg.entityRenderContent = function(entity) {
             viewMode[fieldName], // viewMode
             viewMode[fieldName].third_party_settings // thirdPartySettings
         );
-        content[fieldName] = FieldFormatter.viewElements(FieldItemListInterface, entity.language());
+        var elements = FieldFormatter.viewElements(FieldItemListInterface, entity.language());
+        if (jDrupal.isEmpty(elements)) { continue; }
+        var children = {
+          label: {
+            _theme: 'form_element_label',
+            _title: FieldDefinitionInterface.getLabel(),
+            _title_display: 'before'
+          },
+          elements: elements
+        };
+        content[fieldName] = {
+          _theme: 'container',
+          _children: children,
+          _attributes: {
+            'class': [fieldName.replace(/_/g,'-')]
+          },
+          _weight: viewMode[fieldName].weight
+        };
 
       }
 
@@ -449,7 +473,7 @@ dg.entityRenderContent = function(entity) {
 };
 
 dg.theme_entity_label = function(variables) {
-  return '<h2 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h2>';
+  return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h1>';
 };
 dg.FieldDefinitionInterface = function(entityType, bundle, fieldName) {
   this.entityType = entityType;
@@ -1673,10 +1697,13 @@ dg.modules.core.FormWidget.entityID.prototype.form = function(items, delta, elem
   }
 };
 
+dg.theme_container = function(variables) {
+  return '<div ' + dg.attributes(variables._attributes) + '>' +
+      dg.render(variables._children) +
+      '</div>';
+};
 dg.theme_entity_reference_label = function(variables) {
   var item = variables._item;
-  console.log(item);
-  console.log(dg.path());
   return dg.l(item.target_id, item.url.replace(dg.path(), ''));
 };
 dg.theme_string = function(variables) {
