@@ -100,7 +100,6 @@ dg.appRender = function(content) {
  * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!RenderElement.php/class/RenderElement/8
  */
 dg.render = function(content) {
-  try {
     var type = typeof content;
     if (!content) { return ''; }
     if (type === 'string') { return content; }
@@ -123,7 +122,7 @@ dg.render = function(content) {
       if (content._type) {
         return prefix + dg.theme(content._type, content) + suffix;
       }
-      var weighted = {};
+      var weighted = {}; // @TODO properly handle negative weights
       var weightedCount = 0;
       html += prefix;
       for (var index in content) {
@@ -133,7 +132,7 @@ dg.render = function(content) {
         ) { continue; }
         var piece = content[index];
         var _type = typeof piece;
-        if (_type === 'object') {
+        if (_type === 'object' && piece !== null) {
           var weight = typeof piece._weight !== 'undefined' ? piece._weight : 0;
           if (typeof weighted[weight] === 'undefined') { weighted[weight] = []; }
           weighted[weight].push(dg.render(piece));
@@ -161,6 +160,4 @@ dg.render = function(content) {
       }
     }
     return html;
-  }
-  catch (error) { console.log('dg.render - ' + error); }
 };
