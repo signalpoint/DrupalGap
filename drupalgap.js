@@ -404,12 +404,16 @@ dg.entityRenderContent = function(entity) {
     //console.log(dg);
     //console.log(dg.entity_view_mode);
 
-    // Iterate over each field in the drupalgap entity view mode.
+    // Get the view mode.
+    // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
     var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
+    //console.log('viewMode - ' + entityType + ' / ' + bundle);
+    //console.log(viewMode);
+
+    // Iterate over each field in the drupalgap entity view mode.
     for (var fieldName in viewMode) {
       if (!viewMode.hasOwnProperty(fieldName)) { continue; }
 
-      // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
       //console.log(fieldName);
       //console.log(viewMode[fieldName]);
 
@@ -1140,6 +1144,8 @@ dg.render = function(content) {
       if (content._type) {
         return prefix + dg.theme(content._type, content) + suffix;
       }
+      var weighted = {};
+      var weightedCount = 0;
       html += prefix;
       for (var index in content) {
         if (
@@ -1148,10 +1154,23 @@ dg.render = function(content) {
         ) { continue; }
         var piece = content[index];
         var _type = typeof piece;
-        if (_type === 'object') { html += dg.render(piece); }
+        if (_type === 'object') {
+          var weight = typeof piece._weight !== 'undefined' ? piece._weight : 0;
+          if (typeof weighted[weight] === 'undefined') { weighted[weight] = []; }
+          weighted[weight].push(dg.render(piece));
+          weightedCount++;
+        }
         else if (_type === 'array') {
           for (var i = 0; i < piece.length; i++) {
             html += dg.render(piece[i]);
+          }
+        }
+      }
+      if (weightedCount) {
+        for (var weight in weighted) {
+          if (!weighted.hasOwnProperty(weight)) { continue; }
+          for (var i = 0; i < weighted[weight].length; i++) {
+            html += weighted[weight][i];
           }
         }
       }
