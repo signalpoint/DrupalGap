@@ -29,12 +29,16 @@ dg.entityRenderContent = function(entity) {
     //console.log(dg);
     //console.log(dg.entity_view_mode);
 
-    // Iterate over each field in the drupalgap entity view mode.
+    // Get the view mode.
+    // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
     var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
+    //console.log('viewMode - ' + entityType + ' / ' + bundle);
+    //console.log(viewMode);
+
+    // Iterate over each field in the drupalgap entity view mode.
     for (var fieldName in viewMode) {
       if (!viewMode.hasOwnProperty(fieldName)) { continue; }
 
-      // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
       //console.log(fieldName);
       //console.log(viewMode[fieldName]);
 
