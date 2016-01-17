@@ -53,19 +53,38 @@ dg.Form.prototype.getForm = function() {
           switch (element._widgetType) {
             case 'FieldWidget':
             case 'FormWidget':
-                // Instantiate the widget using the element's module, then build the element form and then merge in
-                // default field values.
+                // Instantiate the widget using the element's module, then build the element form and then add it to the
+                // form as a container.
                 var items = self.form._entity.get(name);
                 var delta = 0;
-                self.elements[name] = new dg.modules[element._module][element._widgetType][element._type](
-                    self.form._entityType,
-                    self.form._bundle,
-                    name,
-                    element,
-                    items,
-                    delta
+                var widget = new dg.modules[element._module][element._widgetType][element._type](
+                  self.form._entityType,
+                  self.form._bundle,
+                  name,
+                  element,
+                  items,
+                  delta
                 );
-                self.elements[name].form(items, delta, element, self.form, self.form_state);
+                self.elements[name] = widget;
+                widget.form(items, delta, element, self.form, self.form_state);
+                // Wrap elements in containers, except for hidden elements.
+                if (element._type == 'hidden') { self.form[name] = element; }
+                else {
+                  var children = {};
+                  if (element._title) {
+                    children.label = {
+                      _theme: 'form_element_label',
+                      _title: element._title
+                    }
+                  }
+                  children.element = element;
+                  var container = {
+                    _theme: 'container',
+                    _children: children,
+                    _weight: element._weight
+                  };
+                  self.form[name] = container;
+                }
               break;
             case 'FormElement':
             default:
