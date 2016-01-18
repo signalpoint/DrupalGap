@@ -1,1 +1,0 @@
-DrupalGap 8 aims to support all popular CSS frameworks. We'll start small and support what we know.

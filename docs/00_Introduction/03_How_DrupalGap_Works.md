@@ -29,5 +29,4 @@ The DrupalGap application development kit uses [jQuery Mobile](http://jquerymobi
 
 - Modules
 - Hooks
-- Themes
 - Templates
