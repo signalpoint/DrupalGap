@@ -55,7 +55,7 @@ dg.theme = function(hook, variables) {
       }
     //}
 
-    // Set default attributes.
+    // Set default properties.
     if (!variables._attributes) { variables._attributes = {}; }
 
     // If there is no class name array, set an empty one.
