@@ -1,31 +1,32 @@
 > DrupalGap has two parts...
 
- - [Drupal Module](https://drupal.org/project/drupalgap)
- - [Application Development Kit](https://github.com/signalpoint/DrupalGap)
+1. [Drupal Module](https://drupal.org/project/drupalgap)
+2. [Application Development Kit](https://github.com/signalpoint/DrupalGap)
 
-The Drupal Module opens up communication between an application and a Drupal 8 website. The application development kit is used by developers to create custom mobile applications, and web applications.
+The module opens up communication between an application and a Drupal 8 website.
+
+The application development kit is used by developers to create custom mobile applications, and web applications.
 
 > How does the module work?
 
-The DrupalGap module utilizes [Drupal 8 REST](https://www.drupal.org/documentation/modules/rest) to help applications communicate with a Drupal 8 website using [JSON](http://www.json.org/).
+The module utilizes [Drupal 8 REST](https://www.drupal.org/documentation/modules/rest) and [JSON](http://www.json.org/) for applications communicate with a Drupal website.
 
-> How does the app development kit work?
+> How does the application development kit work?
 
-The DrupalGap application development kit uses [jQuery Mobile](http://jquerymobile.com/) to build the user interface, and uses [PhoneGap](http://phonegap.com) to compile the app for installation as a mobile application on devices.
+- uses an optional [CSS Framework](Introduction/CSS_Frameworks) (*of your choice*) to style the app's user interface
+- optionally uses [PhoneGap (Cordova)](/Introduction/PhoneGap_and_Cordova) to compile the app for release on Android and iOS devices (*plus many others*)
 
-![DrupalGap Tools](http://drupalgap.org/sites/default/files/drupalgap-tools_0.png)
+> What tools are in the kit?
 
-## Now What?
-
-> DrupalGap utilizes familiar Drupal concepts like:
+DrupalGap utilizes familiar Drupal 8 concepts like:
 
 - Themes
 - Regions
 - Blocks
-- Menus
+- Routes
 - Pages
 
-> And techniques for customization such as:
+And techniques for customization such as:
 
 - Modules
 - Hooks
