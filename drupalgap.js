@@ -1055,6 +1055,15 @@ dg.Region.prototype.getBlocks = function() {
   return result;
 };
 
+// @see https://www.drupal.org/developing/api/8/render/arrays
+
+dg._postRender = []; // Holds onto postRenders for the current page's render array(s).
+
+/**
+ *
+ * @param content
+ * @see https://api.drupal.org/api/drupal/core!includes!common.inc/function/render/8
+ */
 dg.appRender = function(content) {
   dg.themeLoad().then(function(theme) {
     var innerHTML = '';
@@ -1097,8 +1106,6 @@ dg.appRender = function(content) {
     // Place the region, and block placeholders, into the app's div.
     document.getElementById('dg-app').innerHTML = innerHTML;
 
-
-
     // Run the build promise for each block, then inject their content as they respond.
     // Keep a tally of all the blocks, and once their promises have all completed, then
     // if there are any forms on the page, attach their UI submit handlers. We don't use
@@ -1107,12 +1114,23 @@ dg.appRender = function(content) {
     var blocksToRender = [];
 
     var finish = function(_block) {
+
+      // Remove this block from the list of blocks to be rendered.
       blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
-      // If we're all done with every block, process the form(s), if any.
-      // @TODO form should be processed as they're injected, because waiting
-      // until all promises have resolved like this means a form can't be used
-      // until they've all resolved.
+
+      // If we're all done rendering with every block...
       if (blocksToRender.length == 0) {
+
+        // Run any post render functions and reset the queue.
+        if (dg._postRender.length) {
+          for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
+          dg._postRender = [];
+        }
+
+        // Process the form(s), if any.
+        // @TODO form should be processed as they're injected, because waiting
+        // until all promises have resolved like this means a form can't be used
+        // until they've all resolved.
         var forms = dg.loadForms();
         for (var id in forms) {
           if (!forms.hasOwnProperty(id)) { continue; }
@@ -1150,6 +1168,10 @@ dg.appRender = function(content) {
   });
 };
 
+dg.renderProperties = function() {
+  return ['_prefix', '_suffix', '_preRender', '_postRender']
+};
+
 /**
  *
  * @param content
@@ -1165,10 +1187,16 @@ dg.render = function(content) {
     if (type === 'object') {
       var prefix = content._prefix ? content._prefix : '';
       var suffix = content._suffix ? content._suffix : '';
+      if (typeof content._postRender === 'undefined') { content._postRender = []; }
       if (content.markup) {
         console.log('DEPRECATED: Use "_markup" instead of "markup" in this render array:');
         console.log(content);
         content._markup = content.markup;
+      }
+      if (content._postRender.length) {
+        for (var i = 0; i < content._postRender.length; i++) {
+          dg._postRender.push(content._postRender[i]);
+        }
       }
       if (content._markup) {
         return prefix + content._markup + suffix;
@@ -1179,14 +1207,12 @@ dg.render = function(content) {
       if (content._type) {
         return prefix + dg.theme(content._type, content) + suffix;
       }
-      var weighted = {}; // @TODO properly handle negative weights
+      // @TODO properly handle negative weights.
+      var weighted = {};
       var weightedCount = 0;
       html += prefix;
       for (var index in content) {
-        if (
-          !content.hasOwnProperty(index) ||
-          index == '_prefix' || index == '_suffix'
-        ) { continue; }
+        if (!content.hasOwnProperty(index) || jDrupal.inArray(index, dg.renderProperties())) { continue; }
         var piece = content[index];
         var _type = typeof piece;
         if (_type === 'object' && piece !== null) {
@@ -1452,7 +1478,7 @@ dg.theme = function(hook, variables) {
       }
     //}
 
-    // Set default attributes.
+    // Set default properties.
     if (!variables._attributes) { variables._attributes = {}; }
 
     // If there is no class name array, set an empty one.
