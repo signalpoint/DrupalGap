@@ -16,7 +16,7 @@ dg.config = function(name) {
 dg.getMode = function() { return this.config('mode'); };
 dg.setMode = function(mode) { this.config('mode', mode); };
 
-dg.getFront = function() {
+dg.getFrontPagePath = function() {
   var front = dg.config('front');
   if (front == null) { front = 'dg'; }
   return front;

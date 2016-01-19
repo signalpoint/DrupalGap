@@ -2,7 +2,7 @@ var UserLoginForm = function() {
 
   this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
-      form._action = dg.getFront();
+      form._action = dg.getFrontPagePath();
       form.name = {
         _type: 'textfield',
         _title: 'Username',

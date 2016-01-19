@@ -17,7 +17,7 @@ dg.modules.user.routing = function() {
         return new Promise(function(ok, err) {
           ok('Logging out...');
           jDrupal.userLogout().then(function() {
-            dg.goto(dg.getFront());
+            dg.goto(dg.getFrontPagePath());
           });
         });
 
