@@ -2,10 +2,11 @@
 
 # Globals
 APP_MODULES_DIRECTORY="app/modules"
+APP_MODULES_CONTRIB_DIRECTORY="$APP_MODULES_DIRECTORY/contrib"
 APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
 APP_BACKUPS_DIRECTORY=".drupalgap-backups"
-DRUPALGAP_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/7.x-1.x/bin/drupalgap.js"
-DRUPALGAP_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/7.x-1.x/bin/drupalgap.min.js"
+DRUPALGAP_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.js"
+DRUPALGAP_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.min.js"
 
 # DL | DOWNLOAD
 function drupalgap_download_project() {
@@ -82,38 +83,36 @@ function drupalgap_update() {
   fi
 
   # Make a copy of the current bin directory.
-  cp -r bin $TEMP_DIR
+  cp -r drupalgap.js drupalgap.min.js $TEMP_DIR
 
-  # If drupalgap.js or drupalgap.min.js exist in the bin directory, remove them.
-  if [ -f bin/drupalgap.js ]; then
-    rm bin/drupalgap.js
+  # If drupalgap.js or drupalgap.min.js exist, remove them.
+  if [ -f drupalgap.js ]; then
+    rm drupalgap.js
   fi
-  if [ -f bin/drupalgap.min.js ]; then
-    rm bin/drupalgap.min.js
+  if [ -f drupalgap.min.js ]; then
+    rm drupalgap.min.js
   fi
 
   # Download the latest binaries.
-  cd bin
   wget "$DRUPALGAP_JS_URL" --no-check-certificate
   wget "$DRUPALGAP_MIN_JS_URL" --no-check-certificate
-  cd ..
 
   # Let the developer know what happened.
   echo -e "Backups saved to: $TEMP_DIR\nDrupalGap SDK update complete!"
 
   # Warn the developer if their index.html file needs to be updated.
   FOUND_BIN=false
-  if grep -Fq "bin/drupalgap.js"  index.html
+  if grep -Fq "drupalgap.js"  index.html
   then
       FOUND_BIN=true
   fi
-  if ! $FOUND_BIN && grep -Fq "bin/drupalgap.min.js" index.html
+  if ! $FOUND_BIN && grep -Fq "drupalgap.min.js" index.html
   then
       FOUND_BIN=true
   fi
   if ! $FOUND_BIN
   then
-    echo "NOTE, update the index.html file to load: bin/drupalgap.min.js"
+    echo "NOTE, update the index.html file to load: drupalgap.min.js"
   fi
 
 }
