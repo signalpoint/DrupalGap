@@ -1,17 +1,8 @@
-A Foundation 6 based theme.
+# A Foundation 6 based theme for DrupalGap 8
 
-1. Download Foundation 6: http://foundation.zurb.com/sites/download/assets/complete-f6.zip
-2. Extract the `css`, `img` and `js` directories into the app
+## Setup
 
-The file system will look something like this:
-
-```
-index.html      # DrupalGap's default index.html file
-css/            # Foundation 6 CSS
-img/            # Foundation 6 Images
-js/             # Foundation 6 JavaScript
-...             # A bunch of other files...
-```
-
+1. Enable the Foundation Module for DrupalGap: https://github.com/signalpoint/foundation
+2. Follow the Foundation Module's README.md: https://github.com/signalpoint/foundation/blob/8.x-1.x/README.md
 3. Copy the contents of the `default.index.html` file from this theme's folder, and replace the contents of the
  `index.html` file with it.
