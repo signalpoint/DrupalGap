@@ -2,7 +2,7 @@ var UserLoginForm = function() {
 
   this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
-      form._action = dg.config('front');
+      form._action = dg.getFront();
       form.name = {
         _type: 'textfield',
         _title: 'Username',
