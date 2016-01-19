@@ -15,19 +15,3 @@ The module utilizes [Drupal 8 REST](https://www.drupal.org/documentation/modules
 
 - uses an optional [CSS Framework](Introduction/CSS_Frameworks) (*of your choice*) to style the app's user interface
 - optionally uses [PhoneGap (Cordova)](/Introduction/PhoneGap_and_Cordova) to compile the app for release on Android and iOS devices (*plus many others*)
-
-> What tools are in the kit?
-
-DrupalGap utilizes familiar Drupal 8 concepts like:
-
-- Themes
-- Regions
-- Blocks
-- Routes
-- Pages
-
-And techniques for customization such as:
-
-- Modules
-- Hooks
-- Templates
