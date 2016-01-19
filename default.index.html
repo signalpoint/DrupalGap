@@ -1,30 +1,42 @@
 <!DOCTYPE html>
 <html>
-<head>
+    <head>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DrupalGap</title>
-    <meta charset="utf-8" />
-    <link rel="shortcut icon" href="favicon.ico" />
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- jDrupal and DrupalGap-->
-    <script type="text/javascript" charset="utf-8" src="jdrupal.js"></script>
-    <script type="text/javascript" charset="utf-8" src="drupalgap.js"></script>
+        <title>DrupalGap</title>
+        <link rel="shortcut icon" href="favicon.ico" />
+        <link rel="stylesheet" href="css/foundation.css" />
+        <link rel="stylesheet" href="css/app.css" />
+      
+        <!-- jDrupal and DrupalGap-->
+        <script type="text/javascript" charset="utf-8" src="jdrupal.min.js"></script>
+        <script type="text/javascript" charset="utf-8" src="drupalgap.min.js"></script>
+        <link rel="stylesheet" href="css/dg.css" />
+      
+        <!-- App Settings -->
+        <script type="text/javascript" charset="utf-8" src="app/settings.js"></script>
 
-    <!-- App Settings -->
-    <script type="text/javascript" charset="utf-8" src="app/settings.js"></script>
+        <!-- Load DrupalGap Modules -->
+        <!--<script src="app/modules/contrib/example/example.js"></script>-->
+        <!--<script src="app/modules/custom/my_module/my_module.js"></script>-->
 
-    <!-- Load Theme -->
-    <script src="themes/ava/ava.js"></script>
+        <!-- Load Theme -->
+        <script src="themes/ava/ava.js"></script>
 
-</head>
-<body>
+    </head>
+    <body>
 
-    <!-- The DrupalGap App Container -->
-    <div id="dg-app"></div>
+        <!-- The DrupalGap Spinner/Loading Icon -->
+        <div id="dgSpinner" style="display: none;"></div>
 
-    <!-- Start DrupalGap -->
-    <script type="text/javascript">drupalgap.start();</script>
+        <!-- The DrupalGap App Container -->
+        <div id="dg-app"></div>
 
-</body>
+        <!-- Start DrupalGap -->
+        <script type="text/javascript">drupalgap.start();</script>
+
+    </body>
 </html>

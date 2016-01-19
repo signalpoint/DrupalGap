@@ -2,19 +2,25 @@
 <html>
 <head>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DrupalGap</title>
     <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DrupalGap</title>
     <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="css/foundation.css" />
+    <link rel="stylesheet" href="css/app.css" />
 
     <!-- jDrupal and DrupalGap-->
-    <script type="text/javascript" charset="utf-8" src="jdrupal.js"></script>
-    <script type="text/javascript" charset="utf-8" src="drupalgap.js"></script>
+    <script type="text/javascript" charset="utf-8" src="jdrupal.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="drupalgap.min.js"></script>
+    <link rel="stylesheet" href="css/dg.css" />
 
     <!-- App Settings -->
     <script type="text/javascript" charset="utf-8" src="app/settings.js"></script>
 
-    <!-- Load Custom Modules (and configure each module in settings.js) -->
+    <!-- Load DrupalGap Modules -->
+    <!--<script src="app/modules/contrib/example/example.js"></script>-->
     <!--<script src="app/modules/custom/my_module/my_module.js"></script>-->
 
     <!-- Load Theme -->
@@ -25,6 +31,9 @@
 
     <!-- Load PhoneGap (Cordova) -->
     <script type="text/javascript" src="cordova.js"></script>
+
+    <!-- The DrupalGap Spinner/Loading Icon -->
+    <div id="dgSpinner" style="display: none;"></div>
 
     <!-- The DrupalGap App Container -->
     <div id="dg-app"></div>
