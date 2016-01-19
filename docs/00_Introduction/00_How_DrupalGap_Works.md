@@ -3,13 +3,9 @@
 1. [Drupal Module](https://drupal.org/project/drupalgap)
 2. [Application Development Kit](https://github.com/signalpoint/DrupalGap)
 
-The module opens up communication between an application and a Drupal 8 website.
-
-The application development kit is used by developers to create custom mobile applications, and web applications.
-
 > How does the module work?
 
-The module utilizes [Drupal 8 REST](https://www.drupal.org/documentation/modules/rest) and [JSON](http://www.json.org/) for applications communicate with a Drupal website.
+- uses [Drupal 8 REST](https://www.drupal.org/documentation/modules/rest) and [JSON](http://www.json.org/) to open communication between the app and the website
 
 > How does the application development kit work?
 
