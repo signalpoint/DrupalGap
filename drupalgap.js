@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-17 */
+/*! drupalgap 2016-01-19 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -315,6 +315,12 @@ dg.config = function(name) {
 // Mode.
 dg.getMode = function() { return this.config('mode'); };
 dg.setMode = function(mode) { this.config('mode', mode); };
+
+dg.getFrontPagePath = function() {
+  var front = dg.config('front');
+  if (front == null) { front = 'dg'; }
+  return front;
+};
 
 /**
  *
@@ -1335,7 +1341,7 @@ dg.router = {
         dg.appRender();
       };
 
-      if (!route.defaults) { route = this.load(dg.config('front')); }
+      if (!route.defaults) { route = this.load(dg.getFrontPagePath()); }
 
       if (route.defaults) {
 
@@ -2012,6 +2018,40 @@ dg.modules.node.routing = function() {
 
 dg.modules.system = new dg.Module();
 
+dg.modules.system.routing = function() {
+  var routes = {};
+  routes["system.dashboard"] = {
+    "path": "/dg",
+    "defaults": {
+      "_title": "DrupalGap Dashboard",
+      _controller: function() {
+        return new Promise(function(ok, err) {
+          var msg = 'Welcome to DrupalGap!';
+          var account = dg.currentUser();
+          if (account.isAuthenticated()) {
+            msg = msg.replace('!', ', ' + account.getAccountName() + '!');
+          }
+          ok('<p>' + msg + '</p>');
+        });
+
+      }
+    }
+  };
+  routes["system.404"] = {
+    "path": "/404",
+    "defaults": {
+      "_title": "404 - Page not found",
+      _controller: function() {
+        return new Promise(function(ok, err) {
+          ok('Sorry, that page was not found...');
+        });
+
+      }
+    }
+  };
+  return routes;
+};
+
 dg.modules.system.blocks = function() {
   var blocks = {};
   blocks.main = {
@@ -2069,7 +2109,7 @@ var UserLoginForm = function() {
 
   this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
-      form._action = dg.config('front');
+      form._action = dg.getFrontPagePath();
       form.name = {
         _type: 'textfield',
         _title: 'Username',
@@ -2129,7 +2169,7 @@ dg.modules.user.routing = function() {
         return new Promise(function(ok, err) {
           ok('Logging out...');
           jDrupal.userLogout().then(function() {
-            dg.goto(dg.config('front'));
+            dg.goto(dg.getFrontPagePath());
           });
         });
 
