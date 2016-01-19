@@ -1,62 +1,44 @@
-DrupalGap is an open source mobile application development kit for
-Drupal websites. This project utilizes Drupal, PhoneGap (Cordova), jQueryMobile
-and jDrupal.
+## What is DrupalGap?
 
-  http://www.drupalgap.org
+> An open source javascript front end framework and application development kit for Drupal 8. [Try a demo...](http://demo.drupalgap.org/8) 
 
-With DrupalGap developers can create custom multi-platform mobile
-applications that communicate with their Drupal websites.
+## What is DrupalGap used for?
 
-|==============|
-| Installation |
-|==============|
+> Build custom apps for Drupal 8, `with one set of code`, and then deploy them to a wide range of **app stores**, **devices** and **browsers**.
 
-For complete details, please visit the DrupalGap Hello World documentation.
+## Tools and Features
 
-    http://www.drupalgap.org/hello-world
+> By utilizing familiar coding syntax and concepts from Drupal 8 such as...
 
-====
+- Entities / Fields
+- Modules
+- Hooks
+- Themes
+- Regions
+- Blocks
+- Templates
+- Routes / Custom Pages
+- Forms API
+- User Roles / Permissions
 
-1. Download the latest stable release of DrupalGap:
+> with built in pages, widgets and forms to handle...
 
-     https://github.com/signalpoint/DrupalGap/releases
+- User Authentication
+- Adding / Editing Entities
+- Displaying Entities / Fields
+- Rendering Views Result Data
 
-2. Extract the downloaded DrupalGap archive into the www directory
-   located within your PhoneGap project workspace. When you are done,
-   the drupalgap.js file will be located here:
+> the DrupalGap tool set is dedicated to Drupal 8 application development.
 
-     www/bin/drupalgap.js
+## What's under the hood?
 
-   Note, the DrupalGap index.html will overwrite the index.html provided
-   by PhoneGap.
+> Made with *100% organic Vanilla JavaScript*
 
-3. Open www/app/default.settings.js and save a copy of it as settings.js
-   so the copy of it lives here: 
-   
-     www/app/settings.js
-   
-4. Specify your Drupal site path (with NO trailing slash) in settings.js,
-   for example:
+This allows developers to optionally include a **JS** and/or **CSS** framework of their choice alongside DrupalGap when building apps for Drupal 8.
 
-     Drupal.settings.site_path = 'http://www.example.com';
+- [Learn more about DrupalGap's innards](http://docs.drupalgap.org/8/Introduction/How_DrupalGap_Works)
+- [What the heck is Vanilla JS?](http://stackoverflow.com/questions/20435653/what-is-vanillajs)
 
-5. Run your new Mobile Application!
+## Getting Started
 
-===================================
-
-From here you'll have a great start to building a mobile application that
-integrates with your Drupal website. Check out topics in the Getting
-Started Guide to continue.
-
-|=======================|
-| Getting Started Guide |
-|=======================|
-
-http://www.drupalgap.org/get-started
-
-|==================|
-| More Information |
-|==================|
-
-http://www.drupalgap.org
-http://api.drupalgap.org
+> Try the [Hello World](http://docs.drupalgap.org/8/Hello_World) for DrupalGap.
