@@ -73,7 +73,7 @@ dg.router = {
         dg.appRender();
       };
 
-      if (!route.defaults) { route = this.load(dg.config('front')); }
+      if (!route.defaults) { route = this.load(dg.getFront()); }
 
       if (route.defaults) {
 
