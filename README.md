@@ -1,6 +1,6 @@
 ## What is DrupalGap?
 
-> An open source javascript front end framework and application development kit for Drupal 7. [Try a demo...](http://demo.drupalgap.org) 
+> An open source application development kit for Drupal 7. [Try a demo...](http://demo.drupalgap.org) 
 
 ## What is DrupalGap used for?
 
