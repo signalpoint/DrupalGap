@@ -262,7 +262,7 @@ dg.blocksLoad = function() {
           if (!config.id) { config.id = block; }
           if (!config.module) { config.module = module; }
           if (!config.attributes) { config.attributes = {}; }
-          if (!config.attributes.id) { config.attributes.id = block; }
+          if (!config.attributes.id) { config.attributes.id = dg.cleanCssIdentifier(block); }
 
           // Create an instance of the block, warn if someone overwrites somebody
           // else's block.
@@ -385,6 +385,18 @@ dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
+/**
+ * Given an id, this will remove its element from the DOM.
+ * @param id
+ */
+dg.removeElement = function(id) {
+  var elem = document.getElementById(id);
+  elem.parentElement.removeChild(elem);
+};
+
+dg.cleanCssIdentifier = function(id) {
+  return id.replace(/_/g, '-').toLowerCase();
+};
 /**
  * A proxy to create an instance of a jDrupal Node object.
  * @param nid_or_node
@@ -1163,11 +1175,15 @@ dg.appRender = function(content) {
       blocks[id].getVisibility().then(function(visibility) {
         if (visibility.visible) {
           visibility.block.buildWrapper().then(function(_block) {
-            document.getElementById(_block.get('id')).innerHTML = dg.render(_block.get('content'));
+            var _id = dg.cleanCssIdentifier(_block.get('id'));
+            var el = document.getElementById(_id).innerHTML = dg.render(_block.get('content'));
             finish(_block);
           });
         }
-        else { finish(visibility.block); }
+        else {
+          dg.removeElement(dg.cleanCssIdentifier(visibility.block.get('id')));
+          finish(visibility.block);
+        }
       });
     }
 
@@ -1542,6 +1558,13 @@ dg.theme_view = function(variables) {
     });
   });
 };
+/**
+ *
+ * @param text
+ * @param path
+ * @param options
+ * @returns {String}
+ */
 dg.l = function(text, path, options) {
   if (!options) { options = {}; }
   if (!options._text) { options._text = text; }
@@ -1555,9 +1578,9 @@ dg.l = function(text, path, options) {
  */
 dg.theme_link = function(variables) {
   var text = variables._text ? variables._text : '';
-  if (typeof variables._attributes.href === 'undefined' && variables._path) {
-    variables._attributes.href = '#' + variables._path;
-  }
+  var path = variables._path;
+  if (path == '') { path = dg.getFrontPagePath(); }
+  if (typeof variables._attributes.href === 'undefined' && path) { variables._attributes.href = '#' + path; }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
 };
 
@@ -1575,7 +1598,10 @@ dg.theme_item_list = function(variables) {
     for (var i in variables._items) {
       if (!variables._items.hasOwnProperty(i)) { continue; }
       var item = variables._items[i];
-      html += '<li>' + item + '</li>';
+      var attrs = {};
+      if (i == 0) { attrs['class'] = ['first']; }
+      else if (i == variables._items.length - 1) { attrs['class'] = ['last']; }
+      html += '<li ' + dg.attributes(attrs) + '>' + item + '</li>';
     }
   }
   return html += '</' + type + '>';
@@ -1592,7 +1618,9 @@ dg.modules.admin.blocks = function() {
         content['menu'] = {
           _theme: 'item_list',
           _items: [
-            dg.l('Create content', 'node/add')
+            dg.l('Home', ''),
+            dg.l('Create content', 'node/add'),
+            dg.l('Logout', 'user/logout')
           ]
         };
         ok(content);
@@ -2026,10 +2054,13 @@ dg.modules.system.routing = function() {
       "_title": "DrupalGap Dashboard",
       _controller: function() {
         return new Promise(function(ok, err) {
-          var msg = 'Welcome to DrupalGap!';
+          var msg = 'Welcome to DrupalGap, ';
           var account = dg.currentUser();
           if (account.isAuthenticated()) {
-            msg = msg.replace('!', ', ' + account.getAccountName() + '!');
+            msg += account.getAccountName() + '!';
+          }
+          else {
+            msg += dg.l('click here', 'user/login') + ' to login to your app.';
           }
           ok('<p>' + msg + '</p>');
         });
