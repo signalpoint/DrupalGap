@@ -10,22 +10,43 @@
 
 #admin-menu {
     background-color: black;
-    color: white;
-    min-height: 32px;
+    color: #ccc;
 }
 #admin-menu ul {
+    min-height: 32px;
+    font-size: 0.8em;
+    font-family: sans-serif;
+    -webkit-margin-before: 0em;
+    -webkit-padding-start: 0px;
 }
 #admin-menu ul li {
     float: left;
-    margin-top: 0.3em;
-    margin-right: 2em;
     list-style-type: none;
-    min-height: 32px;
+    min-height: 24px;
+    padding: 1em;
+    padding-top: 0.65em;
+    padding-bottom: 0em;
+    max-height: 24px;
+}
+#admin-menu ul li {
+    border-right: 1px dotted #999;
+}
+#admin-menu ul li.first {
+    border: none;
+    padding: 0em;
+    margin: 0em;
+}
+#admin-menu ul li.last {
+    border-left: none;
 }
 #admin-menu ul li a {
-    color: #ccc;
+    color: white;
     text-decoration: none;
 }
 #admin-menu ul li a:hover {
     color: #eee;
+    text-decoration: underline;
+}
+#admin-menu img {
+    max-height: 32px;
 }

@@ -9,8 +9,9 @@ dg.modules.admin.blocks = function() {
         content['menu'] = {
           _theme: 'item_list',
           _items: [
-            dg.l('Home', ''),
-            dg.l('Create content', 'node/add'),
+            dg.l(dg.theme('image', { _path: 'favicon.ico' }), ''),
+            dg.l('Content', 'node/add'),
+            dg.l('My account', 'user/' + dg.currentUser().id()),
             dg.l('Logout', 'user/logout')
           ]
         };
