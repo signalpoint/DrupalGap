@@ -24,6 +24,12 @@ dg.theme_link = function(variables) {
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
 };
 
+dg.theme_image = function(vars) {
+  var src = vars._attributes.src ? vars._attributes.src : vars._path;
+  vars._attributes.src = src;
+  return '<img ' + dg.attributes(vars._attributes) + '/>';
+};
+
 /**
  * Implementation of theme_item_list().
  * @param {Object} variables
