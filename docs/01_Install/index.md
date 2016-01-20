@@ -1,25 +1,16 @@
-## 1. Set up a Drupal 8 Website
-
-To build an application, we first need a Drupal 7 website. For simplicity, we'll want our Drupal 7 website to be available online. This means, we should be able to access the website using the web browser on our mobile device.
-
-Chances are if you are reading this, you already have a Drupal website online (or several). If that is the case, go ahead and jump to step #2. If you are new to Drupal, don't worry, there are plenty of great resources on getting a Drupal 7 website up and running.
+### 1. Set up a Drupal 8 Website
 
  - [Download Drupal](https://drupal.org/download)
  - [Install Drupal](http://drupal.org/documentation/install)
 
-## 2. Enable the DrupalGap Module
+### 2. Enable the DrupalGap 8 Module
 
-For our app to communicate with Drupal, the [DrupalGap module](http://www.drupal.org/project/drupalgap) needs to be enabled.
+- [Install and Configure the DrupalGap Module](http://cgit.drupalcode.org/drupalgap/plain/README.md?h=8.x-1.x)
 
-- [Install and Configure the DrupalGap Module](http://cgit.drupalcode.org/drupalgap/plain/README.md?h=8.x-1.x).
-
-## 3. Install the DrupalGap SDK
-
-For starters, we'll build a web application which is by far the easiest way to get our feet wet:
+### 3. Install the DrupalGap SDK
 
 ```
-# On your Drupal 8 site...
-cd www
+cd drupal
 wget https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip
 unzip 8.x-1.x.zip
 mv DrupalGap-8.x-1.x/ web-application
@@ -29,12 +20,18 @@ wget https://raw.githubusercontent.com/easystreet3/jDrupal/8.x-1.x/jdrupal.min.j
 cp app/default.settings.js app/settings.js
 ```
 
-Then open the `app/settings.js` file, set the `sitePath` value to `http://example.com`, and save the file.
+This sets up the app as a web application (*[types of apps](Introduction/Types_of_Applications)*). Don't worry, you can easily add other types of apps later, all with only `one set of code`.
 
-## 4. Done!
+### 4. Tell the SDK Where Drupal Lives
 
-> We're now ready to build an application!
+1. Open the `app/settings.js` file
+2. Set the `sitePath` value to `http://example.com`
+3. Save the file
 
-Try a demo of your app by visiting `http://example.com/web-application` in your browser.
+### 5. Done!
 
-If you haven't already, we'd recommend completing the [Hello World](Hello_World) for DrupalGap next.
+> Try a demo in your browser by visiting:
+
+```
+http://example.com/web-application
+```

@@ -7,7 +7,7 @@ Here's an example that displays a Google Map within a DrupalGap mobile applicati
 First, we need to include the Google Maps Javascript File in the `index.html` file of our app:
 
 ```
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
+<script src="https://maps.googleapis.com/maps/api/js"></script>
 ```
 
 This should go in the `<head>` of the of the `index.html` file (after the inclusing of the `drupalgap.js` file) for the app.
