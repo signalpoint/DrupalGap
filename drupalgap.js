@@ -369,6 +369,15 @@ dg.applyToConstructor = function(constructor, argArray) {
 };
 
 /**
+ *
+ * @param id
+ * @returns {string}
+ */
+dg.cleanCssIdentifier = function(id) {
+  return id.replace(/_/g, '-').toLowerCase();
+};
+
+/**
  * Given a string separated by underscores or hyphens, this will return the
  * camel case version of a string. For example, given "foo_bar" or "foo-bar",
  * this will return "fooBar".
@@ -380,9 +389,28 @@ dg.getCamelCase = function(str) {
 
 /**
  *
+ * @param str
+ * @param separator
+ * @returns {string}
  */
 dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
+};
+
+/**
+ * Given a drupal image file uri, this will return the path to the image on the Drupal site.
+ * @param uri
+ * @returns {*}
+ */
+dg.imagePath = function(uri) {
+  var src = dg.restPath() + uri;
+  if (src.indexOf('public://') != -1) {
+    src = src.replace('public://', dg.config('files').publicPath + '/');
+  }
+  else if (src.indexOf('private://') != -1) {
+    src = src.replace('private://', dg.config('files').privatePath + '/');
+  }
+  return src;
 };
 
 /**
@@ -394,9 +422,6 @@ dg.removeElement = function(id) {
   elem.parentElement.removeChild(elem);
 };
 
-dg.cleanCssIdentifier = function(id) {
-  return id.replace(/_/g, '-').toLowerCase();
-};
 /**
  * A proxy to create an instance of a jDrupal Node object.
  * @param nid_or_node
@@ -1248,6 +1273,7 @@ dg.render = function(content) {
             html += dg.render(piece[i]);
           }
         }
+        else if (_type === 'string') { html += piece; }
       }
       if (weightedCount) {
         for (var weight in weighted) {
@@ -1585,8 +1611,13 @@ dg.theme_link = function(variables) {
 };
 
 dg.theme_image = function(vars) {
-  var src = vars._attributes.src ? vars._attributes.src : vars._path;
-  vars._attributes.src = src;
+  vars._attributes.src = vars._attributes.src ? vars._attributes.src : vars._path;
+  var src = vars._attributes.src;
+  if (src && src.indexOf('public://') != -1 || src.indexOf('private://') != -1) {
+    vars._attributes.src = dg.imagePath(src);
+  }
+  vars._attributes.alt = vars._attributes.alt ? vars._attributes.alt : vars._alt;
+  vars._attributes.title = vars._attributes.title ? vars._attributes.title : vars._title;
   return '<img ' + dg.attributes(vars._attributes) + '/>';
 };
 
@@ -2061,6 +2092,7 @@ dg.modules.system.routing = function() {
       "_title": "DrupalGap Dashboard",
       _controller: function() {
         return new Promise(function(ok, err) {
+          var content = {};
           var msg = 'Welcome to DrupalGap, ';
           var account = dg.currentUser();
           if (account.isAuthenticated()) {
@@ -2069,7 +2101,8 @@ dg.modules.system.routing = function() {
           else {
             msg += dg.l('click here', 'user/login') + ' to login to your app.';
           }
-          ok('<p>' + msg + '</p>');
+          content['msg'] = { _markup: '<p>' + msg + '</p>' };
+          ok(content);
         });
 
       }
