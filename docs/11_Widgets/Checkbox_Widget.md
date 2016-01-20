@@ -2,7 +2,7 @@ For other example usage, see: [Checkboxes Form Elements](../Forms/Form_Elements/
 
 ![Checkbox Widget](http://drupalgap.org/sites/default/files/checkbox.png)
 
-## Render Array
+## Render Element
 
 ```
 var content = {};

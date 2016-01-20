@@ -7,7 +7,7 @@ With the [jQuery Mobile Textinput](https://api.jquerymobile.com/textinput/) Widg
 
 ![Text Field Widget](http://drupalgap.org/sites/default/files/textfield-widget.png)
 
-### Render Array
+### Render Element
 
 ```
 var content = {};
@@ -35,7 +35,7 @@ return html;
 
 ![Text Area Widget](http://drupalgap.org/sites/default/files/textarea-widget.png)
 
-### Render Array
+### Render Element
 
 ```
 var content = {};

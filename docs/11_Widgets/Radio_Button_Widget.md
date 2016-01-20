@@ -2,7 +2,7 @@ View the [Radio Button Form Element](../Forms/Form_Elements/Radio_Buttons) page 
 
 ![Radio Button Widget](http://drupalgap.org/sites/default/files/radio-button-widget.png)
 
-## Render Array
+## Render Element
 
 ```
 var content = {};

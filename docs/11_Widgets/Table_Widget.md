@@ -2,7 +2,7 @@ There are a few different ways to create tables in DrupalGap.
 
 ![Table Widget](http://drupalgap.org/sites/default/files/table.png)
 
-## Render Array
+## Render Element
 
 ```
 var header = [];

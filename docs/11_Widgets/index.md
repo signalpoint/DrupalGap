@@ -82,4 +82,4 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 ## Views Widget
 
-Visit the Views Render Array page for complete details on utilizing DrupalGap's built in Views Widget. If you've never created a Views Widget in DrupalGap before, we recommend starting with the DrupalGap Views documentation page.
+Visit the Views Render Element page for complete details on utilizing DrupalGap's built in Views Widget. If you've never created a Views Widget in DrupalGap before, we recommend starting with the DrupalGap Views documentation page.

@@ -1,6 +1,6 @@
-Sometimes we just want to use plain old custom HTML when building a widget. Luckily this is possible using a render array, or a string:
+Sometimes we just want to use plain old custom HTML when building a widget. Luckily this is possible using a render element, or a string:
 
-### Render Array (recommended)
+### Render Element (recommended)
 
 ```
 var content = {};

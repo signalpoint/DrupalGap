@@ -2,7 +2,7 @@ Also checkout the [Select List Form Element](../Forms/Form_Elements/Select_Lists
 
 ![Select List](http://drupalgap.com/sites/default/files/selectmenu-widget.png)
 
-## Render Array
+## Render Element
 
 ```
 var content = {};
