@@ -100,11 +100,15 @@ dg.appRender = function(content) {
       blocks[id].getVisibility().then(function(visibility) {
         if (visibility.visible) {
           visibility.block.buildWrapper().then(function(_block) {
-            document.getElementById(_block.get('id')).innerHTML = dg.render(_block.get('content'));
+            var _id = dg.cleanCssIdentifier(_block.get('id'));
+            var el = document.getElementById(_id).innerHTML = dg.render(_block.get('content'));
             finish(_block);
           });
         }
-        else { finish(visibility.block); }
+        else {
+          dg.removeElement(dg.cleanCssIdentifier(visibility.block.get('id')));
+          finish(visibility.block);
+        }
       });
     }
 
