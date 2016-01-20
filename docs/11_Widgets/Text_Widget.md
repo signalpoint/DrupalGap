@@ -20,10 +20,10 @@ content['my_text_field'] = {
 return content;
 ```
 
-### theme('textfield', ...)
+### dg.theme('textfield', ...)
 
 ```
-var html = theme('textfield', {
+var html = dg.theme('textfield', {
   attributes: {
     value: 'Hello'
   }
@@ -46,9 +46,9 @@ content['my_textarea'] = {
 return content;
 ```
 
-### theme('textarea', ...)
+### dg.theme('textarea', ...)
 
 ```
-var html = theme('textarea', { value: 'Hello' });
+var html = dg.theme('textarea', { value: 'Hello' });
 return html;
 ```

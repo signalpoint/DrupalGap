@@ -17,10 +17,10 @@ content['my_radio_buttons'] = {
 return content;
 ```
 
-## theme('radios', ...)
+## dg.theme('radios', ...)
 
 ```
-var html = theme('radios', {
+var html = dg.theme('radios', {
   options: {
     0: 'Rock and Roll',
     1: 'Metal'

@@ -25,7 +25,7 @@ content['my_checkbox_label'] = {
 return content;
 ```
 
-## theme('checkbox', ...)
+## dg.theme('checkbox', ...)
 
 ```
 // Build the checkbox.
@@ -42,6 +42,6 @@ var label = { element: checkbox };
 label.element.id = checkbox.attributes.id;
  
 // Render the checkbox and label and return it.
-return theme('checkbox', checkbox) +
-       theme('form_element_label', label);
+return dg.theme('checkbox', checkbox) +
+       dg.theme('form_element_label', label);
 ```
