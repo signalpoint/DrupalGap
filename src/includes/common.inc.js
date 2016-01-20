@@ -69,6 +69,15 @@ dg.applyToConstructor = function(constructor, argArray) {
 };
 
 /**
+ *
+ * @param id
+ * @returns {string}
+ */
+dg.cleanCssIdentifier = function(id) {
+  return id.replace(/_/g, '-').toLowerCase();
+};
+
+/**
  * Given a string separated by underscores or hyphens, this will return the
  * camel case version of a string. For example, given "foo_bar" or "foo-bar",
  * this will return "fooBar".
@@ -80,9 +89,28 @@ dg.getCamelCase = function(str) {
 
 /**
  *
+ * @param str
+ * @param separator
+ * @returns {string}
  */
 dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
+};
+
+/**
+ * Given a drupal image file uri, this will return the path to the image on the Drupal site.
+ * @param uri
+ * @returns {*}
+ */
+dg.imagePath = function(uri) {
+  var src = dg.restPath() + uri;
+  if (src.indexOf('public://') != -1) {
+    src = src.replace('public://', dg.config('files').publicPath + '/');
+  }
+  else if (src.indexOf('private://') != -1) {
+    src = src.replace('private://', dg.config('files').privatePath + '/');
+  }
+  return src;
 };
 
 /**
@@ -92,8 +120,4 @@ dg.killCamelCase = function(str, separator) {
 dg.removeElement = function(id) {
   var elem = document.getElementById(id);
   elem.parentElement.removeChild(elem);
-};
-
-dg.cleanCssIdentifier = function(id) {
-  return id.replace(/_/g, '-').toLowerCase();
 };
