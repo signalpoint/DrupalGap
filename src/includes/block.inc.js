@@ -112,7 +112,7 @@ dg.blocksLoad = function() {
           if (!config.id) { config.id = block; }
           if (!config.module) { config.module = module; }
           if (!config.attributes) { config.attributes = {}; }
-          if (!config.attributes.id) { config.attributes.id = block; }
+          if (!config.attributes.id) { config.attributes.id = dg.cleanCssIdentifier(block); }
 
           // Create an instance of the block, warn if someone overwrites somebody
           // else's block.
