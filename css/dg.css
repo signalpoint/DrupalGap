@@ -7,3 +7,25 @@
     position: absolute;
 }
 @-webkit-keyframes sweep { to { -webkit-transform: rotate(360deg); } }
+
+#admin-menu {
+    background-color: black;
+    color: white;
+    min-height: 32px;
+}
+#admin-menu ul {
+}
+#admin-menu ul li {
+    float: left;
+    margin-top: 0.3em;
+    margin-right: 2em;
+    list-style-type: none;
+    min-height: 32px;
+}
+#admin-menu ul li a {
+    color: #ccc;
+    text-decoration: none;
+}
+#admin-menu ul li a:hover {
+    color: #eee;
+}
