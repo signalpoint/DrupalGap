@@ -24,26 +24,33 @@ drupalgap.settings.theme = {
   path: 'themes/ava'
 };
 
+// Drupal files directory path(s)
+drupalgap.settings.files = {
+  publicPath: 'sites/default/files',
+  privatePath: null
+};
+
 // Blocks.
 drupalgap.settings.blocks = {};
 
 // Blocks for the "ava" theme.
 drupalgap.settings.blocks.ava = {
-  header: { },
+  header: {
+
+    // DrupalGap's administration menu block.
+    admin_menu: {
+      roles: [
+        { target_id: 'administrator', visible: true }
+      ]
+    }
+
+  },
   content: {
 
     // DrupalGap's "main" content block.
     main: { }
 
   },
-  footer: {
-
-    // DrupalGap's administration menu block.
-    admin_menu: {
-      roles: [
-        { role: 'administrator', mode: 'include' }
-      ]
-    }
-
-  }
+  footer: { }
 };
+
