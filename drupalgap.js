@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-19 */
+/*! drupalgap 2016-01-20 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -1584,6 +1584,12 @@ dg.theme_link = function(variables) {
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
 };
 
+dg.theme_image = function(vars) {
+  var src = vars._attributes.src ? vars._attributes.src : vars._path;
+  vars._attributes.src = src;
+  return '<img ' + dg.attributes(vars._attributes) + '/>';
+};
+
 /**
  * Implementation of theme_item_list().
  * @param {Object} variables
@@ -1618,8 +1624,9 @@ dg.modules.admin.blocks = function() {
         content['menu'] = {
           _theme: 'item_list',
           _items: [
-            dg.l('Home', ''),
-            dg.l('Create content', 'node/add'),
+            dg.l(dg.theme('image', { _path: 'favicon.ico' }), ''),
+            dg.l('Content', 'node/add'),
+            dg.l('My account', 'user/' + dg.currentUser().id()),
             dg.l('Logout', 'user/logout')
           ]
         };
