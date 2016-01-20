@@ -14,11 +14,20 @@ jDrupal.settings = {
 drupalgap.settings = {
   mode: 'web-app'
 };
-drupalgap.front = null;
+
+// The app's front page.
+drupalgap.settings.front = null;
+
+// The active theme.
 drupalgap.settings.theme = {
   name: 'ava',
   path: 'themes/ava'
 };
+
+// Blocks.
+drupalgap.settings.blocks = {};
+
+// Blocks for the "ava" theme.
 drupalgap.settings.blocks.ava = {
   header: { },
   content: {
@@ -38,13 +47,3 @@ drupalgap.settings.blocks.ava = {
 
   }
 };
-
-// Contrib modules.
-//jDrupal.modules['example'] = {
-//  path: 'app/modules/contrib/example'
-//};
-
-// Custom modules.
-//jDrupal.modules['my_module'] = {
-//  path: 'app/modules/custom/my_module'
-//};
