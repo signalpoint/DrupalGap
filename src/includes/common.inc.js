@@ -84,3 +84,16 @@ dg.getCamelCase = function(str) {
 dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
+
+/**
+ * Given an id, this will remove its element from the DOM.
+ * @param id
+ */
+dg.removeElement = function(id) {
+  var elem = document.getElementById(id);
+  elem.parentElement.removeChild(elem);
+};
+
+dg.cleanCssIdentifier = function(id) {
+  return id.replace(/_/g, '-').toLowerCase();
+};
