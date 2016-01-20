@@ -9,7 +9,9 @@ dg.modules.admin.blocks = function() {
         content['menu'] = {
           _theme: 'item_list',
           _items: [
-            dg.l('Create content', 'node/add')
+            dg.l('Home', ''),
+            dg.l('Create content', 'node/add'),
+            dg.l('Logout', 'user/logout')
           ]
         };
         ok(content);
