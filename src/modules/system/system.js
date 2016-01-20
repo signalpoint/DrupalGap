@@ -8,10 +8,13 @@ dg.modules.system.routing = function() {
       "_title": "DrupalGap Dashboard",
       _controller: function() {
         return new Promise(function(ok, err) {
-          var msg = 'Welcome to DrupalGap!';
+          var msg = 'Welcome to DrupalGap, ';
           var account = dg.currentUser();
           if (account.isAuthenticated()) {
-            msg = msg.replace('!', ', ' + account.getAccountName() + '!');
+            msg += account.getAccountName() + '!';
+          }
+          else {
+            msg += dg.l('click here', 'user/login') + ' to login to your app.';
           }
           ok('<p>' + msg + '</p>');
         });
