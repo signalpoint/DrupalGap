@@ -173,6 +173,7 @@ dg.render = function(content) {
             html += dg.render(piece[i]);
           }
         }
+        else if (_type === 'string') { html += piece; }
       }
       if (weightedCount) {
         for (var weight in weighted) {
