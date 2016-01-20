@@ -1,8 +1,8 @@
 #dgSpinner {
-    width: 32px;height: 32px;
+    width: 28px;height: 28px;
     -webkit-animation: sweep 1s infinite linear;
-    border-radius:75px;
-    border-bottom:5px solid #ccc;
+    border-radius: 80px;
+    border-bottom: 4px solid #333;
     z-index: 9999;
     position: absolute;
 }
