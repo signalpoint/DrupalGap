@@ -1,14 +1,8 @@
 Ava = function() {
   this.regions = {
-    header: {
-      attributes: {
-        foo: 'bar'
-      }
-    },
-    content: {
-      format: 'article'
-    },
-    footer: {}
+    header: { },
+    content: { },
+    footer: { }
   };
 };
 // Extend the DrupalGap Theme prototype.
