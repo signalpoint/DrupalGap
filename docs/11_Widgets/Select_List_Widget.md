@@ -17,10 +17,10 @@ content['my_select_list'] = {
 };
 ```
 
-## theme('select', ...)
+## dg.theme('select', ...)
 
 ```
-var html = theme('select', {
+var html = dg.theme('select', {
   options: {
     0: 'No',
     1: 'Yes'

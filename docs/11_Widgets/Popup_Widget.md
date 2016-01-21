@@ -21,10 +21,10 @@ content['my_popup'] = {
 return content;
 ```
 
-Notice how we prepend the page id onto the popup id? This guarantees our popup's id won't collide with any other pages. Here's the equivalent code if you'd like to call the `theme()` function instead:
+Notice how we prepend the page id onto the popup id? This guarantees our popup's id won't collide with any other pages. Here's the equivalent code if you'd like to call the `dg.theme()` function instead:
 
 ```
-var html = theme('popup', {
+var html = dg.theme('popup', {
     button_text: 'Open Popup',
     content: '<p>...</p>',
     attributes: {

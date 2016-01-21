@@ -24,7 +24,7 @@ var content = {
 return content;
 ```
 
-## theme('table', ...)
+## dg.theme('table', ...)
 
 ```
 var header = [];
@@ -40,6 +40,6 @@ var table_data = {
     border: 1
   }
 };
-var table = theme('table', table_data);
+var table = dg.theme('table', table_data);
 $('div#my_container').html(table).trigger('create');
 ```
