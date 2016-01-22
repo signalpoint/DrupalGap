@@ -66,7 +66,7 @@ content['my_custom_image'] = {
 return content;
 ```
 
-### theme('image', ...)
+### dg.theme('image', ...)
 
 ```
 var image = {
@@ -95,7 +95,7 @@ content['my_custom_image'] = {
 return content;
 ```
 
-### theme('image', ...)
+### dg.theme('image', ...)
 
 ```
 var image = {
