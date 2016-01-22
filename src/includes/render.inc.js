@@ -173,7 +173,8 @@ dg.render = function(content) {
             html += dg.render(piece[i]);
           }
         }
-        else if (_type === 'string') { html += piece; }
+        // @TODO this allows string to be embedded in render elements, but it breaks forms.
+        //else if (_type === 'string') { html += piece; }
       }
       if (weightedCount) {
         for (var weight in weighted) {
