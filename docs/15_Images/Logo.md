@@ -10,11 +10,11 @@ First, specify the path to your logo in the `settings.js` file:
 
 The default logo is provided above, so typically you'll want to include a custom logo within your custom theme, for example:
 
-`drupalgap.settings.logo = 'app/themes/my_theme/logo.jpg';`
+`drupalgap.settings.logo = 'themes/my_theme/logo.jpg';`
 
 Or you can place the logo in a custom module:
 
-`drupalgap.settings.logo = 'app/themes/my_theme/logo.jpg';`
+`drupalgap.settings.logo = 'themes/my_theme/logo.jpg';`
 
 ## Logo Block
 

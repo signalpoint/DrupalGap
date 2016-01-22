@@ -12,7 +12,7 @@ The `cordova.js` file is not required when building a web application.
 
 Make sure you are accessing the app via the correct URL, for example:
 
-`http://www.example.com/web-application`
+`http://www.example.com/app`
 
 It's worth noting that when testing an app inside of Ripple, the `cordova.js` file is most likely not needed. In most cases, it appears Ripple dynamically loads the `cordova.js` file into your app. Results may vary, so try including/excluding the `cordova.js` file in your `index.html` file for a fix.
 

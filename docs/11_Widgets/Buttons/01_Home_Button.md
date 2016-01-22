@@ -13,11 +13,11 @@ Both of the lines of code above will have the same value for the `html` variable
 
 ## Creating a Home Button
 
-A Home Button can be placed into a region as a link. The button allows users a quick way to get back to the front page of our app. Home buttons can be added using the `app/settings.js` file, or with a custom module using `hook_menu()`. Typically we don't want the Home button to show up on the home page, so we can exclude it from the front page using visibility rules.
+A Home Button can be placed into a region as a link. The button allows users a quick way to get back to the front page of our app. Home buttons can be added using the `settings.js` file, or with a custom module using `hook_menu()`. Typically we don't want the Home button to show up on the home page, so we can exclude it from the front page using visibility rules.
 
 ![Home Button](http://drupalgap.org/sites/default/files/home-button.png)
 
-### app/settings.js
+### settings.js
 
 ```
 drupalgap.settings.menus.regions['header'] = {

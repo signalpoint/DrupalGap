@@ -14,7 +14,7 @@ else {
 }
 ```
 
-It's important to note that the `Drupal.user` object *will not be available* (aka fully loaded) within the `app/settings.js` file.
+It's important to note that the `Drupal.user` object *will not be available* (aka fully loaded) within the `settings.js` file.
 
 ## user_load()
 

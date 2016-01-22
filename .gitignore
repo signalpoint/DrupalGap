@@ -1,21 +1,10 @@
 cordova*js
-app/modules/*
-app/themes/*
-app/settings.js
-app/.gitignore
-app/README.*
+modules/*
+themes/*
+settings.js
 node_modules
-res
-config.xml
-
-# Ignore a potential jDrupal folder
 jDrupal
-
-# Ignore jQM Theme Roller Files
-bin/themes/images
-bin/themes/*.css
-
-tools/*
-
+jdrupal.js
+jdrupal.min.js
 .drupalgap-backups
 

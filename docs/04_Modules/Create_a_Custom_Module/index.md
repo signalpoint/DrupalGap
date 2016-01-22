@@ -19,7 +19,7 @@ Then add this line of code to `my_module.js`:
 Open the `index.html` file and include your module's `.js` file *after* the `drupalgap.js` (or `drupalgap.min.js`) file:
 
 ```
-<script src="app/modules/custom/my_module/my_module.js"></script>
+<script src="modules/custom/my_module/my_module.js"></script>
 ```
 
 ## 3. Done

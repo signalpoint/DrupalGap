@@ -4,7 +4,7 @@ When a user visits a page in a DrupalGap mobile application, the output of the p
 
 ## Entity Caching
 
-In the `app/settings.js` file, we can control how entities are cached. It is highly recommended to have entity caching enabled when releasing a mobile application. Only disable it for development and debugging purposes.
+In the `settings.js` file, we can control how entities are cached. It is highly recommended to have entity caching enabled when releasing a mobile application. Only disable it for development and debugging purposes.
 
 ```
 Drupal.settings.cache.entity.enabled = true;

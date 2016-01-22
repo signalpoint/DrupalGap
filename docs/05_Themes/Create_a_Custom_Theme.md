@@ -121,8 +121,8 @@ The title, main_menu, main, and powered_by blocks are all system blocks provided
 
 ## 7. Copy the other tpl.html files from the core theme into your theme's directory, so they live here:
 
-    www/app/themes/my_theme/node.tpl.html
-    www/app/themes/my_theme/user-profile.tpl.html
+    app/themes/my_theme/node.tpl.html
+    app/themes/my_theme/user-profile.tpl.html
 
 ## 8. Make drupalgap aware of your theme by specifying it in settings.js
 

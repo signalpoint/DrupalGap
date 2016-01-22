@@ -2,7 +2,7 @@
 
 See also [menus with dynamic links](../Menus_with_Dynamic_Links).
 
-We can add menu links directly to regions using `hook_menu()` or with the `app/settings.js` file. For example, say we wanted to place an Order button on the top right of our Food page (from the [Food & Beverage example](../Creating_Custom_Menus)):
+We can add menu links directly to regions using `hook_menu()` or with the `settings.js` file. For example, say we wanted to place an Order button on the top right of our Food page (from the [Food & Beverage example](../Creating_Custom_Menus)):
 
 ![Food and Beverage Example](http://drupalgap.org/sites/default/files/order-food.png)
 

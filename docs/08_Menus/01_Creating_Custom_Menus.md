@@ -24,7 +24,7 @@ return new Promise(function(ok, err) {
 
 ## Displaying the Menu's Block
 
-For example, if we wanted to put the `my_module_custom_block` block in the `header` region of `my_theme`, we would do this in the `app/settings.js` file:
+For example, if we wanted to put the `my_module_custom_block` block in the `header` region of `my_theme`, we would do this in the `settings.js` file:
 
 ```
 drupalgap.settings.blocks.my_theme = {

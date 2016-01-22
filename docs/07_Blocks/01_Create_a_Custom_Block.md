@@ -23,6 +23,6 @@ my_module.blocks = function() {
 };
 ```
 
-Next, if we [add the block](Blocks/Adding_Block_Region) to a region the `app/settings.js` file, we'll be able to see the custom block. For example, if we placed the block in the `footer` region above the `powered_by` block, it may look something like this:
+Next, if we [add the block](Blocks/Adding_Block_Region) to a region the `settings.js` file, we'll be able to see the custom block. For example, if we placed the block in the `footer` region above the `powered_by` block, it may look something like this:
 
 ![Custom Block in DrupalGap](http://drupalgap.org/sites/default/files/custom-block.png)

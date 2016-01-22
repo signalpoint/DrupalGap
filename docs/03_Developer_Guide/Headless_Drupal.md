@@ -16,7 +16,7 @@ Now we can install the DrupalGap SDK in the root folder of our website:
 
 Then open the `settings.js` file in the DrupalGap SDK:
 
-`/var/www/headless/app/settings.js`
+`/var/www/headless/settings.js`
 
 Then set the site path to the Drupal directory:
 

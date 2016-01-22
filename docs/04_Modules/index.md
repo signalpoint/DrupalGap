@@ -2,11 +2,11 @@
 
  1. Visit the [Modules page](http://drupalgap.org/project/modules) to locate a contributed module
  2. Download a tag of the module from the project home page on GitHub
- 3. Place the module in `www/app/modules` (*not in www/modules*)
+ 3. Place the module in `app/modules`
  4. Tell DrupalGap about the module in `settings.js`:
 
 ```
-/** Contributed Modules - www/app/modules **/
+/** Contributed Modules - app/modules **/
 Drupal.modules.contrib['example'] = {};
 ```
 

@@ -52,11 +52,11 @@ This step *may or may not* be required, depending on your set up. The only diffe
 
 Make a copy of the `default.settings.js` file and save it as `settings.js` in the `app` folder within DrupalGap:
 
-`app/default.settings.js => app/settings.js`
+`app/default.settings.js => settings.js`
 
 The full path to your `settings.js` file will be something like this:
 
-`http://www.example.com/mobile-application/app/settings.js`
+`http://www.example.com/mobile-application/settings.js`
 
 ## 8. Set the Site Path for the Drupal Website in settings.js
 

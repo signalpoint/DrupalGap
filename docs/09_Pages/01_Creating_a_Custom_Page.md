@@ -47,7 +47,7 @@ my_module.routing = function() {
 
 ## 3. View the Custom Page
 
-To view the newly created custom page, we could set our App's front page to the path of the custom page. For example, in the `app/settings.js` file, set the `front` variable to the `hello-world` page path:
+To view the newly created custom page, we could set our App's front page to the path of the custom page. For example, in the `settings.js` file, set the `front` variable to the `hello-world` page path:
 
 ```
 // App Front Page

@@ -38,8 +38,8 @@ Remove this line from index.html:
 Then replace it with these three lines, for example:
 
 ```
-<link rel="stylesheet" href="app/themes/my_theme/my_theme.css" />
-<link rel="stylesheet" href="app/themes/my_theme/jquery.mobile.icons.min.css" />
+<link rel="stylesheet" href="themes/my_theme/my_theme.css" />
+<link rel="stylesheet" href="themes/my_theme/jquery.mobile.icons.min.css" />
 <link rel="stylesheet" href="jquery.mobile.structure-1.4.2.min.css" />
 ```
 
