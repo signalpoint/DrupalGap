@@ -1,11 +1,11 @@
 dg.modules.core = new dg.Module();
 
 /**
- * Implements hook_rest_preprocess().
+ * Implements hook_rest_pre_process().
  * @param xhr
  * @param data
  */
-function core_rest_preprocess(xhr, data) { dg.spinnerShow(); }
+function core_rest_pre_process(xhr, data) { dg.spinnerShow(); }
 
 /**
  * Implements hook_rest_post_process().
