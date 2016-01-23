@@ -9,24 +9,24 @@
 
 ### 3. Install the DrupalGap SDK
 
+Go to your Drupal root folder, and run the DrupalGap `install`:
+
 ```
 cd drupal
-wget https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip
-unzip 8.x-1.x.zip
-mv DrupalGap-8.x-1.x/ app
-rm 8.x-1.x-zip
-cd app
-wget https://raw.githubusercontent.com/easystreet3/jDrupal/8.x-1.x/jdrupal.min.js --no-check-certificate
-cp default.settings.js settings.js
+./modules/contrib/drupalgap/scripts/install app
 ```
-
-This sets up the app as a web application (*[types of apps](Introduction/Types_of_Applications)*). Don't worry, you can easily add other types of apps later, all with only `one set of code`.
 
 ### 4. Tell the SDK Where Drupal Lives
 
-1. Open the `settings.js` file
-2. Set the `sitePath` value to `http://example.com`
+1. Make a copy of the app's `default.settings.js` file and save it as `settings.js`
+2. Open the `settings.js` file and set the `sitePath` value to `http://example.com`
 3. Save the file
+
+```
+cd app
+cp default.settings.js settings.js
+vim settings.js
+```
 
 ### 5. Done!
 
@@ -35,3 +35,5 @@ This sets up the app as a web application (*[types of apps](Introduction/Types_o
 ```
 http://example.com/app
 ```
+
+This sets up the app as a web app (*[see other types](Introduction/Types_of_Applications)*). You can easily add other types of apps later, all with only `one set of code`.
