@@ -2,7 +2,7 @@
 jDrupal.settings = {
 
   // Drupal site settings.
-  sitePath: 'http://localhost',
+  sitePath: '',
   basePath: '/',
 
   // Set to true to see debug info printed to the console.log().
