@@ -2,7 +2,7 @@
 jDrupal.settings = {
 
   // Drupal site settings.
-  sitePath: '',
+  sitePath: 'http://example.com',
   basePath: '/',
 
   // Set to true to see debug info printed to the console.log().
@@ -53,4 +53,3 @@ drupalgap.settings.blocks.ava = {
   },
   footer: { }
 };
-
