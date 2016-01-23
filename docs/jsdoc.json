@@ -1,0 +1,17 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": [ "/var/www/html/jdrupal.web/7/jDrupal/src" ]
+    },
+    "plugins": [],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true,
+            "layoutFile": "/var/www/html/jdrupal.web/7/jDrupal/jsdoc/layout.tmpl"
+        }
+    }
+}

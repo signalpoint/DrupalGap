@@ -10,6 +10,8 @@ config.xml
 
 # Ignore a potential jDrupal folder
 jDrupal
+jdrupal.min.js
+jdrupal.js
 
 # Ignore jQM Theme Roller Files
 bin/themes/images
