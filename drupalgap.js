@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-20 */
+/*! drupalgap 2016-01-23 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -1671,11 +1671,11 @@ dg.modules.admin.blocks = function() {
 dg.modules.core = new dg.Module();
 
 /**
- * Implements hook_rest_preprocess().
+ * Implements hook_rest_pre_process().
  * @param xhr
  * @param data
  */
-function core_rest_preprocess(xhr, data) { dg.spinnerShow(); }
+function core_rest_pre_process(xhr, data) { dg.spinnerShow(); }
 
 /**
  * Implements hook_rest_post_process().
