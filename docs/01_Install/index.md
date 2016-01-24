@@ -9,7 +9,7 @@
 
 ### 3. Install the DrupalGap SDK
 
-Go to your Drupal root folder, and run the DrupalGap `install` script, or you can [manually install the SDK](Resources/Manual_Installation).
+Go to your Drupal root folder and run the DrupalGap `install` script, or you can [manually install the SDK](Resources/Manual_Installation).
 
 ```
 cd drupal

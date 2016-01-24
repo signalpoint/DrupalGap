@@ -1,5 +1,3 @@
-> Welcome to the DrupalGap "Hello World"
-
 By completing this guide, you'll be ready to build a custom application for Drupal 8.
 
 ### 1. Install DrupalGap
@@ -12,15 +10,47 @@ http://example.com/app
 
 ### 2. Create a module
 
-Next, [create a custom DrupalGap module](../Modules/Create_a_Custom_Module) to power the app.
+Next, [create a custom DrupalGap module](../Modules/Create_a_Custom_Module) to power the app:
 
 ```
-app/modules/custom/my_module
+cd app
+./dg create module my_module
 ```
 
-## 3. Create a page
+And then include it in the `<head>` of the app's `index.html` file:
 
-Next, we'll [create a custom page](../Pages/Creating_a_Custom_Page) and add this to the route's `_callback` function:
+```
+<script src='modules/custom/my_module/my_module.js' />
+```
+
+### 3. Create a route
+
+Next, we'll [create a route for the page](../Pages/Creating_a_Custom_Page) in the `my_module.js` file:
+
+```
+my_module.routing = function() {
+  var routes = {};
+
+  // My example page route.
+  routes["my_module.example"] = {
+    "path": "/hello-world",
+    "defaults": {
+      "_title": "Hello World",
+      "_controller": function() {
+
+        // Page content goes here...
+
+      }
+    }
+  };
+
+  return routes;
+};
+```
+
+### 4. Render the page
+
+Next, add this code to the route's `_callback` function in the `my_module.js` file to render the page:
 
 ```
 return new Promise(function(ok, err) {
@@ -43,20 +73,14 @@ return new Promise(function(ok, err) {
 });
 ```
 
-## 4. Set the App's Front Page
+### 5. Run the App!
 
-Open the `settings.js` file and set the app's front page path:
+When we navigate to the page, it will say hello to us:
 
 ```
-drupalgap.settings.front = 'hello_world';
+http://example.com/app/#hello-world
 ```
 
-## 5. Run the App!
+> What's next?
 
-Now when we run the app, we'll have a "Hello World" button widget that will say "Hi" when clicked:
-
-![Hello World](http://www.drupalgap.org/sites/default/files/hello-world_0.png)
-
-That's it, you've now got the basic tools to build a custom mobile application for a Drupal website!
-
-Next, try placing an additional [widget](Widgets) or two on your page or head back to the getting started guide for more topics and features within DrupalGap.
+You've now got the basic tools to build a custom app for Drupal 8! Next, try spicing up the display of your app with a [theme](../Themes).
