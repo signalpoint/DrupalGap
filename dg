@@ -120,7 +120,7 @@ function drupalgap_update() {
 }
 
 # MODULE CREATE
-function drupalgap_module_create() {
+function drupalgap_create_module() {
 
   MODULE_NAME="$1";
   MODULE_DIRECTORY="$APP_MODULES_CUSTOM_DIRECTORY/$MODULE_NAME"
@@ -158,14 +158,26 @@ $MODULE_NAME.routing = function() {
     \"path\": \"/hello-world\",
     \"defaults\": {
       \"_controller\": function() {
+
         return new Promise(function(ok, err) {
-          var text = 'Hello World';
+
+          // Make a greeting for the current user.
           var account = dg.currentUser();
-          if (account.isAuthenticated()) {
-            text = 'Hello ' + account.getAccountName();
-          }
-          ok(text);
+          var msg = account.isAuthenticated() ?
+            'Hello ' + account.getAccountName() :
+            'Hello World';
+
+          // Prepare our page's render element.
+          var element = {};
+          element['my_widget'] = {
+            _markup: '<p>' + msg + '</p>'
+          };
+
+          // Send the element back to be rendered on the page.
+          ok(element);
+
         });
+
       },
       \"_title\": \"Hello World\"
     },
@@ -193,9 +205,9 @@ fi
 
 # Determine the command and call its handler.
 case "$1" in
-module)    
+create)
   case "$2" in
-    create) drupalgap_module_create $3;;
+    module) drupalgap_create_module $3;;
   esac
   ;;
 download|dl) drupalgap_download_project $2 $3;;
