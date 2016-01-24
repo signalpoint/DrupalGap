@@ -9,7 +9,7 @@
 
 ### 3. Install the DrupalGap SDK
 
-Go to your Drupal root folder, and run the DrupalGap `install`:
+Go to your Drupal root folder, and run the DrupalGap `install` script, or you can [manually install the SDK](Resources/Manual_Installation).
 
 ```
 cd drupal
@@ -30,10 +30,10 @@ vim settings.js
 
 ### 5. Done!
 
-> Try a demo in your browser by visiting:
+This sets up an empty web app. You can easily add [other types of apps](Introduction/Types_of_Applications) later, all with only `one set of code`.
+
+> Demo it in a browser by visiting:
 
 ```
 http://example.com/app
 ```
-
-This sets up the app as a web app (*[see other types](Introduction/Types_of_Applications)*). You can easily add other types of apps later, all with only `one set of code`.

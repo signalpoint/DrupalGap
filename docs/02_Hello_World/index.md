@@ -1,49 +1,51 @@
-Welcome to the DrupalGap "Hello World". By completing this guide, you'll be ready to build a mobile application for your Drupal website. Along the way, be sure to visit the [support](http://drupalgap.org/support) and [troubleshoot](Install/Troubleshoot) pages if you run into any problems.
+> Welcome to the DrupalGap "Hello World"
 
-## 1. Install DrupalGap
+By completing this guide, you'll be ready to build a custom application for Drupal 8.
 
-Follow the [DrupalGap Install](Install) documentation.
+### 1. Install DrupalGap
 
-## 2. Create a Custom DrupalGap Module
-
-Follow the [Create a Custom DrupalGap Module](Modules/Create_a_Custom_Module) documentation.
-
-## 3. Create the "Hello World" App Page
-
-Place this code into the custom module's JavaScript file:
+First, complete the [DrupalGap installation](../Install) docs.
 
 ```
-/**
- * Implements hook_menu().
- */
-function my_module_menu() {
-  var items = {};
-  items['hello_world'] = {
-    title: 'DrupalGap',
-    page_callback: 'my_module_hello_world_page'
-  };
-  return items;
-}
+http://example.com/app
+```
 
-/**
- * The callback for the "Hello World" page.
- */
-function my_module_hello_world_page() {
-  var content = {};
-  content['my_button'] = {
-    theme: 'button',
-    text: 'Hello World',
-    attributes: {
-      onclick: "drupalgap_alert('Hi!')"
-    }
+### 2. Create a module
+
+Next, [create a custom DrupalGap module](../Modules/Create_a_Custom_Module) to power the app.
+
+```
+app/modules/custom/my_module
+```
+
+## 3. Create a page
+
+Next, we'll [create a custom page](../Pages/Creating_a_Custom_Page) and add this to the route's `_callback` function:
+
+```
+return new Promise(function(ok, err) {
+
+  // Make a greeting for the current user.
+  var account = dg.currentUser();
+  var msg = account.isAuthenticated() ?
+    'Hello ' + account.getAccountName() :
+    'Hello World';
+
+  // Prepare our page's render element.
+  var element = {};
+  element['my_widget'] = {
+    _markup: '<p>' + msg + '</p>'
   };
-  return content;
-}
+
+  // Send it back to be rendered on the page.
+  ok(element);
+
+});
 ```
 
 ## 4. Set the App's Front Page
 
-Open the `www/settings.js` file and set the app's front page path:
+Open the `settings.js` file and set the app's front page path:
 
 ```
 drupalgap.settings.front = 'hello_world';
