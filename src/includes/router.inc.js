@@ -77,7 +77,7 @@ dg.router = {
 
       if (route.defaults) {
 
-        // Set the page title, which may be null.
+        // Set the page title.
         dg.setTitle(route.defaults._title);
 
         // Handle forms, apply page arguments or no arguments.
