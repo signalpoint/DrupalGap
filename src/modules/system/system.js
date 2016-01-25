@@ -5,7 +5,7 @@ dg.modules.system.routing = function() {
   routes["system.dashboard"] = {
     "path": "/dg",
     "defaults": {
-      "_title": "Welcome",
+      "_title": "Getting started",
       _controller: function() {
         return new Promise(function(ok, err) {
           var content = {};
@@ -19,7 +19,14 @@ dg.modules.system.routing = function() {
 
           // Add getting started info.
           content['header'] = {
-            _markup: '<h2>' + dg.t('Getting started') + '</h2>'
+            _markup: '<h2>' + dg.t('Resources') + '</h2>'
+          };
+          content['resources'] = {
+            _theme: 'item_list',
+            _items: [
+                dg.l(dg.t('Hello World'), 'http://docs.drupalgap.org/8/Hello_World'),
+                dg.l(dg.t('Create a Module'), 'http://docs.drupalgap.org/8/Modules/Create_a_Custom_Module')
+            ]
           };
 
           ok(content);
@@ -55,11 +62,7 @@ dg.modules.system.blocks = function() {
   blocks.powered_by = {
     build: function () {
       return new Promise(function(ok, err) {
-        var content = dg.t('Powered by: ') + dg.bl(
-          'DrupalGap Foo', null,
-          { _attributes: { href: 'http://drupalgap.org' } }
-        );
-        ok(content);
+        ok(dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org'));
       });
     }
   };
