@@ -67,7 +67,13 @@ dg.modules.system.blocks = function() {
     build: function () {
       return new Promise(function(ok, err) {
         var title = dg.getTitle();
-        if (typeof title === 'string') { ok({ title: { _markup: '<h1>' + dg.t(title) + '</h1>' } }); }
+        if (typeof title === 'string') {
+          var element = {
+            _theme: 'title',
+            _title: dg.t(title)
+          };
+          ok(element);
+        }
         else { ok(title); }
       });
     }
