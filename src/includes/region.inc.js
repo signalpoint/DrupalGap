@@ -13,25 +13,48 @@ dg.Region = function(config) {
   }
 };
 
+/**
+ *
+ * @param property
+ * @returns {null}
+ */
 dg.Region.prototype.get = function(property) {
   return typeof this[property] !== 'undefined' ? this[property] : null;
 };
+
+/**
+ *
+ * @param property
+ * @param value
+ */
 dg.Region.prototype.set = function(property, value) {
   this[property] = value;
 };
 
+/**
+ *
+ */
 dg.loadRegions = function() {
 
 };
 
+/**
+ *
+ * @returns {Array}
+ */
 dg.Region.prototype.getBlocks = function() {
   var blocks = dg.blocksLoad();
-  var result = [];
+  var sorted = {};
   for (var block in blocks) {
     if (!blocks.hasOwnProperty(block)) { continue; }
     if (blocks[block].get('region') == this.get('id')) {
-      result.push(block);
+      sorted[blocks[block].get('weight')] = block;
     }
+  }
+  var result = [];
+  for (var sort in sorted) {
+    if (!sorted.hasOwnProperty(sort)) { continue; }
+    result.push(sorted[sort]);
   }
   return result;
 };
