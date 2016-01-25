@@ -1714,7 +1714,7 @@ dg.theme_link = function(variables) {
     var href = path;
     if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) {}
     else { href = '#' + path; }
-    variables._attributes.href = path;
+    variables._attributes.href = href;
   }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
 };
