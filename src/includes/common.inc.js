@@ -4,7 +4,7 @@
  * @returns {*}
  */
 dg.config = function(name) {
-  var value = arguments[1] ? arguments[1] : null;
+  var value = typeof arguments[1] !== 'undefined' ? arguments[1] : null;
   if (value) {
     dg.settings[name] = value;
     return;
@@ -13,14 +13,40 @@ dg.config = function(name) {
 };
 
 // Mode.
+
+/**
+ *
+ * @returns {*}
+ */
 dg.getMode = function() { return this.config('mode'); };
+
+/**
+ *
+ * @param mode
+ */
 dg.setMode = function(mode) { this.config('mode', mode); };
 
+/**
+ *
+ * @returns {*}
+ */
 dg.getFrontPagePath = function() {
   var front = dg.config('front');
   if (front == null) { front = 'dg'; }
   return front;
 };
+
+/**
+ * Gets the current page title.
+ * @returns {*}
+ */
+dg.getTitle = function() { return this._title; };
+
+/**
+ * Sets the current page title.
+ * @param title
+ */
+dg.setTitle = function(title) { this._title = title; };
 
 /**
  *
@@ -114,6 +140,29 @@ dg.imagePath = function(uri) {
 };
 
 /**
+ * Returns html for a simple link.
+ * @param text
+ * @param path
+ * @param options
+ * @returns {String}
+ */
+dg.l = function(text, path, options) {
+  if (!options) { options = {}; }
+  if (!options._text) { options._text = text; }
+  if (!options._path) { options._path = path; }
+  return dg.theme('link', options);
+};
+
+/**
+ * Returns html for a button link.
+ * @param text
+ * @param path
+ * @param options
+ * @returns {String}
+ */
+dg.bl = function(text, path, options) { return this.l.apply(this, arguments); };
+
+/**
  * Given an id, this will remove its element from the DOM.
  * @param id
  */
@@ -121,3 +170,10 @@ dg.removeElement = function(id) {
   var elem = document.getElementById(id);
   elem.parentElement.removeChild(elem);
 };
+
+/**
+ *
+ * @param text
+ * @returns {*}
+ */
+dg.t = function(text) { return text; };
