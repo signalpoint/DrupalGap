@@ -1,17 +1,4 @@
 /**
- *
- * @param text
- * @param path
- * @param options
- * @returns {String}
- */
-dg.l = function(text, path, options) {
-  if (!options) { options = {}; }
-  if (!options._text) { options._text = text; }
-  if (!options._path) { options._path = path; }
-  return dg.theme('link', options);
-};
-/**
  * Implementation of theme_link().
  * @param {Object} variables
  * @return {String}
