@@ -74,10 +74,13 @@ dg.blocksLoad = function() {
       for (var region in blockSettings) {
         if (!blockSettings.hasOwnProperty(region)) { continue; }
         // Iterate over each block mentioned in the theme's region settings...
+        var weight = 0;
         for (var themeBlock in blockSettings[region]) {
           if (!blockSettings[region].hasOwnProperty(themeBlock)) { continue; }
           var block = blockSettings[region][themeBlock];
           block.region = region;
+          block.weight = typeof block.weight !== 'undefined' ? block.weight : weight;
+          weight = block.weight + 1;
           appBlocks[themeBlock] = block;
           blockCount++;
         }
@@ -129,6 +132,7 @@ dg.blocksLoad = function() {
             if (!appBlocks[block].hasOwnProperty(setting)) { continue; }
             dg.blocks[block].set(setting, appBlocks[block][setting]);
           }
+
         }
       }
 
