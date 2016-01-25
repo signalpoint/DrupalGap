@@ -12,11 +12,10 @@ jDrupal.settings = {
 
 // DrupalGap Settings.
 drupalgap.settings = {
-  mode: 'web-app'
+  front: null, // The front page
+  mode: 'web-app', // The app mode, web-app or phonegap
+  title: 'DrupalGap'
 };
-
-// The app's front page.
-drupalgap.settings.front = null;
 
 // The active theme.
 drupalgap.settings.theme = {
