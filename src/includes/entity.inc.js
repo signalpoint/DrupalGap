@@ -18,13 +18,13 @@ dg.entityRenderContent = function(entity) {
     var content = {};
 
     // Add the entity label.
-    content[label] = {
+    dg.setTitle({
       _theme: 'entity_label',
       _entity: entity,
       _attributes: {
         'class': [entityType + '-title']
       }
-    };
+    });
 
     //console.log(dg);
     //console.log(dg.entity_view_mode);
@@ -102,5 +102,5 @@ dg.entityRenderContent = function(entity) {
 };
 
 dg.theme_entity_label = function(variables) {
-  return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h1>';
+  return '<h1 ' + dg.attributes(variables._attributes) + '>' + dg.t(variables._entity.label()) + '</h1>';
 };
