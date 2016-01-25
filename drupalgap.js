@@ -227,10 +227,13 @@ dg.blocksLoad = function() {
       for (var region in blockSettings) {
         if (!blockSettings.hasOwnProperty(region)) { continue; }
         // Iterate over each block mentioned in the theme's region settings...
+        var weight = 0;
         for (var themeBlock in blockSettings[region]) {
           if (!blockSettings[region].hasOwnProperty(themeBlock)) { continue; }
           var block = blockSettings[region][themeBlock];
           block.region = region;
+          block.weight = typeof block.weight !== 'undefined' ? block.weight : weight;
+          weight = block.weight + 1;
           appBlocks[themeBlock] = block;
           blockCount++;
         }
@@ -282,6 +285,7 @@ dg.blocksLoad = function() {
             if (!appBlocks[block].hasOwnProperty(setting)) { continue; }
             dg.blocks[block].set(setting, appBlocks[block][setting]);
           }
+
         }
       }
 
@@ -528,6 +532,8 @@ dg.entityRenderContent = function(entity) {
         'class': [entityType + '-title']
       }
     });
+    // @TODO convert this to a _title_callback on the route.
+    dg.setDocumentTitle(entity.label());
 
     //console.log(dg);
     //console.log(dg.entity_view_mode);
@@ -1154,25 +1160,48 @@ dg.Region = function(config) {
   }
 };
 
+/**
+ *
+ * @param property
+ * @returns {null}
+ */
 dg.Region.prototype.get = function(property) {
   return typeof this[property] !== 'undefined' ? this[property] : null;
 };
+
+/**
+ *
+ * @param property
+ * @param value
+ */
 dg.Region.prototype.set = function(property, value) {
   this[property] = value;
 };
 
+/**
+ *
+ */
 dg.loadRegions = function() {
 
 };
 
+/**
+ *
+ * @returns {Array}
+ */
 dg.Region.prototype.getBlocks = function() {
   var blocks = dg.blocksLoad();
-  var result = [];
+  var sorted = {};
   for (var block in blocks) {
     if (!blocks.hasOwnProperty(block)) { continue; }
     if (blocks[block].get('region') == this.get('id')) {
-      result.push(block);
+      sorted[blocks[block].get('weight')] = block;
     }
+  }
+  var result = [];
+  for (var sort in sorted) {
+    if (!sorted.hasOwnProperty(sort)) { continue; }
+    result.push(sorted[sort]);
   }
   return result;
 };
@@ -1681,7 +1710,12 @@ dg.theme_link = function(variables) {
   var text = variables._text ? variables._text : '';
   var path = variables._path;
   if (path == '') { path = dg.getFrontPagePath(); }
-  if (typeof variables._attributes.href === 'undefined' && path) { variables._attributes.href = '#' + path; }
+  if (typeof variables._attributes.href === 'undefined' && path) {
+    var href = path;
+    if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) {}
+    else { href = '#' + path; }
+    variables._attributes.href = path;
+  }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
 };
 
@@ -2171,7 +2205,7 @@ dg.modules.system.routing = function() {
   routes["system.dashboard"] = {
     "path": "/dg",
     "defaults": {
-      "_title": "Welcome",
+      "_title": "Getting started",
       _controller: function() {
         return new Promise(function(ok, err) {
           var content = {};
@@ -2185,7 +2219,14 @@ dg.modules.system.routing = function() {
 
           // Add getting started info.
           content['header'] = {
-            _markup: '<h2>' + dg.t('Getting started') + '</h2>'
+            _markup: '<h2>' + dg.t('Resources') + '</h2>'
+          };
+          content['resources'] = {
+            _theme: 'item_list',
+            _items: [
+                dg.l(dg.t('Hello World'), 'http://docs.drupalgap.org/8/Hello_World'),
+                dg.l(dg.t('Create a Module'), 'http://docs.drupalgap.org/8/Modules/Create_a_Custom_Module')
+            ]
           };
 
           ok(content);
@@ -2221,11 +2262,7 @@ dg.modules.system.blocks = function() {
   blocks.powered_by = {
     build: function () {
       return new Promise(function(ok, err) {
-        var content = dg.t('Powered by: ') + dg.bl(
-          'DrupalGap Foo', null,
-          { _attributes: { href: 'http://drupalgap.org' } }
-        );
-        ok(content);
+        ok(dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org'));
       });
     }
   };
