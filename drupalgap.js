@@ -340,13 +340,17 @@ dg.getFrontPagePath = function() {
  * Gets the current page title.
  * @returns {*}
  */
-dg.getTitle = function() { return this._title; };
+dg.getTitle = function() { return document.title; };
 
 /**
  * Sets the current page title.
  * @param title
  */
-dg.setTitle = function(title) { this._title = title; };
+dg.setTitle = function(title) {
+  title = !title ? '' : title;
+  if (typeof title === 'object') { title = title._title ? title._title : ''; }
+  document.title = title;
+};
 
 /**
  *
@@ -501,6 +505,7 @@ dg.entityRenderContent = function(entity) {
     dg.setTitle({
       _theme: 'entity_label',
       _entity: entity,
+      _title: entity.label(),
       _attributes: {
         'class': [entityType + '-title']
       }
@@ -1444,7 +1449,7 @@ dg.router = {
 
       if (route.defaults) {
 
-        // Set the page title, which may be null.
+        // Set the page title.
         dg.setTitle(route.defaults._title);
 
         // Handle forms, apply page arguments or no arguments.
@@ -1693,6 +1698,10 @@ dg.theme_item_list = function(variables) {
     }
   }
   return html += '</' + type + '>';
+};
+
+dg.theme_title = function(variables) {
+  return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._title + '</h1>';
 };
 
 dg.modules.admin = new dg.Module();
@@ -2202,7 +2211,13 @@ dg.modules.system.blocks = function() {
     build: function () {
       return new Promise(function(ok, err) {
         var title = dg.getTitle();
-        if (typeof title === 'string') { ok({ title: { _markup: '<h1>' + dg.t(title) + '</h1>' } }); }
+        if (typeof title === 'string') {
+          var element = {
+            _theme: 'title',
+            _title: dg.t(title)
+          };
+          ok(element);
+        }
         else { ok(title); }
       });
     }
