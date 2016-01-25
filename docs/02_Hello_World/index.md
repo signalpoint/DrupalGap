@@ -20,7 +20,7 @@ cd app
 And then include it in the `<head>` of the app's `index.html` file:
 
 ```
-<script src='modules/custom/my_module/my_module.js' />
+<script src="modules/custom/my_module/my_module.js"></script>
 ```
 
 ### 3. Create a route

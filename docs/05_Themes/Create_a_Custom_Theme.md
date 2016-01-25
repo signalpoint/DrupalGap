@@ -1,132 +1,112 @@
-For a complete example of a custom theme, check out the drupalgap_demo app. Otherwise, to create a custom theme in DrupalGap, follow these steps:
+## Option 1
 
-## 1. Create a directory for your theme:
+### Using the DrupalGap CLI
 
-`app/themes/my_theme`
-
-## 2. Create an html file for your theme's page template:
-
-`app/themes/my_theme/page.tpl.html`
-
-## 3. Design your page template using html, region placeholders and the drupalgap page id placeholder:
-
-Latest dev snapshot use this (as of 2014-09-25):
+The quickest way to create a theme is using the DrupalGap CLI. Try this command to quickly create a directory and file to power the theme:
 
 ```
-<div {:drupalgap_page_attributes:}>
-  {:header:}
-  {:navigation:}
-  {:content:}
-  {:footer:}
-</div>
+cd app
+./dg create theme foo
 ```
 
-Versions of the DrupalGap SDK prior to April 2014 should use this instead:
+Then follow the instructions printed to the terminal screen (*see steps 4-6 below*).
+
+## Options 2
+
+### Manually Creating a Theme
+
+#### 1. Create a directory:
+
+First, create a directory to store the theme's files:
 
 ```
-<div id="{:drupalgap_page_id:}" class="{:drupalgap_page_class:}" data-role="page">
-  {:header:}
-  {:navigation:}
-  {:content:}
-  {:footer:}
-</div>
+app/themes/foo
 ```
 
-Please note, DrupalGap expects each theme to implement at a minimum the following three regions (more info: http://api.drupalgap.org/global.html#system_regions_list):
+#### 2. Create a javascript file
 
- - header
- - content
- - footer
-
-## 4. Create a javascript file for your theme. The name of the file must match the name of your theme's directory:
-
-`app/themes/my_theme/my_theme.js`
-
-## 5. Set up your theme and its regions in the javascript file:
+Then create a `.js` file with a name that *matches* the name of the directory, for example:
 
 ```
-/**
- * Implements DrupalGap's template_info() hook.
- */
-function my_theme_info() {
+app/themes/foo/foo.js
+```
 
-  // Init an empty theme object.
-  var theme = {};
+#### 3. Build the theme's regions
 
-  // Set the theme's machine name.
-  theme.name = 'my_theme';
+In `foo.js`, make a constructor for the theme (the capitalized `Foo` is not a typo), and add 3 regions to it:
 
-  // Init the theme's regions.
-  theme.regions = {};
+```
+// The foo theme constructor.
+Foo = function() {
 
-  // Header region.
-  theme.regions['header'] = {
-    attributes: {
-      'data-role': 'header',
-      'data-position': 'fixed',
-      'data-theme': 'b'
-    }
+  // The theme's regions.
+  this.regions = {
+    header: { },
+    content: { },
+    footer: { }
   };
+  
+};
 
-  // Navigation region.
-  theme.regions['navigation'] = {
-    attributes: {
-      'data-role': 'navbar'
-    }
-  };
-
-  // Content Region
-  theme.regions['content'] = {
-    attributes: {
-      'data-role': 'content'
-    }
-  };
-
-  // Footer region.
-  theme.regions['footer'] = {
-    attributes: {
-      'data-role': 'footer',
-      'data-position': 'fixed',
-      'data-position': 'b'
-    }
-  };
-
-  // Return the assembled theme.
-  return theme;
-
-}
+// Extend the DrupalGap Theme prototype.
+Foo.prototype = new dg.Theme;
+Foo.prototype.constructor = Foo;
 ```
 
-## 6. Add blocks to your theme's regions in settings.js:
+#### 4. Load the theme
+
+Open the `index.html` file, and load the theme's `.js` file in the `<head>` like so:
 
 ```
-// The my_theme blocks.
-drupalgap.settings.blocks.my_theme = {
+<script src="themes/foo/foo.js"></script>
+```
+
+Be sure it is placed after the `drupalgap.js` file and any module `.js` files.
+
+#### 5. Configure the settings.js file
+
+Open up the `settings.js` file and tell DrupalGap to use this new theme:
+
+```
+// The active theme.
+drupalgap.settings.theme = {
+  name: 'foo',
+  path: 'themes/foo'
+};
+```
+
+#### 6. Add blocks to the regions
+
+Also in the `settings.js` file, you can then add blocks to the regions:
+
+```
+drupalgap.settings.blocks.foo = {
   header: {
-    title: {}
-  },
-  navigation: {
-    main_menu: {}
+
+    // DrupalGap's administration menu block.
+    admin_menu: {
+      roles: [
+        { target_id: 'administrator', visible: true }
+      ]
+    }
+
   },
   content: {
-    main: {}
+  
+    // DrupalGap's page title block.
+    title: { },
+
+    // DrupalGap's main content block.
+    main: { }
+
   },
   footer: {
-    powered_by: {}
+
+    // The powered by DrupalGap block.
+    powered_by: { }
+
   }
 };
 ```
 
-The title, main_menu, main, and powered_by blocks are all system blocks provided by DrupalGap. You may create your own custom blocks if needed.
-
-## 7. Copy the other tpl.html files from the core theme into your theme's directory, so they live here:
-
-    app/themes/my_theme/node.tpl.html
-    app/themes/my_theme/user-profile.tpl.html
-
-## 8. Make drupalgap aware of your theme by specifying it in settings.js
-
-```
-// Theme
-drupalgap.settings.theme = 'my_theme';
-```
+The `admin_menu`, `title`, `main`, and `powered_by` blocks are all system blocks provided by DrupalGap. You may [create your own custom blocks](../Blocks/Create_a_Custom_Block) if needed.

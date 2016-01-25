@@ -8,15 +8,15 @@ The `l()` function is shorthand for **link**. The `bl()` function is shorthand f
 
 ## Text Link
 
-![Text Link](http://drupalgap.org/sites/default/files/external-link.png)
-
-`var link = l('DrupalGap', 'http://www.drupalgap.org', { InAppBrowser:true });`
+var html = dg.l('DrupalGap', null, {
+  _attributes: { href: 'http://drupalgap.org' }
+});
 
 ## Button Link
 
-![Button Link](http://drupalgap.org/sites/default/files/external-button-link.png)
-
-`var button_link = bl('DrupalGap', 'http://www.drupalgap.org', { InAppBrowser: true });`
+var html = dg.bl('DrupalGap', null, {
+  _attributes: { href: 'http://drupalgap.org' }
+});
 
 ### Using a Render Array
 
