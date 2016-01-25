@@ -15,9 +15,13 @@ dg.Theme.prototype.getRegions = function() {
 dg.themeLoad = function() {
   return new Promise(function(ok, err) {
     if (!dg.activeTheme) {
-      var config = dg.config('theme');
-      var class_name = jDrupal.ucfirst(dg.getCamelCase(config.name));
-      dg.activeTheme = new window[class_name];
+      var themeClassName = jDrupal.ucfirst(dg.getCamelCase(dg.config('theme').name));
+      if (!window[themeClassName]) {
+        var msg = 'Failed to load theme (' + themeClassName + ') - did you include its .js file in the index.html file?';
+        err(msg);
+        return;
+      }
+      dg.activeTheme = new window[themeClassName];
     }
     ok(dg.activeTheme);
   });
