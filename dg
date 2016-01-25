@@ -6,6 +6,7 @@
 APP_MODULES_DIRECTORY="modules"
 APP_MODULES_CONTRIB_DIRECTORY="$APP_MODULES_DIRECTORY/contrib"
 APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
+APP_THEMES_DIRECTORY="themes"
 APP_BACKUPS_DIRECTORY=".drupalgap-backups"
 DRUPALGAP_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.js"
 DRUPALGAP_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.min.js"
@@ -188,7 +189,89 @@ $MODULE_NAME.routing = function() {
   echo "
 Created module in $MODULE_DIRECTORY, next include it in the index.html file:
 
-<script src='$FILE_URI' />
+<script src=\"$FILE_URI\"></script>
+"
+
+}
+
+function drupalgap_create_theme() {
+
+  THEME_NAME="$1";
+  THEME_CLASS_NAME="${THEME_NAME^}"
+  THEME_DIRECTORY="$APP_THEMES_DIRECTORY/$THEME_NAME"
+  FILE_URI="$THEME_DIRECTORY/$THEME_NAME.js"
+
+  # Create the app/themes directory if it doesn't exist.
+  if [ ! -d "$APP_THEMES_DIRECTORY" ]; then
+    mkdir $APP_THEMES_DIRECTORY
+  fi
+
+  # Create the theme's directory, or warn if it already exists.
+  if [ -d "$THEME_DIRECTORY" ]; then
+    echo "$THEME_NAME already exists..."
+    exit
+  fi
+
+  mkdir $THEME_DIRECTORY
+
+
+# WARNING: any changes here should be reflected in the "create a custom theme" docs.
+
+    echo "// The $THEME_NAME theme constructor.
+$THEME_CLASS_NAME = function() {
+  this.regions = {
+    header: { },
+    content: { },
+    footer: { }
+  };
+};
+// Extend the DrupalGap Theme prototype.
+$THEME_CLASS_NAME.prototype = new dg.Theme;
+$THEME_CLASS_NAME.prototype.constructor = $THEME_CLASS_NAME;" > "$FILE_URI"
+  echo "1. Include it in the index.html file:
+
+<script src=\"$FILE_URI\"></script>
+
+2. Set it as the active theme in the settings.js file:
+
+// The active theme.
+drupalgap.settings.theme = {
+  name: '$THEME_NAME',
+  path: 'themes/$THEME_NAME'
+};
+
+3. Add some blocks to the theme's regions in the settings.js file:
+
+drupalgap.settings.blocks.$THEME_NAME = {
+  header: {
+
+    // DrupalGap's administration menu block.
+    admin_menu: {
+      roles: [
+        { target_id: 'administrator', visible: true }
+      ]
+    }
+
+  },
+  content: {
+
+    // DrupalGap's page title block.
+    title: { },
+
+    // DrupalGap's "main" content block.
+    main: { }
+
+  },
+  footer: {
+
+    // The powered by DrupalGap block.
+    powered_by: { }
+
+  }
+};
+
+Created theme in $THEME_DIRECTORY, follow the 1, 2, 3 listed above to use it.
+
 "
 
 }
@@ -208,9 +291,10 @@ case "$1" in
 create)
   case "$2" in
     module) drupalgap_create_module $3;;
+    theme) drupalgap_create_theme $3;;
   esac
   ;;
 download|dl) drupalgap_download_project $2 $3;;
 update|up) drupalgap_update;;
--*) usage "bad argument $1";;
+-*) usage "Unknown command: $1";;
 esac
