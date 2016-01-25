@@ -8,45 +8,38 @@ The `l()` function is shorthand for **link**. The `bl()` function is shorthand f
 
 ## Text Link
 
-var html = dg.l('DrupalGap', null, {
-  _attributes: { href: 'http://drupalgap.org' }
-});
+var html = dg.l('DrupalGap', 'http://drupalgap.org');
 
 ## Button Link
 
-var html = dg.bl('DrupalGap', null, {
-  _attributes: { href: 'http://drupalgap.org' }
-});
+var html = dg.bl('DrupalGap', 'http://drupalgap.org');
 
-### Using a Render Array
+### Using a Render Element
 
 ```
-var content = {};
-content['my_link'] = {
-  theme: 'link',
-  text: 'DrupalGap',
-  path: 'http://www.drupalgap.org',
-  options: {
-    InAppBrowser:true
-  }
+var element = {};
+element['my_link'] = {
+  _theme: 'link',
+  _text: 'DrupalGap',
+  _path: 'http://www.drupalgap.org'
 };
-return content;
+return element;
 ```
 
 You can use either `link` or `button_link` for the theme.
 
 ### Plain HTML Link
 
-`<a onclick="javascript:window.open('http://example.com', '_blank', 'location=yes');">DrupalGap</a>`
+`<a onclick="javascript:window.open('http://drupalgap.org', '_blank', 'location=yes');">DrupalGap</a>`
 
 ## System Browser
 
 It's possible to open links in the user's default browser using the `_system` target:
 
 ```
-var html = bl('example.com', null, {
+var html = dg.bl('example.com', null, {
     attributes: {
-      onclick: "window.open('http://example.com', '_system', 'location=yes')"
+      onclick: "window.open('http://drupalgap.org', '_system', 'location=yes')"
     }
 });
 ```
