@@ -64,7 +64,7 @@ dg.getDocumentTitle = function() { return document.title; };
  */
 dg.setDocumentTitle = function(title) {
   title = !title ? dg.config('title') : title;
-  document.title = dg.theme('document_title', { _title: title });
+  document.title = dg.theme('document_title', { _title: dg.t(title) });
 };
 
 /**
