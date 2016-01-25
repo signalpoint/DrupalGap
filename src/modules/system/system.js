@@ -5,19 +5,23 @@ dg.modules.system.routing = function() {
   routes["system.dashboard"] = {
     "path": "/dg",
     "defaults": {
-      "_title": "DrupalGap Dashboard",
+      "_title": "Welcome",
       _controller: function() {
         return new Promise(function(ok, err) {
           var content = {};
-          var msg = 'Welcome to DrupalGap, ';
           var account = dg.currentUser();
-          if (account.isAuthenticated()) {
-            msg += account.getAccountName() + '!';
-          }
-          else {
-            msg += dg.l('click here', 'user/login') + ' to login to your app.';
-          }
-          content['msg'] = { _markup: '<p>' + msg + '</p>' };
+
+          // Show welcome message.
+          var msg = 'Welcome to DrupalGap, ';
+          if (account.isAuthenticated()) { msg += account.getAccountName() + '!'; }
+          else { msg += dg.l('click here', 'user/login') + ' to login to your app.'; }
+          content['welcome'] = { _markup: '<p>' + msg + '</p>' };
+
+          // Add getting started info.
+          content['header'] = {
+            _markup: '<h2>' + dg.t('Getting started') + '</h2>'
+          };
+
           ok(content);
         });
 
@@ -45,6 +49,26 @@ dg.modules.system.blocks = function() {
     build: function () {
       return new Promise(function(ok, err) {
         ok(dg.content);
+      });
+    }
+  };
+  blocks.powered_by = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        var content = dg.t('Powered by: ') + dg.bl(
+          'DrupalGap Foo', null,
+          { _attributes: { href: 'http://drupalgap.org' } }
+        );
+        ok(content);
+      });
+    }
+  };
+  blocks.title = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        var title = dg.getTitle();
+        if (typeof title === 'string') { ok({ title: { _markup: '<h1>' + dg.t(title) + '</h1>' } }); }
+        else { ok(title); }
       });
     }
   };
