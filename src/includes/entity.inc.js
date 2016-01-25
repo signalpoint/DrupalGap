@@ -26,6 +26,8 @@ dg.entityRenderContent = function(entity) {
         'class': [entityType + '-title']
       }
     });
+    // @TODO convert this to a _title_callback on the route.
+    dg.setDocumentTitle(entity.label());
 
     //console.log(dg);
     //console.log(dg.entity_view_mode);
