@@ -7,7 +7,12 @@ dg.theme_link = function(variables) {
   var text = variables._text ? variables._text : '';
   var path = variables._path;
   if (path == '') { path = dg.getFrontPagePath(); }
-  if (typeof variables._attributes.href === 'undefined' && path) { variables._attributes.href = '#' + path; }
+  if (typeof variables._attributes.href === 'undefined' && path) {
+    var href = path;
+    if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) {}
+    else { href = '#' + path; }
+    variables._attributes.href = path;
+  }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
 };
 
