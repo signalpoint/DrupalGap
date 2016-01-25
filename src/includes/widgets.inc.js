@@ -48,3 +48,6 @@ dg.theme_item_list = function(variables) {
 dg.theme_title = function(variables) {
   return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._title + '</h1>';
 };
+dg.theme_document_title = function(variables) {
+  return variables._title + ' | ' + dg.config('title');
+};
