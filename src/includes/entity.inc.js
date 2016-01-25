@@ -21,6 +21,7 @@ dg.entityRenderContent = function(entity) {
     dg.setTitle({
       _theme: 'entity_label',
       _entity: entity,
+      _title: entity.label(),
       _attributes: {
         'class': [entityType + '-title']
       }
