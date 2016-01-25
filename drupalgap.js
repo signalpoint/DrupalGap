@@ -1,11 +1,14 @@
-/*! drupalgap 2016-01-24 */
+/*! drupalgap 2016-01-25 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
-var dg = {}; var drupalgap = dg;
-
-dg.activeTheme = null;
-dg.regions = null; // Holds instances of regions.
-dg.blocks = null; // Holds instances of blocks.
-dg.spinner = 0; // Holds onto how many spinners have been thrown up.
+var dg = {
+  activeTheme: null, // The active theme.
+  regions: null, // Instances of regions.
+  blocks: null, // Instances of blocks.
+  spinner: 0, // How many spinners have been thrown up.
+  _title: '' // The current page title
+};
+// @TODO consider prefixing all properties above with an underscore.
+var drupalgap = dg;
 
 // Configuration setting defaults.
 dg.settings = {
@@ -340,7 +343,7 @@ dg.getFrontPagePath = function() {
  * Gets the current page title.
  * @returns {*}
  */
-dg.getTitle = function() { return document.title; };
+dg.getTitle = function() { return dg._title; };
 
 /**
  * Sets the current page title.
@@ -349,7 +352,22 @@ dg.getTitle = function() { return document.title; };
 dg.setTitle = function(title) {
   title = !title ? '' : title;
   if (typeof title === 'object') { title = title._title ? title._title : ''; }
-  document.title = title;
+  dg._title = title;
+};
+
+/**
+ * Gets the current document title.
+ * @returns {*}
+ */
+dg.getDocumentTitle = function() { return document.title; };
+
+/**
+ * Sets the current document title.
+ * @param title
+ */
+dg.setDocumentTitle = function(title) {
+  title = !title ? dg.config('title') : title;
+  document.title = dg.theme('document_title', { _title: dg.t(title) });
 };
 
 /**
@@ -1449,8 +1467,9 @@ dg.router = {
 
       if (route.defaults) {
 
-        // Set the page title.
+        // Set the title.
         dg.setTitle(route.defaults._title);
+        dg.setDocumentTitle(route.defaults._title);
 
         // Handle forms, apply page arguments or no arguments.
         if (route.defaults._form) {
@@ -1702,6 +1721,9 @@ dg.theme_item_list = function(variables) {
 
 dg.theme_title = function(variables) {
   return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._title + '</h1>';
+};
+dg.theme_document_title = function(variables) {
+  return variables._title + ' | ' + dg.config('title');
 };
 
 dg.modules.admin = new dg.Module();
@@ -2224,6 +2246,7 @@ dg.modules.system.blocks = function() {
   };
   return blocks;
 };
+
 dg.modules.text = new dg.Module();
 
 dg.modules.text = new dg.Module();
