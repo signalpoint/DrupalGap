@@ -44,3 +44,7 @@ dg.theme_item_list = function(variables) {
   }
   return html += '</' + type + '>';
 };
+
+dg.theme_title = function(variables) {
+  return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._title + '</h1>';
+};
