@@ -40,13 +40,17 @@ dg.getFrontPagePath = function() {
  * Gets the current page title.
  * @returns {*}
  */
-dg.getTitle = function() { return this._title; };
+dg.getTitle = function() { return document.title; };
 
 /**
  * Sets the current page title.
  * @param title
  */
-dg.setTitle = function(title) { this._title = title; };
+dg.setTitle = function(title) {
+  title = !title ? '' : title;
+  if (typeof title === 'object') { title = title._title ? title._title : ''; }
+  document.title = title;
+};
 
 /**
  *
