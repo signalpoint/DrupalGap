@@ -47,9 +47,17 @@ drupalgap.settings.blocks.ava = {
   },
   content: {
 
+    // DrupalGap's page title block.
+    title: { },
+
     // DrupalGap's "main" content block.
     main: { }
 
   },
-  footer: { }
+  footer: {
+
+    // The powered by DrupalGap block.
+    powered_by: { }
+
+  }
 };
