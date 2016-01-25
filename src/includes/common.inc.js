@@ -40,7 +40,7 @@ dg.getFrontPagePath = function() {
  * Gets the current page title.
  * @returns {*}
  */
-dg.getTitle = function() { return document.title; };
+dg.getTitle = function() { return dg._title; };
 
 /**
  * Sets the current page title.
@@ -49,7 +49,22 @@ dg.getTitle = function() { return document.title; };
 dg.setTitle = function(title) {
   title = !title ? '' : title;
   if (typeof title === 'object') { title = title._title ? title._title : ''; }
-  document.title = title;
+  dg._title = title;
+};
+
+/**
+ * Gets the current document title.
+ * @returns {*}
+ */
+dg.getDocumentTitle = function() { return document.title; };
+
+/**
+ * Sets the current document title.
+ * @param title
+ */
+dg.setDocumentTitle = function(title) {
+  title = !title ? dg.config('title') : title;
+  document.title = dg.theme('document_title', { _title: title });
 };
 
 /**
