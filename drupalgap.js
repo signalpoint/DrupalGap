@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-23 */
+/*! drupalgap 2016-01-24 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {}; var drupalgap = dg;
 
@@ -304,7 +304,7 @@ dg.blockLoad = function(id) {
  * @returns {*}
  */
 dg.config = function(name) {
-  var value = arguments[1] ? arguments[1] : null;
+  var value = typeof arguments[1] !== 'undefined' ? arguments[1] : null;
   if (value) {
     dg.settings[name] = value;
     return;
@@ -313,14 +313,40 @@ dg.config = function(name) {
 };
 
 // Mode.
+
+/**
+ *
+ * @returns {*}
+ */
 dg.getMode = function() { return this.config('mode'); };
+
+/**
+ *
+ * @param mode
+ */
 dg.setMode = function(mode) { this.config('mode', mode); };
 
+/**
+ *
+ * @returns {*}
+ */
 dg.getFrontPagePath = function() {
   var front = dg.config('front');
   if (front == null) { front = 'dg'; }
   return front;
 };
+
+/**
+ * Gets the current page title.
+ * @returns {*}
+ */
+dg.getTitle = function() { return this._title; };
+
+/**
+ * Sets the current page title.
+ * @param title
+ */
+dg.setTitle = function(title) { this._title = title; };
 
 /**
  *
@@ -414,6 +440,29 @@ dg.imagePath = function(uri) {
 };
 
 /**
+ * Returns html for a simple link.
+ * @param text
+ * @param path
+ * @param options
+ * @returns {String}
+ */
+dg.l = function(text, path, options) {
+  if (!options) { options = {}; }
+  if (!options._text) { options._text = text; }
+  if (!options._path) { options._path = path; }
+  return dg.theme('link', options);
+};
+
+/**
+ * Returns html for a button link.
+ * @param text
+ * @param path
+ * @param options
+ * @returns {String}
+ */
+dg.bl = function(text, path, options) { return this.l.apply(this, arguments); };
+
+/**
  * Given an id, this will remove its element from the DOM.
  * @param id
  */
@@ -421,6 +470,13 @@ dg.removeElement = function(id) {
   var elem = document.getElementById(id);
   elem.parentElement.removeChild(elem);
 };
+
+/**
+ *
+ * @param text
+ * @returns {*}
+ */
+dg.t = function(text) { return text; };
 
 /**
  * A proxy to create an instance of a jDrupal Node object.
@@ -442,13 +498,13 @@ dg.entityRenderContent = function(entity) {
     var content = {};
 
     // Add the entity label.
-    content[label] = {
+    dg.setTitle({
       _theme: 'entity_label',
       _entity: entity,
       _attributes: {
         'class': [entityType + '-title']
       }
-    };
+    });
 
     //console.log(dg);
     //console.log(dg.entity_view_mode);
@@ -526,7 +582,7 @@ dg.entityRenderContent = function(entity) {
 };
 
 dg.theme_entity_label = function(variables) {
-  return '<h1 ' + dg.attributes(variables._attributes) + '>' + variables._entity.label() + '</h1>';
+  return '<h1 ' + dg.attributes(variables._attributes) + '>' + dg.t(variables._entity.label()) + '</h1>';
 };
 dg.FieldDefinitionInterface = function(entityType, bundle, fieldName) {
   this.entityType = entityType;
@@ -1388,6 +1444,9 @@ dg.router = {
 
       if (route.defaults) {
 
+        // Set the page title, which may be null.
+        dg.setTitle(route.defaults._title);
+
         // Handle forms, apply page arguments or no arguments.
         if (route.defaults._form) {
           var id = route.defaults._form;
@@ -1487,9 +1546,13 @@ dg.Theme.prototype.getRegions = function() {
 dg.themeLoad = function() {
   return new Promise(function(ok, err) {
     if (!dg.activeTheme) {
-      var config = dg.config('theme');
-      var class_name = jDrupal.ucfirst(dg.getCamelCase(config.name));
-      dg.activeTheme = new window[class_name];
+      var themeClassName = jDrupal.ucfirst(dg.getCamelCase(dg.config('theme').name));
+      if (!window[themeClassName]) {
+        var msg = 'Failed to load theme (' + themeClassName + ') - did you include its .js file in the index.html file?';
+        err(msg);
+        return;
+      }
+      dg.activeTheme = new window[themeClassName];
     }
     ok(dg.activeTheme);
   });
@@ -1584,19 +1647,6 @@ dg.theme_view = function(variables) {
       });
     });
   });
-};
-/**
- *
- * @param text
- * @param path
- * @param options
- * @returns {String}
- */
-dg.l = function(text, path, options) {
-  if (!options) { options = {}; }
-  if (!options._text) { options._text = text; }
-  if (!options._path) { options._path = path; }
-  return dg.theme('link', options);
 };
 /**
  * Implementation of theme_link().
@@ -2090,19 +2140,23 @@ dg.modules.system.routing = function() {
   routes["system.dashboard"] = {
     "path": "/dg",
     "defaults": {
-      "_title": "DrupalGap Dashboard",
+      "_title": "Welcome",
       _controller: function() {
         return new Promise(function(ok, err) {
           var content = {};
-          var msg = 'Welcome to DrupalGap, ';
           var account = dg.currentUser();
-          if (account.isAuthenticated()) {
-            msg += account.getAccountName() + '!';
-          }
-          else {
-            msg += dg.l('click here', 'user/login') + ' to login to your app.';
-          }
-          content['msg'] = { _markup: '<p>' + msg + '</p>' };
+
+          // Show welcome message.
+          var msg = 'Welcome to DrupalGap, ';
+          if (account.isAuthenticated()) { msg += account.getAccountName() + '!'; }
+          else { msg += dg.l('click here', 'user/login') + ' to login to your app.'; }
+          content['welcome'] = { _markup: '<p>' + msg + '</p>' };
+
+          // Add getting started info.
+          content['header'] = {
+            _markup: '<h2>' + dg.t('Getting started') + '</h2>'
+          };
+
           ok(content);
         });
 
@@ -2130,6 +2184,26 @@ dg.modules.system.blocks = function() {
     build: function () {
       return new Promise(function(ok, err) {
         ok(dg.content);
+      });
+    }
+  };
+  blocks.powered_by = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        var content = dg.t('Powered by: ') + dg.bl(
+          'DrupalGap Foo', null,
+          { _attributes: { href: 'http://drupalgap.org' } }
+        );
+        ok(content);
+      });
+    }
+  };
+  blocks.title = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        var title = dg.getTitle();
+        if (typeof title === 'string') { ok({ title: { _markup: '<h1>' + dg.t(title) + '</h1>' } }); }
+        else { ok(title); }
       });
     }
   };
