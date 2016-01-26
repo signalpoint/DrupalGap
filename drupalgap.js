@@ -1149,24 +1149,34 @@ dg.Module.prototype.routing = function() {
 // This will allow us to easily separate properties from blocks within settings.js
 
 /**
- * The Form Element prototype.
+ * The Region prototype.
  * @constructor
  */
-dg.Region = function(config) {
-  this.format = 'div';
+dg.Region = function(id, config) {
+  this._id = id;
+
+  // Let the config from the theme's region overwrite anything it wants.
   for (var setting in config) {
     if (!config.hasOwnProperty(setting)) { continue; }
     this[setting] = config[setting];
   }
+
+  // Set any missing defaults.
+  if (!this._attributes) { this._attributes = {}; }
+  if (!this._attributes.id) { this._attributes.id = id; }
+  if (!this._format) { this._format = 'div'; }
+  if (!this._prefix) { this._prefix = ''; }
+  if (!this._suffix) { this._suffix = ''; }
 };
 
 /**
  *
- * @param property
+ * @param prop
  * @returns {null}
  */
-dg.Region.prototype.get = function(property) {
-  return typeof this[property] !== 'undefined' ? this[property] : null;
+dg.Region.prototype.get = function(prop) {
+  var propName = '_' + prop;
+  return typeof this[propName] !== 'undefined' ? this[propName] : null;
 };
 
 /**
@@ -1174,8 +1184,9 @@ dg.Region.prototype.get = function(property) {
  * @param property
  * @param value
  */
-dg.Region.prototype.set = function(property, value) {
-  this[property] = value;
+dg.Region.prototype.set = function(prop, value) {
+  var propName = '_' + property;
+  this[propName] = value;
 };
 
 /**
@@ -1226,30 +1237,22 @@ dg.appRender = function(content) {
     for (var id in regions) {
       if (!regions.hasOwnProperty(id)) { continue; }
 
-      // Instantiate the region, merge the theme's configuration for the region into it,
-      // place the region into the dg scope and then load its blocks.
-      var config = {
-        id: id,
-        attributes: { id: id }
-      };
-      var region = new dg.Region(config);
-      for (var setting in regions[id]) {
-        if (!regions[id].hasOwnProperty(setting)) { continue; }
-        region.set(setting, regions[id][setting]);
-      }
+      // Instantiate the region, skipping any regions without blocks.
+      var region = new dg.Region(id, regions[id]);
       dg.regions[id] = region;
       var blocks = dg.regions[id].getBlocks();
       if (blocks.length == 0) { continue; }
 
       // Open the region, render the placeholder for each of its block(s), then
       // close the region.
-      innerHTML += '<' + region.get('format')  + ' ' + dg.attributes(region.get('attributes')) + '>';
+      var regionFormat = region.get('format');
+      innerHTML += '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
       for (var i = 0; i < blocks.length; i++) {
         var block = dg.blockLoad(blocks[i]);
-        innerHTML += '<' + block.get('format')  + ' ' + dg.attributes(block.get('attributes')) + '>';
-        innerHTML += '</' + block.get('format') + '>';
+        var format = block.get('format');
+        innerHTML += '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>';
       }
-      innerHTML += '</' + region.get('format') + '>';
+      innerHTML += region.get('suffix') + '</' + regionFormat + '>';
 
     }
     innerHTML += dg.render(content);
@@ -1302,6 +1305,8 @@ dg.appRender = function(content) {
       }
     };
 
+    // Begin the render process for each block, checking its visibility and removing any restricted blocks from the DOM,
+    // and then resolving.
     for (id in blocks) {
       if (!blocks.hasOwnProperty(id)) { continue; }
       blocksToRender.push(id);
@@ -1767,14 +1772,15 @@ dg.modules.admin.blocks = function() {
   blocks.admin_menu = {
     build: function () {
       return new Promise(function(ok, err) {
+        //dg.theme('image', { _path: 'favicon.ico' }
         var content = {};
         content['menu'] = {
           _theme: 'item_list',
           _items: [
-            dg.l(dg.theme('image', { _path: 'favicon.ico' }), ''),
-            dg.l('Content', 'node/add'),
-            dg.l('My account', 'user/' + dg.currentUser().id()),
-            dg.l('Logout', 'user/logout')
+            dg.l(dg.t('Home'), ''),
+            dg.l(dg.t('Content'), 'node/add'),
+            dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
+            dg.l(dg.t('Logout'), 'user/logout')
           ]
         };
         ok(content);
@@ -1783,6 +1789,7 @@ dg.modules.admin.blocks = function() {
   };
   return blocks;
 };
+
 dg.modules.core = new dg.Module();
 
 /**
