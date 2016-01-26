@@ -223,6 +223,7 @@ dg.Block.prototype.buildWrapper = function() {
         }
       };
       recurse(element);
+      // @TODO - elements that are just a string can't be altered, e.g. powered by block.
       jDrupal.moduleInvokeAll('block_view_alter', element, self).then(function() {
         self.set('content', element);
         ok(self);
@@ -1809,7 +1810,7 @@ dg.theme_image = function(vars) {
 dg.theme_item_list = function(variables) {
   var html = '';
   var type = variables._type ? variables._type : 'ul';
-  if (variables._title) { html += '<h2>' + variables._title + '</h2>'; }
+  if (variables._title) { html += '<h3>' + variables._title + '</h3>'; }
   html += '<' + type + ' ' + dg.attributes(variables._attributes) + '>';
   if (variables._items && variables._items.length > 0) {
     for (var i in variables._items) {
@@ -1842,6 +1843,7 @@ dg.modules.admin.blocks = function() {
         var content = {};
         content['menu'] = {
           _theme: 'item_list',
+          _title: 'Administer',
           _items: [
             dg.l(dg.t('Home'), ''),
             dg.l(dg.t('Content'), 'node/add'),
@@ -2332,10 +2334,32 @@ dg.modules.system.blocks = function() {
       });
     }
   };
+  blocks.main_menu = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        var content = {};
+        var items = [dg.l(dg.t('Home'), '')];
+        if (!dg.currentUser().isAuthenticated()) { items.push(dg.l(dg.t('Login'), 'user/login')); }
+        else {
+          items.push(
+              dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
+              dg.l(dg.t('Logout'), 'user/logout')
+          );
+        }
+        content['menu'] = {
+          _theme: 'item_list',
+          _items: items
+        };
+        ok(content);
+      });
+    }
+  };
   blocks.powered_by = {
     build: function () {
       return new Promise(function(ok, err) {
-        ok(dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org'));
+        ok({
+          _markup: '<p>' + dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org') + '</p>'
+        });
       });
     }
   };
