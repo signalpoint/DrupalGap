@@ -9,6 +9,7 @@ dg.modules.admin.blocks = function() {
         var content = {};
         content['menu'] = {
           _theme: 'item_list',
+          _title: 'Administer',
           _items: [
             dg.l(dg.t('Home'), ''),
             dg.l(dg.t('Content'), 'node/add'),
