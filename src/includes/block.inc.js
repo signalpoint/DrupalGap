@@ -5,36 +5,92 @@
 // @TODO change block properties to use an underscore prefix.
 
 /**
- * The BLock prototype.
+ * The Block constructor.
+ * @param {String} module The module name that implements the block.
+ * @param {String} id The block id.
+ * @param {Object} config The block config object from settings.js, merged with any defaults.
  * @constructor
  */
-dg.Block = function(config) {
-  this.format = 'div';
+dg.Block = function(module, id, config) {
   for (var setting in config) {
     if (!config.hasOwnProperty(setting)) { continue; }
     this[setting] = config[setting];
   }
+  if (!this._id) { this._id = id; }
+  if (!this._module) { this._module = module; }
+  if (!this._format) { this._format = 'div'; }
+  if (!this._prefix) { this._prefix = ''; }
+  if (!this._suffix) { this._suffix = ''; }
+  if (!this._attributes) { this._attributes = {}; }
+  if (!this._attributes.id) { this._attributes.id = dg.cleanCssIdentifier(id); }
 };
 
-dg.Block.prototype.get = function(property) {
-  return typeof this[property] !== 'undefined' ? this[property] : null;
+/**
+ *
+ * @param name
+ * @returns {null}
+ */
+dg.Block.prototype.get = function(name) {
+  var propName = '_' + name;
+  return typeof this[propName] !== 'undefined' ? this[propName] : null;
 };
-dg.Block.prototype.set = function(property, value) {
-  this[property] = value;
+
+/**
+ *
+ * @param name
+ * @param value
+ */
+dg.Block.prototype.set = function(name, value) {
+  var propName = '_' + name;
+  this[propName] = value;
 };
+
+/**
+ *
+ * @returns {*}
+ */
 dg.Block.prototype.buildWrapper = function() {
   var self = this;
   return new Promise(function(ok, err) {
-    self.build().then(function(content) {
-      self.set('content', content);
-      ok(self);
+    self.build().then(function(element) {
+      // The block build can send us back a string or a render element. If it's a render element, it hasn't yet gone
+      // through the theme layer to pick up its default properties, so we'll have its defaults set automatically, so we
+      // can ship a fully prepared render element off to hook_block_view_alter().
+      // @TODO we only cover the first generation render elements in the build here, we're not properly recursing
+      // deeper.
+      var recurse = function(el) {
+        if (typeof el === 'object') {
+          for (var piece in el) {
+            if (!el.hasOwnProperty(piece)) { continue; }
+            if (typeof el[piece] === 'object') {
+              dg.setRenderElementDefaults(el[piece]);
+              //recurse(el); // WARNING - infite loop, doh!
+            }
+          }
+        }
+      };
+      recurse(element);
+      jDrupal.moduleInvokeAll('block_view_alter', element, self).then(function() {
+        self.set('content', element);
+        ok(self);
+      });
     });
   });
 };
+
+/**
+ *
+ * @returns {*}
+ */
 dg.Block.prototype.build = function() {
   // abstract
   return new Promise(function(ok, err) { ok(''); });
 };
+
+/**
+ *
+ * @returns {*}
+ */
 dg.Block.prototype.getVisibility = function() {
   var self = this;
   var account = dg.currentUser();
@@ -58,6 +114,10 @@ dg.Block.prototype.getVisibility = function() {
   });
 };
 
+/**
+ *
+ * @returns {null|Array}
+ */
 dg.blocksLoad = function() {
   //return new Promise(function(ok, err) {
     if (!dg.blocks) {
@@ -110,21 +170,20 @@ dg.blocksLoad = function() {
         for (block in blocks) {
           if (!blocks.hasOwnProperty(block) || !appBlocks[block]) { continue; }
 
-          // Extract the block's config from the module and set any defaults.
+          // Extract the block's config from the module.
           var config = blocks[block];
-          if (!config.id) { config.id = block; }
-          if (!config.module) { config.module = module; }
-          if (!config.attributes) { config.attributes = {}; }
-          if (!config.attributes.id) { config.attributes.id = dg.cleanCssIdentifier(block); }
 
+          // Make sure this block isn't overwriting another block.
           // Create an instance of the block, warn if someone overwrites somebody
           // else's block.
           if (dg.blocks[block]) {
             var msg = 'WARNING - The "' + block + '" block provided by the "' + dg.blocks[block].get('module') + '" ' +
-              'module has been overwritten by the "' + config.module + '" module.';
+              'module has been overwritten by the "' + module + '" module.';
             console.log(msg);
           }
-          dg.blocks[block] = new dg.Block(config);
+
+          // Create an instance of the block.
+          dg.blocks[block] = new dg.Block(module, block, config);
 
           // Merge the block config from settings.js into the block instance.
           // @TODO turn this into dg.extend().
@@ -149,6 +208,9 @@ dg.blocksLoad = function() {
   //});
 };
 
-dg.blockLoad = function(id) {
-  return dg.blocks[id] ? dg.blocks[id] : null;
-};
+/**
+ *
+ * @param id
+ * @returns {null}
+ */
+dg.blockLoad = function(id) { return dg.blocks[id] ? dg.blocks[id] : null; };
