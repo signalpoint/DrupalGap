@@ -36,12 +36,8 @@ drupalgap.settings.blocks = {};
 drupalgap.settings.blocks.ava = {
   header: {
 
-    // DrupalGap's administration menu block.
-    admin_menu: {
-      roles: [
-        { target_id: 'administrator', visible: true }
-      ]
-    }
+    // DrupalGap's main menu block.
+    main_menu: { }
 
   },
   content: {
@@ -54,6 +50,13 @@ drupalgap.settings.blocks.ava = {
 
   },
   footer: {
+
+    // DrupalGap's administration menu block.
+    admin_menu: {
+      roles: [
+        { target_id: 'administrator', visible: true }
+      ]
+    },
 
     // The powered by DrupalGap block.
     powered_by: { }
