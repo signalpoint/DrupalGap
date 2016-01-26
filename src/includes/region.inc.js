@@ -2,24 +2,34 @@
 // This will allow us to easily separate properties from blocks within settings.js
 
 /**
- * The Form Element prototype.
+ * The Region prototype.
  * @constructor
  */
-dg.Region = function(config) {
-  this.format = 'div';
+dg.Region = function(id, config) {
+  this._id = id;
+
+  // Let the config from the theme's region overwrite anything it wants.
   for (var setting in config) {
     if (!config.hasOwnProperty(setting)) { continue; }
     this[setting] = config[setting];
   }
+
+  // Set any missing defaults.
+  if (!this._attributes) { this._attributes = {}; }
+  if (!this._attributes.id) { this._attributes.id = id; }
+  if (!this._format) { this._format = 'div'; }
+  if (!this._prefix) { this._prefix = ''; }
+  if (!this._suffix) { this._suffix = ''; }
 };
 
 /**
  *
- * @param property
+ * @param prop
  * @returns {null}
  */
-dg.Region.prototype.get = function(property) {
-  return typeof this[property] !== 'undefined' ? this[property] : null;
+dg.Region.prototype.get = function(prop) {
+  var propName = '_' + prop;
+  return typeof this[propName] !== 'undefined' ? this[propName] : null;
 };
 
 /**
@@ -27,8 +37,9 @@ dg.Region.prototype.get = function(property) {
  * @param property
  * @param value
  */
-dg.Region.prototype.set = function(property, value) {
-  this[property] = value;
+dg.Region.prototype.set = function(prop, value) {
+  var propName = '_' + property;
+  this[propName] = value;
 };
 
 /**
