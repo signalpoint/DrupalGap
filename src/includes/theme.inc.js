@@ -59,11 +59,7 @@ dg.theme = function(hook, variables) {
       }
     //}
 
-    // Set default properties.
-    if (!variables._attributes) { variables._attributes = {}; }
-
-    // If there is no class name array, set an empty one.
-    if (!variables._attributes['class']) { variables._attributes['class'] = []; }
+    dg.setRenderElementDefaults(variables);
 
     var html = dg[theme_function].call(null, variables);
     if (html instanceof Promise) {
@@ -75,4 +71,14 @@ dg.theme = function(hook, variables) {
     return html;
   }
   catch (error) { console.log('dg.theme - ' + error); }
+};
+
+/**
+ * Given a render element, this will set any default values that haven't already been set.
+ * @param {Object} element The render element.
+ */
+dg.setRenderElementDefaults = function(element) {
+  //console.log(element);
+  if (typeof element._attributes === 'undefined') { element._attributes = {}; }
+  if (typeof element._attributes['class'] === 'undefined') { element._attributes['class'] = []; }
 };
