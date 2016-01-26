@@ -35,7 +35,7 @@ dg.theme_image = function(vars) {
 dg.theme_item_list = function(variables) {
   var html = '';
   var type = variables._type ? variables._type : 'ul';
-  if (variables._title) { html += '<h2>' + variables._title + '</h2>'; }
+  if (variables._title) { html += '<h3>' + variables._title + '</h3>'; }
   html += '<' + type + ' ' + dg.attributes(variables._attributes) + '>';
   if (variables._items && variables._items.length > 0) {
     for (var i in variables._items) {
