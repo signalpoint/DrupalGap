@@ -59,10 +59,32 @@ dg.modules.system.blocks = function() {
       });
     }
   };
+  blocks.main_menu = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        var content = {};
+        var items = [dg.l(dg.t('Home'), '')];
+        if (!dg.currentUser().isAuthenticated()) { items.push(dg.l(dg.t('Login'), 'user/login')); }
+        else {
+          items.push(
+              dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
+              dg.l(dg.t('Logout'), 'user/logout')
+          );
+        }
+        content['menu'] = {
+          _theme: 'item_list',
+          _items: items
+        };
+        ok(content);
+      });
+    }
+  };
   blocks.powered_by = {
     build: function () {
       return new Promise(function(ok, err) {
-        ok(dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org'));
+        ok({
+          _markup: '<p>' + dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org') + '</p>'
+        });
       });
     }
   };
