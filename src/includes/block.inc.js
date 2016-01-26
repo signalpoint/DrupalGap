@@ -70,6 +70,7 @@ dg.Block.prototype.buildWrapper = function() {
         }
       };
       recurse(element);
+      // @TODO - elements that are just a string can't be altered, e.g. powered by block.
       jDrupal.moduleInvokeAll('block_view_alter', element, self).then(function() {
         self.set('content', element);
         ok(self);
