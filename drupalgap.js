@@ -249,14 +249,11 @@ dg.Block.prototype.getVisibility = function() {
   var account = dg.currentUser();
   return new Promise(function(ok, err) {
     var visible = true;
-    if (self.roles) {
-      for (var i = 0; i < self.roles.length; i++) {
-        if (account.hasRole(self.roles[i].target_id)) {
-          visible = self.roles[i].visible;
-        }
-        else {
-          visible = !self.roles[i].visible;
-        }
+    var roles = self.get('roles');
+    if (roles) {
+      for (var i = 0; i < roles.length; i++) {
+        if (account.hasRole(roles[i].target_id)) { visible = roles[i].visible; }
+        else { visible = !roles[i].visible; }
         if (!visible) { break; }
       }
     }
