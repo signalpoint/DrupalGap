@@ -3,7 +3,7 @@ Bean = function() {
     header: {
       _format: 'nav',
       _attributes: {
-        'class': ['navbar navbar-inverse navbar-fixed-top']
+        'class': ['navbar navbar-inverse']
       },
       _prefix: '<div class="container">',
       _suffix: '</div>'
