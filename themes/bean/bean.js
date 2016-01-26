@@ -1,8 +1,26 @@
 Bean = function() {
   this.regions = {
-    header: { },
-    content: { },
-    footer: { }
+    header: {
+      _format: 'nav',
+      _attributes: {
+        'class': ['navbar navbar-inverse navbar-fixed-top']
+      },
+      _prefix: '<div class="container">',
+      _suffix: '</div>'
+    },
+    content: {
+      _attributes: {
+        'class': ['container']
+      }
+    },
+    footer: {
+      _format: 'footer',
+      _attributes: {
+        'class': ['footer']
+      },
+      _prefix: '<div class="container">',
+      _suffix: '</div>'
+    }
   };
 };
 // Extend the DrupalGap Theme prototype.
