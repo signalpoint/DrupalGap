@@ -37,7 +37,7 @@ In `foo.js`, make a constructor for the theme (the capitalized `Foo` is not a ty
 
 ```
 // The foo theme constructor.
-Foo = function() {
+dg.themes.Foo = function() {
 
   // The theme's regions.
   this.regions = {
@@ -49,8 +49,8 @@ Foo = function() {
 };
 
 // Extend the DrupalGap Theme prototype.
-Foo.prototype = new dg.Theme;
-Foo.prototype.constructor = Foo;
+dg.themes.Foo.prototype = new dg.Theme;
+dg.themes.Foo.prototype.constructor = dg.themes.Foo;
 ```
 
 #### 4. Load the theme
