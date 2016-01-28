@@ -9,102 +9,159 @@ dg._postRender = []; // Holds onto postRenders for the current page's render arr
  */
 dg.appRender = function(content) {
   dg.themeLoad().then(function(theme) {
-    var innerHTML = '';
 
-    // Process regions.
-    // @TODO move this to dg.loadRegions().
+    //console.log('theme');
+    //console.log(theme);
+
+    /**
+     * PREPARATION
+     */
+
+    // Clear the regions and start fresh.
     dg.regions = {};
     var regions = theme.getRegions();
-    for (var id in regions) {
-      if (!regions.hasOwnProperty(id)) { continue; }
+    var innerHTML = '';
+    var regionCount = theme.getRegionCount();
 
-      // Instantiate the region, skipping any regions without blocks.
-      var region = new dg.Region(id, regions[id]);
-      dg.regions[id] = region;
-      var blocks = dg.regions[id].getBlocks();
-      if (blocks.length == 0) { continue; }
+    /**
+     * THIRD - Add region placeholders to html string and inject it into the app container div.
+     */
 
-      // Open the region, render the placeholder for each of its block(s), then
-      // close the region.
-      var regionFormat = region.get('format');
-      innerHTML += '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
-      for (var i = 0; i < blocks.length; i++) {
-        var block = dg.blockLoad(blocks[i]);
-        var format = block.get('format');
-        innerHTML += '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>';
-      }
-      innerHTML += region.get('suffix') + '</' + regionFormat + '>';
+    var finishBlocks = function(allBlocks) {
 
-    }
-    innerHTML += dg.render(content);
+      //console.log('allBlocks');
+      //console.log(allBlocks);
 
-    // Place the region, and block placeholders, into the app's div.
-    document.getElementById('dg-app').innerHTML = innerHTML;
+      for (var id in dg.regions) {
+        if (!dg.regions.hasOwnProperty(id)) { continue; }
+        var region = dg.regions[id];
+        var blocks = region.getBlocks();
 
-    // Run the build promise for each block, then inject their content as they respond.
-    // Keep a tally of all the blocks, and once their promises have all completed, then
-    // if there are any forms on the page, attach their UI submit handlers. We don't use
-    // a promise all, so blocks can render one by one.
-    var blocks = dg.blocksLoad();
-    var blocksToRender = [];
-
-    var finish = function(_block) {
-
-      // Remove this block from the list of blocks to be rendered.
-      blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
-
-      // If we're all done rendering with every block...
-      if (blocksToRender.length == 0) {
-
-        // Run any post render functions and reset the queue.
-        if (dg._postRender.length) {
-          for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
-          dg._postRender = [];
+        // Open the region, render the placeholder for each of its block(s), then
+        // close the region.
+        var regionFormat = region.get('format');
+        innerHTML += '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
+        for (var i = 0; i < blocks.length; i++) {
+          var block = allBlocks[blocks[i]];
+          var format = block.get('format');
+          innerHTML += '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>';
         }
+        innerHTML += region.get('suffix') + '</' + regionFormat + '>';
 
-        // Process the form(s), if any.
-        // @TODO form should be processed as they're injected, because waiting
-        // until all promises have resolved like this means a form can't be used
-        // until they've all resolved.
-        var forms = dg.loadForms();
-        for (var id in forms) {
-          if (!forms.hasOwnProperty(id)) { continue; }
-          var form_html_id = dg.killCamelCase(id, '-');
-          var form = document.getElementById(form_html_id);
-          function processForm(e) {
-            if (e.preventDefault) e.preventDefault();
-            var _form = dg.loadForm(id);
-            _form._submission().then(
-                function() { },
-                function() { }
-            );
-            return false; // Prevent default form behavior.
+      }
+      innerHTML += dg.render(content);
+
+      // Place the region, and block placeholders, into the app's div.
+      document.getElementById('dg-app').innerHTML = innerHTML;
+
+      // Run the build promise for each block, then inject their content as they respond.
+      // Keep a tally of all the blocks, and once their promises have all completed, then
+      // if there are any forms on the page, attach their UI submit handlers. We don't use
+      // a promise all, so blocks can render one by one.
+      var blocks = dg.blocksLoad();
+      var blocksToRender = [];
+
+      /**
+       * FIFTH - Once all blocks have finished rendering, process any forms on the page.
+       */
+
+      var finish = function(_block) {
+
+        // Remove this block from the list of blocks to be rendered.
+        blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
+
+        // If we're all done rendering with every block...
+        if (blocksToRender.length == 0) {
+
+          // Run any post render functions and reset the queue.
+          if (dg._postRender.length) {
+            for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
+            dg._postRender = [];
           }
-          if (form.attachEvent) { form.attachEvent("submit", processForm); }
-          else { form.addEventListener("submit", processForm); }
+
+          // Process the form(s), if any.
+          // @TODO form should be processed as they're injected, because waiting
+          // until all promises have resolved like this means a form can't be used
+          // until they've all resolved.
+          var forms = dg.loadForms();
+          for (var id in forms) {
+            if (!forms.hasOwnProperty(id)) { continue; }
+            var form_html_id = dg.killCamelCase(id, '-');
+            var form = document.getElementById(form_html_id);
+            function processForm(e) {
+              if (e.preventDefault) e.preventDefault();
+              var _form = dg.loadForm(id);
+              _form._submission().then(
+                  function() { },
+                  function() { }
+              );
+              return false; // Prevent default form behavior.
+            }
+            if (form.attachEvent) { form.attachEvent("submit", processForm); }
+            else { form.addEventListener("submit", processForm); }
+          }
         }
+      };
+
+      /**
+       * FOURTH - For any visible blocks, build them then inject their rendered element into their waiting placeholder.
+       */
+
+      for (id in blocks) {
+        if (!blocks.hasOwnProperty(id)) { continue; }
+        blocksToRender.push(id);
+        blocks[id].getVisibility().then(function(visibility) {
+          if (visibility.visible) {
+            visibility.block.buildWrapper().then(function(_block) {
+              var _id = dg.cleanCssIdentifier(_block.get('id'));
+              var el = document.getElementById(_id).innerHTML = dg.render(_block.get('content'));
+              finish(_block);
+            });
+          }
+          else {
+            dg.removeElement(dg.cleanCssIdentifier(visibility.block.get('id')));
+            finish(visibility.block);
+          }
+        });
       }
+
     };
 
-    // Begin the render process for each block, checking its visibility and removing any restricted blocks from the DOM,
-    // and then resolving.
-    for (id in blocks) {
-      if (!blocks.hasOwnProperty(id)) { continue; }
-      blocksToRender.push(id);
-      blocks[id].getVisibility().then(function(visibility) {
-        if (visibility.visible) {
-          visibility.block.buildWrapper().then(function(_block) {
-            var _id = dg.cleanCssIdentifier(_block.get('id'));
-            var el = document.getElementById(_id).innerHTML = dg.render(_block.get('content'));
-            finish(_block);
-          });
+    /**
+     * SECOND - Instantiate and invoke alterations on blocks.
+     */
+
+    var finishRegions = function() {
+
+      //console.log('dg.regions');
+      //console.log(dg.regions);
+
+      // Instantiate the blocks, then give modules a chance to alter them.
+      var allBlocks = {};
+      for (var id in dg.regions) {
+        if (!dg.regions.hasOwnProperty(id)) { continue; }
+        var blocks = dg.regions[id].getBlocks();
+        for (var i = 0; i < blocks.length; i++) {
+          allBlocks[blocks[i]] = dg.blockLoad(blocks[i]);
         }
-        else {
-          dg.removeElement(dg.cleanCssIdentifier(visibility.block.get('id')));
-          finish(visibility.block);
-        }
-      });
+      }
+      jDrupal.moduleInvokeAll('blocks_build_alter', allBlocks).then(finishBlocks(allBlocks));
+
+    };
+
+    /**
+     * FIRST - Instantiate and invoke alterations of regions with blocks.
+     */
+
+    // Instantiate the regions, skipping any without blocks, then give modules a chance to alter the regions.
+    for (var id in regions) {
+      if (!regions.hasOwnProperty(id)) { continue; }
+      var region = new dg.Region(id, regions[id]);
+      if (region.getBlocks().length == 0) { continue; }
+      dg.setRenderElementDefaults(region);
+      dg.regions[id] = region;
     }
+    jDrupal.moduleInvokeAll('regions_build_alter', dg.regions).then(finishRegions);
 
   });
 };
