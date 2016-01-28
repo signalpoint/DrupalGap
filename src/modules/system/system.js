@@ -82,9 +82,13 @@ dg.modules.system.blocks = function() {
   blocks.powered_by = {
     build: function () {
       return new Promise(function(ok, err) {
-        ok({
-          _markup: '<p>' + dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org') + '</p>'
-        });
+        var content = {};
+        content['list'] = {
+          _theme: 'item_list',
+          _title: dg.t('Powered by'),
+          _items: [dg.l('DrupalGap', 'http://drupalgap.org'), dg.l('Drupal', 'http://drupal.org')]
+        };
+        ok(content);
       });
     }
   };
