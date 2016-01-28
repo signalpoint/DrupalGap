@@ -43,6 +43,16 @@ dg.getFrontPagePath = function() {
 dg.getTitle = function() { return dg._title; };
 
 /**
+ *
+ * @param prop
+ * @param obj
+ * @returns {boolean}
+ */
+dg.isProperty = function(prop, obj) {
+  return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
+};
+
+/**
  * Sets the current page title.
  * @param title
  */
