@@ -1,13 +1,14 @@
-/*! drupalgap 2016-01-26 */
+/*! drupalgap 2016-01-27 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
-  regions: null, // Instances of regions.
   blocks: null, // Instances of blocks.
+  regions: null, // Instances of regions.
   spinner: 0, // How many spinners have been thrown up.
+  themes: {}, // Instances of themes.
   _title: '' // The current page title
 };
-// @TODO consider prefixing all properties above with an underscore.
+// @TODO prefixing all properties above with an underscore, then use dg.get() throughout the SDK
 var drupalgap = dg;
 
 // Configuration setting defaults.
@@ -172,9 +173,7 @@ dg.Block = function(module, id, config) {
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
-  if (!this._prefix) { this._prefix = ''; }
-  if (!this._suffix) { this._suffix = ''; }
-  if (!this._attributes) { this._attributes = {}; }
+  dg.setRenderElementDefaults(this);
   if (!this._attributes.id) { this._attributes.id = dg.cleanCssIdentifier(id); }
 };
 
@@ -206,23 +205,7 @@ dg.Block.prototype.buildWrapper = function() {
   var self = this;
   return new Promise(function(ok, err) {
     self.build().then(function(element) {
-      // The block build can send us back a string or a render element. If it's a render element, it hasn't yet gone
-      // through the theme layer to pick up its default properties, so we'll have its defaults set automatically, so we
-      // can ship a fully prepared render element off to hook_block_view_alter().
-      // @TODO we only cover the first generation render elements in the build here, we're not properly recursing
-      // deeper.
-      var recurse = function(el) {
-        if (typeof el === 'object') {
-          for (var piece in el) {
-            if (!el.hasOwnProperty(piece)) { continue; }
-            if (typeof el[piece] === 'object') {
-              dg.setRenderElementDefaults(el[piece]);
-              //recurse(el); // WARNING - infite loop, doh!
-            }
-          }
-        }
-      };
-      recurse(element);
+      dg.setRenderElementDefaults(element);
       // @TODO - elements that are just a string can't be altered, e.g. powered by block.
       jDrupal.moduleInvokeAll('block_view_alter', element, self).then(function() {
         self.set('content', element);
@@ -408,6 +391,16 @@ dg.getFrontPagePath = function() {
  * @returns {*}
  */
 dg.getTitle = function() { return dg._title; };
+
+/**
+ *
+ * @param prop
+ * @param obj
+ * @returns {boolean}
+ */
+dg.isProperty = function(prop, obj) {
+  return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
+};
 
 /**
  * Sets the current page title.
@@ -1288,102 +1281,159 @@ dg._postRender = []; // Holds onto postRenders for the current page's render arr
  */
 dg.appRender = function(content) {
   dg.themeLoad().then(function(theme) {
-    var innerHTML = '';
 
-    // Process regions.
-    // @TODO move this to dg.loadRegions().
+    //console.log('theme');
+    //console.log(theme);
+
+    /**
+     * PREPARATION
+     */
+
+    // Clear the regions and start fresh.
     dg.regions = {};
     var regions = theme.getRegions();
-    for (var id in regions) {
-      if (!regions.hasOwnProperty(id)) { continue; }
+    var innerHTML = '';
+    var regionCount = theme.getRegionCount();
 
-      // Instantiate the region, skipping any regions without blocks.
-      var region = new dg.Region(id, regions[id]);
-      dg.regions[id] = region;
-      var blocks = dg.regions[id].getBlocks();
-      if (blocks.length == 0) { continue; }
+    /**
+     * THIRD - Add region placeholders to html string and inject it into the app container div.
+     */
 
-      // Open the region, render the placeholder for each of its block(s), then
-      // close the region.
-      var regionFormat = region.get('format');
-      innerHTML += '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
-      for (var i = 0; i < blocks.length; i++) {
-        var block = dg.blockLoad(blocks[i]);
-        var format = block.get('format');
-        innerHTML += '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>';
-      }
-      innerHTML += region.get('suffix') + '</' + regionFormat + '>';
+    var finishBlocks = function(allBlocks) {
 
-    }
-    innerHTML += dg.render(content);
+      //console.log('allBlocks');
+      //console.log(allBlocks);
 
-    // Place the region, and block placeholders, into the app's div.
-    document.getElementById('dg-app').innerHTML = innerHTML;
+      for (var id in dg.regions) {
+        if (!dg.regions.hasOwnProperty(id)) { continue; }
+        var region = dg.regions[id];
+        var blocks = region.getBlocks();
 
-    // Run the build promise for each block, then inject their content as they respond.
-    // Keep a tally of all the blocks, and once their promises have all completed, then
-    // if there are any forms on the page, attach their UI submit handlers. We don't use
-    // a promise all, so blocks can render one by one.
-    var blocks = dg.blocksLoad();
-    var blocksToRender = [];
-
-    var finish = function(_block) {
-
-      // Remove this block from the list of blocks to be rendered.
-      blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
-
-      // If we're all done rendering with every block...
-      if (blocksToRender.length == 0) {
-
-        // Run any post render functions and reset the queue.
-        if (dg._postRender.length) {
-          for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
-          dg._postRender = [];
+        // Open the region, render the placeholder for each of its block(s), then
+        // close the region.
+        var regionFormat = region.get('format');
+        innerHTML += '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
+        for (var i = 0; i < blocks.length; i++) {
+          var block = allBlocks[blocks[i]];
+          var format = block.get('format');
+          innerHTML += '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>';
         }
+        innerHTML += region.get('suffix') + '</' + regionFormat + '>';
 
-        // Process the form(s), if any.
-        // @TODO form should be processed as they're injected, because waiting
-        // until all promises have resolved like this means a form can't be used
-        // until they've all resolved.
-        var forms = dg.loadForms();
-        for (var id in forms) {
-          if (!forms.hasOwnProperty(id)) { continue; }
-          var form_html_id = dg.killCamelCase(id, '-');
-          var form = document.getElementById(form_html_id);
-          function processForm(e) {
-            if (e.preventDefault) e.preventDefault();
-            var _form = dg.loadForm(id);
-            _form._submission().then(
-                function() { },
-                function() { }
-            );
-            return false; // Prevent default form behavior.
+      }
+      innerHTML += dg.render(content);
+
+      // Place the region, and block placeholders, into the app's div.
+      document.getElementById('dg-app').innerHTML = innerHTML;
+
+      // Run the build promise for each block, then inject their content as they respond.
+      // Keep a tally of all the blocks, and once their promises have all completed, then
+      // if there are any forms on the page, attach their UI submit handlers. We don't use
+      // a promise all, so blocks can render one by one.
+      var blocks = dg.blocksLoad();
+      var blocksToRender = [];
+
+      /**
+       * FIFTH - Once all blocks have finished rendering, process any forms on the page.
+       */
+
+      var finish = function(_block) {
+
+        // Remove this block from the list of blocks to be rendered.
+        blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
+
+        // If we're all done rendering with every block...
+        if (blocksToRender.length == 0) {
+
+          // Run any post render functions and reset the queue.
+          if (dg._postRender.length) {
+            for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
+            dg._postRender = [];
           }
-          if (form.attachEvent) { form.attachEvent("submit", processForm); }
-          else { form.addEventListener("submit", processForm); }
+
+          // Process the form(s), if any.
+          // @TODO form should be processed as they're injected, because waiting
+          // until all promises have resolved like this means a form can't be used
+          // until they've all resolved.
+          var forms = dg.loadForms();
+          for (var id in forms) {
+            if (!forms.hasOwnProperty(id)) { continue; }
+            var form_html_id = dg.killCamelCase(id, '-');
+            var form = document.getElementById(form_html_id);
+            function processForm(e) {
+              if (e.preventDefault) e.preventDefault();
+              var _form = dg.loadForm(id);
+              _form._submission().then(
+                  function() { },
+                  function() { }
+              );
+              return false; // Prevent default form behavior.
+            }
+            if (form.attachEvent) { form.attachEvent("submit", processForm); }
+            else { form.addEventListener("submit", processForm); }
+          }
         }
+      };
+
+      /**
+       * FOURTH - For any visible blocks, build them then inject their rendered element into their waiting placeholder.
+       */
+
+      for (id in blocks) {
+        if (!blocks.hasOwnProperty(id)) { continue; }
+        blocksToRender.push(id);
+        blocks[id].getVisibility().then(function(visibility) {
+          if (visibility.visible) {
+            visibility.block.buildWrapper().then(function(_block) {
+              var _id = dg.cleanCssIdentifier(_block.get('id'));
+              var el = document.getElementById(_id).innerHTML = dg.render(_block.get('content'));
+              finish(_block);
+            });
+          }
+          else {
+            dg.removeElement(dg.cleanCssIdentifier(visibility.block.get('id')));
+            finish(visibility.block);
+          }
+        });
       }
+
     };
 
-    // Begin the render process for each block, checking its visibility and removing any restricted blocks from the DOM,
-    // and then resolving.
-    for (id in blocks) {
-      if (!blocks.hasOwnProperty(id)) { continue; }
-      blocksToRender.push(id);
-      blocks[id].getVisibility().then(function(visibility) {
-        if (visibility.visible) {
-          visibility.block.buildWrapper().then(function(_block) {
-            var _id = dg.cleanCssIdentifier(_block.get('id'));
-            var el = document.getElementById(_id).innerHTML = dg.render(_block.get('content'));
-            finish(_block);
-          });
+    /**
+     * SECOND - Instantiate and invoke alterations on blocks.
+     */
+
+    var finishRegions = function() {
+
+      //console.log('dg.regions');
+      //console.log(dg.regions);
+
+      // Instantiate the blocks, then give modules a chance to alter them.
+      var allBlocks = {};
+      for (var id in dg.regions) {
+        if (!dg.regions.hasOwnProperty(id)) { continue; }
+        var blocks = dg.regions[id].getBlocks();
+        for (var i = 0; i < blocks.length; i++) {
+          allBlocks[blocks[i]] = dg.blockLoad(blocks[i]);
         }
-        else {
-          dg.removeElement(dg.cleanCssIdentifier(visibility.block.get('id')));
-          finish(visibility.block);
-        }
-      });
+      }
+      jDrupal.moduleInvokeAll('blocks_build_alter', allBlocks).then(finishBlocks(allBlocks));
+
+    };
+
+    /**
+     * FIRST - Instantiate and invoke alterations of regions with blocks.
+     */
+
+    // Instantiate the regions, skipping any without blocks, then give modules a chance to alter the regions.
+    for (var id in regions) {
+      if (!regions.hasOwnProperty(id)) { continue; }
+      var region = new dg.Region(id, regions[id]);
+      if (region.getBlocks().length == 0) { continue; }
+      dg.setRenderElementDefaults(region);
+      dg.regions[id] = region;
     }
+    jDrupal.moduleInvokeAll('regions_build_alter', dg.regions).then(finishRegions);
 
   });
 };
@@ -1660,17 +1710,26 @@ dg.Theme.prototype.get = function(property) {
 dg.Theme.prototype.getRegions = function() {
   return this.get('regions');
 };
+dg.Theme.prototype.getRegionCount = function() {
+  var count = 0;
+  var regions = this.get('regions');
+  for (var region in regions) {
+    if (!regions.hasOwnProperty(region)) { continue; }
+    count++;
+  }
+  return count;
+};
 
 dg.themeLoad = function() {
   return new Promise(function(ok, err) {
     if (!dg.activeTheme) {
       var themeClassName = jDrupal.ucfirst(dg.getCamelCase(dg.config('theme').name));
-      if (!window[themeClassName]) {
+      if (!dg.themes[themeClassName]) {
         var msg = 'Failed to load theme (' + themeClassName + ') - did you include its .js file in the index.html file?';
         err(msg);
         return;
       }
-      dg.activeTheme = new window[themeClassName];
+      dg.activeTheme = new dg.themes[themeClassName];
     }
     ok(dg.activeTheme);
   });
@@ -1728,8 +1787,21 @@ dg.theme = function(hook, variables) {
  */
 dg.setRenderElementDefaults = function(element) {
   //console.log(element);
-  if (typeof element._attributes === 'undefined') { element._attributes = {}; }
-  if (typeof element._attributes['class'] === 'undefined') { element._attributes['class'] = []; }
+  //if (typeof element._attributes === 'undefined') { element._attributes = {}; }
+  //if (typeof element._attributes['class'] === 'undefined') { element._attributes['class'] = []; }
+
+  if (typeof element === 'object') {
+    if (typeof element._attributes === 'undefined') { element._attributes = {}; }
+    if (typeof element._attributes['class'] === 'undefined') { element._attributes['class'] = []; }
+    for (var piece in element) {
+      if (!element.hasOwnProperty(piece) || dg.isProperty(piece, element)) { continue; }
+      // @TODO we should be skipping dg properties here (e.g. anything with an underscore, probably causing the infinite loop)
+      if (typeof element[piece] === 'object') {
+        dg.setRenderElementDefaults(element[piece]);
+      }
+    }
+  }
+
 };
 
 dg.currentUser = function() { return jDrupal.currentUser(); };
@@ -2357,9 +2429,13 @@ dg.modules.system.blocks = function() {
   blocks.powered_by = {
     build: function () {
       return new Promise(function(ok, err) {
-        ok({
-          _markup: '<p>' + dg.t('Powered by: ') + dg.l('DrupalGap', 'http://drupalgap.org') + '</p>'
-        });
+        var content = {};
+        content['list'] = {
+          _theme: 'item_list',
+          _title: dg.t('Powered by'),
+          _items: [dg.l('DrupalGap', 'http://drupalgap.org'), dg.l('Drupal', 'http://drupal.org')]
+        };
+        ok(content);
       });
     }
   };
