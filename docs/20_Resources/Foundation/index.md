@@ -3,6 +3,10 @@
 
 To use DrupalGap Foundation Themes, be sure to install the [foundation module for DrupalGap](http://drupalgap.org/project/foundation).
 
+### Templates
+
+- http://foundation.zurb.com/templates.html
+
 ### Menus
 
 When creating a custom menu, add the `menu` Foundation classes to the menu:
