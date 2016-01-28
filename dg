@@ -218,7 +218,7 @@ function drupalgap_create_theme() {
 # WARNING: any changes here should be reflected in the "create a custom theme" docs.
 
     echo "// The $THEME_NAME theme constructor.
-$THEME_CLASS_NAME = function() {
+dg.themes.$THEME_CLASS_NAME = function() {
   this.regions = {
     header: { },
     content: { },
@@ -226,8 +226,8 @@ $THEME_CLASS_NAME = function() {
   };
 };
 // Extend the DrupalGap Theme prototype.
-$THEME_CLASS_NAME.prototype = new dg.Theme;
-$THEME_CLASS_NAME.prototype.constructor = $THEME_CLASS_NAME;" > "$FILE_URI"
+dg.themes.$THEME_CLASS_NAME.prototype = new dg.Theme;
+dg.themes.$THEME_CLASS_NAME.prototype.constructor = dg.themes.$THEME_CLASS_NAME;" > "$FILE_URI"
   echo "1. Include it in the index.html file:
 
 <script src=\"$FILE_URI\"></script>
