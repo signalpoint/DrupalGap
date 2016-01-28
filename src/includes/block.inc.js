@@ -19,9 +19,7 @@ dg.Block = function(module, id, config) {
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
-  if (!this._prefix) { this._prefix = ''; }
-  if (!this._suffix) { this._suffix = ''; }
-  if (!this._attributes) { this._attributes = {}; }
+  dg.setRenderElementDefaults(this);
   if (!this._attributes.id) { this._attributes.id = dg.cleanCssIdentifier(id); }
 };
 
@@ -53,23 +51,7 @@ dg.Block.prototype.buildWrapper = function() {
   var self = this;
   return new Promise(function(ok, err) {
     self.build().then(function(element) {
-      // The block build can send us back a string or a render element. If it's a render element, it hasn't yet gone
-      // through the theme layer to pick up its default properties, so we'll have its defaults set automatically, so we
-      // can ship a fully prepared render element off to hook_block_view_alter().
-      // @TODO we only cover the first generation render elements in the build here, we're not properly recursing
-      // deeper.
-      var recurse = function(el) {
-        if (typeof el === 'object') {
-          for (var piece in el) {
-            if (!el.hasOwnProperty(piece)) { continue; }
-            if (typeof el[piece] === 'object') {
-              dg.setRenderElementDefaults(el[piece]);
-              //recurse(el); // WARNING - infite loop, doh!
-            }
-          }
-        }
-      };
-      recurse(element);
+      dg.setRenderElementDefaults(element);
       // @TODO - elements that are just a string can't be altered, e.g. powered by block.
       jDrupal.moduleInvokeAll('block_view_alter', element, self).then(function() {
         self.set('content', element);
