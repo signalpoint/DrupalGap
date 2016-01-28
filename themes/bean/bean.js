@@ -1,4 +1,4 @@
-Bean = function() {
+dg.themes.Bean = function() {
   this.regions = {
     header: {
       _format: 'nav',
@@ -24,5 +24,5 @@ Bean = function() {
   };
 };
 // Extend the DrupalGap Theme prototype.
-Bean.prototype = new dg.Theme;
-Bean.prototype.constructor = Bean;
+dg.themes.Bean.prototype = new dg.Theme;
+dg.themes.prototype.constructor = dg.themes.Bean;
