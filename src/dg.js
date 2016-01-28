@@ -1,12 +1,13 @@
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
-  regions: null, // Instances of regions.
   blocks: null, // Instances of blocks.
+  regions: null, // Instances of regions.
   spinner: 0, // How many spinners have been thrown up.
+  themes: {}, // Instances of themes.
   _title: '' // The current page title
 };
-// @TODO consider prefixing all properties above with an underscore.
+// @TODO prefixing all properties above with an underscore, then use dg.get() throughout the SDK
 var drupalgap = dg;
 
 // Configuration setting defaults.
