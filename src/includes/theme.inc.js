@@ -11,17 +11,26 @@ dg.Theme.prototype.get = function(property) {
 dg.Theme.prototype.getRegions = function() {
   return this.get('regions');
 };
+dg.Theme.prototype.getRegionCount = function() {
+  var count = 0;
+  var regions = this.get('regions');
+  for (var region in regions) {
+    if (!regions.hasOwnProperty(region)) { continue; }
+    count++;
+  }
+  return count;
+};
 
 dg.themeLoad = function() {
   return new Promise(function(ok, err) {
     if (!dg.activeTheme) {
       var themeClassName = jDrupal.ucfirst(dg.getCamelCase(dg.config('theme').name));
-      if (!window[themeClassName]) {
+      if (!dg.themes[themeClassName]) {
         var msg = 'Failed to load theme (' + themeClassName + ') - did you include its .js file in the index.html file?';
         err(msg);
         return;
       }
-      dg.activeTheme = new window[themeClassName];
+      dg.activeTheme = new dg.themes[themeClassName];
     }
     ok(dg.activeTheme);
   });
@@ -79,6 +88,19 @@ dg.theme = function(hook, variables) {
  */
 dg.setRenderElementDefaults = function(element) {
   //console.log(element);
-  if (typeof element._attributes === 'undefined') { element._attributes = {}; }
-  if (typeof element._attributes['class'] === 'undefined') { element._attributes['class'] = []; }
+  //if (typeof element._attributes === 'undefined') { element._attributes = {}; }
+  //if (typeof element._attributes['class'] === 'undefined') { element._attributes['class'] = []; }
+
+  if (typeof element === 'object') {
+    if (typeof element._attributes === 'undefined') { element._attributes = {}; }
+    if (typeof element._attributes['class'] === 'undefined') { element._attributes['class'] = []; }
+    for (var piece in element) {
+      if (!element.hasOwnProperty(piece) || dg.isProperty(piece, element)) { continue; }
+      // @TODO we should be skipping dg properties here (e.g. anything with an underscore, probably causing the infinite loop)
+      if (typeof element[piece] === 'object') {
+        dg.setRenderElementDefaults(element[piece]);
+      }
+    }
+  }
+
 };
