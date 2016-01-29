@@ -25,4 +25,4 @@ dg.themes.Bean = function() {
 };
 // Extend the DrupalGap Theme prototype.
 dg.themes.Bean.prototype = new dg.Theme;
-dg.themes.prototype.constructor = dg.themes.Bean;
+dg.themes.Bean.prototype.constructor = dg.themes.Bean;
