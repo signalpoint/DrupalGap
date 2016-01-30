@@ -10,30 +10,29 @@ jDrupal.settings = {
 
 };
 
-// DrupalGap Settings.
-drupalgap.settings = {
-  front: null, // The front page
-  mode: 'web-app', // The app mode, web-app or phonegap
-  title: 'DrupalGap'
-};
+// App mode.
+dg.settings.mode = 'web-app'; // web-app or phonegap
+
+// App title.
+dg.settings.title = 'DrupalGap';
+
+// App front page.
+dg.settings.front = null;
 
 // The active theme.
-drupalgap.settings.theme = {
+dg.settings.theme = {
   name: 'ava',
   path: 'themes/ava'
 };
 
 // Drupal files directory path(s)
-drupalgap.settings.files = {
+dg.settings.files = {
   publicPath: 'sites/default/files',
   privatePath: null
 };
 
-// Blocks.
-drupalgap.settings.blocks = {};
-
-// Blocks for the "ava" theme.
-drupalgap.settings.blocks.ava = {
+// Blocks for the active theme..
+dg.settings.blocks[dg.config('theme').name] = {
   header: {
 
     // DrupalGap's main menu block.
