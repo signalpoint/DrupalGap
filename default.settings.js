@@ -1,4 +1,7 @@
-// jDrupal Settings.
+/**
+ * jDrupal Settings.
+ * @see http://jdrupal.easystreet3.com
+ */
 jDrupal.settings = {
 
   // Drupal site settings.
@@ -19,19 +22,25 @@ dg.settings.title = 'DrupalGap';
 // App front page.
 dg.settings.front = null;
 
-// The active theme.
+/**
+ * The active theme.
+ * @see http://docs.drupalgap.org/8/Themes
+ */
 dg.settings.theme = {
   name: 'ava',
   path: 'themes/ava'
 };
 
-// Drupal files directory path(s)
+// Drupal files directory path(s).
 dg.settings.files = {
   publicPath: 'sites/default/files',
   privatePath: null
 };
 
-// Blocks for the active theme..
+/**
+ * Blocks for the active theme.
+ * @see http://docs.drupalgap.org/8/Blocks
+ */
 dg.settings.blocks[dg.config('theme').name] = {
   header: {
 
