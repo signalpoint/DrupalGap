@@ -1,4 +1,4 @@
-Ava = function() {
+dg.themes.Ava = function() {
   this.regions = {
     header: { },
     content: { },
@@ -6,5 +6,5 @@ Ava = function() {
   };
 };
 // Extend the DrupalGap Theme prototype.
-Ava.prototype = new dg.Theme;
-Ava.prototype.constructor = Ava;
+dg.themes.Ava.prototype = new dg.Theme;
+dg.themes.Ava.prototype.constructor = dg.themes.Ava;

@@ -10,7 +10,7 @@
 
 ```
 <!-- DrupalGap Theme -->
-<script src="themes/bean/bean.js"></script>
+<script src="themes/burrito/burrito.js"></script>
 ```
 
 ### settings.js
@@ -18,12 +18,12 @@
 ```
 // The active theme.
 drupalgap.settings.theme = {
-  name: 'bean',
-  path: 'themes/bean'
+  name: 'burrito',
+  path: 'themes/burrito'
 };
 
-// Blocks for the "bean" theme.
-drupalgap.settings.blocks.bean = {
+// Blocks for the "burrito" theme.
+drupalgap.settings.blocks.burrito = {
   /* ... */
 };
 ```

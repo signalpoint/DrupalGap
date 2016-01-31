@@ -1,4 +1,4 @@
-dg.themes.Bean = function() {
+dg.themes.Burrito = function() {
   this.regions = {
     header: {
       _format: 'nav',
@@ -24,5 +24,5 @@ dg.themes.Bean = function() {
   };
 };
 // Extend the DrupalGap Theme prototype.
-dg.themes.Bean.prototype = new dg.Theme;
-dg.themes.Bean.prototype.constructor = dg.themes.Bean;
+dg.themes.Burrito.prototype = new dg.Theme;
+dg.themes.Burrito.prototype.constructor = dg.themes.Burrito;
