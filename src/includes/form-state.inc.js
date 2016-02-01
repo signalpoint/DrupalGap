@@ -51,7 +51,7 @@ dg.FormStateInterface.prototype.getErrorMessages = function() {
   var errors = this.getErrors();
   for (error in errors) {
     if (!errors.hasOwnProperty(error)) { continue; }
-    msg += error + ' - ' + errors[error];
+    msg += errors[error] + '\n';
   }
   return msg;
 };
