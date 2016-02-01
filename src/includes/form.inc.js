@@ -150,6 +150,16 @@ dg.Form.prototype._submission = function() {
 // dg core form validation handler
 dg.Form.prototype._validateForm = function() {
   var self = this;
+  // Verify required elements have values, otherwise set a form state error on it.
+  var formState = self.getFormState();
+  for (var name in self.form) {
+    if (!dg.isFormElement(name, self.form)) { continue; }
+    var el = self.form[name];
+    if (typeof el._required !== 'undefined' && el._required && jDrupal.isEmpty(formState.getValue(name))) {
+      formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
+    }
+  }
+  // Run through any validation handlers attached to the form, if any.
   var promises = [];
   for (var i = 0; i < self.form._validate.length; i++) {
     var parts = self.form._validate[i].split('.');
