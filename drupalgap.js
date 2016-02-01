@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-27 */
+/*! drupalgap 2016-01-31 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -258,11 +258,12 @@ dg.blocksLoad = function() {
 
       dg.blocks = {};
 
-      // First, figure out what blocks are defined in the settings.js file and
-      // set them aside. Warn the developer if there are no blocks defined.
+      // First, figure out what blocks are defined in the settings.js file and set them aside. Warn the developer if
+      // there are no blocks defined. Remember that these settings are not prefixed with an underscore, and will be
+      // turned converted to a Block property later.
       var appBlocks = {};
       var themeName = dg.config('theme').name;
-      var blockSettings = drupalgap.settings.blocks[themeName];
+      var blockSettings = dg.settings.blocks[themeName];
       var blockCount = 0;
       // Iterate over each region mentioned in the theme settings...
       for (var region in blockSettings) {
@@ -299,8 +300,7 @@ dg.blocksLoad = function() {
         var blocks = modules[module].blocks();
         if (!blocks) { continue; }
 
-        // For each block provided by the module (skipping any blocks not
-        // mentioned by the app)...
+        // For each block provided by the module (skipping any blocks not mentioned by the app)...
         for (block in blocks) {
           if (!blocks.hasOwnProperty(block) || !appBlocks[block]) { continue; }
 
@@ -874,7 +874,7 @@ dg.FormStateInterface.prototype.getErrorMessages = function() {
   var errors = this.getErrors();
   for (error in errors) {
     if (!errors.hasOwnProperty(error)) { continue; }
-    msg += error + ' - ' + errors[error];
+    msg += errors[error] + '\n';
   }
   return msg;
 };
@@ -1084,6 +1084,16 @@ dg.Form.prototype._submission = function() {
 // dg core form validation handler
 dg.Form.prototype._validateForm = function() {
   var self = this;
+  // Verify required elements have values, otherwise set a form state error on it.
+  var formState = self.getFormState();
+  for (var name in self.form) {
+    if (!dg.isFormElement(name, self.form)) { continue; }
+    var el = self.form[name];
+    if (typeof el._required !== 'undefined' && el._required && jDrupal.isEmpty(formState.getValue(name))) {
+      formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
+    }
+  }
+  // Run through any validation handlers attached to the form, if any.
   var promises = [];
   for (var i = 0; i < self.form._validate.length; i++) {
     var parts = self.form._validate[i].split('.');
