@@ -50,6 +50,8 @@ dg.Form.prototype.getForm = function() {
         for (var name in self.form) {
           if (!dg.isFormElement(name, self.form)) { continue; }
           var element = self.form[name];
+          // Reset the attribute value if the element value was changed during form alteration.
+          if (element._attributes.value != element._value) { element._attributes.value = element._value; }
           switch (element._widgetType) {
             case 'FieldWidget':
             case 'FormWidget':
