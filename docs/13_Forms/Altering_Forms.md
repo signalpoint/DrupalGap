@@ -2,7 +2,7 @@ With a [custom module](../Modules/Create_a_Custom_Module), we can make changes t
 
 ## Alter a Form Element
 
-For example the code below will modify an input label and the submit button's theme on the user login form:
+For example the code below will modify an input label and add a class to the submit button on the user login form:
 
 ```
 /**
@@ -11,8 +11,8 @@ For example the code below will modify an input label and the submit button's th
 function my_module_form_alter(form, form_state, form_id) {
   return new Promise(function(ok, err) {
     if (form_id == 'UserLoginForm') {
-      form._validate.push('my_module.user_login_form_validate');
-      form._submit.push('my_module.user_login_form_submit');
+      form.name._title = form.name._attributes.placeholder = dg.t('Account name');
+      form.actions.submit._attributes['class'].push('foo');
     }
     ok();
   });
@@ -78,33 +78,11 @@ my_module.user_login_form_submit = function(form, form_state) {
 Using the form `action` property, we can specify which path the app will redirect to after the form's submission. For example, by default when creating a new node, the form is designed to redirect to the newly created node for viewing. If we wanted to alter the redirection path, we can do so like so:
 
 ```
-/**
- * Implements hook_form_alter().
- */
-function my_module_form_alter(form, form_state, form_id) {
-  try {
-    // Redirect the node edit form submission to the front page.
-    if (form_id == 'node_edit') {
-      form.action = drupalgap.settings.front;
-    }
-  }
-  catch (error) { drupalgap_error(error); }
-}
+...
 ```
 
 ## Adding an Element to a Form
 
 ```
-/**
- * Implements hook_form_alter().
- */
-function my_module_form_alter(form, form_state, form_id) {
-  if (form_id == 'some_form') {
-    form.elements['my_new_element'] = {
-      type: 'textfield',
-      id: drupalgap_form_get_element_id('my_new_element', form_id),
-      title: 'My New Text Field'
-    };
-  }
-}
+...
 ```

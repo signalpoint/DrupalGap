@@ -1,16 +1,15 @@
 Here's an example that displays a Google Map within a DrupalGap mobile application.
 
-![Google Map](http://drupalgap.org/sites/default/files/google-map.png)
-
 ## Google Maps Javascript File
 
 First, we need to include the Google Maps Javascript File in the `index.html` file of our app:
 
 ```
+<!-- Google Maps -->
 <script src="https://maps.googleapis.com/maps/api/js"></script>
 ```
 
-This should go in the `<head>` of the of the `index.html` file (after the inclusing of the `drupalgap.js` file) for the app.
+This should go in the `<head>` of the of the `index.html` file (after the inclusion of the `drupalgap.min.js` file) for the app.
 
 ## Create a Page to Display a Map
 
@@ -18,9 +17,9 @@ Next we'll create a page to handle the display of our map:
 
 ```
 // Create global variables to hold coordinates and the map.
-var _my_module_user_latitude = null;
-var _my_module_user_longitude = null;
-var _my_module_map = null;
+my_module.userLatitude = null;
+my_module.userLongitude = null;
+my_module.map = null;
 
 /**
  * Defines custom routes for my module.
@@ -30,8 +29,8 @@ my_module.routing = function() {
   routes["my_module.map"] = {
     "path": "/map",
     "defaults": {
-      "_controller": my_module_map,
-      "_title": "Hello World"
+      "_title": "Map",
+      "_controller": my_module_map
     }
   };
   return routes;
@@ -67,13 +66,13 @@ function my_module_map_post_render() {
       function(position) {
 
         // Set aside the user's position.
-        _my_module_user_latitude = position.coords.latitude;
-        _my_module_user_longitude = position.coords.longitude;
+        my_module.userLatitude = position.coords.latitude;
+        my_module.userLongitude = position.coords.longitude;
 
         // Build the lat lng object from the user's position.
         var myLatlng = new google.maps.LatLng(
-            _my_module_user_latitude,
-            _my_module_user_longitude
+            my_module.userLatitude,
+            my_module.userLongitude
         );
 
         // Set the map's options.
@@ -91,19 +90,19 @@ function my_module_map_post_render() {
         };
 
         // Initialize the map, and set a timeout to resize properly.
-        _my_module_map = new google.maps.Map(
+        my_module.map = new google.maps.Map(
             document.getElementById("my-module-map"),
             mapOptions
         );
         setTimeout(function() {
-          google.maps.event.trigger(_my_module_map, 'resize');
-          _my_module_map.setCenter(myLatlng);
+          google.maps.event.trigger(my_module.map, 'resize');
+          my_module.map.setCenter(myLatlng);
         }, 500);
 
         // Add a marker for the user's current position.
         var marker = new google.maps.Marker({
           position: myLatlng,
-          map: _my_module_map,
+          map: my_module.map,
           icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
         });
 

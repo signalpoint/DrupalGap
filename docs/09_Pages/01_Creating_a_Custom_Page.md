@@ -12,7 +12,7 @@ To create a custom page in our DrupalGap mobile application, follow these steps:
 
 ```
 /**
- * Defines custom routes for my module.
+ * Defines custom routes for my_module.
  */
 my_module.routing = function() {
   var routes = {};

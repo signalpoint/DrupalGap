@@ -13,10 +13,10 @@ By default, DrupalGap comes packaged with a few different system blocks. Here ar
 
 ## Remove the "Powered by: DrupalGap" Block
 
-To delete the "Powered by: DrupalGap" Block from our mobile app, open the settings.js file. Then for example, remove the 'powered_by' block from the footer region within our theme:
+To delete the "Powered by: DrupalGap" Block from our mobile app, open the `settings.js` file. Then for example, remove the 'powered_by' block from the footer region within our theme:
 
 ```
-drupalgap.settings.blocks.my_theme = {
+dg.settings.blocks[dg.config('theme').name] = {
   /* ... */
   footer:{
     my_custom_block:{},
