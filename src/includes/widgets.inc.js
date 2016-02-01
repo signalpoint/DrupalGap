@@ -9,7 +9,8 @@ dg.theme_link = function(variables) {
   if (path == '') { path = dg.getFrontPagePath(); }
   if (typeof variables._attributes.href === 'undefined' && path) {
     var href = path;
-    if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) {}
+    if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) { }
+    else if (path.indexOf('/') == 0) { href = path; }
     else { href = '#' + path; }
     variables._attributes.href = href;
   }
@@ -41,6 +42,7 @@ dg.theme_item_list = function(variables) {
     for (var i in variables._items) {
       if (!variables._items.hasOwnProperty(i)) { continue; }
       var item = variables._items[i];
+      if (typeof item === 'object') { item = dg.render(item); }
       var attrs = {};
       if (i == 0) { attrs['class'] = ['first']; }
       else if (i == variables._items.length - 1) { attrs['class'] = ['last']; }
