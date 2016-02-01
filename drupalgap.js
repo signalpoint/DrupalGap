@@ -1,4 +1,4 @@
-/*! drupalgap 2016-01-31 */
+/*! drupalgap 2016-02-01 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -350,7 +350,7 @@ dg.blocksLoad = function() {
 dg.blockLoad = function(id) { return dg.blocks[id] ? dg.blocks[id] : null; };
 /**
  * Get or set a drupalgap configuration setting.
- * @param name
+ * @param {String} name
  * @returns {*}
  */
 dg.config = function(name) {
@@ -362,23 +362,21 @@ dg.config = function(name) {
   return dg.settings[name];
 };
 
-// Mode.
-
 /**
- *
- * @returns {*}
+ * Returns the current mode, which is either "web-app" or "phonegap".
+ * @returns {String}
  */
 dg.getMode = function() { return this.config('mode'); };
 
 /**
- *
- * @param mode
+ * Sets the current mode, which must be either "web-app" or "phonegap".
+ * @param {String} mode
  */
 dg.setMode = function(mode) { this.config('mode', mode); };
 
 /**
- *
- * @returns {*}
+ * Returns the path to the app's front page route.
+ * @returns {String}
  */
 dg.getFrontPagePath = function() {
   var front = dg.config('front');
@@ -387,8 +385,8 @@ dg.getFrontPagePath = function() {
 };
 
 /**
- * Gets the current page title.
- * @returns {*}
+ * Gets the current page's title.
+ * @returns {String}
  */
 dg.getTitle = function() { return dg._title; };
 
@@ -1866,7 +1864,8 @@ dg.theme_link = function(variables) {
   if (path == '') { path = dg.getFrontPagePath(); }
   if (typeof variables._attributes.href === 'undefined' && path) {
     var href = path;
-    if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) {}
+    if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) { }
+    else if (path.indexOf('/') == 0) { href = path; }
     else { href = '#' + path; }
     variables._attributes.href = href;
   }
@@ -1898,6 +1897,7 @@ dg.theme_item_list = function(variables) {
     for (var i in variables._items) {
       if (!variables._items.hasOwnProperty(i)) { continue; }
       var item = variables._items[i];
+      if (typeof item === 'object') { item = dg.render(item); }
       var attrs = {};
       if (i == 0) { attrs['class'] = ['first']; }
       else if (i == variables._items.length - 1) { attrs['class'] = ['last']; }
