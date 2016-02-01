@@ -157,8 +157,8 @@ $MODULE_NAME.routing = function() {
   // My example page route.
   routes[\"$MODULE_NAME.example\"] = {
     \"path\": \"/hello-world\",
-    \"_title\": \"Hello World\",
     \"defaults\": {
+      \"_title\": \"Hello World\",
       \"_controller\": function() {
 
         return new Promise(function(ok, err) {
