@@ -1,6 +1,6 @@
 /**
  * Get or set a drupalgap configuration setting.
- * @param name
+ * @param {String} name
  * @returns {*}
  */
 dg.config = function(name) {
@@ -12,23 +12,21 @@ dg.config = function(name) {
   return dg.settings[name];
 };
 
-// Mode.
-
 /**
- *
- * @returns {*}
+ * Returns the current mode, which is either "web-app" or "phonegap".
+ * @returns {String}
  */
 dg.getMode = function() { return this.config('mode'); };
 
 /**
- *
- * @param mode
+ * Sets the current mode, which must be either "web-app" or "phonegap".
+ * @param {String} mode
  */
 dg.setMode = function(mode) { this.config('mode', mode); };
 
 /**
- *
- * @returns {*}
+ * Returns the path to the app's front page route.
+ * @returns {String}
  */
 dg.getFrontPagePath = function() {
   var front = dg.config('front');
@@ -37,8 +35,8 @@ dg.getFrontPagePath = function() {
 };
 
 /**
- * Gets the current page title.
- * @returns {*}
+ * Gets the current page's title.
+ * @returns {String}
  */
 dg.getTitle = function() { return dg._title; };
 
