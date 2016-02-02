@@ -15,6 +15,9 @@ routes["my_module.say-hello"] = {
 ## Building the Form
 
 ```
+/**
+ * My form's constructor.
+ */
 var MyModuleSayHelloForm = function() {
 
   this.buildForm = function(form, formState) {
@@ -55,10 +58,9 @@ var MyModuleSayHelloForm = function() {
   };
 
 };
-
-// Extend the DrupalGap form prototype and attach our form's constructor.
-DiscAddCourseForm.prototype = new dg.Form('DiscAddCourseForm');
-DiscAddCourseForm.constructor = DiscAddCourseForm;
+// Extend the DrupalGap form prototype and attach my form's constructor.
+MyModuleSayHelloForm.prototype = new dg.Form('MyModuleSayHelloForm');
+MyModuleSayHelloForm.constructor = MyModuleSayHelloForm;
 ```
 
 ## Form Validation

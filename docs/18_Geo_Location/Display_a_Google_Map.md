@@ -42,16 +42,16 @@ my_module.routing = function() {
 function my_module_map() {
   return new Promise(function(ok, err) {
   
-    var content = {};
+    var element = {};
     var map_attributes = {
       id: 'my-module-map',
       style: 'width: 100%; height: 320px;'
     };
-    content['map'] = {
+    element['map'] = {
       _markup: '<div ' + dg.attributes(map_attributes) + '></div>',
       _postRender: [my_module_map_post_render]
     };
-    ok(content);
+    ok(element);
 
   });
 }

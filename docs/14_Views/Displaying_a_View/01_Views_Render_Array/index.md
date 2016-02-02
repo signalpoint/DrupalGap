@@ -13,8 +13,6 @@ We can easily render our view using a few different formats:
 
 Here's an example rendering a view as an unordered list (ul):
 
-![Views Unordered List](http://www.drupalgap.org/sites/default/files/views-ul.png)
-
 ```
 my_module.routing = function() {
   var routes = {};
@@ -23,11 +21,12 @@ my_module.routing = function() {
   routes["my_module.articles"] = {
     "path": "/articles",
     "defaults": {
+      "_title": "Articles",
       "_controller": function() {
         return new Promise(function(ok, err) {
         
-          var content = {};
-          content['course_list'] = {
+          var element = {};
+          element['article_list'] = {
             _theme: 'view',
             _path: 'my-articles', // Path to the View in Drupal
             _format: 'ul',
@@ -36,11 +35,10 @@ my_module.routing = function() {
               return dg.l(node.getTitle(), 'node/' + node.id());
             }
           };
-          ok(content);
+          ok(element);
 
         });
-      },
-      "_title": "Articles"
+      }
     }
   };
 
@@ -57,8 +55,6 @@ To render an ordered list, change the format to ol, for example:
 
 `_format: 'ol',`
 
-![Views Ordered List](http://www.drupalgap.org/sites/default/files/views-ol.png)
-
 ### Table
 
 To render a table, change the format to table, and add some `format_attributes` (optional), for example:
@@ -71,8 +67,6 @@ _format_attributes: {
   'cellspacing': 10,
 },
 ```
-
-![Views Table](http://www.drupalgap.org/sites/default/files/views-table.png)
 
 Note, when using the table format, in your `_row_callback` function, be sure to wrap each column of your row in table data elements, for example:
 
