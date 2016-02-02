@@ -18,6 +18,25 @@ dg.theme_password = function(variables) {
   variables._attributes.type = 'password';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
 };
+dg.theme_select = function(variables) {
+  var options = '';
+  if (variables._options) {
+    for (var value in variables._options) {
+      if (!variables._options.hasOwnProperty(value)) { continue; }
+      var item = variables._options[value];
+      if (typeof item === 'object') {
+        if (typeof variables._value !== 'undefined' && variables._value == value) { item._attributes.selected = ''; }
+        options += dg.render(item);
+      }
+      else {
+        var selected = '';
+        if (typeof variables._value !== 'undefined' && variables._value == value) { selected = ' selected '; }
+        options += '<option value="' + value + '" ' + selected + '>' + item + '</option>';
+      }
+    }
+  }
+  return '<select ' + dg.attributes(variables._attributes) + '>' + options + '</select>';
+};
 dg.theme_submit = function(variables) {
   variables._attributes.type = 'submit';
   var value = 'Submit';
