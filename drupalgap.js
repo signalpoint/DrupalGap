@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-01 */
+/*! drupalgap 2016-02-02 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -2017,6 +2017,27 @@ dg.modules.core.FieldFormatter.string.prototype.viewElements = function(FieldIte
 };
 // Let DrupalGap know we have a FieldWidget(s).
 dg.modules.core.FieldWidget = {};
+
+// Float field.
+// Extend the FieldWidget prototype for the Float field.
+dg.modules.core.FieldWidget.float = function(entityType, bundle, fieldName, element, items, delta) {
+  dg.FieldWidgetPrepare(this, arguments);
+};
+dg.modules.core.FieldWidget.float.prototype = new dg.FieldWidget;
+dg.modules.core.FieldWidget.float.prototype.constructor = dg.modules.core.FieldWidget.float;
+
+dg.modules.core.FieldWidget.float.prototype.form = function(items, delta, element, form, formState) {
+  element._type = 'number';
+  element._title = this.fieldDefinition.getLabel();
+  element._title_placeholder = true;
+  element._widgetType = 'FieldWidget';
+  element._module = 'core';
+  element._attributes.step = 'any';
+  if (items && items[delta] !== 'undefined') {
+    element._value = items[delta].value;
+    element._attributes.value = element._value;
+  }
+};
 
 // Integer field.
 // Extend the FieldWidget prototype for the Integer field.
