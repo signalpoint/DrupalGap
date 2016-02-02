@@ -803,6 +803,25 @@ dg.theme_password = function(variables) {
   variables._attributes.type = 'password';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
 };
+dg.theme_select = function(variables) {
+  var options = '';
+  if (variables._options) {
+    for (var value in variables._options) {
+      if (!variables._options.hasOwnProperty(value)) { continue; }
+      var item = variables._options[value];
+      if (typeof item === 'object') {
+        if (typeof variables._value !== 'undefined' && variables._value == value) { item._attributes.selected = ''; }
+        options += dg.render(item);
+      }
+      else {
+        var selected = '';
+        if (typeof variables._value !== 'undefined' && variables._value == value) { selected = ' selected '; }
+        options += '<option value="' + value + '" ' + selected + '>' + item + '</option>';
+      }
+    }
+  }
+  return '<select ' + dg.attributes(variables._attributes) + '>' + options + '</select>';
+};
 dg.theme_submit = function(variables) {
   variables._attributes.type = 'submit';
   var value = 'Submit';
@@ -952,8 +971,16 @@ dg.Form = function(id) {
 
 };
 
+/**
+ * Returns the form's id.
+ * @returns {String}
+ */
 dg.Form.prototype.getFormId = function() { return this.id; };
 
+/**
+ * Returns the html output for a form, via a Promise.
+ * @returns {Promise}
+ */
 dg.Form.prototype.getForm = function() {
   var self = this;
   return new Promise(function(ok, err) {
@@ -1009,7 +1036,7 @@ dg.Form.prototype.getForm = function() {
                     children.label = {
                       _theme: 'form_element_label',
                       _title: element._title
-                    }
+                    };
                   }
                   children.element = element;
                   var container = {
@@ -1024,6 +1051,25 @@ dg.Form.prototype.getForm = function() {
             default:
                 // Instantiate a new form element.
                 self.elements[name] = new dg[element._widgetType](name, element, self);
+                // Wrap elements in containers, except for hidden elements.
+                //var el = new dg[element._widgetType](name, element, self);
+                //if (element._type == 'hidden') { self.form[name] = el; }
+                //else {
+                //  var children = {};
+                //  if (element._title) {
+                //    children.label = {
+                //      _theme: 'form_element_label',
+                //      _title: element._title
+                //    };
+                //  }
+                //  children.element = el;
+                //  var container = {
+                //    _theme: 'container',
+                //    _children: children,
+                //    _weight: element._weight
+                //  };
+                //  self.form[name] = container;
+                //}
               break;
           }
         }
