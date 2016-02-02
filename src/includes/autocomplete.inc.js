@@ -311,7 +311,19 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           for (var bundle in field_settings.handler_settings.target_bundles) {
               if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
               var name = field_settings.handler_settings.target_bundles[bundle];
-              options.parameters.type = bundle;
+              if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
+              var name = field_settings.handler_settings.target_bundles[bundle];
+              var bundle_name = null;
+              switch (field_settings.target_type) {
+                case 'node':
+                  bundle_name = 'type';
+                  break;
+                case 'taxonomy_term':
+                  bundle_name = 'vid';
+                  bundle = taxonomy_vocabulary_get_vid_from_name(bundle);
+                  break;
+              }
+              if (bundle_name) { options.parameters[bundle_name] = bundle; }
               // @TODO allow multiple bundles to be indexed.
               break;
           }
