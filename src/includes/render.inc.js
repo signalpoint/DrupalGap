@@ -90,7 +90,7 @@ dg.appRender = function(content) {
             var form = document.getElementById(form_html_id);
             function processForm(e) {
               if (e.preventDefault) e.preventDefault();
-              var _form = dg.loadForm(id);
+              var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
               _form._submission().then(
                   function() { },
                   function() { }
