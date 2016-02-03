@@ -8,12 +8,18 @@ dg.theme_view = function(variables) {
   }
   return new Promise(function(ok) {
     jDrupal.viewsLoad(variables._path).then(function(data) {
+      var content = '';
       var format = variables._format ? variables._format : 'div';
       var attrs = variables._format_attributes ? variables._format_attributes : null;
-      var content = '<' + format + ' ' + dg.attributes(attrs) + '>';
+      if (variables._title) {
+        if (typeof variables._title === 'object') { content += dg.render(variables._title); }
+        else { content += '<h2>' + variables._title + '</h2>'; };
+      }
+      content += '<' + format + ' ' + dg.attributes(attrs) + '>';
       if (data.results.length > 0) {
         for (var i = 0; i < data.results.length; i++) {
-          var open, close = '';
+          var open = '';
+          var close = '';
           switch (format) {
             case 'ul':
             case 'ol':
