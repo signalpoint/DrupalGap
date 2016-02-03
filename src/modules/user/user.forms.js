@@ -39,7 +39,25 @@ var UserLoginForm = function() {
   };
 
 };
-
-// Extend the form prototype and attach our constructor.
 UserLoginForm.prototype = new dg.Form('UserLoginForm');
 UserLoginForm.constructor = UserLoginForm;
+
+/**
+ * A custom submit handler for the user login block.
+ * @param {Form} form
+ * @param {FormStateInterface} form_state
+ * @returns {*}
+ */
+dg.modules.user.user_login_block_form_submit = function(form, form_state) {
+  var self = this;
+  return new Promise(function(ok, err) {
+    // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
+    if (dg.getPath() == dg.getFrontPagePath()) {
+      self.submitForm(form, form_state).then(function() {
+        dg.router.check(dg.getFrontPagePath());
+        ok();
+      });
+    }
+    else { ok(); }
+  });
+};
