@@ -58,6 +58,15 @@ dg.FormStateInterface.prototype.getErrorMessages = function() {
 dg.FormStateInterface.prototype.displayErrors = function() {
   dg.alert(this.getErrorMessages());
 };
+
+/**
+ * Clears the form state errors.
+ * @returns {dg.FormStateInterface}
+ */
+dg.FormStateInterface.prototype.clearErrors = function() {
+  this.errors = {};
+};
+
 dg.FormStateInterface.prototype.getValue = function(key, default_value) {
   return typeof this.get('values')[key] !== 'undefined' ?
     this.get('values')[key] : default_value;
