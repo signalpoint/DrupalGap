@@ -4,6 +4,68 @@
     border-radius: 80px;
     border-bottom: 4px solid #333;
     z-index: 9999;
-    position: absolute;
+    position:fixed;
+    top:0;
 }
 @-webkit-keyframes sweep { to { -webkit-transform: rotate(360deg); } }
+
+/**
+ * System Messages
+ */
+div.messages {
+    background-position: 8px 8px; /* LTR */
+    background-repeat: no-repeat;
+    border: 1px solid;
+    margin: 6px 0;
+    padding: 10px 10px 10px 50px; /* LTR */
+}
+
+div.status {
+    background-image: url(../images/message-24-ok.png);
+    border-color: #be7;
+}
+div.status,
+.ok {
+    color: #234600;
+}
+div.status,
+table tr.ok {
+    background-color: #f8fff0;
+}
+
+div.warning {
+    background-image: url(../images/message-24-warning.png);
+    border-color: #ed5;
+}
+div.warning,
+.warning {
+    color: #840;
+}
+div.warning,
+table tr.warning {
+    background-color: #fffce5;
+}
+
+div.error {
+    background-image: url(../images/message-24-error.png);
+    border-color: #ed541d;
+}
+div.error,
+.error {
+    color: #8c2e0b;
+}
+div.error,
+table tr.error {
+    background-color: #fef5f1;
+}
+div.error p.error {
+    color: #333;
+}
+
+div.messages ul {
+    margin: 0 0 0 1em; /* LTR */
+    padding: 0;
+}
+div.messages ul li {
+    list-style-image: none;
+}
