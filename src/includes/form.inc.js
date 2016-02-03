@@ -21,10 +21,19 @@ dg.Form = function(id) {
 };
 
 /**
+ * Given a form's property name, this will return it.
+ * @param name
+ * @returns {null}
+ */
+dg.Form.prototype.get = function(name) {
+  return typeof this[name] !== 'undefined' ? this[name] : null;
+};
+
+/**
  * Returns the form's id.
  * @returns {String}
  */
-dg.Form.prototype.getFormId = function() { return this.id; };
+dg.Form.prototype.getFormId = function() { return this.get('id'); };
 
 /**
  * Returns the html output for a form, via a Promise.
@@ -213,16 +222,16 @@ dg.Form.prototype._submitForm = function() {
   var promises = [];
   for (var i = 0; i < self.form._submit.length; i++) {
     var parts = self.form._submit[i].split('.');
-    var obj = parts[0];
+    var module = parts[0];
     var method = parts[1];
     // Handle prototype submission handler, if any.
-    if (obj == this.getFormId() && method == 'submitForm') {
+    if (module == this.getFormId() && method == 'submitForm') {
       promises.push(this[method].apply(self, [self.form, self.getFormState()]));
       continue;
     }
     // Handle external submission handlers, if any.
-    if (!window[obj] || !window[obj][method]) { continue; }
-    promises.push(window[obj][method].apply(self, [self.form, self.getFormState()]));
+    if (!dg.modules[module] || !dg.modules[module][method]) { continue; }
+    promises.push(dg.modules[module][method].apply(self, [self.form, self.getFormState()]));
   }
   return Promise.all(promises);
 };
