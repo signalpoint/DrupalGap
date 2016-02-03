@@ -106,52 +106,6 @@ dg.spinnerHide = function() {
   dg.spinner--;
   if (!dg.spinner) { document.getElementById('dgSpinner').style.display = 'none'; }
 };
-// We prefixed this file name with an underscore so that dg.FormElement is available quickly. This is our cheap fix
-// until we figure out a better Gruntfile to handle this.
-
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
-
-/**
- * The Form Element prototype.
- * @param {String} name
- * @param {Object} element
- * @param {Object} form
- * @constructor
- */
-dg.FormElement = function(name, element, form) {
-  this.name = name;
-  this.element = element; // Holds the form element JSON object provided by the form builder.
-  this.form = form;
-};
-dg.FormElement.prototype.id = function() { return this.element ? this.element._attributes.id : null; };
-dg.FormElement.prototype.getForm = function() { return this.form; };
-dg.FormElement.prototype.get = function(property) {
-  return typeof this[property] ? this[property] : null;
-};
-
-dg.FormElement.prototype.valueCallback = function() {
-  var self = this;
-  return new Promise(function(ok, err) {
-    var value = null;
-    var el = document.getElementById(self.id());
-    if (el) { value = el.value; }
-    ok({
-      name: self.get('name'),
-      value: value
-    });
-  });
-};
-
-/**
- * Theme's a form element label.
- * @param variables
- * @returns {string}
- * @see https://api.drupal.org/api/drupal/core!modules!system!templates!form-element-label.html.twig/8
- */
-dg.theme_form_element_label = function(variables) {
-  return '<label ' + dg.attributes(variables._attributes) + '>' + variables._title + '</label>';
-};
-
 // @see https://api.drupal.org/api/drupal/core!modules!block!src!Entity!Block.php/class/Block/8
 
 // @see https://www.drupal.org/node/2101565
@@ -373,6 +327,12 @@ dg.getMode = function() { return this.config('mode'); };
  * @param {String} mode
  */
 dg.setMode = function(mode) { this.config('mode', mode); };
+
+/**
+ * Returns the current route's path..
+ * @returns {String}
+ */
+dg.getPath = function() { return dg.router.getFragment(); };
 
 /**
  * Returns the path to the app's front page route.
@@ -664,300 +624,6 @@ dg.entityRenderContent = function(entity) {
 dg.theme_entity_label = function(variables) {
   return '<h1 ' + dg.attributes(variables._attributes) + '>' + dg.t(variables._entity.label()) + '</h1>';
 };
-dg.FieldDefinitionInterface = function(entityType, bundle, fieldName) {
-  this.entityType = entityType;
-  this.bundle = bundle;
-  this.fieldName = fieldName;
-  this.fieldDefinition = dg.fieldDefinitions[entityType][bundle][fieldName];
-};
-dg.FieldDefinitionInterface.prototype.get = function(prop) {
-  return typeof this.fieldDefinition[prop] ? this.fieldDefinition[prop] : null;
-};
-dg.FieldDefinitionInterface.prototype.getLabel = function() {
-  return this.get('label');
-};
-dg.FieldFormMode = function(fieldFormMode) {
-  this.fieldFormMode = fieldFormMode;
-};
-dg.FieldFormMode.prototype.getWeight = function() {
-  return this.fieldFormMode.weight;
-};
-
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FormatterBase.php/class/FormatterBase/8
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!Annotation!FieldFormatter.php/class/FieldFormatter/8
-
-dg.FieldFormatter = function() {
-  this._fieldDefinition = null;
-  this._settings = null;
-  this._label = null;
-  this._viewMode = null;
-  this._thirdPartySettings = null;
-};
-
-/**
- * Used to prepare a field formatter default constructor.
- * @param FieldFormatter
- * @param args
- * @constructor
- */
-dg.FieldFormatterPrepare = function(FieldFormatter, args) {
-  this._fieldDefinition = args[0];
-  this._settings = args[1];
-  this._label = args[2];
-  this._viewMode = args[3];
-  this._thirdPartySettings = args[4];
-};
-
-// Builds a renderable array for a field value.
-dg.FieldFormatter.prototype.viewElements = function(FieldItemListInterface, langcode) {
-  var items = FieldItemListInterface.getItems();
-  var element = {};
-  if (items.length == 0) { return element; }
-  for (var delta = 0; delta < items.length; delta++) {
-    element[delta] = { _markup: items[delta].value };
-  }
-  return element;
-};
-
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FieldItemListInterface.php/interface/FieldItemListInterface/8
-
-dg.FieldItemListInterface = function(items) {
-  this._items = items;
-};
-
-dg.FieldItemListInterface.prototype.getItems = function() { return this._items; };
-
-// @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
-// @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
-dg.FieldWidget = function(entityType, bundle, fieldName, element, items, delta) {
-  // Any default constructor behavior lives in FieldWidgetPrepare
-};
-// Extend the FormElement prototype.
-dg.FieldWidget.prototype = new dg.FormElement;
-dg.FieldWidget.prototype.constructor = dg.FieldWidget;
-/**
- * Used to prepare a Field Widget default constructor.
- * @param FieldWidget
- * @param args
- * @constructor
- */
-dg.FieldWidgetPrepare = function(FieldWidget, args) {
-  FieldWidget.widgetType = 'FieldWidget';
-  FieldWidget.entityType = args[0];
-  FieldWidget.bundle = args[1];
-  FieldWidget.fieldName = args[2];
-  FieldWidget.name = FieldWidget.fieldName;
-  FieldWidget.element = args[3];
-  FieldWidget.items = args[4];
-  FieldWidget.delta = args[5];
-  FieldWidget.fieldDefinition = new dg.FieldDefinitionInterface(
-      FieldWidget.entityType,
-      FieldWidget.bundle,
-      FieldWidget.fieldName
-  );
-  FieldWidget.fieldFormMode = FieldWidget.element._fieldFormMode;
-};
-dg.FieldWidget.prototype.getSetting = function(prop) {
-  return typeof this.settings[prop] ? this.settings[prop] : null;
-};
-dg.FieldWidget.prototype.setSetting = function(prop, val) {
-  this.settings[property] = val;
-};
-dg.FieldWidget.prototype.getSettings = function() {
-  return this.settings;
-};
-dg.FieldWidget.prototype.setSettings = function(val) {
-  this.settings = val;
-};
-
-dg.FieldWidget.prototype.valueCallback = function() {
-  var self = this;
-  return new Promise(function(ok, err) {
-    var value = null;
-    var el = document.getElementById(self.id());
-    if (el) { value = el.value; }
-    ok({
-      name: self.get('name'),
-      value: [ { value: value }  ]
-    });
-  });
-};
-
-dg.theme_actions = function(variables) {
-  var html = '';
-  for (prop in variables) {
-    if (!dg.isFormElement(prop, variables)) { continue; }
-    html += dg.render(variables[prop]);
-  }
-  return html;
-};
-dg.theme_hidden = function(variables) {
-  variables._attributes.type = 'hidden';
-  return '<input ' + dg.attributes(variables._attributes) + ' />';
-};
-dg.theme_number = function(variables) {
-  variables._attributes.type = 'number';
-  return '<input ' + dg.attributes(variables._attributes) + '/>';
-};
-dg.theme_password = function(variables) {
-  variables._attributes.type = 'password';
-  return '<input ' + dg.attributes(variables._attributes) + ' />';
-};
-dg.theme_select = function(variables) {
-  var options = '';
-  if (variables._options) {
-    for (var value in variables._options) {
-      if (!variables._options.hasOwnProperty(value)) { continue; }
-      var item = variables._options[value];
-      if (typeof item === 'object') {
-        if (typeof variables._value !== 'undefined' && variables._value == value) { item._attributes.selected = ''; }
-        options += dg.render(item);
-      }
-      else {
-        var selected = '';
-        if (typeof variables._value !== 'undefined' && variables._value == value) { selected = ' selected '; }
-        options += '<option value="' + value + '" ' + selected + '>' + item + '</option>';
-      }
-    }
-  }
-  return '<select ' + dg.attributes(variables._attributes) + '>' + options + '</select>';
-};
-dg.theme_submit = function(variables) {
-  variables._attributes.type = 'submit';
-  var value = 'Submit';
-  if (!variables._attributes.value && variables._value) {
-    variables._attributes.value = variables._value;
-  }
-  return '<input ' + dg.attributes(variables._attributes) + '/>';
-};
-dg.theme_textarea = function(variables) {
-  var value = variables._value ? variables._value : '';
-  return '<textarea ' + dg.attributes(variables._attributes) + '>' + value + '</textarea>';
-};
-dg.theme_textfield = function(variables) {
-  variables._attributes.type = 'text';
-  return '<input ' + dg.attributes(variables._attributes) + '/>';
-};
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Form!FormStateInterface.php/interface/FormStateInterface/8
-
-/**
- *
- * @constructor
- */
-dg.FormStateInterface = function(form) {
-  this.form = form;
-  this.values = {};
-  this.errors = {};
-};
-
-dg.FormStateInterface.prototype.get = function(property) {
-  return typeof this[property] !== 'undefined' ? this[property] : null;
-};
-dg.FormStateInterface.prototype.set = function(property, value) {
-  this[property] = value;
-};
-dg.FormStateInterface.prototype.setFormState = function() {
-  var self = this;
-  var form = self.get('form');
-  var promises = [];
-  for (var name in form.elements) {
-    if (name == 'actions') { continue; }
-    promises.push(form.elements[name].valueCallback());
-  }
-  return Promise.all(promises).then(function(values) {
-    for (var i = 0; i < values.length; i++) {
-      self.setValue(values[i].name, values[i].value);
-    }
-  });
-};
-dg.FormStateInterface.prototype.setErrorByName = function(name, msg) {
-  this.errors[name] = msg;
-};
-dg.FormStateInterface.prototype.getErrors = function() {
-  return this.errors;
-};
-dg.FormStateInterface.prototype.hasAnyErrors = function() {
-  var hasError = false;
-  var errors = this.getErrors();
-  for (error in errors) {
-    if (!errors.hasOwnProperty(error)) { continue; }
-    hasError = true;
-    break;
-  }
-  return hasError;
-};
-dg.FormStateInterface.prototype.getErrorMessages = function() {
-  var msg = '';
-  var errors = this.getErrors();
-  for (error in errors) {
-    if (!errors.hasOwnProperty(error)) { continue; }
-    msg += errors[error] + '\n';
-  }
-  return msg;
-};
-dg.FormStateInterface.prototype.displayErrors = function() {
-  dg.alert(this.getErrorMessages());
-};
-
-/**
- * Clears the form state errors.
- * @returns {dg.FormStateInterface}
- */
-dg.FormStateInterface.prototype.clearErrors = function() {
-  this.errors = {};
-};
-
-dg.FormStateInterface.prototype.getValue = function(key, default_value) {
-  return typeof this.get('values')[key] !== 'undefined' ?
-    this.get('values')[key] : default_value;
-};
-dg.FormStateInterface.prototype.setValue = function(key, value) {
-  this.values[key] = value;
-};
-dg.FormStateInterface.prototype.getValues = function() {
-  return this.get('values');
-};
-dg.FormStateInterface.prototype.setValues = function(values) {
-  this.values = values;
-};
-dg.FormWidget = function(entityType, bundle, fieldName, element, items, delta) {
-  // Any default constructor behavior lives in FormWidgetPrepare
-};
-// Extend the FormElement prototype.
-dg.FormWidget.prototype = new dg.FormElement;
-dg.FormWidget.prototype.constructor = dg.FormWidget;
-
-/**
- * Used to prepare a Form Widget default constructor.
- * @param FormWidget
- * @param args
- * @constructor
- */
-dg.FormWidgetPrepare = function(FormWidget, args) {
-  FormWidget.widgetType = 'FormWidget';
-  FormWidget.entityType = args[0];
-  FormWidget.bundle = args[1];
-  FormWidget.fieldName = args[2];
-  FormWidget.name = FormWidget.fieldName;
-  FormWidget.element = args[3];
-  FormWidget.items = args[4];
-  FormWidget.delta = args[5];
-  FormWidget.fieldFormMode = FormWidget.element._fieldFormMode;
-};
-
-dg.FormWidget.prototype.valueCallback = function() {
-  var self = this;
-  return new Promise(function(ok, err) {
-    var value = null;
-    var el = document.getElementById(self.id());
-    if (el) { value = el.value; }
-    ok({
-      name: self.get('name'),
-      value: [ { value: value }  ]
-    });
-  });
-};
-
 dg.forms = {}; // A global storage for active forms.
 
 /**
@@ -981,10 +647,19 @@ dg.Form = function(id) {
 };
 
 /**
+ * Given a form's property name, this will return it.
+ * @param name
+ * @returns {null}
+ */
+dg.Form.prototype.get = function(name) {
+  return typeof this[name] !== 'undefined' ? this[name] : null;
+};
+
+/**
  * Returns the form's id.
  * @returns {String}
  */
-dg.Form.prototype.getFormId = function() { return this.id; };
+dg.Form.prototype.getFormId = function() { return this.get('id'); };
 
 /**
  * Returns the html output for a form, via a Promise.
@@ -1173,16 +848,16 @@ dg.Form.prototype._submitForm = function() {
   var promises = [];
   for (var i = 0; i < self.form._submit.length; i++) {
     var parts = self.form._submit[i].split('.');
-    var obj = parts[0];
+    var module = parts[0];
     var method = parts[1];
     // Handle prototype submission handler, if any.
-    if (obj == this.getFormId() && method == 'submitForm') {
+    if (module == this.getFormId() && method == 'submitForm') {
       promises.push(this[method].apply(self, [self.form, self.getFormState()]));
       continue;
     }
     // Handle external submission handlers, if any.
-    if (!window[obj] || !window[obj][method]) { continue; }
-    promises.push(window[obj][method].apply(self, [self.form, self.getFormState()]));
+    if (!dg.modules[module] || !dg.modules[module][method]) { continue; }
+    promises.push(dg.modules[module][method].apply(self, [self.form, self.getFormState()]));
   }
   return Promise.all(promises);
 };
@@ -1214,6 +889,346 @@ dg.setFormElementDefaults = function(name, el) {
   if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
 };
+// We prefixed this file name with an underscore so that dg.FormElement is available quickly. This is our cheap fix
+// until we figure out a better Gruntfile to handle this.
+
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
+
+/**
+ * The Form Element prototype.
+ * @param {String} name
+ * @param {Object} element
+ * @param {Object} form
+ * @constructor
+ */
+dg.FormElement = function(name, element, form) {
+  this.name = name;
+  this.element = element; // Holds the form element JSON object provided by the form builder.
+  this.form = form;
+};
+dg.FormElement.prototype.id = function() { return this.element ? this.element._attributes.id : null; };
+dg.FormElement.prototype.getForm = function() { return this.form; };
+dg.FormElement.prototype.get = function(property) {
+  return typeof this[property] ? this[property] : null;
+};
+
+dg.FormElement.prototype.valueCallback = function() {
+  var self = this;
+  return new Promise(function(ok, err) {
+    var value = null;
+    var el = document.getElementById(self.id());
+    if (el) { value = el.value; }
+    ok({
+      name: self.get('name'),
+      value: value
+    });
+  });
+};
+
+/**
+ * Theme's a form element label.
+ * @param variables
+ * @returns {string}
+ * @see https://api.drupal.org/api/drupal/core!modules!system!templates!form-element-label.html.twig/8
+ */
+dg.theme_form_element_label = function(variables) {
+  return '<label ' + dg.attributes(variables._attributes) + '>' + variables._title + '</label>';
+};
+
+dg.theme_actions = function(variables) {
+  var html = '';
+  for (prop in variables) {
+    if (!dg.isFormElement(prop, variables)) { continue; }
+    html += dg.render(variables[prop]);
+  }
+  return html;
+};
+dg.theme_hidden = function(variables) {
+  variables._attributes.type = 'hidden';
+  return '<input ' + dg.attributes(variables._attributes) + ' />';
+};
+dg.theme_number = function(variables) {
+  variables._attributes.type = 'number';
+  return '<input ' + dg.attributes(variables._attributes) + '/>';
+};
+dg.theme_password = function(variables) {
+  variables._attributes.type = 'password';
+  return '<input ' + dg.attributes(variables._attributes) + ' />';
+};
+dg.theme_select = function(variables) {
+  var options = '';
+  if (variables._options) {
+    for (var value in variables._options) {
+      if (!variables._options.hasOwnProperty(value)) { continue; }
+      var item = variables._options[value];
+      if (typeof item === 'object') {
+        if (typeof variables._value !== 'undefined' && variables._value == value) { item._attributes.selected = ''; }
+        options += dg.render(item);
+      }
+      else {
+        var selected = '';
+        if (typeof variables._value !== 'undefined' && variables._value == value) { selected = ' selected '; }
+        options += '<option value="' + value + '" ' + selected + '>' + item + '</option>';
+      }
+    }
+  }
+  return '<select ' + dg.attributes(variables._attributes) + '>' + options + '</select>';
+};
+dg.theme_submit = function(variables) {
+  variables._attributes.type = 'submit';
+  var value = 'Submit';
+  if (!variables._attributes.value && variables._value) {
+    variables._attributes.value = variables._value;
+  }
+  return '<input ' + dg.attributes(variables._attributes) + '/>';
+};
+dg.theme_textarea = function(variables) {
+  var value = variables._value ? variables._value : '';
+  return '<textarea ' + dg.attributes(variables._attributes) + '>' + value + '</textarea>';
+};
+dg.theme_textfield = function(variables) {
+  variables._attributes.type = 'text';
+  return '<input ' + dg.attributes(variables._attributes) + '/>';
+};
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Form!FormStateInterface.php/interface/FormStateInterface/8
+
+/**
+ *
+ * @constructor
+ */
+dg.FormStateInterface = function(form) {
+  this.form = form;
+  this.values = {};
+  this.errors = {};
+};
+
+dg.FormStateInterface.prototype.get = function(property) {
+  return typeof this[property] !== 'undefined' ? this[property] : null;
+};
+dg.FormStateInterface.prototype.set = function(property, value) {
+  this[property] = value;
+};
+dg.FormStateInterface.prototype.setFormState = function() {
+  var self = this;
+  var form = self.get('form');
+  var promises = [];
+  for (var name in form.elements) {
+    if (name == 'actions') { continue; }
+    promises.push(form.elements[name].valueCallback());
+  }
+  return Promise.all(promises).then(function(values) {
+    for (var i = 0; i < values.length; i++) {
+      self.setValue(values[i].name, values[i].value);
+    }
+  });
+};
+dg.FormStateInterface.prototype.setErrorByName = function(name, msg) {
+  this.errors[name] = msg;
+};
+dg.FormStateInterface.prototype.getErrors = function() {
+  return this.errors;
+};
+dg.FormStateInterface.prototype.hasAnyErrors = function() {
+  var hasError = false;
+  var errors = this.getErrors();
+  for (error in errors) {
+    if (!errors.hasOwnProperty(error)) { continue; }
+    hasError = true;
+    break;
+  }
+  return hasError;
+};
+dg.FormStateInterface.prototype.getErrorMessages = function() {
+  var msg = '';
+  var errors = this.getErrors();
+  for (error in errors) {
+    if (!errors.hasOwnProperty(error)) { continue; }
+    msg += errors[error] + '\n';
+  }
+  return msg;
+};
+dg.FormStateInterface.prototype.displayErrors = function() {
+  dg.alert(this.getErrorMessages());
+};
+
+/**
+ * Clears the form state errors.
+ * @returns {dg.FormStateInterface}
+ */
+dg.FormStateInterface.prototype.clearErrors = function() {
+  this.errors = {};
+};
+
+dg.FormStateInterface.prototype.getValue = function(key, default_value) {
+  return typeof this.get('values')[key] !== 'undefined' ?
+    this.get('values')[key] : default_value;
+};
+dg.FormStateInterface.prototype.setValue = function(key, value) {
+  this.values[key] = value;
+};
+dg.FormStateInterface.prototype.getValues = function() {
+  return this.get('values');
+};
+dg.FormStateInterface.prototype.setValues = function(values) {
+  this.values = values;
+};
+dg.FormWidget = function(entityType, bundle, fieldName, element, items, delta) {
+  // Any default constructor behavior lives in FormWidgetPrepare
+};
+// Extend the FormElement prototype.
+dg.FormWidget.prototype = new dg.FormElement;
+dg.FormWidget.prototype.constructor = dg.FormWidget;
+
+/**
+ * Used to prepare a Form Widget default constructor.
+ * @param FormWidget
+ * @param args
+ * @constructor
+ */
+dg.FormWidgetPrepare = function(FormWidget, args) {
+  FormWidget.widgetType = 'FormWidget';
+  FormWidget.entityType = args[0];
+  FormWidget.bundle = args[1];
+  FormWidget.fieldName = args[2];
+  FormWidget.name = FormWidget.fieldName;
+  FormWidget.element = args[3];
+  FormWidget.items = args[4];
+  FormWidget.delta = args[5];
+  FormWidget.fieldFormMode = FormWidget.element._fieldFormMode;
+};
+
+dg.FormWidget.prototype.valueCallback = function() {
+  var self = this;
+  return new Promise(function(ok, err) {
+    var value = null;
+    var el = document.getElementById(self.id());
+    if (el) { value = el.value; }
+    ok({
+      name: self.get('name'),
+      value: [ { value: value }  ]
+    });
+  });
+};
+
+dg.FieldDefinitionInterface = function(entityType, bundle, fieldName) {
+  this.entityType = entityType;
+  this.bundle = bundle;
+  this.fieldName = fieldName;
+  this.fieldDefinition = dg.fieldDefinitions[entityType][bundle][fieldName];
+};
+dg.FieldDefinitionInterface.prototype.get = function(prop) {
+  return typeof this.fieldDefinition[prop] ? this.fieldDefinition[prop] : null;
+};
+dg.FieldDefinitionInterface.prototype.getLabel = function() {
+  return this.get('label');
+};
+dg.FieldFormMode = function(fieldFormMode) {
+  this.fieldFormMode = fieldFormMode;
+};
+dg.FieldFormMode.prototype.getWeight = function() {
+  return this.fieldFormMode.weight;
+};
+
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FormatterBase.php/class/FormatterBase/8
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!Annotation!FieldFormatter.php/class/FieldFormatter/8
+
+dg.FieldFormatter = function() {
+  this._fieldDefinition = null;
+  this._settings = null;
+  this._label = null;
+  this._viewMode = null;
+  this._thirdPartySettings = null;
+};
+
+/**
+ * Used to prepare a field formatter default constructor.
+ * @param FieldFormatter
+ * @param args
+ * @constructor
+ */
+dg.FieldFormatterPrepare = function(FieldFormatter, args) {
+  this._fieldDefinition = args[0];
+  this._settings = args[1];
+  this._label = args[2];
+  this._viewMode = args[3];
+  this._thirdPartySettings = args[4];
+};
+
+// Builds a renderable array for a field value.
+dg.FieldFormatter.prototype.viewElements = function(FieldItemListInterface, langcode) {
+  var items = FieldItemListInterface.getItems();
+  var element = {};
+  if (items.length == 0) { return element; }
+  for (var delta = 0; delta < items.length; delta++) {
+    element[delta] = { _markup: items[delta].value };
+  }
+  return element;
+};
+
+// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FieldItemListInterface.php/interface/FieldItemListInterface/8
+
+dg.FieldItemListInterface = function(items) {
+  this._items = items;
+};
+
+dg.FieldItemListInterface.prototype.getItems = function() { return this._items; };
+
+// @see https://api.drupal.org/api/drupal/core!modules!field!field.api.php/group/field_widget/8
+// @see http://capgemini.github.io/drupal/writing-custom-fields-in-drupal-8/
+dg.FieldWidget = function(entityType, bundle, fieldName, element, items, delta) {
+  // Any default constructor behavior lives in FieldWidgetPrepare
+};
+// Extend the FormElement prototype.
+dg.FieldWidget.prototype = new dg.FormElement;
+dg.FieldWidget.prototype.constructor = dg.FieldWidget;
+/**
+ * Used to prepare a Field Widget default constructor.
+ * @param FieldWidget
+ * @param args
+ * @constructor
+ */
+dg.FieldWidgetPrepare = function(FieldWidget, args) {
+  FieldWidget.widgetType = 'FieldWidget';
+  FieldWidget.entityType = args[0];
+  FieldWidget.bundle = args[1];
+  FieldWidget.fieldName = args[2];
+  FieldWidget.name = FieldWidget.fieldName;
+  FieldWidget.element = args[3];
+  FieldWidget.items = args[4];
+  FieldWidget.delta = args[5];
+  FieldWidget.fieldDefinition = new dg.FieldDefinitionInterface(
+      FieldWidget.entityType,
+      FieldWidget.bundle,
+      FieldWidget.fieldName
+  );
+  FieldWidget.fieldFormMode = FieldWidget.element._fieldFormMode;
+};
+dg.FieldWidget.prototype.getSetting = function(prop) {
+  return typeof this.settings[prop] ? this.settings[prop] : null;
+};
+dg.FieldWidget.prototype.setSetting = function(prop, val) {
+  this.settings[property] = val;
+};
+dg.FieldWidget.prototype.getSettings = function() {
+  return this.settings;
+};
+dg.FieldWidget.prototype.setSettings = function(val) {
+  this.settings = val;
+};
+
+dg.FieldWidget.prototype.valueCallback = function() {
+  var self = this;
+  return new Promise(function(ok, err) {
+    var value = null;
+    var el = document.getElementById(self.id());
+    if (el) { value = el.value; }
+    ok({
+      name: self.get('name'),
+      value: [ { value: value }  ]
+    });
+  });
+};
+
 dg.goto = function(path) {
   this.router.navigate(path);
   //this.router.check('/' + path);
@@ -1673,7 +1688,6 @@ dg.router = {
   },
 
   check: function(f) {
-
 
     var route = this.load(f);
     if (route) {
@@ -2254,6 +2268,63 @@ dg.theme_number_integer = function(variables) {
   return variables._item.value;
 };
 dg.modules.image = new dg.Module();
+dg.modules.node = new dg.Module();
+
+dg.modules.node.routing = function() {
+  var routes = {};
+  routes["node.add.type"] = {
+    "path": "/node\/add\/(.*)",
+    "defaults": {
+      "_form": 'NodeEdit',
+      "_title": "Create content"
+    }
+  };
+  routes["node.add"] = {
+    "path": "/node\/add",
+    "defaults": {
+      "_controller": function() {
+        return new Promise(function(ok, err) {
+          var items = [];
+          for (var bundle in dg.allBundleInfo.node) {
+            if (!dg.allBundleInfo.node.hasOwnProperty(bundle)) { continue; }
+            items.push(dg.l(dg.allBundleInfo.node[bundle].label, 'node/add/' + bundle));
+          }
+          var content = {};
+          content['types'] = {
+            _theme: 'item_list',
+            _items: items
+          };
+          ok(content);
+        });
+      },
+      "_title": "Create content"
+    }
+  };
+  routes["node.edit"] = {
+    "path": "/node\/(.*)\/edit",
+    "defaults": {
+      "_form": 'NodeEdit',
+      "_title": "Node edit"
+    }
+  };
+  routes["node"] = {
+    "path": "/node\/(.*)",
+    "defaults": {
+      "_controller": function(nid) {
+        return new Promise(function(ok, err) {
+
+          dg.nodeLoad(nid).then(function(node) {
+            dg.entityRenderContent(node).then(ok);
+          });
+
+        });
+      },
+      "_title": "Node"
+    }
+  };
+  return routes;
+};
+
 var NodeEdit = function() {
 
   this.entity = null;
@@ -2414,63 +2485,6 @@ var NodeEdit = function() {
 };
 NodeEdit.prototype = new dg.Form('NodeEdit');
 NodeEdit.constructor = NodeEdit;
-dg.modules.node = new dg.Module();
-
-dg.modules.node.routing = function() {
-  var routes = {};
-  routes["node.add.type"] = {
-    "path": "/node\/add\/(.*)",
-    "defaults": {
-      "_form": 'NodeEdit',
-      "_title": "Create content"
-    }
-  };
-  routes["node.add"] = {
-    "path": "/node\/add",
-    "defaults": {
-      "_controller": function() {
-        return new Promise(function(ok, err) {
-          var items = [];
-          for (var bundle in dg.allBundleInfo.node) {
-            if (!dg.allBundleInfo.node.hasOwnProperty(bundle)) { continue; }
-            items.push(dg.l(dg.allBundleInfo.node[bundle].label, 'node/add/' + bundle));
-          }
-          var content = {};
-          content['types'] = {
-            _theme: 'item_list',
-            _items: items
-          };
-          ok(content);
-        });
-      },
-      "_title": "Create content"
-    }
-  };
-  routes["node.edit"] = {
-    "path": "/node\/(.*)\/edit",
-    "defaults": {
-      "_form": 'NodeEdit',
-      "_title": "Node edit"
-    }
-  };
-  routes["node"] = {
-    "path": "/node\/(.*)",
-    "defaults": {
-      "_controller": function(nid) {
-        return new Promise(function(ok, err) {
-
-          dg.nodeLoad(nid).then(function(node) {
-            dg.entityRenderContent(node).then(ok);
-          });
-
-        });
-      },
-      "_title": "Node"
-    }
-  };
-  return routes;
-};
-
 dg.modules.system = new dg.Module();
 
 dg.modules.system.routing = function() {
@@ -2625,51 +2639,6 @@ dg.modules.text.FieldWidget.text_with_summary.prototype.form = function(items, d
     element._value = items[delta].value;
   }
 };
-var UserLoginForm = function() {
-
-  this.buildForm = function(form, formState) {
-    return new Promise(function(ok, err) {
-      form._action = dg.getFrontPagePath();
-      form.name = {
-        _type: 'textfield',
-        _title: 'Username',
-        _required: true,
-        _title_placeholder: true
-      };
-      form.pass = {
-        _type: 'password',
-        _title: 'Password',
-        _required: true,
-        _title_placeholder: true
-      };
-      form.actions = {
-        _type: 'actions',
-        submit: {
-          _type: 'submit',
-          _value: 'Log in',
-          _button_type: 'primary'
-        }
-      };
-      ok(form);
-    });
-  };
-
-  this.submitForm = function(form, formState) {
-    var self = this;
-    return new Promise(function(ok, err) {
-      jDrupal.userLogin(
-        formState.getValue('name'),
-        formState.getValue('pass')
-      ).then(ok);
-    });
-
-  };
-
-};
-
-// Extend the form prototype and attach our constructor.
-UserLoginForm.prototype = new dg.Form('UserLoginForm');
-UserLoginForm.constructor = UserLoginForm;
 dg.modules.user = new dg.Module();
 
 dg.modules.user.routing = function() {
@@ -2712,4 +2681,89 @@ dg.modules.user.routing = function() {
     }
   };
   return routes;
+};
+
+/**
+ * Blocks defined by the user module.
+ * @returns {Object}
+ */
+dg.modules.user.blocks = function() {
+  var blocks = {};
+  blocks['user_login'] = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        if (!dg.currentUser().isAuthenticated() && dg.getPath() != 'user/login') {
+          var form = dg.addForm('UserLoginForm', dg.applyToConstructor(UserLoginForm));
+          form.get('form')._submit = ['user.user_login_block_form_submit'];
+          form.getForm().then(ok);
+        }
+        else { ok(); }
+      });
+    }
+  };
+  return blocks;
+};
+
+var UserLoginForm = function() {
+
+  this.buildForm = function(form, formState) {
+    return new Promise(function(ok, err) {
+      form._action = dg.getFrontPagePath();
+      form.name = {
+        _type: 'textfield',
+        _title: 'Username',
+        _required: true,
+        _title_placeholder: true
+      };
+      form.pass = {
+        _type: 'password',
+        _title: 'Password',
+        _required: true,
+        _title_placeholder: true
+      };
+      form.actions = {
+        _type: 'actions',
+        submit: {
+          _type: 'submit',
+          _value: 'Log in',
+          _button_type: 'primary'
+        }
+      };
+      ok(form);
+    });
+  };
+
+  this.submitForm = function(form, formState) {
+    var self = this;
+    return new Promise(function(ok, err) {
+      jDrupal.userLogin(
+        formState.getValue('name'),
+        formState.getValue('pass')
+      ).then(ok);
+    });
+
+  };
+
+};
+UserLoginForm.prototype = new dg.Form('UserLoginForm');
+UserLoginForm.constructor = UserLoginForm;
+
+/**
+ * A custom submit handler for the user login block.
+ * @param {Form} form
+ * @param {FormStateInterface} form_state
+ * @returns {*}
+ */
+dg.modules.user.user_login_block_form_submit = function(form, form_state) {
+  var self = this;
+  return new Promise(function(ok, err) {
+    // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
+    if (dg.getPath() == dg.getFrontPagePath()) {
+      self.submitForm(form, form_state).then(function() {
+        dg.router.check(dg.getFrontPagePath());
+        ok();
+      });
+    }
+    else { ok(); }
+  });
 };
