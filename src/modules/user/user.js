@@ -41,3 +41,24 @@ dg.modules.user.routing = function() {
   };
   return routes;
 };
+
+/**
+ * Blocks defined by the user module.
+ * @returns {Object}
+ */
+dg.modules.user.blocks = function() {
+  var blocks = {};
+  blocks['user_login'] = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        if (!dg.currentUser().isAuthenticated() && dg.getPath() != 'user/login') {
+          var form = dg.addForm('UserLoginForm', dg.applyToConstructor(UserLoginForm));
+          form.get('form')._submit = ['user.user_login_block_form_submit'];
+          form.getForm().then(ok);
+        }
+        else { ok(); }
+      });
+    }
+  };
+  return blocks;
+};
