@@ -20,8 +20,16 @@ dg.Form = function(id) {
 
 };
 
+/**
+ * Returns the form's id.
+ * @returns {String}
+ */
 dg.Form.prototype.getFormId = function() { return this.id; };
 
+/**
+ * Returns the html output for a form, via a Promise.
+ * @returns {Promise}
+ */
 dg.Form.prototype.getForm = function() {
   var self = this;
   return new Promise(function(ok, err) {
@@ -77,7 +85,7 @@ dg.Form.prototype.getForm = function() {
                     children.label = {
                       _theme: 'form_element_label',
                       _title: element._title
-                    }
+                    };
                   }
                   children.element = element;
                   var container = {
@@ -92,6 +100,25 @@ dg.Form.prototype.getForm = function() {
             default:
                 // Instantiate a new form element.
                 self.elements[name] = new dg[element._widgetType](name, element, self);
+                // Wrap elements in containers, except for hidden elements.
+                //var el = new dg[element._widgetType](name, element, self);
+                //if (element._type == 'hidden') { self.form[name] = el; }
+                //else {
+                //  var children = {};
+                //  if (element._title) {
+                //    children.label = {
+                //      _theme: 'form_element_label',
+                //      _title: element._title
+                //    };
+                //  }
+                //  children.element = el;
+                //  var container = {
+                //    _theme: 'container',
+                //    _children: children,
+                //    _weight: element._weight
+                //  };
+                //  self.form[name] = container;
+                //}
               break;
           }
         }
@@ -133,6 +160,7 @@ dg.Form.prototype._submission = function() {
   return new Promise(function(ok, err) {
     var formState = self.getFormState();
     formState.setFormState().then(function() {
+      formState.clearErrors();
       self._validateForm().then(function() {
         if (formState.hasAnyErrors()) {
           formState.displayErrors();
