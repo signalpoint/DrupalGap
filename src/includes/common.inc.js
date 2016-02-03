@@ -25,6 +25,12 @@ dg.getMode = function() { return this.config('mode'); };
 dg.setMode = function(mode) { this.config('mode', mode); };
 
 /**
+ * Returns the current route's path..
+ * @returns {String}
+ */
+dg.getPath = function() { return dg.router.getFragment(); };
+
+/**
  * Returns the path to the app's front page route.
  * @returns {String}
  */
