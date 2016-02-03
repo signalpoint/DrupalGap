@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-02 */
+/*! drupalgap 2016-02-03 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -898,6 +898,15 @@ dg.FormStateInterface.prototype.getErrorMessages = function() {
 dg.FormStateInterface.prototype.displayErrors = function() {
   dg.alert(this.getErrorMessages());
 };
+
+/**
+ * Clears the form state errors.
+ * @returns {dg.FormStateInterface}
+ */
+dg.FormStateInterface.prototype.clearErrors = function() {
+  this.errors = {};
+};
+
 dg.FormStateInterface.prototype.getValue = function(key, default_value) {
   return typeof this.get('values')[key] !== 'undefined' ?
     this.get('values')[key] : default_value;
@@ -1111,6 +1120,7 @@ dg.Form.prototype._submission = function() {
   return new Promise(function(ok, err) {
     var formState = self.getFormState();
     formState.setFormState().then(function() {
+      formState.clearErrors();
       self._validateForm().then(function() {
         if (formState.hasAnyErrors()) {
           formState.displayErrors();
@@ -1238,6 +1248,20 @@ dg.alert = function(message) {
     navigator.notification.alert(message, alertCallback, title, buttonName);
   }
 };
+
+/**
+ * Themes a message box.
+ * @param {Object} variables
+ * @returns {string}
+ */
+dg.theme_message = function(variables) {
+  var format = variables._format ? variables._format : 'div';
+  var type = variables._type ? variables._type : null;
+  if (!jDrupal.inArray('messages', variables._attributes.class)) { variables._attributes.class.push('messages'); }
+  if (type && !jDrupal.inArray(type, variables._attributes.class)) { variables._attributes.class.push(type); }
+  return '<' + format + ' ' + dg.attributes(variables._attributes) + '>' + variables._message + '</' + format + '>';
+};
+
 dg.modules = jDrupal.modules;
 
 dg.Module = function() { };
@@ -1872,12 +1896,18 @@ dg.theme_view = function(variables) {
   }
   return new Promise(function(ok) {
     jDrupal.viewsLoad(variables._path).then(function(data) {
+      var content = '';
       var format = variables._format ? variables._format : 'div';
       var attrs = variables._format_attributes ? variables._format_attributes : null;
-      var content = '<' + format + ' ' + dg.attributes(attrs) + '>';
+      if (variables._title) {
+        if (typeof variables._title === 'object') { content += dg.render(variables._title); }
+        else { content += '<h2>' + variables._title + '</h2>'; };
+      }
+      content += '<' + format + ' ' + dg.attributes(attrs) + '>';
       if (data.results.length > 0) {
         for (var i = 0; i < data.results.length; i++) {
-          var open, close = '';
+          var open = '';
+          var close = '';
           switch (format) {
             case 'ul':
             case 'ol':
@@ -2064,6 +2094,26 @@ dg.modules.core.FieldFormatter.string.prototype.viewElements = function(FieldIte
 // Let DrupalGap know we have a FieldWidget(s).
 dg.modules.core.FieldWidget = {};
 
+// Decimal field.
+// Extend the FieldWidget prototype for the Decimal field.
+dg.modules.core.FieldWidget.decimal = function(entityType, bundle, fieldName, element, items, delta) {
+  dg.FieldWidgetPrepare(this, arguments);
+};
+dg.modules.core.FieldWidget.decimal.prototype = new dg.FieldWidget;
+dg.modules.core.FieldWidget.decimal.prototype.constructor = dg.modules.core.FieldWidget.decimal;
+dg.modules.core.FieldWidget.decimal.prototype.form = function(items, delta, element, form, formState) {
+  element._type = 'number';
+  element._title = this.fieldDefinition.getLabel();
+  element._title_placeholder = true;
+  element._widgetType = 'FieldWidget';
+  element._module = 'core';
+  element._attributes.step = 'any';
+  if (items && items[delta] !== 'undefined') {
+    element._value = items[delta].value;
+    element._attributes.value = element._value;
+  }
+};
+
 // Float field.
 // Extend the FieldWidget prototype for the Float field.
 dg.modules.core.FieldWidget.float = function(entityType, bundle, fieldName, element, items, delta) {
@@ -2071,7 +2121,6 @@ dg.modules.core.FieldWidget.float = function(entityType, bundle, fieldName, elem
 };
 dg.modules.core.FieldWidget.float.prototype = new dg.FieldWidget;
 dg.modules.core.FieldWidget.float.prototype.constructor = dg.modules.core.FieldWidget.float;
-
 dg.modules.core.FieldWidget.float.prototype.form = function(items, delta, element, form, formState) {
   element._type = 'number';
   element._title = this.fieldDefinition.getLabel();
@@ -2092,7 +2141,6 @@ dg.modules.core.FieldWidget.integer = function(entityType, bundle, fieldName, el
 };
 dg.modules.core.FieldWidget.integer.prototype = new dg.FieldWidget;
 dg.modules.core.FieldWidget.integer.prototype.constructor = dg.modules.core.FieldWidget.integer;
-
 dg.modules.core.FieldWidget.integer.prototype.form = function(items, delta, element, form, formState) {
   element._type = 'number';
   element._title = this.fieldDefinition.getLabel();
@@ -2112,7 +2160,6 @@ dg.modules.core.FieldWidget.string = function(entityType, bundle, fieldName, ele
 };
 dg.modules.core.FieldWidget.string.prototype = new dg.FieldWidget;
 dg.modules.core.FieldWidget.string.prototype.constructor = dg.modules.core.FieldWidget.string;
-
 dg.modules.core.FieldWidget.string.prototype.form = function(items, delta, element, form, formState) {
   element._type = 'textfield';
   element._title = this.fieldDefinition.getLabel();
