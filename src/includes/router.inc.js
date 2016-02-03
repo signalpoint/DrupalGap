@@ -60,7 +60,6 @@ dg.router = {
 
   check: function(f) {
 
-
     var route = this.load(f);
     if (route) {
 
