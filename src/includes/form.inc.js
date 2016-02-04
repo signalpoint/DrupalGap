@@ -219,6 +219,9 @@ dg.Form.prototype._validateForm = function() {
   // Verify required elements have values, otherwise set a form state error on it. Keep in mind that most (if not all)
   // form elements have been wrapped in a container by this point.
   var formState = self.getFormState();
+  var setError = function(name) {
+    formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
+  };
   for (var name in self.form) {
     if (!dg.isFormElement(name, self.form)) { continue; }
     var el = self.form[name];
@@ -227,11 +230,11 @@ dg.Form.prototype._validateForm = function() {
           typeof el._children.element.get('element')._required !== 'undefined' &&
           el._children.element.get('element')._required &&
           jDrupal.isEmpty(formState.getValue(name))
-      ) { formState.setErrorByName(name, dg.t('The "' + name + '" field is required')); }
+      ) { setError(name);  }
     }
     else {
       if (typeof el._required !== 'undefined' && el._required && jDrupal.isEmpty(formState.getValue(name))) {
-        formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
+        setError(name);
       }
     }
   }
