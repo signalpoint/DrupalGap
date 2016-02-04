@@ -45,7 +45,10 @@ dg.settings.blocks[dg.config('theme').name] = {
   header: {
 
     // DrupalGap's main menu block.
-    main_menu: { }
+    main_menu: { },
+
+    // The user login form provided by DrupalGap.
+    user_login: { }
 
   },
   content: {
