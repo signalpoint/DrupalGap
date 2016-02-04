@@ -636,10 +636,12 @@ dg.Form = function(id) {
   this.id = id;
   this.form = {
     _attributes: {
-      id: dg.killCamelCase(id, '-').toLowerCase()
+      id: dg.killCamelCase(id, '-').toLowerCase(),
+      'class': []
     },
     _validate: [id + '.validateForm'],
-    _submit: [id + '.submitForm']
+    _submit: [id + '.submitForm'],
+    _after_build: []
   };
   this.form_state = new dg.FormStateInterface(this);
   this.elements = {}; // Holds FormElement instances.
@@ -690,10 +692,11 @@ dg.Form.prototype.getForm = function() {
       // to its widget form builder.
       var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
       var render = function() {
+        var form = '';
         for (var name in self.form) {
           if (!dg.isFormElement(name, self.form)) { continue; }
           var element = self.form[name];
-          // Reset the attribute value if the element value was changed during form alteration.
+          // Reset the attribute value to that of the element value if it changed during form alteration.
           if (element._attributes.value != element._value) { element._attributes.value = element._value; }
           switch (element._widgetType) {
             case 'FieldWidget':
@@ -713,51 +716,75 @@ dg.Form.prototype.getForm = function() {
                 self.elements[name] = widget;
                 widget.form(items, delta, element, self.form, self.form_state);
                 // Wrap elements in containers, except for hidden elements.
-                if (element._type == 'hidden') { self.form[name] = element; }
-                else {
-                  var children = {};
-                  if (element._title) {
-                    children.label = {
-                      _theme: 'form_element_label',
-                      _title: element._title
-                    };
-                  }
-                  children.element = element;
-                  var container = {
-                    _theme: 'container',
-                    _children: children,
-                    _weight: element._weight
-                  };
-                  self.form[name] = container;
+                if (element._type == 'hidden') {
+                  self.form[name] = element;
+                  continue;
                 }
+                var children = {};
+                if (element._title) {
+                  children.label = {
+                    _theme: 'form_element_label',
+                    _title: element._title
+                  };
+                }
+                children.element = element;
+                var container = {
+                  _theme: 'container',
+                  _children: children,
+                  _weight: element._weight
+                };
+                self.form[name] = container;
               break;
             case 'FormElement':
             default:
-                // Instantiate a new form element.
-                self.elements[name] = new dg[element._widgetType](name, element, self);
-                // Wrap elements in containers, except for hidden elements.
-                //var el = new dg[element._widgetType](name, element, self);
-                //if (element._type == 'hidden') { self.form[name] = el; }
-                //else {
-                //  var children = {};
-                //  if (element._title) {
-                //    children.label = {
-                //      _theme: 'form_element_label',
-                //      _title: element._title
-                //    };
-                //  }
-                //  children.element = el;
-                //  var container = {
-                //    _theme: 'container',
-                //    _children: children,
-                //    _weight: element._weight
-                //  };
-                //  self.form[name] = container;
-                //}
+
+              // Instantiate a new form element given the current buildForm element for the Form.
+              // Wrap elements in containers, except for hidden elements.
+              var el = new dg[element._widgetType](name, element, self);
+              self.elements[name] = el;
+              if (el._type == 'hidden') {
+                self.elements[name] = el;
+                continue;
+              }
+              var children = {
+                _attributes: {
+                  'class': []
+                }
+              };
+              if (el._title) {
+                children.label = {
+                  _theme: 'form_element_label',
+                  _title: el._title
+                };
+              }
+              children.element = el;
+              var container = { // @TODO we desperately need a function to instantiate a RenderElement
+                _theme: 'container',
+                _children: children,
+                _attributes: {
+                  'class': []
+                },
+                _weight: el._weight
+              };
+              self.form[name] = container;
+
               break;
           }
         }
-        ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
+        
+        // Run the after builds, if any. Then finally resolve the rendered form.
+        var promises = [];
+        for (var i = 0; i < self.form._after_build.length; i++) {
+          var parts = self.form._after_build[i].split('.');
+          var module = parts[0];
+          var method = parts[1];
+          if (!dg.modules[module] || !dg.modules[module][method]) { continue; }
+          promises.push(dg.modules[module][method].apply(self, [self.form, self.getFormState()]));
+        }
+        Promise.all(promises).then(function() {
+          ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
+        });
+
       };
       if (!alters) { render(); }
       else { alters.then(render); }
@@ -889,9 +916,6 @@ dg.setFormElementDefaults = function(name, el) {
   if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
 };
-// We prefixed this file name with an underscore so that dg.FormElement is available quickly. This is our cheap fix
-// until we figure out a better Gruntfile to handle this.
-
 // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
 
 /**
@@ -906,12 +930,32 @@ dg.FormElement = function(name, element, form) {
   this.element = element; // Holds the form element JSON object provided by the form builder.
   this.form = form;
 };
+
+/**
+ *
+ * @returns {null}
+ */
 dg.FormElement.prototype.id = function() { return this.element ? this.element._attributes.id : null; };
+
+/**
+ *
+ * @returns {Object|*}
+ */
 dg.FormElement.prototype.getForm = function() { return this.form; };
+
+/**
+ *
+ * @param property
+ * @returns {null}
+ */
 dg.FormElement.prototype.get = function(property) {
   return typeof this[property] ? this[property] : null;
 };
 
+/**
+ *
+ * @returns {*}
+ */
 dg.FormElement.prototype.valueCallback = function() {
   var self = this;
   return new Promise(function(ok, err) {
@@ -2550,14 +2594,7 @@ dg.modules.system.blocks = function() {
     build: function () {
       return new Promise(function(ok, err) {
         var content = {};
-        var items = [dg.l(dg.t('Home'), '')];
-        if (!dg.currentUser().isAuthenticated()) { items.push(dg.l(dg.t('Login'), 'user/login')); }
-        else {
-          items.push(
-              dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
-              dg.l(dg.t('Logout'), 'user/logout')
-          );
-        }
+        var items = [ dg.l(dg.t('Home'), '') ];
         content['menu'] = {
           _theme: 'item_list',
           _items: items
@@ -2692,12 +2729,23 @@ dg.modules.user.blocks = function() {
   blocks['user_login'] = {
     build: function () {
       return new Promise(function(ok, err) {
-        if (!dg.currentUser().isAuthenticated() && dg.getPath() != 'user/login') {
+        var authenticated = dg.currentUser().isAuthenticated();
+        if (!authenticated && dg.getPath() != 'user/login') {
           var form = dg.addForm('UserLoginForm', dg.applyToConstructor(UserLoginForm));
           form.get('form')._submit = ['user.user_login_block_form_submit'];
           form.getForm().then(ok);
         }
-        else { ok(); }
+        else if (authenticated) {
+          var content = {};
+          content['menu'] = {
+            _theme: 'item_list',
+            _items: [
+              dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
+              dg.l(dg.t('Logout'), 'user/logout')
+            ]
+          };
+          ok(content);
+        }
       });
     }
   };
