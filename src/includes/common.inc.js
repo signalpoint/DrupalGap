@@ -41,6 +41,12 @@ dg.getFrontPagePath = function() {
 };
 
 /**
+ * Returns true if the current page's route is the app's front page route.
+ * @returns {boolean}
+ */
+dg.isFrontPage = function() { return dg.getFrontPagePath() == dg.getPath(); };
+
+/**
  * Gets the current page's title.
  * @returns {String}
  */
