@@ -63,14 +63,7 @@ dg.modules.system.blocks = function() {
     build: function () {
       return new Promise(function(ok, err) {
         var content = {};
-        var items = [dg.l(dg.t('Home'), '')];
-        if (!dg.currentUser().isAuthenticated()) { items.push(dg.l(dg.t('Login'), 'user/login')); }
-        else {
-          items.push(
-              dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
-              dg.l(dg.t('Logout'), 'user/logout')
-          );
-        }
+        var items = [ dg.l(dg.t('Home'), '') ];
         content['menu'] = {
           _theme: 'item_list',
           _items: items
