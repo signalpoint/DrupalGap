@@ -51,12 +51,23 @@ dg.modules.user.blocks = function() {
   blocks['user_login'] = {
     build: function () {
       return new Promise(function(ok, err) {
-        if (!dg.currentUser().isAuthenticated() && dg.getPath() != 'user/login') {
+        var authenticated = dg.currentUser().isAuthenticated();
+        if (!authenticated && dg.getPath() != 'user/login') {
           var form = dg.addForm('UserLoginForm', dg.applyToConstructor(UserLoginForm));
           form.get('form')._submit = ['user.user_login_block_form_submit'];
           form.getForm().then(ok);
         }
-        else { ok(); }
+        else if (authenticated) {
+          var content = {};
+          content['menu'] = {
+            _theme: 'item_list',
+            _items: [
+              dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
+              dg.l(dg.t('Logout'), 'user/logout')
+            ]
+          };
+          ok(content);
+        }
       });
     }
   };
