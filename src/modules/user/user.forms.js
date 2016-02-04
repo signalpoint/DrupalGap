@@ -51,13 +51,10 @@ UserLoginForm.constructor = UserLoginForm;
 dg.modules.user.user_login_block_form_submit = function(form, form_state) {
   var self = this;
   return new Promise(function(ok, err) {
-    // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
-    if (dg.getPath() == dg.getFrontPagePath()) {
-      self.submitForm(form, form_state).then(function() {
-        dg.router.check(dg.getFrontPagePath());
-        ok();
-      });
-    }
-    else { ok(); }
+    self.submitForm(form, form_state).then(function() {
+      // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
+      if (dg.isFrontPage()) { dg.router.check(dg.getFrontPagePath()); }
+      ok();
+    });
   });
 };
