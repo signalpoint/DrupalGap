@@ -329,7 +329,7 @@ dg.getMode = function() { return this.config('mode'); };
 dg.setMode = function(mode) { this.config('mode', mode); };
 
 /**
- * Returns the current route's path..
+ * Returns the current route's path.
  * @returns {String}
  */
 dg.getPath = function() { return dg.router.getFragment(); };
@@ -348,7 +348,10 @@ dg.getFrontPagePath = function() {
  * Returns true if the current page's route is the app's front page route.
  * @returns {boolean}
  */
-dg.isFrontPage = function() { return dg.getFrontPagePath() == dg.getPath(); };
+dg.isFrontPage = function() {
+  // @TODO I don't think this works properly when navigating between pages, maybe it depends on when you call it.
+  return dg.getFrontPagePath() == dg.getPath() || dg.getPath() == '';
+};
 
 /**
  * Gets the current page's title.
