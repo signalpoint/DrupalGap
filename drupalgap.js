@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-03 */
+/*! drupalgap 2016-02-04 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -343,6 +343,12 @@ dg.getFrontPagePath = function() {
   if (front == null) { front = 'dg'; }
   return front;
 };
+
+/**
+ * Returns true if the current page's route is the app's front page route.
+ * @returns {boolean}
+ */
+dg.isFrontPage = function() { return dg.getFrontPagePath() == dg.getPath(); };
 
 /**
  * Gets the current page's title.
