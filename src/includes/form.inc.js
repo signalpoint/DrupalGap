@@ -10,10 +10,12 @@ dg.Form = function(id) {
   this.id = id;
   this.form = {
     _attributes: {
-      id: dg.killCamelCase(id, '-').toLowerCase()
+      id: dg.killCamelCase(id, '-').toLowerCase(),
+      'class': []
     },
     _validate: [id + '.validateForm'],
-    _submit: [id + '.submitForm']
+    _submit: [id + '.submitForm'],
+    _after_build: []
   };
   this.form_state = new dg.FormStateInterface(this);
   this.elements = {}; // Holds FormElement instances.
@@ -64,10 +66,11 @@ dg.Form.prototype.getForm = function() {
       // to its widget form builder.
       var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
       var render = function() {
+        var form = '';
         for (var name in self.form) {
           if (!dg.isFormElement(name, self.form)) { continue; }
           var element = self.form[name];
-          // Reset the attribute value if the element value was changed during form alteration.
+          // Reset the attribute value to that of the element value if it changed during form alteration.
           if (element._attributes.value != element._value) { element._attributes.value = element._value; }
           switch (element._widgetType) {
             case 'FieldWidget':
@@ -87,51 +90,75 @@ dg.Form.prototype.getForm = function() {
                 self.elements[name] = widget;
                 widget.form(items, delta, element, self.form, self.form_state);
                 // Wrap elements in containers, except for hidden elements.
-                if (element._type == 'hidden') { self.form[name] = element; }
-                else {
-                  var children = {};
-                  if (element._title) {
-                    children.label = {
-                      _theme: 'form_element_label',
-                      _title: element._title
-                    };
-                  }
-                  children.element = element;
-                  var container = {
-                    _theme: 'container',
-                    _children: children,
-                    _weight: element._weight
-                  };
-                  self.form[name] = container;
+                if (element._type == 'hidden') {
+                  self.form[name] = element;
+                  continue;
                 }
+                var children = {};
+                if (element._title) {
+                  children.label = {
+                    _theme: 'form_element_label',
+                    _title: element._title
+                  };
+                }
+                children.element = element;
+                var container = {
+                  _theme: 'container',
+                  _children: children,
+                  _weight: element._weight
+                };
+                self.form[name] = container;
               break;
             case 'FormElement':
             default:
-                // Instantiate a new form element.
-                self.elements[name] = new dg[element._widgetType](name, element, self);
-                // Wrap elements in containers, except for hidden elements.
-                //var el = new dg[element._widgetType](name, element, self);
-                //if (element._type == 'hidden') { self.form[name] = el; }
-                //else {
-                //  var children = {};
-                //  if (element._title) {
-                //    children.label = {
-                //      _theme: 'form_element_label',
-                //      _title: element._title
-                //    };
-                //  }
-                //  children.element = el;
-                //  var container = {
-                //    _theme: 'container',
-                //    _children: children,
-                //    _weight: element._weight
-                //  };
-                //  self.form[name] = container;
-                //}
+
+              // Instantiate a new form element given the current buildForm element for the Form.
+              // Wrap elements in containers, except for hidden elements.
+              var el = new dg[element._widgetType](name, element, self);
+              self.elements[name] = el;
+              if (el._type == 'hidden') {
+                self.elements[name] = el;
+                continue;
+              }
+              var children = {
+                _attributes: {
+                  'class': []
+                }
+              };
+              if (el._title) {
+                children.label = {
+                  _theme: 'form_element_label',
+                  _title: el._title
+                };
+              }
+              children.element = el;
+              var container = { // @TODO we desperately need a function to instantiate a RenderElement
+                _theme: 'container',
+                _children: children,
+                _attributes: {
+                  'class': []
+                },
+                _weight: el._weight
+              };
+              self.form[name] = container;
+
               break;
           }
         }
-        ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
+        
+        // Run the after builds, if any. Then finally resolve the rendered form.
+        var promises = [];
+        for (var i = 0; i < self.form._after_build.length; i++) {
+          var parts = self.form._after_build[i].split('.');
+          var module = parts[0];
+          var method = parts[1];
+          if (!dg.modules[module] || !dg.modules[module][method]) { continue; }
+          promises.push(dg.modules[module][method].apply(self, [self.form, self.getFormState()]));
+        }
+        Promise.all(promises).then(function() {
+          ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
+        });
+
       };
       if (!alters) { render(); }
       else { alters.then(render); }
