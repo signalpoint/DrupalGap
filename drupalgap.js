@@ -852,13 +852,26 @@ dg.Form.prototype._submission = function() {
 // dg core form validation handler
 dg.Form.prototype._validateForm = function() {
   var self = this;
-  // Verify required elements have values, otherwise set a form state error on it.
+  // Verify required elements have values, otherwise set a form state error on it. Keep in mind that most (if not all)
+  // form elements have been wrapped in a container by this point.
   var formState = self.getFormState();
+  var setError = function(name) {
+    formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
+  };
   for (var name in self.form) {
     if (!dg.isFormElement(name, self.form)) { continue; }
     var el = self.form[name];
-    if (typeof el._required !== 'undefined' && el._required && jDrupal.isEmpty(formState.getValue(name))) {
-      formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
+    if (el._theme && el._theme == 'container') {
+      if (
+          typeof el._children.element.get('element')._required !== 'undefined' &&
+          el._children.element.get('element')._required &&
+          jDrupal.isEmpty(formState.getValue(name))
+      ) { setError(name);  }
+    }
+    else {
+      if (typeof el._required !== 'undefined' && el._required && jDrupal.isEmpty(formState.getValue(name))) {
+        setError(name);
+      }
     }
   }
   // Run through any validation handlers attached to the form, if any.
@@ -2857,13 +2870,10 @@ UserLoginForm.constructor = UserLoginForm;
 dg.modules.user.user_login_block_form_submit = function(form, form_state) {
   var self = this;
   return new Promise(function(ok, err) {
-    // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
-    if (dg.getPath() == dg.getFrontPagePath()) {
-      self.submitForm(form, form_state).then(function() {
-        dg.router.check(dg.getFrontPagePath());
-        ok();
-      });
-    }
-    else { ok(); }
+    self.submitForm(form, form_state).then(function() {
+      // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
+      if (dg.isFrontPage()) { dg.router.check(dg.getFrontPagePath()); }
+      ok();
+    });
   });
 };
