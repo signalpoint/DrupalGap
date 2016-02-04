@@ -78,14 +78,15 @@ dg.entityRenderContent = function(entity) {
         );
         var elements = FieldFormatter.viewElements(FieldItemListInterface, entity.language());
         if (jDrupal.isEmpty(elements)) { continue; }
-        var children = {
-          label: {
+        var children = {};
+        if (viewMode[fieldName].label != 'hidden') {
+          children.label = {
             _theme: 'form_element_label',
             _title: FieldDefinitionInterface.getLabel(),
             _title_display: 'before'
-          },
-          elements: elements
-        };
+          };
+        }
+        children.elements = elements;
         content[fieldName] = {
           _theme: 'container',
           _children: children,
