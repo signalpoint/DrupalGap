@@ -2,31 +2,42 @@
 
 // @see https://www.drupal.org/node/2101565
 
-// @TODO change block properties to use an underscore prefix.
-
 /**
  * The Block constructor.
  * @param {String} module The module name that implements the block.
  * @param {String} id The block id.
- * @param {Object} config The block config object from settings.js, merged with any defaults.
+ * @param {Object} implementation Provided by the module that implements the block (includes the build function, ...)
+ * @param {Object} config The block config object from settings.js, pre-merged with any defaults.
  * @constructor
  */
-dg.Block = function(module, id, config) {
+dg.Block = function(module, id, implementation, config) {
+
+  // Merge the block module's implementation onto the block's instance. This merges both properties (e.g. _attributes)
+  // and functions (e.g. build).
+  for (var item in implementation) {
+    if (!implementation.hasOwnProperty(item)) { continue; }
+    this[item] = implementation[item];
+  }
+
+  // Merge the config (from settings.js) onto the instance as properties.
   for (var setting in config) {
     if (!config.hasOwnProperty(setting)) { continue; }
-    this[setting] = config[setting];
+    this['_' + setting] = config[setting];
   }
+
+  // Set remaining default values when needed.
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
   dg.setRenderElementDefaults(this);
   if (!this._attributes.id) { this._attributes.id = dg.cleanCssIdentifier(id); }
+
 };
 
 /**
- *
- * @param name
- * @returns {null}
+ * Gets a block property value and returns it.
+ * @param {String}
+ * @returns {*}
  */
 dg.Block.prototype.get = function(name) {
   var propName = '_' + name;
@@ -34,9 +45,9 @@ dg.Block.prototype.get = function(name) {
 };
 
 /**
- *
- * @param name
- * @param value
+ * Sets a block property value
+ * @param {Sting} name
+ * @param {*} value
  */
 dg.Block.prototype.set = function(name, value) {
   var propName = '_' + name;
@@ -44,15 +55,15 @@ dg.Block.prototype.set = function(name, value) {
 };
 
 /**
- *
- * @returns {*}
+ * A wrapper function around to invoke the block's build function and hook_block_view_alter().
+ * @returns {Promise}
  */
 dg.Block.prototype.buildWrapper = function() {
   var self = this;
   return new Promise(function(ok, err) {
     self.build().then(function(element) {
       dg.setRenderElementDefaults(element);
-      // @TODO - elements that are just a string can't be altered, e.g. powered by block.
+      // @TODO - elements that are just a string (i.e. not a render elemtn) can't be altered.
       jDrupal.moduleInvokeAll('block_view_alter', element, self).then(function() {
         self.set('content', element);
         ok(self);
@@ -62,7 +73,7 @@ dg.Block.prototype.buildWrapper = function() {
 };
 
 /**
- *
+ * A stub function for a block's build.
  * @returns {*}
  */
 dg.Block.prototype.build = function() {
@@ -72,7 +83,7 @@ dg.Block.prototype.build = function() {
 
 /**
  *
- * @returns {*}
+ * @returns {Object}
  */
 dg.Block.prototype.getVisibility = function() {
   var self = this;
@@ -102,41 +113,46 @@ dg.blocksLoad = function() {
   //return new Promise(function(ok, err) {
     if (!dg.blocks) {
 
+      // Prep some helper variables and grab the block config from settings.js.
       dg.blocks = {};
-
-      // First, figure out what blocks are defined in the settings.js file and
-      // set them aside. Warn the developer if there are no blocks defined.
       var appBlocks = {};
       var themeName = dg.config('theme').name;
-      var blockSettings = drupalgap.settings.blocks[themeName];
+      var blockSettings = dg.settings.blocks[themeName];
       var blockCount = 0;
+
+      // First, figure out what blocks are defined in the settings.js file and set them aside. Warn the developer if
+      // there are no blocks defined.
+
       // Iterate over each region mentioned in the theme settings...
       for (var region in blockSettings) {
         if (!blockSettings.hasOwnProperty(region)) { continue; }
-        // Iterate over each block mentioned in the theme's region settings...
+
+        // Iterate over each block mentioned in the region settings...
         var weight = 0;
         for (var themeBlock in blockSettings[region]) {
           if (!blockSettings[region].hasOwnProperty(themeBlock)) { continue; }
+
+          // Create a simple block JSON object from the block's config in the settings.js file. Force set the region,
+          // and set a default weight if one isn't already set. Keep in mind that these simple block JSON objects will
+          // be used to instantiate a Block shortly, so all properties can be set flat on the object (i.e. no underscore
+          // prefix necessary), because they'll be turned into Block properties shortly, and we want the settings.js
+          // block config to be simple. Along the way keep track of how many blocks we have, and always keep the next
+          // weight ready for any blocks that don't have it pre configured.
           var block = blockSettings[region][themeBlock];
           block.region = region;
           block.weight = typeof block.weight !== 'undefined' ? block.weight : weight;
           weight = block.weight + 1;
           appBlocks[themeBlock] = block;
           blockCount++;
+
         }
       }
-      if (blockCount == 0) {
-        var msg = 'WARNING: No blocks were found for the "' + themeName + '" theme in settings.js';
-        console.log(msg);
-      }
+      if (blockCount == 0) { console.log(dg.t('No blocks found in settings.js for the theme: ' + themeName)); }
 
       //console.log('loaded the blocks from settings.js');
       //console.log(appBlocks);
 
-      // Gather all the blocks defined by modules, and then instantiate only
-      // the blocks defined by the app.
-
-      // For each module that overwrites the "blocks" function on their prototype...
+      // Gather all the blocks defined by modules, and then instantiate only the blocks defined by the app's config.
       var modules = jDrupal.modulesLoad();
       for (var module in modules) {
 
@@ -145,13 +161,12 @@ dg.blocksLoad = function() {
         var blocks = modules[module].blocks();
         if (!blocks) { continue; }
 
-        // For each block provided by the module (skipping any blocks not
-        // mentioned by the app)...
+        // For each block provided by the module (skipping any blocks not mentioned by the app)...
         for (block in blocks) {
           if (!blocks.hasOwnProperty(block) || !appBlocks[block]) { continue; }
 
-          // Extract the block's config from the module.
-          var config = blocks[block];
+          // Extract the block's implementation from the module.
+          var implementation = blocks[block];
 
           // Make sure this block isn't overwriting another block.
           // Create an instance of the block, warn if someone overwrites somebody
@@ -163,14 +178,7 @@ dg.blocksLoad = function() {
           }
 
           // Create an instance of the block.
-          dg.blocks[block] = new dg.Block(module, block, config);
-
-          // Merge the block config from settings.js into the block instance.
-          // @TODO turn this into dg.extend().
-          for (var setting in appBlocks[block]) {
-            if (!appBlocks[block].hasOwnProperty(setting)) { continue; }
-            dg.blocks[block].set(setting, appBlocks[block][setting]);
-          }
+          dg.blocks[block] = new dg.Block(module, block, implementation, appBlocks[block]);
 
         }
       }
@@ -179,12 +187,12 @@ dg.blocksLoad = function() {
       //console.log(dg.blocks);
 
       //ok(dg.blocks);
-      return dg.blocks;
+      //return dg.blocks;
     }
-    else {
+    //else {
       //ok(dg.blocks);
       return dg.blocks;
-    }
+    //}
   //});
 };
 
