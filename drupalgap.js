@@ -194,6 +194,9 @@ dg.Block.prototype.build = function() {
  * @returns {Object}
  */
 dg.Block.prototype.getVisibility = function() {
+
+  // @TODO WARNING - it appears drupal 8.0.3 stopped returning user roles to us upon user load... confirm, take action, etc.
+
   var self = this;
   var account = dg.currentUser();
   return new Promise(function(ok, err) {
@@ -529,7 +532,15 @@ dg.removeElement = function(id) {
  * @param text
  * @returns {*}
  */
-dg.t = function(text) { return text; };
+dg.t = function(text, args, options) {
+  if (args) {
+    for (var name in args) {
+      if (!args.hasOwnProperty(name)) { continue; }
+      text = text.replace(name, args[name]);
+    }
+  }
+  return text;
+};
 
 /**
  * A proxy to create an instance of a jDrupal Node object.
@@ -871,6 +882,7 @@ dg.Form.prototype._validateForm = function() {
     if (!dg.isFormElement(name, self.form)) { continue; }
     var el = self.form[name];
     if (el._theme && el._theme == 'container') {
+      if (typeof el._children.element.get !== 'function') { continue; }
       if (
           typeof el._children.element.get('element')._required !== 'undefined' &&
           el._children.element.get('element')._required &&
@@ -2539,7 +2551,7 @@ var NodeEdit = function() {
 
             var type = entityFormMode[fieldName].type;
             if (!dg.modules.core.FormWidget[type]) {
-              console.log('WARNING - buildForm - There is no "' + type + '" widget in the core module to handle the "' + fieldName + '" element.');
+              console.log('buildForm - There is no "' + type + '" widget in the core module to handle the "' + fieldName + '" element.');
               continue;
             }
 
@@ -2569,11 +2581,11 @@ var NodeEdit = function() {
             // Make sure the module and the corresponding field widget implementation is available.
             if (!module) { continue; }
             if (!jDrupal.moduleExists(module)) {
-              console.log('WARNING - buildForm - The "' + module + '" module is not present for the widget on the "' + fieldName + '" field.');
+              console.log('buildForm - The "' + module + '" module is not present for the widget on the "' + fieldName + '" field.');
               continue;
             }
             if (!dg.modules[module].FieldWidget || !dg.modules[module].FieldWidget[fieldStorageConfig.type]) {
-              console.log('WARNING - buildForm - There is no "' + fieldStorageConfig.type + '" widget in the "' + module + '" module to handle the "' + fieldName + '" field.');
+              console.log('buildForm - There is no "' + fieldStorageConfig.type + '" widget in the "' + module + '" module to handle the "' + fieldName + '" field.');
               continue;
             }
 
