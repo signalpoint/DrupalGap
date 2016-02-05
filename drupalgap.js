@@ -555,12 +555,12 @@ dg.entityRenderContent = function(entity) {
     // @TODO convert this to a _title_callback on the route.
     dg.setDocumentTitle(entity.label());
 
-    //console.log(dg);
     //console.log(dg.entity_view_mode);
 
     // Get the view mode.
     // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
     var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
+    if (entityType == 'user') { viewMode = viewMode[entityType]; } // Unwrap the user viewMode since there is no bundle.
     //console.log('viewMode - ' + entityType + ' / ' + bundle);
     //console.log(viewMode);
 
@@ -574,7 +574,7 @@ dg.entityRenderContent = function(entity) {
       // Grab the field storage config and the module in charge of the field.
       var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
       if (!fieldStorageConfig) {
-        console.log('WARNING - entityRenderContent - No field storage config for "' + fieldName + '"');
+        console.log('entityRenderContent - No field storage config for "' + fieldName + '"');
       }
       else {
 
@@ -584,12 +584,12 @@ dg.entityRenderContent = function(entity) {
         //console.log(fieldStorageConfig);
 
         if (!jDrupal.moduleExists(module)) {
-          var msg = 'WARNING - entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
+          var msg = 'entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
           console.log(msg);
           continue;
         }
         if (!dg.modules[module].FieldFormatter || !dg.modules[module].FieldFormatter[type]) {
-          console.log('WARNING - entityRenderContent - There is no "' + type + '" formatter in the "' + module + '" module to handle the "' + fieldName + '" field.');
+          console.log('entityRenderContent - There is no "' + type + '" formatter in the "' + module + '" module to handle the "' + fieldName + '" field.');
           continue;
         }
 
@@ -625,6 +625,8 @@ dg.entityRenderContent = function(entity) {
       }
 
     }
+    // @TODO move this invocation before the fields are wrapped in containers, move the container wrapper out of the
+    // loop above, then make some type of after build alter invocation if anybody wants to then alter the containers.
     jDrupal.moduleInvokeAll('entity_view', content, entity).then(ok(content));
 
   });
@@ -1181,7 +1183,9 @@ dg.FieldDefinitionInterface = function(entityType, bundle, fieldName) {
   this.entityType = entityType;
   this.bundle = bundle;
   this.fieldName = fieldName;
-  this.fieldDefinition = dg.fieldDefinitions[entityType][bundle][fieldName];
+  // Unwrap user entities from the bundle, leave all others as is.
+  this.fieldDefinition = entityType == 'user' ?
+      dg.fieldDefinitions[entityType][fieldName] : dg.fieldDefinitions[entityType][bundle][fieldName];
 };
 dg.FieldDefinitionInterface.prototype.get = function(prop) {
   return typeof this.fieldDefinition[prop] ? this.fieldDefinition[prop] : null;
@@ -1189,6 +1193,7 @@ dg.FieldDefinitionInterface.prototype.get = function(prop) {
 dg.FieldDefinitionInterface.prototype.getLabel = function() {
   return this.get('label');
 };
+
 dg.FieldFormMode = function(fieldFormMode) {
   this.fieldFormMode = fieldFormMode;
 };
@@ -1196,32 +1201,42 @@ dg.FieldFormMode.prototype.getWeight = function() {
   return this.fieldFormMode.weight;
 };
 
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!FormatterBase.php/class/FormatterBase/8
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Field!Annotation!FieldFormatter.php/class/FieldFormatter/8
-
+/**
+ * The FieldFormatter constructor stub.
+ * @constructor
+ */
 dg.FieldFormatter = function() {
-  this._fieldDefinition = null;
-  this._settings = null;
-  this._label = null;
-  this._viewMode = null;
-  this._thirdPartySettings = null;
+
+  // This is a constructor stub, all FieldFormatter implementations should call dg.FieldFormatterPrepare in their
+  // constructors.
+
+  //this._fieldDefinition = null;
+  //this._settings = null;
+  //this._label = null;
+  //this._viewMode = null;
+  //this._thirdPartySettings = null;
 };
 
 /**
  * Used to prepare a field formatter default constructor.
- * @param FieldFormatter
- * @param args
+ * @param {Object} FieldFormatter
+ * @param {Array} args
  * @constructor
  */
 dg.FieldFormatterPrepare = function(FieldFormatter, args) {
-  this._fieldDefinition = args[0];
-  this._settings = args[1];
-  this._label = args[2];
-  this._viewMode = args[3];
-  this._thirdPartySettings = args[4];
+  FieldFormatter._fieldDefinition = args[0];
+  FieldFormatter._settings = args[1];
+  FieldFormatter._label = args[2];
+  FieldFormatter._viewMode = args[3];
+  FieldFormatter._thirdPartySettings = args[4];
 };
 
-// Builds a renderable array for a field value.
+/**
+ * Builds a renderable array for a field value.
+ * @param {Object} FieldItemListInterface
+ * @param {String} langcode
+ * @returns {Object}
+ */
 dg.FieldFormatter.prototype.viewElements = function(FieldItemListInterface, langcode) {
   var items = FieldItemListInterface.getItems();
   var element = {};
@@ -2377,6 +2392,33 @@ dg.theme_number_integer = function(variables) {
   return variables._item.value;
 };
 dg.modules.image = new dg.Module();
+// Let DrupalGap know we have a FieldFormatter(s).
+dg.modules.image.FieldFormatter = {};
+
+// Image field formatter.
+dg.modules.image.FieldFormatter.image = function() { dg.FieldFormatterPrepare(this, arguments); };
+dg.modules.image.FieldFormatter.image.prototype = new dg.FieldFormatter;
+dg.modules.image.FieldFormatter.image.prototype.constructor = dg.modules.image.FieldFormatter.image;
+dg.modules.image.FieldFormatter.image.prototype.viewElements = function(FieldItemListInterface, langcode) {
+  var items = FieldItemListInterface.getItems();
+  var element = {};
+  if (items.length == 0) { return element; }
+  for (var delta = 0; delta < items.length; delta++) {
+    var item = items[delta];
+    element[delta] = {
+      _theme: 'image',
+      _path: item.url,
+      _attributes: {
+        alt: item.alt,
+        title: item.title,
+        width: item.width,
+        height: item.height
+      }
+    };
+  }
+  return element;
+};
+
 dg.modules.node = new dg.Module();
 
 dg.modules.node.routing = function() {
