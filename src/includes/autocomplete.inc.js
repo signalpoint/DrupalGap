@@ -312,8 +312,6 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           for (var bundle in field_settings.handler_settings.target_bundles) {
               if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
               var name = field_settings.handler_settings.target_bundles[bundle];
-              if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
-              var name = field_settings.handler_settings.target_bundles[bundle];
               var bundle_name = null;
               switch (field_settings.target_type) {
                 case 'node':
@@ -325,7 +323,6 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                   break;
               }
               if (bundle_name) { bundles.push(bundle); }
-              break;
           }
           if (bundles.length) { options.parameters[bundle_name] = bundles.join(','); }
           var fn = window[index_resource];
