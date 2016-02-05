@@ -218,4 +218,12 @@ dg.removeElement = function(id) {
  * @param text
  * @returns {*}
  */
-dg.t = function(text) { return text; };
+dg.t = function(text, args, options) {
+  if (args) {
+    for (var name in args) {
+      if (!args.hasOwnProperty(name)) { continue; }
+      text = text.replace(name, args[name]);
+    }
+  }
+  return text;
+};
