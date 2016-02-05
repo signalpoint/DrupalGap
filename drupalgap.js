@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-04 */
+/*! drupalgap 2016-02-05 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -115,7 +115,7 @@ dg.spinnerHide = function() {
  * @param {String} module The module name that implements the block.
  * @param {String} id The block id.
  * @param {Object} implementation Provided by the module that implements the block (includes the build function, ...)
- * @param {Object} config The block config object from settings.js, pre-merged with any defaults.
+ * @param {Object} config The block config object from settings.js.
  * @constructor
  */
 dg.Block = function(module, id, implementation, config) {
@@ -130,7 +130,7 @@ dg.Block = function(module, id, implementation, config) {
   // Merge the config (from settings.js) onto the instance as properties.
   for (var setting in config) {
     if (!config.hasOwnProperty(setting)) { continue; }
-    this['_' + setting] = config[setting];
+    this[setting] = config[setting];
   }
 
   // Set remaining default values when needed.
@@ -242,14 +242,12 @@ dg.blocksLoad = function() {
 
           // Create a simple block JSON object from the block's config in the settings.js file. Force set the region,
           // and set a default weight if one isn't already set. Keep in mind that these simple block JSON objects will
-          // be used to instantiate a Block shortly, so all properties can be set flat on the object (i.e. no underscore
-          // prefix necessary), because they'll be turned into Block properties shortly, and we want the settings.js
-          // block config to be simple. Along the way keep track of how many blocks we have, and always keep the next
-          // weight ready for any blocks that don't have it pre configured.
+          // be used to instantiate a Block shortly. Along the way keep track of how many blocks we have, and always
+          // keep the next weight ready for any blocks that don't have it pre configured.
           var block = blockSettings[region][themeBlock];
-          block.region = region;
-          block.weight = typeof block.weight !== 'undefined' ? block.weight : weight;
-          weight = block.weight + 1;
+          block._region = region;
+          block._weight = typeof block._weight !== 'undefined' ? block._weight : weight;
+          weight = block._weight + 1;
           appBlocks[themeBlock] = block;
           blockCount++;
 
