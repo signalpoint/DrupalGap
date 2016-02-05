@@ -11,7 +11,7 @@ Here are some examples of block visibility rules placed into the `settings.js` f
 ## Show Block in Content Region, only on for logged in users
 
 ```
-drupalgap.settings.blocks.my_theme = {
+dg.settings.blocks[dg.config('theme').name] = {
 
   /* ... */
 
@@ -60,7 +60,7 @@ On the flip side, here's an example that shows a block only for logged in users 
 
 ```
 my_custom_block: {
-  roles: [
+  _roles: [
     { target_id: 'authenticated', visible: true }
   ]
 }
@@ -70,7 +70,7 @@ Here's an example that hides a block from administrators:
 
 ```
 my_custom_block: {
-  roles: [
+  _roles: [
     { target_id: 'administrator', visible: false }
   ]
 }
