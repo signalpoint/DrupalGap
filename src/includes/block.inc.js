@@ -86,6 +86,9 @@ dg.Block.prototype.build = function() {
  * @returns {Object}
  */
 dg.Block.prototype.getVisibility = function() {
+
+  // @TODO WARNING - it appears drupal 8.0.3 stopped returning user roles to us upon user load... confirm, take action, etc.
+
   var self = this;
   var account = dg.currentUser();
   return new Promise(function(ok, err) {
