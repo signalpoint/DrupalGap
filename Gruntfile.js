@@ -37,6 +37,7 @@ var drupalgap_grunt_src = [
   'src/modules/core/core.form-widgets.js',
   'src/modules/core/core.theme.js',
   'src/modules/image/image.js',
+  'src/modules/image/image.field-formatters.js',
   'src/modules/node/node.js',
   'src/modules/node/node.forms.js',
   'src/modules/system/system.js',
