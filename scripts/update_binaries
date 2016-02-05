@@ -3,5 +3,5 @@
 git add bin/drupalgap.js
 git add bin/drupalgap.min.js
 git commit -m "Update binaries."
-git push origin y.x-1.x
+git push origin 7.x-1.x
 
