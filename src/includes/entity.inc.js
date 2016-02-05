@@ -29,12 +29,12 @@ dg.entityRenderContent = function(entity) {
     // @TODO convert this to a _title_callback on the route.
     dg.setDocumentTitle(entity.label());
 
-    //console.log(dg);
     //console.log(dg.entity_view_mode);
 
     // Get the view mode.
     // @TODO viewMode should be turned into a prototype. Then use its functions below instead of accessing properties directly.
     var viewMode = bundle ? dg.entity_view_mode[entityType][bundle] : dg.entity_view_mode[entityType];
+    if (entityType == 'user') { viewMode = viewMode[entityType]; } // Unwrap the user viewMode since there is no bundle.
     //console.log('viewMode - ' + entityType + ' / ' + bundle);
     //console.log(viewMode);
 
@@ -48,7 +48,7 @@ dg.entityRenderContent = function(entity) {
       // Grab the field storage config and the module in charge of the field.
       var fieldStorageConfig = dg.fieldStorageConfig[entityType][fieldName];
       if (!fieldStorageConfig) {
-        console.log('WARNING - entityRenderContent - No field storage config for "' + fieldName + '"');
+        console.log('entityRenderContent - No field storage config for "' + fieldName + '"');
       }
       else {
 
@@ -58,12 +58,12 @@ dg.entityRenderContent = function(entity) {
         //console.log(fieldStorageConfig);
 
         if (!jDrupal.moduleExists(module)) {
-          var msg = 'WARNING - entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
+          var msg = 'entityRenderContent - The "' + module + '" module is not present to render the "' + fieldName + '" field.';
           console.log(msg);
           continue;
         }
         if (!dg.modules[module].FieldFormatter || !dg.modules[module].FieldFormatter[type]) {
-          console.log('WARNING - entityRenderContent - There is no "' + type + '" formatter in the "' + module + '" module to handle the "' + fieldName + '" field.');
+          console.log('entityRenderContent - There is no "' + type + '" formatter in the "' + module + '" module to handle the "' + fieldName + '" field.');
           continue;
         }
 
@@ -99,6 +99,8 @@ dg.entityRenderContent = function(entity) {
       }
 
     }
+    // @TODO move this invocation before the fields are wrapped in containers, move the container wrapper out of the
+    // loop above, then make some type of after build alter invocation if anybody wants to then alter the containers.
     jDrupal.moduleInvokeAll('entity_view', content, entity).then(ok(content));
 
   });
