@@ -54,7 +54,7 @@ var NodeEdit = function() {
 
             var type = entityFormMode[fieldName].type;
             if (!dg.modules.core.FormWidget[type]) {
-              console.log('WARNING - buildForm - There is no "' + type + '" widget in the core module to handle the "' + fieldName + '" element.');
+              console.log('buildForm - There is no "' + type + '" widget in the core module to handle the "' + fieldName + '" element.');
               continue;
             }
 
@@ -84,11 +84,11 @@ var NodeEdit = function() {
             // Make sure the module and the corresponding field widget implementation is available.
             if (!module) { continue; }
             if (!jDrupal.moduleExists(module)) {
-              console.log('WARNING - buildForm - The "' + module + '" module is not present for the widget on the "' + fieldName + '" field.');
+              console.log('buildForm - The "' + module + '" module is not present for the widget on the "' + fieldName + '" field.');
               continue;
             }
             if (!dg.modules[module].FieldWidget || !dg.modules[module].FieldWidget[fieldStorageConfig.type]) {
-              console.log('WARNING - buildForm - There is no "' + fieldStorageConfig.type + '" widget in the "' + module + '" module to handle the "' + fieldName + '" field.');
+              console.log('buildForm - There is no "' + fieldStorageConfig.type + '" widget in the "' + module + '" module to handle the "' + fieldName + '" field.');
               continue;
             }
 
