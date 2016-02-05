@@ -226,6 +226,7 @@ dg.Form.prototype._validateForm = function() {
     if (!dg.isFormElement(name, self.form)) { continue; }
     var el = self.form[name];
     if (el._theme && el._theme == 'container') {
+      if (typeof el._children.element.get !== 'function') { continue; }
       if (
           typeof el._children.element.get('element')._required !== 'undefined' &&
           el._children.element.get('element')._required &&
