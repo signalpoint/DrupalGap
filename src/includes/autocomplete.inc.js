@@ -308,6 +308,7 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           };
           options.parameters[autocomplete.filter] = '%' + value + '%';
           options.parameters_op[autocomplete.filter] = 'like';
+          var bundles = [];
           for (var bundle in field_settings.handler_settings.target_bundles) {
               if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
               var name = field_settings.handler_settings.target_bundles[bundle];
@@ -323,10 +324,10 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                   bundle = taxonomy_vocabulary_get_vid_from_name(bundle);
                   break;
               }
-              if (bundle_name) { options.parameters[bundle_name] = bundle; }
-              // @TODO allow multiple bundles to be indexed.
+              if (bundle_name) { bundles.push(bundle); }
               break;
           }
+          if (bundles.length) { options.parameters[bundle_name] = bundles.join(','); }
           var fn = window[index_resource];
           fn(options, {
               success: function(results) {
