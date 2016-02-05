@@ -26,7 +26,7 @@ drupalgap.settings.blocks.my_theme = {
       /* ... other block settings ... */
 
       my_custom_block: {
-        roles: [
+        _roles: [
           { target_id: 'authenticated', visible: true }
         ]
       },
@@ -50,7 +50,7 @@ Here's an example that shows a block only for logged out users (aka anonymous us
 
 ```
 my_custom_block: {
-  roles: [
+  _roles: [
     { target_id: 'anonymous', visible: true }
   ]
 }
