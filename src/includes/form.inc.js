@@ -69,12 +69,21 @@ dg.Form.prototype.getForm = function() {
         var form = '';
         for (var name in self.form) {
           if (!dg.isFormElement(name, self.form)) { continue; }
+
+          // Grab the render element for the form element.
           var element = self.form[name];
+          //console.log(name + ': ' + element._widgetType);
+          //console.log(element);
+
           // Reset the attribute value to that of the element value if it changed during form alteration.
           if (element._attributes.value != element._value) { element._attributes.value = element._value; }
           switch (element._widgetType) {
             case 'FieldWidget':
             case 'FormWidget':
+
+              //console.log(element._widgetType);
+              //console.log(name);
+
                 // Instantiate the widget using the element's module, then build the element form and then add it to the
                 // form as a container.
                 var items = self.form._entity.get(name);
@@ -115,6 +124,7 @@ dg.Form.prototype.getForm = function() {
               // Instantiate a new form element given the current buildForm element for the Form.
               // Wrap elements in containers, except for hidden elements.
               var el = new dg[element._widgetType](name, element, self);
+
               self.elements[name] = el;
               if (el._type == 'hidden') {
                 self.elements[name] = el;
@@ -125,10 +135,14 @@ dg.Form.prototype.getForm = function() {
                   'class': []
                 }
               };
-              if (el._title) {
+              if (element._title && !element._attributes.placeholder) {
                 children.label = {
                   _theme: 'form_element_label',
-                  _title: el._title
+                  _title: element._title,
+                  _attributes: {
+                    'class': [],
+                    'for': element._attributes.id
+                  }
                 };
               }
               children.element = el;
@@ -144,6 +158,7 @@ dg.Form.prototype.getForm = function() {
 
               break;
           }
+
         }
         
         // Run the after builds, if any. Then finally resolve the rendered form.
