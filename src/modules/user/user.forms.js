@@ -2,7 +2,7 @@ var UserLoginForm = function() {
 
   this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
-      form._action = dg.getFrontPagePath();
+      if (!form._action) { form._action = dg.getFrontPagePath(); }
       form.name = {
         _type: 'textfield',
         _title: 'Username',
@@ -33,7 +33,11 @@ var UserLoginForm = function() {
       jDrupal.userLogin(
         formState.getValue('name'),
         formState.getValue('pass')
-      ).then(ok);
+      ).then(function() {
+        if (dg.isFrontPage()) { dg.router.check(dg.getFrontPagePath()); }
+        else if (dg.getPath() == form._action) { dg.router.check(form._action); }
+        ok();
+      });
     });
 
   };
@@ -41,20 +45,3 @@ var UserLoginForm = function() {
 };
 UserLoginForm.prototype = new dg.Form('UserLoginForm');
 UserLoginForm.constructor = UserLoginForm;
-
-/**
- * A custom submit handler for the user login block.
- * @param {Form} form
- * @param {FormStateInterface} form_state
- * @returns {*}
- */
-dg.modules.user.user_login_block_form_submit = function(form, form_state) {
-  var self = this;
-  return new Promise(function(ok, err) {
-    self.submitForm(form, form_state).then(function() {
-      // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
-      if (dg.isFrontPage()) { dg.router.check(dg.getFrontPagePath()); }
-      ok();
-    });
-  });
-};
