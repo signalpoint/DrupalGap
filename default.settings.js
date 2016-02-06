@@ -22,6 +22,12 @@ dg.settings.title = 'DrupalGap';
 // App front page.
 dg.settings.front = null;
 
+// App logo (render element).
+/*dg.settings.logo = {
+  _theme: 'image',
+  _path: 'modules/custom/my_module/images/logo.jpg' // or http://example.com/logo.jpg
+};*/
+
 /**
  * The active theme.
  * @see http://docs.drupalgap.org/8/Themes
@@ -43,6 +49,9 @@ dg.settings.files = {
  */
 dg.settings.blocks[dg.config('theme').name] = {
   header: {
+
+    // DrupalGap's logo block.
+    //logo: { },
 
     // DrupalGap's main menu block.
     main_menu: { },
