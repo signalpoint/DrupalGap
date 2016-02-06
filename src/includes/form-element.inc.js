@@ -1,4 +1,7 @@
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
+/**
+ * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
+ * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElement.php/class/FormElement/8
+ */
 
 /**
  * The Form Element prototype.
@@ -27,11 +30,18 @@ dg.FormElement.prototype.getForm = function() { return this.form; };
 
 /**
  *
- * @param property
+ * @param prop
  * @returns {null}
  */
-dg.FormElement.prototype.get = function(property) {
-  return typeof this[property] ? this[property] : null;
+dg.FormElement.prototype.get = function(prop) { return typeof this[prop] ? this[prop] : null; };
+
+/**
+ * Given an element name, this will return its render element.
+ * @param name
+ * @returns {null}
+ */
+dg.FormElement.prototype.getElement = function(name) {
+  return typeof this.get('element')[name] ? this.get('element')[name] : null;
 };
 
 /**
