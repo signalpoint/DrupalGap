@@ -1,5 +1,5 @@
 /**
- * Implementation of theme_link().
+ * Themes a link.
  * @param {Object} variables
  * @return {String}
  */
@@ -12,6 +12,9 @@ dg.theme_link = function(variables) {
     if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) { }
     else if (path.indexOf('/') == 0) { href = path; }
     else { href = '#' + path; }
+    if (path == dg.getPath() && !jDrupal.inArray('active', variables._attributes.class)) {
+      variables._attributes.class.push('active');
+    }
     variables._attributes.href = href;
   }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
@@ -29,14 +32,16 @@ dg.theme_image = function(vars) {
 };
 
 /**
- * Implementation of theme_item_list().
+ * Themes an item list.
  * @param {Object} variables
  * @return {String}
  */
 dg.theme_item_list = function(variables) {
   var html = '';
   var type = variables._type ? variables._type : 'ul';
-  if (variables._title) { html += '<h3>' + variables._title + '</h3>'; }
+  if (variables._title) {
+    html += typeof variables._title === 'object' ? dg.render(variables._title) : '<h3>' + variables._title + '</h3>';
+  }
   html += '<' + type + ' ' + dg.attributes(variables._attributes) + '>';
   if (variables._items && variables._items.length > 0) {
     for (var i in variables._items) {
