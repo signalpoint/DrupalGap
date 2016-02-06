@@ -29,6 +29,8 @@ dg.Block = function(module, id, implementation, config) {
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
+  if (!this._routes) { this._routes = []; }
+  //if (!this._roles) { this._roles = []; } // @TODO see if this works after we get routes working.
   dg.setRenderElementDefaults(this);
   if (!this._attributes.id) { this._attributes.id = dg.cleanCssIdentifier(id); }
 
@@ -92,7 +94,26 @@ dg.Block.prototype.getVisibility = function() {
   var self = this;
   var account = dg.currentUser();
   return new Promise(function(ok, err) {
+
+    // We assume the block is visible, unless proven otherwise.
     var visible = true;
+
+    var done = function() {
+      ok({
+        visible: visible,
+        block: self
+      });
+    };
+
+    // Check access visibility rules, if any.
+    var access = self.get('access');
+    if (access) {
+      visible = access.call();
+      done();
+      return;
+    }
+    
+    // Check roles visibility rules, if any.
     var roles = self.get('roles');
     if (roles) {
       for (var i = 0; i < roles.length; i++) {
@@ -101,10 +122,33 @@ dg.Block.prototype.getVisibility = function() {
         if (!visible) { break; }
       }
     }
-    ok({
-      visible: visible,
-      block: self
-    });
+
+    // Check routes visibility rules, if any.
+    var routes = self.get('routes');
+    if (routes.length) {
+      visible = false; // Since we have a route rule, instanly set it to false to make the dev prove the visibility.
+      var route = dg.getRoute();
+      for (var i = 0; i < routes.length; i++) {
+        console.log(route.key + ' ?= ' + routes[i].key);
+        if (route.key == routes[i].key) {
+          console.log(route);
+          console.log(routes[i]);
+          // If there's a role check for it, otherwise just defer to the visible value.
+          if (routes[i].target_id) {
+            if (account.hasRole(routes[i].target_id)) {
+              visible = routes[i].visible;
+              if (visible) { break; }
+            }
+          }
+          else {
+            visible = routes[i].visible;
+            if (visible) { break; }
+          }
+        }
+      }
+    }
+    done();
+
   });
 };
 
