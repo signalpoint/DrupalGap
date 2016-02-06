@@ -25,10 +25,23 @@ dg.getMode = function() { return this.config('mode'); };
 dg.setMode = function(mode) { this.config('mode', mode); };
 
 /**
+ * Returns the current route.
+ * @returns {Object}
+ */
+dg.getRoute = function() {
+  //return dg.router.load(dg.getPath())
+  return dg.router.load(dg.getPath())
+};
+
+/**
  * Returns the current route's path.
  * @returns {String}
  */
-dg.getPath = function() { return dg.router.getFragment(); };
+dg.getPath = function() {
+  var frag = dg.router.getFragment();
+  if (frag == '') { frag = dg.getFrontPagePath(); }
+  return frag;
+};
 
 /**
  * Returns the path to the app's front page route.
@@ -45,7 +58,9 @@ dg.getFrontPagePath = function() {
  * @returns {boolean}
  */
 dg.isFrontPage = function() {
+
   // @TODO I don't think this works properly when navigating between pages, maybe it depends on when you call it.
+
   return dg.getFrontPagePath() == dg.getPath() || dg.getPath() == '';
 };
 
