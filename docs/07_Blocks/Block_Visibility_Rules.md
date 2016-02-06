@@ -76,10 +76,33 @@ my_custom_block: {
 }
 ```
 
+## Route Based Visibility Rules
+
+```
+my_custom_block: {
+
+  // Hide the block on the welcome page from anonymous users.
+  _routes: [
+    { key: 'my_module.welcome', target_id: 'anonymous', visible: false }
+  ]
+  
+}
+```
+
+## Access Callback Based Visibility Rules
+
+```
+my_custom_block: {
+
+  // Hide the block from anonymous users on the front page on Mondays only.
+  _access: function() {
+    var d = new Date();
+    return !(dg.currentUser().isAnonymous() && dg.isFrontPage() && d.getDay() == 1);
+  }
+  
+}
+```
+
 ## Wildcards in Visibility Rules
-
-...
-
-## Custom access_callback function
 
 ...

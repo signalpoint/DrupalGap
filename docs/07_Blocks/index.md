@@ -4,16 +4,17 @@ Blocks are located within regions, within a [theme](Themes). The content display
 
 ## System Blocks
 
-By default, DrupalGap comes packaged with a few different system blocks. Here are their machine names (more commonly referred to as "delta" values):
+By default, DrupalGap comes packaged with a few different system blocks. Here are their machine names:
 
 - admin_menu
+- logo
 - main (*used to display the content of the current page*)
 - main_menu
 - title (*used to display the page title*)
 - powered_by
 - user_login
 
-## Remove the "Powered by: DrupalGap" Block
+### How to Remove the "Powered by: DrupalGap" Block
 
 To remove the block from our app, open the `settings.js` file. Then for example, remove the `powered_by` block from the footer region within our theme:
 

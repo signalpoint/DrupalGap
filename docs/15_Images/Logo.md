@@ -4,38 +4,19 @@ DrupalGap comes with a Block that allows you to easily display a logo within you
 
 ## Logo Image
 
-First, specify the path to your logo in the `settings.js` file:
-
-`drupalgap.settings.logo = 'themes/easystreet3/images/drupalgap.jpg';`
-
-The default logo is provided above, so typically you'll want to include a custom logo within your custom theme, for example:
-
-`drupalgap.settings.logo = 'themes/my_theme/logo.jpg';`
-
-Or you can place the logo in a custom module:
-
-`drupalgap.settings.logo = 'themes/my_theme/logo.jpg';`
-
-## Logo Block
-
-Once you have specified the file path to your logo's image, you'll specify which region the logo block will show up in. For example, we could add the logo block to the header region of our theme in the `settings.js` file:
+First, specify a render element for your logo in the `settings.js` file:
 
 ```
-drupalgap.settings.blocks.my_theme = {
-
-  /* .. other regions ... */
-
-  header: {
-
-    /* ... other blocks ... */
-
-    logo: {},
-
-    /* ... other blocks ... */
-
-  },
-
-  /* .. other regions ... */
-
+dg.settings.logo = {
+  _theme: 'image',
+  _path: 'modules/custom/my_module/images/logo.jpg'
 };
 ```
+
+You can also use an externally hosted image by setting the `_path` to something like:
+
+`http://example.com/logo.jpg`
+
+Since the logo is a render element, you can get very creative with how and what your logo displays.
+
+[Add the logo block to a region](../Blocks/Adding_Block_Region.md) to have it displayed within the app.
