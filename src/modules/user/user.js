@@ -54,7 +54,7 @@ dg.modules.user.blocks = function() {
         var authenticated = dg.currentUser().isAuthenticated();
         if (!authenticated && dg.getPath() != 'user/login') {
           var form = dg.addForm('UserLoginForm', dg.applyToConstructor(UserLoginForm));
-          form.get('form')._submit = ['user.user_login_block_form_submit'];
+          form.get('form')._action = dg.getPath();
           form.getForm().then(ok);
         }
         else if (authenticated) {
