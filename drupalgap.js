@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-05 */
+/*! drupalgap 2016-02-06 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -76,24 +76,15 @@ dg.bootstrap = function() {
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
       var item = routes[route];
+      item.key = route;
       dg.router.add(item);
     }
   }
 
-  // Load the theme.
+  // Load the theme, then the blocks, and then add a default route, and start listening.
   dg.themeLoad().then(function() {
-
-    //dg.blocksLoad().then(function(blocks) {
-
       var blocks = dg.blocksLoad();
-
-      // Add a default route, and start listening.
       dg.router.add(function() { }).listen();
-
-    //});
-
-
-
   });
 
 };
@@ -137,6 +128,8 @@ dg.Block = function(module, id, implementation, config) {
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
+  if (!this._routes) { this._routes = []; }
+  //if (!this._roles) { this._roles = []; } // @TODO see if this works after we get routes working.
   dg.setRenderElementDefaults(this);
   if (!this._attributes.id) { this._attributes.id = dg.cleanCssIdentifier(id); }
 
@@ -200,7 +193,26 @@ dg.Block.prototype.getVisibility = function() {
   var self = this;
   var account = dg.currentUser();
   return new Promise(function(ok, err) {
+
+    // We assume the block is visible, unless proven otherwise.
     var visible = true;
+
+    var done = function() {
+      ok({
+        visible: visible,
+        block: self
+      });
+    };
+
+    // Check access visibility rules, if any.
+    var access = self.get('access');
+    if (access) {
+      visible = access.call();
+      done();
+      return;
+    }
+    
+    // Check roles visibility rules, if any.
     var roles = self.get('roles');
     if (roles) {
       for (var i = 0; i < roles.length; i++) {
@@ -209,10 +221,30 @@ dg.Block.prototype.getVisibility = function() {
         if (!visible) { break; }
       }
     }
-    ok({
-      visible: visible,
-      block: self
-    });
+
+    // Check routes visibility rules, if any.
+    var routes = self.get('routes');
+    if (routes.length) {
+      visible = false; // Since we have a route rule, instantly set it to false to make the dev prove the visibility.
+      var route = dg.getRoute();
+      for (var i = 0; i < routes.length; i++) {
+        if (route.key == routes[i].key) {
+          // If there's a role check for it, otherwise just defer to the visible value.
+          if (routes[i].target_id) {
+            if (account.hasRole(routes[i].target_id)) {
+              visible = routes[i].visible;
+              if (visible) { break; }
+            }
+          }
+          else {
+            visible = routes[i].visible;
+            if (visible) { break; }
+          }
+        }
+      }
+    }
+    done();
+
   });
 };
 
@@ -339,10 +371,23 @@ dg.getMode = function() { return this.config('mode'); };
 dg.setMode = function(mode) { this.config('mode', mode); };
 
 /**
+ * Returns the current route.
+ * @returns {Object}
+ */
+dg.getRoute = function() {
+  //return dg.router.load(dg.getPath())
+  return dg.router.load(dg.getPath())
+};
+
+/**
  * Returns the current route's path.
  * @returns {String}
  */
-dg.getPath = function() { return dg.router.getFragment(); };
+dg.getPath = function() {
+  var frag = dg.router.getFragment();
+  if (frag == '') { frag = dg.getFrontPagePath(); }
+  return frag;
+};
 
 /**
  * Returns the path to the app's front page route.
@@ -359,7 +404,9 @@ dg.getFrontPagePath = function() {
  * @returns {boolean}
  */
 dg.isFrontPage = function() {
+
   // @TODO I don't think this works properly when navigating between pages, maybe it depends on when you call it.
+
   return dg.getFrontPagePath() == dg.getPath() || dg.getPath() == '';
 };
 
@@ -725,12 +772,21 @@ dg.Form.prototype.getForm = function() {
         var form = '';
         for (var name in self.form) {
           if (!dg.isFormElement(name, self.form)) { continue; }
+
+          // Grab the render element for the form element.
           var element = self.form[name];
+          //console.log(name + ': ' + element._widgetType);
+          //console.log(element);
+
           // Reset the attribute value to that of the element value if it changed during form alteration.
           if (element._attributes.value != element._value) { element._attributes.value = element._value; }
           switch (element._widgetType) {
             case 'FieldWidget':
             case 'FormWidget':
+
+              //console.log(element._widgetType);
+              //console.log(name);
+
                 // Instantiate the widget using the element's module, then build the element form and then add it to the
                 // form as a container.
                 var items = self.form._entity.get(name);
@@ -771,6 +827,7 @@ dg.Form.prototype.getForm = function() {
               // Instantiate a new form element given the current buildForm element for the Form.
               // Wrap elements in containers, except for hidden elements.
               var el = new dg[element._widgetType](name, element, self);
+
               self.elements[name] = el;
               if (el._type == 'hidden') {
                 self.elements[name] = el;
@@ -781,10 +838,14 @@ dg.Form.prototype.getForm = function() {
                   'class': []
                 }
               };
-              if (el._title) {
+              if (element._title && !element._attributes.placeholder) {
                 children.label = {
                   _theme: 'form_element_label',
-                  _title: el._title
+                  _title: element._title,
+                  _attributes: {
+                    'class': [],
+                    'for': element._attributes.id
+                  }
                 };
               }
               children.element = el;
@@ -800,6 +861,7 @@ dg.Form.prototype.getForm = function() {
 
               break;
           }
+
         }
         
         // Run the after builds, if any. Then finally resolve the rendered form.
@@ -960,7 +1022,10 @@ dg.setFormElementDefaults = function(name, el) {
   if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
 };
-// @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
+/**
+ * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
+ * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElement.php/class/FormElement/8
+ */
 
 /**
  * The Form Element prototype.
@@ -989,11 +1054,18 @@ dg.FormElement.prototype.getForm = function() { return this.form; };
 
 /**
  *
- * @param property
+ * @param prop
  * @returns {null}
  */
-dg.FormElement.prototype.get = function(property) {
-  return typeof this[property] ? this[property] : null;
+dg.FormElement.prototype.get = function(prop) { return typeof this[prop] ? this[prop] : null; };
+
+/**
+ * Given an element name, this will return its render element.
+ * @param name
+ * @returns {null}
+ */
+dg.FormElement.prototype.getElement = function(name) {
+  return typeof this.get('element')[name] ? this.get('element')[name] : null;
 };
 
 /**
@@ -1887,9 +1959,6 @@ dg.router = {
   },
   getRoutes: function() {
     return this.routes;
-  },
-  getRoute: function() {
-
   }
 };
 /**
@@ -2047,7 +2116,7 @@ dg.theme_view = function(variables) {
   });
 };
 /**
- * Implementation of theme_link().
+ * Themes a link.
  * @param {Object} variables
  * @return {String}
  */
@@ -2060,6 +2129,9 @@ dg.theme_link = function(variables) {
     if (path.indexOf('http://') != -1 || path.indexOf('https://') != -1) { }
     else if (path.indexOf('/') == 0) { href = path; }
     else { href = '#' + path; }
+    if (path == dg.getPath() && !jDrupal.inArray('active', variables._attributes.class)) {
+      variables._attributes.class.push('active');
+    }
     variables._attributes.href = href;
   }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
@@ -2077,14 +2149,16 @@ dg.theme_image = function(vars) {
 };
 
 /**
- * Implementation of theme_item_list().
+ * Themes an item list.
  * @param {Object} variables
  * @return {String}
  */
 dg.theme_item_list = function(variables) {
   var html = '';
   var type = variables._type ? variables._type : 'ul';
-  if (variables._title) { html += '<h3>' + variables._title + '</h3>'; }
+  if (variables._title) {
+    html += typeof variables._title === 'object' ? dg.render(variables._title) : '<h3>' + variables._title + '</h3>';
+  }
   html += '<' + type + ' ' + dg.attributes(variables._attributes) + '>';
   if (variables._items && variables._items.length > 0) {
     for (var i in variables._items) {
@@ -2709,6 +2783,13 @@ dg.modules.system.routing = function() {
 
 dg.modules.system.blocks = function() {
   var blocks = {};
+  blocks.logo = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        ok(dg.config('logo'));
+      });
+    }
+  };
   blocks.main = {
     build: function () {
       return new Promise(function(ok, err) {
@@ -2858,7 +2939,7 @@ dg.modules.user.blocks = function() {
         var authenticated = dg.currentUser().isAuthenticated();
         if (!authenticated && dg.getPath() != 'user/login') {
           var form = dg.addForm('UserLoginForm', dg.applyToConstructor(UserLoginForm));
-          form.get('form')._submit = ['user.user_login_block_form_submit'];
+          form.get('form')._action = dg.getPath();
           form.getForm().then(ok);
         }
         else if (authenticated) {
@@ -2882,7 +2963,7 @@ var UserLoginForm = function() {
 
   this.buildForm = function(form, formState) {
     return new Promise(function(ok, err) {
-      form._action = dg.getFrontPagePath();
+      if (!form._action) { form._action = dg.getFrontPagePath(); }
       form.name = {
         _type: 'textfield',
         _title: 'Username',
@@ -2913,7 +2994,11 @@ var UserLoginForm = function() {
       jDrupal.userLogin(
         formState.getValue('name'),
         formState.getValue('pass')
-      ).then(ok);
+      ).then(function() {
+        if (dg.isFrontPage()) { dg.router.check(dg.getFrontPagePath()); }
+        else if (dg.getPath() == form._action) { dg.router.check(form._action); }
+        ok();
+      });
     });
 
   };
@@ -2921,20 +3006,3 @@ var UserLoginForm = function() {
 };
 UserLoginForm.prototype = new dg.Form('UserLoginForm');
 UserLoginForm.constructor = UserLoginForm;
-
-/**
- * A custom submit handler for the user login block.
- * @param {Form} form
- * @param {FormStateInterface} form_state
- * @returns {*}
- */
-dg.modules.user.user_login_block_form_submit = function(form, form_state) {
-  var self = this;
-  return new Promise(function(ok, err) {
-    self.submitForm(form, form_state).then(function() {
-      // If were on the front page reload it, otherwise the default form action will take care of redirecting them.
-      if (dg.isFrontPage()) { dg.router.check(dg.getFrontPagePath()); }
-      ok();
-    });
-  });
-};
