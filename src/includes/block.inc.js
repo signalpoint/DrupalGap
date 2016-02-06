@@ -126,13 +126,10 @@ dg.Block.prototype.getVisibility = function() {
     // Check routes visibility rules, if any.
     var routes = self.get('routes');
     if (routes.length) {
-      visible = false; // Since we have a route rule, instanly set it to false to make the dev prove the visibility.
+      visible = false; // Since we have a route rule, instantly set it to false to make the dev prove the visibility.
       var route = dg.getRoute();
       for (var i = 0; i < routes.length; i++) {
-        console.log(route.key + ' ?= ' + routes[i].key);
         if (route.key == routes[i].key) {
-          console.log(route);
-          console.log(routes[i]);
           // If there's a role check for it, otherwise just defer to the visible value.
           if (routes[i].target_id) {
             if (account.hasRole(routes[i].target_id)) {
