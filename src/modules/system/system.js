@@ -52,6 +52,13 @@ dg.modules.system.routing = function() {
 
 dg.modules.system.blocks = function() {
   var blocks = {};
+  blocks.logo = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        ok(dg.config('logo'));
+      });
+    }
+  };
   blocks.main = {
     build: function () {
       return new Promise(function(ok, err) {
