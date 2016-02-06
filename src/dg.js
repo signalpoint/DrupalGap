@@ -75,24 +75,15 @@ dg.bootstrap = function() {
     for (route in routes) {
       if (!routes.hasOwnProperty(route)) { continue; }
       var item = routes[route];
+      item.key = route;
       dg.router.add(item);
     }
   }
 
-  // Load the theme.
+  // Load the theme, then the blocks, and then add a default route, and start listening.
   dg.themeLoad().then(function() {
-
-    //dg.blocksLoad().then(function(blocks) {
-
       var blocks = dg.blocksLoad();
-
-      // Add a default route, and start listening.
       dg.router.add(function() { }).listen();
-
-    //});
-
-
-
   });
 
 };
