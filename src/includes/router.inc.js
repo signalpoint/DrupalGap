@@ -70,6 +70,7 @@ dg.router = {
       var menu_execute_active_handler = function(content) {
         dg.content = content;
         dg.appRender();
+        jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath());
       };
 
       if (!route.defaults) { route = this.load(dg.getFrontPagePath()); }
