@@ -29,6 +29,8 @@ dg.Block = function(module, id, implementation, config) {
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
+  if (!this._prefix) { this._prefix = ''; }
+  if (!this._suffix) { this._suffix = ''; }
   if (!this._routes) { this._routes = []; }
   //if (!this._roles) { this._roles = []; } // @TODO see if this works after we get routes working.
   dg.setRenderElementDefaults(this);
