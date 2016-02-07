@@ -3,9 +3,9 @@ dg.themes.Burrito = function() {
     header: {
       _format: 'nav',
       _attributes: {
-        'class': ['navbar navbar-default']
+        'class': ['navbar navbar-default navbar-inverse']
       },
-      _prefix: '<div class="container">',
+      _prefix: '<div class="container-fluid">',
       _suffix: '</div>'
     },
     content: {
