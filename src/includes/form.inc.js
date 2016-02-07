@@ -19,6 +19,7 @@ dg.Form = function(id) {
   };
   this.form_state = new dg.FormStateInterface(this);
   this.elements = {}; // Holds FormElement instances.
+  // Remember, a form is a render element at the end of the day, so it will inherit render element defaults later.
 
 };
 
