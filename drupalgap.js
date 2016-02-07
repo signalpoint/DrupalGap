@@ -724,6 +724,7 @@ dg.Form = function(id) {
   };
   this.form_state = new dg.FormStateInterface(this);
   this.elements = {}; // Holds FormElement instances.
+  // Remember, a form is a render element at the end of the day, so it will inherit render element defaults later.
 
 };
 
@@ -1729,6 +1730,8 @@ dg.render = function(content) {
     if (type === 'object') {
       var prefix = content._prefix ? content._prefix : '';
       var suffix = content._suffix ? content._suffix : '';
+      if (typeof prefix === 'object') { prefix = dg.render(prefix); }
+      if (typeof suffix === 'object') { suffix = dg.render(suffix); }
       if (typeof content._postRender === 'undefined') { content._postRender = []; }
       if (content.markup) {
         console.log('DEPRECATED: Use "_markup" instead of "markup" in this render array:');
