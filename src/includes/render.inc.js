@@ -44,7 +44,9 @@ dg.appRender = function(content) {
         for (var i = 0; i < blocks.length; i++) {
           var block = allBlocks[blocks[i]];
           var format = block.get('format');
-          innerHTML += '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>';
+          innerHTML += block.get('prefix') +
+              '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>' +
+          block.get('suffix');
         }
         innerHTML += region.get('suffix') + '</' + regionFormat + '>';
 
