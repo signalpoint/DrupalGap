@@ -11,6 +11,7 @@
 ```
 <!-- DrupalGap Theme -->
 <script src="themes/burrito/burrito.js"></script>
+<link rel="stylesheet" href="themes/burrito/burrito.css" />
 ```
 
 ### settings.js
@@ -20,10 +21,5 @@
 drupalgap.settings.theme = {
   name: 'burrito',
   path: 'themes/burrito'
-};
-
-// Blocks for the "burrito" theme.
-drupalgap.settings.blocks.burrito = {
-  /* ... */
 };
 ```

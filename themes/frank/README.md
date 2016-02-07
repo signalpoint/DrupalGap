@@ -19,9 +19,4 @@ drupalgap.settings.theme = {
   name: 'frank',
   path: 'themes/frank'
 };
-
-// Blocks for the "frank" theme.
-drupalgap.settings.blocks.frank = {
-  /* ... */
-};
 ```
