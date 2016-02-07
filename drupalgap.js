@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-06 */
+/*! drupalgap 2016-02-07 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -128,6 +128,8 @@ dg.Block = function(module, id, implementation, config) {
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
+  if (!this._prefix) { this._prefix = ''; }
+  if (!this._suffix) { this._suffix = ''; }
   if (!this._routes) { this._routes = []; }
   //if (!this._roles) { this._roles = []; } // @TODO see if this works after we get routes working.
   dg.setRenderElementDefaults(this);
@@ -1584,7 +1586,9 @@ dg.appRender = function(content) {
         for (var i = 0; i < blocks.length; i++) {
           var block = allBlocks[blocks[i]];
           var format = block.get('format');
-          innerHTML += '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>';
+          innerHTML += block.get('prefix') +
+              '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>' +
+          block.get('suffix');
         }
         innerHTML += region.get('suffix') + '</' + regionFormat + '>';
 
@@ -1872,6 +1876,7 @@ dg.router = {
       var menu_execute_active_handler = function(content) {
         dg.content = content;
         dg.appRender();
+        jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath());
       };
 
       if (!route.defaults) { route = this.load(dg.getFrontPagePath()); }
@@ -2115,6 +2120,16 @@ dg.theme_view = function(variables) {
     });
   });
 };
+/**
+ * Themes a button.
+ * @param {Object} variables
+ * @returns {string}
+ */
+dg.theme_button = function(variables) {
+  if (!variables._value) { variables._value = ''; }
+  return '<button ' + dg.attributes(variables._attributes) + '>' + variables._value + '</button>';
+};
+
 /**
  * Themes a link.
  * @param {Object} variables
