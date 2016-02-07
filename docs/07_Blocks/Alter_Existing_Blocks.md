@@ -1,24 +1,36 @@
 ## Alter a block's build
 
-In this example, we add some css class names to a block's div container:
+Here are a few examples of how to alter the builds for any block:
 
 ```
 /**
  * Implements hook_regions_build_alter().
  */
 function my_module_blocks_build_alter(blocks) {
+
+  // Add some custom css classes to the block.
   if (blocks.admin_menu) {
     blocks.admin_menu._attributes['class'].push('medium-6', 'columns');
   }
-  if (blocks.powered_by) {
-    blocks.powered_by._attributes['class'].push('medium-6', 'columns');
+
+  // Move the logo block to the footer region for authenticated users.
+  if (dg.currentUser().isAuthenticated()) {
+    blocks.logo._region = 'footer';
   }
+
+  // Add some content before and after the main menu block.
+  blocks.main_menu._prefix = '<p>$19.95 + shipping</p>';
+  blocks.main_menu._suffix = dg.render({
+    _theme: 'item_list',
+    _items: ['Foo', 'Bar']
+  });
+
 }
 ```
 
 ## Alter a blocks's view
 
-In this example, we add a link to the main menu, and style the powered by list:
+Here are a few examples of how to alter the view (i.e. block content) for any block:
 
 ```
 /**
