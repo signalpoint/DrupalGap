@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-07 */
+/*! drupalgap 2016-02-08 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -2960,7 +2960,13 @@ dg.modules.user.blocks = function() {
           form.get('form')._action = dg.getPath();
           form.getForm().then(ok);
         }
-        else if (authenticated) {
+      });
+    }
+  };
+  blocks['user_menu'] = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        if (dg.currentUser().isAuthenticated()) {
           var content = {};
           content['menu'] = {
             _theme: 'item_list',
@@ -2971,6 +2977,7 @@ dg.modules.user.blocks = function() {
           };
           ok(content);
         }
+        else { ok(); }
       });
     }
   };
