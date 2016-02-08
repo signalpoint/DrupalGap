@@ -8,7 +8,7 @@ With block visibility rules, we can specify where our blocks show up, or who the
 
 Here are some examples of block visibility rules placed into the `settings.js` file:
 
-## Show Block in Content Region, only on for logged in users
+## Show Block in Content Region, only for logged in users
 
 ```
 dg.settings.blocks[dg.config('theme').name] = {
@@ -24,12 +24,9 @@ dg.settings.blocks[dg.config('theme').name] = {
     my_custom_block: {
 
       /* ... other block settings ... */
-
-      my_custom_block: {
-        _roles: [
-          { target_id: 'authenticated', visible: true }
-        ]
-      },
+      _roles: [
+        { target_id: 'authenticated', visible: true }
+      ]
 
       /* ... other block settings ... */
 

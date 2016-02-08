@@ -4,7 +4,7 @@ Blocks are located within regions, within a [theme](Themes). The content display
 
 ## System Blocks
 
-By default, DrupalGap comes packaged with a few different system blocks. Here are their machine names:
+By default, DrupalGap comes packaged with a handful of blocks to make our lives easier. Here are their machine names:
 
 - admin_menu
 - logo
@@ -13,6 +13,7 @@ By default, DrupalGap comes packaged with a few different system blocks. Here ar
 - title (*used to display the page title*)
 - powered_by
 - user_login
+- user_menu
 
 ### How to Remove the "Powered by: DrupalGap" Block
 
