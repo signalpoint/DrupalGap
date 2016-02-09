@@ -118,10 +118,11 @@ dg.Block.prototype.getVisibility = function() {
     // Check roles visibility rules, if any.
     var roles = self.get('roles');
     if (roles) {
+      visible = false; // Since we have a roles rule, instantly set it to false to make the dev prove the visibility.
       for (var i = 0; i < roles.length; i++) {
         if (account.hasRole(roles[i].target_id)) { visible = roles[i].visible; }
         else { visible = !roles[i].visible; }
-        if (!visible) { break; }
+        if (visible) { break; }
       }
     }
 
