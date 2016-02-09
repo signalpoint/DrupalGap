@@ -58,11 +58,9 @@ dg.settings.blocks[dg.config('theme').name] = {
 
     // The user login form provided by DrupalGap.
     user_login: {
-      user_menu: {
-        _roles: [
-          { target_id: 'anonymous', visible: true }
-        ]
-      }
+      _roles: [
+        { target_id: 'anonymous', visible: true }
+      ]
     },
 
     // The user menu provided by DrupalGap.
@@ -86,7 +84,7 @@ dg.settings.blocks[dg.config('theme').name] = {
 
     // DrupalGap's administration menu block.
     admin_menu: {
-      roles: [
+      _roles: [
         { target_id: 'administrator', visible: true }
       ]
     },
