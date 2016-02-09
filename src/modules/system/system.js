@@ -14,7 +14,7 @@ dg.modules.system.routing = function() {
           // Show welcome message.
           var msg = 'Welcome to DrupalGap, ';
           if (account.isAuthenticated()) { msg += account.getAccountName() + '!'; }
-          else { msg += dg.l('click here', 'user/login') + ' to login to your app.'; }
+          else { msg += dg.l('click here', 'http://docs.drupalgap.org/8') + ' to view the documentation.'; }
           content['welcome'] = { _markup: '<p>' + msg + '</p>' };
 
           // Add getting started info.
