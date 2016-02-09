@@ -11,10 +11,7 @@ dg.modules.admin.blocks = function() {
           _theme: 'item_list',
           _title: 'Administer',
           _items: [
-            dg.l(dg.t('Home'), ''),
-            dg.l(dg.t('Content'), 'node/add'),
-            dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
-            dg.l(dg.t('Logout'), 'user/logout')
+            dg.l(dg.t('Content'), 'node/add')
           ]
         };
         ok(content);
