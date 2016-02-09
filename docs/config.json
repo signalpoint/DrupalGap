@@ -15,7 +15,7 @@
     "google_analytics":"UA-2162208-36",
     "auto_landing": false,
     "theme": "daux-green",
-    "breadcrumbs": true,
+    "breadcrumbs": false,
     "breadcrumb_separator": "Chevrons",
     "toggle_code": false,
     "date_modified": false,
