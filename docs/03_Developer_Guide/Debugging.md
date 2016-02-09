@@ -43,6 +43,10 @@ When compiling an app to your phone over USB using the PhoneGap (Cordova) Comman
 
 `adb shell logcat | grep 'Web Console'`
 
+If that doesn't work, later versions of PhoneGap/Cordova use slightly different syntax:
+
+`adb shell logcat | grep 'CONSOLE'`
+
 ### Inspecting a compiled app with Chrome
 
 https://developer.chrome.com/devtools/docs/remote-debugging
