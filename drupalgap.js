@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-08 */
+/*! drupalgap 2016-02-09 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -217,10 +217,11 @@ dg.Block.prototype.getVisibility = function() {
     // Check roles visibility rules, if any.
     var roles = self.get('roles');
     if (roles) {
+      visible = false; // Since we have a roles rule, instantly set it to false to make the dev prove the visibility.
       for (var i = 0; i < roles.length; i++) {
         if (account.hasRole(roles[i].target_id)) { visible = roles[i].visible; }
         else { visible = !roles[i].visible; }
-        if (!visible) { break; }
+        if (visible) { break; }
       }
     }
 
@@ -1995,13 +1996,17 @@ dg.Theme.prototype.getRegionCount = function() {
 dg.themeLoad = function() {
   return new Promise(function(ok, err) {
     if (!dg.activeTheme) {
-      var themeClassName = jDrupal.ucfirst(dg.getCamelCase(dg.config('theme').name));
+      var name = dg.config('theme').name;
+      var themeClassName = jDrupal.ucfirst(dg.getCamelCase(name));
       if (!dg.themes[themeClassName]) {
-        var msg = 'Failed to load theme (' + themeClassName + ') - did you include its .js file in the index.html file?';
+        var msg = 'themeLoad failed (' + themeClassName + ') - did you include its .js file in the index.html file?';
         err(msg);
         return;
       }
       dg.activeTheme = new dg.themes[themeClassName];
+
+      // Also make a module instance for the theme so it can be part of hook invocations.
+      //dg.modules[name] = new dg.Module();
     }
     ok(dg.activeTheme);
   });
@@ -2212,10 +2217,7 @@ dg.modules.admin.blocks = function() {
           _theme: 'item_list',
           _title: 'Administer',
           _items: [
-            dg.l(dg.t('Home'), ''),
-            dg.l(dg.t('Content'), 'node/add'),
-            dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
-            dg.l(dg.t('Logout'), 'user/logout')
+            dg.l(dg.t('Content'), 'node/add')
           ]
         };
         ok(content);
@@ -2763,7 +2765,7 @@ dg.modules.system.routing = function() {
           // Show welcome message.
           var msg = 'Welcome to DrupalGap, ';
           if (account.isAuthenticated()) { msg += account.getAccountName() + '!'; }
-          else { msg += dg.l('click here', 'user/login') + ' to login to your app.'; }
+          else { msg += dg.l('click here', 'http://docs.drupalgap.org/8') + ' to view the documentation.'; }
           content['welcome'] = { _markup: '<p>' + msg + '</p>' };
 
           // Add getting started info.
