@@ -18,7 +18,7 @@
     "breadcrumbs": true,
     "breadcrumb_separator": "Chevrons",
     "toggle_code": false,
-    "date_modified": true,
+    "date_modified": false,
     "float": true,
     "repo": "signalpoint/DrupalGap",
     "links": {
