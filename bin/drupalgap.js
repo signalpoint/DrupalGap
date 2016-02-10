@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-05 */
+/*! drupalgap 2016-02-09 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -4551,7 +4551,7 @@ function drupalgap_back() {
     else if (active_page_id == '_drupalgap_splash') { return; }
     else { _drupalgap_back(); }
   }
-  catch (error) { console.log('drupalgap_back' + error); }
+  catch (error) { console.log('drupalgap_back - ' + error); }
 }
 
 /**
@@ -4564,7 +4564,7 @@ function _drupalgap_back() {
     drupalgap.back = true;
 
     // Properly handle iOS9 back button clicks, and default back button clicks.
-    if (device.platform === "iOS" && parseInt(device.version) === 9) {
+    if (typeof device !== 'undefined' && device.platform === "iOS" && parseInt(device.version) === 9) {
       $.mobile.back();
     }
     else { history.back(); }
@@ -4578,7 +4578,7 @@ function _drupalgap_back() {
     );
 
   }
-  catch (error) { console.log('drupalgap_back' + error); }
+  catch (error) { console.log('_drupalgap_back - ' + error); }
 }
 
 /**
