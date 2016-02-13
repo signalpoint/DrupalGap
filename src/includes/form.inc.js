@@ -153,7 +153,7 @@ dg.Form.prototype.getForm = function() {
                 _attributes: {
                   'class': []
                 },
-                _weight: el._weight
+                _weight: element._weight
               };
               self.form[name] = container;
 
