@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-09 */
+/*! drupalgap 2016-02-13 */
 // Initialize the DrupalGap JSON object and run the bootstrap.
 var dg = {
   activeTheme: null, // The active theme.
@@ -859,7 +859,7 @@ dg.Form.prototype.getForm = function() {
                 _attributes: {
                   'class': []
                 },
-                _weight: el._weight
+                _weight: element._weight
               };
               self.form[name] = container;
 
@@ -1026,6 +1026,7 @@ dg.setFormElementDefaults = function(name, el) {
   if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
 };
+
 /**
  * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElementInterface.php/interface/FormElementInterface/8
  * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!FormElement.php/class/FormElement/8
