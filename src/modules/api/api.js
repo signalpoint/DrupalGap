@@ -185,7 +185,7 @@ function hook_404(router_path) {}
 function hook_entity_post_render_content(entity, entity_type, bundle) {
   try {
     if (entity.type == 'article') {
-      entity.content += '<p>'.t('Example text on every article!')+'</p>';
+      entity.content += '<p>' + t('Example text on every article!') + '</p>';
     }
   }
   catch (error) {
