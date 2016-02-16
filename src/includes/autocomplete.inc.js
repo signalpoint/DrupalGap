@@ -29,7 +29,7 @@ function theme_autocomplete(variables) {
     // id to the variables so it can be passed along.
     var autocomplete_id = null;
     if (typeof variables.field_info_field !== 'undefined') {
-      autocomplete_id = variables.field_info_field.field_name;
+      autocomplete_id = variables.field_info_field.field_name + '_' + variables.delta;
     }
     else if (typeof variables.attributes.id !== 'undefined') {
       autocomplete_id = variables.attributes.id;
@@ -38,7 +38,8 @@ function theme_autocomplete(variables) {
     variables.autocomplete_id = autocomplete_id;
 
     // Hold onto a copy of the variables.
-    _theme_autocomplete_variables[autocomplete_id] = variables;
+    _theme_autocomplete_variables[autocomplete_id] = {};
+    $.extend(true, _theme_autocomplete_variables[autocomplete_id], variables);
 
     // Are we dealing with a remote data set?
     var remote = false;
@@ -147,10 +148,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
     // Make sure a value and/or label has been supplied so we know how to render
     // the items in the autocomplete list.
-    var value_provided =
-      typeof autocomplete.value !== 'undefined' ? true : false;
-    var label_provided =
-      typeof autocomplete.label !== 'undefined' ? true : false;
+    var value_provided = typeof autocomplete.value !== 'undefined';
+    var label_provided = typeof autocomplete.label !== 'undefined';
     if (!value_provided && !label_provided) {
       console.log(
         '_theme_autocomplete - A "value" and/or "label" was not supplied.'
