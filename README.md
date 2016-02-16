@@ -16,7 +16,7 @@
 - Themes
 - Regions
 - Blocks
-- Templates
+- Render Arrays
 - Custom Pages (via `hook_menu()`)
 - Forms API
 - User Roles / Permissions
@@ -35,4 +35,3 @@
 ## Getting Started
 
 > Try the [Hello World](http://docs.drupalgap.org/7/Hello_World) for DrupalGap.
-
