@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-09 */
+/*! drupalgap 2016-02-16 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -1562,7 +1562,7 @@ function theme_autocomplete(variables) {
     // id to the variables so it can be passed along.
     var autocomplete_id = null;
     if (typeof variables.field_info_field !== 'undefined') {
-      autocomplete_id = variables.field_info_field.field_name;
+      autocomplete_id = variables.field_info_field.field_name + '_' + variables.delta;
     }
     else if (typeof variables.attributes.id !== 'undefined') {
       autocomplete_id = variables.attributes.id;
@@ -1571,7 +1571,8 @@ function theme_autocomplete(variables) {
     variables.autocomplete_id = autocomplete_id;
 
     // Hold onto a copy of the variables.
-    _theme_autocomplete_variables[autocomplete_id] = variables;
+    _theme_autocomplete_variables[autocomplete_id] = {};
+    $.extend(true, _theme_autocomplete_variables[autocomplete_id], variables);
 
     // Are we dealing with a remote data set?
     var remote = false;
@@ -1680,10 +1681,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
     // Make sure a value and/or label has been supplied so we know how to render
     // the items in the autocomplete list.
-    var value_provided =
-      typeof autocomplete.value !== 'undefined' ? true : false;
-    var label_provided =
-      typeof autocomplete.label !== 'undefined' ? true : false;
+    var value_provided = typeof autocomplete.value !== 'undefined';
+    var label_provided = typeof autocomplete.label !== 'undefined';
     if (!value_provided && !label_provided) {
       console.log(
         '_theme_autocomplete - A "value" and/or "label" was not supplied.'
@@ -2848,7 +2847,7 @@ function _drupalgap_form_render_element(form, element) {
         }
 
         // Render the element item, unless it wasn't supported.
-        item_html = _drupalgap_form_render_element_item(
+        item_html += _drupalgap_form_render_element_item(
           form,
           element,
           variables,
@@ -6997,7 +6996,7 @@ function hook_404(router_path) {}
 function hook_entity_post_render_content(entity, entity_type, bundle) {
   try {
     if (entity.type == 'article') {
-      entity.content += '<p>'.t('Example text on every article!')+'</p>';
+      entity.content += '<p>' + t('Example text on every article!') + '</p>';
     }
   }
   catch (error) {
@@ -9130,6 +9129,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
           }
           if (entity && entity[name] && entity[name].length != 0 && entity[name][language]) {
             for (var delta = 0; delta < cardinality; delta++) {
+
               // @TODO - is this where we need to use the idea of the
               // value_callback property present in Drupal's FAPI? That way
               // each element knows how to map the entity data to its element
@@ -9138,18 +9138,22 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
                 entity[name][language][delta] &&
                 typeof entity[name][language][delta].value !== 'undefined'
               ) { default_value = entity[name][language][delta].value; }
+
               // If the default_value is null, set it to an empty string.
               if (default_value == null) { default_value = ''; }
+
               // @todo - It appears not all fields have a language code to use
               // here, for example taxonomy term reference fields don't!
               form.elements[name][language][delta] = {
                 value: default_value
               };
+
               // Place the field item onto the element.
               if (entity[name][language][delta]) {
                 form.elements[name][language][delta].item =
                   entity[name][language][delta];
               }
+
             }
           }
 
