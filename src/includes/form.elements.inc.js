@@ -362,7 +362,7 @@ function _drupalgap_form_render_element(form, element) {
         }
 
         // Render the element item, unless it wasn't supported.
-        item_html = _drupalgap_form_render_element_item(
+        item_html += _drupalgap_form_render_element_item(
           form,
           element,
           variables,
