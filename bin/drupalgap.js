@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-16 */
+/*! drupalgap 2016-02-18 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -8475,14 +8475,19 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // If the field value was null, we won't send along the field, so
               // just remove it. Except for list_boolean fields, they need a
               // null value to set the field value to false.
-              // @TODO - will this cause issues with multi value fields? i.e. if
-              // delta zero is null, but delta one isn't, this will probably
-              // destroy the field, derp.
               if (
                 field_value === null &&
                 typeof entity[name] !== 'undefined' &&
                 form.elements[name].type != 'list_boolean'
-              ) { delete entity[name]; }
+              ) {
+                if (is_field) {
+                  if (delta == 0) { delete entity[name]; }
+                  else if (typeof entity[name][language][delta] !== 'undefined') {
+                    delete entity[name][language][delta];
+                  }
+                }
+                else { delete entity[name]; }
+              }
 
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
