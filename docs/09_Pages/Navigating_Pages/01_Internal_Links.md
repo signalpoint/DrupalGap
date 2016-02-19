@@ -35,3 +35,36 @@ You can use either `link` or `button_link` for the theme.
 ### Plain HTML Link
 
 `<a onclick="javascript:drupalgap_goto('node/123');">My Node Link</a>`
+
+### Theme A Button Link
+
+Add an attributes section to the button link and a class.
+
+```
+content['my_link'] = {
+  theme: 'link',
+  text: 'My Node Link',
+  path: 'node/123',
+  attributes: {
+    'class': 'fancycolor'
+  }
+};
+```
+
+Add the following CSS to drupalgap.css file.
+
+```
+a:link.fancycolor.ui-link.ui-btn.ui-shadow.ui-corner-all {
+  background-color: #d5b448;
+  text-shadow: none;
+  color: #fff;
+  border-color: #fff;
+}
+
+a:hover.fancycolor.ui-link.ui-btn.ui-shadow.ui-corner-all {
+  background-color: #eece62;
+  text-shadow: none;
+  color: #fff;
+  border-color: #fff;
+}
+```
