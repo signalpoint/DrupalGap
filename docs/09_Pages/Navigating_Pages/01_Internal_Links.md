@@ -36,11 +36,11 @@ You can use either `link` or `button_link` for the theme.
 
 `<a onclick="javascript:drupalgap_goto('node/123');">My Node Link</a>`
 
-### Theme A Button Link Manually
+## Theme A Button Link Manually
 
 - [Button Widget Docs](../../Widgets/Buttons) (*easy to create button links*)
 
-Buttons can be created manually by adding a class attribute to a regular link:
+Buttons can be themed manually by adding a class attribute to a link:
 
 ```
 content['my_link'] = {
@@ -51,6 +51,14 @@ content['my_link'] = {
     'class': 'fancycolor'
   }
 };
+```
+
+```
+content = bl('My Node Link', 'node/123', {
+  attributes: {
+    'class': 'fancycolor'
+  }
+});
 ```
 
 Add the following CSS to drupalgap.css file.
