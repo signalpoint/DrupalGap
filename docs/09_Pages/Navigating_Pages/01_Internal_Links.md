@@ -36,9 +36,11 @@ You can use either `link` or `button_link` for the theme.
 
 `<a onclick="javascript:drupalgap_goto('node/123');">My Node Link</a>`
 
-### Theme A Button Link
+### Theme A Button Link Manually
 
-Add an attributes section to the button link and a class.
+- [Button Widget Docs](../../Widgets/Buttons) (*easy to create button links*)
+
+Buttons can be created manually by adding a class attribute to a regular link:
 
 ```
 content['my_link'] = {
