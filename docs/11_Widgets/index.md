@@ -18,11 +18,11 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 ## Autocomplete Widget
 
-[![Autocomplete Widget](http://drupalgap.com/sites/default/files/autocomplete-mini.png)](Widgets/Autocomplete_Widget)
+[![Autocomplete Widget](http://drupalgap.com/sites/default/files/autocomplete-mini.png)](Forms/Form_Elements/Autocomplete)
 
 ## Button Widget
 
-[![Button Widget](http://drupalgap.com/sites/default/files/button-widget.png)](Widgets/Button_Widget)
+[![Button Widget](http://drupalgap.com/sites/default/files/button-widget.png)](Widgets/Buttons)
 
 ## Checkbox Widget
 
@@ -82,4 +82,4 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 ## Views Widget
 
-Visit the Views Render Array page for complete details on utilizing DrupalGap's built in Views Widget. If you've never created a Views Widget in DrupalGap before, we recommend starting with the DrupalGap Views documentation page.
+Visit the [Views Render Array](Views/Displaying_a_View/Views_Render_Array) docs for complete details on utilizing DrupalGap's built in Views Widget. If you've never created a Views Widget in DrupalGap before, we recommend starting with the DrupalGap Views documentation page.
