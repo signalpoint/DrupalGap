@@ -108,9 +108,10 @@ function drupalgap_check_visibility(type, data) {
                     }
                   }
                 }
-                if (data.pages.mode == 'include') { visible = false; }
-                else if (data.pages.mode == 'exclude') { visible = true; }
-                if (!match) { visible = !visible; }
+                if (match) {
+                  if (data.pages.mode == 'include') { visible = false; }
+                  else if (data.pages.mode == 'exclude') { visible = true; }
+                }
               }
             }
             else {
