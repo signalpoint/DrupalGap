@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-18 */
+/*! drupalgap 2016-02-21 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -2217,9 +2217,10 @@ function drupalgap_check_visibility(type, data) {
                     }
                   }
                 }
-                if (data.pages.mode == 'include') { visible = false; }
-                else if (data.pages.mode == 'exclude') { visible = true; }
-                if (!match) { visible = !visible; }
+                if (match) {
+                  if (data.pages.mode == 'include') { visible = false; }
+                  else if (data.pages.mode == 'exclude') { visible = true; }
+                }
               }
             }
             else {
@@ -13077,7 +13078,7 @@ function taxonomy_views_exposed_filter(
     //console.log(field);
 
     // @TODO this filter loses its value after one submission, aka the next
-    // submission will submit it as 'All' eventhough we have a term selected in
+    // submission will submit it as 'All' even though we have a term selected in
     // the widget from the previous submission.
 
     // Autocomplete.
@@ -13101,7 +13102,7 @@ function taxonomy_views_exposed_filter(
       // them into the widget. We'll just use a taxonomy term reference field and
       // fake its instance.
       element.type = 'hidden';
-    for (var index in field.settings.allowed_values) {
+      for (var index in field.settings.allowed_values) {
         if (!field.settings.allowed_values.hasOwnProperty(index)) { continue; }
         var object = field.settings.allowed_values[index];
 
@@ -13138,12 +13139,11 @@ function taxonomy_views_exposed_filter(
         child += theme('taxonomy_term_reference', variables);
         element.children.push({ markup: child });
 
-    }
+      }
     }
   }
   catch (error) { console.log('taxonomy_views_exposed_filter - ' + error); }
 }
-
 
 /**
  * The user login form.
