@@ -110,3 +110,55 @@ function my_module_form_alter(form, form_state, form_id) {
   }
 }
 ```
+
+## Hiding an Element in a Form
+
+To hide a field on the node add/edit form.
+
+```
+function my_module_form_alter(form, form_state, form_id) {
+  try {
+  
+    // console.log (form);
+    
+    if (form.id == 'node_edit' && form.bundle == 'article') {
+      
+      // form elements to hide field
+      form.elements['field_name'].access = false;
+      form.elements['field_name'].prefix = '<div style="display: none;">';
+      form.elements['field_name'].suffix = '</div>';
+
+    }
+
+  }
+
+  catch (error) { console.log('my_module_form_alter - ' + error); }
+  
+}
+```
+
+## Set Field Value in a form
+
+To set the value of a field on the node add/edit form.
+
+```
+function my_module_form_alter(form, form_state, form_id) {
+  try {
+  
+    // console.log (form);
+    
+    if (form.id == 'node_edit' && form.bundle == 'article') {
+      
+      // set value
+      form.elements['field_name']['und']['0'].value = 1;
+
+    }
+    
+    
+  }
+
+  catch (error) { console.log('my_module_form_alter - ' + error); }
+  
+}
+
+```
