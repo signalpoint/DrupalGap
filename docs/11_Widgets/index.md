@@ -54,7 +54,7 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 ## Panel Widget
 
-[[![Panel Widget](http://drupalgap.com/sites/default/files/panel.png)](Widgets/Panels)]
+[![Panel Widget](http://drupalgap.com/sites/default/files/panel.png)](Widgets/Panels)
 
 ## Popup Widget
 
