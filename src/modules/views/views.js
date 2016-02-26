@@ -400,7 +400,7 @@ function theme_view(variables) {
       jqm_page_event_callback: '_theme_view',
       jqm_page_event_args: JSON.stringify(variables)
     };
-    return html += drupalgap_jqm_page_event_script_code(options);
+    return html += drupalgap_jqm_page_event_script_code(options, variables.attributes.id);
   }
   catch (error) { console.log('theme_view - ' + error); }
 }
