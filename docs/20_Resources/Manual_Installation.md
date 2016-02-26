@@ -5,7 +5,7 @@ cd drupal
 wget https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip
 unzip 8.x-1.x.zip
 mv DrupalGap-8.x-1.x/ app
-rm 8.x-1.x-zip
+rm 8.x-1.x.zip
 cd app
 wget https://raw.githubusercontent.com/easystreet3/jDrupal/8.x-1.x/jdrupal.min.js --no-check-certificate
 cp default.settings.js settings.js
