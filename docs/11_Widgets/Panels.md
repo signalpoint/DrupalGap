@@ -130,3 +130,37 @@ var html = bl('Open panel', '#my_module_left_panel', {
 ```
 
 This button can go anywhere we like: on a page, in a menu, in a block, etc. We recommend using the **block button** approach mentioned in the [Slide menus tutorial](../Menus/Slide_Menus).
+
+#### Open Panel Button with Control Group
+
+![Panel Button in Control Group](http://drupalgap.org/sites/default/files/panel-button-control-group.png)
+
+It's common to want a home button next to the slide menu button when you're not on the app's front page. We can make a simple control group for our block content (`hook_block_view()`) to handle this:
+
+```
+var button_text = 'Open panel';
+var button_link = '#my_moduleleft_panel';
+var button_options = {
+  attributes: {
+    'data-icon': 'bars',
+    'data-iconpos': 'notext',
+    'class': 'ui-btn-left'
+  }
+};
+
+// If we're not on the home page, wrap the button in a control group
+// and add the home button in the control group.
+if (!drupalgap_is_front_page()) {
+  delete button_options.attributes.class;
+  var attrs = {
+    'data-type': 'horizontal',
+    'data-role': 'controlgroup',
+    'class': 'ui-btn-left'
+  };
+  content = '<div ' + drupalgap_attributes(attrs) + '>' +
+        bl(button_text, button_link, button_options) +
+        bl('Home', '', { attributes: { 'data-icon': 'home', 'data-iconpos': 'notext'} }) +
+  '</div>';
+}
+else { content = bl(button_text, button_link, button_options); }
+```
