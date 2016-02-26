@@ -904,6 +904,7 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
     // Get the container id, set the drupalgap.output to the page build, then
     // inject the rendered page into the container.
     var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
+    module_invoke_all('entity_view_alter', entity_type, entity_id, mode, build);
     drupalgap.output = build;
     $('#' + id).html(drupalgap_render_page()).trigger('create');
   }

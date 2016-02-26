@@ -194,6 +194,35 @@ function hook_entity_post_render_content(entity, entity_type, bundle) {
 }
 
 /**
+ * Implements hook_entity_view_alter().
+ * Called immediately before a page is rendered and injected into its waiting
+ * container. Use this hook to modifications to the build object by adding or
+ * editing render arrays (widgets) on the build object.
+ */
+function hook_entity_view_alter(entity_type, entity_id, mode, build) {
+  try {
+    if (entity_type == 'user' && mode == 'view') {
+      if (entity_id == Drupal.user.uid) {
+        build['foo'] = { markup: '<p>Extra stuff when viewing own user profile...</p>' };
+        build['volume'] = {
+          theme: 'range',
+          attributes: {
+            min: '0',
+            max: '11',
+            value: '11',
+            'data-theme': 'b'
+          }
+        };
+      }
+      else {
+        build['bar'] = { markup: '<p>Viewing some other profile...</p>' };
+      }
+    }
+  }
+  catch (error) { console.log('hook_entity_view_alter - ' + error); }
+}
+
+/**
  * Implements hook_field_info_instance_add_to_form().
  * Used by modules that provide custom fields to operate on a form or its
  * elements before the form gets saved to local storage. This allows extra
@@ -285,7 +314,7 @@ function hook_field_widget_form(form, form_state, field, instance, langcode, ite
 //function hook_form_element_alter(form, element, variables) { }
 
 /**
- * Implements hook_image_path_alter().
+ * Implements hook_entity_post_render_field().
  * Called after drupalgap_entity_render_field() assembles the field content
  * string. Use this to make modifications to the HTML output of the entity's
  * field before it is displayed. The field content will be inside of
