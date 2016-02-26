@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-21 */
+/*! drupalgap 2016-02-25 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -5906,11 +5906,11 @@ function drupalgap_render_page() {
       // @todo - each remaining variables should have its own container div and
       // unique id, similar to the placeholder div containers mentioned above.
       for (var element in output) {
-          if (!output.hasOwnProperty(element)) { continue; }
-          var variables = output[element];
-          if ($.inArray(element, render_variables) == -1) {
-            content += theme(variables.theme, variables);
-          }
+        if (!output.hasOwnProperty(element)) { continue; }
+        var variables = output[element];
+        if ($.inArray(element, render_variables && typeof variables.theme !== 'undefined') == -1) {
+          content += theme(variables.theme, variables);
+        }
       }
     }
 
@@ -7006,6 +7006,35 @@ function hook_entity_post_render_content(entity, entity_type, bundle) {
 }
 
 /**
+ * Implements hook_entity_view_alter().
+ * Called immediately before a page is rendered and injected into its waiting
+ * container. Use this hook to modifications to the build object by adding or
+ * editing render arrays (widgets) on the build object.
+ */
+function hook_entity_view_alter(entity_type, entity_id, mode, build) {
+  try {
+    if (entity_type == 'user' && mode == 'view') {
+      if (entity_id == Drupal.user.uid) {
+        build['foo'] = { markup: '<p>Extra stuff when viewing own user profile...</p>' };
+        build['volume'] = {
+          theme: 'range',
+          attributes: {
+            min: '0',
+            max: '11',
+            value: '11',
+            'data-theme': 'b'
+          }
+        };
+      }
+      else {
+        build['bar'] = { markup: '<p>Viewing some other profile...</p>' };
+      }
+    }
+  }
+  catch (error) { console.log('hook_entity_view_alter - ' + error); }
+}
+
+/**
  * Implements hook_field_info_instance_add_to_form().
  * Used by modules that provide custom fields to operate on a form or its
  * elements before the form gets saved to local storage. This allows extra
@@ -7097,7 +7126,7 @@ function hook_field_widget_form(form, form_state, field, instance, langcode, ite
 //function hook_form_element_alter(form, element, variables) { }
 
 /**
- * Implements hook_image_path_alter().
+ * Implements hook_entity_post_render_field().
  * Called after drupalgap_entity_render_field() assembles the field content
  * string. Use this to make modifications to the HTML output of the entity's
  * field before it is displayed. The field content will be inside of
@@ -8880,6 +8909,7 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
     // Get the container id, set the drupalgap.output to the page build, then
     // inject the rendered page into the container.
     var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
+    module_invoke_all('entity_view_alter', entity_type, entity_id, mode, build);
     drupalgap.output = build;
     $('#' + id).html(drupalgap_render_page()).trigger('create');
   }
@@ -11270,14 +11300,13 @@ function node_page_view_pageshow(nid) {
           if (node.title_field && node.title_field[default_language]) {
             node_title = node.title_field[default_language][0].safe_value;
           }
-          // Build the node display.
+          // Build the node display. Set the node onto the build so it makes it to the theme layer variables.
           var build = {
             'theme': 'node',
-            // @todo - is this line of code doing anything?
             'node': node,
             // @todo - this is a core field and should by fetched from entity.js
-            'title': {'markup': node_title},
-            'content': {'markup': node.content}
+            'title': { markup: node_title },
+            'content': { markup: node.content }
           };
           // If comments are undefined, just inject the page.
           if (typeof node.comment === 'undefined') {
