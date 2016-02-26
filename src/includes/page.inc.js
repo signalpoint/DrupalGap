@@ -464,11 +464,11 @@ function drupalgap_render_page() {
       // @todo - each remaining variables should have its own container div and
       // unique id, similar to the placeholder div containers mentioned above.
       for (var element in output) {
-          if (!output.hasOwnProperty(element)) { continue; }
-          var variables = output[element];
-          if ($.inArray(element, render_variables) == -1) {
-            content += theme(variables.theme, variables);
-          }
+        if (!output.hasOwnProperty(element)) { continue; }
+        var variables = output[element];
+        if ($.inArray(element, render_variables && typeof variables.theme !== 'undefined') == -1) {
+          content += theme(variables.theme, variables);
+        }
       }
     }
 
