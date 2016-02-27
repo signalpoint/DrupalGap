@@ -14,25 +14,25 @@ Next, [create a custom DrupalGap module](../Modules/Create_a_Custom_Module) to p
 
 ```
 cd app
-./dg create module my_module
+./dg create module example
 ```
 
 And then include it in the `<head>` of the app's `index.html` file:
 
 ```
-<script src="modules/custom/my_module/my_module.js"></script>
+<script src="modules/custom/example/example.js"></script>
 ```
 
 ### 3. Create a route
 
-Next, we'll [create a route for the page](../Pages/Creating_a_Custom_Page) in the `my_module.js` file:
+Next, we'll [create a route for the page](../Pages/Creating_a_Custom_Page) in the `example.js` file:
 
 ```
-my_module.routing = function() {
+example.routing = function() {
   var routes = {};
 
   // My example page route.
-  routes["my_module.example"] = {
+  routes["example.hello"] = {
     "path": "/hello-world",
     "defaults": {
       "_title": "Hello World",
@@ -50,7 +50,7 @@ my_module.routing = function() {
 
 ### 4. Render the page
 
-Next, add this code to the route's `_callback` function in the `my_module.js` file to render the page:
+Next, add this code to the route's `_controller` function in the `example.js` file to render the page:
 
 ```
 return new Promise(function(ok, err) {
