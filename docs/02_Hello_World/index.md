@@ -2,7 +2,7 @@ By completing this guide, you'll be ready to build a custom application for Drup
 
 ### 1. Install DrupalGap
 
-First, complete the [DrupalGap installation](../Install) docs.
+First, complete the [DrupalGap installation](Install) docs.
 
 ```
 http://example.com/app
@@ -10,7 +10,7 @@ http://example.com/app
 
 ### 2. Create a module
 
-Next, [create a custom DrupalGap module](../Modules/Create_a_Custom_Module) to power the app:
+Next, [create a custom DrupalGap module](Modules/Create_a_Custom_Module) to power the app:
 
 ```
 cd app
@@ -25,7 +25,7 @@ And then include it in the `<head>` of the app's `index.html` file:
 
 ### 3. Create a route
 
-Next, we'll [create a route for the page](../Pages/Creating_a_Custom_Page) in the `example.js` file:
+Next, we'll [create a route for the page](Pages/Creating_a_Custom_Page) in the `example.js` file:
 
 ```
 example.routing = function() {
@@ -83,4 +83,4 @@ http://example.com/app/#hello-world
 
 > What's next?
 
-You've now got the basic tools to build a custom app for Drupal 8! Next, try spicing up the display of your app with a [theme](../Themes).
+You've now got the basic tools to build a custom app for Drupal 8! Next, try spicing up the display of your app with a [theme](Themes).
