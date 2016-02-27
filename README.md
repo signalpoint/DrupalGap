@@ -16,7 +16,7 @@
 - Themes
 - Regions
 - Blocks
-- Templates
+- Render Elements
 - Routes / Custom Pages
 - Forms API
 - User Roles / Permissions
