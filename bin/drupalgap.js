@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-25 */
+/*! drupalgap 2016-02-27 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -13675,10 +13675,11 @@ function user_logout_callback() {
  * The user logout pageshow callback. This actually handles the call to the
  * user logout service resource.
  */
-function user_logout_pagechange() {
+function user_logout_pageshow() {
   try {
     user_logout({
       success: function(data) {
+        drupalgap_remove_pages_from_dom();
         drupalgap_goto(drupalgap.settings.front);
       }
     });
@@ -13704,7 +13705,7 @@ function user_menu() {
       'user/logout': {
         'title': t('Logout'),
         'page_callback': 'user_logout_callback',
-        'pagechange': 'user_logout_pagechange',
+        'pageshow': 'user_logout_pageshow',
         options: {reloadPage: true}
       },
       'user/register': {
