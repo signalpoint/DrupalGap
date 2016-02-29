@@ -10367,7 +10367,7 @@ function user_login_form_submit(form, form_state) {
   try {
     user_login(form_state.values.name, form_state.values.pass, {
       success: function(result) {
-        drupalgap_goto(drupalgap.settings.front);
+        drupalgap_goto(drupalgap.settings.front,{reloadPage: true});
       }
     });
   }
@@ -10390,7 +10390,7 @@ function user_logout_pagechange() {
   try {
     user_logout({
       success: function(data) {
-        drupalgap_goto(drupalgap.settings.front);
+        drupalgap_goto(drupalgap.settings.front,{reloadPage: true});
       }
     });
   }
