@@ -1920,6 +1920,10 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
       }
 
     }
+    else {
+      // The autocomplete text field was emptied, clear out the hidden value.
+      $('#' + autocomplete.id).val('');
+    }
   }
   catch (error) { console.log('_theme_autocomplete - ' + error); }
 }
