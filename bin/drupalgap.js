@@ -12667,6 +12667,7 @@ function taxonomy_term_page(tid) {
  */
 function taxonomy_term_pageshow(tid) {
   try {
+<<<<<<< HEAD
     taxonomy_term_load(tid, {
         success: function(term) {
           var description = term.description ? term.description : '';
@@ -12700,6 +12701,12 @@ function taxonomy_term_pageshow(tid) {
               }
           });
         }
+=======
+    user_login(form_state.values.name, form_state.values.pass, {
+      success: function(result) {
+        drupalgap_goto(drupalgap.settings.front,{reloadPage: true});
+      }
+>>>>>>> 75abb275589b6005548e2cfecea88fc67f818ddd
     });
   }
   catch (error) { console.log('taxonomy_term_pageshow - ' + error); }
@@ -12712,6 +12719,7 @@ function taxonomy_term_pageshow(tid) {
  */
 function taxonomy_term_selectNodes(tid, options) {
   try {
+<<<<<<< HEAD
     // @TODO - move this function to jDrupal.
     options.method = 'POST';
     options.path = 'taxonomy_term/selectNodes.json';
@@ -12719,6 +12727,13 @@ function taxonomy_term_selectNodes(tid, options) {
     options.resource = 'selectNodes';
     options.data = JSON.stringify({ tid: tid});
     Drupal.services.call(options);
+=======
+    user_logout({
+      success: function(data) {
+        drupalgap_goto(drupalgap.settings.front,{reloadPage: true});
+      }
+    });
+>>>>>>> 75abb275589b6005548e2cfecea88fc67f818ddd
   }
   catch (error) { console.log('taxonomy_term_selectNodes - ' + error); }
 }
