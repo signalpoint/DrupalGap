@@ -307,28 +307,11 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           };
           options.parameters[autocomplete.filter] = '%' + value + '%';
           options.parameters_op[autocomplete.filter] = 'like';
-          var bundles = [];
-          for (var bundle in field_settings.handler_settings.target_bundles) {
-              if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
-              var name = field_settings.handler_settings.target_bundles[bundle];
-              var bundle_name = null;
-              switch (field_settings.target_type) {
-                case 'node':
-                  bundle_name = 'type';
-                  break;
-                case 'taxonomy_term':
-                  bundle_name = 'vid';
-                  bundle = taxonomy_vocabulary_get_vid_from_name(bundle);
-                  break;
-              }
-              if (bundle_name) { bundles.push(bundle); }
-          }
-          if (bundles.length) { options.parameters[bundle_name] = bundles.join(','); }
-          var fn = window[index_resource];
-          fn(options, {
+          var bundles = entityreference_get_target_bundles(field_settings);
+          if (bundles) { options.parameters[entity_get_bundle_name(field_settings.target_type)] = bundles.join(','); }
+          window[index_resource](options, {
               success: function(results) {
-                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, results, false);
+                _theme_autocomplete_success_handlers[autocomplete_id](autocomplete_id, results, false);
               }
           });
           break;
