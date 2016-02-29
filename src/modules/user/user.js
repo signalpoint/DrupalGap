@@ -102,7 +102,7 @@ function user_logout_pageshow() {
     user_logout({
       success: function(data) {
         drupalgap_remove_pages_from_dom();
-        drupalgap_goto(drupalgap.settings.front);
+        drupalgap_goto(drupalgap.settings.front, { reloadPage:true });
       }
     });
   }
