@@ -18,4 +18,10 @@ Use the **web-app** in the `settings.js` file to run the app as a web applicatio
 
 `http://www.example.com/mobile-application`
 
-The URL above assumes you installed the DrupalGap SDK in a folder called **mobile-application** in the root of your Drupal site.
+The URL above assumes you installed the DrupalGap SDK in a folder called **mobile-application** in the root of your Drupal site. If you place the SDK in any other folder then change **your** directory:
+
+`drush "vset drupalgap_sdk_dir sites/default/files/mobile-application"`
+
+Then set your installed SDK variable to true:
+
+`drush vset drupalgap_sdk_installed 1`
