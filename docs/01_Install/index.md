@@ -13,7 +13,7 @@ For our app to communicate with Drupal, the [DrupalGap module](http://www.drupal
 
 ## 3. Install the DrupalGap SDK
 
-With one click, we can [install the SDK](Install/Installing_the_SDK).
+With one click, we can [install the SDK](./Installing_the_SDK.md).
 
 ## 4. Done!
 
