@@ -340,6 +340,8 @@ function drupalgap_form_load(form_id) {
       // Place the assembled form into local storage so _drupalgap_form_submit
       // will have access to the assembled form.
       drupalgap_form_local_storage_save(form);
+      Drupal.cache_expiration.forms[form_id] = 1;
+      window.localStorage.setItem('cache_expiration', JSON.stringify(Drupal.cache_expiration));
     }
     else {
       var error_msg = 'drupalgap_form_load - ' + t('no callback function') +
