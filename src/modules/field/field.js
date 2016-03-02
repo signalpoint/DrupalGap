@@ -340,12 +340,22 @@ function list_assemble_form_state_into_field(entity_type, bundle,
  */
 function list_views_exposed_filter(form, form_state, element, filter, field) {
   try {
-    //dpm('list_views_exposed_filter');
-    //dpm(arguments);
+
+    //console.log('list_views_exposed_filter');
+    //console.log(form);
+    //console.log(form_state);
+    //console.log(element);
+    //console.log(filter);
+    //console.log(field);
+
     var widget = filter.options.group_info.widget;
+
+    // List fields.
     if (widget == 'select') {
+
       // Set the element value if we have one in the filter.
       if (!empty(filter.value)) { element.value = filter.value[0]; }
+
       // Set the options, then depending on whether or not it is required, set
       // the default value accordingly.
       element.options = filter.value_options;
@@ -353,13 +363,10 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
         element.options['All'] = '- ' + t('Any') + ' -';
         if (typeof element.value === 'undefined') { element.value = 'All'; }
       }
+
     }
     else {
-      dpm(
-        'WARNING: list_views_exposed_filter - unsupported widget (' +
-          widget +
-        ')'
-      );
+      console.log('WARNING: list_views_exposed_filter - unsupported widget:' + widget);
     }
   }
   catch (error) { console.log('list_views_exposed_filter - ' + error); }
