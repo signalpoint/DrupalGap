@@ -65,3 +65,7 @@ On some servers, when trying to use a PUT command with the Node Update Service R
 jQuery Mobile 1.4.2
 
 On some Android tables, jQuery Mobile 1.4.2 may not work properly and result in the pages being rendered improperly (i.e. only the placeholder names in the page.tpl.html file get rendered). Downgrading to jQuery Mobile 1.4.1 or 1.4.0 .js and .css files, seems to resolve this issue.
+
+> theme_views_view - TypeError: Cannot read property 'root' of undefined
+
+Your Views JSON page display `Format` needs to be set to `JSON data document`.
