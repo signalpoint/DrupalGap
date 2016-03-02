@@ -9,6 +9,8 @@ DrupalGap has built in support for image fields provided by Drupal Core. Otherwi
 
 ## Camera Buttons
 
+### HTML
+
 ```
 // Open camera.
 var html = bl('My camera', null, {
@@ -22,11 +24,41 @@ var html = bl('My camera', null, {
 // Photo library.
 var html = bl('My photos', null, {
     attributes: {
-      'data-icon': 'camera',
+      'data-icon': 'grid',
       'data-iconpos': 'right',
       onclick: 'my_module_photos_click()'
     }
 });
+```
+
+### Render Arrays
+
+```
+var content = {};
+
+// Open library.
+content['camera'] = {
+  theme: 'button_link',
+  text: t('My camera'),
+  path: null,
+  attributes: {
+    'data-icon': 'camera',
+    'data-iconpos': 'right',
+    onclick: 'my_module_camera_click()'
+  }
+};
+
+// Photo library.
+content['photos'] = {
+  theme: 'button_link',
+  text: t('My photos'),
+  path: null,
+  attributes: {
+    'data-icon': 'grid',
+    'data-iconpos': 'right',
+    onclick: 'my_module_photos_click()'
+  }
+};
 ```
 
 ## Open Camera
