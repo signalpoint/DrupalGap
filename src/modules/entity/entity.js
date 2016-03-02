@@ -1,4 +1,11 @@
 /**
+ * Implements hook_install().
+ */
+function entity_install() {
+  entity_clean_local_storage();
+}
+
+/**
  * Given an entity type, bundle name, form and entity, this will add the
  * entity's core fields to the form via the DrupalGap forms api.
  * @param {String} entity_type
@@ -685,11 +692,6 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           case '2':
             fields['mail'].required = true;
             fields['homepage'].required = true;
-            break;
-          default:
-            console.log('WARNING: drupalgap_entity_get_core_fields - ' +
-              'Unknown anonymous comment setting (' + content_type + '): ' +
-              comment_anonymous);
             break;
         }
         // Only anonymous users get the mail and homepage fields.
