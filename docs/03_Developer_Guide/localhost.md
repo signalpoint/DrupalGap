@@ -27,6 +27,12 @@ Now if we navigate to the localhost mobile app:
 
 And then "Disable" the "Cross Domain Proxy" under "Settings" in Ripple, we should be able to connect to example.com from our localhost app.
 
+### Using Mac OSX
+
+In the `Terminal` app:
+
+`open -a Google\ Chrome --args --disable-web-security`
+
 ### Using Windows
 
 Find google chrome right click on it and view properties.  Then copy the path of the location including the `.exe`. Mine looked like this `C:\Users\myusername\AppData\Local\Google\Chrome\Application\chrome.exe`.  You have to use this in the following commands.
