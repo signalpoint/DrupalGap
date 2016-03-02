@@ -59,7 +59,7 @@ Drupal.settings.cache.entity = {
       // Content types (aka bundles)
       bundles: {
 
-        articles: {
+        article: {
           expiration: 3600
         },
         page: {
