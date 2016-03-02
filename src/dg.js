@@ -95,8 +95,14 @@ function drupalgap_init() {
       },
       views_datasource: {}
     };
-    //if (drupalgap) { dg = $.extend({}, dg, drupalgap); }
-    return dg;
+
+  // Extend jDrupal as needed...
+
+  // Forms will expire upon install and don't have an expiration time.
+  if (!Drupal.cache_expiration.forms) { Drupal.cache_expiration.forms = {}; }
+
+  // Finally return the JSON object.
+  return dg;
 }
 
 /**
