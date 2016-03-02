@@ -1,4 +1,4 @@
-/*! drupalgap 2016-02-29 */
+/*! drupalgap 2016-03-01 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -96,8 +96,14 @@ function drupalgap_init() {
       },
       views_datasource: {}
     };
-    //if (drupalgap) { dg = $.extend({}, dg, drupalgap); }
-    return dg;
+
+  // Extend jDrupal as needed...
+
+  // Forms will expire upon install and don't have an expiration time.
+  if (!Drupal.cache_expiration.forms) { Drupal.cache_expiration.forms = {}; }
+
+  // Finally return the JSON object.
+  return dg;
 }
 
 /**
@@ -634,6 +640,7 @@ function drupalgap_file_exists(path) {
     jQuery.ajax({
       async: false,
       type: 'HEAD',
+      dataType: 'text',
       url: path,
       success: function() { file_exists = true; },
       error: function(xhr, textStatus, errorThrown) { }
@@ -3451,6 +3458,8 @@ function drupalgap_form_load(form_id) {
       // Place the assembled form into local storage so _drupalgap_form_submit
       // will have access to the assembled form.
       drupalgap_form_local_storage_save(form);
+      Drupal.cache_expiration.forms[form_id] = 1;
+      window.localStorage.setItem('cache_expiration', JSON.stringify(Drupal.cache_expiration));
     }
     else {
       var error_msg = 'drupalgap_form_load - ' + t('no callback function') +
@@ -7998,6 +8007,13 @@ function contact_personal_form_to_container_id(recipient) {
 
 
 /**
+ * Implements hook_install().
+ */
+function entity_install() {
+  entity_clean_local_storage();
+}
+
+/**
  * Given an entity type, bundle name, form and entity, this will add the
  * entity's core fields to the form via the DrupalGap forms api.
  * @param {String} entity_type
@@ -8684,11 +8700,6 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           case '2':
             fields['mail'].required = true;
             fields['homepage'].required = true;
-            break;
-          default:
-            console.log('WARNING: drupalgap_entity_get_core_fields - ' +
-              'Unknown anonymous comment setting (' + content_type + '): ' +
-              comment_anonymous);
             break;
         }
         // Only anonymous users get the mail and homepage fields.
@@ -11772,6 +11783,21 @@ function drupalgap_services_rss_extract_items(data) {
 
 var _system_reload_page = null;
 var _system_reload_messages = null;
+
+/**
+ * Implements hook_install().
+ */
+function system_install() {
+
+  // Remove any old forms from local storage, then purge the form expiration tracker.
+  for (var form_id in Drupal.cache_expiration.forms) {
+    if (!Drupal.cache_expiration.forms.hasOwnProperty(form_id)) { continue; }
+    drupalgap_form_local_storage_delete(form_id);
+  }
+  Drupal.cache_expiration.forms = {};
+  window.localStorage.setItem('cache_expiration', JSON.stringify(Drupal.cache_expiration));
+
+}
 
 /**
  * Implements hook_block_info().
