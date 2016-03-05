@@ -1,4 +1,4 @@
-/*! drupalgap 2016-03-01 */
+/*! drupalgap 2016-03-05 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -9157,18 +9157,24 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
             required: field.required,
             description: field.description
           };
-          if (!form.elements[name][language]) {
-            form.elements[name][language] = {};
-          }
+          if (!form.elements[name][language]) { form.elements[name][language] = {}; }
           var default_value = field.default_value;
-          var delta = 0;
           var cardinality = parseInt(field_info.cardinality);
           if (cardinality == -1) {
             cardinality = 1; // we'll just add one element for now, until we
                              // figure out how to handle the 'add another
                              // item' feature.
           }
-          if (entity && entity[name] && entity[name].length != 0 && entity[name][language]) {
+          if (entity && entity[name] && entity[name].length != 0) {
+
+            // Make sure the field has some type of language code on it, or just skip it. An entity will sometimes have
+            // a language code that a field doesn't have, so fall back to und on the field if the language code isn't
+            // present.
+            if (!entity[name][language]) {
+              if (!entity[name].und) { continue; }
+              language = 'und';
+            }
+
             for (var delta = 0; delta < cardinality; delta++) {
 
               // @TODO - is this where we need to use the idea of the
@@ -9183,8 +9189,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
               // If the default_value is null, set it to an empty string.
               if (default_value == null) { default_value = ''; }
 
-              // @todo - It appears not all fields have a language code to use
-              // here, for example taxonomy term reference fields don't!
+              // Note, not all fields have a language code to use here, e.g. taxonomy term reference fields do not.
               form.elements[name][language][delta] = {
                 value: default_value
               };
@@ -9196,6 +9201,11 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
               }
 
             }
+
+            // Set the language back to the entity's language in case it was temporarily changed because of an un
+            // translated field.
+            if (entity && entity.language) { language = entity.language; }
+
           }
 
           // Give module's a chance to alter their own element during the form
