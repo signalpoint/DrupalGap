@@ -25,10 +25,7 @@ function user_login_form(form, form_state) {
     };
     form.elements.submit = {
       type: 'submit',
-      value: t('Login'),
-      attributes: {
-        'class': 'login'
-      }
+      value: t('Login')
     };
     if (user_register_access()) {
       form.buttons['create_new_account'] = {
