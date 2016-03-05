@@ -115,7 +115,7 @@ Then open your app's `settings.js file`, and switch the mode to phonegap:
 
 `drupalgap.settings.mode = 'phonegap';`
 
-Then include the `cordova.js` file in the body of your `index.html` file.
+**VERY IMPORTANT** Then include the `cordova.js` file in the body of your `index.html` file.
 
 ```
 <!-- Load PhoneGap (Cordova) -->
