@@ -1,3 +1,5 @@
+We can either use the `Simple` selection mode on our Entity reference field's widget to have DrupalGap automatically handle the field, otherwise we can use a View to power the results for the field (described below).
+
 When using a View to power an [Entity Reference](http://drupalgap.org/project/entityreference) field, we need  a Views JSON page display so the app can retrieve the data to power the field.
 
 **1**. First, create a new View (or edit an existing one), [using these instructions](../Forms/Form_Elements/Autocomplete/Autocomplete_with_Remote_Views_JSON_Data). When following the instructions, be sure to create the "Entity reference" display mentioned in step #2 below, before creating the Page display on your View. When creating the Page display in your View, you'll need the path mentioned in step #3 below.
