@@ -127,7 +127,6 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
             required: field.required,
             description: field.description
           };
-          if (!form.elements[name][language]) { form.elements[name][language] = {}; }
           var default_value = field.default_value;
           var cardinality = parseInt(field_info.cardinality);
           if (cardinality == -1) {
@@ -144,6 +143,8 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
               if (!entity[name].und) { continue; }
               language = 'und';
             }
+
+            if (!form.elements[name][language]) { form.elements[name][language] = {}; }
 
             for (var delta = 0; delta < cardinality; delta++) {
 
