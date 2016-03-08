@@ -227,12 +227,7 @@ function _drupalgap_form_render_element(form, element) {
 
     // Grab the language.
     var language = language_default();
-    
-    if (element.und) { 
-		element.und = $.extend(true,element.und,element[language]);
-		language = 'und'
-		 };
-		 
+      
     // We'll assume the element has no items (e.g. title, nid, vid, etc), unless
     // we determine later that this element is a field, then it'll have items.
     var items = false;
