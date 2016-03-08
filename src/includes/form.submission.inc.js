@@ -124,6 +124,7 @@ function _drupalgap_form_submit(form_id) {
  */
 function _drupalgap_form_validate(form, form_state) {
   try {
+	var lng;  
     for (var name in form.elements) {
         if (!form.elements.hasOwnProperty(name)) { continue; }
         var element = form.elements[name];
@@ -131,8 +132,16 @@ function _drupalgap_form_validate(form, form_state) {
         if (element.required) {
           var valid = true;
           var value = null;
+          
+          if (element.und) { 
+		     lng = 'und'
+		     }
+	       else {
+		     lng = language_default();
+	         }
+	         
           if (element.is_field) {
-            value = form_state.values[name][language_default()][0];
+            value = form_state.values[name][lng /*language_default()*/][0];
           }
           else { value = form_state.values[name]; }
           // Check for empty values.
@@ -173,13 +182,21 @@ function _drupalgap_form_validate(form, form_state) {
  */
 function drupalgap_form_state_values_assemble(form) {
   try {
-    var lng = language_default();
+    var lng; // = language_default();
     var form_state = { values: {} };
     for (var name in form.elements) {
       if (!form.elements.hasOwnProperty(name)) { continue; }
       var element = form.elements[name];
       if (name == 'submit') { continue; } // Always skip the form 'submit'.
       var id = null;
+      
+      if (element.und) { 
+		lng = 'und'
+		 }
+	   else {
+		   lng = language_default();
+	   }	
+      
       if (element.is_field) {
         form_state.values[name] = {};
         form_state.values[name][lng] = {};

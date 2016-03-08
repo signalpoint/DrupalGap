@@ -376,6 +376,13 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           if (!function_exists(hook)) { hook = false; }
         }
 
+        if (form.elements[name].und) { 
+		    language = 'und'
+		   }
+	     else {
+		   language = language_default();
+	      }
+
         // Retrieve the potential key for the element, if we don't get one
         // then it is a flat field that should be attached as a property to the
         // entity. Otherwise attach the key and value to the entity.
