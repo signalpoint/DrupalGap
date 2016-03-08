@@ -259,7 +259,6 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
         // Views (and Organic Groups)
         case 'views':
-        case 'og':
           // Prepare the path to the view.
           var path = autocomplete.path + '?' + autocomplete.filter + '=' +
             encodeURIComponent(value);
@@ -291,6 +290,7 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
         // Simple entity selection mode (provided by the entity reference
         // module), use the Index resource for the entity type.
         case 'base':
+        case 'og':
           var field_settings =
             autocomplete.field_info_field.settings;
           var index_resource = field_settings.target_type + '_index';
