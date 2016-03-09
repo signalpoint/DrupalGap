@@ -995,7 +995,8 @@ function entity_services_request_pre_postprocess_alter(options, result) {
       if (typeof result.content !== 'undefined') { return; }
       drupalgap_entity_render_content(options.service, result);
     }
-    // If we're nodes or comments, render its content, if it isn't already set.
+    // If we're indexing nodes or comments, render their content, if possible.
+    // Don't overwrite existing content, and only render fully loaded nodes.
     else if (
       (options.service == 'node' || options.service == 'comment') &&
       options.resource == 'index'
@@ -1008,8 +1009,17 @@ function entity_services_request_pre_postprocess_alter(options, result) {
             typeof object.content !== 'undefined' ||
             (typeof object.content === 'string' && object.content != '')
           ) { continue; }
-          dpm('rendering after index!');
-          drupalgap_entity_render_content(options.service, result[index]);
+
+        // When dealing with nodes, only render fully loaded nodes.
+        var ok_to_render = true;
+        if (
+          options.service == 'node' &&
+          typeof options.query.options.entity_load === 'undefined' ||
+          !options.query.options.entity_load
+        ) { ok_to_render = false; }
+        if (!ok_to_render) { continue; }
+
+        drupalgap_entity_render_content(options.service, result[index]);
       }
     }
   }
