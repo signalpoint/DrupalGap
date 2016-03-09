@@ -29,7 +29,7 @@ function theme_autocomplete(variables) {
     // id to the variables so it can be passed along.
     var autocomplete_id = null;
     if (typeof variables.field_info_field !== 'undefined') {
-      autocomplete_id = variables.field_info_field.field_name;
+      autocomplete_id = variables.field_info_field.field_name + '_' + variables.delta;
     }
     else if (typeof variables.attributes.id !== 'undefined') {
       autocomplete_id = variables.attributes.id;
@@ -38,7 +38,8 @@ function theme_autocomplete(variables) {
     variables.autocomplete_id = autocomplete_id;
 
     // Hold onto a copy of the variables.
-    _theme_autocomplete_variables[autocomplete_id] = variables;
+    _theme_autocomplete_variables[autocomplete_id] = {};
+    $.extend(true, _theme_autocomplete_variables[autocomplete_id], variables);
 
     // Are we dealing with a remote data set?
     var remote = false;
@@ -147,10 +148,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
     // Make sure a value and/or label has been supplied so we know how to render
     // the items in the autocomplete list.
-    var value_provided =
-      typeof autocomplete.value !== 'undefined' ? true : false;
-    var label_provided =
-      typeof autocomplete.label !== 'undefined' ? true : false;
+    var value_provided = typeof autocomplete.value !== 'undefined';
+    var label_provided = typeof autocomplete.label !== 'undefined';
     if (!value_provided && !label_provided) {
       console.log(
         '_theme_autocomplete - A "value" and/or "label" was not supplied.'
@@ -260,7 +259,6 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
         // Views (and Organic Groups)
         case 'views':
-        case 'og':
           // Prepare the path to the view.
           var path = autocomplete.path + '?' + autocomplete.filter + '=' +
             encodeURIComponent(value);
@@ -292,6 +290,7 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
         // Simple entity selection mode (provided by the entity reference
         // module), use the Index resource for the entity type.
         case 'base':
+        case 'og':
           var field_settings =
             autocomplete.field_info_field.settings;
           var index_resource = field_settings.target_type + '_index';
@@ -308,18 +307,11 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           };
           options.parameters[autocomplete.filter] = '%' + value + '%';
           options.parameters_op[autocomplete.filter] = 'like';
-          for (var bundle in field_settings.handler_settings.target_bundles) {
-              if (!field_settings.handler_settings.target_bundles.hasOwnProperty(bundle)) { continue; }
-              var name = field_settings.handler_settings.target_bundles[bundle];
-              options.parameters.type = bundle;
-              // @TODO allow multiple bundles to be indexed.
-              break;
-          }
-          var fn = window[index_resource];
-          fn(options, {
+          var bundles = entityreference_get_target_bundles(field_settings);
+          if (bundles) { options.parameters[entity_get_bundle_name(field_settings.target_type)] = bundles.join(','); }
+          window[index_resource](options, {
               success: function(results) {
-                var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, results, false);
+                _theme_autocomplete_success_handlers[autocomplete_id](autocomplete_id, results, false);
               }
           });
           break;
@@ -382,6 +374,10 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
       }
 
+    }
+    else {
+      // The autocomplete text field was emptied, clear out the hidden value.
+      $('#' + autocomplete.id).val('');
     }
   }
   catch (error) { console.log('_theme_autocomplete - ' + error); }

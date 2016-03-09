@@ -361,7 +361,7 @@ function drupalgap_back() {
     else if (active_page_id == '_drupalgap_splash') { return; }
     else { _drupalgap_back(); }
   }
-  catch (error) { console.log('drupalgap_back' + error); }
+  catch (error) { console.log('drupalgap_back - ' + error); }
 }
 
 /**
@@ -372,15 +372,23 @@ function _drupalgap_back() {
     // @WARNING - any changes here (except the history.back() call) need to be
     // reflected into the window "navigate" handler below
     drupalgap.back = true;
-    history.back();
+
+    // Properly handle iOS9 back button clicks, and default back button clicks.
+    if (typeof device !== 'undefined' && device.platform === "iOS" && parseInt(device.version) === 9) {
+      $.mobile.back();
+    }
+    else { history.back(); }
+
+    // Update the path and router path.
     drupalgap_path_set(drupalgap.back_path.pop());
     drupalgap_router_path_set(
       drupalgap_get_menu_link_router_path(
         drupalgap_path_get()
       )
     );
+
   }
-  catch (error) { console.log('drupalgap_back' + error); }
+  catch (error) { console.log('_drupalgap_back - ' + error); }
 }
 
 /**
@@ -412,6 +420,7 @@ $(window).on('navigate', function(event, data) {
         // @WARNING - any changes here should be reflected into
         // _drupalgap_back().
         drupalgap.back = true;
+        // Update the path and router path.
         drupalgap_path_set(drupalgap.back_path[drupalgap.back_path.length - 1]);
         drupalgap_router_path_set(
           drupalgap_get_menu_link_router_path(

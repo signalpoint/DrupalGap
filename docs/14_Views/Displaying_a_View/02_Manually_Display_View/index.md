@@ -1,0 +1,3 @@
+It's possible to manually retrieve the results of a View, iterate over the results, and display them according to our needs. The built in [Views Render Array](Views_Render_Array) feature handles this job the majority of the time, but when we're looking for more flexibility, we can take a `pageshow` approach.
+
+Here are two examples that manually retrieve the results of a View from Drupal, iterate over the results, and render each on the page.

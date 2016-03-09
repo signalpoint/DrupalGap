@@ -1,4 +1,11 @@
 /**
+ * Implements hook_install().
+ */
+function entity_install() {
+  entity_clean_local_storage();
+}
+
+/**
  * Given an entity type, bundle name, form and entity, this will add the
  * entity's core fields to the form via the DrupalGap forms api.
  * @param {String} entity_type
@@ -500,14 +507,19 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
               // If the field value was null, we won't send along the field, so
               // just remove it. Except for list_boolean fields, they need a
               // null value to set the field value to false.
-              // @TODO - will this cause issues with multi value fields? i.e. if
-              // delta zero is null, but delta one isn't, this will probably
-              // destroy the field, derp.
               if (
                 field_value === null &&
                 typeof entity[name] !== 'undefined' &&
                 form.elements[name].type != 'list_boolean'
-              ) { delete entity[name]; }
+              ) {
+                if (is_field) {
+                  if (delta == 0) { delete entity[name]; }
+                  else if (typeof entity[name][language][delta] !== 'undefined') {
+                    delete entity[name][language][delta];
+                  }
+                }
+                else { delete entity[name]; }
+              }
 
               // If we had an optional select list, and no options were
               // selected, delete the empty field from the assembled entity.
@@ -680,11 +692,6 @@ function drupalgap_entity_get_core_fields(entity_type, bundle) {
           case '2':
             fields['mail'].required = true;
             fields['homepage'].required = true;
-            break;
-          default:
-            console.log('WARNING: drupalgap_entity_get_core_fields - ' +
-              'Unknown anonymous comment setting (' + content_type + '): ' +
-              comment_anonymous);
             break;
         }
         // Only anonymous users get the mail and homepage fields.
@@ -899,6 +906,7 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
     // Get the container id, set the drupalgap.output to the page build, then
     // inject the rendered page into the container.
     var id = _drupalgap_entity_page_container_id(entity_type, entity_id, mode);
+    module_invoke_all('entity_view_alter', entity_type, entity_id, mode, build);
     drupalgap.output = build;
     $('#' + id).html(drupalgap_render_page()).trigger('create');
   }

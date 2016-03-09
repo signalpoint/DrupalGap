@@ -1,0 +1,20 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": [
+            "/var/www/html/drupalgap.web/7/mobile-application/jDrupal/src",
+            "/var/www/html/drupalgap.web/7/mobile-application/src"
+        ]
+    },
+    "plugins": [],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true,
+            "layoutFile": "/var/www/html/drupalgap.web/7/mobile-application/docs/jsdocLayout.tmpl"
+        }
+    }
+}

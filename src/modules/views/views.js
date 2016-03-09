@@ -146,6 +146,11 @@ function views_datasource_get_view_result(path, options) {
  */
 function views_exposed_form(form, form_state, options) {
   try {
+
+    //console.log(form);
+    //console.log(form_state);
+    //console.log(options);
+
     // @TODO we tried to make the filters collapsible, but jQM doesn't seem to
     // like collapsibles with form inputs in them... weird.
     //var title = form.title ? form.title : 'Filter';
@@ -216,7 +221,25 @@ function views_exposed_form(form, form_state, options) {
           // This is NOT an entity field, so it is probably a core field (e.g.
           // nid, status, etc). Let's assemble the element. In some cases we may
           // just be able to forward it to a pre-existing handler.
-          if (element.type == 'select') {
+
+          // "Has taxonomy term" exposed filter.
+          if (filter.definition.handler == 'views_handler_filter_term_node_tid') {
+            element.type = 'autocomplete';
+            var autocomplete = {
+              remote: true,
+              custom: true,
+              handler: 'index',
+              entity_type: 'taxonomy_term',
+              value: 'name',
+              label: 'name',
+              filter: 'name'
+            };
+            if (filter.options.vocabulary != '') {
+              autocomplete.vid = taxonomy_vocabulary_get_vid_from_name(filter.options.vocabulary);
+            }
+            $.extend(element, autocomplete, true);
+          }
+          else if (element.type == 'select') {
             list_views_exposed_filter(form, form_state, element, filter, null);
           }
           else {
@@ -400,7 +423,7 @@ function theme_view(variables) {
       jqm_page_event_callback: '_theme_view',
       jqm_page_event_args: JSON.stringify(variables)
     };
-    return html += drupalgap_jqm_page_event_script_code(options);
+    return html += drupalgap_jqm_page_event_script_code(options, variables.attributes.id);
   }
   catch (error) { console.log('theme_view - ' + error); }
 }

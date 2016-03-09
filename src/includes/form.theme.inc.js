@@ -255,10 +255,12 @@ function theme_select(variables) {
           if (value == 'attributes') { continue; } // Skip the attributes.
           // Is the option selected?
           var selected = '';
-          if (
-            typeof variables.value !== 'undefined' &&
-            variables.value == value
-          ) { selected = ' selected '; }
+          if (typeof variables.value !== 'undefined') {
+            if (
+              ($.isArray(variables.value) && in_array(value, variables.value)) ||
+              variables.value == value
+            ) { selected = ' selected '; }
+          }
           // Render the option.
           options += '<option value="' + value + '" ' + selected + '>' +
             label +

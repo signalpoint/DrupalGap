@@ -1,0 +1,168 @@
+#!/bin/bash
+
+
+# Ideal source.png would be 1280x1280, but a min of 512x512 is OK.
+
+# usage:
+# ./drupalgap_icon_generator android source.png "#f56800"
+# ./drupalgap_icon_generator ios source.png "#f56800"
+
+function drupalgap_android() {
+  IMAGE="$1";
+  BG="$2";
+  DIRECTORY="app-icons";
+
+  if [ ! -d "$DIRECTORY" ]; then
+    mkdir $DIRECTORY
+  fi
+
+  cd "$DIRECTORY"
+
+  DIR="drawable";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 96x96 "$DIR/icon.png"
+
+  DIR="drawable-hdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 72x72 "$DIR/icon.png"
+
+  DIR="drawable-ldpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 36x36 "$DIR/icon.png"
+
+  DIR="drawable-mdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 48x48 "$DIR/icon.png"
+
+  DIR="drawable-xhdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -resize 96x96 "$DIR/icon.png"
+
+  DIR="drawable-land-hdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 800x480  "$DIR/screen.png"
+
+  DIR="drawable-land-ldpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 320x200  "$DIR/screen.png"
+
+  DIR="drawable-land-mdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 480x320  "$DIR/screen.png"
+
+  DIR="drawable-land-xhdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 1280x720  "$DIR/screen.png"
+
+  DIR="drawable-port-hdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 480x800  "$DIR/screen.png"
+
+  DIR="drawable-port-ldpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 200x320  "$DIR/screen.png"
+
+  DIR="drawable-port-mdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 320x480  "$DIR/screen.png"
+
+  DIR="drawable-port-xhdpi";
+  if [ ! -d "$DIR" ]; then
+    mkdir "$DIR"
+  fi
+  convert "../$IMAGE" -gravity center -background "$BG" -extent 720x1280  "$DIR/screen.png"
+
+}
+
+function drupalgap_ios() {
+  IMAGE="$1";
+  BG="$2";
+  DIRECTORY="app-icons";
+  PLATFORM="ios";
+
+  if [ ! -d "$DIRECTORY" ]; then
+    mkdir $DIRECTORY
+  fi
+
+  cd "$DIRECTORY"
+
+  if [ ! -d "$PLATFORM" ]; then
+    mkdir $PLATFORM
+  fi
+  cd "$PLATFORM"
+  if [ ! -d "icons" ]; then
+    mkdir "icons"
+  fi
+  if [ ! -d "splash" ]; then
+    mkdir "splash"
+  fi
+
+  # Icons
+  cd "icons"
+  IMAGE_PATH="$IMAGE"
+
+  convert "$IMAGE_PATH" -resize 40x40 "icon-40.png"
+  convert "$IMAGE_PATH" -resize 80x80 "icon-40@2x.png"
+  convert "$IMAGE_PATH" -resize 50x50 "icon-50.png"
+  convert "$IMAGE_PATH" -resize 100x100 "icon-50@2x.png"
+  convert "$IMAGE_PATH" -resize 60x60 "icon-60.png"
+  convert "$IMAGE_PATH" -resize 120x120 "icon-60@2x.png"
+  convert "$IMAGE_PATH" -resize 180x180 "icon-60@3x.png"
+  convert "$IMAGE_PATH" -resize 72x72 "icon-72.png"
+  convert "$IMAGE_PATH" -resize 144x144 "icon-72@2x.png"
+  convert "$IMAGE_PATH" -resize 76x76 "icon-76.png"
+  convert "$IMAGE_PATH" -resize 152x152 "icon-76@2x.png"
+  convert "$IMAGE_PATH" -resize 29x29 "Icon-Small.png"
+  convert "$IMAGE_PATH" -resize 58x58 "Icon-Small@2x.png"
+  convert "$IMAGE_PATH" -resize 87x87 "Icon-Small@3x.png"
+  convert "$IMAGE_PATH" -resize 57x57 "Icon.png"
+  convert "$IMAGE_PATH" -resize 114x114 "Icon@2x.png"
+  convert "$IMAGE_PATH" -resize 512x512 "iTunesArtwork.png"
+  convert "$IMAGE_PATH" -resize 1024x1024 "iTunesArtwork@2x.png"
+
+  # Splash
+  cd "../splash"
+
+  convert "$1" -gravity center -background "$BG" -extent 640x1136 "Default-568h@2x~iphone.png"
+  convert "$1" -gravity center -background "$BG" -extent 640x1136 "Default-667h.png"
+  convert "$1" -gravity center -background "$BG" -extent 1242x2208 "Default-736h.png"
+  convert "$1" -gravity center -background "$BG" -extent 2208x1242 "Default-Landscape-736h.png"
+  convert "$1" -gravity center -background "$BG" -extent 2208x1242 "Default-Landscape@2x~ipad.png"
+  convert "$1" -gravity center -background "$BG" -extent 1024x768 "Default-Landscape~ipad.png"
+  convert "$1" -gravity center -background "$BG" -extent 1242x2208 "Default-Portrait@2x~ipad.png"
+  convert "$1" -gravity center -background "$BG" -extent 750x1334 "Default-Portrait~ipad.png"
+  convert "$1" -gravity center -background "$BG" -extent 320x480 "Default.png"
+  convert "$1" -gravity center -background "$BG" -extent 640x960 "Default@2x~iphone.png"
+  convert "$1" -gravity center -background "$BG" -extent 320x480 "Default~iphone.png"
+
+}
+
+case "$1" in
+android) drupalgap_android $2 $3;;
+ios) drupalgap_ios $2 $3;;
+esac
+

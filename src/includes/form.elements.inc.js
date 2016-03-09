@@ -285,6 +285,7 @@ function _drupalgap_form_render_element(form, element) {
     for (var delta in items) {
         if (!items.hasOwnProperty(delta)) { continue; }
         var item = items[delta];
+
         // We'll render the item, unless we prove otherwise.
         render_item = true;
 
@@ -361,13 +362,17 @@ function _drupalgap_form_render_element(form, element) {
           );
         }
 
-        // Render the element item, unless it wasn't supported.
-        item_html = _drupalgap_form_render_element_item(
+        // Render the element item, unless it wasn't supported. Before rendering, clear out any default values so they
+        // aren't stale for the next delta item.
+        item_html += _drupalgap_form_render_element_item(
           form,
           element,
           variables,
           item
         );
+        if (typeof variables.default_value !== 'undefined') { delete variables.default_value; }
+        if (typeof variables.default_value_label !== 'undefined') { delete variables.default_value_label; }
+        if (typeof variables.value !== 'undefined') { delete variables.value; }
         if (typeof item_html === 'undefined') {
           render_item = false;
           break;

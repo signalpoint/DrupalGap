@@ -1,0 +1,1 @@
+Before compiling or publishing our app, we need to setup the development environment to launch the app. Follow the [install page instructions](Compiling_a_Mobile_Application/Preparing_PhoneGap/Installing_PhoneGap) to setup an Android or iOS project using the PhoneGap (Cordova) Command Line Interface (CLI).

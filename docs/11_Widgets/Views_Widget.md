@@ -1,0 +1,1 @@
+Visit the [Views Render Array](../Views/Displaying_a_View/Views_Render_Array) page for complete details on utilizing DrupalGap's built in Views Widget. If you've never created a Views Widget in DrupalGap before, we recommend starting with the [DrupalGap Views](../Views) documentation page.
