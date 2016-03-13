@@ -24,4 +24,4 @@ The URL above assumes you installed the DrupalGap SDK in a folder called **mobil
 
 Then set your installed SDK variable to true:
 
-`drush vset drupalgap_sdk_installed 1`
+`drush "vset drupalgap_sdk_installed 1"`
