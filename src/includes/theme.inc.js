@@ -29,22 +29,24 @@ function theme(hook, variables) {
     if (!variables) { variables = {}; }
     if (variables.markup) { return variables.markup; }
     var content = '';
+    if (!hook) { return content; }
 
     // First see if the current theme implements the hook, if it does use it, if
     // it doesn't fallback to the core theme implementation of the hook.
     var theme_function = drupalgap.settings.theme + '_' + hook;
     if (!function_exists(theme_function)) {
       theme_function = 'theme_' + hook;
+
+      // Fail safely an informative message if a bogus hook was passed in.
       if (!function_exists(theme_function)) {
         var caller = null;
-        if (arguments.callee.caller) {
-          caller = arguments.callee.caller.name;
-        }
+        if (arguments.callee.caller) { caller = arguments.callee.caller.name; }
         var msg = 'WARNING: ' + theme_function + '() does not exist.';
         if (caller) { msg += ' Called by: ' + caller + '().' }
         console.log(msg);
         return content;
       }
+
     }
 
     // If no attributes are coming in, look to variables.options.attributes
