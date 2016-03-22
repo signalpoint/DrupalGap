@@ -99,6 +99,7 @@ function drupalgap_init() {
   // Extend jDrupal as needed...
 
   // Forms will expire upon install and don't have an expiration time.
+  if (!Drupal.cache_expiration) { Drupal.cache_expiration = {}; }
   if (!Drupal.cache_expiration.forms) { Drupal.cache_expiration.forms = {}; }
 
   // Finally return the JSON object.
