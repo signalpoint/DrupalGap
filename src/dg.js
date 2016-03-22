@@ -348,7 +348,8 @@ function drupalgap_load_modules() {
             var dir = drupalgap_modules_get_bundle_directory(bundle);
             module_base_path = dir + '/' + module.name;
             // Add module .js file to array of paths to load.
-            module_path = module_base_path + '/' + module.name + '.js';
+            var extension = module.minified ? '.min.js' : '.js';
+            module_path = module_base_path + '/' + module.name + extension;
             modules_paths = [module_path];
             // If there are any includes with this module, add them to the
             // list of paths to include.
