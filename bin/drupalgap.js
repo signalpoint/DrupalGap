@@ -1,4 +1,4 @@
-/*! drupalgap 2016-03-20 */
+/*! drupalgap 2016-03-22 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -100,6 +100,7 @@ function drupalgap_init() {
   // Extend jDrupal as needed...
 
   // Forms will expire upon install and don't have an expiration time.
+  if (!Drupal.cache_expiration) { Drupal.cache_expiration = {}; }
   if (!Drupal.cache_expiration.forms) { Drupal.cache_expiration.forms = {}; }
 
   // Finally return the JSON object.
@@ -2586,8 +2587,9 @@ function _drupalgap_form_render_elements(form) {
             element.is_field &&
             typeof element.field_info_instance.widget.weight !== 'undefined'
           ) {
-            content_weighted[element.field_info_instance.widget.weight] =
-              _drupalgap_form_render_element(form, element);
+            var weight = element.field_info_instance.widget.weight;
+            while (typeof content_weighted[weight] !== 'undefined') { weight += .1; }
+            content_weighted['' + weight] = _drupalgap_form_render_element(form, element);
           }
           else {
             // Extract the bundle. Note, on comments the bundle is prefixed with
@@ -4558,7 +4560,7 @@ function drupalgap_back() {
 }
 
 /**
- * Change the page to the previous page.
+ * An internal function used to change the page to the previous page.
  */
 function _drupalgap_back() {
   try {
@@ -4573,12 +4575,11 @@ function _drupalgap_back() {
     else { history.back(); }
 
     // Update the path and router path.
+    var from = drupalgap_path_get();
     drupalgap_path_set(drupalgap.back_path.pop());
-    drupalgap_router_path_set(
-      drupalgap_get_menu_link_router_path(
-        drupalgap_path_get()
-      )
-    );
+    var to = drupalgap_path_get();
+    drupalgap_router_path_set(drupalgap_get_menu_link_router_path(to));
+    module_invoke_all('drupalgap_back', from, to);
 
   }
   catch (error) { console.log('_drupalgap_back - ' + error); }
@@ -4610,16 +4611,14 @@ $(window).on('navigate', function(event, data) {
       // back, forward (or undefined, aka moving from splash to front page)
       var direction = data.state.direction;
       if (direction == 'back' && drupalgap.back_path.length > 0) {
-        // @WARNING - any changes here should be reflected into
-        // _drupalgap_back().
+        // @WARNING - any changes here should be reflected into _drupalgap_back().
         drupalgap.back = true;
         // Update the path and router path.
-        drupalgap_path_set(drupalgap.back_path[drupalgap.back_path.length - 1]);
-        drupalgap_router_path_set(
-          drupalgap_get_menu_link_router_path(
-            drupalgap_path_get()
-          )
-        );
+        var from = drupalgap_path_get();
+        drupalgap_path_set(drupalgap.back_path.pop());
+        var to = drupalgap_path_get();
+        drupalgap_router_path_set(drupalgap_get_menu_link_router_path(to));
+        module_invoke_all('drupalgap_back', from, to);
       }
     }
 
@@ -6934,6 +6933,26 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
  * appears to be an anonymous user.
  */
 function hook_deviceready() {}
+
+/**
+ * Take action when the user presses the "back" button. This includes the soft,
+ * hardware and browser back buttons. The browser back button is only available
+ * in web app mode, the hardware back button is typically only on compiled
+ * Android devices, whereas the soft back button actually appears within the UX
+ * of the app.
+ * @param {String} from
+ * @param {String} to
+ * @see http://docs.drupalgap.org/7/Widgets/Buttons/Back_Button
+ */
+function hook_drupalgap_back(from, to) {
+
+  // When the user navigates from the front page to the login page, show them
+  // a message (a toast).
+  if (from == drupalgap.settings.front && to == 'user/login') {
+    drupalgap_toast('Please login to continue');
+  }
+
+}
 
 /**
  * Each time a page is navigated to within the app, drupalgap_goto() is called.
@@ -9673,6 +9692,10 @@ function options_field_widget_form(form, form_state, field, instance, langcode, 
                   field.field_name
               )
           });
+        break;
+      default:
+          var msg = 'options_field_widget_form - unknown widget type: ' + element.type;
+          console.log(msg);
         break;
     }
   }
