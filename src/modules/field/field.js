@@ -648,6 +648,10 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               )
           });
         break;
+      default:
+          var msg = 'options_field_widget_form - unknown widget type: ' + element.type;
+          console.log(msg);
+        break;
     }
   }
   catch (error) { console.log('options_field_widget_form - ' + error); }
