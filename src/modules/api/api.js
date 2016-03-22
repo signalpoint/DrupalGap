@@ -119,6 +119,26 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
 function hook_deviceready() {}
 
 /**
+ * Take action when the user presses the "back" button. This includes the soft,
+ * hardware and browser back buttons. The browser back button is only available
+ * in web app mode, the hardware back button is typically only on compiled
+ * Android devices, whereas the soft back button actually appears within the UX
+ * of the app.
+ * @param {String} from
+ * @param {String} to
+ * @see http://docs.drupalgap.org/7/Widgets/Buttons/Back_Button
+ */
+function hook_drupalgap_back(from, to) {
+
+  // When the user navigates from the front page to the login page, show them
+  // a message (a toast).
+  if (from == drupalgap.settings.front && to == 'user/login') {
+    drupalgap_toast('Please login to continue');
+  }
+
+}
+
+/**
  * Each time a page is navigated to within the app, drupalgap_goto() is called.
  * Use this hook to do some preprocessing before drupalgap_goto() gets started.
  * @param {String} path The current page path.

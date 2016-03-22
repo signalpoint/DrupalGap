@@ -365,7 +365,7 @@ function drupalgap_back() {
 }
 
 /**
- * Change the page to the previous page.
+ * An internal function used to change the page to the previous page.
  */
 function _drupalgap_back() {
   try {
@@ -380,12 +380,11 @@ function _drupalgap_back() {
     else { history.back(); }
 
     // Update the path and router path.
+    var from = drupalgap_path_get();
     drupalgap_path_set(drupalgap.back_path.pop());
-    drupalgap_router_path_set(
-      drupalgap_get_menu_link_router_path(
-        drupalgap_path_get()
-      )
-    );
+    var to = drupalgap_path_get();
+    drupalgap_router_path_set(drupalgap_get_menu_link_router_path(to));
+    module_invoke_all('drupalgap_back', from, to);
 
   }
   catch (error) { console.log('_drupalgap_back - ' + error); }
@@ -417,16 +416,14 @@ $(window).on('navigate', function(event, data) {
       // back, forward (or undefined, aka moving from splash to front page)
       var direction = data.state.direction;
       if (direction == 'back' && drupalgap.back_path.length > 0) {
-        // @WARNING - any changes here should be reflected into
-        // _drupalgap_back().
+        // @WARNING - any changes here should be reflected into _drupalgap_back().
         drupalgap.back = true;
         // Update the path and router path.
-        drupalgap_path_set(drupalgap.back_path[drupalgap.back_path.length - 1]);
-        drupalgap_router_path_set(
-          drupalgap_get_menu_link_router_path(
-            drupalgap_path_get()
-          )
-        );
+        var from = drupalgap_path_get();
+        drupalgap_path_set(drupalgap.back_path.pop());
+        var to = drupalgap_path_get();
+        drupalgap_router_path_set(drupalgap_get_menu_link_router_path(to));
+        module_invoke_all('drupalgap_back', from, to);
       }
     }
 

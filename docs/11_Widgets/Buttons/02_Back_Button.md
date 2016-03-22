@@ -26,3 +26,5 @@ drupalgap.settings.menus.regions['header'] = {
   ]
 };
 ```
+
+Developers, also look at [hook_drupalgap_back()](http://api.drupalgap.org/7/global.html#hook_drupalgap_back).

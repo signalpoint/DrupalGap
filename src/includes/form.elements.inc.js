@@ -106,8 +106,9 @@ function _drupalgap_form_render_elements(form) {
             element.is_field &&
             typeof element.field_info_instance.widget.weight !== 'undefined'
           ) {
-            content_weighted[element.field_info_instance.widget.weight] =
-              _drupalgap_form_render_element(form, element);
+            var weight = element.field_info_instance.widget.weight;
+            while (typeof content_weighted[weight] !== 'undefined') { weight += .1; }
+            content_weighted['' + weight] = _drupalgap_form_render_element(form, element);
           }
           else {
             // Extract the bundle. Note, on comments the bundle is prefixed with
