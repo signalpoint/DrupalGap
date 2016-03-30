@@ -9804,9 +9804,18 @@ function file_field_formatter_view(entity_type, entity, field, instance, langcod
               };
             }
 
+            // Build the path to the file.
+            var file_path = drupalgap_image_path(item.uri);
+
+            // Android can't open .pdf files in the in app browser, so have
+            // Google Docs open it instead.
+            if (item.filemime == 'application/pdf' &&
+              typeof device !== 'undefined' && device.platform == 'Android'
+            ) { file_path = 'https://docs.google.com/gview?embedded=true&url=' + file_path; }
+
             // Add the row to the table.
             content.file_table.rows.push([
-              l(item.filename, drupalgap_image_path(item.uri), { InAppBrowser: true }),
+              l(item.filename, file_path, { InAppBrowser: true }),
               Math.round(item.filesize/1000).toFixed(2) + ' KB'
             ]);
 
