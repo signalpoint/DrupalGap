@@ -1789,14 +1789,15 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
       var handler = null;
       if (autocomplete.custom) {
         if (autocomplete.handler) { handler = autocomplete.handler; }
-        else if (autocomplete.field_info_field.settings.handler) {
+        else if (autocomplete.field_info_field && autocomplete.field_info_field.settings.handler) {
           handler = autocomplete.field_info_field.settings.handler;
         }
         else { handler = 'views'; }
       }
-      else {
+      else if (autocomplete.field_info_field) {
         handler = autocomplete.field_info_field.settings.handler;
       }
+      else { handler = 'views'; }
       switch (handler) {
 
         // Views (and Organic Groups)
