@@ -48,42 +48,39 @@ function user_edit_access(account) {
  * @return {Object}
  */
 function user_listing() {
-    // Place an empty item list that will hold a list of users.
-    var content = {
-      'user_listing': {
-        'theme': 'jqm_item_list',
-        'title': t('Users'),
-        'items': [],
-        'attributes': {'id': 'user_listing_items'}
-      }
-    };
-    return content;
+  var content = {};
+  content['user_list'] = {
+    theme: 'view',
+    format: 'ul',
+    path: 'drupalgap/views_datasource/drupalgap_users',
+    row_callback: 'user_listing_row',
+    empty_callback: 'user_listing_empty',
+    attributes: {
+      id: 'user_listing_' + user_password() /* make a random id */
+    }
+  };
+  return content;
 }
 
 /**
- * The pageshow callback handler for the user listing page.
+ * The row callback for the simple user listing page.
+ * @param view
+ * @param row
+ * @returns {String}
  */
-function user_listing_pageshow() {
+function user_listing_row(view, row) {
   try {
-    // Grab some users and display them.
-    views_datasource_get_view_result(
-      'drupalgap/views_datasource/drupalgap_users',
-      {
-        success: function(data) {
-          // Extract the users into items, then drop them in the list.
-          var items = [];
-          for (var index in data.users) {
-              if (!data.users.hasOwnProperty(index)) { continue; }
-              var object = data.users[index];
-              items.push(l(object.user.name, 'user/' + object.user.uid));
-          }
-          drupalgap_item_list_populate('#user_listing_items', items);
-        }
-      }
-    );
+    return l(t(row.name), 'user/' + row.uid);
   }
-  catch (error) { console.log('user_listing_pageshow - ' + error); }
+  catch (error) { console.log('user_listing_row - ' + error); }
 }
+
+/**
+ * The empty callback for the simple user listing page.
+ * @param view
+ * @returns {String}
+ */
+function user_listing_empty(view) { return t('Sorry, no users were found.'); }
 
 /**
  * The user logout page callback.
@@ -160,13 +157,12 @@ function user_menu() {
         'weight': 0,
         'type': 'MENU_LOCAL_TASK',
         options: {reloadPage: true}
-      },
-      'user-listing': {
-        'title': t('Users'),
-        'page_callback': 'user_listing',
-        'access_arguments': ['access user profiles'],
-        'pageshow': 'user_listing_pageshow'
       }
+    };
+    items['user-listing'] = {
+      title: t('Users'),
+      page_callback: 'user_listing',
+      access_arguments: ['access user profiles']
     };
     items['user/password'] = {
       title: t('Request new password'),
