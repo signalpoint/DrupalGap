@@ -126,6 +126,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle, form, e
             required: field.required,
             description: field.description
           };
+
           var default_value = field.default_value;
           var cardinality = parseInt(field_info.cardinality);
           if (cardinality == -1) {

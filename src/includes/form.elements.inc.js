@@ -228,7 +228,7 @@ function _drupalgap_form_render_element(form, element) {
 
     // Grab the language.
     var language = language_default();
-
+      
     // We'll assume the element has no items (e.g. title, nid, vid, etc), unless
     // we determine later that this element is a field, then it'll have items.
     var items = false;
@@ -347,6 +347,10 @@ function _drupalgap_form_render_element(form, element) {
               delta,
               element
           ]);
+          // hook above may change item.value (see date.js), so put again in variables
+          if (typeof item.value !== 'undefined') {
+             variables.attributes.value = item.value;
+           }
           // @TODO - sometimes an item gets merged without a type here, why?
           // @UPDATE - did the recursive extend fix this?
           item = $.extend(true, item, items[delta]);

@@ -295,6 +295,11 @@ function drupalgap_form_load(form_id) {
                                // figure out how to handle the 'add another
                                // item' feature.
             }
+            
+            language = language_default();
+            if (!form.elements[name][language]) 
+              if (form.elements[name].und) { language = 'und'; }
+              
             // Initialize the item collections language code if it hasn't been.
             if (!form.elements[name][language]) {
               form.elements[name][language] = {};
