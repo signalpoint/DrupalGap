@@ -138,7 +138,7 @@ function theme_autocomplete(variables) {
 function _theme_autocomplete(list, e, data, autocomplete_id) {
   try {
     var autocomplete = _theme_autocomplete_variables[autocomplete_id];
-    // Make sure a filter is present.
+    // Make sure a filter is present UNLESS a contextual filter is being used. {{CES}}
     if (typeof autocomplete.filter === 'undefined') {
       console.log(
         '_theme_autocomplete - A "filter" was not supplied.'
@@ -196,34 +196,53 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
             // Convert the result into an items array for a list. Each item will
             // be a JSON object with a "value" and "label" properties.
+            // The above is true only if autocomplete.apply_post_filter is true (default)
             var items = [];
-            var _value = autocomplete.value;
-            var _label = autocomplete.label;
-            for (var index in result_items) {
+            if (!autocomplete.custom_theme) { // added {{CES}}
+              var _value = autocomplete.value;
+              var _label = autocomplete.label;
+              for (var index in result_items) {
+                  if (!result_items.hasOwnProperty(index)) { continue; }
+                  var object = result_items[index];
+                  var _item = null;
+                  if (_wrapped) { _item = object[_child]; }
+                  else { _item = object; }
+                  var item = {
+                    value: _item[_value],
+                    label: _item[_label]
+                  };
+                  items.push(item);
+              }
+              // Now render the items, add them to list and refresh the list.
+              if (items.length != 0) {
+                autocomplete.items = items;
+                var _items = _theme_autocomplete_prepare_items(autocomplete);
+                for (var index in _items) {
+                  if (!_items.hasOwnProperty(index)) { continue; }
+                  var item = _items[index];
+                  html += '<li>' + item + '</li>';
+                }
+                $ul.html(html);
+                $ul.listview('refresh');
+                $ul.trigger('updatelayout');
+              }              
+            } else { // added {CES}
+              for (var index in result_items) {
                 if (!result_items.hasOwnProperty(index)) { continue; }
                 var object = result_items[index];
                 var _item = null;
                 if (_wrapped) { _item = object[_child]; }
                 else { _item = object; }
-                var item = {
-                  value: _item[_value],
-                  label: _item[_label]
-                };
-                items.push(item);
-            }
-
-            // Now render the items, add them to list and refresh the list.
-            if (items.length != 0) {
-              autocomplete.items = items;
-              var _items = _theme_autocomplete_prepare_items(autocomplete);
-              for (var index in _items) {
-                  if (!_items.hasOwnProperty(index)) { continue; }
-                  var item = _items[index];
-                  html += '<li>' + item + '</li>';
+                var output_str = autocomplete.theme_map;
+                for (var i = 0; i < autocomplete.theme_fields.length; i++) {
+                  var pattern = new RegExp("{{" + autocomplete.theme_fields[i] + "}}");
+                  output_str = output_str.replace(pattern, _item[autocomplete.theme_fields[i]]);
+                }
+                html += '<li>' + output_str + '</li>';
+                $ul.html(html);
+                $ul.listview('refresh');
+                $ul.trigger('updatelayout');
               }
-              $ul.html(html);
-              $ul.listview('refresh');
-              $ul.trigger('updatelayout');
             }
           }
 
@@ -260,12 +279,32 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
 
         // Views (and Organic Groups)
         case 'views':
-          // Prepare the path to the view.
-          var path = autocomplete.path + '?' + autocomplete.filter + '=' +
-            encodeURIComponent(value);
-          // Any extra params to send along?
-          if (autocomplete.params) { path += '&' + autocomplete.params; }
-
+          // Check to see if we need to target an exposed filter/alias. {{CES}}
+          var contextual_content = '';
+          if (autocomplete.filter_type == 'contextual') {
+            for (var i = 0; i < autocomplete.contextual_arg_structure.length; i++) {
+              if (autocomplete.contextual_arg_structure[i] != '%') {
+                contextual_content += '/' + autocomplete.contextual_arg_structure[i];
+              } else {
+                contextual_content += '/' + value;
+              }
+            }
+          }
+          
+          // Override exposed filters if contextual filter content is available. {{CES}}
+          if (contextual_content.length > 0) {
+            autocomplete.filter = ''; // this line might not be necessary
+            // Prepare the path to the view.
+            var path = autocomplete.path + contextual_content;
+          } else {
+            // Prepare the path to the view.
+            var path = autocomplete.path + contextual_content + '?' + autocomplete.filter + '='
+              + encodeURIComponent(value);
+            
+            // Any extra params to send along?
+            if (autocomplete.params && contextual_content.length == 0) { path += '&' + autocomplete.params; }
+          }
+          
           // Retrieve JSON results. Keep in mind, we use this for retrieving
           // Views JSON results and custom hook_menu() path results in Drupal.
           views_datasource_get_view_result(path, {
