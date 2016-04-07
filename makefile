@@ -5,6 +5,7 @@ files = src/dg.js\
                                 src/includes/common.inc.js\
                                 src/includes/form.elements.inc.js\
                                 src/includes/form.inc.js\
+                                src/includes/form.load.inc.js\
                                 src/includes/form.submission.inc.js\
                                 src/includes/form.theme.inc.js\
                                 src/includes/go.inc.js\
