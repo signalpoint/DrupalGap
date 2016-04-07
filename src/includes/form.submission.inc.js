@@ -250,14 +250,12 @@ function _drupalgap_form_state_values_assemble_get_element_value(id, element) {
         // over the element option(s) in the DOM.
         value = {};
         var options = $('label[for="' + id + '"]').siblings('.ui-checkbox');
-        for (var index in options) {
-            if (!options.hasOwnProperty(index)) { continue; }
-            var option = options[index];
-            var checkbox = $(option).children('input');
-            var _value = $(checkbox).attr('value');
-            if ($(checkbox).is(':checked')) { value[_value] = _value; }
-            else { value[_value] = 0; }
-        }
+        $.each(options, function(index, option) {
+          var checkbox = $(option).children('input');
+          var _value = $(checkbox).attr('value');
+          if ($(checkbox).is(':checked')) { value[_value] = _value; }
+          else { value[_value] = 0; }
+        });
         break;
       case 'list_boolean':
         var _checkbox = $(selector);
