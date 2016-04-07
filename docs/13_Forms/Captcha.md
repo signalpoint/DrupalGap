@@ -37,3 +37,21 @@ function my_module_form_captcha_after_build($form, &$form_state) {
   return $form;
 }
 ```
+
+## Honeypot
+
+The Honeypot module can cause problems for certain forms, so you can manually remove it from DrupalGap in a custom Drupal module:
+
+```
+/**
+ * Implements hook_form_alter().
+ */
+function ngt_form_alter(&$form, $form_state, $form_id) {
+ 
+  // Disable honeypot on the DrupalGap user registration form.
+  if ($form_id == 'user_register_form' && arg(0) == 'drupalgap' && isset($form['honeypot_time'])) {
+    unset($form['honeypot_time']);
+  }
+
+}
+```
