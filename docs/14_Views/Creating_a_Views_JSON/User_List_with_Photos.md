@@ -1,6 +1,6 @@
 > There is currently [a bug in the Views datasource module](https://www.drupal.org/node/2396813) which prevents the picture's JSON data from being output properly! See [this comment](https://www.drupal.org/node/2396813#comment-10461959) for a workaround.
 
-[Click here](Displaying_a_View/Views_Render_Array/Image_Lists) to see the corresponding Views Render Array example to render a list of users and their profile pictures.
+[Click here](../Displaying_a_View/Views_Render_Array/Image_Lists) to see the corresponding Views Render Array example to render a list of users and their profile pictures.
 
 In this example, we'll create a Views JSON Page Display that returns to us a list of user names and profile pictures:
 
