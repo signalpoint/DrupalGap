@@ -39,12 +39,8 @@ function theme_checkboxes(variables) {
             value: value
           }
         };
-        if (variables.value && variables.value[value]) {
-          checkbox.checked = true;
-        }
-        html += '<label>' +
-          theme('checkbox', checkbox) + '&nbsp;' + label +
-        '</label>';
+        if (variables.value && variables.value[value]) { checkbox.checked = true; }
+        html += '<label>' + theme('checkbox', checkbox) + '&nbsp;' + label + '</label>';
     }
     // Check the box?
     /*if (variables.checked) {
