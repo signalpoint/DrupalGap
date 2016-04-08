@@ -333,7 +333,7 @@ function node_page_view_pageshow(nid) {
                             comments: comments
                         });
                         // If the comments are open, show the comment form.
-                        if (node.comment == 2) {
+                        if (node.comment == 2 && user_access('post comments')) {
                           build.content.markup += comment_form;
                         }
                         // Finally, inject the page.
@@ -355,7 +355,7 @@ function node_page_view_pageshow(nid) {
                 // the page.
                 if (node.comment == 2) {
                   build.content.markup += theme('comments', { node: node });
-                  build.content.markup += comment_form;
+                  if (user_access('post comments')) { build.content.markup += comment_form; }
                 }
                 _drupalgap_entity_page_container_inject(
                   'node', node.nid, 'view', build
