@@ -35,6 +35,10 @@ dg.theme_view = function(variables) {
           content += open + variables._row_callback(data.results[i]) + close;
         }
       }
+      else if (variables._empty) {
+        if (typeof variables._empty === 'object') { content += dg.render(variables._empty); }
+        else { content += '<div class="view-empty">' + variables._empty + '</div>'; };
+      }
       content += '</' + format + '>';
       ok({
         variables: variables,
