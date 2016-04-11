@@ -34,6 +34,11 @@ dg.theme_view = function(variables) {
           }
           content += open + variables._row_callback(data.results[i]) + close;
         }
+        var contentPrefix = variables._contentPrefix ? variables._contentPrefix : '';
+        var contentSuffix = variables._contentSuffix ? variables._contentSuffix : '';
+        if (typeof contentPrefix === 'object') { contentPrefix = dg.render(contentPrefix); }
+        if (typeof contentSuffix === 'object') { contentSuffix = dg.render(contentSuffix); }
+        content = contentPrefix + content + contentSuffix;
       }
       content += '</' + format + '>';
       ok({
