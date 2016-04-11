@@ -124,8 +124,7 @@ function theme_form_required_marker(variables) {
 function theme_number(variables) {
   try {
     variables.attributes.type = 'number';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_number - ' + error); }
 }
@@ -141,8 +140,7 @@ function theme_hidden(variables) {
     if (!variables.attributes.value && variables.value != null) {
       variables.attributes.value = variables.value;
     }
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_hidden - ' + error); }
 }
@@ -155,8 +153,7 @@ function theme_hidden(variables) {
 function theme_password(variables) {
   try {
     variables.attributes.type = 'password';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_password - ' + error); }
 }
