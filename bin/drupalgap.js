@@ -1,4 +1,4 @@
-/*! drupalgap 2016-04-07 */
+/*! drupalgap 2016-04-11 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -2807,12 +2807,11 @@ function _drupalgap_form_render_element(form, element) {
           variables.attributes['placeholder'] = placeholder;
         }
 
-        // If there wasn't a default value provided, set one. Then set the
-        // default value into the variables' attributes. Although, if we have an
-        // item value, just use that.
+        // If there wasn't a default value provided, set one. Then set the default value into the variables' attributes,
+        // if it wasn't already set, otherwise set it to the item's value.
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
-        if (typeof item.value !== 'undefined') {
+        if (typeof item.value !== 'undefined' && typeof variables.attributes.value === 'undefined') {
           variables.attributes.value = item.value;
         }
 
@@ -2830,8 +2829,6 @@ function _drupalgap_form_render_element(form, element) {
               delta,
               element
           ]);
-          // @TODO - sometimes an item gets merged without a type here, why?
-          // @UPDATE - did the recursive extend fix this?
           item = $.extend(true, item, items[delta]);
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
@@ -4024,8 +4021,7 @@ function theme_form_required_marker(variables) {
 function theme_number(variables) {
   try {
     variables.attributes.type = 'number';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_number - ' + error); }
 }
@@ -4041,8 +4037,7 @@ function theme_hidden(variables) {
     if (!variables.attributes.value && variables.value != null) {
       variables.attributes.value = variables.value;
     }
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_hidden - ' + error); }
 }
@@ -4055,8 +4050,7 @@ function theme_hidden(variables) {
 function theme_password(variables) {
   try {
     variables.attributes.type = 'password';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_password - ' + error); }
 }
