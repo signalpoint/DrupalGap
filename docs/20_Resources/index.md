@@ -6,6 +6,7 @@
 
 ## Videos:
 
+- [Building Apps is Easy with Drupal, DrupalGap, HTML, JavaScript & CSS for Apple and Android Stores](https://www.youtube.com/watch?v=MNINCbGJylY)
 - [Building Apps with DrupalGap](https://www.youtube.com/watch?v=Kc8iZh9c684) (Drupal Camp PA Pittsburgh August 2015, [View Slides](http://tylerfrankenstein.com/sites/default/files/drupalgap-drupalcamppa-2015.pdf))
 - [How to develop a native mobile app with DrupalGap](https://www.youtube.com/watch?v=YiX7v32-ZJM) (Drupal Cafe Lviv, May 2015)
 - [Building Apps by Example](https://www.youtube.com/watch?v=Q8-G8g-ixi4) (DrupalCamp MI Dearborn, January 2015)
