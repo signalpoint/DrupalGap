@@ -74,7 +74,7 @@ dg.theme = function(hook, variables) {
     if (html instanceof Promise) {
       html.then(function(data) {
         document.getElementById(data.variables._attributes.id).innerHTML = dg.render(data.content);
-        if (data.variables._callback.length) {
+        if (typeof data.variables._callback !== 'undefined' && data.variables._callback.length) {
           for (var i = 0; i < data.variables._callback.length; i++) { data.variables._callback[i](data); }
           data.variables._callback = [];
         }
