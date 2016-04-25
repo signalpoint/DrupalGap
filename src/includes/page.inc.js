@@ -367,7 +367,7 @@ function drupalgap_render_page() {
     // Since the page output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.
-    var output = drupalgap.output;
+    var output = typeof arguments[0] === 'undefined' ? drupalgap.output : arguments[0];
     var output_type = $.type(output);
     var content = '';
 
