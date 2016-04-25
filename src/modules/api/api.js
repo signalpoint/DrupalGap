@@ -198,6 +198,25 @@ function hook_block_view(delta, region) {
 function hook_404(router_path) {}
 
 /**
+ * Implements hook_entity_pre_render_content().
+ * Called before drupalgap_entity_render_content() assembles the entity.content
+ * string. Use this to make modifications to an entity before its' content is rendered.
+ */
+function hook_entity_pre_render_content(entity, entity_type, bundle) {
+  try {
+
+    // Remove access to the date field on all nodes.
+    if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
+      entity.field_date.access = false;
+    }
+
+  }
+  catch (error) {
+    console.log('hook_entity_pre_render_content - ' + error);
+  }
+}
+
+/**
  * Called after drupalgap_entity_render_content() assembles the entity.content
  * string. Use this to make modifications to the HTML output of the entity's
  * content before it is displayed.
