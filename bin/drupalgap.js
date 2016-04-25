@@ -1,4 +1,4 @@
-/*! drupalgap 2016-04-11 */
+/*! drupalgap 2016-04-12 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -5827,7 +5827,7 @@ function drupalgap_render_page() {
     // Since the page output has already been assembled, render the content
     // based on the output type. The output type will either be an html string
     // or a drupalgap render object.
-    var output = drupalgap.output;
+    var output = typeof arguments[0] === 'undefined' ? drupalgap.output : arguments[0];
     var output_type = $.type(output);
     var content = '';
 
@@ -8945,8 +8945,7 @@ function _drupalgap_entity_page_container_id(entity_type, entity_id, mode) {
  * @param {String} mode
  * @param {Object} build
  */
-function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
-  build) {
+function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode, build) {
   try {
     // Get the container id, set the drupalgap.output to the page build, then
     // inject the rendered page into the container.
