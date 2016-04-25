@@ -27,6 +27,7 @@ function theme(hook, variables) {
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
     if (!variables) { variables = {}; }
+    if (typeof variables.access !== 'undefined' && !variables.access) { return ''; }
     if (variables.markup) { return variables.markup; }
     var content = '';
     if (!hook) { return content; }
