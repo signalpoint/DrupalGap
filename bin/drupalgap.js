@@ -1,4 +1,4 @@
-/*! drupalgap 2016-04-12 */
+/*! drupalgap 2016-04-25 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -6248,6 +6248,7 @@ function theme(hook, variables) {
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
     if (!variables) { variables = {}; }
+    if (typeof variables.access !== 'undefined' && !variables.access) { return ''; }
     if (variables.markup) { return variables.markup; }
     var content = '';
     if (!hook) { return content; }
@@ -8223,6 +8224,8 @@ function drupalgap_entity_render_content(entity_type, entity) {
         extracted_weights.push(weight);
     }
     extracted_weights.sort(function(a, b) { return a - b; });
+    // Give modules a chance to pre alter the content.
+    module_invoke_all('entity_pre_render_content', entity, entity_type, bundle);
     // For each sorted weight, locate the field with the corresponding weight,
     // then render it's field content.
     var completed_fields = [];
@@ -8230,7 +8233,8 @@ function drupalgap_entity_render_content(entity_type, entity) {
         if (!extracted_weights.hasOwnProperty(weight_index)) { continue; }
         var target_weight = extracted_weights[weight_index];
         for (var field_name in field_weights) {
-            if (!field_weights.hasOwnProperty(field_name)) { continue; }
+            if (!field_weights.hasOwnProperty(field_name) || typeof entity[field_name] === 'undefined') { continue; }
+            if (typeof entity[field_name].access !== 'undefined' && !entity[field_name].access) { continue; }
             var weight = field_weights[field_name];
             if (target_weight == weight) {
               if (completed_fields.indexOf(field_name) == -1) {
@@ -8248,12 +8252,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
         }
     }
     // Give modules a chance to alter the content.
-    module_invoke_all(
-      'entity_post_render_content',
-      entity,
-      entity_type,
-      bundle
-    );
+    module_invoke_all('entity_post_render_content', entity, entity_type, bundle);
     // Update this entity in local storage so the content property sticks.
     if (entity_caching_enabled(entity_type, bundle)) {
       _entity_local_storage_save(
