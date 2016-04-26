@@ -7031,6 +7031,44 @@ function hook_block_view(delta, region) {
 function hook_404(router_path) {}
 
 /**
+ * Implements hook_entity_pre_build_content().
+ */
+function hook_entity_pre_build_content(entity, entity_type, bundle) {
+
+  // Change some weights on nodes with a date field.
+  if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
+    entity.body.weight = 0;
+    entity.field_date.weight = 1;
+  }
+}
+
+/**
+ * Implements hook_entity_post_build_content().
+ */
+function hook_entity_post_build_content(entity, entity_type, bundle) {
+
+}
+
+/**
+ * Implements hook_entity_pre_render_content().
+ * Called before drupalgap_entity_render_content() assembles the entity.content
+ * string. Use this to make modifications to an entity before its' content is rendered.
+ */
+function hook_entity_pre_render_content(entity, entity_type, bundle) {
+  try {
+
+    // Remove access to the date field on all nodes.
+    if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
+      entity.field_date.access = false;
+    }
+
+  }
+  catch (error) {
+    console.log('hook_entity_pre_render_content - ' + error);
+  }
+}
+
+/**
  * Called after drupalgap_entity_render_content() assembles the entity.content
  * string. Use this to make modifications to the HTML output of the entity's
  * content before it is displayed.
@@ -8181,41 +8219,51 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
 function drupalgap_entity_render_content(entity_type, entity) {
   try {
     entity.content = '';
-    // Render each field on the entity, using the default display. The fields
-    // need to be appended according to their weight, so we'll keep track of
-    // the weights and displays, then at the end we'll render them and append
-    // them in order onto the entity's content.
+
+    // Figure out the bundle.
     var bundle = entity.type;
     if (entity_type == 'comment') { bundle = entity.bundle; }
-    else if (entity_type == 'taxonomy_term') {
-      bundle = entity.vocabulary_machine_name;
-    }
+    else if (entity_type == 'taxonomy_term') { bundle = entity.vocabulary_machine_name; }
+
+    // Load the field info for this entity and bundle combo.
     var field_info = drupalgap_field_info_instances(entity_type, bundle);
     if (!field_info) { return; }
+
+    // Give modules a chance to pre build the content.
+    module_invoke_all('entity_pre_build_content', entity, entity_type, bundle);
+
+    // Render each field on the entity, using the drupalgap or default display.
     var field_weights = {};
     var field_displays = {};
     for (var field_name in field_info) {
         if (!field_info.hasOwnProperty(field_name)) { continue; }
         var field = field_info[field_name];
-        // Determine which display mode to use. The default mode will be used
-        // if the drupalgap display mode is not present.
+
+        // Determine which display mode to use. The default mode will be used if the drupalgap display mode is not
+        // present. If a module isn't listed on the drupalgap display, use the default display's module.
         if (!field.display) { break; }
         var display = field.display['default'];
         if (field.display['drupalgap']) {
           display = field.display['drupalgap'];
-          // If a module isn't listed on the drupalgap display, use the default
-          // display's module.
           if (
             typeof display.module === 'undefined' &&
             typeof field.display['default'].module !== 'undefined'
           ) { display.module = field.display['default'].module; }
         }
+
         // Skip hidden fields.
         if (display.type == 'hidden') { continue; }
-        // Save the field display and weight.
+
+        // Save the field display and weight. Use the weight from the field's render element if it's available,
+        // otherwise fallback to the weight mentioned in the display.
         field_displays[field_name] = display;
-        field_weights[field_name] = display.weight;
+        field_weights[field_name] = typeof entity[field_name].weight !== 'undefined' ?
+            entity[field_name].weight : display.weight;
     }
+
+    // Give modules a chance to alter the build content.
+    module_invoke_all('entity_post_build_content', entity, entity_type, bundle);
+
     // Extract the field weights and sort them.
     var extracted_weights = [];
     for (var field_name in field_weights) {
@@ -8224,8 +8272,10 @@ function drupalgap_entity_render_content(entity_type, entity) {
         extracted_weights.push(weight);
     }
     extracted_weights.sort(function(a, b) { return a - b; });
+
     // Give modules a chance to pre alter the content.
     module_invoke_all('entity_pre_render_content', entity, entity_type, bundle);
+
     // For each sorted weight, locate the field with the corresponding weight,
     // then render it's field content.
     var completed_fields = [];
@@ -8251,8 +8301,10 @@ function drupalgap_entity_render_content(entity_type, entity) {
             }
         }
     }
+
     // Give modules a chance to alter the content.
     module_invoke_all('entity_post_render_content', entity, entity_type, bundle);
+
     // Update this entity in local storage so the content property sticks.
     if (entity_caching_enabled(entity_type, bundle)) {
       _entity_local_storage_save(
@@ -8261,6 +8313,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
         entity
       );
     }
+
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
