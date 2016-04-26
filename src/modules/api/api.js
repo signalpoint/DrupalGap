@@ -198,6 +198,25 @@ function hook_block_view(delta, region) {
 function hook_404(router_path) {}
 
 /**
+ * Implements hook_entity_pre_build_content().
+ */
+function hook_entity_pre_build_content(entity, entity_type, bundle) {
+
+  // Change some weights on nodes with a date field.
+  if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
+    entity.body.weight = 0;
+    entity.field_date.weight = 1;
+  }
+}
+
+/**
+ * Implements hook_entity_post_build_content().
+ */
+function hook_entity_post_build_content(entity, entity_type, bundle) {
+
+}
+
+/**
  * Implements hook_entity_pre_render_content().
  * Called before drupalgap_entity_render_content() assembles the entity.content
  * string. Use this to make modifications to an entity before its' content is rendered.
