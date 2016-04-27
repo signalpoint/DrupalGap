@@ -6219,6 +6219,10 @@ function drupalgap_panel_id(key) {
 }
 
 
+function drupalgap_render(content) {
+  return drupalgap_render_page(content);
+}
+
 /**
  * Returns the path to the current DrupalGap theme, false otherwise.
  * @return {String|Boolean}
