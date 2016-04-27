@@ -1,4 +1,4 @@
-/*! drupalgap 2016-04-25 */
+/*! drupalgap 2016-04-26 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -8082,6 +8082,25 @@ function contact_personal_form_to_container_id(recipient) {
 }
 
 
+function drupalgap_entity_view_mode(entity_type, bundle) {
+  var view_mode = 'drupalgap';
+  if (typeof drupalgap.settings.view_modes !== 'undefined') {
+    if (entity_type && bundle) {
+      if (
+        drupalgap.settings.view_modes[entity_type] &&
+        drupalgap.settings.view_modes[entity_type][bundle] &&
+        drupalgap.settings.view_modes[entity_type][bundle].view_mode
+      ) { view_mode = drupalgap.settings.view_modes[entity_type][bundle].view_mode; }
+    }
+    else if (entity_type) {
+      if (
+          drupalgap.settings.view_modes[entity_type] &&
+          drupalgap.settings.view_modes[entity_type].view_mode
+      ) { view_mode = drupalgap.settings.view_modes[entity_type].view_mode; }
+    }
+  }
+  return view_mode;
+}
 /**
  * Implements hook_install().
  */
@@ -8240,14 +8259,14 @@ function drupalgap_entity_render_content(entity_type, entity) {
         var field = field_info[field_name];
 
         // Determine which display mode to use. The default mode will be used if the drupalgap display mode is not
-        // present. If a module isn't listed on the drupalgap display, use the default display's module.
+        // present, unless a view mode has been specified in settings.js then we'll use that config for the current
+        // entity/bundle combo. If a module isn't listed on a custom display, use the default display's module.
         if (!field.display) { break; }
         var display = field.display['default'];
-        if (field.display['drupalgap']) {
-          display = field.display['drupalgap'];
-          if (
-            typeof display.module === 'undefined' &&
-            typeof field.display['default'].module !== 'undefined'
+        var view_mode = drupalgap_entity_view_mode(entity_type, bundle);
+        if (field.display[view_mode]) {
+          display = field.display[view_mode];
+          if (typeof display.module === 'undefined' && typeof field.display['default'].module !== 'undefined'
           ) { display.module = field.display['default'].module; }
         }
 
