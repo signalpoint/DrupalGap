@@ -156,14 +156,14 @@ function drupalgap_entity_render_content(entity_type, entity) {
         var field = field_info[field_name];
 
         // Determine which display mode to use. The default mode will be used if the drupalgap display mode is not
-        // present. If a module isn't listed on the drupalgap display, use the default display's module.
+        // present, unless a view mode has been specified in settings.js then we'll use that config for the current
+        // entity/bundle combo. If a module isn't listed on a custom display, use the default display's module.
         if (!field.display) { break; }
         var display = field.display['default'];
-        if (field.display['drupalgap']) {
-          display = field.display['drupalgap'];
-          if (
-            typeof display.module === 'undefined' &&
-            typeof field.display['default'].module !== 'undefined'
+        var view_mode = drupalgap_entity_view_mode(entity_type, bundle);
+        if (field.display[view_mode]) {
+          display = field.display[view_mode];
+          if (typeof display.module === 'undefined' && typeof field.display['default'].module !== 'undefined'
           ) { display.module = field.display['default'].module; }
         }
 
