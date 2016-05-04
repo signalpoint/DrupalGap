@@ -1,4 +1,4 @@
-/*! drupalgap 2016-04-26 */
+/*! drupalgap 2016-05-03 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -47,6 +47,7 @@ function drupalgap_init() {
       back: false, /* moving backwards or not */
       back_path: [], /* paths to move back to */
       blocks: [],
+      connected: false, // Becomes true once DrupalGap performs a System Connect call.
       content_types_list: {}, /* holds info about each content type */
       date_formats: { }, /* @see system_get_date_formats() in Drupal core */
       date_types: { }, /* @see system_get_date_types() in Drupal core */
@@ -199,47 +200,41 @@ function _drupalgap_deviceready() {
       return;
     }
 
-    // Check device connection. If the device is offline, warn the user and then
-    // go to the offline page.
-    drupalgap_check_connection();
-    if (!drupalgap.online) {
-      module_invoke_all('device_offline');
-      if (drupalgap.settings.offline_message) {
-        drupalgap_alert(drupalgap.settings.offline_message, {
-            title: t('Offline'),
-            alertCallback: function() { drupalgap_goto('offline'); }
-        });
-      }
-      else {
-        drupalgap_goto('offline');
-      }
-      return;
-    }
-    else {
-
-      // Device is online, let's call any implementations of hook_deviceready().
-      // If any implementation returns false, that means they don't want
-      // DrupalGap to continue with the System Connect call, so we'll skip that
-      // and go straight to the App's front page.
-      var proceed = true;
-      var invocation_results = module_invoke_all('deviceready');
-      if (invocation_results && invocation_results.length > 0) {
-        for (var i = 0; i < invocation_results.length; i++) {
-          if (!invocation_results[i]) {
-            proceed = false;
-            break;
-          }
+    // Device is ready, let's call any implementations of hook_deviceready(). If any implementation returns
+    // false, that means they would like to take over the rest of the deviceready procedure (aka the System
+    // Connect call)
+    var proceed = true;
+    var invocation_results = module_invoke_all('deviceready');
+    if (invocation_results && invocation_results.length > 0) {
+      for (var i = 0; i < invocation_results.length; i++) {
+        if (!invocation_results[i]) {
+          proceed = false;
+          break;
         }
       }
-      if (!proceed) {
-        // @todo - if module's are going to skip the System Connect call, then
-        // we need to make sure Drupal.user is set up with appropriate defaults.
-      }
-      else {
-        // Device is online, make the system connect call.
-        system_connect(_drupalgap_deviceready_options());
-      }
     }
+
+    // If the device is offline, warn the user and then go to the offline page, unless someone implemented
+    // hook_offline, then let them handle it.
+    if (!drupalgap_has_connection()) {
+      if (!module_implements('device_offline')) {
+        if (drupalgap.settings.offline_message) {
+          drupalgap_alert(drupalgap.settings.offline_message, {
+            title: t('Offline'),
+            alertCallback: function() { drupalgap_goto('offline'); }
+          });
+        }
+        else { drupalgap_goto('offline'); }
+      }
+      else { setTimeout(function() { module_invoke_all('device_offline'); }, 1); }
+    }
+    else if (proceed) {
+
+      // Device is online and no one has taken over the deviceready, continue with the System Connect call.
+      system_connect(_drupalgap_deviceready_options());
+
+    }
+
   }
   catch (error) { console.log('_drupalgap_deviceready - ' + error); }
 }
@@ -253,6 +248,7 @@ function _drupalgap_deviceready_options() {
     var page_options = arguments[0] ? arguments[0] : {};
     return {
       success: function(result) {
+        drupalgap.connected = true;
         // Call all hook_device_connected implementations then go to
         // the front page.
         module_invoke_all('device_connected');
@@ -547,9 +543,7 @@ function drupalgap_load_locales() {
       var languages = fn();
       for (var j = 0; j < languages.length; j++) {
         var language_code = languages[i];
-        var file_path =
-          drupalgap_get_path('module', module) +
-          '/locale/' + language_code + '.json';
+        var file_path = drupalgap_get_path('module', module) + '/locale/' + language_code + '.json';
         var translations = drupalgap_file_get_contents(
           file_path,
           { dataType: 'json' }
@@ -572,6 +566,19 @@ function drupalgap_load_locales() {
 }
 
 /**
+ * Checks for an Internet connection, returns true if connected, false otherwise.
+ * @returns {boolean}
+ */
+function drupalgap_has_connection() {
+  try {
+    drupalgap_check_connection();
+    module_invoke_all('device_connection');
+    return drupalgap.online;
+  }
+  catch (error) { console.log('drupalgap_has_connection - ' + error); }
+}
+
+/**
  * Checks the devices connection and sets drupalgap.online to true if the
  * device has a connection, false otherwise.
  * @return {String}
@@ -579,19 +586,13 @@ function drupalgap_load_locales() {
  */
 function drupalgap_check_connection() {
   try {
-
-    // If we're not in PhoneGap (i.e. a web app environment, or Ripple), we'll
-    // assume we have a connection. Is this a terrible assumption? Anybody out
-    // there know?
-    // http://stackoverflow.com/q/15950382/763010
-    if (
-      drupalgap.settings.mode != 'phonegap' ||
-      typeof parent.window.ripple === 'function'
-    ) {
-      drupalgap.online = true;
-      return 'Ethernet connection';
+    // If we're not in phonegap, just use the navigator.onLine value.
+    if (drupalgap.settings.mode != 'phonegap' || typeof parent.window.ripple === 'function' ) {
+      drupalgap.online = navigator.onLine;
+      return 'Ethernet connection'; // @TODO detect real connection type.
     }
 
+    // Determine what connection phonegap has.
     var networkState = navigator.connection.type;
     var states = {};
     states[Connection.UNKNOWN] = 'Unknown connection';
@@ -601,12 +602,7 @@ function drupalgap_check_connection() {
     states[Connection.CELL_3G] = 'Cell 3G connection';
     states[Connection.CELL_4G] = 'Cell 4G connection';
     states[Connection.NONE] = 'No network connection';
-    if (states[networkState] == 'No network connection') {
-      drupalgap.online = false;
-    }
-    else {
-      drupalgap.online = true;
-    }
+    drupalgap.online = states[networkState] != 'No network connection';
     return states[networkState];
   }
   catch (error) { console.log('drupalgap_check_connection - ' + error); }
@@ -4415,6 +4411,10 @@ function drupalgap_goto(path) {
 function drupalgap_goto_generate_page_and_go(
   path, page_id, options, menu_link) {
   try {
+
+    // @TODO using a page.tpl.html is pretty dumb, this makes a disc read on each page change, use render arrays only
+    // be deprecating the page.tpl.html file, converting it to a render array and warning developers to upgrade their
+    // themes.
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
       console.log(
@@ -4432,6 +4432,7 @@ function drupalgap_goto_generate_page_and_go(
 
       // Load the page template html file. Determine if we are going to cache
       // the template file or not.
+      // @TODO another disc read here, dumb, use render arrays and deprecate.
       var file_options = {};
       if (drupalgap.settings.cache &&
           drupalgap.settings.cache.theme_registry !== 'undefined' &&
@@ -4461,7 +4462,7 @@ function drupalgap_goto_generate_page_and_go(
           drupalgap.settings.mode != 'phonegap' ||
           typeof parent.window.ripple === 'function'
         ) { destination = '#' + page_id; }
-        $.mobile.changePage(destination, options);
+        $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
@@ -6944,16 +6945,37 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
 }
 
 /**
- * When the app is first loading up, DrupalGap checks to see if the device has
- * a connection, if it does then this hook is called. Implementations of this
- * hook need to return true if they'd like DrupalGap to continue, or return
- * false if you'd like DrupalGap to NOT continue. If DrupalGap continues, it
- * will perform a System Connect resource call then go to the App's front page.
- * This is called during DrupalGap's "deviceready" implementation for PhoneGap.
- * Note, the Drupal.user object is not initialized at this point, and always
- * appears to be an anonymous user.
+ * When the app is first loading up, DrupalGap checks to see if the device has a connection, if it does then this hook
+ * is called. If DrupalGap doesn't have a connection, then hook_device_offline() is called. Implementations of
+ * hook_deviceready() need to return true if they'd like DrupalGap to continue, or return false if you'd like DrupalGap
+ * to NOT continue. If DrupalGap continues, it will perform a System Connect resource call then go to the App's front
+ * page. This is called during DrupalGap's "deviceready" implementation for PhoneGap. Note, the Drupal.user object is
+ * not initialized at this point, and will always be an anonymous user.
  */
 function hook_deviceready() {}
+
+/**
+ * When someone calls drupalgap_has_connection(), this hook has an opportunity to set drupalgap.online to true or false.
+ * The value of drupalgap.online is returned to anyone who calls drupalgap_has_connection(), including DrupalGap core.
+ */
+function hook_device_connection() {
+
+  // If it is Saturday, take the app offline and force the user to go outside and play.
+  var d = new Date();
+  if (d.getDay() == 6) { drupalgap.online = false; }
+
+}
+
+/**
+ * Called during app startup if the device does not have a connection. Note, the Drupal.user object is ot initialized at
+ * this point, and will always be an anonymous user.
+ */
+function hook_device_offline() {
+
+  // Even though we're offline, let's just go to the front page.
+  drupalgap_goto('');
+
+}
 
 /**
  * Take action when the user presses the "back" button. This includes the soft,
@@ -7379,7 +7401,6 @@ function hook_views_exposed_filter(form, form_state, element, filter, field) {
   }
   catch (error) { console.log('hook_views_exposed_filter - ' + error); }
 }
-
 
 /**
  * Implements hook_menu().
@@ -11483,6 +11504,15 @@ function node_page_view_pageshow(nid) {
             return;
           }
 
+          // Build a done handler which will inject the given build into the page container. If there was a success
+          // callback attached to the page options call it.
+          var done = function(build) {
+            _drupalgap_entity_page_container_inject(
+                'node', node.nid, 'view', build
+            );
+            if (drupalgap.page.options.success) { drupalgap.page.options.success(node); }
+          };
+
           // Figure out the title, and watch for translation.
           var default_language = language_default();
           var node_title = node.title;
@@ -11497,12 +11527,10 @@ function node_page_view_pageshow(nid) {
             'title': { markup: node_title },
             'content': { markup: node.content }
           };
+
           // If comments are undefined, just inject the page.
-          if (typeof node.comment === 'undefined') {
-            _drupalgap_entity_page_container_inject(
-              'node', node.nid, 'view', build
-            );
-          }
+          if (typeof node.comment === 'undefined') { done(build); }
+
           // If the comments are closed (1) or open (2), show the comments.
           else if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
@@ -11541,15 +11569,16 @@ function node_page_view_pageshow(nid) {
                           build.content.markup += comment_form;
                         }
                         // Finally, inject the page.
-                        _drupalgap_entity_page_container_inject(
-                          'node', node.nid, 'view', build
-                        );
+                        done(build);
                       }
                       catch (error) {
                         var msg = 'node_page_view_pageshow - comment_index - ' +
                           error;
                         console.log(msg);
                       }
+                    },
+                    error: function(xhr, status, msg) {
+                      if (drupalgap.page.options.error) { drupalgap.page.options.error(xhr, status, msg); }
                     }
                 });
               }
@@ -11561,9 +11590,7 @@ function node_page_view_pageshow(nid) {
                   build.content.markup += theme('comments', { node: node });
                   if (user_access('post comments')) { build.content.markup += comment_form; }
                 }
-                _drupalgap_entity_page_container_inject(
-                  'node', node.nid, 'view', build
-                );
+                done(build);
               }
             }
           }
@@ -11571,11 +11598,12 @@ function node_page_view_pageshow(nid) {
             // Comments are hidden (0), append an empty comments wrapper to the
             // content and inject the content into the page.
             build.content.markup += theme('comments', { node: node });
-            _drupalgap_entity_page_container_inject(
-              'node', node.nid, 'view', build
-            );
+            done(build);
           }
-        }
+        },
+      error: function(xhr, status, msg) {
+        if (drupalgap.page.options.error) { drupalgap.page.options.error(xhr, status, msg); }
+      }
     });
   }
   catch (error) { console.log('node_page_view_pageshow - ' + error); }
