@@ -279,6 +279,15 @@ function node_page_view_pageshow(nid) {
             return;
           }
 
+          // Build a done handler which will inject the given build into the page container. If there was a success
+          // callback attached to the page options call it.
+          var done = function(build) {
+            _drupalgap_entity_page_container_inject(
+                'node', node.nid, 'view', build
+            );
+            if (drupalgap.page.options.success) { drupalgap.page.options.success(node); }
+          };
+
           // Figure out the title, and watch for translation.
           var default_language = language_default();
           var node_title = node.title;
@@ -293,12 +302,10 @@ function node_page_view_pageshow(nid) {
             'title': { markup: node_title },
             'content': { markup: node.content }
           };
+
           // If comments are undefined, just inject the page.
-          if (typeof node.comment === 'undefined') {
-            _drupalgap_entity_page_container_inject(
-              'node', node.nid, 'view', build
-            );
-          }
+          if (typeof node.comment === 'undefined') { done(build); }
+
           // If the comments are closed (1) or open (2), show the comments.
           else if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
@@ -337,15 +344,16 @@ function node_page_view_pageshow(nid) {
                           build.content.markup += comment_form;
                         }
                         // Finally, inject the page.
-                        _drupalgap_entity_page_container_inject(
-                          'node', node.nid, 'view', build
-                        );
+                        done(build);
                       }
                       catch (error) {
                         var msg = 'node_page_view_pageshow - comment_index - ' +
                           error;
                         console.log(msg);
                       }
+                    },
+                    error: function(xhr, status, msg) {
+                      if (drupalgap.page.options.error) { drupalgap.page.options.error(xhr, status, msg); }
                     }
                 });
               }
@@ -357,9 +365,7 @@ function node_page_view_pageshow(nid) {
                   build.content.markup += theme('comments', { node: node });
                   if (user_access('post comments')) { build.content.markup += comment_form; }
                 }
-                _drupalgap_entity_page_container_inject(
-                  'node', node.nid, 'view', build
-                );
+                done(build);
               }
             }
           }
@@ -367,11 +373,12 @@ function node_page_view_pageshow(nid) {
             // Comments are hidden (0), append an empty comments wrapper to the
             // content and inject the content into the page.
             build.content.markup += theme('comments', { node: node });
-            _drupalgap_entity_page_container_inject(
-              'node', node.nid, 'view', build
-            );
+            done(build);
           }
-        }
+        },
+      error: function(xhr, status, msg) {
+        if (drupalgap.page.options.error) { drupalgap.page.options.error(xhr, status, msg); }
+      }
     });
   }
   catch (error) { console.log('node_page_view_pageshow - ' + error); }
