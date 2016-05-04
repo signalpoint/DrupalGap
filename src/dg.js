@@ -46,6 +46,7 @@ function drupalgap_init() {
       back: false, /* moving backwards or not */
       back_path: [], /* paths to move back to */
       blocks: [],
+      connected: false, // Becomes true once DrupalGap performs a System Connect call.
       content_types_list: {}, /* holds info about each content type */
       date_formats: { }, /* @see system_get_date_formats() in Drupal core */
       date_types: { }, /* @see system_get_date_types() in Drupal core */
@@ -198,47 +199,41 @@ function _drupalgap_deviceready() {
       return;
     }
 
-    // Check device connection. If the device is offline, warn the user and then
-    // go to the offline page.
-    drupalgap_check_connection();
-    if (!drupalgap.online) {
-      module_invoke_all('device_offline');
-      if (drupalgap.settings.offline_message) {
-        drupalgap_alert(drupalgap.settings.offline_message, {
-            title: t('Offline'),
-            alertCallback: function() { drupalgap_goto('offline'); }
-        });
-      }
-      else {
-        drupalgap_goto('offline');
-      }
-      return;
-    }
-    else {
-
-      // Device is online, let's call any implementations of hook_deviceready().
-      // If any implementation returns false, that means they don't want
-      // DrupalGap to continue with the System Connect call, so we'll skip that
-      // and go straight to the App's front page.
-      var proceed = true;
-      var invocation_results = module_invoke_all('deviceready');
-      if (invocation_results && invocation_results.length > 0) {
-        for (var i = 0; i < invocation_results.length; i++) {
-          if (!invocation_results[i]) {
-            proceed = false;
-            break;
-          }
+    // Device is ready, let's call any implementations of hook_deviceready(). If any implementation returns
+    // false, that means they would like to take over the rest of the deviceready procedure (aka the System
+    // Connect call)
+    var proceed = true;
+    var invocation_results = module_invoke_all('deviceready');
+    if (invocation_results && invocation_results.length > 0) {
+      for (var i = 0; i < invocation_results.length; i++) {
+        if (!invocation_results[i]) {
+          proceed = false;
+          break;
         }
       }
-      if (!proceed) {
-        // @todo - if module's are going to skip the System Connect call, then
-        // we need to make sure Drupal.user is set up with appropriate defaults.
-      }
-      else {
-        // Device is online, make the system connect call.
-        system_connect(_drupalgap_deviceready_options());
-      }
     }
+
+    // If the device is offline, warn the user and then go to the offline page, unless someone implemented
+    // hook_offline, then let them handle it.
+    if (!drupalgap_has_connection()) {
+      if (!module_implements('device_offline')) {
+        if (drupalgap.settings.offline_message) {
+          drupalgap_alert(drupalgap.settings.offline_message, {
+            title: t('Offline'),
+            alertCallback: function() { drupalgap_goto('offline'); }
+          });
+        }
+        else { drupalgap_goto('offline'); }
+      }
+      else { setTimeout(function() { module_invoke_all('device_offline'); }, 1); }
+    }
+    else if (proceed) {
+
+      // Device is online and no one has taken over the deviceready, continue with the System Connect call.
+      system_connect(_drupalgap_deviceready_options());
+
+    }
+
   }
   catch (error) { console.log('_drupalgap_deviceready - ' + error); }
 }
@@ -252,6 +247,7 @@ function _drupalgap_deviceready_options() {
     var page_options = arguments[0] ? arguments[0] : {};
     return {
       success: function(result) {
+        drupalgap.connected = true;
         // Call all hook_device_connected implementations then go to
         // the front page.
         module_invoke_all('device_connected');
@@ -546,9 +542,7 @@ function drupalgap_load_locales() {
       var languages = fn();
       for (var j = 0; j < languages.length; j++) {
         var language_code = languages[i];
-        var file_path =
-          drupalgap_get_path('module', module) +
-          '/locale/' + language_code + '.json';
+        var file_path = drupalgap_get_path('module', module) + '/locale/' + language_code + '.json';
         var translations = drupalgap_file_get_contents(
           file_path,
           { dataType: 'json' }
@@ -571,6 +565,19 @@ function drupalgap_load_locales() {
 }
 
 /**
+ * Checks for an Internet connection, returns true if connected, false otherwise.
+ * @returns {boolean}
+ */
+function drupalgap_has_connection() {
+  try {
+    drupalgap_check_connection();
+    module_invoke_all('device_connection');
+    return drupalgap.online;
+  }
+  catch (error) { console.log('drupalgap_has_connection - ' + error); }
+}
+
+/**
  * Checks the devices connection and sets drupalgap.online to true if the
  * device has a connection, false otherwise.
  * @return {String}
@@ -578,19 +585,13 @@ function drupalgap_load_locales() {
  */
 function drupalgap_check_connection() {
   try {
-
-    // If we're not in PhoneGap (i.e. a web app environment, or Ripple), we'll
-    // assume we have a connection. Is this a terrible assumption? Anybody out
-    // there know?
-    // http://stackoverflow.com/q/15950382/763010
-    if (
-      drupalgap.settings.mode != 'phonegap' ||
-      typeof parent.window.ripple === 'function'
-    ) {
-      drupalgap.online = true;
-      return 'Ethernet connection';
+    // If we're not in phonegap, just use the navigator.onLine value.
+    if (drupalgap.settings.mode != 'phonegap' || typeof parent.window.ripple === 'function' ) {
+      drupalgap.online = navigator.onLine;
+      return 'Ethernet connection'; // @TODO detect real connection type.
     }
 
+    // Determine what connection phonegap has.
     var networkState = navigator.connection.type;
     var states = {};
     states[Connection.UNKNOWN] = 'Unknown connection';
@@ -600,12 +601,7 @@ function drupalgap_check_connection() {
     states[Connection.CELL_3G] = 'Cell 3G connection';
     states[Connection.CELL_4G] = 'Cell 4G connection';
     states[Connection.NONE] = 'No network connection';
-    if (states[networkState] == 'No network connection') {
-      drupalgap.online = false;
-    }
-    else {
-      drupalgap.online = true;
-    }
+    drupalgap.online = states[networkState] != 'No network connection';
     return states[networkState];
   }
   catch (error) { console.log('drupalgap_check_connection - ' + error); }
