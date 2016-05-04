@@ -55,6 +55,7 @@ dg.appRender = function(content) {
 
       // Place the region, and block placeholders, into the app's div.
       document.getElementById('dg-app').innerHTML = innerHTML;
+      window.scrollTo(0,0);
 
       // Run the build promise for each block, then inject their content as they respond.
       // Keep a tally of all the blocks, and once their promises have all completed, then
