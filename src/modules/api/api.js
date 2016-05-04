@@ -135,7 +135,6 @@ function hook_device_connection() {
 function hook_device_offline() {
 
   // Even though we're offline, let's just go to the front page.
-  // Give it a slight timeout so jQuery Mobile's page is ready.
   drupalgap_goto('');
 
 }
