@@ -107,16 +107,38 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
 }
 
 /**
- * When the app is first loading up, DrupalGap checks to see if the device has
- * a connection, if it does then this hook is called. Implementations of this
- * hook need to return true if they'd like DrupalGap to continue, or return
- * false if you'd like DrupalGap to NOT continue. If DrupalGap continues, it
- * will perform a System Connect resource call then go to the App's front page.
- * This is called during DrupalGap's "deviceready" implementation for PhoneGap.
- * Note, the Drupal.user object is not initialized at this point, and always
- * appears to be an anonymous user.
+ * When the app is first loading up, DrupalGap checks to see if the device has a connection, if it does then this hook
+ * is called. If DrupalGap doesn't have a connection, then hook_device_offline() is called. Implementations of
+ * hook_deviceready() need to return true if they'd like DrupalGap to continue, or return false if you'd like DrupalGap
+ * to NOT continue. If DrupalGap continues, it will perform a System Connect resource call then go to the App's front
+ * page. This is called during DrupalGap's "deviceready" implementation for PhoneGap. Note, the Drupal.user object is
+ * not initialized at this point, and will always be an anonymous user.
  */
 function hook_deviceready() {}
+
+/**
+ * When someone calls drupalgap_has_connection(), this hook has an opportunity to set drupalgap.online to true or false.
+ * The value of drupalgap.online is returned to anyone who calls drupalgap_has_connection(), including DrupalGap core.
+ */
+function hook_device_connection() {
+
+  // If it is Saturday, take the app offline and force the user to go outside and play.
+  var d = new Date();
+  if (d.getDay() == 6) { drupalgap.online = false; }
+
+}
+
+/**
+ * Called during app startup if the device does not have a connection. Note, the Drupal.user object is ot initialized at
+ * this point, and will always be an anonymous user.
+ */
+function hook_device_offline() {
+
+  // Even though we're offline, let's just go to the front page.
+  // Give it a slight timeout so jQuery Mobile's page is ready.
+  drupalgap_goto('');
+
+}
 
 /**
  * Take action when the user presses the "back" button. This includes the soft,
@@ -542,4 +564,3 @@ function hook_views_exposed_filter(form, form_state, element, filter, field) {
   }
   catch (error) { console.log('hook_views_exposed_filter - ' + error); }
 }
-
