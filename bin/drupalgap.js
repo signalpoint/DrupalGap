@@ -6132,48 +6132,40 @@ function drupalgap_render(content) {
       var template_file_path = template.path + '/' + template_file_name;
 
       // Make sure the template file exists.
+      // @TODO disc read here, replace with render array!
       if (drupalgap_file_exists(template_file_path)) {
 
         // Loads the template file's content into a string.
         // @TODO there is a disc read here, it is slow for UX! Deprecate via a render array.
-        var template_file_html = drupalgap_file_get_contents(
-            template_file_path
-        );
+        var template_file_html = drupalgap_file_get_contents(template_file_path);
         if (template_file_html) {
 
           // What variable placeholders are present in the template file?
-          var placeholders = drupalgap_get_placeholders_from_html(
-              template_file_html
-          );
+          var placeholders = drupalgap_get_placeholders_from_html(template_file_html);
           if (placeholders) {
 
             // Replace each placeholder with html.
-            // @todo - each placeholder should have its own container div and
-            // unique id.
             for (var index in placeholders) {
               if (!placeholders.hasOwnProperty(index)) { continue; }
               var placeholder = placeholders[index];
-              var html = '';
+              var _html = '';
               if (content[placeholder]) {
                 // Grab the element variable from the content.
                 var element = content[placeholder];
                 // If it is markup, render it as is, if it is themeable,
                 // then theme it.
                 if (content[placeholder].markup) {
-                  html = content[placeholder].markup;
+                  _html = content[placeholder].markup;
                 }
                 else if (content[placeholder].theme) {
-                  html = theme(content[placeholder].theme, element);
+                  _html = theme(content[placeholder].theme, element);
                 }
                 // Now remove the variable from the content.
                 delete content[placeholder];
               }
               // Now replace the placeholder with the html, even if it was
               // empty.
-              template_file_html = template_file_html.replace(
-                  '{:' + placeholder + ':}',
-                  html
-              );
+              template_file_html = template_file_html.replace('{:' + placeholder + ':}', _html);
             }
           }
           else {
@@ -6184,25 +6176,15 @@ function drupalgap_render(content) {
           html += template_file_html;
         }
         else {
-          console.log(
-              'drupalgap_render - failed to get file contents (' +
-              template_file_path +
-              ')'
-          );
+          console.log('drupalgap_render - failed to get file contents (' + template_file_path + ')');
         }
       }
       else {
-        console.log(
-            'drupalgap_render - template file does not exist (' +
-            template_file_path +
-            ')'
-        );
+        console.log('drupalgap_render - template file does not exist (' + template_file_path + ')');
       }
     }
 
     // Iterate over any remaining variables and theme them.
-    // @todo - each remaining variables should have its own container div and
-    // unique id, similar to the placeholder div containers mentioned above.
     for (var element in content) {
       if (!content.hasOwnProperty(element)) { continue; }
       var variables = content[element];
