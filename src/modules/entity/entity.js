@@ -480,7 +480,8 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   form.elements[name].field_info_instance,
                   language,
                   delta,
-                  field_key
+                  field_key,
+                  form
                 );
               }
 
