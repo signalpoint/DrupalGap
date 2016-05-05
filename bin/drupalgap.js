@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-03 */
+/*! drupalgap 2016-05-05 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -4411,10 +4411,6 @@ function drupalgap_goto(path) {
 function drupalgap_goto_generate_page_and_go(
   path, page_id, options, menu_link) {
   try {
-
-    // @TODO using a page.tpl.html is pretty dumb, this makes a disc read on each page change, use render arrays only
-    // be deprecating the page.tpl.html file, converting it to a render array and warning developers to upgrade their
-    // themes.
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
       console.log(
@@ -4432,7 +4428,6 @@ function drupalgap_goto_generate_page_and_go(
 
       // Load the page template html file. Determine if we are going to cache
       // the template file or not.
-      // @TODO another disc read here, dumb, use render arrays and deprecate.
       var file_options = {};
       if (drupalgap.settings.cache &&
           drupalgap.settings.cache.theme_registry !== 'undefined' &&
@@ -4462,7 +4457,7 @@ function drupalgap_goto_generate_page_and_go(
           drupalgap.settings.mode != 'phonegap' ||
           typeof parent.window.ripple === 'function'
         ) { destination = '#' + page_id; }
-        $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
+        $.mobile.changePage(destination, options);
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
@@ -8604,7 +8599,8 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   form.elements[name].field_info_instance,
                   language,
                   delta,
-                  field_key
+                  field_key,
+                  form
                 );
               }
 
