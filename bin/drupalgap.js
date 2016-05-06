@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-05 */
+/*! drupalgap 2016-05-06 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -14002,8 +14002,9 @@ function user_services_postprocess(options, result) {
   try {
     // Don't process any other services.
     if (options.service != 'user') { return; }
+    var resources = ['login', 'logout', 'register'];
     // Only process login, logout and registration.
-    if (!in_array(options.resource, ['login', 'logout', 'register'])) {
+    if (!in_array(options.resource, resources) || (arg(0) != 'user' && !in_array(arg(1), resources))) {
       return;
     }
     // If there were any form errors, alert them to the user.
@@ -14014,7 +14015,7 @@ function user_services_postprocess(options, result) {
       for (var index in response) {
           if (!response.hasOwnProperty(index)) { continue; }
           var message = response[index];
-          msg += message + '\n';
+          msg += t(message) + '\n';
       }
       if (msg != '') { drupalgap_alert(msg); }
     }
