@@ -107,16 +107,57 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
 }
 
 /**
- * When the app is first loading up, DrupalGap checks to see if the device has
- * a connection, if it does then this hook is called. Implementations of this
- * hook need to return true if they'd like DrupalGap to continue, or return
- * false if you'd like DrupalGap to NOT continue. If DrupalGap continues, it
- * will perform a System Connect resource call then go to the App's front page.
- * This is called during DrupalGap's "deviceready" implementation for PhoneGap.
- * Note, the Drupal.user object is not initialized at this point, and always
- * appears to be an anonymous user.
+ * When the app is first loading up, DrupalGap checks to see if the device has a connection, if it does then this hook
+ * is called. If DrupalGap doesn't have a connection, then hook_device_offline() is called. Implementations of
+ * hook_deviceready() need to return true if they'd like DrupalGap to continue, or return false if you'd like DrupalGap
+ * to NOT continue. If DrupalGap continues, it will perform a System Connect resource call then go to the App's front
+ * page. This is called during DrupalGap's "deviceready" implementation for PhoneGap. Note, the Drupal.user object is
+ * not initialized at this point, and will always be an anonymous user.
  */
 function hook_deviceready() {}
+
+/**
+ * When someone calls drupalgap_has_connection(), this hook has an opportunity to set drupalgap.online to true or false.
+ * The value of drupalgap.online is returned to anyone who calls drupalgap_has_connection(), including DrupalGap core.
+ */
+function hook_device_connection() {
+
+  // If it is Saturday, take the app offline and force the user to go outside and play.
+  var d = new Date();
+  if (d.getDay() == 6) { drupalgap.online = false; }
+
+}
+
+/**
+ * Called during app startup if the device does not have a connection. Note, the Drupal.user object is ot initialized at
+ * this point, and will always be an anonymous user.
+ */
+function hook_device_offline() {
+
+  // Even though we're offline, let's just go to the front page.
+  drupalgap_goto('');
+
+}
+
+/**
+ * Take action when the user presses the "back" button. This includes the soft,
+ * hardware and browser back buttons. The browser back button is only available
+ * in web app mode, the hardware back button is typically only on compiled
+ * Android devices, whereas the soft back button actually appears within the UX
+ * of the app.
+ * @param {String} from
+ * @param {String} to
+ * @see http://docs.drupalgap.org/7/Widgets/Buttons/Back_Button
+ */
+function hook_drupalgap_back(from, to) {
+
+  // When the user navigates from the front page to the login page, show them
+  // a message (a toast).
+  if (from == drupalgap.settings.front && to == 'user/login') {
+    drupalgap_toast('Please login to continue');
+  }
+
+}
 
 /**
  * Each time a page is navigated to within the app, drupalgap_goto() is called.
@@ -176,6 +217,44 @@ function hook_block_view(delta, region) {
  * A hook used to handle a 404 in the app.
  */
 function hook_404(router_path) {}
+
+/**
+ * Implements hook_entity_pre_build_content().
+ */
+function hook_entity_pre_build_content(entity, entity_type, bundle) {
+
+  // Change some weights on nodes with a date field.
+  if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
+    entity.body.weight = 0;
+    entity.field_date.weight = 1;
+  }
+}
+
+/**
+ * Implements hook_entity_post_build_content().
+ */
+function hook_entity_post_build_content(entity, entity_type, bundle) {
+
+}
+
+/**
+ * Implements hook_entity_pre_render_content().
+ * Called before drupalgap_entity_render_content() assembles the entity.content
+ * string. Use this to make modifications to an entity before its' content is rendered.
+ */
+function hook_entity_pre_render_content(entity, entity_type, bundle) {
+  try {
+
+    // Remove access to the date field on all nodes.
+    if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
+      entity.field_date.access = false;
+    }
+
+  }
+  catch (error) {
+    console.log('hook_entity_pre_render_content - ' + error);
+  }
+}
 
 /**
  * Called after drupalgap_entity_render_content() assembles the entity.content
@@ -484,4 +563,3 @@ function hook_views_exposed_filter(form, form_state, element, filter, field) {
   }
   catch (error) { console.log('hook_views_exposed_filter - ' + error); }
 }
-

@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-05 */
+/*! drupalgap 2016-04-07 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -47,7 +47,6 @@ function drupalgap_init() {
       back: false, /* moving backwards or not */
       back_path: [], /* paths to move back to */
       blocks: [],
-      connected: false, // Becomes true once DrupalGap performs a System Connect call.
       content_types_list: {}, /* holds info about each content type */
       date_formats: { }, /* @see system_get_date_formats() in Drupal core */
       date_types: { }, /* @see system_get_date_types() in Drupal core */
@@ -200,41 +199,47 @@ function _drupalgap_deviceready() {
       return;
     }
 
-    // Device is ready, let's call any implementations of hook_deviceready(). If any implementation returns
-    // false, that means they would like to take over the rest of the deviceready procedure (aka the System
-    // Connect call)
-    var proceed = true;
-    var invocation_results = module_invoke_all('deviceready');
-    if (invocation_results && invocation_results.length > 0) {
-      for (var i = 0; i < invocation_results.length; i++) {
-        if (!invocation_results[i]) {
-          proceed = false;
-          break;
-        }
-      }
-    }
-
-    // If the device is offline, warn the user and then go to the offline page, unless someone implemented
-    // hook_offline, then let them handle it.
-    if (!drupalgap_has_connection()) {
-      if (!module_implements('device_offline')) {
-        if (drupalgap.settings.offline_message) {
-          drupalgap_alert(drupalgap.settings.offline_message, {
+    // Check device connection. If the device is offline, warn the user and then
+    // go to the offline page.
+    drupalgap_check_connection();
+    if (!drupalgap.online) {
+      module_invoke_all('device_offline');
+      if (drupalgap.settings.offline_message) {
+        drupalgap_alert(drupalgap.settings.offline_message, {
             title: t('Offline'),
             alertCallback: function() { drupalgap_goto('offline'); }
-          });
-        }
-        else { drupalgap_goto('offline'); }
+        });
       }
-      else { setTimeout(function() { module_invoke_all('device_offline'); }, 1); }
+      else {
+        drupalgap_goto('offline');
+      }
+      return;
     }
-    else if (proceed) {
+    else {
 
-      // Device is online and no one has taken over the deviceready, continue with the System Connect call.
-      system_connect(_drupalgap_deviceready_options());
-
+      // Device is online, let's call any implementations of hook_deviceready().
+      // If any implementation returns false, that means they don't want
+      // DrupalGap to continue with the System Connect call, so we'll skip that
+      // and go straight to the App's front page.
+      var proceed = true;
+      var invocation_results = module_invoke_all('deviceready');
+      if (invocation_results && invocation_results.length > 0) {
+        for (var i = 0; i < invocation_results.length; i++) {
+          if (!invocation_results[i]) {
+            proceed = false;
+            break;
+          }
+        }
+      }
+      if (!proceed) {
+        // @todo - if module's are going to skip the System Connect call, then
+        // we need to make sure Drupal.user is set up with appropriate defaults.
+      }
+      else {
+        // Device is online, make the system connect call.
+        system_connect(_drupalgap_deviceready_options());
+      }
     }
-
   }
   catch (error) { console.log('_drupalgap_deviceready - ' + error); }
 }
@@ -248,7 +253,6 @@ function _drupalgap_deviceready_options() {
     var page_options = arguments[0] ? arguments[0] : {};
     return {
       success: function(result) {
-        drupalgap.connected = true;
         // Call all hook_device_connected implementations then go to
         // the front page.
         module_invoke_all('device_connected');
@@ -543,7 +547,9 @@ function drupalgap_load_locales() {
       var languages = fn();
       for (var j = 0; j < languages.length; j++) {
         var language_code = languages[i];
-        var file_path = drupalgap_get_path('module', module) + '/locale/' + language_code + '.json';
+        var file_path =
+          drupalgap_get_path('module', module) +
+          '/locale/' + language_code + '.json';
         var translations = drupalgap_file_get_contents(
           file_path,
           { dataType: 'json' }
@@ -566,19 +572,6 @@ function drupalgap_load_locales() {
 }
 
 /**
- * Checks for an Internet connection, returns true if connected, false otherwise.
- * @returns {boolean}
- */
-function drupalgap_has_connection() {
-  try {
-    drupalgap_check_connection();
-    module_invoke_all('device_connection');
-    return drupalgap.online;
-  }
-  catch (error) { console.log('drupalgap_has_connection - ' + error); }
-}
-
-/**
  * Checks the devices connection and sets drupalgap.online to true if the
  * device has a connection, false otherwise.
  * @return {String}
@@ -586,13 +579,19 @@ function drupalgap_has_connection() {
  */
 function drupalgap_check_connection() {
   try {
-    // If we're not in phonegap, just use the navigator.onLine value.
-    if (drupalgap.settings.mode != 'phonegap' || typeof parent.window.ripple === 'function' ) {
-      drupalgap.online = navigator.onLine;
-      return 'Ethernet connection'; // @TODO detect real connection type.
+
+    // If we're not in PhoneGap (i.e. a web app environment, or Ripple), we'll
+    // assume we have a connection. Is this a terrible assumption? Anybody out
+    // there know?
+    // http://stackoverflow.com/q/15950382/763010
+    if (
+      drupalgap.settings.mode != 'phonegap' ||
+      typeof parent.window.ripple === 'function'
+    ) {
+      drupalgap.online = true;
+      return 'Ethernet connection';
     }
 
-    // Determine what connection phonegap has.
     var networkState = navigator.connection.type;
     var states = {};
     states[Connection.UNKNOWN] = 'Unknown connection';
@@ -602,7 +601,12 @@ function drupalgap_check_connection() {
     states[Connection.CELL_3G] = 'Cell 3G connection';
     states[Connection.CELL_4G] = 'Cell 4G connection';
     states[Connection.NONE] = 'No network connection';
-    drupalgap.online = states[networkState] != 'No network connection';
+    if (states[networkState] == 'No network connection') {
+      drupalgap.online = false;
+    }
+    else {
+      drupalgap.online = true;
+    }
     return states[networkState];
   }
   catch (error) { console.log('drupalgap_check_connection - ' + error); }
@@ -2803,11 +2807,12 @@ function _drupalgap_form_render_element(form, element) {
           variables.attributes['placeholder'] = placeholder;
         }
 
-        // If there wasn't a default value provided, set one. Then set the default value into the variables' attributes,
-        // if it wasn't already set, otherwise set it to the item's value.
+        // If there wasn't a default value provided, set one. Then set the
+        // default value into the variables' attributes. Although, if we have an
+        // item value, just use that.
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
-        if (typeof item.value !== 'undefined' && typeof variables.attributes.value === 'undefined') {
+        if (typeof item.value !== 'undefined') {
           variables.attributes.value = item.value;
         }
 
@@ -2825,6 +2830,8 @@ function _drupalgap_form_render_element(form, element) {
               delta,
               element
           ]);
+          // @TODO - sometimes an item gets merged without a type here, why?
+          // @UPDATE - did the recursive extend fix this?
           item = $.extend(true, item, items[delta]);
           // If the item type got lost, replace it.
           if (!item.type && element.type) { item.type = element.type; }
@@ -4017,7 +4024,8 @@ function theme_form_required_marker(variables) {
 function theme_number(variables) {
   try {
     variables.attributes.type = 'number';
-    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
   }
   catch (error) { console.log('theme_number - ' + error); }
 }
@@ -4033,7 +4041,8 @@ function theme_hidden(variables) {
     if (!variables.attributes.value && variables.value != null) {
       variables.attributes.value = variables.value;
     }
-    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
   }
   catch (error) { console.log('theme_hidden - ' + error); }
 }
@@ -4046,7 +4055,8 @@ function theme_hidden(variables) {
 function theme_password(variables) {
   try {
     variables.attributes.type = 'password';
-    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
+    return output;
   }
   catch (error) { console.log('theme_password - ' + error); }
 }
@@ -4339,7 +4349,6 @@ function drupalgap_goto(path) {
     // page and we're not in the middle of a form submission, prevent the page
     // from processing then change to it.
     if (drupalgap_page_in_dom(page_id)) {
-
       // If there are any hook_menu() item options for this router path, bring
       // them into the current options without overwriting any existing values.
       if (drupalgap.menu_links[router_path].options) {
@@ -4349,7 +4358,6 @@ function drupalgap_goto(path) {
           options
         );
       }
-
       // Reload the page? If so, remove the page from the DOM, delete the
       // reloadPage option, then set the reloadingPage option to true so others
       // down the line will know the page is reloading. We can't pass along the
@@ -4388,7 +4396,13 @@ function drupalgap_goto(path) {
     }
 
     // Generate the page.
-    drupalgap_goto_generate_page_and_go(path, page_id, options, drupalgap.menu_links[router_path]);
+    drupalgap_goto_generate_page_and_go(
+      path,
+      page_id,
+      options,
+      drupalgap.menu_links[router_path]
+    );
+
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
 }
@@ -4407,10 +4421,6 @@ function drupalgap_goto(path) {
 function drupalgap_goto_generate_page_and_go(
   path, page_id, options, menu_link) {
   try {
-
-    // @TODO using a page.tpl.html is pretty dumb, this makes a disc read on each page change, use render arrays only
-    // be deprecating the page.tpl.html file, converting it to a render array and warning developers to upgrade their
-    // themes.
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
       console.log(
@@ -4428,7 +4438,6 @@ function drupalgap_goto_generate_page_and_go(
 
       // Load the page template html file. Determine if we are going to cache
       // the template file or not.
-      // @TODO another disc read here, dumb, use render arrays and deprecate.
       var file_options = {};
       if (drupalgap.settings.cache &&
           drupalgap.settings.cache.theme_registry !== 'undefined' &&
@@ -4458,7 +4467,7 @@ function drupalgap_goto_generate_page_and_go(
           drupalgap.settings.mode != 'phonegap' ||
           typeof parent.window.ripple === 'function'
         ) { destination = '#' + page_id; }
-        $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
+        $.mobile.changePage(destination, options);
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
@@ -5818,11 +5827,124 @@ function drupalgap_jqm_active_page_url() {
  */
 function drupalgap_render_page() {
   try {
+
     module_invoke_all('page_build', drupalgap.output);
-    return drupalgap_render(drupalgap.output);
+
+    // Since the page output has already been assembled, render the content
+    // based on the output type. The output type will either be an html string
+    // or a drupalgap render object.
+    var output = drupalgap.output;
+    var output_type = $.type(output);
+    var content = '';
+
+    // If the output came back as a string, we can render it as is. If the
+    // output came back as on object, render each element in it through the
+    // theme system.
+    if (output_type === 'string') {
+      // The page came back as an html string.
+      content = output;
+    }
+    else if (output_type === 'object') {
+      // The page came back as a render object. Let's define the names of
+      // variables that are reserved for theme processing.
+      var render_variables = ['theme', 'view_mode', 'language'];
+
+      // Is there a theme value specified in the output and the registry?
+      if (output.theme && drupalgap.theme_registry[output.theme]) {
+
+        // Extract the theme object template and determine the template file
+        // name and path.
+        var template = drupalgap.theme_registry[output.theme];
+        var template_file_name = output.theme.replace(/_/g, '-') + '.tpl.html';
+        var template_file_path = template.path + '/' + template_file_name;
+
+        // Make sure the template file exists.
+        if (drupalgap_file_exists(template_file_path)) {
+
+          // Loads the template file's content into a string.
+          var template_file_html = drupalgap_file_get_contents(
+            template_file_path
+          );
+          if (template_file_html) {
+
+            // What variable placeholders are present in the template file?
+            var placeholders = drupalgap_get_placeholders_from_html(
+              template_file_html
+            );
+            if (placeholders) {
+
+              // Replace each placeholder with html.
+              // @todo - each placeholder should have its own container div and
+              // unique id.
+              for (var index in placeholders) {
+                  if (!placeholders.hasOwnProperty(index)) { continue; }
+                  var placeholder = placeholders[index];
+                  var html = '';
+                  if (output[placeholder]) {
+                    // Grab the element variable from the output.
+                    var element = output[placeholder];
+                    // If it is markup, render it as is, if it is themeable,
+                    // then theme it.
+                    if (output[placeholder].markup) {
+                      html = output[placeholder].markup;
+                    }
+                    else if (output[placeholder].theme) {
+                      html = theme(output[placeholder].theme, element);
+                    }
+                    // Now remove the variable from the output.
+                    delete output[placeholder];
+                  }
+                  // Now replace the placeholder with the html, even if it was
+                  // empty.
+                  template_file_html = template_file_html.replace(
+                    '{:' + placeholder + ':}',
+                    html
+                  );
+              }
+            }
+            else {
+              // There were no place holders found, do nothing, ok.
+            }
+
+            // Finally add the rendered template file to the content.
+            content += template_file_html;
+          }
+          else {
+            console.log(
+              'drupalgap_render_page - failed to get file contents (' +
+                template_file_path +
+              ')'
+            );
+          }
+        }
+        else {
+          console.log(
+            'drupalgap_render_page - template file does not exist (' +
+              template_file_path +
+              ')'
+            );
+        }
+      }
+
+      // Iterate over any remaining variables and theme them.
+      // @todo - each remaining variables should have its own container div and
+      // unique id, similar to the placeholder div containers mentioned above.
+      for (var element in output) {
+        if (!output.hasOwnProperty(element)) { continue; }
+        var variables = output[element];
+        if ($.inArray(element, render_variables && typeof variables.theme !== 'undefined') == -1) {
+          content += theme(variables.theme, variables);
+        }
+      }
+    }
+
+    // Now that we are done assembling the content into an html string, we can
+    // return it.
+    return content;
   }
   catch (error) { console.log('drupalgap_render_page - ' + error); }
 }
+
 
 /**
  * Given a region, this renders it and all the blocks in it. The blocks are
@@ -6103,102 +6225,6 @@ function drupalgap_panel_id(key) {
 }
 
 
-function drupalgap_render(content) {
-
-  var output_type = $.type(content);
-  var html = '';
-
-  // If the output came back as a string, we can render it as is. If the
-  // output came back as on object, render each element in it through the
-  // theme system.
-  if (output_type === 'string') {
-    // The page came back as an html string.
-    html = content;
-  }
-  else if (output_type === 'object') {
-    // The page came back as a render object. Let's define the names of
-    // variables that are reserved for theme processing.
-    var render_variables = ['theme', 'view_mode', 'language'];
-
-    if (content.markup) { return content.markup; }
-
-    // Is there a theme value specified in the content and the registry?
-    if (content.theme && drupalgap.theme_registry[content.theme]) {
-
-      // Extract the theme object template and determine the template file
-      // name and path.
-      var template = drupalgap.theme_registry[content.theme];
-      var template_file_name = content.theme.replace(/_/g, '-') + '.tpl.html';
-      var template_file_path = template.path + '/' + template_file_name;
-
-      // Make sure the template file exists.
-      // @TODO disc read here, replace with render array!
-      if (drupalgap_file_exists(template_file_path)) {
-
-        // Loads the template file's content into a string.
-        // @TODO there is a disc read here, it is slow for UX! Deprecate via a render array.
-        var template_file_html = drupalgap_file_get_contents(template_file_path);
-        if (template_file_html) {
-
-          // What variable placeholders are present in the template file?
-          var placeholders = drupalgap_get_placeholders_from_html(template_file_html);
-          if (placeholders) {
-
-            // Replace each placeholder with html.
-            for (var index in placeholders) {
-              if (!placeholders.hasOwnProperty(index)) { continue; }
-              var placeholder = placeholders[index];
-              var _html = '';
-              if (content[placeholder]) {
-                // Grab the element variable from the content.
-                var element = content[placeholder];
-                // If it is markup, render it as is, if it is themeable,
-                // then theme it.
-                if (content[placeholder].markup) {
-                  _html = content[placeholder].markup;
-                }
-                else if (content[placeholder].theme) {
-                  _html = theme(content[placeholder].theme, element);
-                }
-                // Now remove the variable from the content.
-                delete content[placeholder];
-              }
-              // Now replace the placeholder with the html, even if it was
-              // empty.
-              template_file_html = template_file_html.replace('{:' + placeholder + ':}', _html);
-            }
-          }
-          else {
-            // There were no place holders found, do nothing, ok.
-          }
-
-          // Finally add the rendered template file to the html.
-          html += template_file_html;
-        }
-        else {
-          console.log('drupalgap_render - failed to get file contents (' + template_file_path + ')');
-        }
-      }
-      else {
-        console.log('drupalgap_render - template file does not exist (' + template_file_path + ')');
-      }
-    }
-
-    // Iterate over any remaining variables and theme them.
-    for (var element in content) {
-      if (!content.hasOwnProperty(element)) { continue; }
-      var variables = content[element];
-      if ($.inArray(element, render_variables) == -1) {
-        html += theme(typeof variables.theme === 'undefined' ? null : variables.theme, variables);
-      }
-    }
-  }
-
-  // Now that we are done assembling the content into an html string, we can
-  // return it.
-  return html;
-}
-
 /**
  * Returns the path to the current DrupalGap theme, false otherwise.
  * @return {String|Boolean}
@@ -6228,7 +6254,6 @@ function theme(hook, variables) {
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
     if (!variables) { variables = {}; }
-    if (typeof variables.access !== 'undefined' && !variables.access) { return ''; }
     if (variables.markup) { return variables.markup; }
     var content = '';
     if (!hook) { return content; }
@@ -6920,37 +6945,16 @@ function hook_assemble_form_state_into_field(entity_type, bundle,
 }
 
 /**
- * When the app is first loading up, DrupalGap checks to see if the device has a connection, if it does then this hook
- * is called. If DrupalGap doesn't have a connection, then hook_device_offline() is called. Implementations of
- * hook_deviceready() need to return true if they'd like DrupalGap to continue, or return false if you'd like DrupalGap
- * to NOT continue. If DrupalGap continues, it will perform a System Connect resource call then go to the App's front
- * page. This is called during DrupalGap's "deviceready" implementation for PhoneGap. Note, the Drupal.user object is
- * not initialized at this point, and will always be an anonymous user.
+ * When the app is first loading up, DrupalGap checks to see if the device has
+ * a connection, if it does then this hook is called. Implementations of this
+ * hook need to return true if they'd like DrupalGap to continue, or return
+ * false if you'd like DrupalGap to NOT continue. If DrupalGap continues, it
+ * will perform a System Connect resource call then go to the App's front page.
+ * This is called during DrupalGap's "deviceready" implementation for PhoneGap.
+ * Note, the Drupal.user object is not initialized at this point, and always
+ * appears to be an anonymous user.
  */
 function hook_deviceready() {}
-
-/**
- * When someone calls drupalgap_has_connection(), this hook has an opportunity to set drupalgap.online to true or false.
- * The value of drupalgap.online is returned to anyone who calls drupalgap_has_connection(), including DrupalGap core.
- */
-function hook_device_connection() {
-
-  // If it is Saturday, take the app offline and force the user to go outside and play.
-  var d = new Date();
-  if (d.getDay() == 6) { drupalgap.online = false; }
-
-}
-
-/**
- * Called during app startup if the device does not have a connection. Note, the Drupal.user object is ot initialized at
- * this point, and will always be an anonymous user.
- */
-function hook_device_offline() {
-
-  // Even though we're offline, let's just go to the front page.
-  drupalgap_goto('');
-
-}
 
 /**
  * Take action when the user presses the "back" button. This includes the soft,
@@ -7030,44 +7034,6 @@ function hook_block_view(delta, region) {
  * A hook used to handle a 404 in the app.
  */
 function hook_404(router_path) {}
-
-/**
- * Implements hook_entity_pre_build_content().
- */
-function hook_entity_pre_build_content(entity, entity_type, bundle) {
-
-  // Change some weights on nodes with a date field.
-  if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
-    entity.body.weight = 0;
-    entity.field_date.weight = 1;
-  }
-}
-
-/**
- * Implements hook_entity_post_build_content().
- */
-function hook_entity_post_build_content(entity, entity_type, bundle) {
-
-}
-
-/**
- * Implements hook_entity_pre_render_content().
- * Called before drupalgap_entity_render_content() assembles the entity.content
- * string. Use this to make modifications to an entity before its' content is rendered.
- */
-function hook_entity_pre_render_content(entity, entity_type, bundle) {
-  try {
-
-    // Remove access to the date field on all nodes.
-    if (entity_type == 'node' && typeof entity.field_date !== 'undefined') {
-      entity.field_date.access = false;
-    }
-
-  }
-  catch (error) {
-    console.log('hook_entity_pre_render_content - ' + error);
-  }
-}
 
 /**
  * Called after drupalgap_entity_render_content() assembles the entity.content
@@ -7376,6 +7342,7 @@ function hook_views_exposed_filter(form, form_state, element, filter, field) {
   }
   catch (error) { console.log('hook_views_exposed_filter - ' + error); }
 }
+
 
 /**
  * Implements hook_menu().
@@ -8082,25 +8049,6 @@ function contact_personal_form_to_container_id(recipient) {
 }
 
 
-function drupalgap_entity_view_mode(entity_type, bundle) {
-  var view_mode = 'drupalgap';
-  if (typeof drupalgap.settings.view_modes !== 'undefined') {
-    if (entity_type && bundle) {
-      if (
-        drupalgap.settings.view_modes[entity_type] &&
-        drupalgap.settings.view_modes[entity_type][bundle] &&
-        drupalgap.settings.view_modes[entity_type][bundle].view_mode
-      ) { view_mode = drupalgap.settings.view_modes[entity_type][bundle].view_mode; }
-    }
-    else if (entity_type) {
-      if (
-          drupalgap.settings.view_modes[entity_type] &&
-          drupalgap.settings.view_modes[entity_type].view_mode
-      ) { view_mode = drupalgap.settings.view_modes[entity_type].view_mode; }
-    }
-  }
-  return view_mode;
-}
 /**
  * Implements hook_install().
  */
@@ -8238,51 +8186,41 @@ function drupalgap_entity_edit_form_delete_confirmation(entity_type,
 function drupalgap_entity_render_content(entity_type, entity) {
   try {
     entity.content = '';
-
-    // Figure out the bundle.
+    // Render each field on the entity, using the default display. The fields
+    // need to be appended according to their weight, so we'll keep track of
+    // the weights and displays, then at the end we'll render them and append
+    // them in order onto the entity's content.
     var bundle = entity.type;
     if (entity_type == 'comment') { bundle = entity.bundle; }
-    else if (entity_type == 'taxonomy_term') { bundle = entity.vocabulary_machine_name; }
-
-    // Load the field info for this entity and bundle combo.
+    else if (entity_type == 'taxonomy_term') {
+      bundle = entity.vocabulary_machine_name;
+    }
     var field_info = drupalgap_field_info_instances(entity_type, bundle);
     if (!field_info) { return; }
-
-    // Give modules a chance to pre build the content.
-    module_invoke_all('entity_pre_build_content', entity, entity_type, bundle);
-
-    // Render each field on the entity, using the drupalgap or default display.
     var field_weights = {};
     var field_displays = {};
     for (var field_name in field_info) {
         if (!field_info.hasOwnProperty(field_name)) { continue; }
         var field = field_info[field_name];
-
-        // Determine which display mode to use. The default mode will be used if the drupalgap display mode is not
-        // present, unless a view mode has been specified in settings.js then we'll use that config for the current
-        // entity/bundle combo. If a module isn't listed on a custom display, use the default display's module.
+        // Determine which display mode to use. The default mode will be used
+        // if the drupalgap display mode is not present.
         if (!field.display) { break; }
         var display = field.display['default'];
-        var view_mode = drupalgap_entity_view_mode(entity_type, bundle);
-        if (field.display[view_mode]) {
-          display = field.display[view_mode];
-          if (typeof display.module === 'undefined' && typeof field.display['default'].module !== 'undefined'
+        if (field.display['drupalgap']) {
+          display = field.display['drupalgap'];
+          // If a module isn't listed on the drupalgap display, use the default
+          // display's module.
+          if (
+            typeof display.module === 'undefined' &&
+            typeof field.display['default'].module !== 'undefined'
           ) { display.module = field.display['default'].module; }
         }
-
         // Skip hidden fields.
         if (display.type == 'hidden') { continue; }
-
-        // Save the field display and weight. Use the weight from the field's render element if it's available,
-        // otherwise fallback to the weight mentioned in the display.
+        // Save the field display and weight.
         field_displays[field_name] = display;
-        field_weights[field_name] = typeof entity[field_name].weight !== 'undefined' ?
-            entity[field_name].weight : display.weight;
+        field_weights[field_name] = display.weight;
     }
-
-    // Give modules a chance to alter the build content.
-    module_invoke_all('entity_post_build_content', entity, entity_type, bundle);
-
     // Extract the field weights and sort them.
     var extracted_weights = [];
     for (var field_name in field_weights) {
@@ -8291,10 +8229,6 @@ function drupalgap_entity_render_content(entity_type, entity) {
         extracted_weights.push(weight);
     }
     extracted_weights.sort(function(a, b) { return a - b; });
-
-    // Give modules a chance to pre alter the content.
-    module_invoke_all('entity_pre_render_content', entity, entity_type, bundle);
-
     // For each sorted weight, locate the field with the corresponding weight,
     // then render it's field content.
     var completed_fields = [];
@@ -8302,8 +8236,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
         if (!extracted_weights.hasOwnProperty(weight_index)) { continue; }
         var target_weight = extracted_weights[weight_index];
         for (var field_name in field_weights) {
-            if (!field_weights.hasOwnProperty(field_name) || typeof entity[field_name] === 'undefined') { continue; }
-            if (typeof entity[field_name].access !== 'undefined' && !entity[field_name].access) { continue; }
+            if (!field_weights.hasOwnProperty(field_name)) { continue; }
             var weight = field_weights[field_name];
             if (target_weight == weight) {
               if (completed_fields.indexOf(field_name) == -1) {
@@ -8320,10 +8253,13 @@ function drupalgap_entity_render_content(entity_type, entity) {
             }
         }
     }
-
     // Give modules a chance to alter the content.
-    module_invoke_all('entity_post_render_content', entity, entity_type, bundle);
-
+    module_invoke_all(
+      'entity_post_render_content',
+      entity,
+      entity_type,
+      bundle
+    );
     // Update this entity in local storage so the content property sticks.
     if (entity_caching_enabled(entity_type, bundle)) {
       _entity_local_storage_save(
@@ -8332,7 +8268,6 @@ function drupalgap_entity_render_content(entity_type, entity) {
         entity
       );
     }
-
   }
   catch (error) {
     console.log('drupalgap_entity_render_content - ' + error);
@@ -8583,8 +8518,7 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
                   form.elements[name].field_info_instance,
                   language,
                   delta,
-                  field_key,
-                  form
+                  field_key
                 );
               }
 
@@ -9017,7 +8951,8 @@ function _drupalgap_entity_page_container_id(entity_type, entity_id, mode) {
  * @param {String} mode
  * @param {Object} build
  */
-function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode, build) {
+function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode,
+  build) {
   try {
     // Get the container id, set the drupalgap.output to the page build, then
     // inject the rendered page into the container.
@@ -11480,15 +11415,6 @@ function node_page_view_pageshow(nid) {
             return;
           }
 
-          // Build a done handler which will inject the given build into the page container. If there was a success
-          // callback attached to the page options call it.
-          var done = function(build) {
-            _drupalgap_entity_page_container_inject(
-                'node', node.nid, 'view', build
-            );
-            if (drupalgap.page.options.success) { drupalgap.page.options.success(node); }
-          };
-
           // Figure out the title, and watch for translation.
           var default_language = language_default();
           var node_title = node.title;
@@ -11503,10 +11429,12 @@ function node_page_view_pageshow(nid) {
             'title': { markup: node_title },
             'content': { markup: node.content }
           };
-
           // If comments are undefined, just inject the page.
-          if (typeof node.comment === 'undefined') { done(build); }
-
+          if (typeof node.comment === 'undefined') {
+            _drupalgap_entity_page_container_inject(
+              'node', node.nid, 'view', build
+            );
+          }
           // If the comments are closed (1) or open (2), show the comments.
           else if (node.comment != 0) {
             if (node.comment == 1 || node.comment == 2) {
@@ -11545,16 +11473,15 @@ function node_page_view_pageshow(nid) {
                           build.content.markup += comment_form;
                         }
                         // Finally, inject the page.
-                        done(build);
+                        _drupalgap_entity_page_container_inject(
+                          'node', node.nid, 'view', build
+                        );
                       }
                       catch (error) {
                         var msg = 'node_page_view_pageshow - comment_index - ' +
                           error;
                         console.log(msg);
                       }
-                    },
-                    error: function(xhr, status, msg) {
-                      if (drupalgap.page.options.error) { drupalgap.page.options.error(xhr, status, msg); }
                     }
                 });
               }
@@ -11566,7 +11493,9 @@ function node_page_view_pageshow(nid) {
                   build.content.markup += theme('comments', { node: node });
                   if (user_access('post comments')) { build.content.markup += comment_form; }
                 }
-                done(build);
+                _drupalgap_entity_page_container_inject(
+                  'node', node.nid, 'view', build
+                );
               }
             }
           }
@@ -11574,12 +11503,11 @@ function node_page_view_pageshow(nid) {
             // Comments are hidden (0), append an empty comments wrapper to the
             // content and inject the content into the page.
             build.content.markup += theme('comments', { node: node });
-            done(build);
+            _drupalgap_entity_page_container_inject(
+              'node', node.nid, 'view', build
+            );
           }
-        },
-      error: function(xhr, status, msg) {
-        if (drupalgap.page.options.error) { drupalgap.page.options.error(xhr, status, msg); }
-      }
+        }
     });
   }
   catch (error) { console.log('node_page_view_pageshow - ' + error); }

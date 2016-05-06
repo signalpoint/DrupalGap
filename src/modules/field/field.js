@@ -95,8 +95,7 @@ function drupalgap_field_info_instances(entity_type, bundle_name) {
  * @param {Object} form
  * @param {Object} entity
  */
-function drupalgap_field_info_instances_add_to_form(entity_type, bundle,
-  form, entity) {
+function drupalgap_field_info_instances_add_to_form(entity_type, bundle, form, entity) {
   try {
     // Grab the field info instances for this entity type and bundle.
     var fields = drupalgap_field_info_instances(entity_type, bundle);
@@ -237,8 +236,7 @@ function drupalgap_field_key(field_name) {
  * @param {*} display
  * @return {Object}
  */
-function list_field_formatter_view(entity_type, entity, field, instance,
-  langcode, items, display) {
+function list_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
   try {
     var element = {};
     if (!empty(items)) {
@@ -278,8 +276,7 @@ function list_field_formatter_view(entity_type, entity, field, instance,
  *
  * @return {*}
  */
-function list_assemble_form_state_into_field(entity_type, bundle,
-  form_state_value, field, instance, langcode, delta, field_key) {
+function list_assemble_form_state_into_field(entity_type, bundle, form_state_value, field, instance, langcode, delta, field_key) {
   try {
     var result = form_state_value;
     switch (field.type) {
@@ -394,8 +391,7 @@ function list_views_exposed_filter(form, form_state, element, filter, field) {
  * @param {*} display
  * @return {Object}
  */
-function number_field_formatter_view(entity_type, entity, field, instance,
-  langcode, items, display) {
+function number_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
   try {
     var element = {};
     // If items is a string, convert it into a single item JSON object.
@@ -431,8 +427,7 @@ function number_field_formatter_view(entity_type, entity, field, instance,
  * @param {Number} delta
  * @param {Object} element
  */
-function number_field_widget_form(form, form_state, field, instance, langcode,
-  items, delta, element) {
+function number_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
     switch (element.type) {
       case 'number_integer':
@@ -477,8 +472,7 @@ function number_field_widget_form(form, form_state, field, instance, langcode,
  * @param {Object} element
  * @return {*}
  */
-function options_field_widget_form(form, form_state, field, instance, langcode,
-  items, delta, element) {
+function options_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
     switch (element.type) {
       case 'checkbox':
@@ -648,6 +642,10 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
               )
           });
         break;
+      default:
+          var msg = 'options_field_widget_form - unknown widget type: ' + element.type;
+          console.log(msg);
+        break;
     }
   }
   catch (error) { console.log('options_field_widget_form - ' + error); }
@@ -664,20 +662,24 @@ function options_field_widget_form(form, form_state, field, instance, langcode,
  * @param {*} display
  * @return {Object}
  */
-function text_field_formatter_view(entity_type, entity, field, instance,
-  langcode, items, display) {
+function text_field_formatter_view(entity_type, entity, field, instance, langcode, items, display) {
   try {
     var element = {};
-    if (!empty(items)) {
+    if (items.length) {
       for (var delta in items) {
-          if (!items.hasOwnProperty(delta)) { continue; }
-          var item = items[delta];
-          // Grab the field value, but use the safe_value if we have it.
-          var value = item.value;
-          if (typeof item.safe_value !== 'undefined') {
-            value = item.safe_value;
-          }
-          element[delta] = { markup: value };
+        if (!items.hasOwnProperty(delta)) { continue; }
+
+        // Grab the item, then grab the field value or its safe_value if we have it.
+        var item = items[delta];
+        var value = typeof item.safe_value !== 'undefined' ? item.safe_value : item.value;
+
+        // Any trim?
+        if (display.type == 'text_summary_or_trimmed') {
+          var length = display.settings.trim_length;
+          value = value.length > length ? value.substring(0, length - 3) + "..." : value.substring(0, length);
+        }
+
+        element[delta] = { markup: value };
       }
     }
     return element;
@@ -696,8 +698,7 @@ function text_field_formatter_view(entity_type, entity, field, instance,
  * @param {Number} delta
  * @param {Object} element
  */
-function text_field_widget_form(form, form_state, field, instance, langcode,
-  items, delta, element) {
+function text_field_widget_form(form, form_state, field, instance, langcode, items, delta, element) {
   try {
     // Determine the widget type, then set the delta item's type property.
     var type = null;

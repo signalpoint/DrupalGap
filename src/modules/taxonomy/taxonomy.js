@@ -809,6 +809,12 @@ function _theme_taxonomy_term_reference_load_items(options) {
     var query = {
       parameters: {
         vid: options.taxonomy_vocabulary.vid
+      },
+      options: {
+        orderby: {
+          weight: 'asc',
+          name: 'asc'
+        }
       }
     };
     taxonomy_term_index(query, {

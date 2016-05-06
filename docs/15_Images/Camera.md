@@ -78,7 +78,7 @@ function my_module_camera_click() {
 
       // Settings
       {
-        quality: 50,
+        quality: drupalgap.settings.camera.quality,
         destinationType: Camera.DestinationType.FILE_URI
       }
 
@@ -105,7 +105,7 @@ function my_module_photos_click() {
 
       // Settings
       {
-        quality: 50,
+        quality: drupalgap.settings.camera.quality,
         destinationType: Camera.DestinationType.FILE_URI,
         sourceType: Camera.PictureSourceType.PHOTOLIBRARY
       }

@@ -162,5 +162,5 @@ The PhoneGap Platform Guide installation will leave a few directories that we no
 
 ```
 cd ~/Desktop/ExampleApp/www
-rm -rf css/ img/ js/
+rm -rf img/ js/
 ```

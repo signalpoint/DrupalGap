@@ -1,5 +1,5 @@
 {
-  "version": "7.0.0",
+  "version": "7.0.1",
   "name": "drupalgap",
   "description": "An application development kit for Drupal 7.",
   "main": "index.html",
