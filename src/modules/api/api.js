@@ -22,11 +22,12 @@
  *                           placed around the result object. Defaults to true.
  *                           Set the 'use_delta' boolean property to false when
  *                           a delta value is not needed. Defaults to true.
+ * @param {Object} form
  *
  * @return {*}
  */
 function hook_assemble_form_state_into_field(entity_type, bundle,
-  form_state_value, field, instance, langcode, delta, field_key) {
+  form_state_value, field, instance, langcode, delta, field_key, form) {
   try {
     // Listed below are example use cases. Each show how to assemble the result,
     // and what the resulting field object will look like when assembled by the
