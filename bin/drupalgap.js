@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-05 */
+/*! drupalgap 2016-05-06 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -4339,6 +4339,7 @@ function drupalgap_goto(path) {
     // page and we're not in the middle of a form submission, prevent the page
     // from processing then change to it.
     if (drupalgap_page_in_dom(page_id)) {
+
       // If there are any hook_menu() item options for this router path, bring
       // them into the current options without overwriting any existing values.
       if (drupalgap.menu_links[router_path].options) {
@@ -4348,6 +4349,7 @@ function drupalgap_goto(path) {
           options
         );
       }
+
       // Reload the page? If so, remove the page from the DOM, delete the
       // reloadPage option, then set the reloadingPage option to true so others
       // down the line will know the page is reloading. We can't pass along the
@@ -4386,13 +4388,7 @@ function drupalgap_goto(path) {
     }
 
     // Generate the page.
-    drupalgap_goto_generate_page_and_go(
-      path,
-      page_id,
-      options,
-      drupalgap.menu_links[router_path]
-    );
-
+    drupalgap_goto_generate_page_and_go(path, page_id, options, drupalgap.menu_links[router_path]);
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
 }
@@ -4411,6 +4407,10 @@ function drupalgap_goto(path) {
 function drupalgap_goto_generate_page_and_go(
   path, page_id, options, menu_link) {
   try {
+
+    // @TODO using a page.tpl.html is pretty dumb, this makes a disc read on each page change, use render arrays only
+    // be deprecating the page.tpl.html file, converting it to a render array and warning developers to upgrade their
+    // themes.
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
       console.log(
@@ -4428,6 +4428,7 @@ function drupalgap_goto_generate_page_and_go(
 
       // Load the page template html file. Determine if we are going to cache
       // the template file or not.
+      // @TODO another disc read here, dumb, use render arrays and deprecate.
       var file_options = {};
       if (drupalgap.settings.cache &&
           drupalgap.settings.cache.theme_registry !== 'undefined' &&
@@ -4457,7 +4458,7 @@ function drupalgap_goto_generate_page_and_go(
           drupalgap.settings.mode != 'phonegap' ||
           typeof parent.window.ripple === 'function'
         ) { destination = '#' + page_id; }
-        $.mobile.changePage(destination, options);
+        $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
@@ -6131,47 +6132,40 @@ function drupalgap_render(content) {
       var template_file_path = template.path + '/' + template_file_name;
 
       // Make sure the template file exists.
+      // @TODO disc read here, replace with render array!
       if (drupalgap_file_exists(template_file_path)) {
 
         // Loads the template file's content into a string.
-        var template_file_html = drupalgap_file_get_contents(
-            template_file_path
-        );
+        // @TODO there is a disc read here, it is slow for UX! Deprecate via a render array.
+        var template_file_html = drupalgap_file_get_contents(template_file_path);
         if (template_file_html) {
 
           // What variable placeholders are present in the template file?
-          var placeholders = drupalgap_get_placeholders_from_html(
-              template_file_html
-          );
+          var placeholders = drupalgap_get_placeholders_from_html(template_file_html);
           if (placeholders) {
 
             // Replace each placeholder with html.
-            // @todo - each placeholder should have its own container div and
-            // unique id.
             for (var index in placeholders) {
               if (!placeholders.hasOwnProperty(index)) { continue; }
               var placeholder = placeholders[index];
-              var html = '';
+              var _html = '';
               if (content[placeholder]) {
                 // Grab the element variable from the content.
                 var element = content[placeholder];
                 // If it is markup, render it as is, if it is themeable,
                 // then theme it.
                 if (content[placeholder].markup) {
-                  html = content[placeholder].markup;
+                  _html = content[placeholder].markup;
                 }
                 else if (content[placeholder].theme) {
-                  html = theme(content[placeholder].theme, element);
+                  _html = theme(content[placeholder].theme, element);
                 }
                 // Now remove the variable from the content.
                 delete content[placeholder];
               }
               // Now replace the placeholder with the html, even if it was
               // empty.
-              template_file_html = template_file_html.replace(
-                  '{:' + placeholder + ':}',
-                  html
-              );
+              template_file_html = template_file_html.replace('{:' + placeholder + ':}', _html);
             }
           }
           else {
@@ -6182,25 +6176,15 @@ function drupalgap_render(content) {
           html += template_file_html;
         }
         else {
-          console.log(
-              'drupalgap_render - failed to get file contents (' +
-              template_file_path +
-              ')'
-          );
+          console.log('drupalgap_render - failed to get file contents (' + template_file_path + ')');
         }
       }
       else {
-        console.log(
-            'drupalgap_render - template file does not exist (' +
-            template_file_path +
-            ')'
-        );
+        console.log('drupalgap_render - template file does not exist (' + template_file_path + ')');
       }
     }
 
     // Iterate over any remaining variables and theme them.
-    // @todo - each remaining variables should have its own container div and
-    // unique id, similar to the placeholder div containers mentioned above.
     for (var element in content) {
       if (!content.hasOwnProperty(element)) { continue; }
       var variables = content[element];
@@ -14018,8 +14002,9 @@ function user_services_postprocess(options, result) {
   try {
     // Don't process any other services.
     if (options.service != 'user') { return; }
+    var resources = ['login', 'logout', 'register'];
     // Only process login, logout and registration.
-    if (!in_array(options.resource, ['login', 'logout', 'register'])) {
+    if (!in_array(options.resource, resources) || (arg(0) != 'user' && !in_array(arg(1), resources))) {
       return;
     }
     // If there were any form errors, alert them to the user.
@@ -14030,7 +14015,7 @@ function user_services_postprocess(options, result) {
       for (var index in response) {
           if (!response.hasOwnProperty(index)) { continue; }
           var message = response[index];
-          msg += message + '\n';
+          msg += t(message) + '\n';
       }
       if (msg != '') { drupalgap_alert(msg); }
     }

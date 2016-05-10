@@ -132,6 +132,7 @@ function drupalgap_goto(path) {
     // page and we're not in the middle of a form submission, prevent the page
     // from processing then change to it.
     if (drupalgap_page_in_dom(page_id)) {
+
       // If there are any hook_menu() item options for this router path, bring
       // them into the current options without overwriting any existing values.
       if (drupalgap.menu_links[router_path].options) {
@@ -141,6 +142,7 @@ function drupalgap_goto(path) {
           options
         );
       }
+
       // Reload the page? If so, remove the page from the DOM, delete the
       // reloadPage option, then set the reloadingPage option to true so others
       // down the line will know the page is reloading. We can't pass along the
@@ -179,13 +181,7 @@ function drupalgap_goto(path) {
     }
 
     // Generate the page.
-    drupalgap_goto_generate_page_and_go(
-      path,
-      page_id,
-      options,
-      drupalgap.menu_links[router_path]
-    );
-
+    drupalgap_goto_generate_page_and_go(path, page_id, options, drupalgap.menu_links[router_path]);
   }
   catch (error) { console.log('drupalgap_goto - ' + error); }
 }
@@ -204,6 +200,10 @@ function drupalgap_goto(path) {
 function drupalgap_goto_generate_page_and_go(
   path, page_id, options, menu_link) {
   try {
+
+    // @TODO using a page.tpl.html is pretty dumb, this makes a disc read on each page change, use render arrays only
+    // be deprecating the page.tpl.html file, converting it to a render array and warning developers to upgrade their
+    // themes.
     var page_template_path = path_to_theme() + '/page.tpl.html';
     if (!drupalgap_file_exists(page_template_path)) {
       console.log(
@@ -221,6 +221,7 @@ function drupalgap_goto_generate_page_and_go(
 
       // Load the page template html file. Determine if we are going to cache
       // the template file or not.
+      // @TODO another disc read here, dumb, use render arrays and deprecate.
       var file_options = {};
       if (drupalgap.settings.cache &&
           drupalgap.settings.cache.theme_registry !== 'undefined' &&
@@ -250,7 +251,7 @@ function drupalgap_goto_generate_page_and_go(
           drupalgap.settings.mode != 'phonegap' ||
           typeof parent.window.ripple === 'function'
         ) { destination = '#' + page_id; }
-        $.mobile.changePage(destination, options);
+        $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
 
         // Invoke all implementations of hook_drupalgap_goto_post_process().
         module_invoke_all('drupalgap_goto_post_process', path);
