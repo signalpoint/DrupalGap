@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-06 */
+/*! drupalgap 2016-05-16 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -542,7 +542,7 @@ function drupalgap_load_locales() {
       var fn = window[module + '_locale'];
       var languages = fn();
       for (var j = 0; j < languages.length; j++) {
-        var language_code = languages[i];
+        var language_code = languages[j];
         var file_path = drupalgap_get_path('module', module) + '/locale/' + language_code + '.json';
         var translations = drupalgap_file_get_contents(
           file_path,
@@ -6835,11 +6835,12 @@ function _drupalgap_page_title_pageshow_success(title) {
  *                           placed around the result object. Defaults to true.
  *                           Set the 'use_delta' boolean property to false when
  *                           a delta value is not needed. Defaults to true.
+ * @param {Object} form
  *
  * @return {*}
  */
 function hook_assemble_form_state_into_field(entity_type, bundle,
-  form_state_value, field, instance, langcode, delta, field_key) {
+  form_state_value, field, instance, langcode, delta, field_key, form) {
   try {
     // Listed below are example use cases. Each show how to assemble the result,
     // and what the resulting field object will look like when assembled by the
