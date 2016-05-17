@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-16 */
+/*! drupalgap 2016-05-17 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -4168,8 +4168,7 @@ function theme_select(variables) {
 function theme_tel(variables) {
   try {
     variables.attributes['type'] = 'tel';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_tel - ' + error); }
 }
@@ -4182,8 +4181,7 @@ function theme_tel(variables) {
 function theme_textfield(variables) {
   try {
     variables.attributes.type = 'text';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_textfield - ' + error); }
 }
@@ -9849,8 +9847,15 @@ function text_field_widget_form(form, form_state, field, instance, langcode, ite
       case 'text_with_summary':
       case 'text_textarea':
         type = 'textarea';
+        break;
     }
     items[delta].type = type;
+
+    // If the item has a value and its attribute value hasn't yet been set, then set the attribute value.
+    if (
+        typeof items[delta].value !== 'undefined' &&
+        typeof items[delta].options.attributes.value === 'undefined'
+    ) { items[delta].options.attributes.value = items[delta].value; }
   }
   catch (error) { console.log('text_field_widget_form - ' + error); }
 }
