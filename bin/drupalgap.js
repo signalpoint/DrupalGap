@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-05 */
+/*! drupalgap 2016-05-18 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -542,7 +542,7 @@ function drupalgap_load_locales() {
       var fn = window[module + '_locale'];
       var languages = fn();
       for (var j = 0; j < languages.length; j++) {
-        var language_code = languages[i];
+        var language_code = languages[j];
         var file_path = drupalgap_get_path('module', module) + '/locale/' + language_code + '.json';
         var translations = drupalgap_file_get_contents(
           file_path,
@@ -4168,8 +4168,7 @@ function theme_select(variables) {
 function theme_tel(variables) {
   try {
     variables.attributes['type'] = 'tel';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_tel - ' + error); }
 }
@@ -4182,8 +4181,7 @@ function theme_tel(variables) {
 function theme_textfield(variables) {
   try {
     variables.attributes.type = 'text';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_textfield - ' + error); }
 }
@@ -6835,11 +6833,12 @@ function _drupalgap_page_title_pageshow_success(title) {
  *                           placed around the result object. Defaults to true.
  *                           Set the 'use_delta' boolean property to false when
  *                           a delta value is not needed. Defaults to true.
+ * @param {Object} form
  *
  * @return {*}
  */
 function hook_assemble_form_state_into_field(entity_type, bundle,
-  form_state_value, field, instance, langcode, delta, field_key) {
+  form_state_value, field, instance, langcode, delta, field_key, form) {
   try {
     // Listed below are example use cases. Each show how to assemble the result,
     // and what the resulting field object will look like when assembled by the
@@ -9025,10 +9024,29 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode, b
     module_invoke_all('entity_view_alter', entity_type, entity_id, mode, build);
     drupalgap.output = build;
     $('#' + id).html(drupalgap_render_page()).trigger('create');
+    _drupalgap_entity_page_add_css_class_names(entity_type, entity_id, build);
   }
   catch (error) {
     console.log('_drupalgap_entity_page_container_inject - ' + error);
   }
+}
+
+/**
+ * An internal function used to add css class names to an entity's jQM page container.
+ * @param {String} entity_type
+ * @param {Number} entity_id
+ * @param {Object} build
+ * @private
+ */
+function _drupalgap_entity_page_add_css_class_names(entity_type, entity_id, build) {
+  try {
+    var className = entity_type;
+    var bundleName = entity_get_bundle(entity_type, build[entity_type]);
+    if (bundleName) { className += '-' + bundleName; }
+    className += ' ' + entity_type.replace(/_/g, '-') + '-' + entity_id;
+    $('#' + drupalgap_get_page_id()).addClass(className);
+  }
+  catch (error) { console.log('_drupalgap_entity_page_add_css_class_names - ' + error); }
 }
 
 /**
@@ -9848,8 +9866,15 @@ function text_field_widget_form(form, form_state, field, instance, langcode, ite
       case 'text_with_summary':
       case 'text_textarea':
         type = 'textarea';
+        break;
     }
     items[delta].type = type;
+
+    // If the item has a value and its attribute value hasn't yet been set, then set the attribute value.
+    if (
+        typeof items[delta].value !== 'undefined' &&
+        typeof items[delta].options.attributes.value === 'undefined'
+    ) { items[delta].options.attributes.value = items[delta].value; }
   }
   catch (error) { console.log('text_field_widget_form - ' + error); }
 }
@@ -14002,8 +14027,9 @@ function user_services_postprocess(options, result) {
   try {
     // Don't process any other services.
     if (options.service != 'user') { return; }
+    var resources = ['login', 'logout', 'register'];
     // Only process login, logout and registration.
-    if (!in_array(options.resource, ['login', 'logout', 'register'])) {
+    if (!in_array(options.resource, resources) || (arg(0) != 'user' && !in_array(arg(1), resources))) {
       return;
     }
     // If there were any form errors, alert them to the user.
@@ -14014,7 +14040,7 @@ function user_services_postprocess(options, result) {
       for (var index in response) {
           if (!response.hasOwnProperty(index)) { continue; }
           var message = response[index];
-          msg += message + '\n';
+          msg += t(message) + '\n';
       }
       if (msg != '') { drupalgap_alert(msg); }
     }
@@ -14629,8 +14655,17 @@ function views_embed_view(path, options) {
             views_embedded_view_set(options.page_id, 'options', options);
             if (!options.success) { return; }
             options.results = results;
-            var html = theme('views_view', options);
-            options.success(html);
+
+            // Render the view if there are some results, or if there are no results and an
+            // empty_callback has been specified. Otherwise remove the empty div container for
+            // the view from the DOM.
+            if (results.view.count != 0 || results.view.count == 0 && options.empty_callback) {
+              options.success(theme('views_view', options));
+            }
+            else {
+              var elem = document.getElementById(options.attributes.id);
+              elem.parentElement.removeChild(elem);
+            }
           }
           catch (error) {
             console.log('views_embed_view - success - ' + error);
@@ -14684,9 +14719,12 @@ function theme_views_view(variables) {
       }
     }
 
-    // Render the exposed filters, if there are any.
+    // Render the exposed filters if there are any, and the developer didn't explicitly exclude
+    // them via the Views Render Array.
     var views_exposed_form_html = '';
-    if (typeof results.view.exposed_data !== 'undefined') {
+    if (typeof results.view.exposed_data !== 'undefined' &&
+      (typeof variables.exposed_filters === 'undefined' || variables.exposed_filters)
+    ) {
       views_exposed_form_html = drupalgap_get_form(
         'views_exposed_form', {
           exposed_data: results.view.exposed_data,

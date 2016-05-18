@@ -922,10 +922,29 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode, b
     module_invoke_all('entity_view_alter', entity_type, entity_id, mode, build);
     drupalgap.output = build;
     $('#' + id).html(drupalgap_render_page()).trigger('create');
+    _drupalgap_entity_page_add_css_class_names(entity_type, entity_id, build);
   }
   catch (error) {
     console.log('_drupalgap_entity_page_container_inject - ' + error);
   }
+}
+
+/**
+ * An internal function used to add css class names to an entity's jQM page container.
+ * @param {String} entity_type
+ * @param {Number} entity_id
+ * @param {Object} build
+ * @private
+ */
+function _drupalgap_entity_page_add_css_class_names(entity_type, entity_id, build) {
+  try {
+    var className = entity_type;
+    var bundleName = entity_get_bundle(entity_type, build[entity_type]);
+    if (bundleName) { className += '-' + bundleName; }
+    className += ' ' + entity_type.replace(/_/g, '-') + '-' + entity_id;
+    $('#' + drupalgap_get_page_id()).addClass(className);
+  }
+  catch (error) { console.log('_drupalgap_entity_page_add_css_class_names - ' + error); }
 }
 
 /**

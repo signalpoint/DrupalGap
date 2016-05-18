@@ -541,7 +541,7 @@ function drupalgap_load_locales() {
       var fn = window[module + '_locale'];
       var languages = fn();
       for (var j = 0; j < languages.length; j++) {
-        var language_code = languages[i];
+        var language_code = languages[j];
         var file_path = drupalgap_get_path('module', module) + '/locale/' + language_code + '.json';
         var translations = drupalgap_file_get_contents(
           file_path,

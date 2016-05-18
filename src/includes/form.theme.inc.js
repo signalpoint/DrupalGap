@@ -275,8 +275,7 @@ function theme_select(variables) {
 function theme_tel(variables) {
   try {
     variables.attributes['type'] = 'tel';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_tel - ' + error); }
 }
@@ -289,8 +288,7 @@ function theme_tel(variables) {
 function theme_textfield(variables) {
   try {
     variables.attributes.type = 'text';
-    var output = '<input ' + drupalgap_attributes(variables.attributes) + ' />';
-    return output;
+    return '<input ' + drupalgap_attributes(variables.attributes) + ' />';
   }
   catch (error) { console.log('theme_textfield - ' + error); }
 }

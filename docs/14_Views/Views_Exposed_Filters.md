@@ -1,13 +1,4 @@
-As of DrupalGap SDK 7.x-1.0-rc4, we now have the option to include Views Exposed Filters in our mobile applications.
-
 Please note, the Views Exposed Filters in DrupalGap is designed to work in conjunction with [Views Render Arrays](Displaying_a_View/Views_Render_Array) (it's of course possible to build your own forms and construct your own URL parameters to filter your Views, this feature is meant to simplify that entire process in a dynamic way).
-Currently Supported Field Types and Widgets (*as of 2014-10-31*)
-
-- Published (aka node status)
-- Term reference (Select list)
-- List text (Select list)
-
-Supporting other fields should be relatively easy, the SDK is set up to accommodate other fields in a dynamic way. Simply set `Drupal.settings.debug` to `true` in the `settings.js` file, and then watch the `console.log()` output when you load your app. Here you'll see informative messages about how to add support for a new field type's exposed filter on the View.
 
 ## Getting Started
 
@@ -52,3 +43,7 @@ And finally click the **Save** button on the View.
 Now if we were to navigate to the page in our app that contains the Views Render Array of our article's Views JSON, we'll see the exposed filter ready for use:
 
 ![Views Exposed Filters](http://drupalgap.com/sites/default/files/views-exposed-filters.png)
+
+## Disabling Exposed Filters
+
+In the app, it is sometimes desirable to expose the filter on the Drupal side, so url query string filters can be used. But at the same time undesirable to show DrupalGap's exposed filters in the app. On a Views Render Array object, we can set the `exposed_filters` property to `false` to force DrupalGap to not render the exposed filters.

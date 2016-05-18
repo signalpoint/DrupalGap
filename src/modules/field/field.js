@@ -710,8 +710,15 @@ function text_field_widget_form(form, form_state, field, instance, langcode, ite
       case 'text_with_summary':
       case 'text_textarea':
         type = 'textarea';
+        break;
     }
     items[delta].type = type;
+
+    // If the item has a value and its attribute value hasn't yet been set, then set the attribute value.
+    if (
+        typeof items[delta].value !== 'undefined' &&
+        typeof items[delta].options.attributes.value === 'undefined'
+    ) { items[delta].options.attributes.value = items[delta].value; }
   }
   catch (error) { console.log('text_field_widget_form - ' + error); }
 }
