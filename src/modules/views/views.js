@@ -473,8 +473,17 @@ function views_embed_view(path, options) {
             views_embedded_view_set(options.page_id, 'options', options);
             if (!options.success) { return; }
             options.results = results;
-            var html = theme('views_view', options);
-            options.success(html);
+
+            // Render the view if there are some results, or if there are no results and an
+            // empty_callback has been specified. Otherwise remove the empty div container for
+            // the view from the DOM.
+            if (results.view.count != 0 || results.view.count == 0 && options.empty_callback) {
+              options.success(theme('views_view', options));
+            }
+            else {
+              var elem = document.getElementById(options.attributes.id);
+              elem.parentElement.removeChild(elem);
+            }
           }
           catch (error) {
             console.log('views_embed_view - success - ' + error);
@@ -528,9 +537,12 @@ function theme_views_view(variables) {
       }
     }
 
-    // Render the exposed filters, if there are any.
+    // Render the exposed filters if there are any, and the developer didn't explicitly exclude
+    // them via the Views Render Array.
     var views_exposed_form_html = '';
-    if (typeof results.view.exposed_data !== 'undefined') {
+    if (typeof results.view.exposed_data !== 'undefined' &&
+      (typeof variables.exposed_filters === 'undefined' || variables.exposed_filters)
+    ) {
       views_exposed_form_html = drupalgap_get_form(
         'views_exposed_form', {
           exposed_data: results.view.exposed_data,
