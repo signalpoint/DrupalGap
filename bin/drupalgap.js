@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-17 */
+/*! drupalgap 2016-05-18 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -9024,10 +9024,29 @@ function _drupalgap_entity_page_container_inject(entity_type, entity_id, mode, b
     module_invoke_all('entity_view_alter', entity_type, entity_id, mode, build);
     drupalgap.output = build;
     $('#' + id).html(drupalgap_render_page()).trigger('create');
+    _drupalgap_entity_page_add_css_class_names(entity_type, entity_id, build);
   }
   catch (error) {
     console.log('_drupalgap_entity_page_container_inject - ' + error);
   }
+}
+
+/**
+ * An internal function used to add css class names to an entity's jQM page container.
+ * @param {String} entity_type
+ * @param {Number} entity_id
+ * @param {Object} build
+ * @private
+ */
+function _drupalgap_entity_page_add_css_class_names(entity_type, entity_id, build) {
+  try {
+    var className = entity_type;
+    var bundleName = entity_get_bundle(entity_type, build[entity_type]);
+    if (bundleName) { className += '-' + bundleName; }
+    className += ' ' + entity_type.replace(/_/g, '-') + '-' + entity_id;
+    $('#' + drupalgap_get_page_id()).addClass(className);
+  }
+  catch (error) { console.log('_drupalgap_entity_page_add_css_class_names - ' + error); }
 }
 
 /**
@@ -14636,8 +14655,17 @@ function views_embed_view(path, options) {
             views_embedded_view_set(options.page_id, 'options', options);
             if (!options.success) { return; }
             options.results = results;
-            var html = theme('views_view', options);
-            options.success(html);
+
+            // Render the view if there are some results, or if there are no results and an
+            // empty_callback has been specified. Otherwise remove the empty div container for
+            // the view from the DOM.
+            if (results.view.count != 0 || results.view.count == 0 && options.empty_callback) {
+              options.success(theme('views_view', options));
+            }
+            else {
+              var elem = document.getElementById(options.attributes.id);
+              elem.parentElement.removeChild(elem);
+            }
           }
           catch (error) {
             console.log('views_embed_view - success - ' + error);
@@ -14691,9 +14719,12 @@ function theme_views_view(variables) {
       }
     }
 
-    // Render the exposed filters, if there are any.
+    // Render the exposed filters if there are any, and the developer didn't explicitly exclude
+    // them via the Views Render Array.
     var views_exposed_form_html = '';
-    if (typeof results.view.exposed_data !== 'undefined') {
+    if (typeof results.view.exposed_data !== 'undefined' &&
+      (typeof variables.exposed_filters === 'undefined' || variables.exposed_filters)
+    ) {
       views_exposed_form_html = drupalgap_get_form(
         'views_exposed_form', {
           exposed_data: results.view.exposed_data,
