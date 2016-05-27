@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-25 */
+/*! drupalgap 2016-05-26 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -5721,9 +5721,10 @@ function drupalgap_remove_page_from_dom(page_id) {
 function drupalgap_remove_pages_from_dom() {
   try {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
-    for (var index in drupalgap.pages) {
-        if (!drupalgap.pages.hasOwnProperty(index)) { continue; }
-        var page_id = drupalgap.pages[index];
+    var pages = drupalgap.pages.slice(0);
+    for (var index in pages) {
+        if (!pages.hasOwnProperty(index)) { continue; }
+        var page_id = pages[index];
         if (current_page_id != page_id) {
           drupalgap_remove_page_from_dom(page_id, null, current_page_id);
         }
