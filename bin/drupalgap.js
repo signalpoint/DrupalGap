@@ -1,4 +1,4 @@
-/*! drupalgap 2016-05-18 */
+/*! drupalgap 2016-05-26 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -5721,9 +5721,10 @@ function drupalgap_remove_page_from_dom(page_id) {
 function drupalgap_remove_pages_from_dom() {
   try {
     var current_page_id = drupalgap_get_page_id(drupalgap_path_get());
-    for (var index in drupalgap.pages) {
-        if (!drupalgap.pages.hasOwnProperty(index)) { continue; }
-        var page_id = drupalgap.pages[index];
+    var pages = drupalgap.pages.slice(0);
+    for (var index in pages) {
+        if (!pages.hasOwnProperty(index)) { continue; }
+        var page_id = pages[index];
         if (current_page_id != page_id) {
           drupalgap_remove_page_from_dom(page_id, null, current_page_id);
         }
@@ -10347,21 +10348,25 @@ function _image_phonegap_camera_getPicture_success(options) {
  */
 function _image_field_form_process(form, form_state, options) {
   try {
-    // @todo - this needs mutli value field support (delta)
+    // @TODO needs mutli value field support (delta)
+    // @see https://www.drupal.org/node/2224803
+
     var lng = language_default();
     var processed_an_image = false;
+
+    // For each image field on the form...
     for (var index in form.image_fields) {
       if (!form.image_fields.hasOwnProperty(index)) { continue; }
       var name = form.image_fields[index];
-      // Skip empty images.
-      if (!image_phonegap_camera_options[name][0]) { break; }
-      // Skip image fields that already have their file id set.
-      if (form_state.values[name][lng][0] != '') { break; }
+
+      // Skip empty images and ones that already have their field id set.
+      if (!image_phonegap_camera_options[name][0] || form_state.values[name][lng][0] != '') { continue; }
+
       // Create a unique file name using the UTC integer value.
       var d = new Date();
       var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
-      // Build the data for the file create resource. If it's private, adjust
-      // the filepath.
+
+      // Build the data for the file create resource. If it's private, adjust the filepath.
       var file = {
         file: {
           file: image_phonegap_camera_options[name][0].image,
@@ -10372,6 +10377,7 @@ function _image_field_form_process(form, form_state, options) {
       if (!empty(Drupal.settings.file_private_path)) {
         file.file.filepath = 'private://' + image_file_name;
       }
+
       // Change the loader mode to saving, and save the file.
       drupalgap.loader = 'saving';
       processed_an_image = true;
@@ -10391,6 +10397,7 @@ function _image_field_form_process(form, form_state, options) {
           }
       });
     }
+
     // If no images were processed, we need to continue onward anyway.
     if (!processed_an_image && options.success) { options.success(); }
   }
