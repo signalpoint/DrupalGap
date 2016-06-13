@@ -118,35 +118,22 @@ cd ~/phonegap/my_app
 keytool -genkey -v -keystore my_app.keystore -alias my_app -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Follow the prompts and enter all the information it asks for and be sure to take note of the password you specify because you will need it later. Then run these two terminal commands:
+Follow the prompts and enter all the information it asks for and be sure to take note of the password you specify because you will need it below. Then create a `release-signing.properties` file in the `platforms/android` directory and add this to it:
 
 ```
-cd platforms/android
-ant -f build.xml clean release -Dsdk.dir=/path-to-my-android-sdk/
+storeFile=/my-absolute-path-to-keystore/my_app.keystore
+storePassword=secret
+storeType=jks
+keyAlias=my_app
+keyPassword=secret
 ```
 
-Be sure to replace `/path-to-my-android-sdk` in the command above with the path to your Android SDK, which should contain the following folders:
-
-- build-tools
-- extras
-- platforms
-- platform-tools
-- temp
-- tools
-
-Then sign it:
+Now you can compile a signed release using this terminal command:
 
 ```
-cd bin
-jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ~/phonegap/my_app/my_app.keystore CordovaApp-release-unsigned.apk my_app
+cordova build android --release
 ```
 
-Then zip align it to verify it:
+That's it! The `android-relees.apk` file can now be uploaded to the Google Play Developer Console:
 
-```
-/path-to-my-android-sdk/build-tools/android-4.4W/zipalign -v 4 CordovaApp-release-unsigned.apk my_app.apk
-```
-
-That's it! The `my_app.apk` file can now be uploaded to the Google Play Developer Console:
-
-`~/phonegap/my_app/platforms/android/bin/my_app.apk`
+`~/phonegap/my_app/platforms/android/build/outputs/apk/my_app.apk`
