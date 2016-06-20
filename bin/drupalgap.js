@@ -13597,6 +13597,8 @@ function user_register_form_submit(form, form_state) {
         var options = {
           title: t('Registered')
         };
+        var destination = typeof form.action !== 'undefined' ?
+            form.action : drupalgap.settings.front;
         // Check if e-mail verification is required or not..
         if (!drupalgap.site_settings.user_email_verification) {
           // E-mail verification not needed, if administrator approval is
@@ -13606,7 +13608,7 @@ function user_register_form_submit(form, form_state) {
               config.user_mail_register_pending_approval_required_body,
               options
             );
-            drupalgap_goto('');
+            drupalgap_goto(destination);
           }
           else {
             drupalgap_alert(
@@ -13622,7 +13624,7 @@ function user_register_form_submit(form, form_state) {
                   }
               });
             }
-            else { drupalgap_goto(''); }
+            else { drupalgap_goto(destination); }
           }
         }
         else {
@@ -13631,7 +13633,7 @@ function user_register_form_submit(form, form_state) {
             config.user_mail_register_email_verification_body,
             options
           );
-          drupalgap_goto('');
+          drupalgap_goto(destination);
         }
       },
       error: function(xhr, status, message) {
