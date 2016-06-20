@@ -1,5 +1,3 @@
-> WARNING: the drupalgap_toast() function has a pretty terrible bug in the 7.x-1.1 release of drupalgap.js, it is highly recommended you download the latest development snapshot of the drupalgap.js file if you want to use a toaster that doesn't have a memory leak!
-
 ## drupalgap_toast()
 
 With a "toast" we can show a non intrusive message to the user:
