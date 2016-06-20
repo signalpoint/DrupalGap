@@ -1,4 +1,4 @@
-/*! drupalgap 2016-06-18 */
+/*! drupalgap 2016-06-20 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -13478,7 +13478,11 @@ function user_login_form_submit(form, form_state) {
   try {
     user_login(form_state.values.name, form_state.values.pass, {
       success: function(result) {
-        drupalgap_goto(drupalgap.settings.front, { reloadPage:true });
+        drupalgap_goto(
+            typeof form.action !== 'undefined' ?
+                form.action : drupalgap.settings.front,
+            { reloadPage:true }
+        );
       }
     });
   }
