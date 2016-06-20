@@ -55,7 +55,11 @@ function user_login_form_submit(form, form_state) {
   try {
     user_login(form_state.values.name, form_state.values.pass, {
       success: function(result) {
-        drupalgap_goto(drupalgap.settings.front, { reloadPage:true });
+        drupalgap_goto(
+            typeof form.action !== 'undefined' ?
+                form.action : drupalgap.settings.front,
+            { reloadPage:true }
+        );
       }
     });
   }
