@@ -63,10 +63,18 @@ function my_module_articles_list_row(view, row) {
  *
  */
 function my_module_articles_list_empty(view) {
-  try {
-    return t('Sorry, no articles were found.');
-  }
-  catch (error) { console.log('my_module_articles_list_empty - ' + error); }
+
+  // This...
+
+  return t('Sorry, no articles were found.');
+
+  // Or...
+
+  var content = {};
+  content['msg'] = { markup: t('Sorry, no articles were found.') }
+  // content['some-other-widget'] = { /* ... */ }
+  return content;
+
 }
 ```
 
@@ -106,7 +114,7 @@ return html;
 
 ## No Results
 
-If there were no results available, then the `my_module_articles_page_empty` function would be called to render the empty text.
+If there were no results available, then the `my_module_articles_page_empty` function would be called to render the empty text. You can return a plain html string here, or build a Widget(s) and return it as `content`. 
 
 ## Row Position
 
