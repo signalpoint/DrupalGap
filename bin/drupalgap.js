@@ -1,4 +1,4 @@
-/*! drupalgap 2016-06-20 */
+/*! drupalgap 2016-06-21 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -14773,7 +14773,7 @@ function theme_views_view(variables) {
         function_exists(variables.empty_callback)
       ) {
         var empty_callback = window[variables.empty_callback];
-        return views_exposed_form_html + empty_callback(results.view);
+        return views_exposed_form_html + drupalgap_render(empty_callback(results.view));
       }
       return html + views_exposed_form_html;
     }
