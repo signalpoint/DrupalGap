@@ -1,4 +1,4 @@
-/*! drupalgap 2016-06-21 */
+/*! drupalgap 2016-06-28 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -7829,7 +7829,7 @@ function contact_site_form(form, form_state) {
       type: 'textfield',
       required: true
     };
-    form.elements.category = {
+    form.elements.cid = {
       title: t('Category'),
       type: 'select',
       required: true
