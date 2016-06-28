@@ -134,21 +134,17 @@ function contact_site_form_pageshow() {
   try {
     contact_index({
         success: function(results) {
+          var select = $('#edit-contact-site-form-cid');
           if (!results || !results.length) { return; }
           for (var index in results) {
               if (!results.hasOwnProperty(index)) { continue; }
               var result = results[index];
               var selected = result.selected == 1 ? 'selected' : '';
-              var option =
-                '<option value="' + result.cid + '" ' + selected + '>' +
-                  result.category +
-                '</option>';
-              $('#edit-contact-site-form-category').append(option);
+              var option = '<option value="' + result.cid + '" ' + selected + '>' + result.category + '</option>';
+              $(select).append(option);
           }
-          $('#edit-contact-site-form-category').selectmenu('refresh');
-          if (results.length == 1) {
-            $('#contact_site_form .field-name-category').hide();
-          }
+          $(select).selectmenu('refresh');
+          if (results.length == 1) { $(select).hide(); }
         }
     });
   }
@@ -165,7 +161,7 @@ function contact_site_form_submit(form, form_state) {
     name: form_state.values['name'],
     mail: form_state.values['mail'],
     subject: form_state.values['subject'],
-    category: form_state.values['category'],
+    cid: form_state.values['cid'],
     message: form_state.values['message'],
     copy: form_state.values['copy']
   };
@@ -304,7 +300,6 @@ function contact_personal_form_submit(form, form_state) {
     mail: form_state.values['mail'],
     to: form_state.values['to'],
     subject: form_state.values['subject'],
-    category: form_state.values['category'],
     message: form_state.values['message'],
     copy: form_state.values['copy']
   };
