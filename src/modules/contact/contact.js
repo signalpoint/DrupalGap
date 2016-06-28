@@ -94,7 +94,7 @@ function contact_site_form(form, form_state) {
       type: 'textfield',
       required: true
     };
-    form.elements.category = {
+    form.elements.cid = {
       title: t('Category'),
       type: 'select',
       required: true
