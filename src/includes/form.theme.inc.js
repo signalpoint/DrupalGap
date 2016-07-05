@@ -99,7 +99,7 @@ function theme_form_element_label(variables) {
     if (element.type == 'radios') { label_for = element.name; }
     // Render the label.
     var html =
-      '<label for="' + label_for + '"><strong>' + element.title + '</strong>';
+      '<label for="' + label_for + '"><strong>' + t(element.title) + '</strong>';
     if (element.required) { html += theme('form_required_marker', { }); }
     html += '</label>';
     return html;
