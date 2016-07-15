@@ -1,3 +1,5 @@
+> Developer tip, careful with symbolic links within an iOS project, xCode and Emulators may fail to start.
+
 ## 0. Install PhoneGap
 
 If you haven't already, [install PhoneGap for iOS](../Preparing_PhoneGap/Installing_PhoneGap).
