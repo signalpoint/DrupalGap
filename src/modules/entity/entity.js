@@ -399,7 +399,15 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           var allowed_values = form.elements[name].field_info_field.cardinality;
 
           // Convert unlimited value fields to one, for now...
-          if (allowed_values == -1) { allowed_values = 1; }
+          // if (allowed_values == -1) { allowed_values = 1; }
+          if (allowed_values == -1) {
+            console.log('drupalgap_entity_build_from_form_state - value: ');
+            console.log(value);
+            allowed_values = Object.keys(value[language]).length;
+            console.log('allowed_values : '+ allowed_values);
+          }
+
+
 
           // Make sure there is at least one value before creating the form
           // element on the entity.

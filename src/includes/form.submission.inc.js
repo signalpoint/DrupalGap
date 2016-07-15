@@ -185,7 +185,8 @@ function drupalgap_form_state_values_assemble(form) {
         form_state.values[name][lng] = {};
         var allowed_values = element.field_info_field.cardinality;
         if (allowed_values == -1) {
-          allowed_values = 1; // Convert unlimited value field to one for now...
+          // how many values are in the form
+          allowed_values = Object.keys(element[lng]).length;
         }
         for (var delta = 0; delta < allowed_values; delta++) {
           id = drupalgap_form_get_element_id(name, form.id, lng, delta);
