@@ -4,11 +4,43 @@ When a user visits a page in a DrupalGap mobile application, the output of the p
 
 ## Entity Caching
 
-In the `app/settings.js` file, we can control how entities are cached. It is highly recommended to have entity caching enabled when releasing a mobile application. Only disable it for development and debugging purposes.
+In the [settings.js](https://github.com/signalpoint/DrupalGap/blob/7.x-1.x/app/default.settings.js) file, we can control how entities are cached.
 
 ```
-Drupal.settings.cache.entity.enabled = true;
-Drupal.settings.cache.entity.expiration = 3600;
+// Entity Caching
+Drupal.settings.cache.entity = {
+
+  /* Globals (will be used if not overwritten below) */
+  enabled: true,
+  expiration: 60, // # of seconds to cache
+
+  /* Entity types */
+  entity_types: {
+
+    // Nodes
+    node: {
+
+      // Node Globals (will be used if not overwritten below)
+      enabled: true,
+      expiration: 120,
+
+      // Content types (aka bundles)
+      bundles: {
+
+        article: {
+          expiration: 3600
+        },
+        page: {
+          enabled: false
+        }
+
+      }
+      
+    }
+
+  }
+
+};
 ```
 
 View the **Entity Caching** section in the [default.settings.js](https://github.com/signalpoint/DrupalGap/blob/7.x-1.x/app/default.settings.js) file for advanced usage. 
