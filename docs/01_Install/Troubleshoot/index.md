@@ -8,6 +8,14 @@ More troubleshooting topics are listed below, please feel free to add any inform
 
 The Views JSON module needed by DrupalGap is a sub module of the [Views Datasource](https://drupal.org/project/views_datasource) module. There is another Drupal module called [Views JSON](https://drupal.org/project/views_json), ***do not*** install this module.
 
+### SDK Installation Problems
+
+#### drupalgap-sdk.zip
+```
+Warning: file_put_contents(drupalgap-sdk.zip): failed to open stream: Permission denied in drupalgap_sdk_form_submit()
+```
+This means the folder where Drupal's index.php file lives (typically public_html or www) is not writable by the web server. This is usually resolved by granting write permissions to that folder for the web server. It is advised to contact your server administrator if you are unable to grant write permissions to that folder.
+
 ## System Connect Failed
 
 This [particular comment](https://www.drupal.org/node/2305493#comment-9155291) stresses the basics to resolving and/or debugging this problem: Otherwise, see the following issues for more information:
