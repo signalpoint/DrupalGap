@@ -118,7 +118,9 @@ cd ~/phonegap/my_app
 keytool -genkey -v -keystore my_app.keystore -alias my_app -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Follow the prompts and enter all the information it asks for and be sure to take note of the password you specify because you will need it below. Then create a `release-signing.properties` file in the `platforms/android` directory and add this to it:
+Follow the prompts and enter all the information it asks for and be sure to take note of the password you specify because you will need it below.
+
+Then create a `release-signing.properties` file in the `platforms/android` directory and add this to it:
 
 ```
 storeFile=/my-absolute-path-to-keystore/my_app.keystore
@@ -128,12 +130,14 @@ keyAlias=my_app
 keyPassword=secret
 ```
 
+Be sure to replace both occurrences of `secret` with your passwords, and replace `my_app` with the alias to your app.
+
 Now you can compile a signed release using this terminal command:
 
 ```
 cordova build android --release
 ```
 
-That's it! The `android-relees.apk` file can now be uploaded to the Google Play Developer Console:
+That's it! The `android-release.apk` file can now be uploaded to the Google Play Developer Console:
 
 `~/phonegap/my_app/platforms/android/build/outputs/apk/my_app.apk`
