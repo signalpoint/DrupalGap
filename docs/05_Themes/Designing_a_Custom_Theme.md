@@ -33,14 +33,14 @@ Now we need to tell DrupalGap about the new assets for our custom theme. This is
 
 Remove this line from index.html:
 
-`<link rel="stylesheet" href="jquery.mobile-1.4.2.min.css" />`
+`<link rel="stylesheet" href="jquery.mobile-1.4.5.min.css" />`
 
 Then replace it with these three lines, for example:
 
 ```
 <link rel="stylesheet" href="app/themes/my_theme/my_theme.css" />
 <link rel="stylesheet" href="app/themes/my_theme/jquery.mobile.icons.min.css" />
-<link rel="stylesheet" href="jquery.mobile.structure-1.4.2.min.css" />
+<link rel="stylesheet" href="jquery.mobile.structure-1.4.5.min.css" />
 ```
 
 ## Specify the Theme in settings.js
