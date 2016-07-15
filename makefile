@@ -9,15 +9,17 @@ files = src/dg.js\
                                 src/includes/form.submission.inc.js\
                                 src/includes/form.theme.inc.js\
                                 src/includes/go.inc.js\
-                                src/includes/page.inc.js\
-                                src/includes/region.inc.js\
                                 src/includes/menu.inc.js\
                                 src/includes/messages.inc.js\
+                                src/includes/page.inc.js\
+                                src/includes/region.inc.js\
+                                src/includes/render.inc.js\
                                 src/includes/theme.inc.js\
                                 src/includes/title.inc.js\
                                 src/modules/comment/comment.js\
                                 src/modules/contact/contact.js\
                                 src/modules/entity/entity.js\
+                                src/modules/entity/entity.helpers.js\
                                 src/modules/field/field.js\
                                 src/modules/file/file.js\
                                 src/modules/image/image.js\
