@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# WARNING: don't use this within a sym linked directory, it probably won't work.
 
 # Ideal source.png would be 1280x1280, but a min of 512x512 is OK.
 
