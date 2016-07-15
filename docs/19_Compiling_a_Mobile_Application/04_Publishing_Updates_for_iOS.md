@@ -1,3 +1,5 @@
+> Developer tip, careful with symbolic links within an iOS project, xCode and Emulators may fail to start.
+
 This page is based on [Apple's Official Documentation](https://developer.apple.com/library/ios/documentation/LanguagesUtilities/Conceptual/iTunesConnect_Guide/Chapters/ReplacingYourAppWithANewVersion.html#//apple_ref/doc/uid/TP40011225-CH14).
 
 After you initially publish your app, you'll most likely want to improve upon your app and release new versions of it. Updating your App for iOS app is similar to some aspects of the initial publication of the App, except there is much less to do, and there are some new options that can be set:
