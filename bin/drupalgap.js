@@ -1,4 +1,4 @@
-/*! drupalgap 2016-06-28 */
+/*! drupalgap 2016-07-15 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -2859,23 +2859,6 @@ function _drupalgap_form_render_element(form, element) {
     // Are we skipping the render of the item?
     if (!render_item) { return ''; }
 
-    // Show the 'Add another item' button on unlimited value fields.
-    /*if (element.field_info_field &&
-      element.field_info_field.cardinality == -1) {
-      var add_another_item_variables = {
-        text: 'Add another item',
-        attributes: {
-          'class': 'drupalgap_form_add_another_item',
-          onclick:
-            "javascript:_drupalgap_form_add_another_item('" +
-              form.id + "', '" +
-              element.name + "', " +
-              delta +
-            ')'
-        }
-      };
-      html += theme('button', add_another_item_variables);
-    }*/
 
     // Is this element wrapped? We won't wrap hidden inputs by default, unless
     // someone is overriding it.
@@ -2923,6 +2906,26 @@ function _drupalgap_form_render_element(form, element) {
     if (element.description && element.type != 'hidden') {
       html += '<div class="description">' + t(element.description) + '</div>';
     }
+
+    // Show the 'Add another item' button on unlimited value fields.
+    if (element.field_info_field &&
+        element.field_info_field.cardinality == -1) {
+      var add_another_item_variables = {
+        text: 'Add another item',
+        attributes: {
+          'class': 'drupalgap_form_add_another_item',
+          onclick:
+          "javascript:_drupalgap_form_add_another_item('" +
+          form.id + "', '" +
+          element.name + "', " +
+          delta +
+          ')'
+        }
+      };
+      html += theme('button', add_another_item_variables);
+      console.log('class + : ' + drupalgap_form_get_element_container_class(name));
+    }
+
 
     // Close the element container.
     if (wrapped) { html += '</div>'; }
@@ -3125,8 +3128,8 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
     // Locate the last item, load the form, extract the element from
     // the form, generate default variables for the new item, determine the next
     // delta value.
-    var selector = '.' + drupalgap_form_get_element_container_class(name) +
-      ' .drupalgap_form_add_another_item';
+    var selector = '.' + drupalgap_form_get_element_container_class(name).replace(/\s+/g, '.') + ' .drupalgap_form_add_another_item';
+    console.log('selector: ' + selector);
     var add_another_item_button = $(selector);
     var form = drupalgap_form_local_storage_load(form_id);
     var language = language_default();
@@ -3139,7 +3142,10 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
     form.elements[name][language][delta + 1] = item;
     var element = form.elements[name];
     var variables = {
-      attributes: {},
+      attributes: {
+        id: item.id,
+        value: ''
+      },
       field_info_field: element.field_info_field,
       field_info_instance: element.field_info_instance
     };
@@ -3157,8 +3163,19 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
     );
     drupalgap_form_local_storage_save(form);
     $(add_another_item_button).before(
-      _drupalgap_form_render_element_item(form, element, variables, item)
+        _drupalgap_form_render_element_item(form, element, variables, item)
     );
+    // increment delta of the add another button item
+    $(add_another_item_button).attr("onclick",
+      "javascript:_drupalgap_form_add_another_item('" +
+        form.id + "', '" +
+        element.name + "', " +
+        (delta + 1) +
+        ")"
+    );
+    // enhance the markup of dynamically added element
+    $('#' + drupalgap_get_page_id()).trigger('create');
+
   }
   catch (error) { console.log('_drupalgap_form_add_another_item - ' + error); }
 }
@@ -3745,7 +3762,8 @@ function drupalgap_form_state_values_assemble(form) {
         form_state.values[name][lng] = {};
         var allowed_values = element.field_info_field.cardinality;
         if (allowed_values == -1) {
-          allowed_values = 1; // Convert unlimited value field to one for now...
+          // how many values are in the form
+          allowed_values = Object.keys(element[lng]).length;
         }
         for (var delta = 0; delta < allowed_values; delta++) {
           id = drupalgap_form_get_element_id(name, form.id, lng, delta);
@@ -8498,7 +8516,15 @@ function drupalgap_entity_build_from_form_state(form, form_state) {
           var allowed_values = form.elements[name].field_info_field.cardinality;
 
           // Convert unlimited value fields to one, for now...
-          if (allowed_values == -1) { allowed_values = 1; }
+          // if (allowed_values == -1) { allowed_values = 1; }
+          if (allowed_values == -1) {
+            console.log('drupalgap_entity_build_from_form_state - value: ');
+            console.log(value);
+            allowed_values = Object.keys(value[language]).length;
+            console.log('allowed_values : '+ allowed_values);
+          }
+
+
 
           // Make sure there is at least one value before creating the form
           // element on the entity.
