@@ -10,8 +10,8 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
     // Locate the last item, load the form, extract the element from
     // the form, generate default variables for the new item, determine the next
     // delta value.
-    var selector = '.' + drupalgap_form_get_element_container_class(name) +
-      ' .drupalgap_form_add_another_item';
+    var selector = '.' + drupalgap_form_get_element_container_class(name).replace(/\s+/g, '.') + ' .drupalgap_form_add_another_item';
+    console.log('selector: ' + selector);
     var add_another_item_button = $(selector);
     var form = drupalgap_form_local_storage_load(form_id);
     var language = language_default();
@@ -24,7 +24,10 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
     form.elements[name][language][delta + 1] = item;
     var element = form.elements[name];
     var variables = {
-      attributes: {},
+      attributes: {
+        id: item.id,
+        value: ''
+      },
       field_info_field: element.field_info_field,
       field_info_instance: element.field_info_instance
     };
@@ -42,8 +45,19 @@ function _drupalgap_form_add_another_item(form_id, name, delta) {
     );
     drupalgap_form_local_storage_save(form);
     $(add_another_item_button).before(
-      _drupalgap_form_render_element_item(form, element, variables, item)
+        _drupalgap_form_render_element_item(form, element, variables, item)
     );
+    // increment delta of the add another button item
+    $(add_another_item_button).attr("onclick",
+      "javascript:_drupalgap_form_add_another_item('" +
+        form.id + "', '" +
+        element.name + "', " +
+        (delta + 1) +
+        ")"
+    );
+    // enhance the markup of dynamically added element
+    $('#' + drupalgap_get_page_id()).trigger('create');
+
   }
   catch (error) { console.log('_drupalgap_form_add_another_item - ' + error); }
 }

@@ -380,23 +380,6 @@ function _drupalgap_form_render_element(form, element) {
     // Are we skipping the render of the item?
     if (!render_item) { return ''; }
 
-    // Show the 'Add another item' button on unlimited value fields.
-    /*if (element.field_info_field &&
-      element.field_info_field.cardinality == -1) {
-      var add_another_item_variables = {
-        text: 'Add another item',
-        attributes: {
-          'class': 'drupalgap_form_add_another_item',
-          onclick:
-            "javascript:_drupalgap_form_add_another_item('" +
-              form.id + "', '" +
-              element.name + "', " +
-              delta +
-            ')'
-        }
-      };
-      html += theme('button', add_another_item_variables);
-    }*/
 
     // Is this element wrapped? We won't wrap hidden inputs by default, unless
     // someone is overriding it.
@@ -444,6 +427,27 @@ function _drupalgap_form_render_element(form, element) {
     if (element.description && element.type != 'hidden') {
       html += '<div class="description">' + t(element.description) + '</div>';
     }
+
+    // Show the 'Add another item' button on unlimited value fields.
+    if (element.field_info_field &&
+        element.field_info_field.cardinality == -1) {
+      var add_another_item_variables = {
+        text: 'Add another item',
+        attributes: {
+          'class': 'drupalgap_form_add_another_item',
+          'style': (element.field_info_field.type == 'file') ? 'display: none;' : '',
+          onclick:
+          "javascript:_drupalgap_form_add_another_item('" +
+          form.id + "', '" +
+          element.name + "', " +
+          delta +
+          ')'
+        }
+      };
+      html += theme('button', add_another_item_variables);
+      console.log('class + : ' + drupalgap_form_get_element_container_class(name));
+    }
+
 
     // Close the element container.
     if (wrapped) { html += '</div>'; }
