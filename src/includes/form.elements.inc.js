@@ -435,6 +435,7 @@ function _drupalgap_form_render_element(form, element) {
         text: 'Add another item',
         attributes: {
           'class': 'drupalgap_form_add_another_item',
+          'style': (element.field_info_field.type == 'file') ? 'display: none;' : '',
           onclick:
           "javascript:_drupalgap_form_add_another_item('" +
           form.id + "', '" +
