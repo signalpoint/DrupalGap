@@ -1,4 +1,4 @@
-/*! drupalgap 2016-06-28 */
+/*! drupalgap 2016-07-20 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -2807,9 +2807,10 @@ function _drupalgap_form_render_element(form, element) {
         // if it wasn't already set, otherwise set it to the item's value.
         if (!item.default_value) { item.default_value = ''; }
         variables.attributes.value = item.default_value;
-        if (typeof item.value !== 'undefined' && typeof variables.attributes.value === 'undefined') {
-          variables.attributes.value = item.value;
-        }
+        if (
+            typeof item.value !== 'undefined' &&
+            (typeof variables.attributes.value === 'undefined' || empty(variables.attributes.value))
+        ) { variables.attributes.value = item.value; }
 
         // Call the hook_field_widget_form() if necessary. Merge any changes
         // to the item back into this item.
@@ -14014,7 +14015,7 @@ function user_page() {
  */
 function user_register_access() {
   try {
-    switch (drupalgap.site_settings.user_register) {
+    switch (drupalgap.site_settings.user_register.toString()) {
       case '0': // admins only can register
         return false;
         break;
