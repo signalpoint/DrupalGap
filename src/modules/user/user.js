@@ -189,7 +189,7 @@ function user_page() {
  */
 function user_register_access() {
   try {
-    switch (drupalgap.site_settings.user_register) {
+    switch (drupalgap.site_settings.user_register.toString()) {
       case '0': // admins only can register
         return false;
         break;
