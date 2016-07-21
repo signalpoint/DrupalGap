@@ -73,19 +73,29 @@ In xCode, select an "iPhone" simulator, then click the "Run" button to open the 
 
 ## 4. Install PhoneGap (Cordova) Plugins
 
-Now that we've created and tested an empty app. Let's add some plugins.
+Now that we've created and tested an empty app. Let's add some [Cordova plugins](http://plugins.cordova.io/#/_browse/all).
 
-Since PhoneGap 3.x was released, many core features we need are now packaged as [Cordova plugins](http://plugins.cordova.io/#/_browse/all). Here are the required plugins, install them with this single terminal command:
+Here are the required plugins, install them with this single terminal command:
 
-`cordova plugin add org.apache.cordova.console org.apache.cordova.device org.apache.cordova.dialogs org.apache.cordova.file org.apache.cordova.inappbrowser org.apache.cordova.network-information`
+`cordova plugin add cordova-plugin-console cordova-plugin-device cordova-plugin-dialogs cordova-plugin-file cordova-plugin-inappbrowser cordova-plugin-network-information`
+
+Then to update your `config.xml` file, run this terminal command:
+
+`cordova plugin save`
+
+Anytime you add or remove plugins from your app, be sure to run this command again.
 
 ### Other recommended Plugins
 
 There are a few other plugins that are common to many mobile apps, feel free to install them like we did above:
 
-`cordova plugin add org.apache.cordova.camera org.apache.cordova.geolocation`
+`cordova plugin add cordova-plugin-camera cordova-plugin-geolocation`
 
-Once we've successfully completed the platform guide for PhoneGap, we're now ready to place DrupalGap on top of the app.
+Again, update your `config.xml` file with this command:
+
+`cordova plugin save`
+
+Now that we've successfully completed the platform guide for PhoneGap, we're now ready to place DrupalGap on top of the app.
 
 ## 5. Install the DrupalGap SDK over PhoneGap
 
