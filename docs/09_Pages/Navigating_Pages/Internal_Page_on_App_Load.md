@@ -7,7 +7,7 @@ var landingPage = 'dashboard';
 if(location.hash){
   // additional logic can be added here for other internal page types and exclude certain pages from being directed to on the initial app load.
   goToPage = location.hash.replace("#","");
-  homePage = goToPage.replace('node_', 'node/');
+  landingPage = goToPage.replace('node_', 'node/');
 }
 
 // fix drupalgap_back() to not break if coming from external page
