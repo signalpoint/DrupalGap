@@ -25,7 +25,7 @@ function drupalgap_back() {
     }
     else if (active_page_id == '_drupalgap_splash') { return; }
     else if (drupalgap.back_path == ''){
-      drupalgap_goto('home_page');
+      drupalgap_goto('dashboard');
       return;
     }
     else { _drupalgap_back(); }
