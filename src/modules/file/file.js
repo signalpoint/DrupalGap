@@ -227,12 +227,12 @@ function file_upload() {
     function uploadFile(fileURI) {
       // upload file
       var uri = encodeURI(Drupal.settings.site_path + "/" + Drupal.settings.endpoint + "/file/create_raw");
+      var headers={'X-CSRF-Token': Drupal.sessid};
 
       var fileOptions = new FileUploadOptions();
       fileOptions.fileKey = "files[file_1]";
       fileOptions.fileName = fileURI.substr(fileURI.lastIndexOf('/') + 1);
-      //options.mimeType="image/jpeg";
-      //options.mimeType="video/quicktime";
+      fileOptions.headers = headers;
 
       var ft = new FileTransfer();
 
@@ -252,10 +252,6 @@ function file_upload() {
         fileURI,
         uri,
         function (r) {
-          // success
-          // $("#edit-node-edit-field-media-und-0-value-add-media-button").trigger( "click" );
-          //_drupalgap_form_add_another_item(form_id, name, delta);
-
 
           drupalgap_loading_message_hide();
           console.log("Code = " + r.responseCode);
@@ -274,10 +270,6 @@ function file_upload() {
           // remove current media button
           $("#" + input_id + "-add-media-button").remove();
           file_upload();
-          // move media button below new field
-          //$(this).after($(this).next());
-
-
         },
         function (error) {
           // error
