@@ -432,7 +432,7 @@ function _drupalgap_form_render_element(form, element) {
     if (element.field_info_field &&
         element.field_info_field.cardinality == -1) {
       var add_another_item_variables = {
-        text: 'Add another item',
+        text: t('Add another item'),
         attributes: {
           'class': 'drupalgap_form_add_another_item',
           'style': (element.field_info_field.type == 'file') ? 'display: none;' : '',
