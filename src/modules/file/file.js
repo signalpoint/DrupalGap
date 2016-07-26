@@ -122,23 +122,12 @@ function file_field_widget_form(form, form_state, field, instance, langcode, ite
       browse_button_text +
       '</a>';
 
-
-
-
-    // Open extra javascript declaration.
-    //
-// $("#" + drupalgap_get_page_id(drupalgap_path_get())).on("pageshow", function () {
-//   document.addEventListener("deviceready", init, false);
-// });
-
-
     html += '<script type="text/javascript">';
-    // Add device ready listener for PhoneGap camera.
-    html += '$("#' + drupalgap_get_page_id(
-        drupalgap_path_get()) + '").on("pageshow",function(){' +
+    html += '$("#' + drupalgap_get_page_id() + '").on("pageshow",function(){' +
       'document.addEventListener(' +
       '"deviceready", init_media_upload, false );' +
       '});' ;
+
     html += '</script>';
 
     // Add html to the item's children.
