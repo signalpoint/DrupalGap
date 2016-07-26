@@ -125,7 +125,7 @@ function file_field_widget_form(form, form_state, field, instance, langcode, ite
     html += '<script type="text/javascript">';
     html += '$("#' + drupalgap_get_page_id() + '").on("pageshow",function(){' +
       'document.addEventListener(' +
-      '"deviceready", init_media_upload, false );' +
+      '"deviceready", file_upload, false );' +
       '});' ;
 
     html += '</script>';
@@ -174,13 +174,7 @@ function file_assemble_form_state_into_field(entity_type, bundle,
   }
 }
 
-//
-// $("#" + drupalgap_get_page_id(drupalgap_path_get())).on("pageshow", function () {
-//   document.addEventListener("deviceready", init, false);
-// });
-
-function init_media_upload() {
-  console.log("init_media_upload");
+function file_upload() {
   $("[id$=-add-media-button]").on("click", function (event) {
     // get id of input field
     var regExp = /(.+)-add-media-button/;
@@ -279,7 +273,7 @@ function init_media_upload() {
           _drupalgap_form_add_another_item(form_id, name, delta);
           // remove current media button
           $("#" + input_id + "-add-media-button").remove();
-          init_media_upload();
+          file_upload();
           // move media button below new field
           //$(this).after($(this).next());
 
