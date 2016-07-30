@@ -1,4 +1,4 @@
-/*! drupalgap 2016-07-20 */
+/*! drupalgap 2016-07-29 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -7632,7 +7632,7 @@ function comment_services_postprocess(options, result) {
                     $(container).append(
                       theme('comment', { comment: comment })
                     ).trigger('create');
-                    scrollToElement('#' + container_id + ' :last-child', 500);
+                    scrollToElement('#' + container_id + ' #' + comment_container_id(comment.cid), 500);
                     var form_selector = '#' + drupalgap_get_page_id() +
                       ' #comment_edit' + '_' + comment.nid;
                     drupalgap_form_clear(form_selector);
