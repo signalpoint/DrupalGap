@@ -1,4 +1,4 @@
-/*! drupalgap 2016-07-29 */
+/*! drupalgap 2016-08-11 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -6496,9 +6496,9 @@ function theme_item_list(variables) {
     if (variables.items && variables.items.length > 0) {
       var listview = typeof variables.attributes['data-role'] !== 'undefined' &&
         variables.attributes['data-role'] == 'listview';
-      for (var index in variables.items) {
-          if (!variables.items.hasOwnProperty(index)) { continue; }
-          var item = variables.items[index];
+      for (var index = 0; index < variables.items.length; index++) {
+        var item = variables.items[index];
+        if (typeof item === 'string') {
           var icon = null;
           html += '<li';
           if (listview && (icon = $(item).attr('data-icon'))) {
@@ -6507,6 +6507,12 @@ function theme_item_list(variables) {
             html += ' data-icon="' + icon + '"';
           }
           html += '>' + item + '</li>';
+        }
+        else if (typeof item === 'object') {
+          var attributes = item.attributes ? item.attributes : {};
+          var content = item.content ? item.content : '';
+          html += '<li ' + drupalgap_attributes(attributes) + '>' + drupalgap_render(content) + '</li>';
+        }
       }
     }
     html += '</' + type + '>';
