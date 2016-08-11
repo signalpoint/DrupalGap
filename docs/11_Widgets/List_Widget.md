@@ -69,3 +69,25 @@ content['my_item_list'] = {
 };
 return content;
 ```
+
+## List item attributes
+
+Sometimes we need to place custom attributes on a particular list item. This is possible like so:
+
+```
+items: [
+  'Stop',
+  {
+    attributes: { class: 'foo' },
+    content: 'Drop'
+  },
+  {
+    attributes: { class: 'bar' },
+    content: {
+      markup: 'Roll'
+    }
+  }
+]
+```
+Notice how we can use a *string* or a *widget* for the `content` property, this gives us great flexibility on what goes inside a list item.
+
