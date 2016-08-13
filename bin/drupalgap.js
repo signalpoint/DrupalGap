@@ -1,4 +1,4 @@
-/*! drupalgap 2016-08-11 */
+/*! drupalgap 2016-08-13 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -13437,7 +13437,10 @@ function user_login_form(form, form_state) {
       type: 'textfield',
       title: t('Username'),
       title_placeholder: true,
-      required: true
+      required: true,
+      attributes: {
+        autocapitalize: 'none'
+      }
     };
     form.elements.pass = {
       type: 'password',
