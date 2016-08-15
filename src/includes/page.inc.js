@@ -241,7 +241,11 @@ function drupalgap_remove_page_from_dom(page_id) {
     var options = {};
     if (typeof arguments[1] !== 'undefined') { options = arguments[1]; }
     if (current_page_id != page_id || options.force) {
+      var currentPage = $('#' + current_page_id);
+      // Preserve and re-apply style to current page, @see https://github.com/signalpoint/DrupalGap/issues/837
+      var style = $(currentPage).attr('style');
       $('#' + page_id).empty().remove();
+      if (style) { $(currentPage).attr('style', style); }
       var page_index = drupalgap.pages.indexOf(page_id);
       if (page_index > -1) { drupalgap.pages.splice(page_index, 1); }
       // We'll remove the query string, unless we were instructed to leave it.
