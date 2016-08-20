@@ -50,7 +50,7 @@ example.routing = function() {
 
 ### 4. Render the page
 
-Next, add this code to the route's `_controller` function in the `example.js` file to render the page:
+Next, add this code inside the route's `_controller` function in the `example.js` file to render the page:
 
 ```
 return new Promise(function(ok, err) {
