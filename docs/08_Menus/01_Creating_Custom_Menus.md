@@ -73,17 +73,17 @@ my_module.routing = function() {
   };
   
   // My example beverage page route.
-    routes["my_module.beverage"] = {
-      "path": "/beverage",
-      "defaults": {
-        "_controller": function() {
-          return new Promise(function(ok, err) {
-            ok('What would you like to drink?');
-          });
-        },
-        "_title": "Beverage"
-      }
-    };
+  routes["my_module.beverage"] = {
+    "path": "/beverage",
+    "defaults": {
+      "_controller": function() {
+        return new Promise(function(ok, err) {
+          ok('What would you like to drink?');
+        });
+      },
+      "_title": "Beverage"
+    }
+  };
 
   // Returns the routes.
   return routes;
