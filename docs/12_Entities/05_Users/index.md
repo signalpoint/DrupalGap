@@ -1,88 +1,61 @@
-See the [User Services](../Services/User_Services) page for more information.
-
 ## The current user
 
 Once the DrupalGap bootstrap is complete, the current user will be available to your app's source code:
 
 ```
-var account = Drupal.user.name;
-if (account.uid == 0) {
-  alert('You are anonymous!');
-}
-else {
-  alert('You are authenticated! Hello, ' + Drupal.user.name);
-}
+// Grab the current user account.
+var user = jDrupal.currentUser();
+var msg = user.isAuthenticated() ?
+  'Hello ' + user.getAccountName() :
+  'Hello World';
 ```
 
-It's important to note that the `Drupal.user` object *will not be available* (aka fully loaded) within the `settings.js` file.
+It's important to note that the `jDrupal.currentUser()` function *will not be available* within the `settings.js` file, because the app hasn't bootsrapped itself by that time.
 
-## user_load()
+## Load a User Account
 
 ```
-user_load(1, {
-    success:function(account) {
-      alert("Loaded user " + account.name);
-    }
+jDrupal.userLoad(456).then(function(account) {
+  var msg = 'Loaded : ' + account.getAccountName();
+  console.log(msg);
 });
 ```
 
-## user_save()
+## Save a User Account
 
-**Save a New User**
+### Save a New User
 
 ```
-var account = {
-  name:"bob",
-  mail:"bob@hotmail.com",
-  pass:"pizza"
-};
-user_save(account, {
-    success:function(result) {
-      alert('Created new user #' + result.uid);
-    }
-});
-```
-
-**Update an Existing User**
-
 ...
+```
 
-
-## user_register()
+### Update an Existing User
 
 ```
-var account = {
-  name:"bob",
-  mail:"bot@example.com"
-};
-user_register(account, {
-    success:function(result) {
-      console.log('Registered user #' + result.uid);
-    }
-});
+...
+```
+
+
+## Register a New User
+
+This will become available in Drupal 8.3.0
+
+```
+...
 ```
 
 ## user_login()
 
 ```
-user_login("bob", "bobs-password", {
-    success:function(result){
-      alert('Hi, ' + result.user.name + '!');
-    },
-    error:function(xhr, status, message){
-      alert(message);
-    }
+jDrupal.userLogin('bob', 'secret').then(function() {
+  console.log('Logged in!');
 });
 ```
 
 ## user_logout()
 
 ```
-user_logout({
-    success:function(result){
-      if (result[0]) {
-         alert("Logged out!");
-      }
-    }
+jDrupal.userLogout().then(function() {
+  console.log('Logged out!');
 });
 ```

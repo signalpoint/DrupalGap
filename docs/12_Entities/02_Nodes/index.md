@@ -1,70 +1,55 @@
-See the [Node Services](../Services/Node_Services) page for more information.
-
-## node_load()
+## Load a Node
 
 ```
-node_load(123, {
-  success:function(node){
-    alert("Loaded " + node.title);
-  }
+jDrupal.nodeLoad(123).then(function(node) {
+  var msg = 'Loaded node: ' + node.getTitle();
+  console.log(msg);
 });
 ```
 
-## node_save()
+## Save a Node
 
-**Save a New Node**
+### Save a New Node
 
 ```
-var node = {
-  title:"Hello World",
-  type:"article"
-};
-node_save(node, {
-  success:function(result) {
-    alert("Saved new node #" + result.nid);
-  }
+var node = new jDrupal.Node({
+  type: [ { target_id: 'article' } ],
+  title: [ { value: 'Hello World' }]
+});
+node.save().then(function() {
+  var msg = 'Saved new node # ' + node.id();
+  console.log(msg);
 });
 ```
 
-**Update an Existing Node**
+### Update an Existing Node
 
 ```
-var node = {
-  nid:123,
-  title:"New Title"
-};
-node_save(node, {
-  success:function(result) {
-    alert("Updated existing node #" + result.nid);
-  }
+// First, load the node...
+jDrupal.nodeLoad(123).then(function(node) {
+
+  // then change its title...
+  node.setTitle('Goodbye world');
+
+  // and then save the changes.
+  node.save().then(function() {
+    var msg = 'Saved ' + node.getTitle();
+    console.log(msg);
+  });
+
 });
 ```
 
-## node_delete()
+## Delete a Node
 
 ```
-node_delete(123, {
-    success:function(result){
-      if (result[0]) {
-        alert("Node deleted!");
-      }
-    }
-});
-```
+// First, load the node...
+jDrupal.nodeLoad(123).then(function(node) {
 
-## node_index()
+  // then delete it.
+  node.delete(123).then(function() {
+    console.log('Node deleted!');
+  });
 
-**Get the Most Recent Nodes of Type Article**
-
-```
-var query = {
-  parameters: {
-    'type': 'article'
-  }
-};
-node_index(query, {
-    success:function(nodes){
-      alert('Indexed ' + nodes.length + ' node(s)!');
-    }
 });
 ```

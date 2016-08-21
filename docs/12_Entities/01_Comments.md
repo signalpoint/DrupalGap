@@ -1,80 +1,62 @@
-See the [Comment Services](../Services/Comment_Services) page for more information.
-
-## comment_load()
+## Load a Comment
 
 ```
-comment_load(456, {
-    success: function(comment) {
-      console.log('Loaded comment #' + comment.cid);
-    }
+jDrupal.commentLoad(456).then(function(comment) {
+  var msg = 'Loaded: ' + comment.getSubject();
+  console.log(msg);
 });
 ```
 
-## comment_save()
+## Save a Comment
 
-**Save a New Comment**
+### Save a New Comment
 
 ```
-var comment = {
-  nid: 123,
-  subject: 'My Comment Subject',
-  comment_body: {
-    und: [
-      { value: 'My Comment Body.' }
-    ]
-  }
-};
-comment_save(comment, {
-    success:function(result) {
-      console.log('Saved comment #' + result.cid);
-    }
+var comment = new jDrupal.Comment({
+  uid: [ { target_id: 1 } ],
+  entity_id: [ { target_id: 123 } ],
+  entity_type: [ { value: 'node' } ],
+  comment_type:[ { target_id: "comment" } ],
+  subject: [ { value: 'Hello World' } ],
+  comment_body: [{
+    "value": "<p>How are you?</p>",
+    "format": "basic_html"
+  }]
+});
+comment.save().then(function() {
+  var msg = 'Saved new comment # ' + comment.id();
+  console.log(msg);
 });
 ```
 
-**Update an Existing Comment**
+## Update an Existing Comment
 
 ```
-var comment = {
-  cid: 456,
-  subject: "New Subject",
-  comment_body: {
-    und: [
-      { value: "New Comment Body" }
-    ]
-  }
-};
-comment_save(comment, {
-  success: function(result) {
-    alert("Saved comment #" + result[0]);
-  }
+// First, load the comment...
+jDrupal.commentLoad(456).then(function(comment) {
+
+  // then change its subject...
+  comment.setSubject('Goodbye world');
+
+  // and then save the changes.
+  comment.save().then(function() {
+    var msg = 'Saved ' + comment.setSubject();
+    console.log(msg);
+  });
+
 });
 ```
 
-## comment_delete()
+## Delete a Comment
 
 ```
-comment_delete(456, {
-    success: function(result){
-      if (result[0]) {
-        alert("Comment deleted!");
-      }
-    }
-});
-```
+// First, load the comment...
+jDrupal.commentLoad(456).then(function(comment) {
 
-## comment_index()
+  // then delete it.
+  comment.delete(456).then(function() {
+    console.log('comment deleted!');
+  });
 
-**Get Comments from a Node**
-
-```
-var query = {
-  parameters:{
-    nid: 123,
-  }
-};
-comment_index(query, {
-    success: function(comments){
-      alert('Found ' + comments.length + ' comment(s)!');
-    }
 });
 ```
