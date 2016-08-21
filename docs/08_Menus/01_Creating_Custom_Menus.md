@@ -27,7 +27,7 @@ return new Promise(function(ok, err) {
 For example, if we wanted to put the `my_module_custom_block` block in the `header` region of `my_theme`, we would do this in the `settings.js` file:
 
 ```
-drupalgap.settings.blocks.my_theme = {
+dg.settings.blocks[dg.config('theme').name] = {
 
   /* ... */
 
