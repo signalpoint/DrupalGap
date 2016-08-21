@@ -1,0 +1,13 @@
+/**
+ * DRUPAL 8
+ */
+.hljs-number {
+  color: #ff0000;
+}
+.hljs-string {
+  color: #0033ff;
+}
+.hljs-comment {
+  color: #7704bb;
+}
+
