@@ -4,7 +4,7 @@ Here are a few examples of how to alter the builds for any block:
 
 ```
 /**
- * Implements hook_regions_build_alter().
+ * Implements hook_blocks_build_alter().
  */
 function my_module_blocks_build_alter(blocks) {
 

@@ -1,7 +1,7 @@
 Block display settings in DrupalGap are specified in the `settings.js` file. Each theme has its own specific block settings, and inside each theme, the theme's regions specify which blocks to display in it.
 
 ```
-drupalgap.settings.blocks.my_theme = {
+dg.settings.blocks[dg.config('theme').name] = {
 
   /* ... */
 
