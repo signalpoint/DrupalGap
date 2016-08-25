@@ -1,4 +1,4 @@
-/*! drupalgap 2016-08-15 */
+/*! drupalgap 2016-08-25 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -1071,7 +1071,7 @@ function drupalgap_menu_access(path) {
 
         // An access callback function is specified for this path...
         var function_name = drupalgap.menu_links[path].access_callback;
-        if (drupalgap_function_exists(function_name)) {
+        if (function_exists(function_name)) {
           // Grab the access callback function. If there are any access args
           // send them along, or just call the function directly.
           // access arguments.
@@ -14777,12 +14777,9 @@ function theme_views_view(variables) {
       setTimeout(function() {
           $(selector).trigger('create').show('fast');
       }, 100);
-      if (
-        variables.empty_callback &&
-        function_exists(variables.empty_callback)
-      ) {
+      if (variables.empty_callback && function_exists(variables.empty_callback)) {
         var empty_callback = window[variables.empty_callback];
-        return views_exposed_form_html + drupalgap_render(empty_callback(results.view));
+        return views_exposed_form_html + drupalgap_render(empty_callback(results.view, variables));
       }
       return html + views_exposed_form_html;
     }
@@ -15118,7 +15115,7 @@ function drupalgap_views_render_rows(variables, results, root, child, open_row, 
       var row_content = '';
       if (variables.row_callback && function_exists(variables.row_callback)) {
         row_callback = window[variables.row_callback];
-        row_content = row_callback(results.view, row);
+        row_content = row_callback(results.view, row, variables);
       }
       else { row_content = JSON.stringify(row); }
       html += open_row + row_content + close_row;
