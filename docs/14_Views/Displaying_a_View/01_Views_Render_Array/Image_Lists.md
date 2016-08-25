@@ -60,7 +60,7 @@ function my_module_user_profiles() {
  /**
  * The row callback to render a single row.
  */
-function my_module_user_profiles_list_row(view, row) {
+function my_module_user_profiles_list_row(view, row, variables) {
   try {
       var image_html = theme('image', { path: row.picture.src });
       var name_html = '<h2>' + row.name + '</h2>';
@@ -73,7 +73,7 @@ function my_module_user_profiles_list_row(view, row) {
 /**
  * Callback function for no results.
  */
-function my_module_user_profiles_list_empty(view) {
+function my_module_user_profiles_list_empty(view, variables) {
   try {
     return '<p>Sorry, no users were found.</p>';
   }
@@ -134,7 +134,7 @@ function my_module_article_images() {
 /**
  * The row callback to render a single row.
  */
-function my_module_article_images_list_row(view, row) {
+function my_module_article_images_list_row(view, row, variables) {
   try {
         
       var image_html = theme('image', { path: row.field_image.src });
@@ -150,7 +150,7 @@ function my_module_article_images_list_row(view, row) {
 /**
  * Callback function for no results.
  */
-function my_module_article_images_list_empty(view) {
+function my_module_article_images_list_empty(view, variables) {
   try {
     return '<p>Sorry, no articles were found.</p>';
   }

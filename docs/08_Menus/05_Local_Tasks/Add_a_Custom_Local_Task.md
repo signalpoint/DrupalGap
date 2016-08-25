@@ -146,7 +146,7 @@ function my_module_user_articles_page(uid) {
 /**
  *
  */
-function my_module_user_articles_row(view, row) {
+function my_module_user_articles_row(view, row, variables) {
   try {
     return l(row.title, 'node/' + row.nid);
   }
@@ -156,7 +156,7 @@ function my_module_user_articles_row(view, row) {
 /**
  *
  */
-function my_module_user_articles_empty(view) {
+function my_module_user_articles_empty(view, variables) {
   try {
     return 'Sorry, no articles were found.';
   }

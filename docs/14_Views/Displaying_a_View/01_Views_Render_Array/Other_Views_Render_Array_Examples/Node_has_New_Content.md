@@ -6,7 +6,7 @@ Then you could use something like this in your `row_callback`:
 /**
  * The row callback to render a single row.
  */
-function my_module_articles_list_row(view, row) {
+function my_module_articles_list_row(view, row, variables) {
   try {
     if (row.new_content == 1) {
       var html = l('<font color="#0404B4">' + row.title + '</font>', 'node/' + row.nid);

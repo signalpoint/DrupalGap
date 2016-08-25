@@ -52,7 +52,7 @@ function my_module_articles_page() {
 /**
  * The row callback to render a single row.
  */
-function my_module_articles_list_row(view, row) {
+function my_module_articles_list_row(view, row, variables) {
   try {
     return l(t(row.title), 'node/' + row.nid);
   }
@@ -62,7 +62,7 @@ function my_module_articles_list_row(view, row) {
 /**
  *
  */
-function my_module_articles_list_empty(view) {
+function my_module_articles_list_empty(view, variables) {
 
   // This...
 
@@ -124,7 +124,7 @@ When using a `row_callback` function, the position of the row is located within 
 /**
  * The row callback to render a single row.
  */
-function my_module_articles_list_row(view, row) {
+function my_module_articles_list_row(view, row, variables) {
   try {
     var html = l(row.title, 'node/' + row.nid);
     // Use plain text for the first and last rows.

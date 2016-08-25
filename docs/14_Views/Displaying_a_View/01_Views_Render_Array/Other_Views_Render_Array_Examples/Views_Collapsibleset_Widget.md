@@ -84,7 +84,7 @@ function my_module_beer_list_page() {
   catch (error) { console.log('my_module_beer_list_page - ' + error); }
 }
 
-function my_module_beer_list_page_row(view, row) {
+function my_module_beer_list_page_row(view, row, variables) {
   try {
     var attributes = {
       'data-role': 'collapsible'
@@ -98,7 +98,7 @@ function my_module_beer_list_page_row(view, row) {
   catch (error) { console.log('my_module_beer_list_page_row - ' + error); }
 }
 
-function my_module_beer_list_page_empty(view) {
+function my_module_beer_list_page_empty(view, variables) {
   try {
     return "Sorry, we are out of beer.";
   }
