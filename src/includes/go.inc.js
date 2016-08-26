@@ -366,6 +366,26 @@ function drupalgap_back() {
 }
 
 /**
+ * The DrupalGap "Back to the Future" function goes forward to the previous page by first
+ * removing that page from the DOM, then going "forward" to that page using drupalgap_goto().
+ */
+function drupalgap_back_2tf() {
+  var back = drupalgap_back_path();
+  drupalgap_remove_page_from_dom(drupalgap_get_page_id(back));
+  drupalgap_goto(back, { reloadPage: true });
+}
+
+/**
+ * Returns the previous page path, or the front page if there is none.
+ * @returns {String}
+ */
+function drupalgap_back_path() {
+  return drupalgap.back_path.length ?
+      drupalgap.back_path[drupalgap.back_path.length - 1] :
+      drupalgap.settings.front;
+}
+
+/**
  * An internal function used to change the page to the previous page.
  */
 function _drupalgap_back() {
