@@ -7,19 +7,16 @@ For example, say we had a content type called **Team**, we could display team no
  * Implements hook_menu().
  */
 function example_menu() {
-  try {
-    var items = {};
-    items['team/%'] = {
-      title: 'Team',
-      title_callback: 'example_team_title_callback',
-      title_arguments: [1],
-      page_callback: 'example_team_page',
-      pageshow: 'example_team_pageshow',
-      page_arguments: [1]
-    };
-    return items;
-  }
-  catch (error) { console.log('example_menu - ' + error); }
+  var items = {};
+  items['team/%'] = {
+    title: 'Team',
+    title_callback: 'example_team_title_callback',
+    title_arguments: [1],
+    page_callback: 'example_team_page',
+    pageshow: 'example_team_pageshow',
+    page_arguments: [1]
+  };
+  return items;
 }
 
 
