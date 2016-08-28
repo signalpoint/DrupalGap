@@ -9,6 +9,32 @@ For example, say we had a content type called **Team**, we could display team no
 function example_menu() {
   var items = {};
   items['team/%'] = {
+    page_callback: 'drupalgap_get_entity',
+    page_arguments: ['my_module_team_page', 'node', 1]
+  };
+  return items;
+}
+
+function my_module_team_page(node, ok) {
+  var content = {};
+  content['title'] = { markup: node.title };
+  ok(content);
+}
+```
+
+For a similar example with user accounts, [see this comment](https://github.com/signalpoint/DrupalGap/issues/845#issue-173522542).
+
+The example above is actually a new feature that was built after doing the same thing over and over again, which is the example listed below.
+
+The example below provides complete control over the process, whereas the above example is essentially short hand for this: 
+
+```
+/**
+ * Implements hook_menu().
+ */
+function example_menu() {
+  var items = {};
+  items['team/%'] = {
     title: 'Team',
     title_callback: 'example_team_title_callback',
     title_arguments: [1],

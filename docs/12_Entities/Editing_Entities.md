@@ -8,6 +8,58 @@ For example, say we had a content type called **Team**, we could edit team nodes
  */
 function example_menu() {
   var items = {};
+  items['team/%/edit'] = {
+    page_callback: 'drupalgap_get_entity_form',
+    page_arguments: ['my_module_team_form', 'node', 1]
+  };
+  return items;
+}
+
+function my_module_team_form(form, form_state, node) {
+  form.elements['nid'] = {
+    type: 'hidden',
+    required: true,
+    default_value: node.nid
+  };
+  form.elements['type'] = {
+    type: 'hidden',
+    required: true,
+    default_value: node.type
+  };
+  form.elements['title'] = {
+    type: 'textfield',
+    title: t('Title'),
+    required: true,
+    default_value: node.title
+  };
+  form.elements['submit'] = {
+    type: 'submit',
+    value: t('Save')
+  };
+  return form;
+}
+
+function my_module_team_form_submit(form, form_state) {
+  node_save(form_state.values, {
+    success: function(result) {
+      drupalgap_toast(t('Node saved!'));
+    }
+  });
+}
+```
+
+For a similar example with user accounts, [see this comment](https://github.com/signalpoint/DrupalGap/issues/845#issue-173522542).
+
+The example above is actually a new feature that was built after doing the same thing over and over again, which is the example listed below.
+
+The example below provides complete control over the process, whereas the above example is essentially short hand for this:
+
+```
+/**
+ * Implements hook_menu().
+ */
+function example_menu() {
+  var items = {};
   items['team-edit/%'] = {
     title: 'Team edit',
     page_callback: 'example_team_edit_page',
@@ -40,6 +92,13 @@ function example_team_edit_pageshow(nid) {
 }
 
 function example_team_edit_form(form, form_state, node) {
+
+  // Node ID.
+  form.elements['nid'] = {
+    type: 'hidden',
+    required: true,
+    default_value: node.nid
+  };
 
   // Node title.
   form.elements.title = {
