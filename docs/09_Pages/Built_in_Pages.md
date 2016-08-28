@@ -1,17 +1,25 @@
-DrupalGap comes prepackaged with many pages that can automatically be displayed in a mobile application. For example, we know our Drupal websites come with the following pages:
+DrupalGap comes prepackaged with many pages that can automatically be displayed in a mobile application.
 
-- Node Pages
-- Node Edit Form
-- User Login
-- User Registration
-- User Profile Pages
-- User Account Edit Form
-- Taxonomy Term Pages
-- Taxonomy Term Edit Form
-- Site-Wide Contact Form
-- User Contact Forms
+- Node Pages (`node/123`)
+- Node Edit Form (`node/123/edit`)
+- User Login (`user/login`)
+- User Registration (`user/register`)
+- User Forgot Password (`user/password`)
+- User Profile Pages (`user/123`)
+- User Account Edit Form (`user/123/edit`)
+- Taxonomy Term Pages (`taxonomy_term/123`)
+- Taxonomy Term Edit Form (`taxonomy_term/123/edit`)
+- Site-Wide Contact Form (`contact`)
+- User Contact Forms (`user/123/contact`)
 
-So it makes sense to have these same types of pages available withour mobile applications.
+Notice how the pages built into DrupalGap use the same paths that we're used to in Drupal?
+
+## Custom Pages and Forms for Entities
+
+Although DrupalGap has these built in pages, it can be very beneficial to have complete control over the display and editing of your entities. These topics have great examples for how easy it is to customize your own pages and forms:
+
+- [Rendering Entities](../Entities/Rendering_Entities)
+- [Editing Entities](../Entities/Editing_Entities)
 
 ## Node Pages
 
