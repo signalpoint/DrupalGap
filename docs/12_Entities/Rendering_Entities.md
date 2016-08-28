@@ -15,10 +15,10 @@ function example_menu() {
   return items;
 }
 
-function my_module_team_page(node, ok) {
+function my_module_team_page(node) {
   var content = {};
   content['title'] = { markup: node.title };
-  ok(content);
+  return content;
 }
 ```
 
