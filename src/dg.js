@@ -994,19 +994,20 @@ function drupalgap_jqm_page_events() {
  */
 function drupalgap_jqm_page_event_script_code(options) {
   try {
+    if (!options.page_id) { options.page_id = drupalgap_get_page_id(); }
+    if (!options.jqm_page_event) { options.jqm_page_event = 'pageshow'; }
     // Build the arguments to send to the event fire handler.
     var event_fire_args = '"' + options.jqm_page_event + '", "' +
       options.jqm_page_event_callback + '", ' +
       options.jqm_page_event_args;
     if (arguments[1]) { event_fire_args += ', "' + arguments[1] + '"'; }
     // Build the inline JS and return it.
-    var script_code = '<script type="text/javascript">' +
+    return '<script type="text/javascript">' +
       '$("#' + options.page_id + '").on("' +
         options.jqm_page_event + '", drupalgap_jqm_page_event_fire(' +
-          event_fire_args +
-        '));' +
+        event_fire_args +
+      '));' +
     '</script>';
-    return script_code;
   }
   catch (error) {
     console.log('drupalgap_jqm_page_event_script_code - ' + error);
