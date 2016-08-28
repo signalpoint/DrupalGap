@@ -8183,10 +8183,8 @@ function drupalgap_get_entity(handler, entity_type, entity_id) {
 function drupalgap_get_entity_pageshow(options) {
   entity_load(options.entity_type, options.entity_id, {
     success: function(entity) {
-      window[options.handler](entity, function(content) {
-        var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id);
-        $('#' + id).html(drupalgap_render(content)).trigger('create');
-      });
+      var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id);
+      $('#' + id).html(drupalgap_render(window[options.handler](entity))).trigger('create');
     }
   });
 }
