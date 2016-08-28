@@ -39,7 +39,7 @@ function drupalgap_block_load(delta) {
 function drupalgap_block_render(region, current_path, block_delta,
   block_settings, block_counts) {
   try {
-    var html = '';
+    var content = '';
     // Check the block's visibility settings. If an access_callback
     // function is specified on the block's settings, we'll call that
     // to determine the visibility, otherwise we'll fall back to the
@@ -73,7 +73,7 @@ function drupalgap_block_render(region, current_path, block_delta,
         block_counts.block_menu_count++;
       }
       if (block) {
-        html = module_invoke(
+        content = module_invoke(
           block.module,
           'block_view',
           block_delta,
@@ -81,7 +81,7 @@ function drupalgap_block_render(region, current_path, block_delta,
         );
       }
     }
-    return html;
+    return typeof content === 'string' ? content : drupalgap_render(content);
   }
   catch (error) { console.log('drupalgap_block_render - ' + error); }
 }
