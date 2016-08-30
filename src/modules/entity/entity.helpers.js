@@ -48,9 +48,11 @@ function drupalgap_get_entity_container_id(entity_type, entity_id, context) {
  * @param {Number} entity_id
  * @returns {string}
  */
-function drupalgap_get_entity(handler, entity_type, entity_id) {
+function drupalgap_get_entity(handler, entity_type, entity_id, context) {
   return '<div ' + drupalgap_attributes({
-    id: drupalgap_get_entity_container_id(entity_type, entity_id),
+    id: !context ?
+        drupalgap_get_entity_container_id(entity_type, entity_id) :
+        drupalgap_get_entity_container_id(entity_type, entity_id, context),
     'class': 'dg-entity-container ' + entity_type
   }) + '></div>' + drupalgap_jqm_page_event_script_code({
     jqm_page_event_callback: 'drupalgap_get_entity_pageshow',
@@ -68,9 +70,11 @@ function drupalgap_get_entity(handler, entity_type, entity_id) {
  * @param {Object} options
  */
 function drupalgap_get_entity_pageshow(options) {
+  var context = drupalgap.menu_links[drupalgap_router_path_get()].page_arguments.length == 4 ?
+      drupalgap.menu_links[drupalgap_router_path_get()].page_arguments[3] : null;
   entity_load(options.entity_type, options.entity_id, {
     success: function(entity) {
-      var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id);
+      var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id, context);
       $('#' + id).html(drupalgap_render(window[options.handler](entity))).trigger('create');
     }
   });
@@ -84,9 +88,10 @@ function drupalgap_get_entity_pageshow(options) {
  * @param {Number} entity_id
  * @returns {string}
  */
-function drupalgap_get_entity_form(handler, entity_type, entity_id) {
+function drupalgap_get_entity_form(handler, entity_type, entity_id, context) {
+  context = !context ? 'edit' : context;
   return '<div ' + drupalgap_attributes({
-        id: drupalgap_get_entity_container_id(entity_type, entity_id, 'edit'),
+        id: drupalgap_get_entity_container_id(entity_type, entity_id, context),
         'class': 'dg-entity-container ' + entity_type
       }) + '></div>' + drupalgap_jqm_page_event_script_code({
         jqm_page_event_callback: 'drupalgap_get_entity_form_pageshow',
@@ -104,9 +109,11 @@ function drupalgap_get_entity_form(handler, entity_type, entity_id) {
  * @param {Object} options
  */
 function drupalgap_get_entity_form_pageshow(options) {
+  var context = drupalgap.menu_links[drupalgap_router_path_get()].page_arguments.length == 4 ?
+      drupalgap.menu_links[drupalgap_router_path_get()].page_arguments[3] : 'edit';
   entity_load(options.entity_type, options.entity_id, {
     success: function(entity) {
-      var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id, 'edit');
+      var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id, context);
       $('#' + id).html(drupalgap_get_form(options.handler, entity)).trigger('create');
     }
   });

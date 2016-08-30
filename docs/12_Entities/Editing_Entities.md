@@ -48,6 +48,23 @@ function my_module_team_form_submit(form, form_state) {
 }
 ```
 
+You may optionally pass a *unique* 4th `page_argument` as a string, should you need to use this same technique on a different `hook_menu()` item. For example:
+
+```
+function example_menu() {
+  var items = {};
+  items['team/%/edit'] = {
+    page_callback: 'drupalgap_get_entity_form',
+    page_arguments: ['my_module_team_form', 'node', 1, 'team-form']
+  };
+  items['team/%/edit'] = {
+    page_callback: 'drupalgap_get_entity_form',
+    page_arguments: ['my_module_manage_team_form', 'node', 1, 'manage-team-form']
+  };
+  return items;
+}
+```
+
 For a similar example with user accounts, [see this comment](https://github.com/signalpoint/DrupalGap/issues/845#issue-173522542).
 
 The example above is actually a new feature that was built after doing the same thing over and over again, which is the example listed below.
