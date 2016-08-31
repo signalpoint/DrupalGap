@@ -111,10 +111,14 @@ function drupalgap_get_entity_form(handler, entity_type, entity_id, context) {
 function drupalgap_get_entity_form_pageshow(options) {
   var context = drupalgap.menu_links[drupalgap_router_path_get()].page_arguments.length == 4 ?
       drupalgap.menu_links[drupalgap_router_path_get()].page_arguments[3] : 'edit';
-  entity_load(options.entity_type, options.entity_id, {
-    success: function(entity) {
-      var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id, context);
-      $('#' + id).html(drupalgap_get_form(options.handler, entity)).trigger('create');
-    }
-  });
+  var done = function(entity) {
+    var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id, context);
+    $('#' + id).html(drupalgap_get_form(options.handler, entity)).trigger('create');
+  };
+  if (options.entity_id == 'add') { done({}); }
+  else {
+    entity_load(options.entity_type, options.entity_id, {
+      success: done
+    });
+  }
 }

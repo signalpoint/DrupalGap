@@ -1,6 +1,6 @@
 Although DrupalGap can [edit most entities](../Pages/Built_in_Pages) out of the box, and we can override the output of a node page using [hook_node_page_view_alter_TYPE()](http://api.drupalgap.org/7/global.html#hook_node_page_view_alter_TYPE), we can still make our own custom form to load and edit an entity.
 
-For example, say we had a content type called **Team**, we could edit team nodes like this:
+For example, say we had a content type called **Team**, we could add and edit team nodes like this:
 
 ```
 /**
@@ -8,6 +8,10 @@ For example, say we had a content type called **Team**, we could edit team nodes
  */
 function example_menu() {
   var items = {};
+  items['team/add'] = {
+      page_callback: 'drupalgap_get_entity_form',
+      page_arguments: ['my_module_team_form', 'node', 'add']
+    };
   items['team/%/edit'] = {
     page_callback: 'drupalgap_get_entity_form',
     page_arguments: ['my_module_team_form', 'node', 1]
@@ -16,11 +20,13 @@ function example_menu() {
 }
 
 function my_module_team_form(form, form_state, node) {
-  form.elements['nid'] = {
-    type: 'hidden',
-    required: true,
-    default_value: node.nid
-  };
+  if (node.nid) {
+    form.elements['nid'] = {
+        type: 'hidden',
+        required: true,
+        default_value: node.nid
+      };
+  }
   form.elements['type'] = {
     type: 'hidden',
     required: true,
@@ -42,7 +48,7 @@ function my_module_team_form(form, form_state, node) {
 function my_module_team_form_submit(form, form_state) {
   node_save(form_state.values, {
     success: function(result) {
-      drupalgap_toast(t('Node saved!'));
+      drupalgap_goto('team/' + result.nid, { reloadPage: true });
     }
   });
 }
@@ -57,7 +63,7 @@ function example_menu() {
     page_callback: 'drupalgap_get_entity_form',
     page_arguments: ['my_module_team_form', 'node', 1, 'team-form']
   };
-  items['team/%/edit'] = {
+  items['manage-team/%/edit'] = {
     page_callback: 'drupalgap_get_entity_form',
     page_arguments: ['my_module_manage_team_form', 'node', 1, 'manage-team-form']
   };
