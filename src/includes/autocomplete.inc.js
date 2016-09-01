@@ -170,7 +170,10 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
     // Clear the list.
     $ul.html('');
     // If a value has been input, start the autocomplete search.
-    if (value && value.length > 0) {
+    if (value && value.length > 0 && !autocomplete._searching) {
+
+      autocomplete._searching = true;
+
       // Show the loader icon.
       $ul.html('<li><div class="ui-loader">' +
         '<span class="ui-icon ui-icon-loading"></span>' +
@@ -182,6 +185,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
       _theme_autocomplete_success_handlers[autocomplete_id] = function(
         _autocomplete_id, result_items, _wrapped, _child) {
         try {
+
+          autocomplete._searching = false;
 
           // If there are no results, and then if an empty callback handler was
           // provided, call it.
@@ -471,4 +476,3 @@ function _theme_autocomplete_set_default_value_label(options) {
     console.log('_theme_autocomplete_set_default_value_label - ' + error);
   }
 }
-
