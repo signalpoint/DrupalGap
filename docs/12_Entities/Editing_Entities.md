@@ -21,6 +21,7 @@ function example_menu() {
 
 function my_module_team_form(form, form_state, node) {
   if (node.nid) {
+    form.id += '_' + node.nid;
     form.elements['nid'] = {
         type: 'hidden',
         required: true,
