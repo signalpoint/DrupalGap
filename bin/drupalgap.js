@@ -1,4 +1,4 @@
-/*! drupalgap 2016-09-15 */
+/*! drupalgap 2016-09-21 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -5884,8 +5884,20 @@ function drupalgap_render_region(region) {
     region_html +=
       _drupalgap_region_render_zone('_prefix', region, current_path);
 
+    // Verify the region has any blocks.
+    var hasBlocks = drupalgap.settings.blocks[drupalgap.settings.theme][region.name];
+    if (hasBlocks) {
+      var blockCount = 0;
+      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name], function(index, block) {
+        if (!in_array(index, ['_prefix', '_suffix'])) {
+          blockCount++;
+        }
+      });
+      hasBlocks = blockCount;
+    }
+
     // If the region has blocks specified for it in the theme in settings.js...
-    if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
+    if (hasBlocks) {
 
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
@@ -6150,7 +6162,12 @@ function drupalgap_render(content) {
     // variables that are reserved for theme processing.
     var render_variables = ['theme', 'view_mode', 'language'];
 
-    if (content.markup) { return content.markup; }
+    if (content.markup) {
+      return content.markup;
+    }
+    if (content.theme && !drupalgap.theme_registry[content.theme]) {
+      return theme(content.theme, content);
+    }
 
     // Is there a theme value specified in the content and the registry?
     if (content.theme && drupalgap.theme_registry[content.theme]) {
@@ -6213,15 +6230,39 @@ function drupalgap_render(content) {
         console.log('drupalgap_render - template file does not exist (' + template_file_path + ')');
       }
     }
+    else {
 
-    // Iterate over any remaining variables and theme them.
-    for (var element in content) {
-      if (!content.hasOwnProperty(element)) { continue; }
-      var variables = content[element];
-      if ($.inArray(element, render_variables) == -1) {
-        html += theme(typeof variables.theme === 'undefined' ? null : variables.theme, variables);
+      var weighted = {};
+      var weightedCount = 0;
+      for (var index in content) {
+        if (!content.hasOwnProperty(index)) { continue; }
+        var piece = content[index];
+        var _type = typeof piece;
+        if (_type === 'object' && piece !== null) {
+          if (piece.theme && drupalgap.theme_registry[piece.theme]) { continue; }
+          var weight = typeof piece.weight !== 'undefined' ? piece.weight : 0;
+          if (typeof weighted[weight] === 'undefined') { weighted[weight] = []; }
+          weighted[weight].push(drupalgap_render(piece));
+          weightedCount++;
+        }
+        else if (_type === 'array') {
+          for (var i = 0; i < piece.length; i++) {
+            html += drupalgap_render(piece[i]);
+          }
+        }
+        else if (_type === 'string') { html += piece; }
       }
+      if (weightedCount) {
+        for (var weight in weighted) {
+          if (!weighted.hasOwnProperty(weight)) { continue; }
+          for (var i = 0; i < weighted[weight].length; i++) {
+            html += weighted[weight][i];
+          }
+        }
+      }
+
     }
+
   }
 
   // Now that we are done assembling the content into an html string, we can
