@@ -1,4 +1,4 @@
-/*! drupalgap 2016-09-01 */
+/*! drupalgap 2016-09-15 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -8415,7 +8415,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
         // Save the field display and weight. Use the weight from the field's render element if it's available,
         // otherwise fallback to the weight mentioned in the display.
         field_displays[field_name] = display;
-        field_weights[field_name] = typeof entity[field_name].weight !== 'undefined' ?
+        field_weights[field_name] = entity[field_name] && typeof entity[field_name].weight !== 'undefined' ?
             entity[field_name].weight : display.weight;
     }
 
