@@ -28,8 +28,20 @@ function drupalgap_render_region(region) {
     region_html +=
       _drupalgap_region_render_zone('_prefix', region, current_path);
 
+    // Verify the region has any blocks.
+    var hasBlocks = drupalgap.settings.blocks[drupalgap.settings.theme][region.name];
+    if (hasBlocks) {
+      var blockCount = 0;
+      $.each(drupalgap.settings.blocks[drupalgap.settings.theme][region.name], function(index, block) {
+        if (!in_array(index, ['_prefix', '_suffix'])) {
+          blockCount++;
+        }
+      });
+      hasBlocks = blockCount;
+    }
+
     // If the region has blocks specified for it in the theme in settings.js...
-    if (drupalgap.settings.blocks[drupalgap.settings.theme][region.name]) {
+    if (hasBlocks) {
 
       // If a class attribute hasn't yet been provided, set a default, then
       // append a system class name for the region onto its attributes array.
