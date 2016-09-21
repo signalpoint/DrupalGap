@@ -15,7 +15,12 @@ function drupalgap_render(content) {
     // variables that are reserved for theme processing.
     var render_variables = ['theme', 'view_mode', 'language'];
 
-    if (content.markup) { return content.markup; }
+    if (content.markup) {
+      return content.markup;
+    }
+    if (content.theme && !drupalgap.theme_registry[content.theme]) {
+      return theme(content.theme, content);
+    }
 
     // Is there a theme value specified in the content and the registry?
     if (content.theme && drupalgap.theme_registry[content.theme]) {
@@ -78,15 +83,39 @@ function drupalgap_render(content) {
         console.log('drupalgap_render - template file does not exist (' + template_file_path + ')');
       }
     }
+    else {
 
-    // Iterate over any remaining variables and theme them.
-    for (var element in content) {
-      if (!content.hasOwnProperty(element)) { continue; }
-      var variables = content[element];
-      if ($.inArray(element, render_variables) == -1) {
-        html += theme(typeof variables.theme === 'undefined' ? null : variables.theme, variables);
+      var weighted = {};
+      var weightedCount = 0;
+      for (var index in content) {
+        if (!content.hasOwnProperty(index)) { continue; }
+        var piece = content[index];
+        var _type = typeof piece;
+        if (_type === 'object' && piece !== null) {
+          if (piece.theme && drupalgap.theme_registry[piece.theme]) { continue; }
+          var weight = typeof piece.weight !== 'undefined' ? piece.weight : 0;
+          if (typeof weighted[weight] === 'undefined') { weighted[weight] = []; }
+          weighted[weight].push(drupalgap_render(piece));
+          weightedCount++;
+        }
+        else if (_type === 'array') {
+          for (var i = 0; i < piece.length; i++) {
+            html += drupalgap_render(piece[i]);
+          }
+        }
+        else if (_type === 'string') { html += piece; }
       }
+      if (weightedCount) {
+        for (var weight in weighted) {
+          if (!weighted.hasOwnProperty(weight)) { continue; }
+          for (var i = 0; i < weighted[weight].length; i++) {
+            html += weighted[weight][i];
+          }
+        }
+      }
+
     }
+
   }
 
   // Now that we are done assembling the content into an html string, we can
