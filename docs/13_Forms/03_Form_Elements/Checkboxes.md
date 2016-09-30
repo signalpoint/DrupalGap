@@ -9,7 +9,7 @@ When creating a form, we can add a single checkbox to it:
 ### Form Element
 
 ```
-form.elements.['my_checkbox'] = {
+form.elements['my_checkbox'] = {
   title: 'Enjoy Pizza?',
   type: 'checkbox',
   description: 'Check this box if you enjoy pizza.',
