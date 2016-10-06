@@ -6,7 +6,14 @@ We can create Headers by utilizing the [jQuery Mobile Toolbar widget](http://api
 var content = {};
 content['my_header'] = {
   theme: 'header',
-  text: 'Header Text'
+  text: 'Header Text',
+  attributes: {
+    id: 'foo'
+  },
+  type: 'h3',
+  type_attributes: {
+    class: 'my-css-class''
+  }
 };
 return content;
 ```
