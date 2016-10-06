@@ -1,4 +1,4 @@
-/*! drupalgap 2016-09-21 */
+/*! drupalgap 2016-10-06 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -6447,8 +6447,10 @@ function theme_header(variables) {
   try {
     variables.attributes['data-role'] = 'header';
     if (typeof variables.type === 'undefined') { type = 'h2'; }
+    var typeAttrs = variables.type_attributes ?
+      ' ' + drupalgap_attributes(variables.type_attributes) : '';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>' +
-      '<' + type + '>' + variables.text + '</' + type + '></div>';
+      '<' + type + typeAttrs + '>' + variables.text + '</' + type + '></div>';
     return html;
   }
   catch (error) { console.log('theme_header - ' + error); }
