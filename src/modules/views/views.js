@@ -828,6 +828,40 @@ function drupalgap_views_get_result_formats(variables) {
     format_attributes['class'] += ' views-results ';
 
     switch (variables.format) {
+      case 'grid':
+
+          // Determine how many columns to use, warn if there are any problems.
+          var columns = variables.columns ? variables.columns : 2;
+          var msg = null;
+          if (columns < 2) {
+            msg = columns + ' columns is not enough, a minimum of 2 is needed';
+            columns = 2;
+          }
+          if (columns > 5) {
+            msg = columns + ' columns is too many enough, a maximum of 5 is allowed';
+            columns = 5;
+          }
+          variables.columns = columns;
+          if (msg) { console.log('drupalgap_views_get_result_formats - ' + msg ); }
+          var grid = null;
+          switch (columns) {
+            case 2: grid = 'a'; break;
+            case 3: grid = 'b'; break;
+            case 4: grid = 'c'; break;
+            case 5: grid = 'd'; break;
+          }
+
+          // Prep the container class name.
+          if (!format_attributes.class) { format_attributes.class = ''; }
+          format_attributes.class += ' ui-grid-' + grid + ' ';
+
+          // Build the strings.
+          open = '<div ' + drupalgap_attributes(format_attributes) + '>';
+          close = '</div>';
+          open_row = '<div class="ui-block">'; // This class will be replaced dynamically.
+          close_row = '</div>';
+        break;
+
       case 'ul':
         if (typeof format_attributes['data-role'] === 'undefined') {
           format_attributes['data-role'] = 'listview';
@@ -837,6 +871,7 @@ function drupalgap_views_get_result_formats(variables) {
         open_row = '<li>';
         close_row = '</li>';
         break;
+
       case 'ol':
         if (typeof format_attributes['data-role'] === 'undefined') {
           format_attributes['data-role'] = 'listview';
@@ -846,6 +881,7 @@ function drupalgap_views_get_result_formats(variables) {
         open_row = '<li>';
         close_row = '</li>';
         break;
+
       case 'table':
       case 'jqm_table':
         if (variables.format == 'jqm_table') {
@@ -864,6 +900,7 @@ function drupalgap_views_get_result_formats(variables) {
         open_row = '<tr>';
         close_row = '</tr>';
         break;
+
       case 'unformatted_list':
       default:
         if (typeof format_attributes['class'] === 'undefined') {
@@ -898,13 +935,15 @@ function drupalgap_views_get_result_formats(variables) {
 function drupalgap_views_render_rows(variables, results, root, child, open_row, close_row) {
   try {
     var html = '';
+    var totalRows = results[root].length;
     for (var count in results[root]) {
       if (!results[root].hasOwnProperty(count)) { continue; }
+
+      // Extract the row and mark its position.
       var object = results[root][count];
-      // Extract the row.
       var row = object[child];
-      // Mark the row position.
-      row._position = count;
+      row._position = parseInt(count);
+
       // If a row_callback function exists, call it to render the row,
       // otherwise use the default row render mechanism.
       var row_content = '';
@@ -913,7 +952,24 @@ function drupalgap_views_render_rows(variables, results, root, child, open_row, 
         row_content = row_callback(results.view, row, variables);
       }
       else { row_content = JSON.stringify(row); }
-      html += open_row + row_content + close_row;
+
+      // If we're rendering a grid, replace the class name for the current column. Otherwise
+      // just render the row as usual.
+      if (variables.format == 'grid') {
+        var className = null;
+        switch ((row._position) % variables.columns) {
+          case 0: className = 'ui-block-a'; break;
+          case 1: className = 'ui-block-b'; break;
+          case 2: className = 'ui-block-c'; break;
+          case 3: className = 'ui-block-d'; break;
+          case 4: className = 'ui-block-e'; break;
+        }
+        var openRow = JSON.parse(JSON.stringify(open_row)); // Make a copy of the string.
+        if (className) { openRow = openRow.replace('ui-block', className); }
+        html += openRow + row_content + close_row;
+      }
+      else { html += open_row + row_content + close_row; }
+
     }
     return html;
   }
