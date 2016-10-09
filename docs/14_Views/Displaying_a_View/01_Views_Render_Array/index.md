@@ -8,6 +8,7 @@ We can easily render our view using a few different formats:
 - **ol**
 - **table**
 - **unformatted_list** (*default*)
+- **grid**
 
 ### Unordered List
 
@@ -90,7 +91,7 @@ To render an ordered list, change the format to ol, for example:
 
 ### Table
 
-To render a table, change the format to table, and add some `format_attributes` (optional), for example:
+To render a table, change the format to `table`, and add some `format_attributes` (optional), for example:
 
 ```
 format: 'table',
@@ -111,6 +112,17 @@ var html =
   '<td>' + l(row.title, 'node/' + row.nid) + '</td>';
 return html;
 ```
+
+### Grid
+
+To render a [jQueryMobile Grid](http://demos.jquerymobile.com/1.4.5/grids/), change the format to `grid`, and add a `columns` count (optional), for example:
+
+```
+format: 'grid',
+columns: 3
+```
+
+The `columns` count will default to `2` which is also the minimum, the maximum is `5`.
 
 ## No Results
 
