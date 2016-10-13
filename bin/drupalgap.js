@@ -1,4 +1,4 @@
-/*! drupalgap 2016-10-09 */
+/*! drupalgap 2016-10-13 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -1034,29 +1034,30 @@ function drupalgap_max_width() {
  * account object as the second argument to check access on a specific user.
  * Also, you may optionally pass in an entity object as the third argument, if
  * that entity needs to be passed along to an 'access_callback' handler.
- * @param {String} path
+ * @param {String} routerPath The router path of the destination.
+ * @param {String} path The destination path.
  * @return {Boolean}
  */
-function drupalgap_menu_access(path) {
+function drupalgap_menu_access(routerPath, path) {
   try {
 
     // User #1 is allowed to do anything, I mean anything.
     if (Drupal.user.uid == 1) { return true; }
     // Everybody else will not have access unless we prove otherwise.
     var access = false;
-    if (drupalgap.menu_links[path]) {
+    if (drupalgap.menu_links[routerPath]) {
       // Check to see if there is an access callback specified with the menu
       // link.
-      if (typeof drupalgap.menu_links[path].access_callback === 'undefined') {
+      if (typeof drupalgap.menu_links[routerPath].access_callback === 'undefined') {
         // No access call back specified, if there are any access arguments
         // on the menu link, then it is assumed they are user permission machine
         // names, so check that user account's role(s) for that permission to
         // grant access.
-        if (drupalgap.menu_links[path].access_arguments) {
-          if ($.isArray(drupalgap.menu_links[path].access_arguments)) {
-            for (var index in drupalgap.menu_links[path].access_arguments) {
-              if (!drupalgap.menu_links[path].access_arguments.hasOwnProperty(index)) { continue; }
-              var permission = drupalgap.menu_links[path].access_arguments[index];
+        if (drupalgap.menu_links[routerPath].access_arguments) {
+          if ($.isArray(drupalgap.menu_links[routerPath].access_arguments)) {
+            for (var index in drupalgap.menu_links[routerPath].access_arguments) {
+              if (!drupalgap.menu_links[routerPath].access_arguments.hasOwnProperty(index)) { continue; }
+              var permission = drupalgap.menu_links[routerPath].access_arguments[index];
               access = user_access(permission);
               if (access) { break; }
             }
@@ -1070,16 +1071,16 @@ function drupalgap_menu_access(path) {
       }
       else {
 
-        // An access callback function is specified for this path...
-        var function_name = drupalgap.menu_links[path].access_callback;
+        // An access callback function is specified for this routerPath...
+        var function_name = drupalgap.menu_links[routerPath].access_callback;
         if (function_exists(function_name)) {
           // Grab the access callback function. If there are any access args
           // send them along, or just call the function directly.
           // access arguments.
           var fn = window[function_name];
-          if (drupalgap.menu_links[path].access_arguments) {
+          if (drupalgap.menu_links[routerPath].access_arguments) {
             var access_arguments =
-              drupalgap.menu_links[path].access_arguments.slice(0);
+              drupalgap.menu_links[routerPath].access_arguments.slice(0);
             // If we have an entity loaded, replace the first integer we find
             // in the page arguments with the loaded entity.
             if (arguments[2]) {
@@ -1091,6 +1092,12 @@ function drupalgap_menu_access(path) {
                     access_arguments[index] = entity;
                     break;
                   }
+              }
+            }
+            else {
+              // Replace any integer arguments with the corresponding path argument.
+              for (var i = 0; i < access_arguments.length; i++) {
+                if (is_int(access_arguments[i])) { access_arguments[i] = arg(i, path); }
               }
             }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
@@ -1105,7 +1112,7 @@ function drupalgap_menu_access(path) {
       }
     }
     else {
-      console.log('drupalgap_menu_access - path (' + path + ') does not exist');
+      console.log('drupalgap_menu_access - routerPath (' + routerPath + ') does not exist');
     }
     return access;
   }
@@ -4276,7 +4283,7 @@ function drupalgap_goto(path) {
     if (
       drupalgap.menu_links[router_path].type != 'MENU_DEFAULT_LOCAL_TASK' &&
       drupalgap.menu_links[router_path].type != 'MENU_LOCAL_TASK' &&
-      !drupalgap_menu_access(router_path)
+      !drupalgap_menu_access(router_path, path)
     ) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
