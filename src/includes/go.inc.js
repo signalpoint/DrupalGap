@@ -65,7 +65,7 @@ function drupalgap_goto(path) {
     if (
       drupalgap.menu_links[router_path].type != 'MENU_DEFAULT_LOCAL_TASK' &&
       drupalgap.menu_links[router_path].type != 'MENU_LOCAL_TASK' &&
-      !drupalgap_menu_access(router_path)
+      !drupalgap_menu_access(router_path, path)
     ) {
       path = '401';
       router_path = drupalgap_get_menu_link_router_path(path);
