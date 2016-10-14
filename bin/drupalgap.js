@@ -1,4 +1,4 @@
-/*! drupalgap 2016-10-13 */
+/*! drupalgap 2016-10-14 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -8472,6 +8472,7 @@ function drupalgap_entity_render_content(entity_type, entity) {
 
     // Update this entity in local storage so the content property sticks.
     if (entity_caching_enabled(entity_type, bundle)) {
+      _entity_set_expiration_time(entity_type, entity);
       _entity_local_storage_save(
         entity_type,
         entity[entity_primary_key(entity_type)],
