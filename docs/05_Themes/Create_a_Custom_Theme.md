@@ -1,8 +1,6 @@
 > Q: How to fix @deprecated notice? (*2016-10-13*)
 
-A: See the `hook_TYPE_tpl_html` example implementations below.
-
-For a complete example of a custom theme, check out the drupalgap_demo app. Otherwise, to create a custom theme in DrupalGap, follow these steps:
+A: See the `hook_TYPE_tpl_html()` example implementations below.
 
 ### 1. Create a directory
 
