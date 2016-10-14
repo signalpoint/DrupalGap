@@ -197,76 +197,54 @@ function drupalgap_goto(path) {
  * @param {Object} options
  * @param {Object} menu_link The menu link object from drupalgap.menu_links.
  */
-function drupalgap_goto_generate_page_and_go(
-  path, page_id, options, menu_link) {
+function drupalgap_goto_generate_page_and_go(path, page_id, options, menu_link) {
   try {
 
-    // @TODO using a page.tpl.html is pretty dumb, this makes a disc read on each page change, use render arrays only
-    // be deprecating the page.tpl.html file, converting it to a render array and warning developers to upgrade their
-    // themes.
-    var page_template_path = path_to_theme() + '/page.tpl.html';
-    if (!drupalgap_file_exists(page_template_path)) {
-      console.log(
-        'drupalgap_goto_generate_page_and_go - ' +
-        'page template does not exist! (' + page_template_path + ')'
-      );
-    }
+    // First see if the theme implements hook_page_tpl_html() and use its string for the page placeholders,
+    // otherwise use the file read method from DrupalGap's early days, and notify the developer to upgrade
+    // their theme.
+    var html = '';
+    var themeName = drupalgap.settings.theme;
+    var pageTplHtmlFunctionName = themeName + '_page_tpl_html';
+    if (function_exists(pageTplHtmlFunctionName)) { html = window[pageTplHtmlFunctionName](); }
     else {
-
-      // Reset the internal query string.
-      _drupalgap_goto_query_string = null;
-
-      // If options wasn't set, set it as an empty JSON object.
-      if (typeof options === 'undefined') { options = {}; }
-
-      // Load the page template html file. Determine if we are going to cache
-      // the template file or not.
-      // @TODO another disc read here, dumb, use render arrays and deprecate.
-      var file_options = {};
-      if (drupalgap.settings.cache &&
-          drupalgap.settings.cache.theme_registry !== 'undefined' &&
-          !drupalgap.settings.cache.theme_registry) {
-          file_options.cache = false;
-       }
-      var html = drupalgap_file_get_contents(page_template_path, file_options);
-
-      if (html) {
-
-        // Add page to DOM.
-        drupalgap_add_page_to_dom({
-            page_id: page_id,
-            html: html,
-            menu_link: menu_link
-        });
-
-        // Setup change page options if necessary.
-        if (drupalgap_path_get() == path && options.form_submission) {
-          options.allowSamePageTransition = true;
-        }
-
-        // Let's change to the page. Web apps and the ripple emulator do not
-        // seem to like the 'index.html' prefix, so we'll remove that.
-        var destination = 'index.html#' + page_id;
-        if (
-          drupalgap.settings.mode != 'phonegap' ||
-          typeof parent.window.ripple === 'function'
-        ) { destination = '#' + page_id; }
-        $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
-
-        // Invoke all implementations of hook_drupalgap_goto_post_process().
-        module_invoke_all('drupalgap_goto_post_process', path);
-      }
-      else {
-        drupalgap_alert(
-          'drupalgap_goto_generate_page_and_go - ' +
-          t('failed to load theme\'s page.tpl.html file')
-        );
-      }
+      var pageTemplatePath = path_to_theme() + '/page.tpl.html';
+      console.log('@deprecated: ' + pageTemplatePath + ' - use ' + pageTplHtmlFunctionName + '() in ' +
+          themeName + '.js instead, see: http://docs.drupalgap.org/7/Themes/Create_a_Custom_Theme');
+      html = drupalgap_file_get_contents(pageTemplatePath);
     }
+
+    // Reset the internal query string.
+    _drupalgap_goto_query_string = null;
+
+    // If options wasn't set, set it as an empty JSON object.
+    if (typeof options === 'undefined') { options = {}; }
+
+    // Add page to DOM.
+    drupalgap_add_page_to_dom({
+      page_id: page_id,
+      html: html,
+      menu_link: menu_link
+    });
+
+    // Setup change page options if necessary.
+    if (drupalgap_path_get() == path && options.form_submission) {
+      options.allowSamePageTransition = true;
+    }
+
+    // Let's change to the page. Web apps and the ripple emulator do not
+    // seem to like the 'index.html' prefix, so we'll remove that.
+    var destination = 'index.html#' + page_id;
+    if (
+        drupalgap.settings.mode != 'phonegap' ||
+        typeof parent.window.ripple === 'function'
+    ) { destination = '#' + page_id; }
+    $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
+
+    // Invoke all implementations of hook_drupalgap_goto_post_process().
+    module_invoke_all('drupalgap_goto_post_process', path);
   }
-  catch (error) {
-    console.log('drupalgap_goto_generate_page_and_go - ' + error);
-  }
+  catch (error) { console.log('drupalgap_goto_generate_page_and_go - ' + error); }
 }
 
 /**

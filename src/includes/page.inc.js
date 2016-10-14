@@ -209,10 +209,8 @@ function drupalgap_add_page_to_dom(options) {
       id: options.page_id,
       'data-role': 'page'
     };
-    attributes =
-      $.extend(true, attributes, options.menu_link.options.attributes);
-    attributes['class'] +=
-      ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    attributes = $.extend(true, attributes, options.menu_link.options.attributes);
+    attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
     options.html = options.html.replace(
       /{:drupalgap_page_attributes:}/g,
       drupalgap_attributes(attributes)
