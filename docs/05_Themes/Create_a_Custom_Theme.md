@@ -96,7 +96,7 @@ function my_theme_user_profile_tpl_html() {
 
 ```
 
-In previous versions of DrupalGap, the strings returned by the `hook_TYPE_tpl_html()` implementations above used to live in files like `page.tpl.html`, `node.tpl.html` and `user-profile.tpl.html`.` However, loading one or more of these files from disc each time we navigate to a page can have a noticeable performance degradation on mobile devices. Now we just return those template files as a string with functions in our theme's `.js` file.
+In previous versions of DrupalGap, the strings returned by the `hook_TYPE_tpl_html()` implementations above used to live in files like `page.tpl.html`, `node.tpl.html` and `user-profile.tpl.html`. However, loading one or more of these files from disc each time we navigate to a page can have a noticeable performance degradation on mobile devices. Now we just return those template files as a string with functions in our theme's `.js` file.
 
 #### Minimum Required Regions
 
