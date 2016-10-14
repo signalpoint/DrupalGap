@@ -4415,76 +4415,54 @@ function drupalgap_goto(path) {
  * @param {Object} options
  * @param {Object} menu_link The menu link object from drupalgap.menu_links.
  */
-function drupalgap_goto_generate_page_and_go(
-  path, page_id, options, menu_link) {
+function drupalgap_goto_generate_page_and_go(path, page_id, options, menu_link) {
   try {
 
-    // @TODO using a page.tpl.html is pretty dumb, this makes a disc read on each page change, use render arrays only
-    // be deprecating the page.tpl.html file, converting it to a render array and warning developers to upgrade their
-    // themes.
-    var page_template_path = path_to_theme() + '/page.tpl.html';
-    if (!drupalgap_file_exists(page_template_path)) {
-      console.log(
-        'drupalgap_goto_generate_page_and_go - ' +
-        'page template does not exist! (' + page_template_path + ')'
-      );
-    }
+    // First see if the theme implements hook_page_tpl_html() and use its string for the page placeholders,
+    // otherwise use the file read method from DrupalGap's early days, and notify the developer to upgrade
+    // their theme.
+    var html = '';
+    var themeName = drupalgap.settings.theme;
+    var pageTplHtmlFunctionName = themeName + '_page_tpl_html';
+    if (function_exists(pageTplHtmlFunctionName)) { html = window[pageTplHtmlFunctionName](); }
     else {
-
-      // Reset the internal query string.
-      _drupalgap_goto_query_string = null;
-
-      // If options wasn't set, set it as an empty JSON object.
-      if (typeof options === 'undefined') { options = {}; }
-
-      // Load the page template html file. Determine if we are going to cache
-      // the template file or not.
-      // @TODO another disc read here, dumb, use render arrays and deprecate.
-      var file_options = {};
-      if (drupalgap.settings.cache &&
-          drupalgap.settings.cache.theme_registry !== 'undefined' &&
-          !drupalgap.settings.cache.theme_registry) {
-          file_options.cache = false;
-       }
-      var html = drupalgap_file_get_contents(page_template_path, file_options);
-
-      if (html) {
-
-        // Add page to DOM.
-        drupalgap_add_page_to_dom({
-            page_id: page_id,
-            html: html,
-            menu_link: menu_link
-        });
-
-        // Setup change page options if necessary.
-        if (drupalgap_path_get() == path && options.form_submission) {
-          options.allowSamePageTransition = true;
-        }
-
-        // Let's change to the page. Web apps and the ripple emulator do not
-        // seem to like the 'index.html' prefix, so we'll remove that.
-        var destination = 'index.html#' + page_id;
-        if (
-          drupalgap.settings.mode != 'phonegap' ||
-          typeof parent.window.ripple === 'function'
-        ) { destination = '#' + page_id; }
-        $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
-
-        // Invoke all implementations of hook_drupalgap_goto_post_process().
-        module_invoke_all('drupalgap_goto_post_process', path);
-      }
-      else {
-        drupalgap_alert(
-          'drupalgap_goto_generate_page_and_go - ' +
-          t('failed to load theme\'s page.tpl.html file')
-        );
-      }
+      var pageTemplatePath = path_to_theme() + '/page.tpl.html';
+      console.log('@deprecated: ' + pageTemplatePath + ' - use ' + pageTplHtmlFunctionName + '() in ' +
+          themeName + '.js instead, see: http://docs.drupalgap.org/7/Themes/Create_a_Custom_Theme');
+      html = drupalgap_file_get_contents(pageTemplatePath);
     }
+
+    // Reset the internal query string.
+    _drupalgap_goto_query_string = null;
+
+    // If options wasn't set, set it as an empty JSON object.
+    if (typeof options === 'undefined') { options = {}; }
+
+    // Add page to DOM.
+    drupalgap_add_page_to_dom({
+      page_id: page_id,
+      html: html,
+      menu_link: menu_link
+    });
+
+    // Setup change page options if necessary.
+    if (drupalgap_path_get() == path && options.form_submission) {
+      options.allowSamePageTransition = true;
+    }
+
+    // Let's change to the page. Web apps and the ripple emulator do not
+    // seem to like the 'index.html' prefix, so we'll remove that.
+    var destination = 'index.html#' + page_id;
+    if (
+        drupalgap.settings.mode != 'phonegap' ||
+        typeof parent.window.ripple === 'function'
+    ) { destination = '#' + page_id; }
+    $.mobile.changePage(destination, options); // @see the pagebeforechange handler in page.inc.js
+
+    // Invoke all implementations of hook_drupalgap_goto_post_process().
+    module_invoke_all('drupalgap_goto_post_process', path);
   }
-  catch (error) {
-    console.log('drupalgap_goto_generate_page_and_go - ' + error);
-  }
+  catch (error) { console.log('drupalgap_goto_generate_page_and_go - ' + error); }
 }
 
 /**
@@ -5698,10 +5676,8 @@ function drupalgap_add_page_to_dom(options) {
       id: options.page_id,
       'data-role': 'page'
     };
-    attributes =
-      $.extend(true, attributes, options.menu_link.options.attributes);
-    attributes['class'] +=
-      ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    attributes = $.extend(true, attributes, options.menu_link.options.attributes);
+    attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
     options.html = options.html.replace(
       /{:drupalgap_page_attributes:}/g,
       drupalgap_attributes(attributes)
@@ -6160,18 +6136,13 @@ function drupalgap_render(content) {
   // If the output came back as a string, we can render it as is. If the
   // output came back as on object, render each element in it through the
   // theme system.
-  if (output_type === 'string') {
-    // The page came back as an html string.
-    html = content;
-  }
+  if (output_type === 'string') { html = content; }
   else if (output_type === 'object') {
     // The page came back as a render object. Let's define the names of
     // variables that are reserved for theme processing.
     var render_variables = ['theme', 'view_mode', 'language'];
 
-    if (content.markup) {
-      return content.markup;
-    }
+    if (content.markup) { return content.markup; }
     if (content.theme && !drupalgap.theme_registry[content.theme]) {
       return theme(content.theme, content);
     }
@@ -6179,63 +6150,49 @@ function drupalgap_render(content) {
     // Is there a theme value specified in the content and the registry?
     if (content.theme && drupalgap.theme_registry[content.theme]) {
 
-      // Extract the theme object template and determine the template file
-      // name and path.
-      var template = drupalgap.theme_registry[content.theme];
-      var template_file_name = content.theme.replace(/_/g, '-') + '.tpl.html';
-      var template_file_path = template.path + '/' + template_file_name;
-
-      // Make sure the template file exists.
-      // @TODO disc read here, replace with render array!
-      if (drupalgap_file_exists(template_file_path)) {
-
-        // Loads the template file's content into a string.
-        // @TODO there is a disc read here, it is slow for UX! Deprecate via a render array.
-        var template_file_html = drupalgap_file_get_contents(template_file_path);
-        if (template_file_html) {
-
-          // What variable placeholders are present in the template file?
-          var placeholders = drupalgap_get_placeholders_from_html(template_file_html);
-          if (placeholders) {
-
-            // Replace each placeholder with html.
-            for (var index in placeholders) {
-              if (!placeholders.hasOwnProperty(index)) { continue; }
-              var placeholder = placeholders[index];
-              var _html = '';
-              if (content[placeholder]) {
-                // Grab the element variable from the content.
-                var element = content[placeholder];
-                // If it is markup, render it as is, if it is themeable,
-                // then theme it.
-                if (content[placeholder].markup) {
-                  _html = content[placeholder].markup;
-                }
-                else if (content[placeholder].theme) {
-                  _html = theme(content[placeholder].theme, element);
-                }
-                // Now remove the variable from the content.
-                delete content[placeholder];
-              }
-              // Now replace the placeholder with the html, even if it was
-              // empty.
-              template_file_html = template_file_html.replace('{:' + placeholder + ':}', _html);
-            }
-          }
-          else {
-            // There were no place holders found, do nothing, ok.
-          }
-
-          // Finally add the rendered template file to the html.
-          html += template_file_html;
-        }
-        else {
-          console.log('drupalgap_render - failed to get file contents (' + template_file_path + ')');
-        }
-      }
+      var themeName = drupalgap.settings.theme;
+      var tplHtmlFunctionName = themeName + '_' + content.theme + '_tpl_html';
+      template_file_html = '';
+      if (function_exists(tplHtmlFunctionName)) { template_file_html = window[tplHtmlFunctionName](); }
       else {
-        console.log('drupalgap_render - template file does not exist (' + template_file_path + ')');
+        var template = drupalgap.theme_registry[content.theme];
+        var template_file_name = content.theme.replace(/_/g, '-') + '.tpl.html';
+        var template_file_path = template.path + '/' + template_file_name;
+        console.log('@deprecated: ' + template_file_path + ' - use ' + tplHtmlFunctionName + '() in ' +
+            themeName + '.js instead, see: http://docs.drupalgap.org/7/Themes/Create_a_Custom_Theme');
+        template_file_html = drupalgap_file_get_contents(template_file_path);
       }
+
+      // What variable placeholders are present in the template file?
+      var placeholders = drupalgap_get_placeholders_from_html(template_file_html);
+      if (placeholders) {
+
+        // Replace each placeholder with html.
+        for (var index in placeholders) {
+          if (!placeholders.hasOwnProperty(index)) { continue; }
+          var placeholder = placeholders[index];
+          var _html = '';
+          if (content[placeholder]) {
+            // Grab the element variable from the content.
+            var element = content[placeholder];
+            // If it is markup, render it as is, if it is themeable, then theme it.
+            if (content[placeholder].markup) {
+              _html = content[placeholder].markup;
+            }
+            else if (content[placeholder].theme) {
+              _html = theme(content[placeholder].theme, element);
+            }
+            // Now remove the variable from the content.
+            delete content[placeholder];
+          }
+          // Now replace the placeholder with the html, even if it was empty.
+          template_file_html = template_file_html.replace('{:' + placeholder + ':}', _html);
+        }
+      }
+
+      // Finally add the rendered template file to the html.
+      html += template_file_html;
+
     }
     else {
 
