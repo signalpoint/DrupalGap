@@ -40,6 +40,10 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 [![Controlgroup Widget](http://drupalgap.com/sites/default/files/controlgroup-widget.png)](Widgets/Controlgroup_Widget)
 
+## Grid Widget
+
+[![Grid Widget](http://drupalgap.org/sites/default/files/jqm-grid.png)](Widgets/Grid_Widget)
+
 ## Header Widget
 
 [![Header Widget](http://drupalgap.com/sites/default/files/header-widget.png)](Widgets/Header_Widget)
