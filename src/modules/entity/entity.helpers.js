@@ -76,7 +76,9 @@ function drupalgap_get_entity_pageshow(options) {
     success: function(entity) {
       var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id, context);
       $('#' + id).html(drupalgap_render(window[options.handler](entity))).trigger('create');
-    }
+      if (drupalgap.page.options.success) { drupalgap.page.options.success(entity); }
+    },
+    error: drupalgap.page.options.error ? drupalgap.page.options.error : null
   });
 }
 
@@ -114,11 +116,13 @@ function drupalgap_get_entity_form_pageshow(options) {
   var done = function(entity) {
     var id = drupalgap_get_entity_container_id(options.entity_type, options.entity_id, context);
     $('#' + id).html(drupalgap_get_form(options.handler, entity)).trigger('create');
+    if (drupalgap.page.options.success) { drupalgap.page.options.success(entity); }
   };
   if (options.entity_id == 'add') { done({}); }
   else {
     entity_load(options.entity_type, options.entity_id, {
-      success: done
+      success: done,
+      error: drupalgap.page.options.error ? drupalgap.page.options.error : null
     });
   }
 }
