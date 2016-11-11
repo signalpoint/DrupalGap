@@ -9,6 +9,7 @@ var html = theme('autocomplete', {
     handler: 'index',
     entity_type: 'taxonomy_term',
     vid: 1, /* optional vocabulary id filter */
+    parent: 123, /* optional parent term id filter */
     value: 'tid',
     label: 'name',
     filter: 'name'
