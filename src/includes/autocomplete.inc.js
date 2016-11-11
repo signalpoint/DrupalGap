@@ -345,9 +345,8 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
               entity_primary_key_title(autocomplete.entity_type)
             ];
             if (autocomplete.entity_type == 'taxonomy_term') {
-              if (autocomplete.vid) {
-                query.parameters['vid'] = autocomplete.vid;
-              }
+              if (autocomplete.vid) { query.parameters['vid'] = autocomplete.vid; }
+              if (autocomplete.parent) { query.parameters['parent'] = autocomplete.parent; }
             }
             query.fields = fields;
             query.parameters[autocomplete.filter] = '%' + value + '%';
