@@ -192,7 +192,7 @@ function drupalgap_get_page_id(path) {
 }
 
 /**
- * Given a page id, the theme's page.tpl.html string, and the menu link object
+ * Given a page id, the theme's hook_TYPE_tpl_html() string, and the menu link object
  * (all bundled in options) this takes the page template html and adds it to the
  * DOM. It doesn't actually render the page, that is taken care of by the
  * pagebeforechange handler.
