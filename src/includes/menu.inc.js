@@ -487,7 +487,7 @@ function drupalgap_menus_load() {
 
 /**
  * Given a menu link item from drupalgap_menus_load(), this will return a JSON
- * object representing a link object compatable with theme_link(). It contains
+ * object representing a link object compatible with theme_link(). It contains
  * the link title, path and options.
  * @param {Object} menu_link
  * @return {Object}
