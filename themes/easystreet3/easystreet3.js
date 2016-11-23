@@ -3,7 +3,7 @@
  */
 function easystreet3_info() {
   try {
-    var theme = {
+    return {
       name: 'easystreet3',
       regions: {
         header: {
@@ -38,7 +38,6 @@ function easystreet3_info() {
         }
       }
     };
-    return theme;
   }
   catch (error) { drupalgap_error(error); }
 }
