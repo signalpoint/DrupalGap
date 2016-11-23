@@ -113,9 +113,6 @@ function drupalgap_init() {
 function drupalgap_onload() {
   try {
 
-    // Remove any hash in case the app is restarting.
-    window.location.hash = '';
-
     // At this point, the Drupal object has been initialized by jDrupal and the
     // app/settings.js file was loaded in <head>. Let's add DrupalGap's modules
     // onto the Drupal JSON object. Remember, all of the module source code is
@@ -247,16 +244,25 @@ function _drupalgap_deviceready_options() {
     var page_options = arguments[0] ? arguments[0] : {};
     return {
       success: function(result) {
+
+        // Set the connection and invoke hook_device_connected().
         drupalgap.connected = true;
-        // Call all hook_device_connected implementations then go to
-        // the front page.
         module_invoke_all('device_connected');
-        drupalgap_goto('', page_options);
+
+        // If there is a has hash url present and it can be routed go directly to that page,
+        // otherwise go to the app's front page.
+        var path = '';
+        if (window.location.hash.indexOf('#') != -1) {
+          var routedPath = drupalgap_get_path_from_page_id(window.location.hash.replace('#', ''));
+          if (routedPath) { path = routedPath; }
+        }
+        drupalgap_goto(path, page_options);
+
       },
       error: function(jqXHR, textStatus, errorThrown) {
+
         // Build an informative error message and display it.
-        var msg = t('Failed connection to') + ' ' +
-          Drupal.settings.site_path;
+        var msg = t('Failed connection to') + ' ' + Drupal.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
         msg += ' - ' + t('Check your device\'s connection and check that') +
           ' ' + Drupal.settings.site_path + ' ' + t('is online.');
@@ -368,17 +374,15 @@ function drupalgap_load_modules() {
                     url: modules_paths_object,
                     data: null,
                     success: function() {
-                      if (Drupal.settings.debug) { dpm(modules_paths_object); }
+                      if (Drupal.settings.debug) { console.log(modules_paths_object); }
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = t('Failed to load module!') +
-                        ' (' + module.name + ')';
-                      dpm(msg);
-                      console.log(modules_paths_object);
-                      dpm(textStatus);
-                      dpm(errorThrown.message);
-                      drupalgap_alert(msg);
+                      console.log(
+                          t('Failed to load module!') + ' (' + module.name + ')',
+                          textStatus,
+                          errorThrown.message
+                      );
                     }
                 });
             }
