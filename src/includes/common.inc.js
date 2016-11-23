@@ -244,10 +244,7 @@ function drupalgap_link_get_class(link) {
  * @return {String}
  */
 function drupalgap_path_get() {
-  try {
-    var path = drupalgap.path;
-    return path;
-  }
+  try { return drupalgap.path; }
   catch (error) { console.log('drupalgap_path_get - ' + error); }
 }
 
@@ -265,10 +262,7 @@ function drupalgap_path_set(path) {
  * @return {String}
  */
 function drupalgap_router_path_get() {
-  try {
-    var router_path = drupalgap.router_path;
-    return router_path;
-  }
+  try { return drupalgap.router_path; }
   catch (error) { console.log('drupalgap_router_path_get - ' + error); }
 }
 
@@ -279,6 +273,47 @@ function drupalgap_router_path_get() {
 function drupalgap_router_path_set(router_path) {
   try { drupalgap.router_path = router_path; }
   catch (error) { console.log('drupalgap_router_path_set - ' + error); }
+}
+
+/**
+ * Returns the path used for a given page id. Essentially a reverse path look up, given a page id.
+ * @param  {String} page_id
+ * @returns {String|null}
+ */
+function drupalgap_get_path_from_page_id(page_id) {
+  if (!page_id) { page_id = drupalgap_get_page_id(); }
+
+  // SUPPORTS THE FOLLOWING PATH PATTERNS:
+  //    *           foo
+  //    */*         foo/bar, node/123
+  //    *-*/*       foo-bar/chew, foo-bar/123
+  //    */*/*/...   foo/bar/chew, foo/123/bar, foo/bar/chew/you, etc
+
+  // First check to see if there is an exact router match, if there is use it. If there is no exact match, split the
+  // page id by underscore into arguments so we can attempt to lookup a potential router.
+  if (drupalgap.menu_links[page_id]) { return drupalgap.menu_links[page_id].path; }
+  else {
+    var args = page_id.split('_');
+    if (args.length < 2) { return null; }
+    var slashPath = '';
+    var hyphenPath = '';
+    for (var i = 0; i < args.length; i++) {
+      slashPath += args[i];
+      if (i != args.length -1) { slashPath += '/'; }
+      hyphenPath += args[i];
+      if (i == 0) { hyphenPath += '-'; }
+      else if (i != 0 && i != args.length -1) { hyphenPath += '/'; }
+    }
+    var potentialPaths = [slashPath, hyphenPath];
+    for (var j = 0; j < potentialPaths.length; j++) {
+      var routerPath = drupalgap_get_menu_link_router_path(potentialPaths[j]);
+      if (!drupalgap.menu_links[routerPath]) { continue; }
+      return potentialPaths[j];
+    }
+  }
+
+  return null;
+
 }
 
 /**
