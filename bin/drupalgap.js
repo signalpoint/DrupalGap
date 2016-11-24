@@ -1,4 +1,4 @@
-/*! drupalgap 2016-11-11 */
+/*! drupalgap 2016-11-23 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -113,9 +113,6 @@ function drupalgap_init() {
  */
 function drupalgap_onload() {
   try {
-
-    // Remove any hash in case the app is restarting.
-    window.location.hash = '';
 
     // At this point, the Drupal object has been initialized by jDrupal and the
     // app/settings.js file was loaded in <head>. Let's add DrupalGap's modules
@@ -248,16 +245,25 @@ function _drupalgap_deviceready_options() {
     var page_options = arguments[0] ? arguments[0] : {};
     return {
       success: function(result) {
+
+        // Set the connection and invoke hook_device_connected().
         drupalgap.connected = true;
-        // Call all hook_device_connected implementations then go to
-        // the front page.
         module_invoke_all('device_connected');
-        drupalgap_goto('', page_options);
+
+        // If there is a has hash url present and it can be routed go directly to that page,
+        // otherwise go to the app's front page.
+        var path = '';
+        if (window.location.hash.indexOf('#') != -1) {
+          var routedPath = drupalgap_get_path_from_page_id(window.location.hash.replace('#', ''));
+          if (routedPath) { path = routedPath; }
+        }
+        drupalgap_goto(path, page_options);
+
       },
       error: function(jqXHR, textStatus, errorThrown) {
+
         // Build an informative error message and display it.
-        var msg = t('Failed connection to') + ' ' +
-          Drupal.settings.site_path;
+        var msg = t('Failed connection to') + ' ' + Drupal.settings.site_path;
         if (errorThrown != '') { msg += ' - ' + errorThrown; }
         msg += ' - ' + t('Check your device\'s connection and check that') +
           ' ' + Drupal.settings.site_path + ' ' + t('is online.');
@@ -369,17 +375,15 @@ function drupalgap_load_modules() {
                     url: modules_paths_object,
                     data: null,
                     success: function() {
-                      if (Drupal.settings.debug) { dpm(modules_paths_object); }
+                      if (Drupal.settings.debug) { console.log(modules_paths_object); }
                     },
                     dataType: 'script',
                     error: function(xhr, textStatus, errorThrown) {
-                      var msg = t('Failed to load module!') +
-                        ' (' + module.name + ')';
-                      dpm(msg);
-                      console.log(modules_paths_object);
-                      dpm(textStatus);
-                      dpm(errorThrown.message);
-                      drupalgap_alert(msg);
+                      console.log(
+                          t('Failed to load module!') + ' (' + module.name + ')',
+                          textStatus,
+                          errorThrown.message
+                      );
                     }
                 });
             }
@@ -2357,10 +2361,7 @@ function drupalgap_link_get_class(link) {
  * @return {String}
  */
 function drupalgap_path_get() {
-  try {
-    var path = drupalgap.path;
-    return path;
-  }
+  try { return drupalgap.path; }
   catch (error) { console.log('drupalgap_path_get - ' + error); }
 }
 
@@ -2378,10 +2379,7 @@ function drupalgap_path_set(path) {
  * @return {String}
  */
 function drupalgap_router_path_get() {
-  try {
-    var router_path = drupalgap.router_path;
-    return router_path;
-  }
+  try { return drupalgap.router_path; }
   catch (error) { console.log('drupalgap_router_path_get - ' + error); }
 }
 
@@ -2392,6 +2390,47 @@ function drupalgap_router_path_get() {
 function drupalgap_router_path_set(router_path) {
   try { drupalgap.router_path = router_path; }
   catch (error) { console.log('drupalgap_router_path_set - ' + error); }
+}
+
+/**
+ * Returns the path used for a given page id. Essentially a reverse path look up, given a page id.
+ * @param  {String} page_id
+ * @returns {String|null}
+ */
+function drupalgap_get_path_from_page_id(page_id) {
+  if (!page_id) { page_id = drupalgap_get_page_id(); }
+
+  // SUPPORTS THE FOLLOWING PATH PATTERNS:
+  //    *           foo
+  //    */*         foo/bar, node/123
+  //    *-*/*       foo-bar/chew, foo-bar/123
+  //    */*/*/...   foo/bar/chew, foo/123/bar, foo/bar/chew/you, etc
+
+  // First check to see if there is an exact router match, if there is use it. If there is no exact match, split the
+  // page id by underscore into arguments so we can attempt to lookup a potential router.
+  if (drupalgap.menu_links[page_id]) { return drupalgap.menu_links[page_id].path; }
+  else {
+    var args = page_id.split('_');
+    if (args.length < 2) { return null; }
+    var slashPath = '';
+    var hyphenPath = '';
+    for (var i = 0; i < args.length; i++) {
+      slashPath += args[i];
+      if (i != args.length -1) { slashPath += '/'; }
+      hyphenPath += args[i];
+      if (i == 0) { hyphenPath += '-'; }
+      else if (i != 0 && i != args.length -1) { hyphenPath += '/'; }
+    }
+    var potentialPaths = [slashPath, hyphenPath];
+    for (var j = 0; j < potentialPaths.length; j++) {
+      var routerPath = drupalgap_get_menu_link_router_path(potentialPaths[j]);
+      if (!drupalgap.menu_links[routerPath]) { continue; }
+      return potentialPaths[j];
+    }
+  }
+
+  return null;
+
 }
 
 /**
@@ -5136,7 +5175,7 @@ function drupalgap_menus_load() {
 
 /**
  * Given a menu link item from drupalgap_menus_load(), this will return a JSON
- * object representing a link object compatable with theme_link(). It contains
+ * object representing a link object compatible with theme_link(). It contains
  * the link title, path and options.
  * @param {Object} menu_link
  * @return {Object}
@@ -5658,7 +5697,7 @@ function drupalgap_get_page_id(path) {
 }
 
 /**
- * Given a page id, the theme's page.tpl.html string, and the menu link object
+ * Given a page id, the theme's hook_TYPE_tpl_html() string, and the menu link object
  * (all bundled in options) this takes the page template html and adds it to the
  * DOM. It doesn't actually render the page, that is taken care of by the
  * pagebeforechange handler.
