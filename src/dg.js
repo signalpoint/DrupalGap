@@ -249,7 +249,7 @@ function _drupalgap_deviceready_options() {
         drupalgap.connected = true;
         module_invoke_all('device_connected');
 
-        // If there is a has hash url present and it can be routed go directly to that page,
+        // If there is a hash url present and it can be routed go directly to that page,
         // otherwise go to the app's front page.
         var path = '';
         if (window.location.hash.indexOf('#') != -1) {
