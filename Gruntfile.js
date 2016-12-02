@@ -54,16 +54,6 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    concat: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-        separator: '\n'
-      },
-      dist: {
-        src: drupalgap_grunt_src,
-        dest: '<%= pkg.name %>.js'
-      }
-    },
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -75,15 +65,14 @@ module.exports = function(grunt) {
     },
     watch: {
       files: drupalgap_grunt_src,
-      tasks: ['concat', 'uglify'] // @see http://stackoverflow.com/a/20740693/763010
+      tasks: ['uglify'] // @see http://stackoverflow.com/a/20740693/763010
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task(s).
-  grunt.registerTask('default', ['concat', 'uglify', 'watch']);
+  grunt.registerTask('default', ['uglify', 'watch']);
 
 };
