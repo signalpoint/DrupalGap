@@ -6,6 +6,12 @@ dg.theme_actions = function(variables) {
   }
   return html;
 };
+dg.theme_checkbox = function(variables) {
+  variables._attributes.type = 'checkbox';
+  var id = variables._attributes.id ? variables._attributes.id : 'checkbox-' + jDrupal.userPassword();
+  var label = variables._title ? ' <label for="' + id + '">' + variables._title + '</label>' : '';
+  return '<input ' + dg.attributes(variables._attributes) + ' />' + label;
+};
 dg.theme_hidden = function(variables) {
   variables._attributes.type = 'hidden';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
