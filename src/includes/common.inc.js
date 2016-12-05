@@ -3,13 +3,12 @@
  * @param {String} name
  * @returns {*}
  */
-dg.config = function(name) {
-  var value = typeof arguments[1] !== 'undefined' ? arguments[1] : null;
-  if (value) {
+dg.config = function(name, value) {
+  if (typeof value !== 'undefined') {
     dg.settings[name] = value;
     return;
   }
-  return dg.settings[name];
+  return typeof dg.settings[name] !== 'undefined' ? dg.settings[name] : null;
 };
 
 /**
@@ -23,6 +22,14 @@ dg.getMode = function() { return this.config('mode'); };
  * @param {String} mode
  */
 dg.setMode = function(mode) { this.config('mode', mode); };
+
+/**
+ * Returns true if the app is in 'phonegap' or 'cordova' mode, false otherwise.
+ * @return {Boolean}
+ */
+dg.isCompiled = function() {
+  jDrupal.inArray(dg.getMode(), ['phonegap', 'cordova'])
+};
 
 /**
  * Returns the current route.
@@ -119,6 +126,7 @@ dg.attributes = function(attributes) {
       if (Array.isArray(value) && value.length) {
         attrs += name + '="' + value.join(' ') + '" ';
       }
+      else if (value === null) { attrs += ' ' + name + ' '; }
       else if (value != '') {
         // @todo - if someone passes in a value with double quotes, this
         // will break. e.g.
