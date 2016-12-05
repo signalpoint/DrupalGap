@@ -8,6 +8,12 @@ dg.forms = {}; // A global storage for active forms.
 dg.Form = function(id) {
 
   this.id = id;
+
+  // @TODO this should be turned into a prototype (e.g. FormInterface), that way when this is passed into validate
+  // and submit handlers it'll be much easier to work with. However, why aren't we just passing the Form prototype
+  // into the validate and submit handlers right now? Currently we're sending in this JSON object which isn't
+  // very helpful. We should still turn this into a FormInterface, and then pass in the Form prototype to the
+  // handlers.
   this.form = {
     _attributes: {
       id: dg.killCamelCase(id, '-').toLowerCase(),
@@ -209,12 +215,14 @@ dg.Form.prototype.submitForm = function(form, form_state, options) {
 // dg core form UX submission handler
 dg.Form.prototype._submission = function() {
   var self = this;
+  self.disableSubmitButton();
   return new Promise(function(ok, err) {
     var formState = self.getFormState();
     formState.setFormState().then(function() {
       formState.clearErrors();
       self._validateForm().then(function() {
         if (formState.hasAnyErrors()) {
+          self.enableSubmitButton();
           formState.displayErrors();
           err();
           return;
@@ -223,6 +231,8 @@ dg.Form.prototype._submission = function() {
           if (self.form._action) { dg.goto(self.form._action); }
           dg.removeForm(self.getFormId());
           ok();
+        }).catch(function() {
+          self.enableSubmitButton();
         });
       });
     });
@@ -293,6 +303,21 @@ dg.Form.prototype._submitForm = function() {
   return Promise.all(promises);
 };
 
+/**
+ * Disables the submit button on the form.
+ */
+dg.Form.prototype.enableSubmitButton = function() {
+  // @TODO this should actually iterate over the FormInterface and look for the real submit button.
+  document.getElementById('edit-submit').disabled = false;
+};
+/**
+ * Enables the submit button on the form.
+ */
+dg.Form.prototype.disableSubmitButton = function() {
+  // @TODO this should actually iterate over the FormInterface and look for the real submit button.
+  document.getElementById('edit-submit').disabled = true;
+};
+
 dg.addForm = function(id, form) {
   this.forms[id] = form;
   return this.forms[id];
@@ -303,6 +328,15 @@ dg.loadForm = function(id) {
 dg.loadForms = function() { return this.forms; };
 dg.removeForm = function(id) { delete this.forms[id]; };
 dg.removeForms = function() { this.forms = {}; };
+
+/**
+ * Given a form interface that is normally passed to a form's validate and submit handlers, this will return
+ * the corresponding Form prototype instance associated with the form interface.
+ * @param form
+ */
+dg.loadFormFromInterface = function(form) {
+  return dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(form._attributes.id)));
+};
 
 dg.isFormElement = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) != '_';
