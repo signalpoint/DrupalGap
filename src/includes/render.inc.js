@@ -40,15 +40,15 @@ dg.appRender = function(content) {
         // Open the region, render the placeholder for each of its block(s), then
         // close the region.
         var regionFormat = region.get('format');
-        innerHTML += '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
+        innerHTML += region.get('before') + '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
         for (var i = 0; i < blocks.length; i++) {
           var block = allBlocks[blocks[i]];
           var format = block.get('format');
-          innerHTML += block.get('prefix') +
+          innerHTML += block.get('before') +
               '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>' +
-          block.get('suffix');
+          block.get('after');
         }
-        innerHTML += region.get('suffix') + '</' + regionFormat + '>';
+        innerHTML += region.get('suffix') + '</' + regionFormat + '>' + region.get('after');
 
       }
       innerHTML += dg.render(content);
@@ -91,7 +91,15 @@ dg.appRender = function(content) {
             if (!forms.hasOwnProperty(id)) { continue; }
             var form_html_id = dg.killCamelCase(id, '-');
             var form = document.getElementById(form_html_id);
+            if (!form) {
+              // @TODO this happens when navigating away from a page with a form, navigating away should
+              // remove the form from dg because it will be gone from the DOM.
+              console.log(form_html_id, 'form not in DOM');
+              continue;
+            }
             function processForm(e) {
+              // @TODO if any developer has a JS error during form submission, form state values are
+              // placed into the url for all to see, yikes, wtf.
               if (e.preventDefault) e.preventDefault();
               var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
               _form._submission().then(
