@@ -18,8 +18,10 @@ dg.Region = function(id, config) {
   if (!this._attributes) { this._attributes = {}; }
   if (!this._attributes.id) { this._attributes.id = id; }
   if (!this._format) { this._format = 'div'; }
+  if (!this._before) { this._before = ''; }
   if (!this._prefix) { this._prefix = ''; }
   if (!this._suffix) { this._suffix = ''; }
+  if (!this._after) { this._after = ''; }
 };
 
 /**
