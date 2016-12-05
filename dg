@@ -245,7 +245,7 @@ drupalgap.settings.theme = {
 
 3. Add some blocks to the theme's regions in the settings.js file:
 
-drupalgap.settings.blocks.$THEME_NAME = {
+drupalgap.settings.blocks[dg.config('theme').name] = {
   header: {
 
     // DrupalGap's administration menu block.
