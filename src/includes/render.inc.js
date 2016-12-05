@@ -91,12 +91,7 @@ dg.appRender = function(content) {
             if (!forms.hasOwnProperty(id)) { continue; }
             var form_html_id = dg.killCamelCase(id, '-');
             var form = document.getElementById(form_html_id);
-            if (!form) {
-              // @TODO this happens when navigating away from a page with a form, navigating away should
-              // remove the form from dg because it will be gone from the DOM.
-              console.log(form_html_id, 'form not in DOM');
-              continue;
-            }
+            if (!form) { continue; }
             function processForm(e) {
               // @TODO if any developer has a JS error during form submission, form state values are
               // placed into the url for all to see, yikes, wtf.
