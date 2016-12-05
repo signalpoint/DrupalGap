@@ -24,9 +24,14 @@ dg.Theme.prototype.getRegionCount = function() {
 dg.themeLoad = function() {
   return new Promise(function(ok, err) {
     if (!dg.activeTheme) {
-      var themeClassName = jDrupal.ucfirst(dg.getCamelCase(dg.config('theme').name));
+      var themeConfig = dg.config('theme');
+      if (!themeConfig) {
+        console.log('No theme config found in settings.js file');
+        return;
+      }
+      var themeClassName = jDrupal.ucfirst(dg.getCamelCase(themeConfig.name));
       if (!dg.themes[themeClassName]) {
-        var msg = 'Failed to load theme (' + themeClassName + ') - did you include its .js file in the index.html file?';
+        var msg = 'Failed to load theme (' + themeClassName + ') - did you include its .js file in index.html?';
         err(msg);
         return;
       }
