@@ -29,8 +29,10 @@ dg.Block = function(module, id, implementation, config) {
   if (!this._id) { this._id = id; }
   if (!this._module) { this._module = module; }
   if (!this._format) { this._format = 'div'; }
-  if (!this._prefix) { this._prefix = ''; }
-  if (!this._suffix) { this._suffix = ''; }
+  if (!this._before) { this._before = ''; }
+  if (!this._prefix) { this._prefix = ''; } // @TODO deprecate, because we're using "_before", and block content is overridden
+  if (!this._suffix) { this._suffix = ''; } // @TODO deprecate, because we're using "_after", and block content is overridden
+  if (!this._after) { this._after = ''; }
   if (!this._routes) { this._routes = []; }
   //if (!this._roles) { this._roles = []; } // @TODO see if this works after we get routes working.
   dg.setRenderElementDefaults(this);
@@ -67,7 +69,7 @@ dg.Block.prototype.buildWrapper = function() {
   return new Promise(function(ok, err) {
     self.build().then(function(element) {
       dg.setRenderElementDefaults(element);
-      // @TODO - elements that are just a string (i.e. not a render elemtn) can't be altered.
+      // @TODO - elements that are just a string (i.e. not a render element) can't be altered.
       jDrupal.moduleInvokeAll('block_view_alter', element, self).then(function() {
         self.set('content', element);
         ok(self);
