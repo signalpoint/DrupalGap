@@ -77,10 +77,7 @@ dg.appRender = function(content) {
         if (blocksToRender.length == 0) {
 
           // Run any post render functions and reset the queue.
-          if (dg._postRender.length) {
-            for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
-            dg._postRender = [];
-          }
+          dg.runPostRenders();
 
           // Process the form(s), if any.
           // @TODO form should be processed as they're injected, because waiting
@@ -89,22 +86,7 @@ dg.appRender = function(content) {
           var forms = dg.loadForms();
           for (var id in forms) {
             if (!forms.hasOwnProperty(id)) { continue; }
-            var form_html_id = dg.killCamelCase(id, '-');
-            var form = document.getElementById(form_html_id);
-            if (!form) { continue; }
-            function processForm(e) {
-              // @TODO if any developer has a JS error during form submission, form state values are
-              // placed into the url for all to see, yikes, wtf.
-              if (e.preventDefault) e.preventDefault();
-              var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
-              _form._submission().then(
-                  function() { },
-                  function() { }
-              );
-              return false; // Prevent default form behavior.
-            }
-            if (form.attachEvent) { form.attachEvent("submit", processForm); }
-            else { form.addEventListener("submit", processForm); }
+            dg.formAttachSubmissionHandler(id);
           }
         }
       };
@@ -251,4 +233,14 @@ dg.render = function(content) {
       }
     }
     return html;
+};
+
+/**
+ * This will run through any of the queued up `_postRender` functions then reset the queue.
+ */
+dg.runPostRenders = function() {
+  if (dg._postRender.length) {
+    for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
+    dg._postRender = [];
+  }
 };
