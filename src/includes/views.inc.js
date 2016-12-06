@@ -1,11 +1,5 @@
 dg.theme_view = function(variables) {
-  if (!variables._attributes.id) {
-    var msg = 'WARNING: dg.theme_view - no attribute id was provided, so a ' +
-      'random one was generated for the following View widget: ' +
-      dg.restPath() + variables._path;
-    console.log(msg);
-    variables._attributes.id = dg.userPassword();
-  }
+  if (!variables._attributes.id) { variables._attributes.id = 'view-' + dg.userPassword(); }
   return new Promise(function(ok) {
     jDrupal.viewsLoad(variables._path).then(function(data) {
       var content = '';
@@ -13,7 +7,7 @@ dg.theme_view = function(variables) {
       var attrs = variables._format_attributes ? variables._format_attributes : null;
       if (variables._title) {
         if (typeof variables._title === 'object') { content += dg.render(variables._title); }
-        else { content += '<h2>' + variables._title + '</h2>'; };
+        else { content += '<h2>' + variables._title + '</h2>'; }
       }
       content += '<' + format + ' ' + dg.attributes(attrs) + '>';
       if (data.results.length > 0) {
