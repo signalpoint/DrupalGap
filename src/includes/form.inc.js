@@ -1,6 +1,32 @@
 dg.forms = {}; // A global storage for active forms.
 
 /**
+ * Given a form id, this will return an empty placeholder for the form. It then uses a `_postRender` to dynamically
+ * load and inject the form's html into the waiting placeholder container.
+ * @param {Object} variables
+ *  _id - The form id, e.g. UserLoginForm, MyCustomForm
+ * @returns {String}
+ */
+dg.theme_form = function(variables) {
+  if (!variables._id) {
+    console.log('dg.theme_form - no form _id was provided, skipping.');
+    return '';
+  }
+  var formDomId = dg.killCamelCase(variables._id, '-');
+  variables._attributes.id = 'form-wrapper-' + formDomId;
+  return dg.render({
+    _markup: '<div ' + dg.attributes(variables._attributes) + '></div>',
+    _postRender: [function() {
+      dg.addForm(variables._id, dg.applyToConstructor(window[variables._id])).getForm().then(function(html) {
+        document.getElementById(variables._attributes.id).innerHTML = html;
+        dg.formAttachSubmissionHandler(formDomId);
+        dg.runPostRenders();
+      });
+    }]
+  });
+};
+
+/**
  * The Form prototype.
  * @param id
  * @constructor
@@ -167,7 +193,7 @@ dg.Form.prototype.getForm = function() {
           }
 
         }
-        
+
         // Run the after builds, if any. Then finally resolve the rendered form.
         var promises = [];
         for (var i = 0; i < self.form._after_build.length; i++) {
@@ -328,6 +354,30 @@ dg.loadForm = function(id) {
 dg.loadForms = function() { return this.forms; };
 dg.removeForm = function(id) { delete this.forms[id]; };
 dg.removeForms = function() { this.forms = {}; };
+
+/**
+ * Given a form id from the DOM, this will attach the internal submission handler event via JavaScript. The handler
+ * function waits until submission then invokes DrupalGap's core form validation and submission system.
+ */
+dg.formAttachSubmissionHandler = function(id) {
+  var form_html_id = dg.killCamelCase(id, '-');
+  var form = document.getElementById(form_html_id);
+  if (!form) { return false; }
+  function processForm(e) {
+    // @TODO if any developer has a JS error during form submission, form state values are
+    // placed into the url for all to see, yikes, wtf.
+    if (e.preventDefault) e.preventDefault();
+    var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
+    _form._submission().then(
+        function() { },
+        function() { }
+    );
+    return false; // Prevent default form behavior.
+  }
+  if (form.attachEvent) { form.attachEvent("submit", processForm); }
+  else { form.addEventListener("submit", processForm); }
+  return true;
+};
 
 /**
  * Given a form interface that is normally passed to a form's validate and submit handlers, this will return
