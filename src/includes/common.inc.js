@@ -60,6 +60,13 @@ dg.getFrontPagePath = function() {
   return front;
 };
 
+dg.arg = function(i, path) {
+  if (!path) { path = dg.getPath(); }
+  var parts = path.split('/');
+  if (typeof i === 'undefined' || i === null) { return parts; }
+  return typeof parts[i] !== 'undefined' ? parts[i] : null;
+};
+
 /**
  * Returns true if the current page's route is the app's front page route.
  * @returns {boolean}
