@@ -102,9 +102,9 @@ dg.bootstrap = function() {
 
 dg.spinnerShow = function() {
   dg.spinner++;
-  if (dg.spinner == 1) { document.getElementById('dgSpinner').style.display = 'block'; }
+  //if (dg.spinner == 1) { document.getElementById('dgSpinner').style.display = 'block'; }
 };
 dg.spinnerHide = function() {
   dg.spinner--;
-  if (!dg.spinner) { document.getElementById('dgSpinner').style.display = 'none'; }
+  //if (!dg.spinner) { document.getElementById('dgSpinner').style.display = 'none'; }
 };
