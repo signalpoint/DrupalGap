@@ -11,7 +11,7 @@ var drupalgap_grunt_src = [
   'src/includes/forms/form-input.inc.js',
   'src/includes/forms/form-state.inc.js',
   'src/includes/forms/form-widget.inc.js',
-  'src/includes/forms/widgets/widget.checkbox.inc.js',
+  'src/includes/forms/elements/element.checkboxes.js',
 
   'src/includes/field-definition.inc.js',
   'src/includes/field-form-mode.inc.js',
