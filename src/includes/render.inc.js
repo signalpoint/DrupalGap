@@ -240,7 +240,21 @@ dg.render = function(content) {
  */
 dg.runPostRenders = function() {
   if (dg._postRender.length) {
-    for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
+    for (var i = 0; i < dg._postRender.length; i++) {
+
+      // Prevent runaway post render invocations potentially caused by uncaught exceptions in the
+      // developer's function(s).
+      if (dg._postRender.length > dg._postRenderMax) {
+        console.log('dg._postRenderMax reached: ' + dg._postRenderMax);
+        dg._postRender = [];
+        break;
+      }
+
+      // Run the post render function.
+      dg._postRender[i]();
+    }
+
+    // Clear the queue.
     dg._postRender = [];
   }
 };
