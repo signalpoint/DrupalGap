@@ -11,9 +11,14 @@
  * @constructor
  */
 dg.FormElement = function(name, element, form) {
-  this.name = name;
-  this.element = element; // Holds the form element JSON object provided by the form builder.
-  this.form = form;
+  if (arguments.length) { dg.FormElementPrepare(this, arguments); }
+};
+
+dg.FormElementPrepare = function(FormElement, args) {
+  FormElement.name = args[0];
+  FormElement.element = args[1]; // Holds the form element JSON object provided by the form builder.
+  FormElement.form = args[2];
+  //FormElement.widgetType = 'FormElement';
 };
 
 /**
