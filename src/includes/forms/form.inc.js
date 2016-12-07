@@ -154,15 +154,21 @@ dg.Form.prototype.getForm = function() {
             case 'FormElement':
             default:
 
-              // Instantiate a new form element given the current buildForm element for the Form.
-              // Wrap elements in containers, except for hidden elements.
-              var el = new dg[element._widgetType](name, element, self);
+                // Determine constructor by looking for any FormElement implementations.
+                var constructorName = element._widgetType;
+                if (element._type) {
+                  var nameToCheck = jDrupal.ucfirst(dg.getCamelCase(element._type)) + 'Element';
+                  if (dg[nameToCheck]) { constructorName = nameToCheck; }
+                }
 
+              // Instantiate a new form element given the current buildForm element for the Form.
+              var el = new dg[constructorName](name, element, self);
               self.elements[name] = el;
-              if (el._type == 'hidden') {
-                self.elements[name] = el;
-                continue;
-              }
+
+              // Hidden elements need nothing more.
+              if (el._type == 'hidden') { continue; }
+
+              // Place the potential label, and element, as children to a container.
               var children = {
                 _attributes: {
                   'class': []
