@@ -1,3 +1,20 @@
+dg.theme_bucket = function(variables) {
+  if (!variables._attributes.id) { variables._attributes.id = 'bucket-' + jDrupal.userPassword(); }
+  if (!variables._format) { variables._format = 'div'; }
+  if (!variables._grab) { return; }
+  var format = variables._format;
+  var element = {};
+  element.bucket = {
+    _markup: '<' + format + ' ' + dg.attributes(variables._attributes) + '></' + format + '>',
+    _postRender: [function() {
+      variables._grab().then(function(content) {
+        document.getElementById(variables._attributes.id).innerHTML = dg.render(content);
+      });
+    }]
+  };
+  return dg.render(element);
+};
+
 /**
  * Themes a button.
  * @param {Object} variables
