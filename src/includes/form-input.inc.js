@@ -8,9 +8,25 @@ dg.theme_actions = function(variables) {
 };
 dg.theme_checkbox = function(variables) {
   variables._attributes.type = 'checkbox';
-  var id = variables._attributes.id ? variables._attributes.id : 'checkbox-' + jDrupal.userPassword();
-  var label = variables._title ? ' <label for="' + id + '">' + variables._title + '</label>' : '';
+  if (!variables._attributes.id) { variables._attributes.id = 'checkbox-' + jDrupal.userPassword(); }
+  var label = variables._title ?
+    ' <label for="' + variables._attributes.id + '">' + variables._title + '</label>' :
+    '';
   return '<input ' + dg.attributes(variables._attributes) + ' />' + label;
+};
+dg.theme_checkboxes = function(variables) {
+  var html = '';
+  for (var value in variables._options) {
+    if (!variables._options.hasOwnProperty(value)) { continue; }
+    var label = variables._options[value];
+    html += dg.theme('checkbox', {
+      _title: !jDrupal.isEmpty(label) ? label : value,
+      _attributes: {
+        value: value
+      }
+    }) + '<br />';
+  }
+  return '<div ' + dg.attributes(variables._attributes) + '>' + html + '</div>';
 };
 dg.theme_hidden = function(variables) {
   variables._attributes.type = 'hidden';
