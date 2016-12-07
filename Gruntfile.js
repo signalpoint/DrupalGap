@@ -6,11 +6,12 @@ var drupalgap_grunt_src = [
   'src/includes/common.inc.js',
   'src/includes/entity.inc.js',
 
-  'src/includes/form.inc.js',
-  'src/includes/form-element.inc.js',
-  'src/includes/form-input.inc.js',
-  'src/includes/form-state.inc.js',
-  'src/includes/form-widget.inc.js',
+  'src/includes/forms/form.inc.js',
+  'src/includes/forms/form-element.inc.js',
+  'src/includes/forms/form-input.inc.js',
+  'src/includes/forms/form-state.inc.js',
+  'src/includes/forms/form-widget.inc.js',
+  'src/includes/forms/widgets/widget.checkbox.inc.js',
 
   'src/includes/field-definition.inc.js',
   'src/includes/field-form-mode.inc.js',
