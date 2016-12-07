@@ -36,6 +36,9 @@ dg.themeLoad = function() {
         return;
       }
       dg.activeTheme = new dg.themes[themeClassName];
+
+      // Also make a module instance for the theme so it can be part of hook invocations.
+      dg.modules[name] = new dg.Module();
     }
     ok(dg.activeTheme);
   });
