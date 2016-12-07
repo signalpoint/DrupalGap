@@ -96,12 +96,17 @@ dg.isProperty = function(prop, obj) {
 
 /**
  * Sets the current page title.
- * @param title
+ * @param {String} title The title to set.
+ * @param {Boolean} updateDocument If set, set's the document title as well, defaults to true.
  */
-dg.setTitle = function(title) {
+dg.setTitle = function(title, updateDocument, updatePage) {
+  if (typeof updateDocument === 'undefined') { updateDocument = true; }
+  if (typeof updatePage === 'undefined') { updatePage = true; }
   title = !title ? '' : title;
   if (typeof title === 'object') { title = title._title ? title._title : ''; }
   dg._title = title;
+  if (updateDocument) { dg.setDocumentTitle(title); }
+  if (updatePage) { dg.setPageTitle(title); }
 };
 
 /**
@@ -117,6 +122,11 @@ dg.getDocumentTitle = function() { return document.title; };
 dg.setDocumentTitle = function(title) {
   title = !title ? dg.config('title') : title;
   document.title = dg.theme('document_title', { _title: dg.t(title) });
+};
+
+dg.setPageTitle = function(title) {
+  var titleDiv = document.getElementById('title');
+  if (titleDiv) { titleDiv.innerHTML = dg.theme('title', { _title: title }); }
 };
 
 /**
