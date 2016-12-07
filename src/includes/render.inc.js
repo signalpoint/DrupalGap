@@ -40,15 +40,15 @@ dg.appRender = function(content) {
         // Open the region, render the placeholder for each of its block(s), then
         // close the region.
         var regionFormat = region.get('format');
-        innerHTML += '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
+        innerHTML += region.get('before') + '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
         for (var i = 0; i < blocks.length; i++) {
           var block = allBlocks[blocks[i]];
           var format = block.get('format');
-          innerHTML += block.get('prefix') +
+          innerHTML += block.get('before') +
               '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>' +
-          block.get('suffix');
+          block.get('after');
         }
-        innerHTML += region.get('suffix') + '</' + regionFormat + '>';
+        innerHTML += region.get('suffix') + '</' + regionFormat + '>' + region.get('after');
 
       }
       innerHTML += dg.render(content);
@@ -77,10 +77,7 @@ dg.appRender = function(content) {
         if (blocksToRender.length == 0) {
 
           // Run any post render functions and reset the queue.
-          if (dg._postRender.length) {
-            for (var i = 0; i < dg._postRender.length; i++) { dg._postRender[i](); }
-            dg._postRender = [];
-          }
+          dg.runPostRenders();
 
           // Process the form(s), if any.
           // @TODO form should be processed as they're injected, because waiting
@@ -89,19 +86,7 @@ dg.appRender = function(content) {
           var forms = dg.loadForms();
           for (var id in forms) {
             if (!forms.hasOwnProperty(id)) { continue; }
-            var form_html_id = dg.killCamelCase(id, '-');
-            var form = document.getElementById(form_html_id);
-            function processForm(e) {
-              if (e.preventDefault) e.preventDefault();
-              var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
-              _form._submission().then(
-                  function() { },
-                  function() { }
-              );
-              return false; // Prevent default form behavior.
-            }
-            if (form.attachEvent) { form.attachEvent("submit", processForm); }
-            else { form.addEventListener("submit", processForm); }
+            dg.formAttachSubmissionHandler(id);
           }
         }
       };
@@ -248,4 +233,28 @@ dg.render = function(content) {
       }
     }
     return html;
+};
+
+/**
+ * This will run through any of the queued up `_postRender` functions then reset the queue.
+ */
+dg.runPostRenders = function() {
+  if (dg._postRender.length) {
+    for (var i = 0; i < dg._postRender.length; i++) {
+
+      // Prevent runaway post render invocations potentially caused by uncaught exceptions in the
+      // developer's function(s).
+      if (dg._postRender.length > dg._postRenderMax) {
+        console.log('dg._postRenderMax reached: ' + dg._postRenderMax);
+        dg._postRender = [];
+        break;
+      }
+
+      // Run the post render function.
+      dg._postRender[i]();
+    }
+
+    // Clear the queue.
+    dg._postRender = [];
+  }
 };

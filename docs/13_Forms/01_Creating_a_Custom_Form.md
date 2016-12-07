@@ -24,7 +24,7 @@ var MyModuleSayHelloForm = function() {
     return new Promise(function(ok, err) {
       form.name = {
         _type: 'textfield',
-        _title: 'Name',
+        _title: dg.t('Name'),
         _required: true,
         _title_placeholder: true
       };
@@ -32,7 +32,7 @@ var MyModuleSayHelloForm = function() {
         _type: 'actions',
         submit: {
           _type: 'submit',
-          _value: 'Say hello',
+          _value: dg.t('Say hello'),
           _button_type: 'primary'
         }
       };
@@ -76,16 +76,3 @@ To handle our form's submission, we implement the form's submit function. Notice
 ## Viewing the Form
 
 Now when the `say-hello` page is visited, it will automatically display your form! Visit [Navigating Pages](../Pages/Navigating_Pages) to learn more about linking to custom pages.
-
-### Placing the Form in a Block
-
-In a [custom block's](../Blocks/Create_a_Custom_Block) `build` function, we can provide a form to be rendered within the block:
-
-```
-return new Promise(function(ok, err) {
-
-  // Load the form, add it to DrupalGap, render it and then return it.
-  dg.addForm('MyModuleSayHelloForm', dg.applyToConstructor(MyModuleSayHelloForm)).getForm().then(ok);
-
-});
-```

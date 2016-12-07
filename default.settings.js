@@ -14,7 +14,7 @@ jDrupal.settings = {
 };
 
 // App mode.
-dg.settings.mode = 'web-app'; // web-app or phonegap
+dg.settings.mode = 'web-app'; // web-app, phonegap or cordova
 
 // App title.
 dg.settings.title = 'DrupalGap';

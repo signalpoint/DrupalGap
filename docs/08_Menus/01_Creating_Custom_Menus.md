@@ -1,8 +1,4 @@
-Creating custom menus in DrupalGap is done with custom blocks. Here's an example menu with a link to a Food page, and a link to a Beverage page:
-
-![Food Page](http://drupalgap.org/sites/default/files/food-page.png)
-
-![Beverage](http://drupalgap.org/sites/default/files/beverage-page.png)
+Creating custom menus in DrupalGap 8 is done with custom blocks. Here's an example menu with a link to a Food page, and a link to a Beverage page:
 
 ## Creating the Menu
 

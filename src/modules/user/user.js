@@ -63,18 +63,25 @@ dg.modules.user.blocks = function() {
   blocks['user_menu'] = {
     build: function () {
       return new Promise(function(ok, err) {
+        var items = [];
         if (dg.currentUser().isAuthenticated()) {
-          var content = {};
-          content['menu'] = {
-            _theme: 'item_list',
-            _items: [
-              dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
-              dg.l(dg.t('Logout'), 'user/logout')
-            ]
-          };
-          ok(content);
+          items = [
+            dg.l(dg.t('My account'), 'user/' + dg.currentUser().id()),
+            dg.l(dg.t('Logout'), 'user/logout')
+          ];
         }
-        else { ok(); }
+        else {
+          items = [
+            dg.l(dg.t('Login'), 'user/login'),
+            dg.l(dg.t('Register'), 'user/register')
+          ];
+        }
+        var content = {};
+        content['menu'] = {
+          _theme: 'item_list',
+          _items: items
+        };
+        ok(content);
       });
     }
   };

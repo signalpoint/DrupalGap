@@ -3,13 +3,12 @@
  * @param {String} name
  * @returns {*}
  */
-dg.config = function(name) {
-  var value = typeof arguments[1] !== 'undefined' ? arguments[1] : null;
-  if (value) {
+dg.config = function(name, value) {
+  if (typeof value !== 'undefined') {
     dg.settings[name] = value;
     return;
   }
-  return dg.settings[name];
+  return typeof dg.settings[name] !== 'undefined' ? dg.settings[name] : null;
 };
 
 /**
@@ -23,6 +22,14 @@ dg.getMode = function() { return this.config('mode'); };
  * @param {String} mode
  */
 dg.setMode = function(mode) { this.config('mode', mode); };
+
+/**
+ * Returns true if the app is in 'phonegap' or 'cordova' mode, false otherwise.
+ * @return {Boolean}
+ */
+dg.isCompiled = function() {
+  jDrupal.inArray(dg.getMode(), ['phonegap', 'cordova'])
+};
 
 /**
  * Returns the current route.
@@ -51,6 +58,13 @@ dg.getFrontPagePath = function() {
   var front = dg.config('front');
   if (front == null) { front = 'dg'; }
   return front;
+};
+
+dg.arg = function(i, path) {
+  if (!path) { path = dg.getPath(); }
+  var parts = path.split('/');
+  if (typeof i === 'undefined' || i === null) { return parts; }
+  return typeof parts[i] !== 'undefined' ? parts[i] : null;
 };
 
 /**
@@ -82,12 +96,17 @@ dg.isProperty = function(prop, obj) {
 
 /**
  * Sets the current page title.
- * @param title
+ * @param {String} title The title to set.
+ * @param {Boolean} updateDocument If set, set's the document title as well, defaults to true.
  */
-dg.setTitle = function(title) {
+dg.setTitle = function(title, updateDocument, updatePage) {
+  if (typeof updateDocument === 'undefined') { updateDocument = true; }
+  if (typeof updatePage === 'undefined') { updatePage = true; }
   title = !title ? '' : title;
   if (typeof title === 'object') { title = title._title ? title._title : ''; }
   dg._title = title;
+  if (updateDocument) { dg.setDocumentTitle(title); }
+  if (updatePage) { dg.setPageTitle(title); }
 };
 
 /**
@@ -105,6 +124,11 @@ dg.setDocumentTitle = function(title) {
   document.title = dg.theme('document_title', { _title: dg.t(title) });
 };
 
+dg.setPageTitle = function(title) {
+  var titleDiv = document.getElementById('title');
+  if (titleDiv) { titleDiv.innerHTML = dg.theme('title', { _title: title }); }
+};
+
 /**
  *
  * @param attributes
@@ -119,6 +143,7 @@ dg.attributes = function(attributes) {
       if (Array.isArray(value) && value.length) {
         attrs += name + '="' + value.join(' ') + '" ';
       }
+      else if (value === null) { attrs += ' ' + name + ' '; }
       else if (value != '') {
         // @todo - if someone passes in a value with double quotes, this
         // will break. e.g.

@@ -21,11 +21,19 @@ function drupalgap_download_project() {
       exit 1
   fi
 
+  # Create default directories if they don't exist.
+  if [ -d "$APP_MODULES_DIRECTORY" ]; then
+      mkdir "$APP_MODULES_DIRECTORY"
+  fi
+  if [ -d "$APP_MODULES_CONTRIB_DIRECTORY" ]; then
+      mkdir "$APP_MODULES_CONTRIB_DIRECTORY"
+  fi
+
   # @TODO support Macs with curl instead of wget
 
   # Grab the project name and determine the destination directory for it.
   PROJECT="$1"
-  MODULE_DIR="$APP_MODULES_DIRECTORY/$PROJECT"
+  MODULE_DIR="$APP_MODULES_CONTRIB_DIRECTORY/$PROJECT"
 
   # Check to see if the project already exists.
   if [ -d "$MODULE_DIR" ]; then
@@ -41,7 +49,7 @@ function drupalgap_download_project() {
   fi
 
   # Determine which branch to download.
-  BRANCH="7.x-1.x"
+  BRANCH="8.x-1.x"
   if [ $# -eq 2 ]; then
     BRANCH=$2
   fi
@@ -245,7 +253,7 @@ drupalgap.settings.theme = {
 
 3. Add some blocks to the theme's regions in the settings.js file:
 
-drupalgap.settings.blocks.$THEME_NAME = {
+drupalgap.settings.blocks[dg.config('theme').name] = {
   header: {
 
     // DrupalGap's administration menu block.

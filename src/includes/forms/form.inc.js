@@ -1,6 +1,32 @@
 dg.forms = {}; // A global storage for active forms.
 
 /**
+ * Given a form id, this will return an empty placeholder for the form. It then uses a `_postRender` to dynamically
+ * load and inject the form's html into the waiting placeholder container.
+ * @param {Object} variables
+ *  _id - The form id, e.g. UserLoginForm, MyCustomForm
+ * @returns {String}
+ */
+dg.theme_form = function(variables) {
+  if (!variables._id) {
+    console.log('dg.theme_form - no form _id was provided, skipping.');
+    return '';
+  }
+  var formDomId = dg.killCamelCase(variables._id, '-');
+  variables._attributes.id = 'form-wrapper-' + formDomId;
+  return dg.render({
+    _markup: '<div ' + dg.attributes(variables._attributes) + '></div>',
+    _postRender: [function() {
+      dg.addForm(variables._id, dg.applyToConstructor(window[variables._id])).getForm().then(function(html) {
+        document.getElementById(variables._attributes.id).innerHTML = html;
+        dg.formAttachSubmissionHandler(formDomId);
+        dg.runPostRenders();
+      });
+    }]
+  });
+};
+
+/**
  * The Form prototype.
  * @param id
  * @constructor
@@ -8,6 +34,12 @@ dg.forms = {}; // A global storage for active forms.
 dg.Form = function(id) {
 
   this.id = id;
+
+  // @TODO this should be turned into a prototype (e.g. FormInterface), that way when this is passed into validate
+  // and submit handlers it'll be much easier to work with. However, why aren't we just passing the Form prototype
+  // into the validate and submit handlers right now? Currently we're sending in this JSON object which isn't
+  // very helpful. We should still turn this into a FormInterface, and then pass in the Form prototype to the
+  // handlers.
   this.form = {
     _attributes: {
       id: dg.killCamelCase(id, '-').toLowerCase(),
@@ -122,15 +154,21 @@ dg.Form.prototype.getForm = function() {
             case 'FormElement':
             default:
 
-              // Instantiate a new form element given the current buildForm element for the Form.
-              // Wrap elements in containers, except for hidden elements.
-              var el = new dg[element._widgetType](name, element, self);
+                // Determine constructor by looking for any FormElement implementations.
+                var constructorName = element._widgetType;
+                if (element._type) {
+                  var nameToCheck = jDrupal.ucfirst(dg.getCamelCase(element._type)) + 'Element';
+                  if (dg[nameToCheck]) { constructorName = nameToCheck; }
+                }
 
+              // Instantiate a new form element given the current buildForm element for the Form.
+              var el = new dg[constructorName](name, element, self);
               self.elements[name] = el;
-              if (el._type == 'hidden') {
-                self.elements[name] = el;
-                continue;
-              }
+
+              // Hidden elements need nothing more.
+              if (el._type == 'hidden') { continue; }
+
+              // Place the potential label, and element, as children to a container.
               var children = {
                 _attributes: {
                   'class': []
@@ -161,7 +199,7 @@ dg.Form.prototype.getForm = function() {
           }
 
         }
-        
+
         // Run the after builds, if any. Then finally resolve the rendered form.
         var promises = [];
         for (var i = 0; i < self.form._after_build.length; i++) {
@@ -209,12 +247,14 @@ dg.Form.prototype.submitForm = function(form, form_state, options) {
 // dg core form UX submission handler
 dg.Form.prototype._submission = function() {
   var self = this;
+  self.disableSubmitButton();
   return new Promise(function(ok, err) {
     var formState = self.getFormState();
     formState.setFormState().then(function() {
       formState.clearErrors();
       self._validateForm().then(function() {
         if (formState.hasAnyErrors()) {
+          self.enableSubmitButton();
           formState.displayErrors();
           err();
           return;
@@ -223,6 +263,8 @@ dg.Form.prototype._submission = function() {
           if (self.form._action) { dg.goto(self.form._action); }
           dg.removeForm(self.getFormId());
           ok();
+        }).catch(function() {
+          self.enableSubmitButton();
         });
       });
     });
@@ -293,6 +335,21 @@ dg.Form.prototype._submitForm = function() {
   return Promise.all(promises);
 };
 
+/**
+ * Disables the submit button on the form.
+ */
+dg.Form.prototype.enableSubmitButton = function() {
+  // @TODO this should actually iterate over the FormInterface and look for the real submit button.
+  document.getElementById('edit-submit').disabled = false;
+};
+/**
+ * Enables the submit button on the form.
+ */
+dg.Form.prototype.disableSubmitButton = function() {
+  // @TODO this should actually iterate over the FormInterface and look for the real submit button.
+  document.getElementById('edit-submit').disabled = true;
+};
+
 dg.addForm = function(id, form) {
   this.forms[id] = form;
   return this.forms[id];
@@ -303,6 +360,39 @@ dg.loadForm = function(id) {
 dg.loadForms = function() { return this.forms; };
 dg.removeForm = function(id) { delete this.forms[id]; };
 dg.removeForms = function() { this.forms = {}; };
+
+/**
+ * Given a form id from the DOM, this will attach the internal submission handler event via JavaScript. The handler
+ * function waits until submission then invokes DrupalGap's core form validation and submission system.
+ */
+dg.formAttachSubmissionHandler = function(id) {
+  var form_html_id = dg.killCamelCase(id, '-');
+  var form = document.getElementById(form_html_id);
+  if (!form) { return false; }
+  function processForm(e) {
+    // @TODO if any developer has a JS error during form submission, form state values are
+    // placed into the url for all to see, yikes, wtf.
+    if (e.preventDefault) e.preventDefault();
+    var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
+    _form._submission().then(
+        function() { },
+        function() { }
+    );
+    return false; // Prevent default form behavior.
+  }
+  if (form.attachEvent) { form.attachEvent("submit", processForm); }
+  else { form.addEventListener("submit", processForm); }
+  return true;
+};
+
+/**
+ * Given a form interface that is normally passed to a form's validate and submit handlers, this will return
+ * the corresponding Form prototype instance associated with the form interface.
+ * @param form
+ */
+dg.loadFormFromInterface = function(form) {
+  return dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(form._attributes.id)));
+};
 
 dg.isFormElement = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) != '_';

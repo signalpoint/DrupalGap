@@ -6,11 +6,12 @@ var drupalgap_grunt_src = [
   'src/includes/common.inc.js',
   'src/includes/entity.inc.js',
 
-  'src/includes/form.inc.js',
-  'src/includes/form-element.inc.js',
-  'src/includes/form-input.inc.js',
-  'src/includes/form-state.inc.js',
-  'src/includes/form-widget.inc.js',
+  'src/includes/forms/form.inc.js',
+  'src/includes/forms/form-element.inc.js',
+  'src/includes/forms/form-input.inc.js',
+  'src/includes/forms/form-state.inc.js',
+  'src/includes/forms/form-widget.inc.js',
+  'src/includes/forms/elements/element.checkboxes.js',
 
   'src/includes/field-definition.inc.js',
   'src/includes/field-form-mode.inc.js',
@@ -54,16 +55,6 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    concat: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-        separator: '\n'
-      },
-      dist: {
-        src: drupalgap_grunt_src,
-        dest: '<%= pkg.name %>.js'
-      }
-    },
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -75,15 +66,14 @@ module.exports = function(grunt) {
     },
     watch: {
       files: drupalgap_grunt_src,
-      tasks: ['concat', 'uglify'] // @see http://stackoverflow.com/a/20740693/763010
+      tasks: ['uglify'] // @see http://stackoverflow.com/a/20740693/763010
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task(s).
-  grunt.registerTask('default', ['concat', 'uglify', 'watch']);
+  grunt.registerTask('default', ['uglify', 'watch']);
 
 };

@@ -1,11 +1,13 @@
-// Initialize the DrupalGap JSON object and run the bootstrap.
+// Initialize the DrupalGap JSON object.
 var dg = {
   activeTheme: null, // The active theme.
   blocks: null, // Instances of blocks.
   regions: null, // Instances of regions.
   spinner: 0, // How many spinners have been thrown up.
   themes: {}, // Instances of themes.
-  _title: '' // The current page title
+  _title: '', // The current page title,
+  _continued: false, // A marker to indicate when dg.continue() has been called at least once
+  _postRenderMax: 128, // The max allowed post renders functions in the queue.
 };
 // @TODO prefixing all properties above with an underscore, then use dg.get() throughout the SDK
 var drupalgap = dg;
@@ -19,48 +21,55 @@ dg.settings = {
 
 // Start.
 dg.start = function() {
-  if (dg.getMode() == 'phonegap') {
+  if (dg.isCompiled()) {
     document.addEventListener('deviceready', dg.deviceready, false);
   }
   else { dg.deviceready(); } // web-app
 };
 
-// Device ready.
-dg.deviceready = function() {
-  dg.bootstrap();
-  if (!jDrupal.isReady()) {
-    dg.alert('Set the sitePath in the settings.js file!');
-    return;
-  }
-  //jDrupal.moduleInvokeAll('deviceready');
-  jDrupal.connect().then(this.devicereadyGood, this.devicereadyBad);
-};
-dg.devicereadyGood = function(data) {
-  // Pull out any important data from the Connect resource results.
-  for (var d in data.drupalgap) {
-    if (!data.drupalgap.hasOwnProperty(d)) { continue; }
-    drupalgap[d] = data.drupalgap[d];
-  }
+// Continue.
+dg.continue = function() {
   // Force a check on the router (which is already listening at this point), to
   // refresh the current page or navigate to the current path.
+  dg._continued = true;
   dg.router.check(dg.router.getFragment());
 };
-dg.devicereadyBad = function() {
-  var note = 'Failed connection to ' + jDrupal.sitePath();
-  if (msg != '') { note += ' - ' + msg; }
-  dg.alert(note, {
-    title: 'Unable to Connect',
-    alertCallback: function() { }
+
+// Device ready.
+dg.deviceready = function() {
+  // @TODO, we'll probably want a hook_bootstrap() that can resolve with a Promise.
+  dg.bootstrap();
+
+  // Invoke hook_deviceready()...
+  jDrupal.moduleInvokeAll('deviceready').then(function() {
+
+    // If no one implemented the hook, continue gracefully.
+    if (!jDrupal.moduleImplements('deviceready') && !dg._continued) {
+      jDrupal.connect().then(dg.continue, function() {
+        console.log('deviceready connect failed', arguments);
+      });
+    }
+
   });
 };
+//dg.devicereadyGood = function(data) {
+//
+//  // Pull out any important data from the Connect resource results.
+//  // @TODO move this to a jDrupal connect post processor
+//  if (data) {
+//    for (var d in data.drupalgap) {
+//      if (!data.drupalgap.hasOwnProperty(d)) { continue; }
+//      drupalgap[d] = data.drupalgap[d];
+//    }
+//  }
+//
+//
+//};
 
 // Bootstrap.
 dg.bootstrap = function() {
 
-  dg.router.config({
-    //mode: 'history',
-    //root: 'discasaurus.com'
-  });
+  dg.router.config({});
 
   // Build the routes.
   // @TODO turn route building into promises.
@@ -80,6 +89,9 @@ dg.bootstrap = function() {
     }
   }
 
+  // If there's no front page specified, set it to the default dg dashboard.
+  if (!dg.config('front')) { dg.config('front', 'dg'); }
+
   // Load the theme, then the blocks, and then add a default route, and start listening.
   dg.themeLoad().then(function() {
       var blocks = dg.blocksLoad();
@@ -90,9 +102,9 @@ dg.bootstrap = function() {
 
 dg.spinnerShow = function() {
   dg.spinner++;
-  if (dg.spinner == 1) { document.getElementById('dgSpinner').style.display = 'block'; }
+  //if (dg.spinner == 1) { document.getElementById('dgSpinner').style.display = 'block'; }
 };
 dg.spinnerHide = function() {
   dg.spinner--;
-  if (!dg.spinner) { document.getElementById('dgSpinner').style.display = 'none'; }
+  //if (!dg.spinner) { document.getElementById('dgSpinner').style.display = 'none'; }
 };
