@@ -24,7 +24,7 @@ var MyModuleSayHelloForm = function() {
     return new Promise(function(ok, err) {
       form.name = {
         _type: 'textfield',
-        _title: 'Name',
+        _title: dg.t('Name'),
         _required: true,
         _title_placeholder: true
       };
@@ -32,7 +32,7 @@ var MyModuleSayHelloForm = function() {
         _type: 'actions',
         submit: {
           _type: 'submit',
-          _value: 'Say hello',
+          _value: dg.t('Say hello'),
           _button_type: 'primary'
         }
       };
