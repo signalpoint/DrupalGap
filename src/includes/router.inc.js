@@ -93,17 +93,17 @@ dg.router = {
           }
         }
 
-        // All other routes, apply page arguments or no arguments.
+        // All other routes, apply page arguments or no arguments. We accept both render elements and
+        // promises to be returned from a controller.
         else {
-
+          var controllerResult = null;
           if (matches.length > 1) {
             matches.shift();
-            route.defaults._controller.apply(null, matches).then(menu_execute_active_handler);
+            controllerResult = route.defaults._controller.apply(null, matches);
           }
-          else {
-            route.defaults._controller().then(menu_execute_active_handler);
-          }
-
+          else { controllerResult = route.defaults._controller(); }
+          if (jDrupal.isPromise(controllerResult)) { controllerResult.then(menu_execute_active_handler); }
+          else { menu_execute_active_handler(controllerResult); }
         }
 
       }
