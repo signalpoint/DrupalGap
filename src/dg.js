@@ -6,7 +6,8 @@ var dg = {
   spinner: 0, // How many spinners have been thrown up.
   themes: {}, // Instances of themes.
   _title: '', // The current page title,
-  _continued: false // A marker to indicate when dg.continue() has been called at least once
+  _continued: false, // A marker to indicate when dg.continue() has been called at least once
+  _postRenderMax: 128, // The max allowed post renders functions in the queue.
 };
 // @TODO prefixing all properties above with an underscore, then use dg.get() throughout the SDK
 var drupalgap = dg;
