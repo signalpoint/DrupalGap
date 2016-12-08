@@ -15,7 +15,7 @@ dg.CheckboxesElement.prototype.valueCallback = function() {
       value = {};
       for (var i = 0; i < checkboxes.length; i++) {
         var _value = checkboxes[i].value;
-        if (_value !== null) { value[_value] = checkboxes[i].checked ? _value : null; }
+        if (_value !== null) { value[_value] = checkboxes[i].checked ? 1 : 0; }
       }
     }
     ok({
