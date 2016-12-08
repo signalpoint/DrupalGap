@@ -109,7 +109,10 @@ dg.Form.prototype.getForm = function() {
           //console.log(element);
 
           // Reset the attribute value to that of the element value if it changed during form alteration.
-          if (element._attributes.value != element._value) { element._attributes.value = element._value; }
+          // @TODO this is weird... why would we want to overwrite an alteration?
+          //if (element._attributes.value != element._value) { element._attributes.value = element._value; }
+
+          // Depending on the type of widget/element...
           switch (element._widgetType) {
             case 'FieldWidget':
             case 'FormWidget':
@@ -117,8 +120,7 @@ dg.Form.prototype.getForm = function() {
               //console.log(element._widgetType);
               //console.log(name);
 
-                // Instantiate the widget using the element's module, then build the element form and then add it to the
-                // form as a container.
+                // Instantiate the widget using the element's module.
                 var items = self.form._entity.get(name);
                 var delta = 0;
                 var widget = new dg.modules[element._module][element._widgetType][element._type](
@@ -129,7 +131,10 @@ dg.Form.prototype.getForm = function() {
                   items,
                   delta
                 );
+
                 self.elements[name] = widget;
+
+                // Build the element form and then add it to the form as a container.
                 widget.form(items, delta, element, self.form, self.form_state);
                 // Wrap elements in containers, except for hidden elements.
                 if (element._type == 'hidden') {
@@ -166,7 +171,7 @@ dg.Form.prototype.getForm = function() {
               self.elements[name] = el;
 
               // Hidden elements need nothing more.
-              if (el._type == 'hidden') { continue; }
+              if (element._type == 'hidden') { continue; }
 
               // Place the potential label, and element, as children to a container.
               var children = {
@@ -175,14 +180,17 @@ dg.Form.prototype.getForm = function() {
                 }
               };
               if (element._title && !element._attributes.placeholder) {
-                children.label = {
-                  _theme: 'form_element_label',
-                  _title: element._title,
-                  _attributes: {
-                    'class': [],
-                    'for': element._attributes.id
-                  }
-                };
+                if (element._type == 'checkbox') { /* single checkboxes provide their own label */ }
+                else {
+                  children.label = {
+                    _theme: 'form_element_label',
+                    _title: element._title,
+                    _attributes: {
+                      'class': [],
+                      'for': element._attributes.id
+                    }
+                  };
+                }
               }
               children.element = el;
               var container = { // @TODO we desperately need a function to instantiate a RenderElement
@@ -406,6 +414,7 @@ dg.setFormElementDefaults = function(name, el) {
   if (!attrs.name) { attrs.name = name; }
   if (!attrs.class) { attrs.class = []; }
   if (!attrs.value && el._value) { attrs.value = el._value; }
+  if (typeof el._default_value !== 'undefined') { attrs.value = el._default_value; }
   if (!el._widgetType) { el._widgetType = 'FormElement'; }
   if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
