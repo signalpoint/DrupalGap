@@ -107,5 +107,20 @@ dg.modules.system.blocks = function() {
       });
     }
   };
+  blocks.messages = {
+    build: function () {
+      return new Promise(function(ok, err) {
+        if (!dg.getMessageCount()) { ok(); return; }
+        var element = {};
+        var messages = dg.getMessages();
+        for (var i = 0; i < messages.length; i++) {
+          element['msg' + i] = messages[i];
+        }
+        dg.clearMessages();
+        console.log(element);
+        ok(element);
+      });
+    }
+  };
   return blocks;
 };

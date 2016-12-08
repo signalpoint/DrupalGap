@@ -10,6 +10,7 @@ By default, DrupalGap comes packaged with a handful of blocks to make our lives 
 - logo
 - main (*used to display the content of the current page*)
 - main_menu
+- messages
 - title (*used to display the page title*)
 - powered_by
 - user_login

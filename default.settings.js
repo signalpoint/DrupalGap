@@ -73,6 +73,9 @@ dg.settings.blocks[dg.config('theme').name] = {
   },
   content: {
 
+    // DrupalGap's messages block.
+    messages: { },
+
     // DrupalGap's page title block.
     title: { },
 

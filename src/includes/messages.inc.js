@@ -41,3 +41,43 @@ dg.theme_message = function(variables) {
   if (type && !jDrupal.inArray(type, variables._attributes.class)) { variables._attributes.class.push(type); }
   return '<' + format + ' ' + dg.attributes(variables._attributes) + '>' + variables._message + '</' + format + '>';
 };
+
+/**
+ * Queues a message for future display.
+ * @param {String|Array} message A message string to display, or an array of message objects.
+ * @param {String} type Available types are "success", "warning" and "error". Defaults to "success".
+ */
+dg.setMessage = function(message, type) {
+  if (jDrupal.isArray(message)) {
+    for (var i in message) {
+      if (!message.hasOwnProperty(i) || i.indexOf('_') == 0) { continue; }
+      if (!message[i]._message || message[i]._message == '') { continue; }
+      if (!message[i]._type) { message[i]._type = 'status'; }
+      dg.setMessage(message[i]._message, message[i]._type);
+    }
+    return;
+  }
+  if (!type) { type = 'status'; }
+  dg._messages.push({
+    _message: message,
+    _type: type,
+    _theme: 'message'
+  });
+};
+
+dg.getMessageCount = function() {
+  return dg._messages.length;
+};
+
+dg.getMessages = function() {
+  return dg._messages;
+};
+
+dg.getMessage = function() {
+  if (dg.getMessageCount()) { return dg._messages.pop(); }
+  return null;
+};
+
+dg.clearMessages = function() {
+  dg._messages = [];
+};
