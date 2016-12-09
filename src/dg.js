@@ -1261,15 +1261,28 @@ function drupalgap_set_title(title) {
 }
 
 /**
+ * Returns true if the loader spinner is enabled, false otherwise. Defaults to true if no config for it is present.
+ * @returns {Boolean}
+ */
+function drupalgap_loader_enabled() {
+  return typeof drupalgap.settings.loader.enabled !== 'undefined' ?
+      drupalgap.settings.loader.enabled : true;
+}
+
+/**
+ * Toggle on or off the loader spinner, send true to turn it on, false to turn it off.
+ * @param {Boolean} enable
+ */
+function drupalgap_loader_enable(enable) {
+  drupalgap.settings.loader.enabled = enable;
+}
+
+/**
  * Implements hook_services_preprocess().
  * @param {Object} options
  */
 function drupalgap_services_preprocess(options) {
-  try {
-    // Show the loading icon.
-    drupalgap_loading_message_show();
-  }
-  catch (error) { console.log('drupalgap_services_preprocess - ' + error); }
+  if (drupalgap_loader_enabled()) { drupalgap_loading_message_show(); }
 }
 
 /**
@@ -1278,11 +1291,7 @@ function drupalgap_services_preprocess(options) {
  * @param {Object} result
  */
 function drupalgap_services_postprocess(options, result) {
-  try {
-    // Hide the loading icon.
-    drupalgap_loading_message_hide();
-  }
-  catch (error) { console.log('drupalgap_services_postprocess - ' + error); }
+  if (drupalgap_loader_enabled()) { drupalgap_loading_message_hide(); }
 }
 
 /**
