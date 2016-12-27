@@ -387,15 +387,19 @@ function _image_field_form_process(form, form_state, options) {
       var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
 
       // Build the data for the file create resource. If it's private, adjust the filepath.
+      var image_file_path = form.elements[name].field_info_instance.settings.file_directory;
+      if (image_file_path !== "") {
+        image_file_path += "/";
+      }
       var file = {
         file: {
           file: image_phonegap_camera_options[name][0].image,
           filename: image_file_name,
-          filepath: 'public://' + image_file_name
+          filepath: 'public://' + image_file_path + image_file_name
         }
       };
       if (!empty(Drupal.settings.file_private_path)) {
-        file.file.filepath = 'private://' + image_file_name;
+        file.file.filepath = 'private://' + image_file_path + image_file_name;
       }
 
       // Change the loader mode to saving, and save the file.
