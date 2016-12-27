@@ -583,6 +583,9 @@ function options_field_widget_form(form, form_state, field, instance, langcode, 
                 if (items[delta].required) {
                   delete items[delta].options[''];
                 }
+                if (items[delta].item && typeof items[delta].item.value !== 'undefined') {
+                  items[delta].value = items[delta].value = items[delta].item.value;
+                }
             }
           }
         }
