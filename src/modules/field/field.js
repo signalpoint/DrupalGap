@@ -580,6 +580,9 @@ function options_field_widget_form(form, form_state, field, instance, langcode, 
             if (instance.default_value && instance.default_value[delta] &&
               typeof instance.default_value[delta].value !== 'undefined') {
                 items[delta].value = instance.default_value[delta].value;
+                if (items[delta].required) {
+                  delete items[delta].options[''];
+                }
             }
           }
         }
