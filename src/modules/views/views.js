@@ -239,6 +239,20 @@ function views_exposed_form(form, form_state, options) {
             }
             $.extend(element, autocomplete, true);
           }
+          // User ID exposed filter.
+          else if (filter.definition.handler == 'views_handler_filter_user_name') {
+            element.type = 'autocomplete';
+            var autocomplete = {
+              remote: true,
+              custom: true,
+              handler: 'index',
+              entity_type: 'user',
+              value: 'name',
+              label: 'name',
+              filter: 'name'
+            };
+            $.extend(element, autocomplete, true);
+          }
           else if (element.type == 'select') {
             list_views_exposed_filter(form, form_state, element, filter, null);
           }
