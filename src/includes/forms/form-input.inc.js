@@ -9,6 +9,7 @@ dg.theme_actions = function(variables) {
 dg.theme_checkbox = function(variables) {
   variables._attributes.type = 'checkbox';
   if (!variables._attributes.id) { variables._attributes.id = 'checkbox-' + jDrupal.userPassword(); }
+  if (variables._default_value) { variables._attributes.checked = 'checked'; }
   var label = variables._title ?
     ' <label for="' + variables._attributes.id + '">' + variables._title + '</label>' :
     '';
@@ -19,12 +20,16 @@ dg.theme_checkboxes = function(variables) {
   for (var value in variables._options) {
     if (!variables._options.hasOwnProperty(value)) { continue; }
     var label = variables._options[value];
-    html += dg.theme('checkbox', {
+    var checkboxVariables = {
       _title: !jDrupal.isEmpty(label) ? label : value,
       _attributes: {
         value: value
       }
-    }) + '<br />';
+    };
+    if (variables._default_value && variables._default_value[value]) {
+      checkboxVariables._default_value = variables._default_value[value];
+    }
+    html += dg.theme('checkbox', checkboxVariables) + '<br />';
   }
   return '<div ' + dg.attributes(variables._attributes) + '>' + html + '</div>';
 };
