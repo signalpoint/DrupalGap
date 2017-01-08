@@ -15,3 +15,7 @@ If this happens on the `connect?_format=json` call, then you probably forgot to 
 > Uncaught (in promise) TypeError: window[] is not a function
 
 This probably means you forgot to include a theme's `.js` file in the `<head>` of your `index.html` file.
+
+> Uncaught TypeError: a.replace is not a function at Object.dg.getCamelCase
+
+This probably means you've created a `form.id` element on your form. The `id` element is reserved by DrupalGap, and overwriting it may lead to unintended consequences.
