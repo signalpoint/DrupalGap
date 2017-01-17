@@ -204,7 +204,7 @@ function views_exposed_form(form, form_state, options) {
           var field = drupalgap_field_info_field(field_name);
           var module = field.module;
           var handler = module + '_views_exposed_filter';
-          if (!drupalgap_function_exists(handler)) {
+          if (!function_exists(handler)) {
             dpm(
               'WARNING: views_exposed_form() - ' + handler + '() must be ' +
               'created to assemble the ' + field.type + ' filter used by ' +

@@ -103,11 +103,11 @@ function drupalgap_form_defaults(form_id) {
     form.validate = [];
     form.submit = [];
     var validate_function_name = form.id + '_validate';
-    if (drupalgap_function_exists(validate_function_name)) {
+    if (function_exists(validate_function_name)) {
       form.validate.push(validate_function_name);
     }
     var submit_function_name = form.id + '_submit';
-    if (drupalgap_function_exists(submit_function_name)) {
+    if (function_exists(submit_function_name)) {
       form.submit.push(submit_function_name);
     }
     // Finally, return the form.

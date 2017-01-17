@@ -16,7 +16,7 @@ function _drupalgap_page_title_pageshow(page_arguments) {
       typeof drupalgap.menu_links[router_path].title_callback !== 'undefined'
     ) {
       var function_name = drupalgap.menu_links[router_path].title_callback;
-      if (drupalgap_function_exists(function_name)) {
+      if (function_exists(function_name)) {
         // Grab the title callback function.
         var fn = window[function_name];
         // Place the internal success callback handler on the front of the

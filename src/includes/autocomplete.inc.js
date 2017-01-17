@@ -300,7 +300,7 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
           var field_settings =
             autocomplete.field_info_field.settings;
           var index_resource = field_settings.target_type + '_index';
-          if (!drupalgap_function_exists(index_resource)) {
+          if (!function_exists(index_resource)) {
             console.log('WARNING - _theme_autocomplete - ' +
               index_resource + '() does not exist!'
             );
@@ -449,7 +449,7 @@ function _theme_autocomplete_click(id, item, autocomplete_id) {
     // Now fire the item onclick handler, if one was provided.
     if (
       _theme_autocomplete_variables[autocomplete_id].item_onclick &&
-      drupalgap_function_exists(
+      function_exists(
         _theme_autocomplete_variables[autocomplete_id].item_onclick
       )
     ) {

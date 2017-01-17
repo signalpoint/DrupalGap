@@ -23,7 +23,7 @@ function menu_execute_active_handler() {
     // arguments.
     var function_name = drupalgap.menu_links[router_path].page_callback;
     var page_arguments = [];
-    if (drupalgap_function_exists(function_name)) {
+    if (function_exists(function_name)) {
 
       // Grab the page callback function and get ready to build the html.
       var fn = window[function_name];
@@ -79,7 +79,7 @@ function menu_execute_active_handler() {
           var jqm_page_event = jqm_page_events[i];
           var jqm_page_event_callback =
             drupalgap.menu_links[router_path][jqm_page_event];
-          if (drupalgap_function_exists(jqm_page_event_callback)) {
+          if (function_exists(jqm_page_event_callback)) {
             var options = {
               'page_id': page_id,
               'jqm_page_event': jqm_page_event,

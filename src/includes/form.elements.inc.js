@@ -252,7 +252,7 @@ function _drupalgap_form_render_element(form, element) {
     if (module) {
       field_widget_form_function_name = module + '_field_widget_form';
 
-      if (drupalgap_function_exists(field_widget_form_function_name)) {
+      if (function_exists(field_widget_form_function_name)) {
         field_widget_form_function = window[field_widget_form_function_name];
       }
       else {
@@ -524,7 +524,7 @@ function _drupalgap_form_render_element_item(form, element, variables, item) {
 
     // Run the item through the theme system if a theme function exists, or try
     // to use the item markup, or let the user know the field isn't supported.
-    if (drupalgap_function_exists('theme_' + theme_function)) {
+    if (function_exists('theme_' + theme_function)) {
       html += theme(theme_function, variables);
     }
     else {

@@ -230,7 +230,7 @@ function menu_block_view_pageshow(options) {
           var load_function = load_function_prefix + '_load';
 
           // If the load function exists, load the entity.
-          if (drupalgap_function_exists(load_function)) {
+          if (function_exists(load_function)) {
             var entity_fn = window[load_function];
             // Load the entity. MVC items need to pass along the module name and
             // model type to its load function. All other entity load functions
