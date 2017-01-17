@@ -747,6 +747,8 @@ function drupalgap_format_plural(count, singular, plural) {
  */
 function drupalgap_function_exists(name) {
   try {
+    console.log('WARNING - drupalgap_function_exists() is deprecated. ' +
+      'Use function_exists() instead!');
     return function_exists(name);
   }
   catch (error) { console.log('drupalgap_function_exists - ' + error); }
