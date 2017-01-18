@@ -423,7 +423,7 @@ function drupalgap_load_theme() {
       drupalgap_add_js(theme_path);
       // Call the theme's template_info implementation.
       var template_info_function = theme_name + '_info';
-      if (drupalgap_function_exists(template_info_function)) {
+      if (function_exists(template_info_function)) {
         var fn = window[template_info_function];
         drupalgap.theme = fn();
         // For each region in the name, set the 'name' value on the region JSON.
@@ -747,6 +747,8 @@ function drupalgap_format_plural(count, singular, plural) {
  */
 function drupalgap_function_exists(name) {
   try {
+    console.log('WARNING - drupalgap_function_exists() is deprecated. ' +
+      'Use function_exists() instead!');
     return function_exists(name);
   }
   catch (error) { console.log('drupalgap_function_exists - ' + error); }
@@ -948,7 +950,7 @@ function drupalgap_jqm_page_event_fire(event, callback, page_arguments) {
       if (arguments[3]) { key += '-' + arguments[3]; }
     }
     if ($.inArray(key, drupalgap.page.jqm_events) == -1 &&
-      drupalgap_function_exists(callback)) {
+      function_exists(callback)) {
       drupalgap.page.jqm_events.push(key);
       var fn = window[callback];
       if (page_arguments) {

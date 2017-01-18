@@ -183,7 +183,7 @@ function drupalgap_field_info_instances_add_to_form(entity_type, bundle, form, e
           // and then available during hook_field_widget_form() and the form
           // submission process.
           var fn = field.widget.module + '_field_info_instance_add_to_form';
-          if (drupalgap_function_exists(fn)) {
+          if (function_exists(fn)) {
             window[fn](entity_type, bundle, form, entity, form.elements[name]);
           }
 

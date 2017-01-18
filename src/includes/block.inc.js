@@ -47,7 +47,7 @@ function drupalgap_block_render(region, current_path, block_delta,
     var render_block = false;
     if (
       block_settings.access_callback &&
-      drupalgap_function_exists(block_settings.access_callback)
+      function_exists(block_settings.access_callback)
     ) {
       var fn = window[block_settings.access_callback];
       render_block = fn({

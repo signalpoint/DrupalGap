@@ -10,7 +10,7 @@ function drupalgap_form_load(form_id) {
 
     // The form's call back function will be equal to the form id.
     var function_name = form_id;
-    if (drupalgap_function_exists(function_name)) {
+    if (function_exists(function_name)) {
 
       // Grab the form's function.
       var fn = window[function_name];

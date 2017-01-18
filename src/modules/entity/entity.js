@@ -267,7 +267,7 @@ function drupalgap_entity_render_field(entity_type, entity, field_name,
       else { module = field.widget.module; }
     }
     var function_name = module + '_field_formatter_view';
-    if (drupalgap_function_exists(function_name)) {
+    if (function_exists(function_name)) {
       // Grab the field formatter function, then grab the field items
       // from the entity, then call the formatter function and append its result
       // to the entity's content.

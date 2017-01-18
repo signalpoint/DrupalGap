@@ -726,7 +726,7 @@ function theme_taxonomy_term_reference(variables) {
     if (widget_type == 'options_select') { widget_type = 'select'; }
     var widget_function = 'theme_' + widget_type;
     var widget_id = variables.attributes.id + '-' + widget_type;
-    if (drupalgap_function_exists(widget_function)) {
+    if (function_exists(widget_function)) {
 
       // Grab the function in charge of themeing this widget.
       var fn = window[widget_function];
