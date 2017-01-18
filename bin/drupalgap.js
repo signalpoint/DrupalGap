@@ -1,4 +1,4 @@
-/*! drupalgap 2017-01-17 */
+/*! drupalgap 2017-01-18 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -6459,11 +6459,13 @@ function theme_controlgroup(variables) {
 function theme_header(variables) {
   try {
     variables.attributes['data-role'] = 'header';
-    if (typeof variables.type === 'undefined') { type = 'h2'; }
+    if (typeof variables.type == 'undefined') {
+      variables.type = 'h2';
+    }
     var typeAttrs = variables.type_attributes ?
       ' ' + drupalgap_attributes(variables.type_attributes) : '';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>' +
-      '<' + type + typeAttrs + '>' + variables.text + '</' + type + '></div>';
+      '<' + variables.type + typeAttrs + '>' + variables.text + '</' + variables.type + '></div>';
     return html;
   }
   catch (error) { console.log('theme_header - ' + error); }
@@ -10008,6 +10010,12 @@ function options_field_widget_form(form, form_state, field, instance, langcode, 
             if (instance.default_value && instance.default_value[delta] &&
               typeof instance.default_value[delta].value !== 'undefined') {
                 items[delta].value = instance.default_value[delta].value;
+                if (items[delta].required) {
+                  delete items[delta].options[''];
+                }
+                if (items[delta].item && typeof items[delta].item.value !== 'undefined') {
+                  items[delta].value = items[delta].item.value;
+                }
             }
           }
         }
@@ -10638,15 +10646,19 @@ function _image_field_form_process(form, form_state, options) {
       var image_file_name = Drupal.user.uid + '_' + d.valueOf() + '.jpg';
 
       // Build the data for the file create resource. If it's private, adjust the filepath.
+      var image_file_path = form.elements[name].field_info_instance.settings.file_directory;
+      if (image_file_path !== "") {
+        image_file_path += "/";
+      }
       var file = {
         file: {
           file: image_phonegap_camera_options[name][0].image,
           filename: image_file_name,
-          filepath: 'public://' + image_file_name
+          filepath: 'public://' + image_file_path + image_file_name
         }
       };
       if (!empty(Drupal.settings.file_private_path)) {
-        file.file.filepath = 'private://' + image_file_name;
+        file.file.filepath = 'private://' + image_file_path + image_file_name;
       }
 
       // Change the loader mode to saving, and save the file.
@@ -14706,6 +14718,20 @@ function views_exposed_form(form, form_state, options) {
             if (filter.options.vocabulary != '') {
               autocomplete.vid = taxonomy_vocabulary_get_vid_from_name(filter.options.vocabulary);
             }
+            $.extend(element, autocomplete, true);
+          }
+          // User ID exposed filter.
+          else if (filter.definition.handler == 'views_handler_filter_user_name') {
+            element.type = 'autocomplete';
+            var autocomplete = {
+              remote: true,
+              custom: true,
+              handler: 'index',
+              entity_type: 'user',
+              value: 'name',
+              label: 'name',
+              filter: 'name'
+            };
             $.extend(element, autocomplete, true);
           }
           else if (element.type == 'select') {
