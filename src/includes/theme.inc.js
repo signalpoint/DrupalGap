@@ -174,11 +174,13 @@ function theme_controlgroup(variables) {
 function theme_header(variables) {
   try {
     variables.attributes['data-role'] = 'header';
-    if (typeof variables.type === 'undefined') { type = 'h2'; }
+    if (typeof variables.type == 'undefined') {
+      variables.type = 'h2';
+    }
     var typeAttrs = variables.type_attributes ?
       ' ' + drupalgap_attributes(variables.type_attributes) : '';
     var html = '<div ' + drupalgap_attributes(variables.attributes) + '>' +
-      '<' + type + typeAttrs + '>' + variables.text + '</' + type + '></div>';
+      '<' + variables.type + typeAttrs + '>' + variables.text + '</' + variables.type + '></div>';
     return html;
   }
   catch (error) { console.log('theme_header - ' + error); }
