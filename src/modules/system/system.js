@@ -117,7 +117,6 @@ dg.modules.system.blocks = function() {
           element['msg' + i] = messages[i];
         }
         dg.clearMessages();
-        console.log(element);
         ok(element);
       });
     }
