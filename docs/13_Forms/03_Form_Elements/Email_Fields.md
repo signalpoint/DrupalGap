@@ -1,10 +1,10 @@
 ## Form Element
 
 ```
-form.elements.my_email_field = {
-  title:'Email Address',
-  type:'email',
-  default_value:'foo@bar.com'
+form.my_email_field = {
+  _title: dg.t('Email Address'),
+  _type: 'email',
+  _default_value: 'foo@bar.com'
 };
 ```
 
@@ -13,20 +13,20 @@ form.elements.my_email_field = {
 ```
 var content = {
   my_email_field:{
-    theme:'email',
-    attributes:{
-      value:'foo@bar.com'
+    _theme: 'email',
+    _attributes: {
+      value: 'foo@bar.com'
     }
   }
 };
 ```
 
-## theme('email', ...)
+## dg.theme('email', ...)
 
 ```
-var html = theme('email', {
-  attributes:{
-    value:'foo@bar.com'
+var html = dg.theme('email', {
+  _attributes: {
+    value: 'foo@bar.com'
   }
 });
 ```
