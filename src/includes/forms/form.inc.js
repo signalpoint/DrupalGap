@@ -348,14 +348,14 @@ dg.Form.prototype._submitForm = function() {
  */
 dg.Form.prototype.enableSubmitButton = function() {
   // @TODO this should actually iterate over the FormInterface and look for the real submit button.
-  document.getElementById('edit-submit').disabled = false;
+  document.querySelector('#' + dg.killCamelCase(this.getFormId()) + ' #edit-submit').disabled = false;
 };
 /**
  * Enables the submit button on the form.
  */
 dg.Form.prototype.disableSubmitButton = function() {
   // @TODO this should actually iterate over the FormInterface and look for the real submit button.
-  document.getElementById('edit-submit').disabled = true;
+  document.querySelector('#' + dg.killCamelCase(this.getFormId()) + ' #edit-submit').disabled = true;
 };
 
 dg.addForm = function(id, form) {
