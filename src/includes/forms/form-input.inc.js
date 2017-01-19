@@ -33,6 +33,10 @@ dg.theme_checkboxes = function(variables) {
   }
   return '<div ' + dg.attributes(variables._attributes) + '>' + html + '</div>';
 };
+dg.theme_email = function(variables) {
+  variables._attributes.type = 'email';
+  return '<input ' + dg.attributes(variables._attributes) + '/>';
+};
 dg.theme_hidden = function(variables) {
   variables._attributes.type = 'hidden';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
