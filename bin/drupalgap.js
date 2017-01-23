@@ -1,4 +1,4 @@
-/*! drupalgap 2017-01-18 */
+/*! drupalgap 2017-01-23 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -2978,12 +2978,19 @@ function _drupalgap_form_render_element(form, element) {
       }
     }
 
-    // Add the item html if it isn't empty.
-    if (item_html != '') { html += item_html; }
-
-    // Add element description.
-    if (element.description && element.type != 'hidden') {
-      html += '<div class="description">' + t(element.description) + '</div>';
+    // Add the item html if it isn't empty. Place the description "before" or "after" the item, exclude it if set
+    // to "none".
+    if (item_html != '') {
+      if (element.description && element.type != 'hidden') {
+        var descriptionDisplay = element.description_display ? element.description_display : 'after';
+        var descriptionHtml = '<div class="description">' + t(element.description) + '</div>';
+        switch (descriptionDisplay) {
+          case 'before': html += descriptionHtml + item_html; break;
+          case 'after': html += item_html + descriptionHtml; break;
+          case 'none': html += item_html; break;
+        }
+      }
+      else { html += item_html; }
     }
 
     // Close the element container.
