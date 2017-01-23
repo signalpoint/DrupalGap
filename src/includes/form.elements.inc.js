@@ -439,11 +439,21 @@ function _drupalgap_form_render_element(form, element) {
     }
 
     // Add the item html if it isn't empty.
-    if (item_html != '') { html += item_html; }
-
-    // Add element description.
-    if (element.description && element.type != 'hidden') {
-      html += '<div class="description">' + t(element.description) + '</div>';
+    if (item_html != '') {      
+      if (element.description_display) {
+        if (element.description && element.type != 'hidden' && element.description_display == 'above') {
+          // Add element description above field
+          html += '<div class="description">' + t(element.description) + '</div>' + item_html;
+        } else if (element.description && element.type != 'hidden' && element.description_display == 'below') {
+          // Add element description below field
+          html += item_html + '<div class="description">' + t(element.description) + '</div>';
+        } else if (element.description && element.type != 'hidden' && element.description_display == 'hidden') {
+          // Do not show description
+          html += item_html;
+        }
+      } else {
+        html += item_html;
+      }
     }
 
     // Close the element container.
