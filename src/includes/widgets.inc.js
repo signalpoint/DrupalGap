@@ -9,6 +9,7 @@ dg.theme_bucket = function(variables) {
     _postRender: [function() {
       variables._grab().then(function(content) {
         document.getElementById(variables._attributes.id).innerHTML = dg.render(content);
+        if (dg.postRenderCount()) { dg.runPostRenders(); }
       });
     }]
   };
