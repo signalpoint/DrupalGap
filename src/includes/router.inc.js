@@ -1,6 +1,7 @@
 // @inspiration http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
 dg.router = {
+  _activeRoute: null,
   routes: [],
   mode: null,
   root: '/',
@@ -68,6 +69,7 @@ dg.router = {
       var matches = this.matches(f).match;
 
       var menu_execute_active_handler = function(content) {
+        dg.router.setActiveRoute(route);
         dg.content = content;
         dg.appRender();
         jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath());
@@ -158,5 +160,11 @@ dg.router = {
   },
   getRoutes: function() {
     return this.routes;
+  },
+  setActiveRoute: function(route) {
+    this._activeRoute = route;
+  },
+  getActiveRoute: function() {
+    return this._activeRoute;
   }
 };
