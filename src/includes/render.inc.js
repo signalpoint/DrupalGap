@@ -236,15 +236,24 @@ dg.render = function(content) {
 };
 
 /**
+ * Returns the number of `_postRender` functions that are queued up.
+ * @returns {Number}
+ */
+dg.postRenderCount = function() {
+  return dg._postRender.length;
+};
+
+/**
  * This will run through any of the queued up `_postRender` functions then reset the queue.
  */
 dg.runPostRenders = function() {
-  if (dg._postRender.length) {
-    for (var i = 0; i < dg._postRender.length; i++) {
+  var count = dg.postRenderCount();
+  if (count) {
+    for (var i = 0; i < count; i++) {
 
       // Prevent runaway post render invocations potentially caused by uncaught exceptions in the
       // developer's function(s).
-      if (dg._postRender.length > dg._postRenderMax) {
+      if (count > dg._postRenderMax) {
         console.log('dg._postRenderMax reached: ' + dg._postRenderMax);
         dg._postRender = [];
         break;
