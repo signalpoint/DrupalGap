@@ -346,8 +346,10 @@ function drupalgap_load_modules() {
               Drupal.modules[bundle][module_name].name = module_name;
               module = Drupal.modules[bundle][module_name];
             }
+
           // If the module is already loaded via the index.html file, just continue.
           if (typeof module.loaded !== 'undefined' && module.loaded) { continue; }
+
             // Determine module directory.
             var dir = drupalgap_modules_get_bundle_directory(bundle);
             module_base_path = dir + '/' + module.name;
@@ -1269,6 +1271,7 @@ function drupalgap_set_title(title) {
  * @returns {Boolean}
  */
 function drupalgap_loader_enabled() {
+  if (!drupalgap.settings.loader) { drupalgap.settings.loader = {}; }
   return typeof drupalgap.settings.loader.enabled !== 'undefined' ?
       drupalgap.settings.loader.enabled : true;
 }
