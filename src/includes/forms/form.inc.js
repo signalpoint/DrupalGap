@@ -17,7 +17,7 @@ dg.theme_form = function(variables) {
   return dg.render({
     _markup: '<div ' + dg.attributes(variables._attributes) + '></div>',
     _postRender: [function() {
-      dg.addForm(variables._id, dg.applyToConstructor(window[variables._id])).getForm().then(function(html) {
+      dg.addForm(variables._id, dg.applyToConstructor(window[variables._id])).getForm(variables).then(function(html) {
         document.getElementById(variables._attributes.id).innerHTML = html;
         dg.formAttachSubmissionHandler(formDomId);
         dg.runPostRenders();
@@ -25,6 +25,13 @@ dg.theme_form = function(variables) {
     }]
   });
 };
+
+/**
+ * Given a form id, this will return the id that will be used in the DOM.
+ * @param {String} formId
+ * @returns {string}
+ */
+dg.formDomIdFromId = function(formId) { return dg.killCamelCase(formId, '-').toLowerCase(); };
 
 /**
  * The Form prototype.
@@ -42,7 +49,7 @@ dg.Form = function(id) {
   // handlers.
   this.form = {
     _attributes: {
-      id: dg.killCamelCase(id, '-').toLowerCase(),
+      id: dg.formDomIdFromId(id),
       'class': []
     },
     _validate: [id + '.validateForm'],
@@ -71,13 +78,21 @@ dg.Form.prototype.get = function(name) {
 dg.Form.prototype.getFormId = function() { return this.get('id'); };
 
 /**
+ * Returns the form's id to be used in the DOM.
+ * @returns {String}
+ */
+dg.Form.prototype.getFormDomId = function() { return dg.formDomIdFromId(this.getFormId()); };
+
+/**
  * Returns the html output for a form, via a Promise.
  * @returns {Promise}
  */
 dg.Form.prototype.getForm = function() {
   var self = this;
+  var selfArguments = arguments;
+
   return new Promise(function(ok, err) {
-    self.buildForm(self.form, self.form_state).then(function() {
+    var done = function() {
 
       // Set up default values across each element.
       for (name in self.form) {
@@ -120,51 +135,51 @@ dg.Form.prototype.getForm = function() {
               //console.log(element._widgetType);
               //console.log(name);
 
-                // Instantiate the widget using the element's module.
-                var items = self.form._entity.get(name);
-                var delta = 0;
-                var widget = new dg.modules[element._module][element._widgetType][element._type](
+              // Instantiate the widget using the element's module.
+              var items = self.form._entity.get(name);
+              var delta = 0;
+              var widget = new dg.modules[element._module][element._widgetType][element._type](
                   self.form._entityType,
                   self.form._bundle,
                   name,
                   element,
                   items,
                   delta
-                );
+              );
 
-                self.elements[name] = widget;
+              self.elements[name] = widget;
 
-                // Build the element form and then add it to the form as a container.
-                widget.form(items, delta, element, self.form, self.form_state);
-                // Wrap elements in containers, except for hidden elements.
-                if (element._type == 'hidden') {
-                  self.form[name] = element;
-                  continue;
-                }
-                var children = {};
-                if (element._title) {
-                  children.label = {
-                    _theme: 'form_element_label',
-                    _title: element._title
-                  };
-                }
-                children.element = element;
-                var container = {
-                  _theme: 'container',
-                  _children: children,
-                  _weight: element._weight
+              // Build the element form and then add it to the form as a container.
+              widget.form(items, delta, element, self.form, self.form_state);
+              // Wrap elements in containers, except for hidden elements.
+              if (element._type == 'hidden') {
+                self.form[name] = element;
+                continue;
+              }
+              var children = {};
+              if (element._title) {
+                children.label = {
+                  _theme: 'form_element_label',
+                  _title: element._title
                 };
-                self.form[name] = container;
+              }
+              children.element = element;
+              var container = {
+                _theme: 'container',
+                _children: children,
+                _weight: element._weight
+              };
+              self.form[name] = container;
               break;
             case 'FormElement':
             default:
 
-                // Determine constructor by looking for any FormElement implementations.
-                var constructorName = element._widgetType;
-                if (element._type) {
-                  var nameToCheck = jDrupal.ucfirst(dg.getCamelCase(element._type)) + 'Element';
-                  if (dg[nameToCheck]) { constructorName = nameToCheck; }
-                }
+              // Determine constructor by looking for any FormElement implementations.
+              var constructorName = element._widgetType;
+              if (element._type) {
+                var nameToCheck = jDrupal.ucfirst(dg.getCamelCase(element._type)) + 'Element';
+                if (dg[nameToCheck]) { constructorName = nameToCheck; }
+              }
 
               // Instantiate a new form element given the current buildForm element for the Form.
               var el = new dg[constructorName](name, element, self);
@@ -225,7 +240,16 @@ dg.Form.prototype.getForm = function() {
       if (!alters) { render(); }
       else { alters.then(render); }
 
-    });
+    };
+
+    // If there are arguments send them along to the form, otherwise just build the form.
+    if (selfArguments.length) {
+      var formArgs = [self.form, self.form_state];
+      for (var i = 0; i < selfArguments.length; i++) { formArgs.push(selfArguments[i]); }
+      self.buildForm.apply(this, formArgs).then(done);
+    }
+    else { self.buildForm(self.form, self.form_state).then(done); }
+
   });
 };
 
@@ -410,7 +434,7 @@ dg.isFormProperty = function(prop, obj) {
 };
 dg.setFormElementDefaults = function(name, el) {
   var attrs = el._attributes ? el._attributes : {};
-  if (!attrs.id) { attrs.id = 'edit-' + name.toLowerCase().replace(/_/g, '-'); }
+  if (!attrs.id) { attrs.id = dg.formElementDomIdFromName(name); }
   if (!attrs.name) { attrs.name = name; }
   if (!attrs.class) { attrs.class = []; }
   if (!attrs.value && el._value) { attrs.value = el._value; }
@@ -418,4 +442,13 @@ dg.setFormElementDefaults = function(name, el) {
   if (!el._widgetType) { el._widgetType = 'FormElement'; }
   if (el._title_placeholder) { attrs.placeholder = el._title; }
   el._attributes = attrs;
+};
+
+/**
+ * Given a form element name, this will return the id to be used for it in the DOM.
+ * @param {String} name
+ * @returns {string}
+ */
+dg.formElementDomIdFromName = function(name) {
+  return 'edit-' + name.toLowerCase().replace(/_/g, '-');
 };
