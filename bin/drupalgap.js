@@ -1,4 +1,4 @@
-/*! drupalgap 2017-01-30 */
+/*! drupalgap 2017-02-01 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -5739,6 +5739,7 @@ function drupalgap_add_page_to_dom(options) {
     };
     attributes = $.extend(true, attributes, options.menu_link.options.attributes);
     attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    module_invoke_all('add_page_to_dom_alter', attributes, options);
     options.html = options.html.replace(
       /{:drupalgap_page_attributes:}/g,
       drupalgap_attributes(attributes)
@@ -6989,6 +6990,35 @@ function jqm_grid_set_item_row_class(open_row, className) {
 }
 
 /**
+ * Implements hook_add_page_to_dom_alter().
+ */
+function hook_add_page_to_dom_alter(attributes, options) {
+
+  // Use this hook to make alterations to a page's attributes or options before it is added to the DOM.
+
+  // @param {Object} attributes
+  // The page attributes on a page before it is added to the DOM.
+
+  // @param {Object} options
+  // The page options object containing the rendered html, the menu link object, and the internal page id.
+
+  // Add a custom class to the page indicating the device size. Place
+  // empty spaces around the class name so we don't collide with others.
+  var size = null;
+  var width = $(window).width();
+  if (width <= 414) { size = 'small'; }
+  else if (width < 1024) { size = 'medium'; }
+  else { size = 'large'; }
+  attributes.class += ' ' + size + ' ';
+
+  // Add a custom class to a particular route.
+  if (drupalgap_router_path_get() == 'channel/%') {
+    attributes.class += ' foo-bar ';
+  }
+
+}
+
+/**
  * When a form submission for an entity is assembling the entity json object to
  * send to the server, some form element fields need to be assembled in unique
  * ways to match the entity's structure in Drupal. Modules that implement fields
@@ -7554,6 +7584,7 @@ function hook_views_exposed_filter(form, form_state, element, filter, field) {
   }
   catch (error) { console.log('hook_views_exposed_filter - ' + error); }
 }
+
 
 /**
  * Implements hook_menu().
