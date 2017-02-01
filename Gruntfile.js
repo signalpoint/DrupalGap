@@ -1,4 +1,5 @@
 var drupalgap_grunt_src = ['src/*.js', 'src/includes/*.inc.js', 'src/modules/*/*.js'];
+var drupalgap_grunt_min_src = ['src/*.js', 'src/includes/*.inc.js', 'src/modules/*/*.js', '!src/modules/api/**'];
 
 module.exports = function(grunt) {
 
@@ -20,7 +21,7 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: drupalgap_grunt_src,
+        src: drupalgap_grunt_min_src,
         dest: 'bin/<%= pkg.name %>.min.js'
       }
     },
