@@ -211,6 +211,7 @@ function drupalgap_add_page_to_dom(options) {
     };
     attributes = $.extend(true, attributes, options.menu_link.options.attributes);
     attributes['class'] += ' ' + drupalgap_page_class_get(drupalgap.router_path);
+    module_invoke_all('add_page_to_dom_alter', attributes, options);
     options.html = options.html.replace(
       /{:drupalgap_page_attributes:}/g,
       drupalgap_attributes(attributes)
