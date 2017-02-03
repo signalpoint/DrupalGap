@@ -28,3 +28,7 @@ user_load(456, {
 If entity caching is enabled in the `settings.js` file, anytime DrupalGap fetches an entity from the server, it will save it to the local storage on the mobile device. This allows developers to call e.g. `node_load(123, {...});` multiple times without worrying about the mobile application calling the Drupal server over and over for the same data.
 
 [Learn More About Entity Caching](Developer_Guide/Caching_and_Performance)
+
+## Custom Entity Types
+
+With the [Services Entity](https://www.drupal.org/project/services_entity) module and jDrupal, DrupalGap can interact with custom entities in Drupal. See [jDrupal's README](https://github.com/signalpoint/jDrupal/tree/7.x-1.x#custom-entity-types) for details.
