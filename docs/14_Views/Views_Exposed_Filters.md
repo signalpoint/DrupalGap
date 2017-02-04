@@ -1,3 +1,5 @@
+> This feature is considered **abandoned with no further development**, see the [Contextual Filters](Views_Contextual_Filters) page for the recommended approach to building filters.
+
 Please note, the Views Exposed Filters in DrupalGap is designed to work in conjunction with [Views Render Arrays](Displaying_a_View/Views_Render_Array) (it's of course possible to build your own forms and construct your own URL parameters to filter your Views, this feature is meant to simplify that entire process in a dynamic way).
 
 ## Getting Started
