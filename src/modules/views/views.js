@@ -386,14 +386,9 @@ function views_exposed_form_reset() {
  */
 function theme_view(variables) {
   try {
-    // Throw a warning if no id is provided.
-    if (!variables.attributes.id) {
-      console.log(
-        'WARNING: theme_view() - No id specified on attributes! ' +
-        'A random id will be generated instead.'
-      );
-      variables.attributes.id = 'views-view--' + user_password();
-    }
+    // Create a random id attribute if one wasn't provided.
+    if (!variables.attributes.id) { variables.attributes.id = 'views-view--' + user_password(); }
+
     // Since multiple pages can stack up in the DOM, warn the developer if they
     // re-use a Views ID that is already in the DOM. If the ID hasn't been used
     // yet, add it to the drupalgap.views.ids array.
