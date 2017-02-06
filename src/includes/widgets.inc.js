@@ -58,22 +58,29 @@ dg.theme_image = function(vars) {
   if (src && src.indexOf('public://') != -1 || src.indexOf('private://') != -1) {
     vars._attributes.src = dg.imagePath(src);
   }
-  vars._attributes.alt = vars._attributes.alt ? vars._attributes.alt : vars._alt;
-  vars._attributes.title = vars._attributes.title ? vars._attributes.title : vars._title;
+  if (vars._alt) { vars._attributes.alt = vars._alt; }
+  if (vars._title) { vars._attributes.title = vars._title; }
   return '<img ' + dg.attributes(vars._attributes) + '/>';
 };
 
 /**
  * Themes an item list.
  * @param {Object} variables
+ *  _title {String} The title for the list.
+ *  _items {Array} An array of list items to render, or an array of strings to render.
+ *  _items_prefix {String} An html string to render immediately before the items, but after the title.
+ *  _items_suffix {String} An html string to render immediately after the items.
  * @return {String}
  */
 dg.theme_item_list = function(variables) {
   var html = '';
   var type = variables._type ? variables._type : 'ul';
   if (variables._title) {
-    html += typeof variables._title === 'object' ? dg.render(variables._title) : '<h3>' + variables._title + '</h3>';
+    html += typeof variables._title === 'object' ?
+        dg.render(variables._title) :
+        '<h3>' + variables._title + '</h3>';
   }
+  if (variables._items_prefix) { html += variables._items_prefix; }
   html += '<' + type + ' ' + dg.attributes(variables._attributes) + '>';
   if (variables._items && variables._items.length > 0) {
     for (var i in variables._items) {
@@ -85,7 +92,9 @@ dg.theme_item_list = function(variables) {
       });
     }
   }
-  return html += '</' + type + '>';
+  html += '</' + type + '>';
+  if (variables._items_suffix) { html += variables._items_suffix; }
+  return html;
 };
 
 dg.theme_list_item = function(variables) {
