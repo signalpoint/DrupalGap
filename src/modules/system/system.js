@@ -89,22 +89,27 @@ dg.modules.system.blocks = function() {
         var items = [];
         var route = dg.router.getActiveRoute();
 
-        // Figure out the base route and place it first on the items array.
+        // Figure out the base route depending on if the active route is a child, or
+        // has children..
         var childRoutes = null;
         var baseLinkText = null;
         var baseLinkPath = null;
-        if (dg.router.hasBaseRoute(route)) {
+        if (dg.router.hasBaseRoute(route)) { // Is a child...
           var baseRoute = dg.router.getBaseRoute(route);
           childRoutes = dg.router.getChildRoutes(baseRoute);
           baseLinkText = dg.router.getRouteTitle(baseRoute);
           baseLinkPath = dg.router.resolvePath(baseRoute);
         }
-        else if (dg.router.hasChildRoutes(route)) {
+        else if (dg.router.hasChildRoutes(route)) { // Has children...
           childRoutes = dg.router.getChildRoutes(route);
           baseLinkText = dg.router.getRouteTitle(route);
           baseLinkPath = dg.router.resolvePath(route);
         }
-        if (!childRoutes) { err(); return; }
+
+        // No base routes or child routes on this path, resolve nothing.
+        if (!childRoutes) { ok(''); return; }
+
+        // Add the base link.
         items.push({
           _theme: 'list_item',
           _text: {
