@@ -53,6 +53,8 @@ dg.themeLoad = function() {
 dg.theme = function(hook, variables) {
   try {
 
+    // @TODO add an `_access_callback` and `_access_arguments` properties, see Drupal's way before implementing
+
     // If there is HTML markup present, just return it as is. Otherwise, run
     // the theme hook and send along the variables.
     if (!variables) { variables = {}; }
