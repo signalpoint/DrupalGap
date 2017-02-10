@@ -1,5 +1,9 @@
 // @inspiration http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
+// @TODO an individual Route item should be a JS Prototype instantiated by dg.bootstrap(),
+// and many of the helper functions below belong on that item prototype instead of in this
+// main router object.
+
 dg.router = {
   _activeRoute: null,
   routes: [],
@@ -11,7 +15,12 @@ dg.router = {
     this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
     return this;
   },
-  getFragment: function() {
+
+  /**
+   * Gets the current path.
+   * @returns {String}
+   */
+  getPath: function() {
     var fragment = '';
     if(this.mode === 'history') {
       fragment = this.clearSlashes(decodeURI(location.pathname + location.search));
@@ -23,9 +32,12 @@ dg.router = {
     }
     return this.clearSlashes(fragment);
   },
+  getFragment: function() {
+    console.log('WARNING: getFragment() is deprecated, use getPath() instead.');
+    return this.getPath();
+  },
   prepFragment: function(f) {
-    //var fragment = f || this.getFragment();
-    var frag = f || this.getFragment();
+    var frag = f || this.getPath();
     return this.root + frag;
   },
   clearSlashes: function(path) {
@@ -115,10 +127,10 @@ dg.router = {
   },
   listen: function() {
     var self = this;
-    var current = self.getFragment();
+    var current = self.getPath();
     var fn = function() {
-      if(current !== self.getFragment()) {
-        current = self.getFragment();
+      if(current !== self.getPath()) {
+        current = self.getPath();
         self.check(current);
       }
     };
@@ -164,7 +176,88 @@ dg.router = {
   setActiveRoute: function(route) {
     this._activeRoute = route;
   },
+
+  /**
+   * Resolves a route to a path by filling in its argument placeholders utilizing the current path.
+   * @param route {Object}
+   * @returns {string}
+   */
+  resolvePath: function(route) {
+    return dg.router.clearSlashes(
+        dg.router.getRoutePath(route)
+    ).replace('(.*)', dg.arg(1));
+  },
   getActiveRoute: function() {
     return this._activeRoute;
+  },
+  getRouteIndex: function(key) {
+    var routes = this.getRoutes();
+    for (var i = 0; i < routes.length; i++) {
+      if (routes[i].key == key) { return i; }
+    }
+    return -1;
+  },
+
+  /**
+   * Loads and returns a route object given a route key.
+   * @param key {String} The route key declared by a module's routing() function.
+   * @returns {Object|null}
+   */
+  loadRoute: function(key) {
+    var index = this.getRouteIndex(key);
+    return  index != -1 ? this.getRoutes()[index] : null;
+  },
+
+  /**
+   * Saves a route object onto the routes collection, overriding any previous values
+   * for the given route key.
+   * @param key {String} The route key declared by a module's routing() function.
+   * @param route {Object} The route object.
+   */
+  saveRoute: function(key, route) {
+    var index = this.getRouteIndex(key);
+    if (index != -1) { this.getRoutes()[index] = route; }
+    else { this.getRoutes().push(route); }
+  },
+
+  hasBaseRoute: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    return route.defaults._base_route ? true : false;
+  },
+
+  getBaseRoute: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    return this.hasBaseRoute(route) ?
+        dg.router.loadRoute(route.defaults._base_route) : null;
+  },
+
+  hasChildRoutes: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    return route.defaults._child_routes ? true : false;
+  },
+
+  initChildRoutes: function(route) {
+    route.defaults._child_routes = []
+  },
+
+  getChildRoutes: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    return this.hasChildRoutes(route) ?
+        route.defaults._child_routes : null;
+  },
+
+  addChildRoute: function(route, childKey) {
+    this.getChildRoutes(route).push(childKey);
+  },
+
+  getRoutePath: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    return route.path;
+  },
+
+  getRouteTitle: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    return route.defaults._title;
   }
+
 };
