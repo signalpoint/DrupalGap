@@ -108,7 +108,7 @@ dg.theme_list_item = function(variables) {
       return dg.theme(item._theme, item);
     }
     var text = item._text ? item._text : '';
-    return '<li ' + dg.attributes(item._attributes) + '>' + text + '</li>';
+    return '<li ' + dg.attributes(item._attributes) + '>' + dg.render(text) + '</li>';
   }
   else {
     var attrs = {};
