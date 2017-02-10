@@ -33,7 +33,7 @@ dg.continue = function() {
   // Force a check on the router (which is already listening at this point), to
   // refresh the current page or navigate to the current path.
   dg._continued = true;
-  dg.router.check(dg.router.getFragment());
+  dg.router.check(dg.router.getPath());
 };
 
 // Device ready.
@@ -87,6 +87,12 @@ dg.bootstrap = function() {
       var item = routes[route];
       item.key = route;
       dg.router.add(item);
+      var baseRoute = dg.router.getBaseRoute(item);
+      if (baseRoute) {
+        if (!dg.router.hasChildRoutes(baseRoute)) { dg.router.initChildRoutes(baseRoute); }
+        dg.router.addChildRoute(baseRoute, item.key);
+        dg.router.saveRoute(baseRoute.key, baseRoute);
+      }
     }
   }
 
