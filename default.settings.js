@@ -79,6 +79,9 @@ dg.settings.blocks[dg.config('theme').name] = {
     // DrupalGap's page title block.
     title: { },
 
+    // DrupalGap's primary local tasks.
+    primary_local_tasks: { },
+
     // DrupalGap's "main" content block.
     main: { }
 
