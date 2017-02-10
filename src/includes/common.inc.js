@@ -45,7 +45,7 @@ dg.getRoute = function() {
  * @returns {String}
  */
 dg.getPath = function() {
-  var frag = dg.router.getFragment();
+  var frag = dg.router.getPath();
   if (frag == '') { frag = dg.getFrontPagePath(); }
   return frag;
 };
