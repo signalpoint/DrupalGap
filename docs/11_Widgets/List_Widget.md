@@ -16,6 +16,37 @@ content['my_item_list'] = {
 return content;
 ```
 
+### Dynamic list items
+
+Instead of just a plain string, an item in the `_items` array can be `list_item` widget ready:
+```
+  _items: [
+    {
+      _text: dg.t('Red'),
+      _attributes: {
+        class: ['list-group-item']
+      }
+    },
+    /* another item... */
+  ]
+```
+You can use a *render element* instead of just a plain *string* on the `_text` property for even more control.
+
+Or an item in the `_items` array can be any widget for that matter:
+```
+_items: [
+    {
+      _theme: 'view',
+      _path: 'my-articles', // Path to the View in Drupal
+      _format: 'ul',
+      _row_callback: function(row) {
+        return row.fooBar;
+      }
+    },
+    /* another item... */
+  ]
+```
+
 ## Ordered Lists
 
 Creating an ordered list is very similar to the unordered list example above, except we specify the `type` of list as `ol`, for example:
