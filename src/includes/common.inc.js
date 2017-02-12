@@ -206,6 +206,18 @@ dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
+dg.hasClass = function(el, className) {
+  return el.classList.contains(className);
+};
+
+dg.addClass = function(el, className) {
+  if (!dg.hasClass(el, className)) { el.classList.add(className); }
+};
+
+dg.removeClass = function(el, className) {
+  if (dg.hasClass(el, className)) { el.classList.remove(className); }
+};
+
 /**
  * Given a drupal image file uri, this will return the path to the image on the Drupal site.
  * @param uri
@@ -220,6 +232,26 @@ dg.imagePath = function(uri) {
     src = src.replace('private://', dg.config('files').privatePath + '/');
   }
   return src;
+};
+
+dg.elementAttributesInit = function(element) {
+  var attrs = element._attributes ? element._attributes : {};
+  if (!attrs.class) { attrs.class = []; }
+  else if (typeof attrs.class === 'string') { attrs.class = [attrs.class]; }
+  element._attributes = attrs;
+};
+
+/**
+ * Returns html for a simple button.
+ * @param text
+ * @param path
+ * @param options
+ * @returns {String}
+ */
+dg.b = function(text, options) {
+  if (!options) { options = {}; }
+  if (!options._value) { options._value = text; }
+  return dg.theme('button', options);
 };
 
 /**
