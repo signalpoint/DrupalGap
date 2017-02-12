@@ -76,6 +76,8 @@ dg.confirm = function(message) {
 /**
  * Themes a message box.
  * @param {Object} variables
+ *  _message {String} The message to display.
+ *  _type {String} The message type can be 'status', 'warning' or 'error', defaults to 'status'.
  * @returns {string}
  */
 dg.theme_message = function(variables) {

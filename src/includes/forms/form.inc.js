@@ -95,6 +95,7 @@ dg.Form.prototype.getForm = function() {
     var done = function() {
 
       // Set up default values across each element.
+      // @TODO this should be the FormElementPrepare prototype, or combination of.
       for (name in self.form) {
         if (!dg.isFormElement(name, self.form)) { continue; }
         var el = self.form[name];
