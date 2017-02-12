@@ -4,24 +4,24 @@ To build routes that utilize a local task menu bar, try something like this:
 
 ```
 routes["example.group"] = {
-  "path": "/group\/(.*)",
-  "defaults": {
-    "_title": "Group",
+  path: "/group\/(.*)",
+  defaults: {
+    _title: "Group",
     _controller: example.groupController
   }
 };
 routes["example.group-members"] = {
-  "path": "/group-members\/(.*)",
-  "defaults": {
-    "_title": "Members",
+  path: "/group-members\/(.*)",
+  defaults: {
+    _title: "Members",
     _controller: example.groupMembersController,
     _base_route: 'example.group'
   }
 };
 routes["example.group-events"] = {
-  "path": "/group-events\/(.*)",
-  "defaults": {
-    "_title": "Events",
+  path: "/group-events\/(.*)",
+  defaults: {
+    _title: "Events",
     _controller: example.groupEventsController,
     _dgEntityType: 'node',
     _dgController: example.pageGroupEvents,
