@@ -11,8 +11,7 @@ var drupalgap_grunt_src = [
   'src/includes/forms/form-input.inc.js',
   'src/includes/forms/form-state.inc.js',
   'src/includes/forms/form-widget.inc.js',
-  'src/includes/forms/elements/element.checkbox.js',
-  'src/includes/forms/elements/element.checkboxes.js',
+  'src/includes/forms/elements/element.*.js',
 
   'src/includes/field-definition.inc.js',
   'src/includes/field-form-mode.inc.js',
@@ -47,7 +46,9 @@ var drupalgap_grunt_src = [
   'src/modules/text/text.field-formatters.js',
   'src/modules/text/text.field-widgets.js',
   'src/modules/user/user.js',
-  'src/modules/user/user.forms.js'
+  'src/modules/user/user.forms.js',
+
+    'src/widgets/widget.*.js'
 
 ];
 
