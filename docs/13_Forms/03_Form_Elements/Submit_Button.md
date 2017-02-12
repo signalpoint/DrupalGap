@@ -2,20 +2,24 @@ DrupalGap automatically disables a form's submit button when the form is submitt
 
 To control the status of a form's submit button, try these helper functions:
 
-### Disable the submit button
+### Disable submit button
 ```
-form.disableSubmitButton(); // When you have a Form prototype.
+// When you have a Form prototype...
+form.disableSubmitButton();
 
 // OR...
 
-dg.loadFormFromInterface(form).enableSubmitButton(); // When you have a FormInterface object.
+ // When you have a FormInterface object...
+dg.loadFormFromInterface(form).disableSubmitButton();
 ```
 
-### Enable the submit button
+### Enable submit button
 ```
-form.enableSubmitButton();  // When you have a Form prototype.
+// When you have a Form prototype...
+form.enableSubmitButton();  
 
 // OR...
 
-dg.loadFormFromInterface(form).enableSubmitButton(); // When you have a FormInterface object.
+// When you have a FormInterface object...
+dg.loadFormFromInterface(form).enableSubmitButton(); 
 ```
