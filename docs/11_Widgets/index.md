@@ -28,18 +28,6 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 [![Checkbox Widget](http://drupalgap.com/sites/default/files/checkbox.png)](Widgets/Checkbox_Widget)
 
-## Collapsible Widget
-
-[![Collapsible Widget](http://drupalgap.com/sites/default/files/collapsible-widget-open.png)](Widgets/Collapsible_Widget)
-
-## Collapsibleset Widget
-
-[![Collapsibleset Widget](http://drupalgap.com/sites/default/files/collapsibleset-widget-open.png)](Widgets/Collapsibleset_Widget)
-
-## Controlgroup Widget
-
-[![Controlgroup Widget](http://drupalgap.com/sites/default/files/controlgroup-widget.png)](Widgets/Controlgroup_Widget)
-
 ## Header Widget
 
 [![Header Widget](http://drupalgap.com/sites/default/files/header-widget.png)](Widgets/Header_Widget)
