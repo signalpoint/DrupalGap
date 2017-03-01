@@ -75,9 +75,10 @@ dg._curtainClick = function(button, direction) {
   document.getElementById('curtain-btn-wrapper-' + id).innerHTML =
       dg._curtainButtonRender(btn, curtain, op);
 
-  // Fill the content.
+  // Fill the content and run any post renders.
   document.getElementById(id).innerHTML = direction == 'open' ?
       dg.render(curtain._fill()) : '';
+  dg.runPostRenders();
 
   // Run after handler, if any.
   if (curtain[opKey].after) { curtain[opKey].after(button, curtain); }
