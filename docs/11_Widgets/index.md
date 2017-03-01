@@ -28,6 +28,10 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 [![Checkbox Widget](http://drupalgap.com/sites/default/files/checkbox.png)](Widgets/Checkbox_Widget)
 
+## Curtain Widget
+
+[Curtain Widget](Widgets/Curtain_Widget)
+
 ## Header Widget
 
 [![Header Widget](http://drupalgap.com/sites/default/files/header-widget.png)](Widgets/Header_Widget)
