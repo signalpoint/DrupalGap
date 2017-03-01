@@ -11,7 +11,7 @@ var html = dg.theme('curtain', {
       _text: '<i class="fa fa-plus"></i>',
       _type: 'link',
       _attributes: {
-        title: dg.t('Add content for') + ' ' + group.title
+        title: dg.t('Add content')
       }
     },
     
@@ -28,7 +28,7 @@ var html = dg.theme('curtain', {
     element.foo = {
       _theme: 'item_list',
       _items: [123, 456]
-    }
+    };
     return element;
   },
   
@@ -55,7 +55,7 @@ var html = dg.theme('curtain', {
   _button_wrapper: {
     _format: 'div',
     _attributes: {
-      class: ['foo, 'bar']
+      class: ['foo', 'bar']
     }
   }
   
