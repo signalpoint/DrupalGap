@@ -36,6 +36,7 @@ dg.appRender = function(content) {
         if (!dg.regions.hasOwnProperty(id)) { continue; }
         var region = dg.regions[id];
         var blocks = region.getBlocks();
+        if (!blocks.length) { continue; } // Skip regions without blocks.
 
         // Open the region, render the placeholder for each of its block(s), then
         // close the region.
@@ -102,7 +103,16 @@ dg.appRender = function(content) {
           if (visibility.visible) {
             visibility.block.buildWrapper().then(function(_block) {
               var _id = dg.cleanCssIdentifier(_block.get('id'));
-              var el = document.getElementById(_id).innerHTML = dg.render(_block.get('content'));
+              var el = document.getElementById(_id);
+              var rendered = dg.render(_block.get('content'));
+              if (el) { el.innerHTML = rendered; }
+              else {
+                // The element isn't in the DOM yet, set a timeout to wait for it.
+                setTimeout(function(elId) {
+                  var el = document.getElementById(elId);
+                  if (el) { el.innerHTML = rendered; }
+                }, 1, _id);
+              }
               finish(_block);
             });
           }
@@ -138,14 +148,15 @@ dg.appRender = function(content) {
     };
 
     /**
-     * FIRST - Instantiate and invoke alterations of regions with blocks.
+     * FIRST - Instantiate and invoke alterations of regions.
      */
 
-    // Instantiate the regions, skipping any without blocks, then give modules a chance to alter the regions.
+    // Instantiate the regions and give modules a chance to alter the regions. We let regions without blocks
+    // go through here because a block build alter allows developers to potentially add a block to region
+    // after this.
     for (var id in regions) {
       if (!regions.hasOwnProperty(id)) { continue; }
       var region = new dg.Region(id, regions[id]);
-      if (region.getBlocks().length == 0) { continue; }
       dg.setRenderElementDefaults(region);
       dg.regions[id] = region;
     }
