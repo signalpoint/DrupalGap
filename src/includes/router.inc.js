@@ -146,6 +146,7 @@ dg.router = {
   matches: function(frag) {
     var f = this.prepFragment(frag);
     for(var i=0; i<this.routes.length; i++) {
+      if (!this.routes[i]) { continue; }
       var match = f.match(this.routes[i].path);
       if (match) {
         return {
@@ -248,6 +249,11 @@ dg.router = {
 
   addChildRoute: function(route, childKey) {
     this.getChildRoutes(route).push(childKey);
+  },
+
+  getRouteKey: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    return route.key;
   },
 
   getRoutePath: function(route) {
