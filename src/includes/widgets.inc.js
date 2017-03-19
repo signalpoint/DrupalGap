@@ -63,6 +63,20 @@ dg.theme_image = function(vars) {
   return '<img ' + dg.attributes(vars._attributes) + '/>';
 };
 
+dg.theme_image_style = function(vars) {
+  vars._path = dg.imageStyleUrl(vars._style_name, vars._path);
+  return dg.theme_image(vars);
+};
+
+dg.imageStyleUrl = function(styleName, path) {
+  var src = jDrupal.sitePath() + jDrupal.basePath() + path;
+  return src.indexOf('public://') != -1 ?
+      src.replace(
+          'public://',
+          'sites/default/files/styles/' + styleName + '/public/'
+      ) : src;
+};
+
 /**
  * Themes an item list.
  * @param {Object} variables
@@ -83,10 +97,12 @@ dg.theme_item_list = function(variables) {
   if (variables._items_prefix) { html += variables._items_prefix; }
   html += '<' + type + ' ' + dg.attributes(variables._attributes) + '>';
   if (variables._items && variables._items.length > 0) {
+    var itemType = variables._itemType ? variables._itemType : 'li';
     for (var i in variables._items) {
       if (!variables._items.hasOwnProperty(i)) { continue; }
       html += dg.theme('list_item', {
         _item: variables._items[i],
+        _itemType: itemType,
         _i: i,
         _total: variables._items.length
       });
@@ -97,8 +113,15 @@ dg.theme_item_list = function(variables) {
   return html;
 };
 
+/**
+ *
+ * @param variables
+ *  _text {String} The text to appear within the item.
+ * @returns {*}
+ */
 dg.theme_list_item = function(variables) {
   var item = variables._item;
+  var itemType = variables._itemType ? variables._itemType : 'li';
   var i = variables._i;
   if (typeof item === 'object') {
     dg.setRenderElementDefaults(item);
@@ -108,13 +131,13 @@ dg.theme_list_item = function(variables) {
       return dg.theme(item._theme, item);
     }
     var text = item._text ? item._text : '';
-    return '<li ' + dg.attributes(item._attributes) + '>' + dg.render(text) + '</li>';
+    return '<' + itemType + ' ' + dg.attributes(item._attributes) + '>' + dg.render(text) + '</' + itemType + '>';
   }
   else {
     var attrs = {};
     if (i == 0) { attrs['class'] = ['first']; }
     else if (i == item._total - 1) { attrs['class'] = ['last']; }
-    return '<li ' + dg.attributes(attrs) + '>' + item + '</li>';
+    return '<' + itemType + ' ' + dg.attributes(attrs) + '>' + item + '</' + itemType + '>';
   }
 };
 
