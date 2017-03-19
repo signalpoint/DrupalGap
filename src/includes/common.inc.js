@@ -126,7 +126,8 @@ dg.setDocumentTitle = function(title) {
 
 dg.setPageTitle = function(title) {
   var titleDiv = document.getElementById('title');
-  if (titleDiv) { titleDiv.innerHTML = dg.theme('title', { _title: title }); }
+  if (titleDiv) { titleDiv.innerHTML = typeof title === 'string' ?
+      dg.theme('title', { _title: title }) : dg.render(title); }
 };
 
 /**
