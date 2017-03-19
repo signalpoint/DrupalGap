@@ -8,16 +8,20 @@ dg.forms = {}; // A global storage for active forms.
  * @returns {String}
  */
 dg.theme_form = function(variables) {
-  if (!variables._id) {
-    console.log('dg.theme_form - no form _id was provided, skipping.');
-    return '';
-  }
+  // Validate variables.
+  var msg = '';
+  if (!variables._id) { msg = 'missing _id'; }
+  var factoryFunction = window[variables._id];
+  if (!factoryFunction) { msg = 'form id not found: ' + variables._id; }
+  if (msg != '') { console.log('dg.theme_form - ' + msg); return ''; }
+
+  // Add an empty div for the form's wrapper, then use a post render to load and inject the form into the DOM.
   var formDomId = dg.killCamelCase(variables._id, '-');
   variables._attributes.id = 'form-wrapper-' + formDomId;
   return dg.render({
     _markup: '<div ' + dg.attributes(variables._attributes) + '></div>',
     _postRender: [function() {
-      dg.addForm(variables._id, dg.applyToConstructor(window[variables._id])).getForm(variables).then(function(html) {
+      dg.addForm(variables._id, dg.applyToConstructor(factoryFunction)).getForm(variables).then(function(html) {
         document.getElementById(variables._attributes.id).innerHTML = html;
         dg.formAttachSubmissionHandler(formDomId);
         dg.runPostRenders();
@@ -124,12 +128,18 @@ dg.Form.prototype.getForm = function() {
           //console.log(name + ': ' + element._widgetType);
           //console.log(element);
 
+          // Set any missing default values.
+          if (!element._type) { element._type = 'markup'; }
+          if (!element._widgetType) { element._widgetType = 'FormElement'; }
+
           // Reset the attribute value to that of the element value if it changed during form alteration.
           // @TODO this is weird... why would we want to overwrite an alteration?
           //if (element._attributes.value != element._value) { element._attributes.value = element._value; }
 
           // Depending on the type of widget/element...
           switch (element._widgetType) {
+
+            // @TODO move support for FieldWidget and FormWidget into a contrib module.
             case 'FieldWidget':
             case 'FormWidget':
 
@@ -186,8 +196,8 @@ dg.Form.prototype.getForm = function() {
               var el = new dg[constructorName](name, element, self);
               self.elements[name] = el;
 
-              // Hidden elements need nothing more.
-              if (element._type == 'hidden') { continue; }
+              // Hidden and markup elements need nothing more.
+              if (jDrupal.inArray(element._type,  ['hidden', 'markup'])) { continue; }
 
               // Place the potential label, and element, as children to a container.
               var children = {
@@ -294,7 +304,7 @@ dg.Form.prototype._submission = function() {
         }
         self._submitForm(self, formState).then(function() {
           if (self.form._action) { dg.goto(self.form._action); }
-          dg.removeForm(self.getFormId());
+          //dg.removeForm(self.getFormId());
           ok();
         }).catch(function() {
           self.enableSubmitButton();
@@ -307,26 +317,30 @@ dg.Form.prototype._submission = function() {
 // dg core form validation handler
 dg.Form.prototype._validateForm = function() {
   var self = this;
-  // Verify required elements have values, otherwise set a form state error on it. Keep in mind that most (if not all)
-  // form elements have been wrapped in a container by this point.
   var formState = self.getFormState();
+
+  // Prepare to handle any validation errors.
   var setError = function(name) {
     formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
   };
+
+  // Verify required elements have values. Keep in mind that most (if not all) form elements have been wrapped in a
+  // container by this point.
   for (var name in self.form) {
     if (!dg.isFormElement(name, self.form)) { continue; }
     var el = self.form[name];
     if (el._theme && el._theme == 'container') {
       if (typeof el._children.element.get !== 'function') { continue; }
-      if (
-          typeof el._children.element.get('element')._required !== 'undefined' &&
-          el._children.element.get('element')._required &&
-          jDrupal.isEmpty(formState.getValue(name))
-      ) { setError(name);  }
+      if (el._children.element.get('element')._required && !el._children.element.validateValue(formState.getValue(name))) {
+        setError(name);
+      }
     }
     else {
-      if (typeof el._required !== 'undefined' && el._required && jDrupal.isEmpty(formState.getValue(name))) {
-        setError(name);
+      if (typeof el._required !== 'undefined' && el._required) {
+        if (jDrupal.isEmpty(formState.getValue(name))) {
+          console.log('_validateForm - we should be invoking validateValue here if possible');
+          setError(name);
+        }
       }
     }
   }
@@ -368,19 +382,40 @@ dg.Form.prototype._submitForm = function() {
   return Promise.all(promises);
 };
 
+dg.Form.prototype.getSubmitButtonSelector = function() {
+  return '#' + dg.killCamelCase(this.getFormId()) + ' #' + dg.formSubmitButtonId(this);
+};
+
 /**
  * Disables the submit button on the form.
  */
 dg.Form.prototype.enableSubmitButton = function() {
-  // @TODO this should actually iterate over the FormInterface and look for the real submit button.
-  document.querySelector('#' + dg.killCamelCase(this.getFormId()) + ' #edit-submit').disabled = false;
+  document.querySelector(this.getSubmitButtonSelector()).disabled = false;
 };
 /**
  * Enables the submit button on the form.
  */
 dg.Form.prototype.disableSubmitButton = function() {
-  // @TODO this should actually iterate over the FormInterface and look for the real submit button.
-  document.querySelector('#' + dg.killCamelCase(this.getFormId()) + ' #edit-submit').disabled = true;
+  document.querySelector(this.getSubmitButtonSelector()).disabled = true;
+};
+
+/**
+ * Given a Form, this will return its' submit button id as a string, or null if it can't find it.
+ * @param {dg.Form} form
+ * @returns {string}
+ */
+dg.formSubmitButtonId = function(form) {
+  if (form.elements && form.elements.actions) {
+    var element = form.elements.actions.element;
+    for (var action in element) {
+      if (!element.hasOwnProperty(action)) { continue; }
+      var _action = element[action];
+      if (!_action) { continue; }
+      if (!dg.isFormElement(action, element)) { continue; }
+      if (_action._type == 'submit') { return _action._attributes.id; }
+    }
+  }
+  return null;
 };
 
 dg.addForm = function(id, form) {
@@ -428,7 +463,7 @@ dg.loadFormFromInterface = function(form) {
 };
 
 dg.isFormElement = function(prop, obj) {
-  return obj.hasOwnProperty(prop) && prop.charAt(0) != '_';
+  return typeof obj == 'object' && obj.hasOwnProperty(prop) && prop.charAt(0) != '_';
 };
 dg.isFormProperty = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
