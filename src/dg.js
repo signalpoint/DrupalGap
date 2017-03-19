@@ -102,7 +102,9 @@ dg.bootstrap = function() {
   // Load the theme, then the blocks, and then add a default route, and start listening.
   dg.themeLoad().then(function() {
       var blocks = dg.blocksLoad();
-      dg.router.add(function() { }).listen();
+    jDrupal.moduleInvokeAll('init').then(function() {
+      dg.router.add(function() {}).listen();
+    });
   });
 
 };
