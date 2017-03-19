@@ -58,6 +58,11 @@ function my_module_block_view_alter(element, block) {
       break;
 
   }
+  
+  // On the hello world page, add a prefix to the title block.
+  if (dg.router.getRouteKey() == 'example.hello-world' && block.get('id') == 'title') {
+    element._prefix = '<i class="fa fa-cog"></i>';
+  }
 
 }
 ```
