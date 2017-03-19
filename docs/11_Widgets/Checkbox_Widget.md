@@ -6,20 +6,11 @@ For other example usage, see: [Checkboxes Form Elements](../Forms/Form_Elements/
 
 ```
 var content = {};
-content['my_checkbox'] = {
-  theme: 'checkbox',
-  attributes: {
+content.my_checkbox = {
+  _theme: 'checkbox',
+  _attributes: {
     id: 'my_checkbox',
     checked: 'checked'
-  }
-};
-content['my_checkbox_label'] = {
-  theme: 'form_element_label',
-  element: {
-    title: 'Enjoy Pizza?',
-    attributes: {
-      'for': 'my_checkbox'
-    }
   }
 };
 return content;
