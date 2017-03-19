@@ -22,6 +22,7 @@ dg.FormStateInterface.prototype.setFormState = function() {
   var promises = [];
   for (var name in form.elements) {
     if (name == 'actions') { continue; }
+    if (form.elements[name].element._type == 'markup') { continue; }
     promises.push(form.elements[name].valueCallback());
   }
   return Promise.all(promises).then(function(values) {
