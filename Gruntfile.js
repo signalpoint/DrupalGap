@@ -41,7 +41,8 @@ var drupalgap_grunt_src = [
   'src/modules/image/image.field-formatters.js',
   'src/modules/node/node.js',
   'src/modules/node/node.forms.js',
-  'src/modules/system/system.js',
+  'src/modules/system/*.js',
+  'src/modules/system/blocks/block.*.js',
   'src/modules/text/text.js',
   'src/modules/text/text.field-formatters.js',
   'src/modules/text/text.field-widgets.js',
@@ -57,6 +58,13 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    concat: {
+      options: { },
+      dist: {
+        src: drupalgap_grunt_src,
+        dest: '<%= pkg.name %>.js'
+      }
+    },
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -72,10 +80,11 @@ module.exports = function(grunt) {
     }
   });
 
+  //grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task(s).
-  grunt.registerTask('default', ['uglify', 'watch']);
+  grunt.registerTask('default', [/*'concat', */'uglify', 'watch']);
 
 };
