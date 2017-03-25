@@ -184,9 +184,27 @@ dg.router = {
    * @returns {string}
    */
   resolvePath: function(route) {
-    return dg.router.clearSlashes(
-        dg.router.getRoutePath(route)
-    ).replace('(.*)', dg.arg(1));
+    var path = dg.router.clearSlashes(dg.router.getRoutePath(route));
+
+    // Is there an argument pattern present?
+    var pattern = '(.*)';
+    var argIndex = path.indexOf(pattern);
+    var argPresent = argIndex != -1;
+
+    // If there is an arg present, locate its position by counting how many '/' are before it.
+    while (argPresent) {
+      var argPosition = 0;
+      for (var i = 0; i < argIndex; i++) {
+        if (path.charAt(i) == '/') { argPosition++; }
+      }
+
+      // Replace the pattern with the arg, then try to locate the next pattern.
+      path = path.replace(pattern, dg.arg(argPosition));
+      argIndex = path.indexOf(pattern);
+      argPresent = argIndex != -1;
+    }
+
+    return path;
   },
   getActiveRoute: function() {
     return this._activeRoute;
