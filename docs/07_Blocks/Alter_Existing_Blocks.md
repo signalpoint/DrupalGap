@@ -39,8 +39,7 @@ Here are a few examples of how to alter the view (i.e. block content) for any bl
 function my_module_block_view_alter(element, block) {
 
   // Inspect the element and block to reveal who and what to alter.
-  //console.log(element);
-  //console.log(block);
+  //console.log(block.get('id'), element, block);
 
   switch (block.get('id')) {
 
