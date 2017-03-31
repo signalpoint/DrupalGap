@@ -1,4 +1,4 @@
-/*! drupalgap 2017-03-30 */
+/*! drupalgap 2017-03-31 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -3637,11 +3637,13 @@ function _drupalgap_form_load_set_element_defaults(form, language) {
  * attempt to listen for the enter key being pressed and submit the form at that
  * time.
  * @param {String} form_id
+ * @param {Object} event
  * @return {Boolean}
  */
-function drupalgap_form_onkeypress(form_id) {
+function drupalgap_form_onkeypress(form_id, event) {
   try {
-    var event = window.event;
+    var event = event ? event : window.event;
+    if (!event) { return; }
     var charCode = event.which || event.keyCode;
     if (charCode != '13') { return; }
     $('#' + form_id + ' button.dg_form_submit_button').click();
@@ -13765,7 +13767,7 @@ function user_login_form(form, form_state) {
       title_placeholder: true,
       required: true,
       attributes: {
-        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "', event)"
       }
     };
     form.elements.submit = {
@@ -14111,7 +14113,7 @@ function user_pass_form(form, form_state) {
       title: t('Username or e-mail address'),
       required: true,
       attributes: {
-        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "', event)"
       }
     };
     form.elements['submit'] = {
