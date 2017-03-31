@@ -3,11 +3,13 @@
  * attempt to listen for the enter key being pressed and submit the form at that
  * time.
  * @param {String} form_id
+ * @param {Object} event
  * @return {Boolean}
  */
-function drupalgap_form_onkeypress(form_id) {
+function drupalgap_form_onkeypress(form_id, event) {
   try {
-    var event = window.event;
+    var event = event ? event : window.event;
+    if (!event) { return; }
     var charCode = event.which || event.keyCode;
     if (charCode != '13') { return; }
     $('#' + form_id + ' button.dg_form_submit_button').click();

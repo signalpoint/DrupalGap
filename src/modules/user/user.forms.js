@@ -23,7 +23,7 @@ function user_login_form(form, form_state) {
       title_placeholder: true,
       required: true,
       attributes: {
-        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "', event)"
       }
     };
     form.elements.submit = {
@@ -369,7 +369,7 @@ function user_pass_form(form, form_state) {
       title: t('Username or e-mail address'),
       required: true,
       attributes: {
-        onkeypress: "drupalgap_form_onkeypress('" + form.id + "')"
+        onkeypress: "drupalgap_form_onkeypress('" + form.id + "', event)"
       }
     };
     form.elements['submit'] = {
