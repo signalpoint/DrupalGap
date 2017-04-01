@@ -80,6 +80,10 @@ var fruits = [
 ];
 ```
 
+You can also if you have need to use contextual filters or have multiple fields that you are querying (for example, if you are using a contextual filter with full text search to query multiple fields).
+
+See Autocomplete with Remote Views and Contextual Filters for details.
+
 ## Accessing the Input Values
 
 The Autocomplete uses a hidden input to hold onto the value, that way the label can be shown in the text field.
