@@ -27,7 +27,10 @@ dg.modules.system.blockPrimaryLocalTasks = function() {
         }
 
         // No base routes or child routes on this path, resolve nothing.
-        if (!childRoutes) { console.log('nada'); ok(''); return; }
+        if (!childRoutes) {
+          ok('');
+          return;
+        }
 
         // Add the base link.
         items.push({
