@@ -80,6 +80,16 @@ var fruits = [
 ];
 ```
 
+## Setting a Default Value
+
+If you want to set a default value, update __content__ to include _default_value_ and _default_value_label_ as follows:
+
+    content['my_autocomplete'] = {
+      /* ... other properties ... */
+      default_value: 'apples',
+      default_value_label: 'apples,
+    };
+
 ## Accessing the Input Values
 
 The Autocomplete uses a hidden input to hold onto the value, that way the label can be shown in the text field.
