@@ -8,6 +8,7 @@ files = src/dg.js\
                                 src/includes/form/form.load.js\
                                 src/includes/form/form.submission.js\
                                 src/includes/form/form.theme.js\
+                                src/includes/form/form.file.js\
                                 src/includes/go.inc.js\
                                 src/includes/menu.inc.js\
                                 src/includes/messages.inc.js\
