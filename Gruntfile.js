@@ -1,5 +1,16 @@
-var drupalgap_grunt_src = ['src/*.js', 'src/includes/*.inc.js', 'src/modules/*/*.js'];
-var drupalgap_grunt_min_src = ['src/*.js', 'src/includes/*.inc.js', 'src/modules/*/*.js', '!src/modules/api/**'];
+var drupalgap_grunt_src = [
+  'src/*.js',
+  'src/includes/*.inc.js',
+  'src/includes/form/form.*.js',
+  'src/modules/*/*.js'
+];
+var drupalgap_grunt_min_src = [
+  'src/*.js',
+  'src/includes/*.inc.js',
+  'src/includes/form/form.*.js',
+  'src/modules/*/*.js',
+  '!src/modules/api/**'
+];
 
 module.exports = function(grunt) {
 
