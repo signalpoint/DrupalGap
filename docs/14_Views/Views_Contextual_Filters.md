@@ -65,7 +65,7 @@ function my_module_pageshow() {
 }
 
 function my_module_row(view, row, variables) {
-  return l(row.title + 'node/' + row.nid);
+  return l(row.title, 'node/' + row.nid);
 }
 
 function my_module_empty(view) {
