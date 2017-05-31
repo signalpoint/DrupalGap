@@ -338,6 +338,10 @@ function drupalgap_back() {
       });
     }
     else if (active_page_id == '_drupalgap_splash') { return; }
+    else if (drupalgap.back_path == ''){
+      drupalgap_goto(drupal.settings.front);
+      return;
+    }        
     else { _drupalgap_back(); }
   }
   catch (error) { console.log('drupalgap_back - ' + error); }

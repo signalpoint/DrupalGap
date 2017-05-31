@@ -117,6 +117,14 @@ drupalgap.settings.locale = {
 drupalgap.settings.title = 'DrupalGap';
  
 // App Front Page
+
+// uncomment below and change drupalgap.settings.front to = landingPage; to route to expected page if coming from external site
+//var landingPage = 'dashboard';
+//if(location.hash){
+//  goToPage = location.hash.replace("#","");
+//    homePage = goToPage.replace('node_', 'node/');
+//}
+
 drupalgap.settings.front = 'dashboard';
 
 // Theme
