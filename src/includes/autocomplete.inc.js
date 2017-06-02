@@ -283,12 +283,16 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 // Extract the result items based on the presence of the wrapper
                 // or not.
                 var result_items = null;
-                if (wrapped) { result_items = results[results.view.root]; }
+                var result_items_child = null;
+                if (wrapped) {
+                  result_items = results[results.view.root];
+                  result_items_child = results.view.child;
+                }
                 else { result_items = results; }
 
                 // Finally call the sucess handler.
                 var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, result_items, wrapped, results.view.child);
+                fn(autocomplete_id, result_items, wrapped, result_items_child);
               }
           });
           break;
