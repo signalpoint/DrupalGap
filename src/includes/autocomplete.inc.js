@@ -283,11 +283,7 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 // Extract the result items based on the presence of the wrapper
                 // or not.
                 var result_items = null;
-                var result_items_child = null;
-                if (wrapped) {
-                  result_items = results[results.view.root];
-                  result_items_child = results.view.child;
-                }
+                if (wrapped) { result_items = results[results.view.root]; }
                 else { result_items = results; }
 
                 // Finally call the success handler. Note, since we route custom Drupal hook_menu() item JSON page
