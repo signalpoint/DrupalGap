@@ -1,4 +1,4 @@
-/*! drupalgap 2017-03-31 */
+/*! drupalgap 2017-06-02 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -1849,12 +1849,18 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 // Extract the result items based on the presence of the wrapper
                 // or not.
                 var result_items = null;
-                if (wrapped) { result_items = results[results.view.root]; }
+                var result_items_child = null;
+                if (wrapped) {
+                  result_items = results[results.view.root];
+                  result_items_child = results.view.child;
+                }
                 else { result_items = results; }
 
-                // Finally call the sucess handler.
+                // Finally call the success handler. Note, since we route custom Drupal hook_menu() item JSON page
+                // callbacks through this Views handler, we don't attempt to send along the view to the handler. Hack.
                 var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, result_items, wrapped, results.view.child);
+                if (results.view) { fn(autocomplete_id, result_items, wrapped, results.view.child); }
+                else { fn(autocomplete_id, result_items, wrapped); }
               }
           });
           break;
