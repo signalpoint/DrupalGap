@@ -34,14 +34,16 @@ function user_login_form(form, form_state) {
       form.buttons['create_new_account'] = {
         title: t('Create new account'),
         attributes: {
-          onclick: "drupalgap_goto('user/register')"
+          onclick: "drupalgap_goto('user/register')",
+          'class': 'create-new-account'
         }
       };
     }
     form.buttons['forgot_password'] = {
       title: t('Request new password'),
         attributes: {
-          onclick: "drupalgap_goto('user/password')"
+          onclick: "drupalgap_goto('user/password')",
+          'class': 'request-new-password'
         }
     };
     return form;
