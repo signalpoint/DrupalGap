@@ -33,6 +33,9 @@ dg.theme_button = function(variables) {
 /**
  * Themes a link.
  * @param {Object} variables
+ *  _text {String}
+ *  _path {String}
+ *  _query {Object} key/value properties to be placed in query string
  * @return {String}
  */
 dg.theme_link = function(variables) {
@@ -47,6 +50,15 @@ dg.theme_link = function(variables) {
     if (path == dg.getPath() && !jDrupal.inArray('active', variables._attributes.class)) {
       variables._attributes.class.push('active');
     }
+    if (variables._query) {
+      var query = variables._query;
+      var queries = [];
+      for (var name in query) {
+        if (!query.hasOwnProperty(name)) { continue; }
+        queries.push(name + '=' + query[name]);
+      }
+      if (queries.length) { href += '?' + queries.join('&'); }
+    }
     variables._attributes.href = href;
   }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
@@ -55,6 +67,7 @@ dg.theme_link = function(variables) {
 dg.theme_image = function(vars) {
   vars._attributes.src = vars._attributes.src ? vars._attributes.src : vars._path;
   var src = vars._attributes.src;
+  // @TODO support a _uri property here instead.
   if (src && src.indexOf('public://') != -1 || src.indexOf('private://') != -1) {
     vars._attributes.src = dg.imagePath(src);
   }
