@@ -257,24 +257,30 @@ dg.postRenderCount = function() {
 /**
  * This will run through any of the queued up `_postRender` functions then reset the queue.
  */
-dg.runPostRenders = function() {
-  var count = dg.postRenderCount();
-  if (count) {
-    for (var i = 0; i < count; i++) {
+dg.runPostRenders = function(timeout, milliseconds) {
+  if (typeof timeout === 'undefined') { timeout = false; }
+  if (typeof milliseconds === 'undefined') { milliseconds = 1; }
+  var done = function() {
+    var count = dg.postRenderCount();
+    if (count) {
+      for (var i = 0; i < count; i++) {
 
-      // Prevent runaway post render invocations potentially caused by uncaught exceptions in the
-      // developer's function(s).
-      if (count > dg._postRenderMax) {
-        console.log('dg._postRenderMax reached: ' + dg._postRenderMax);
-        dg._postRender = [];
-        break;
+        // Prevent runaway post render invocations potentially caused by uncaught exceptions in the
+        // developer's function(s).
+        if (count > dg._postRenderMax) {
+          console.log('dg._postRenderMax reached: ' + dg._postRenderMax);
+          dg._postRender = [];
+          break;
+        }
+
+        // Run the post render function.
+        dg._postRender[i]();
       }
 
-      // Run the post render function.
-      dg._postRender[i]();
+      // Clear the queue.
+      dg._postRender = [];
     }
-
-    // Clear the queue.
-    dg._postRender = [];
-  }
+  };
+  if (timeout) { setTimeout(done, milliseconds); }
+  else { done(); }
 };
