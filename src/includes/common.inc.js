@@ -131,6 +131,17 @@ dg.setPageTitle = function(title) {
 };
 
 /**
+ * A proxy function to quickly call `dg.attributes(variables._attributes)`, instead you can
+ * just call `dg.attrs(variables);`.
+ * @param variables
+ * @returns {string}
+ */
+dg.attrs = function(variables) {
+  var attrs = variables._attributes;
+  return attrs ? dg.attributes(attrs) : '';
+};
+
+/**
  *
  * @param attributes
  * @returns {string}
