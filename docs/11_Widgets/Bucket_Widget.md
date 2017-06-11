@@ -1,4 +1,4 @@
-The *Bucket Widget* is a very powerful widget. It allows you to place an empty `div` on the page, fetch data from the server, then render that data and inject it into the empty div.
+The *Bucket Widget* is a very powerful widget. It allows you to place an empty `div` on the page, make an *async* call (like fetching data from Drupal, or requesting GPS coordinates), then render something and inject it into the empty div.
  
 ```
 /**
