@@ -1,3 +1,8 @@
+/**
+ * @TODO the fact that you're using "self" all over the place is sketchy, and I believe instead we should be using
+ * .call() and/or .apply() to properly set "this" instead of getting/settings "self" all over the place.
+ */
+
 dg.forms = {}; // A global storage for active forms.
 
 /**
@@ -88,184 +93,328 @@ dg.Form.prototype.getFormId = function() { return this.get('id'); };
 dg.Form.prototype.getFormDomId = function() { return dg.formDomIdFromId(this.getFormId()); };
 
 /**
+ * // Set up default values across each element.
+ * @param form
+ */
+dg.Form.prototype.prepareFormElements = function(self) {
+  for (name in self.form) {
+    if (!dg.isFormElement(name, self.form)) { continue; }
+    var el = self.form[name];
+    if (el._type == 'actions') {
+      dg.setFormElementDefaults(name, el);
+      for (_name in el) {
+        if (!dg.isFormElement(_name, el)) { continue; }
+        dg.setFormElementDefaults(_name, el[_name]);
+      }
+    }
+    else { dg.setFormElementDefaults(name, el); }
+  }
+};
+
+dg.Form.prototype.removeElements = function() {
+  for (var name in this.form) {
+    if (!dg.isFormElement(name, this.form)) { continue; }
+    delete this.form[name];
+  }
+};
+
+dg.Form.prototype.goToNextPage = function() {
+  try {
+
+    // Grab the form's DOM Id.
+    var formDomId = this.getFormDomId();
+    console.log('formDomId', formDomId);
+    console.log('going to next page...');
+
+    // Determine the current page and the next page.
+    var page = this.pageNumber();
+    var nextPage = page + 1;
+    console.log('page', page);
+    console.log('nextPage', nextPage);
+
+    // Determine the next page's buildForm function name.
+    var buildName = 'buildForm' + (nextPage + 1);
+    console.log('buildName', buildName);
+
+    // Validate the buildForm function's existance.
+    if (this[buildName]) {
+
+      // Remove previous page's form elements.
+      this.removeElements();
+
+      // Call the page's formBuild to get the Promise.
+      var builtForm = this._formBuild(buildName);
+      console.log('builtForm', builtForm);
+
+      var self = this;
+
+      if (builtForm) {
+
+        builtForm.then(function() {
+
+          // The form's page has been built, now we handling it's Promise's resolution...
+
+          console.log('builtForm resolved', arguments);
+
+          self.prepareFormElements(self);
+
+          self.alterThenRender(self, function(html) {
+            console.log('html => ' + formDomId, html);
+            document.getElementById(formDomId).innerHTML = html;
+            //dg.formAttachSubmissionHandler(formDomId);
+            //dg.runPostRenders();
+          }, function() { console.log(arguments) });
+
+        });
+      }
+    }
+  }
+  catch (error) { console.log('goToNextPage ERROR', error); }
+};
+
+dg.Form.prototype.alterThenRender = function(self, ok, err) {
+  var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
+  var alterDone = function() { self._render(self, ok, err); };
+  if (!alters) { alterDone(); }
+  else { alters.then(alterDone); }
+};
+
+/**
  * Returns the html output for a form, via a Promise.
  * @returns {Promise}
  */
 dg.Form.prototype.getForm = function() {
   var self = this;
-  var selfArguments = arguments;
+  //var selfArguments = arguments;
+  this.setBuildArguments(arguments);
+  var selfArguments = this.getBuildArguments();
+  console.log('selfArguments', arguments, selfArguments);
+
 
   return new Promise(function(ok, err) {
     var done = function() {
 
-      // Set up default values across each element.
-      // @TODO this should be the FormElementPrepare prototype, or combination of.
-      for (name in self.form) {
-        if (!dg.isFormElement(name, self.form)) { continue; }
-        var el = self.form[name];
-        if (el._type == 'actions') {
-          dg.setFormElementDefaults(name, el);
-          for (_name in el) {
-            if (!dg.isFormElement(_name, el)) { continue; }
-            dg.setFormElementDefaults(_name, el[_name]);
-          }
-        }
-        else { dg.setFormElementDefaults(name, el); }
-      }
+      self.prepareFormElements(self);
+
+      self.alterThenRender(self, ok, err);
 
       // Allow form alterations, and set up the resolve to instantiate the form
       // elements and resolve the rendered form.
       // @TODO should this alter be moved after the widget assembly? Then we won't have to pass the element by reference
       // to its widget form builder.
-      var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
-      var render = function() {
-        var form = '';
-        for (var name in self.form) {
-          if (!dg.isFormElement(name, self.form)) { continue; }
-
-          // Grab the render element for the form element.
-          var element = self.form[name];
-          //console.log(name + ': ' + element._widgetType);
-          //console.log(element);
-
-          // Set any missing default values.
-          if (!element._type) { element._type = 'markup'; }
-          if (!element._widgetType) { element._widgetType = 'FormElement'; }
-
-          // Reset the attribute value to that of the element value if it changed during form alteration.
-          // @TODO this is weird... why would we want to overwrite an alteration?
-          //if (element._attributes.value != element._value) { element._attributes.value = element._value; }
-
-          // Depending on the type of widget/element...
-          switch (element._widgetType) {
-
-            // @TODO move support for FieldWidget and FormWidget into a contrib module.
-            case 'FieldWidget':
-            case 'FormWidget':
-
-              //console.log(element._widgetType);
-              //console.log(name);
-
-              // Instantiate the widget using the element's module.
-              var items = self.form._entity.get(name);
-              var delta = 0;
-              var widget = new dg.modules[element._module][element._widgetType][element._type](
-                  self.form._entityType,
-                  self.form._bundle,
-                  name,
-                  element,
-                  items,
-                  delta
-              );
-
-              self.elements[name] = widget;
-
-              // Build the element form and then add it to the form as a container.
-              widget.form(items, delta, element, self.form, self.form_state);
-              // Wrap elements in containers, except for hidden elements.
-              if (element._type == 'hidden') {
-                self.form[name] = element;
-                continue;
-              }
-              var children = {};
-              if (element._title) {
-                children.label = {
-                  _theme: 'form_element_label',
-                  _title: element._title
-                };
-              }
-              children.element = element;
-              var container = {
-                _theme: 'container',
-                _children: children,
-                _weight: element._weight
-              };
-              self.form[name] = container;
-              break;
-            case 'FormElement':
-            default:
-
-              // Determine constructor by looking for any FormElement implementations.
-              var constructorName = element._widgetType;
-              if (element._type) {
-                var nameToCheck = jDrupal.ucfirst(dg.getCamelCase(element._type)) + 'Element';
-                if (dg[nameToCheck]) { constructorName = nameToCheck; }
-              }
-
-              // Instantiate a new form element given the current buildForm element for the Form.
-              var el = new dg[constructorName](name, element, self);
-              self.elements[name] = el;
-
-              // Hidden and markup elements need nothing more.
-              if (jDrupal.inArray(element._type,  ['hidden', 'markup'])) { continue; }
-
-              // Place the potential label, and element, as children to a container.
-              var children = {
-                _attributes: {
-                  'class': []
-                }
-              };
-              if (element._title && !element._attributes.placeholder) {
-                if (element._type == 'checkbox') { /* single checkboxes provide their own label */ }
-                else {
-                  children.label = {
-                    _theme: 'form_element_label',
-                    _title: element._title,
-                    _attributes: {
-                      'class': [],
-                      'for': element._attributes.id
-                    }
-                  };
-                }
-              }
-              children.element = el;
-              var container = { // @TODO we desperately need a function to instantiate a RenderElement
-                _theme: 'container',
-                _children: children,
-                _attributes: {
-                  'class': []
-                },
-                _weight: element._weight
-              };
-              self.form[name] = container;
-
-              break;
-          }
-
-        }
-
-        // Run the after builds, if any. Then finally resolve the rendered form.
-        var promises = [];
-        for (var i = 0; i < self.form._after_build.length; i++) {
-          var parts = self.form._after_build[i].split('.');
-          var module = parts[0];
-          var method = parts[1];
-          if (!dg.modules[module] || !dg.modules[module][method]) { continue; }
-          promises.push(dg.modules[module][method].apply(self, [self.form, self.getFormState()]));
-        }
-        Promise.all(promises).then(function() {
-          ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
-        });
-
-      };
-      if (!alters) { render(); }
-      else { alters.then(render); }
+      //var alters = jDrupal.moduleInvokeAll('form_alter', self.form, self.getFormState(), self.getFormId());
+      //var alterDone = function() {
+      //  self._render(self, ok, err);
+      //};
+      //if (!alters) { alterDone(); }
+      //else { alters.then(alterDone); }
 
     };
 
     // If there are arguments send them along to the form, otherwise just build the form.
-    if (selfArguments.length) {
-      var formArgs = [self.form, self.form_state];
-      for (var i = 0; i < selfArguments.length; i++) { formArgs.push(selfArguments[i]); }
-      self.buildForm.apply(this, formArgs).then(done);
-    }
-    else { self.buildForm(self.form, self.form_state).then(done); }
+    var builtForm = self._formBuild();
+    if (builtForm) { builtForm.then(done); }
+    //var builtForm = null;
+    //if (selfArguments.length) {
+    //  var formArgs = [self.form, self.form_state];
+    //  for (var i = 0; i < selfArguments.length; i++) { formArgs.push(selfArguments[i]); }
+    //  builtForm = self.buildForm.apply(this, formArgs);
+    //}
+    //else { builtForm = self.buildForm(self.form, self.form_state); }
+    //builtForm.then(done);
 
   });
 };
 
+dg.Form.prototype._render = function(self, ok, err) {
+  //var form = '';
+  for (var name in self.form) {
+    if (!dg.isFormElement(name, self.form)) { continue; }
+
+    // Grab the render element for the form element.
+    var element = self.form[name];
+    //console.log(name + ': ' + element._widgetType);
+    //console.log(element);
+
+    // Set any missing default values.
+    if (!element._type) { element._type = 'markup'; }
+    if (!element._widgetType) { element._widgetType = 'FormElement'; }
+
+    // Reset the attribute value to that of the element value if it changed during form alteration.
+    // @TODO this is weird... why would we want to overwrite an alteration?
+    //if (element._attributes.value != element._value) { element._attributes.value = element._value; }
+
+    // Depending on the type of widget/element...
+    switch (element._widgetType) {
+
+      // @TODO move support for FieldWidget and FormWidget into a contrib module.
+      case 'FieldWidget':
+      case 'FormWidget':
+
+        //console.log(element._widgetType);
+        //console.log(name);
+
+        // Instantiate the widget using the element's module.
+        var items = self.form._entity.get(name);
+        var delta = 0;
+        var widget = new dg.modules[element._module][element._widgetType][element._type](
+            self.form._entityType,
+            self.form._bundle,
+            name,
+            element,
+            items,
+            delta
+        );
+
+        self.elements[name] = widget;
+
+        // Build the element form and then add it to the form as a container.
+        widget.form(items, delta, element, self.form, self.form_state);
+        // Wrap elements in containers, except for hidden elements.
+        if (element._type == 'hidden') {
+          self.form[name] = element;
+          continue;
+        }
+        var children = {};
+        if (element._title) {
+          children.label = {
+            _theme: 'form_element_label',
+            _title: element._title
+          };
+        }
+        children.element = element;
+        var container = {
+          _theme: 'container',
+          _children: children,
+          _weight: element._weight
+        };
+        self.form[name] = container;
+        break;
+      case 'FormElement':
+      default:
+
+        // Determine constructor by looking for any FormElement implementations.
+        var constructorName = element._widgetType;
+        if (element._type) {
+          var nameToCheck = jDrupal.ucfirst(dg.getCamelCase(element._type)) + 'Element';
+          if (dg[nameToCheck]) { constructorName = nameToCheck; }
+        }
+
+        // Instantiate a new form element given the current buildForm element for the Form.
+        var el = new dg[constructorName](name, element, self);
+        self.elements[name] = el;
+
+        // Hidden and markup elements need nothing more.
+        if (jDrupal.inArray(element._type,  ['hidden', 'markup'])) { continue; }
+
+        // Place the potential label, and element, as children to a container.
+        var children = {
+          _attributes: {
+            'class': []
+          }
+        };
+        if (element._title && !element._attributes.placeholder) {
+          if (element._type == 'checkbox') { /* single checkboxes provide their own label */ }
+          else {
+            children.label = {
+              _theme: 'form_element_label',
+              _title: element._title,
+              _attributes: {
+                'class': [],
+                'for': element._attributes.id
+              }
+            };
+          }
+        }
+        children.element = el;
+        var container = { // @TODO we desperately need a function to instantiate a RenderElement
+          _theme: 'container',
+          _children: children,
+          _attributes: {
+            'class': []
+          },
+          _weight: element._weight
+        };
+        self.form[name] = container;
+
+        break;
+    }
+
+  }
+
+  // Run the after builds, if any. Then finally resolve the rendered form.
+  var promises = [];
+  for (var i = 0; i < self.form._after_build.length; i++) {
+    var parts = self.form._after_build[i].split('.');
+    var module = parts[0];
+    var method = parts[1];
+    if (!dg.modules[module] || !dg.modules[module][method]) { continue; }
+    promises.push(dg.modules[module][method].apply(self, [self.form, self.getFormState()]));
+  }
+  Promise.all(promises).then(function() {
+    ok('<form ' + dg.attributes(self.form._attributes) + '>' + dg.render(self.form) + '</form>');
+  });
+
+};
+
+dg.Form.prototype.setBuildArguments = function(args) { this._buildArguments = args; };
+
+dg.Form.prototype.getBuildArguments = function() { return this._buildArguments; };
+
+dg.Form.prototype._formBuild = function(buildName) {
+  if (!buildName) { buildName = 'buildForm'; }
+  var buildArguments = this.getBuildArguments();
+  var builtForm = null;
+  if (buildArguments && buildArguments.length) {
+    var formArgs = [this.form, this.form_state];
+    for (var i = 0; i < buildArguments.length; i++) { formArgs.push(buildArguments[i]); }
+    builtForm = this[buildName].apply(this, formArgs);
+  }
+  else { builtForm = this[buildName](this.form, this.form_state); }
+  return builtForm;
+};
+
 dg.Form.prototype.getFormState = function() {
   return this.form_state;
+};
+
+/**
+ * Given a boolean, this will mark the form as multi page or not. If you skip the argument, then it will return true if
+ * the form is set as a multi page form, false otherwise, defaults to false.
+ * @returns {boolean}
+ */
+dg.Form.prototype.multiPage = function() {
+  // Setting the value?
+  if (arguments.length) { this._multiPage = arguments[0]; }
+  // Checking the value?
+  else { return typeof this._multiPage !== 'undefined' ? this._multiPage : false; }
+};
+
+dg.Form.prototype.pageCount = function() {
+  var count = 0;
+  var buildFunctionNameBase = 'buildForm';
+  var buildFunctionNameCheck = buildFunctionNameBase;
+  while (this[buildFunctionNameCheck]) {
+    count++;
+    buildFunctionNameCheck = buildFunctionNameBase + (count + 1);
+  }
+  console.log('pageCount', count);
+  return count;
+};
+
+dg.Form.prototype.pageNumber = function() {
+  // Setting the value?
+  if (arguments.length) { this._pageNumber = arguments[0]; }
+  // Checking the value?
+  else { return typeof this._pageNumber !== 'undefined' ? this._pageNumber : 0; }
+};
+
+dg.Form.prototype.onFirstPage = function() {
+  return this.pageNumber() == 0;
+};
+
+dg.Form.prototype.onLastPage = function() {
+  return this.pageCount() == (this.pageNumber() - 1);
 };
 
 dg.Form.prototype.buildForm = function(form, form_state, options) {
@@ -303,9 +452,26 @@ dg.Form.prototype._submission = function() {
           return;
         }
         self._submitForm(self, formState).then(function() {
-          if (self.form._action) { dg.goto(self.form._action); }
-          //dg.removeForm(self.getFormId());
-          ok();
+
+          var done = function() {
+            if (self.form._action) { dg.goto(self.form._action); }
+            //dg.removeForm(self.getFormId());
+            ok();
+          };
+
+          if (self.multiPage()) {
+
+            if (self.onLastPage()) { done(); }
+            else {
+              console.log('not on last page! ' + (self.pageNumber() + 1) + '/' + self.pageCount());
+
+              self.goToNextPage();
+              done();
+
+            }
+
+          }
+          else { done(); }
         }).catch(function() {
           self.enableSubmitButton();
         });
