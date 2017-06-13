@@ -291,7 +291,6 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 var fn = _theme_autocomplete_success_handlers[autocomplete_id];
                 if (results.view) { fn(autocomplete_id, result_items, wrapped, results.view.child); }
                 else { fn(autocomplete_id, result_items, wrapped); }
-
               }
           });
           break;
