@@ -118,8 +118,9 @@ function my_module_autocomplete_page() {
 }
 
 function my_autocomplete_item_onclick(id, item) {
-  console.log('List id: ' + id);
-  drupalgap_alert("Clicked on item with value: " + $(item).attr('value'));
+  var text = $(item).html();
+  var value = $(item).attr('value');
+  drupalgap_alert('Clicked on ' + text + ': ' + value);
 }
 ```
 
