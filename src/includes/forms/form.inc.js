@@ -179,11 +179,18 @@ dg.Form.prototype.alterThenRender = function(self, ok, err) {
   else { alters.then(alterDone); }
 };
 
+dg._dgGetFormFlood = 0;
+dg._dgGetFormFloodMax = 10;
 /**
  * Returns the html output for a form, via a Promise.
  * @returns {Promise}
  */
 dg.Form.prototype.getForm = function() {
+  dg._dgGetFormFlood++;
+  if (dg._dgGetFormFlood > dg._dgGetFormFloodMax) {
+    console.log('killing the runaway form flood!');
+    return;
+  }
   var self = this;
   //var selfArguments = arguments;
   this.setBuildArguments(arguments);

@@ -158,6 +158,7 @@ dg.router = {
     return null;
   },
   navigate: function(path) {
+    dg.runPostRenders = 0; // @TODO this is a temp hack to fix a runaway form build on the multi page form branch
     path = path ? path : '';
     if(this.mode === 'history') {
       var hPath = this.root + this.clearSlashes(path);
