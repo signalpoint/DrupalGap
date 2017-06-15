@@ -35,13 +35,25 @@ dg.modules.system.routing = function() {
       }
     }
   };
-  routes["system.404"] = {
-    "path": "/404",
-    "defaults": {
-      "_title": "404 - Page not found",
+  routes['system.403'] = {
+    path: '/403',
+    defaults: {
+      _title: '403 - Access denied',
       _controller: function() {
         return new Promise(function(ok, err) {
-          ok('Sorry, that page was not found...');
+          ok(dg.t('You do not have access to this page.'));
+        });
+
+      }
+    }
+  };
+  routes['system.404'] = {
+    path: '/404',
+    defaults: {
+      _title: '404 - Page not found',
+      _controller: function() {
+        return new Promise(function(ok, err) {
+          ok(dg.t('Sorry, that page was not found.'));
         });
 
       }
