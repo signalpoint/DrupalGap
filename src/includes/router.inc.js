@@ -89,6 +89,9 @@ dg.router = {
 
       if (!route.defaults) { route = this.load(dg.getFrontPagePath()); }
 
+      //if (!route.defaults) { route = this.load('404'); } // @TODO properly handle 404
+      if (!this.meetsRequirements(route)) { route = this.load('403'); }
+
       if (route.defaults) {
 
         // Set the title.
@@ -176,6 +179,14 @@ dg.router = {
   },
   setActiveRoute: function(route) {
     this._activeRoute = route;
+  },
+  meetsRequirements: function(route) {
+    if (!route) { route = this.getActiveRoute(); }
+    if (route.requirements) {
+      var requirements = route.requirements;
+      if (requirements._role) { return dg.hasRole(requirements._role); }
+    }
+    return true;
   },
 
   /**
