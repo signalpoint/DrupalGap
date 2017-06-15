@@ -207,6 +207,14 @@ dg.getCamelCase = function(str) {
   return str.replace(/[-_]([a-z])/g, function (g) { return g[1].toUpperCase(); });
 };
 
+dg.extend = function(obj1, obj2) {
+  for (var name in obj2) {
+    if (!obj2.hasOwnProperty(name)) { continue; }
+    obj1[name] = obj2[name];
+  }
+  return obj1;
+};
+
 /**
  *
  * @param str
