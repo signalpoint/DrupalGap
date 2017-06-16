@@ -150,7 +150,16 @@ dg.router = {
     var f = this.prepFragment(frag);
     for(var i=0; i<this.routes.length; i++) {
       if (!this.routes[i]) { continue; }
-      var match = f.match(this.routes[i].path);
+      var path = this.routes[i].path;
+      // Make sure the path has the same number of slashes, otherwise it can be skipped.
+      // @TODO the slash match count on the "path" could be done during the routes assembly, that way
+      // it only has to be computed once during bootstrap, then only the "f" needs to compute
+      // a match count here.
+      if (path && (
+          (f.match(/\//g) || []).length !=
+          (path.match(/\//g) || []).length
+      )) { continue; }
+      var match = f.match(path);
       if (match) {
         return {
           match: match,
