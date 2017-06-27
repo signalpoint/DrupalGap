@@ -2,7 +2,7 @@
  * Converts a JSON object to an XML/HTML tag attribute string and returns the
  * string.
  * @param {Object} attributes
- * @return {String{
+ * @return {String}
  */
 function drupalgap_attributes(attributes) {
   try {
