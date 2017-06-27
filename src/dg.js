@@ -241,7 +241,7 @@ function _drupalgap_deviceready() {
  */
 function _drupalgap_deviceready_options() {
   try {
-    var page_options = arguments[0] ? arguments[0] : {};
+    var pageOptions = arguments[0] ? arguments[0] : {};
     return {
       success: function(result) {
 
@@ -252,11 +252,14 @@ function _drupalgap_deviceready_options() {
         // If there is a hash url present and it can be routed go directly to that page,
         // otherwise go to the app's front page.
         var path = '';
-        if (window.location.hash.indexOf('#') != -1) {
-          var routedPath = drupalgap_get_path_from_page_id(window.location.hash.replace('#', ''));
+        var hash = window.location.hash;
+        if (hash.indexOf('#') != -1) {
+          hash = hash.replace('#', '');
+          _drupalgap_goto_prepare_path(hash, true);
+          var routedPath = drupalgap_get_path_from_page_id(hash);
           if (routedPath) { path = routedPath; }
         }
-        drupalgap_goto(path, page_options);
+        drupalgap_goto(path, pageOptions);
 
       },
       error: function(jqXHR, textStatus, errorThrown) {
