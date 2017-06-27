@@ -1,4 +1,4 @@
-Although DrupalGap can [edit most entities](../Pages/Built_in_Pages) out of the box, and we can override the output of a node page using [hook_node_page_view_alter_TYPE()](http://api.drupalgap.org/7/global.html#hook_node_page_view_alter_TYPE), we can still make our own custom form to load and edit an entity.
+Although DrupalGap can [edit most entities](../Pages/Built_in_Pages) out of the box, we can still make our own custom form to load and edit an entity.
 
 For example, say we had a content type called **Team**, we could add and edit team nodes like this:
 
