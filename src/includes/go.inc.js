@@ -18,7 +18,7 @@ dg.getDestinationPath = function() {
 };
 
 dg.getQueryString = function(variables) {
-  if (variables._query) {
+  if (variables && variables._query) {
     var query = variables._query;
     var queries = [];
     for (var name in query) {
