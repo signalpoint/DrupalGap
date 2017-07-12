@@ -78,7 +78,7 @@ my_module.user_login_form_submit = function(form, form_state) {
 Using the form `action` property, we can specify which path the app will redirect to after the form's submission. For example, by default when creating a new node, the form is designed to redirect to the newly created node for viewing. If we wanted to alter the redirection path, we can do so like so:
 
 ```
-...
+form._action = 'foo';
 ```
 
 ## Adding an Element to a Form
