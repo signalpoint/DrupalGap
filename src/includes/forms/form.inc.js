@@ -303,7 +303,9 @@ dg.Form.prototype._submission = function() {
           return;
         }
         self._submitForm(self, formState).then(function() {
-          if (self.form._action) { dg.goto(self.form._action); }
+          var destination = dg._GET('destination') ? dg._GET('destination') : null;
+          if (!destination && self.form._action) { destination = self.form._action; }
+          if (destination) { dg.goto(destination); }
           //dg.removeForm(self.getFormId());
           ok();
         }).catch(function() {
