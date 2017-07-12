@@ -50,15 +50,7 @@ dg.theme_link = function(variables) {
     if (path == dg.getPath() && !jDrupal.inArray('active', variables._attributes.class)) {
       variables._attributes.class.push('active');
     }
-    if (variables._query) {
-      var query = variables._query;
-      var queries = [];
-      for (var name in query) {
-        if (!query.hasOwnProperty(name)) { continue; }
-        queries.push(name + '=' + query[name]);
-      }
-      if (queries.length) { href += '?' + queries.join('&'); }
-    }
+    href += dg.getQueryString(variables);
     variables._attributes.href = href;
   }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
