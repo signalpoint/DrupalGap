@@ -322,3 +322,15 @@ dg.t = function(text, args, options) {
   }
   return text;
 };
+
+/**
+ * Formats a string containing a count of items.
+ * @see TranslationInterface::formatPlural in Drupal 8
+ * @param count {Number} e.g. The number of apples.
+ * @param singular {String} e.g. Apple
+ * @param plural {String} e.g. Apples
+ * @returns {String}
+ */
+dg.formatPlural = function(count, singular, plural) {
+  return parseInt(count) == 1 ?  singular : plural;
+};
