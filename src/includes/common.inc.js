@@ -226,6 +226,8 @@ dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
+dg.inArray = function(needle, haystack) { return jDrupal.inArray(needle, haystack); };
+
 dg.hasClass = function(el, className) {
   return el.classList.contains(className);
 };
