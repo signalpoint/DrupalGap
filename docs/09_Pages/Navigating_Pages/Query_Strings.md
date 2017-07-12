@@ -1,3 +1,5 @@
+# Links
+
 We can pass along query strings to our pages by placing them in our links:
 
 ```
@@ -17,3 +19,13 @@ dg.alert(dg._GET('foo'));
 Which would then alert the user to `bar`.
 
 This is a handy feature for dynamically sending/receiving data as you navigate around the app between pages.
+
+# Goto
+
+```
+dg.goto('pizza', {
+  _query: {
+    foo: 'bar'
+  }
+});
+```
