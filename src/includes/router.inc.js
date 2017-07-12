@@ -148,6 +148,12 @@ dg.router = {
   },
   matches: function(frag) {
     var f = this.prepFragment(frag);
+
+    // Strip off the query string when looking for matches.
+    var queryIndex = f.indexOf('?');
+    var queryPresent = queryIndex != -1;
+    if (queryPresent) { f = f.substr(0, queryIndex); }
+
     for(var i=0; i<this.routes.length; i++) {
       if (!this.routes[i]) { continue; }
       var path = this.routes[i].path;
