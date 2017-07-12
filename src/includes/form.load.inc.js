@@ -174,5 +174,5 @@ function _drupalgap_form_load_set_element_defaults(form, language) {
       }
     }
   }
-  catch (error) { console.log('_drupalgap_form_elements_set_defaults - ' + error); }
+  catch (error) { console.log('_drupalgap_form_load_set_element_defaults - ' + error); }
 }
