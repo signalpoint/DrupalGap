@@ -185,7 +185,11 @@ dg.router = {
         hPath
       );
     } else {
-      window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
+      if (dg.getPath() == path) { location.reload(); } // Reload page.
+      else {
+        window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path; // Navigate to page.
+      }
+
     }
     return this;
   },
