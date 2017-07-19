@@ -30,7 +30,7 @@ dg.router = {
       var match = window.location.href.match(/#(.*)$/);
       fragment = match ? match[1] : '';
     }
-    return this.clearSlashes(fragment);
+    return dg.removeQueryString(this.clearSlashes(fragment));
   },
   getFragment: function() {
     console.log('WARNING: getFragment() is deprecated, use getPath() instead.');
@@ -147,12 +147,8 @@ dg.router = {
     return null;
   },
   matches: function(frag) {
-    var f = this.prepFragment(frag);
-
     // Strip off the query string when looking for matches.
-    var queryIndex = f.indexOf('?');
-    var queryPresent = queryIndex != -1;
-    if (queryPresent) { f = f.substr(0, queryIndex); }
+    var f = dg.removeQueryString(this.prepFragment(frag));
 
     for(var i=0; i<this.routes.length; i++) {
       if (!this.routes[i]) { continue; }
@@ -186,10 +182,9 @@ dg.router = {
       );
     } else {
       if (dg.getPath() == path) { location.reload(); } // Reload page.
-      else {
-        window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path; // Navigate to page.
+      else { // Navigate to page.
+        window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
       }
-
     }
     return this;
   },
@@ -317,7 +312,7 @@ dg.router = {
 };
 
  /**
- * Get the value of a querystring
+ * Get the value of a query string
  * @see https://gomakethings.com/how-to-get-the-value-of-a-querystring-with-native-javascript/
  * @param  {String} field The field to get the value of
  * @param  {String} url   The URL to get the value from (optional)
