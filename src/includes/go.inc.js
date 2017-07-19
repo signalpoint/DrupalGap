@@ -29,3 +29,31 @@ dg.getQueryString = function(variables) {
   }
   return '';
 };
+
+/**
+ * Given a path, this will remove the query string from it.
+ * @param path {String}
+ * @return {String}
+ */
+dg.removeQueryString = function(path) {
+  var queryIndex = path.indexOf('?');
+  return queryIndex != -1 ? path.substr(0, queryIndex) : path;
+};
+
+dg.nextPage = function() {
+  var page = dg._GET('page') ? parseInt(dg._GET('page')) : 0;
+  dg.goto(dg.getPath(), {
+    _query: {
+      page: page + 1
+    }
+  });
+};
+
+dg.previousPage = function() {
+  var page = dg._GET('page') ? parseInt(dg._GET('page')) : 0;
+  dg.goto(dg.getPath(), {
+    _query: {
+      page: page - 1
+    }
+  });
+};
