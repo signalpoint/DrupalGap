@@ -43,14 +43,6 @@ dg.router = {
   clearSlashes: function(path) {
     return path.toString().replace(/\/$/, '').replace(/^\//, '');
   },
-  //add: function(re, handler) {
-  //  if(typeof re == 'function') {
-  //    handler = re;
-  //    re = '';
-  //  }
-  //  this.routes.push({ re: re, handler: handler });
-  //  return this;
-  //},
   add: function(item) {
     this.routes.push(item);
     return this;
@@ -141,11 +133,23 @@ dg.router = {
     this.interval = setInterval(fn, 50);
     return this;
   },
-  load: function(frag) {
-    var matches = this.matches(frag);
-    if (matches) { return this.routes[matches.i]; }
-    return null;
+
+  /**
+   * Given a path, this will return the router object or null if it doesn't exist.
+   * @param path {String}
+   * @returns {String|null}
+   */
+  load: function(path) {
+    var matches = this.matches(path);
+    return matches ? this.routes[matches.i] : null;
   },
+
+  /**
+   * Given a path, this will look over all the routes and return regex matches (if any, null otherwise), that can handle
+   * the path. Most notably it contains the index on the routes array.
+   * @param frag {String} A path to a page.
+   * @returns {Object|null}
+   */
   matches: function(frag) {
     // Strip off the query string when looking for matches.
     var f = dg.removeQueryString(this.prepFragment(frag));
@@ -181,7 +185,7 @@ dg.router = {
         hPath
       );
     } else {
-      if (dg.getPath() == path) { location.reload(); } // Reload page.
+      if (dg.getPath() == path) { dg.reload(); } // Reload page.
       else { // Navigate to page.
         window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
       }
@@ -231,6 +235,7 @@ dg.router = {
 
     return path;
   },
+
   getActiveRoute: function() {
     return this._activeRoute;
   },
