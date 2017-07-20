@@ -38,7 +38,9 @@ dg.modules.system.blockPrimaryLocalTasks = function() {
           _text: {
             _theme: 'link',
             _text: baseLinkText,
-            _path: baseLinkPath
+            _path: baseLinkPath,
+            _key: dg.router.getRouteKey(baseRoute),
+            _attributes: { class: [] } // Leave these for easy alterations down the line.
           },
           _attributes: { class: [] } // Leave these for easy alterations down the line.
         });
@@ -52,7 +54,9 @@ dg.modules.system.blockPrimaryLocalTasks = function() {
             _text: {
               _theme: 'link',
               _text: dg.router.getRouteTitle(childRoute),
-              _path: dg.router.resolvePath(childRoute)
+              _path: dg.router.resolvePath(childRoute),
+              _key: dg.router.getRouteKey(childRoute),
+              _attributes: { class: [] } // Leave these for easy alterations down the line.
             },
             _attributes: { class: [] } // Leave these for easy alterations down the line.
           });
