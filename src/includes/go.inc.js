@@ -5,8 +5,12 @@
  *  _query: @see dg.theme_link()
  */
 dg.goto = function(path, options) {
-  path += dg.getQueryString(options);
+  path += dg.extractQueryString(options);
   this.router.navigate(path);
+};
+
+dg.reload = function() {
+  location.reload();
 };
 
 dg.getDestination = function() {
@@ -17,7 +21,25 @@ dg.getDestinationPath = function() {
   return dg.arg().join('/');
 };
 
-dg.getQueryString = function(variables) {
+/**
+ * Retrieves the query string from a url.
+ * @param url {String} Optional, defaults to current url.
+ * @returns {String|null}
+ */
+dg.getQueryString = function(url) {
+  if (!url) { url = dg.getUrl(); }
+  var queryIndex = url.indexOf('?');
+  return queryIndex != -1 ?
+      url.substr(queryIndex, (url.length - queryIndex) + 1) :
+      null;
+};
+
+/**
+ * Extracts a query string from a render element and returns it as a string.
+ * @param variables {Object}
+ * @returns {String}
+ */
+dg.extractQueryString = function(variables) {
   if (variables && variables._query) {
     var query = variables._query;
     var queries = [];
@@ -38,22 +60,4 @@ dg.getQueryString = function(variables) {
 dg.removeQueryString = function(path) {
   var queryIndex = path.indexOf('?');
   return queryIndex != -1 ? path.substr(0, queryIndex) : path;
-};
-
-dg.nextPage = function() {
-  var page = dg._GET('page') ? parseInt(dg._GET('page')) : 0;
-  dg.goto(dg.getPath(), {
-    _query: {
-      page: page + 1
-    }
-  });
-};
-
-dg.previousPage = function() {
-  var page = dg._GET('page') ? parseInt(dg._GET('page')) : 0;
-  dg.goto(dg.getPath(), {
-    _query: {
-      page: page - 1
-    }
-  });
 };
