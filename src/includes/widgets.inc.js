@@ -50,7 +50,7 @@ dg.theme_link = function(variables) {
     if (path == dg.getPath() && !jDrupal.inArray('active', variables._attributes.class)) {
       variables._attributes.class.push('active');
     }
-    href += dg.getQueryString(variables);
+    href += dg.extractQueryString(variables);
     variables._attributes.href = href;
   }
   return '<a ' + dg.attributes(variables._attributes) + '>' + text + '</a>';
