@@ -36,8 +36,7 @@ dg.isCompiled = function() {
  * @returns {Object}
  */
 dg.getRoute = function() {
-  //return dg.router.load(dg.getPath())
-  return dg.router.load(dg.getPath())
+  return dg.router.load(dg.getPath());
 };
 
 /**
@@ -48,6 +47,10 @@ dg.getPath = function() {
   var frag = dg.router.getPath();
   if (frag == '') { frag = dg.getFrontPagePath(); }
   return frag;
+};
+
+dg.getUrl = function() {
+  return window.location.href;
 };
 
 /**
