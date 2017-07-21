@@ -49,7 +49,7 @@ var drupalgap_grunt_src = [
   'src/modules/user/user.js',
   'src/modules/user/user.forms.js',
 
-    'src/widgets/widget.*.js'
+  'src/widgets/widget.*.js'
 
 ];
 
