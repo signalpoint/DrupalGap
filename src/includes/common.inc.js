@@ -180,6 +180,17 @@ dg.attributes = function(attributes) {
 
 /**
  *
+ * @param element {Object} A typical render element or widget.
+ */
+dg.attributesInit = function(element) {
+  var attrs = element._attributes ? element._attributes : {};
+  if (!attrs.class) { attrs.class = []; }
+  else if (typeof attrs.class === 'string') { attrs.class = [attrs.class]; }
+  element._attributes = attrs;
+};
+
+/**
+ *
  * @param constructor
  * @param argArray
  * @returns {*}
@@ -259,11 +270,11 @@ dg.imagePath = function(uri) {
   return src;
 };
 
+/**
+ * @param element
+ */
 dg.elementAttributesInit = function(element) {
-  var attrs = element._attributes ? element._attributes : {};
-  if (!attrs.class) { attrs.class = []; }
-  else if (typeof attrs.class === 'string') { attrs.class = [attrs.class]; }
-  element._attributes = attrs;
+  dg.attributesInit(element);
 };
 
 /**
