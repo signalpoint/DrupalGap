@@ -171,11 +171,12 @@ dg.renderProperties = function() {
 
 /**
  *
- * @param content
+ * @param content {*}
+ * @param runPostRender {Boolean} Optional, set to true to run post renders after returning html, defaults to false.
  * @returns {*}
  * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!RenderElement.php/class/RenderElement/8
  */
-dg.render = function(content) {
+dg.render = function(content, runPostRender) {
     var type = typeof content;
     if (!content) { return ''; }
     if (type === 'string') { return content; }
@@ -243,6 +244,7 @@ dg.render = function(content) {
         html += dg.render(content[i]);
       }
     }
+  if (runPostRender) { setTimeout(dg.runPostRenders, 1); }
     return html;
 };
 
