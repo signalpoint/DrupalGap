@@ -22,11 +22,13 @@ Then implement the page callback function in the module:
 
 ```
 function _my_module_autocomplete() {
+  $max = 10;
   $title = $_GET['title'];
-  $limit = $_GET['limit'] ? $_GET['limit'] : 10;
+  $limit = isset($_GET['limit']) ? $_GET['limit'] : $max;
+    if ($limit > $max) { $limit = $max; }
   $results = db_select('node', 'n')
     ->fields('n', array('nid', 'title'))
-    ->condition('title', db_like($title) . '%', 'LIKE')
+    ->condition('title', '%' . db_like($title) . '%', 'LIKE')
     ->condition('type', 'article')
     ->range(0, $limit)
     ->execute()

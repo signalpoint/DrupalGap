@@ -57,7 +57,8 @@ function theme_autocomplete(variables) {
 
     // We need a hidden input to hold the value. If a default value
     // was provided by a form element, use it.
-    var hidden_attributes = { id: id };
+    var hidden_attributes = {};
+    $.extend(hidden_attributes, variables.attributes);
     if (
       variables.element &&
       typeof variables.element.default_value !== 'undefined'
@@ -286,9 +287,11 @@ function _theme_autocomplete(list, e, data, autocomplete_id) {
                 if (wrapped) { result_items = results[results.view.root]; }
                 else { result_items = results; }
 
-                // Finally call the sucess handler.
+                // Finally call the success handler. Note, since we route custom Drupal hook_menu() item JSON page
+                // callbacks through this Views handler, we don't attempt to send along the view to the handler. Hack.
                 var fn = _theme_autocomplete_success_handlers[autocomplete_id];
-                fn(autocomplete_id, result_items, wrapped, results.view.child);
+                if (results.view) { fn(autocomplete_id, result_items, wrapped, results.view.child); }
+                else { fn(autocomplete_id, result_items, wrapped); }
               }
           });
           break;
