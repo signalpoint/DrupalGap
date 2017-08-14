@@ -128,10 +128,10 @@ function user_menu() {
         options: {reloadPage: true}
       },
       'user/register': {
-        'title': t('Register'),
-        'page_callback': 'drupalgap_get_form',
-        'page_arguments': ['user_register_form'],
-        'access_callback': 'user_register_access',
+        title: t('Register'),
+        page_callback: 'drupalgap_get_form',
+        page_arguments: ['user_register_form'],
+        access_callback: 'user_register_access',
         options: {reloadPage: true}
       },
       'user/%': {
