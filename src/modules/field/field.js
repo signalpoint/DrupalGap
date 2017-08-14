@@ -1,24 +1,19 @@
 /**
- * Given a field name, this will return its field info.
+ * Given a field name, this will return its field info or null if it doesn't exist.
  * @param {String} field_name
  * @return {Object}
  */
 function drupalgap_field_info_field(field_name) {
-  try {
-    return drupalgap.field_info_fields[field_name];
-  }
-  catch (error) { console.log('drupalgap_field_info_field - ' + error); }
+  return drupalgap.field_info_fields && drupalgap.field_info_fields[field_name] ?
+      drupalgap.field_info_fields[field_name] : null;
 }
 
 /**
- * Returns info on all fields.
+ * Returns info on all fields or null if they don't exist.
  * @return {Object}
  */
 function drupalgap_field_info_fields() {
-  try {
-    return drupalgap.field_info_fields;
-  }
-  catch (error) { console.log('drupalgap_field_info_fields - ' + error); }
+  return drupalgap.field_info_fields ? drupalgap.field_info_fields : null;
 }
 
 /**
