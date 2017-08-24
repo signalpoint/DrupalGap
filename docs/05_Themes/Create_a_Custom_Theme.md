@@ -54,7 +54,7 @@ function my_theme_info() {
     attributes: {
       'data-role': 'footer',
       'data-position': 'fixed',
-      'data-position': 'b'
+      'data-theme': 'b'
     }
   };
 
