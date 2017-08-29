@@ -11,8 +11,19 @@ For example the code below will modify an input label and add a class to the sub
 function my_module_form_alter(form, form_state, form_id) {
   return new Promise(function(ok, err) {
     if (form_id == 'UserLoginForm') {
+
+      // Change the label on the user name input.
       form.name._title = form.name._attributes.placeholder = dg.t('Account name');
+
+      // Add a custom class name to the submit button.
       form.actions.submit._attributes['class'].push('foo');
+
+    }
+    else if (form_id == 'SomeOtherForm') {
+
+      // Change the default value on the input.
+      form.foo._default_value = dg.t('Bar');
+
     }
     ok();
   });
