@@ -126,7 +126,6 @@ dg.theme_select = function(variables) {
 };
 dg.theme_submit = function(variables) {
   variables._attributes.type = 'submit';
-  var value = 'Submit';
   if (!variables._attributes.value && variables._value) {
     variables._attributes.value = variables._value;
   }
