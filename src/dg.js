@@ -89,9 +89,7 @@ dg.bootstrap = function() {
       dg.router.add(item);
       var baseRoute = dg.router.getBaseRoute(item);
       if (baseRoute) {
-        if (!dg.router.hasChildRoutes(baseRoute)) { dg.router.initChildRoutes(baseRoute); }
-        dg.router.addChildRoute(baseRoute, item.key);
-        dg.router.saveRoute(baseRoute.key, baseRoute);
+        dg.router.saveAsChildRoute(item,baseRoute);
       }
     }
   }

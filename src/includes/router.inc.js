@@ -299,6 +299,12 @@ dg.router = {
     this.getChildRoutes(route).push(childKey);
   },
 
+  saveAsChildRoute: function(route, baseRoute) {
+    if (!dg.router.hasChildRoutes(baseRoute)) { dg.router.initChildRoutes(baseRoute); }
+    dg.router.addChildRoute(baseRoute, route.key);
+    dg.router.saveRoute(baseRoute.key, baseRoute);
+  },
+
   getRouteKey: function(route) {
     if (!route) { route = this.getActiveRoute(); }
     return route.key;
