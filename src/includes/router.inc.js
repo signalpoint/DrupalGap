@@ -299,7 +299,18 @@ dg.router = {
     this.getChildRoutes(route).push(childKey);
   },
 
+  /**
+   * Saves a route as a child of a base route.
+   * @param route {String|Object} A child route key or object.
+   * @param baseRoute {String|Object} A base route key or object to use as the parent.
+   */
   saveAsChildRoute: function(route, baseRoute) {
+    if (typeof route === 'string') { route = dg.router.loadRoute(route); }
+    if (typeof baseRoute === 'string') {
+      route._base_route = baseRoute;
+      baseRoute = dg.router.loadRoute(baseRoute);
+    }
+    if (!route || !baseRoute) { return; }
     if (!dg.router.hasChildRoutes(baseRoute)) { dg.router.initChildRoutes(baseRoute); }
     dg.router.addChildRoute(baseRoute, route.key);
     dg.router.saveRoute(baseRoute.key, baseRoute);
