@@ -11,8 +11,8 @@ my_module.blocks = function() {
     build: function () {
       return new Promise(function(ok, err) {
         var element = {};
-        element['my_markup'] = {
-          markup: '<p>Hello World</p>'
+        element.foo = {
+          _markup: '<p>Hello World</p>'
         };
         ok(element);
       });
