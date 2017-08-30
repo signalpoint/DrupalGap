@@ -306,11 +306,9 @@ dg.router = {
    */
   saveAsChildRoute: function(route, baseRoute) {
     if (typeof route === 'string') { route = dg.router.loadRoute(route); }
-    if (typeof baseRoute === 'string') {
-      route._base_route = baseRoute;
-      baseRoute = dg.router.loadRoute(baseRoute);
-    }
+    if (typeof baseRoute === 'string') { baseRoute = dg.router.loadRoute(baseRoute); }
     if (!route || !baseRoute) { return; }
+    if (!route.defaults._base_route) { route.defaults._base_route = baseRoute.key; }
     if (!dg.router.hasChildRoutes(baseRoute)) { dg.router.initChildRoutes(baseRoute); }
     dg.router.addChildRoute(baseRoute, route.key);
     dg.router.saveRoute(baseRoute.key, baseRoute);
