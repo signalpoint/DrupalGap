@@ -48,7 +48,7 @@ dg.modules.system.blockPrimaryLocalTasks = function() {
         // Iterate over the child routes and add list item links onto the items array.
         for (var i = 0; i < childRoutes.length; i++) {
           var childRoute = dg.router.loadRoute(childRoutes[i]);
-          if (!childRoute) { continue; }
+          if (!childRoute || !dg.router.meetsRequirements(childRoute)) { continue; }
           items.push({
             _theme: 'list_item',
             _text: {
