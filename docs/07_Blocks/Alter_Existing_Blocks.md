@@ -25,6 +25,9 @@ function my_module_blocks_build_alter(blocks) {
     _items: ['Foo', 'Bar']
   });
 
+  // Add a custom class to the title block div for Bootstrap.
+  blocks.title._attributes.class.push('page-title');
+
 }
 ```
 
