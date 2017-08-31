@@ -40,8 +40,10 @@ Sometimes we want to add our own validation logic to a pre-existing form. We can
  */
 function my_module_form_alter(form, form_state, form_id) {
   return new Promise(function(ok, err) {
-    if (form_id == 'UserLoginForm') {
-      form._validate.push('my_module.user_login_form_validate');
+    switch (form_id) {
+      case 'UserLoginForm':
+        form._validate.push('my_module.user_login_form_validate');
+        break;
     }
     ok();
   });
