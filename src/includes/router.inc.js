@@ -6,6 +6,7 @@
 
 dg.router = {
   _activeRoute: null,
+  _stack: [],
   routes: [],
   mode: null,
   root: '/',
@@ -63,6 +64,21 @@ dg.router = {
     return this;
   },
 
+  /**
+   * STACK
+   */
+  getStack: function() { return dg.router._stack; },
+  stackPush: function(route, path) {
+    dg.router.getStack().push({
+      key: route.key,
+      path: path
+    });
+  },
+  stackPop: function() { // @TODO figure out if the user is moving backwards
+    var stack = dg.router.getStack();
+    return stack.length ? stack.pop() : null;
+  },
+
   check: function(f) {
 
     var route = this.load(f);
@@ -74,6 +90,7 @@ dg.router = {
 
       var menu_execute_active_handler = function(content) {
         dg.router.setActiveRoute(route);
+        dg.router.stackPush(route, dg.getPath());
         dg.content = content;
         dg.appRender();
         jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath());
@@ -175,6 +192,7 @@ dg.router = {
     }
     return null;
   },
+
   navigate: function(path) {
     path = path ? path : '';
     if(this.mode === 'history') {
