@@ -88,6 +88,7 @@ my_custom_block: {
 
 ## Access Callback Based Visibility Rules
 
+### Custom Block
 ```
 my_custom_block: {
 
@@ -97,6 +98,23 @@ my_custom_block: {
     return !(dg.currentUser().isAnonymous() && dg.isFrontPage() && d.getDay() == 1);
   }
   
+}
+```
+
+### Title Block
+```
+// DrupalGap's page title block.
+title: {
+
+  _access: function() {
+
+    // Hide the title block on a few pages.
+    return !jDrupal.inArray(dg.getRoute().key, [
+      'my_module.home',
+      'my_module.map'
+    ]);
+  }
+
 }
 ```
 
