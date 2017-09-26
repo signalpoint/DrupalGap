@@ -79,21 +79,27 @@ dg.router = {
     return stack.length ? stack.pop() : null;
   },
 
-  check: function(f) {
+  /**
+   * Checks for a route to handle the path and executes the menu handler if one exists.
+   * @param {String} newPath The destination path.
+   * @param {String} oldPath The referral path (aka the last path).
+   * @returns {dg.router}
+   */
+  check: function(newPath, oldPath) {
 
-    var route = this.load(f);
+    var route = this.load(newPath);
     if (route) {
 
       dg.removeForms();
 
-      var matches = this.matches(f).match;
+      var matches = this.matches(newPath).match;
 
       var menu_execute_active_handler = function(content) {
         dg.router.setActiveRoute(route);
         dg.router.stackPush(route, dg.getPath());
         dg.content = content;
         dg.appRender();
-        jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath());
+        jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath(), oldPath);
       };
 
       if (!route.defaults) { route = this.load(dg.getFrontPagePath()); }
@@ -142,8 +148,9 @@ dg.router = {
     var current = self.getPath();
     var fn = function() {
       if(current !== self.getPath()) {
+        var old = current;
         current = self.getPath();
-        self.check(current);
+        self.check(current, old);
       }
     };
     clearInterval(this.interval);

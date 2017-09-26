@@ -8,7 +8,28 @@ routes["example.hello"] = {
     _controller: function() { /* ... */ }
   },
   requirements: {
-    _role: 'administrator'
+    /* ... see options below ... */
   }
 };
+```
+
+## Role Based Access Callback
+
+```
+requirements: {
+  _role: 'administrator',
+}
+```
+
+## Custom Access Callback
+
+```
+requirements: {
+  _custom_access: function() {
+
+    // Only anonymous users can access this page.
+    return dg.currentUser().isAnonymous();
+
+  },
+}
 ```
