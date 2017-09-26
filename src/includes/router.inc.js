@@ -228,6 +228,7 @@ dg.router = {
     if (route.requirements) {
       var requirements = route.requirements;
       if (requirements._role) { return dg.hasRole(requirements._role); }
+      else if (requirements._custom_access) { return requirements._custom_access(); }
     }
     return true;
   },
