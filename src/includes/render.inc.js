@@ -10,9 +10,6 @@ dg._postRender = []; // Holds onto postRenders for the current page's render arr
 dg.appRender = function(content) {
   dg.themeLoad().then(function(theme) {
 
-    //console.log('theme');
-    //console.log(theme);
-
     /**
      * PREPARATION
      */
@@ -29,21 +26,18 @@ dg.appRender = function(content) {
 
     var finishBlocks = function(allBlocks) {
 
-      //console.log('allBlocks');
-      //console.log(allBlocks);
-
       for (var id in dg.regions) {
         if (!dg.regions.hasOwnProperty(id)) { continue; }
         var region = dg.regions[id];
-        var blocks = region.getBlocks();
-        if (!blocks.length) { continue; } // Skip regions without blocks.
+        var regionBlocks = region.getBlocks();
+        if (!regionBlocks.length) { continue; } // Skip regions without blocks.
 
         // Open the region, render the placeholder for each of its block(s), then
         // close the region.
         var regionFormat = region.get('format');
         innerHTML += region.get('before') + '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
-        for (var i = 0; i < blocks.length; i++) {
-          var block = allBlocks[blocks[i]];
+        for (var i = 0; i < regionBlocks.length; i++) {
+          var block = allBlocks[regionBlocks[i]];
           var format = block.get('format');
           innerHTML += block.get('before') +
               '<' + format + ' ' + dg.attributes(block.get('attributes')) + '></' + format + '>' +
@@ -66,10 +60,21 @@ dg.appRender = function(content) {
       var blocksToRender = [];
 
       /**
-       * FIFTH - Once all blocks have finished rendering, process any forms on the page.
+       * FIFTH - Process the finished blocks one by one, while watching to see when all blocks have finished rendering,
+       * at which point we can process any forms on the page.
        */
 
       var finish = function(_block) {
+
+        var _region = _block.getRegion();
+
+        // If all the blocks in the region are hidden, remove the empty region from the DOM and add a css class to the
+        // body to indicate the region isn't present
+        if (_region.getBlocks().length == region.getHiddenBlocks().length) {
+          var _regionId = _region.get('id');
+          dg.removeElement(dg.cleanCssIdentifier(_regionId));
+          dg.addBodyClass('no-' + _regionId);
+        }
 
         // Remove this block from the list of blocks to be rendered.
         blocksToRender.splice(blocksToRender.indexOf(_block.get('id')), 1);
@@ -89,11 +94,13 @@ dg.appRender = function(content) {
             if (!forms.hasOwnProperty(id)) { continue; }
             dg.formAttachSubmissionHandler(id);
           }
+
         }
       };
 
       /**
-       * FOURTH - For any visible blocks, build them then inject their rendered element into their waiting placeholder.
+       * FOURTH - Go over each block, then inject them into the DOM if they are visible, otherwise remove their
+       * placeholder from the DOM.
        */
 
       for (id in blocks) {
@@ -101,6 +108,8 @@ dg.appRender = function(content) {
         blocksToRender.push(id);
         blocks[id].getVisibility().then(function(visibility) {
           if (visibility.visible) {
+
+            // Build the block, render it and inject it into the DOM.
             visibility.block.buildWrapper().then(function(_block) {
               var _id = dg.cleanCssIdentifier(_block.get('id'));
               var el = document.getElementById(_id);
@@ -115,10 +124,18 @@ dg.appRender = function(content) {
               }
               finish(_block);
             });
+
           }
           else {
-            dg.removeElement(dg.cleanCssIdentifier(visibility.block.get('id')));
+
+            // The block is not visible, remove it's placeholder from the DOM.
+            var _block = visibility.block;
+            var _blockId = _block.get('id');
+            var _region = dg.regions[_block.get('region')];
+            _region.addHiddenBlock(_blockId);
+            dg.removeElement(dg.cleanCssIdentifier(_blockId));
             finish(visibility.block);
+
           }
         });
       }
