@@ -61,6 +61,14 @@ dg.Block.prototype.set = function(name, value) {
 };
 
 /**
+ * Returns the assembled region the block resides in, if it is ready.
+ * @returns {Region|null}
+ */
+dg.Block.prototype.getRegion = function() {
+  return dg.regions ? dg.regions[this.get('region')] : null;
+};
+
+/**
  * A wrapper function around to invoke the block's build function and hook_block_view_alter().
  * @returns {Promise}
  */
