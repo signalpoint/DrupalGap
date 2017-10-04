@@ -1,9 +1,5 @@
 // @inspiration http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
-// @TODO an individual Route item should be a JS Prototype instantiated by dg.bootstrap(),
-// and many of the helper functions below belong on that item prototype instead of in this
-// main router object.
-
 dg.router = {
   _activeRoute: null,
   _stack: [],
@@ -33,6 +29,10 @@ dg.router = {
     }
     return dg.removeQueryString(this.clearSlashes(fragment));
   },
+
+  /**
+   * @deprecated
+   */
   getFragment: function() {
     console.log('WARNING: getFragment() is deprecated, use getPath() instead.');
     return this.getPath();
@@ -87,12 +87,38 @@ dg.router = {
    */
   check: function(newPath, oldPath) {
 
-    var route = this.load(newPath);
-    if (route) {
+    var self = this;
+
+    if (newPath == '') { newPath = dg.getFrontPagePath(); }
+
+    // Give developers a chance to alter the path to check ,thereby potentially rerouting.
+    jDrupal.moduleInvokeAll('pre_process_route_change', newPath, oldPath).then(function(alters) {
+
+      // If anybody altered the path, take the first one, navigate to it and return, unless we're already there, then
+      // proceed with the original path.
+      if (alters && alters.length) {
+        for (var i = 0; i < alters.length; i++) {
+          var alter = alters[i];
+          if (!alter) { continue; }
+          if (alter != dg.getPath()) {
+            self.navigate(alter);
+            return;
+          }
+        }
+      }
+
+      // Try to load the route for this path, or throw a 404 if nobody can handle this.
+      var route = self.load(newPath);
+      if (!route) { // 404
+        console.log('dg.router.check() - 404?', newPath);
+        return;
+      }
+
+      // We have a route to handle the path...
 
       dg.removeForms();
 
-      var matches = this.matches(newPath).match;
+      var matches = self.matches(newPath).match;
 
       var menu_execute_active_handler = function(content) {
         dg.router.setActiveRoute(route);
@@ -102,10 +128,10 @@ dg.router = {
         jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath(), oldPath);
       };
 
-      if (!route.defaults) { route = this.load(dg.getFrontPagePath()); }
+      if (!route.defaults) { route = self.load(dg.getFrontPagePath()); }
 
       //if (!route.defaults) { route = this.load('404'); } // @TODO properly handle 404
-      if (!this.meetsRequirements(route)) { route = this.load('403'); }
+      if (!self.meetsRequirements(route)) { route = self.load('403'); }
 
       if (route.defaults) {
 
@@ -140,9 +166,17 @@ dg.router = {
 
       }
 
-    }
+    });
+
     return this;
+
   },
+
+  /**
+   * Listens for a change to the route, and when it detects a change it calls "check" to see if anybody wants to handle
+   * the route.
+   * @returns {dg.router}
+   */
   listen: function() {
     var self = this;
     var current = self.getPath();
@@ -186,9 +220,9 @@ dg.router = {
       // it only has to be computed once during bootstrap, then only the "f" needs to compute
       // a match count here.
       if (path && (
-          (f.match(/\//g) || []).length !=
-          (path.match(/\//g) || []).length
-      )) { continue; }
+              (f.match(/\//g) || []).length !=
+              (path.match(/\//g) || []).length
+          )) { continue; }
       var match = f.match(path);
       if (match) {
         return {
@@ -205,9 +239,9 @@ dg.router = {
     if(this.mode === 'history') {
       var hPath = this.root + this.clearSlashes(path);
       history.pushState(
-        null,
-        null,
-        hPath
+          null,
+          null,
+          hPath
       );
     } else {
       if (dg.getPath() == path) { dg.reload(); } // Reload page.
@@ -357,7 +391,7 @@ dg.router = {
 
 };
 
- /**
+/**
  * Get the value of a query string
  * @see https://gomakethings.com/how-to-get-the-value-of-a-querystring-with-native-javascript/
  * @param  {String} field The field to get the value of
