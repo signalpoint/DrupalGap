@@ -10,27 +10,142 @@ function my_module_install() {
 }
 ```
 
-A listing of hooks is available below. Click on a hook to learn more about when, and how to use it:
+A listing of hooks is available below.
 
-- [hook_404](http://api.drupalgap.org/global.html#hook_404)
-- [hook_assemble_form_state_into_field](http://api.drupalgap.org/global.html#hook_assemble_form_state_into_field)
-- [hook_block_info](http://api.drupalgap.org/global.html#hook_block_info)
-- [hook_block_view](http://api.drupalgap.org/global.html#hook_block_view)
-- [hook_deviceready](http://api.drupalgap.org/global.html#hook_deviceready)
-- [hook_drupalgap_goto_post_process](http://api.drupalgap.org/global.html#hook_drupalgap_goto_post_process)
-- [hook_drupalgap_goto_preprocess](http://api.drupalgap.org/global.html#hook_drupalgap_goto_preprocess)
-- [hook_entity_post_render_content](http://api.drupalgap.org/global.html#hook_entity_post_render_content)
-- [hook_entity_post_render_field](http://api.drupalgap.org/global.html#hook_entity_post_render_field)
-- [hook_field_formatter_view](http://api.drupalgap.org/global.html#hook_field_formatter_view)
-- [hook_field_widget_form](http://api.drupalgap.org/global.html#hook_field_widget_form)
-- [hook_form_alter](http://api.drupalgap.org/global.html#hook_form_alter)
-- [hook_image_path_alter](http://api.drupalgap.org/global.html#hook_image_path_alter)
-- [hook_install](http://api.drupalgap.org/global.html#hook_install)
-- [hook_menu](http://api.drupalgap.org/global.html#hook_menu)
-- [hook_services_postprocess](http://api.drupalgap.org/global.html#hook_services_postprocess)
-- [hook_services_preprocess](http://api.drupalgap.org/global.html#hook_services_preprocess)
-- [hook_services_request_postprocess_alter](http://api.drupalgap.org/global.html#hook_services_request_postprocess_alter)
-- [hook_services_request_pre_postprocess_alter](http://api.drupalgap.org/global.html#hook_services_request_pre_postprocess_alter)
-- [hook_services_success](http://api.drupalgap.org/global.html#hook_services_success)
 
-For a complete listing of hooks, be sure to visit the [DrupalGap API](http://api.drupalgap.org).
+## hook_deviceready
+```
+/**
+ * Implements hook_deviceready
+ */
+function example_deviceready() {
+}
+```
+
+## hook_init
+```
+/**
+ * Implements hook_init
+ */
+function example_init() {
+}
+```
+
+## hook_form_alter
+```
+/**
+ * Implements hook_form_alter
+ */
+function example_form_alter() {
+}
+```
+
+## hook_regions_build_alter
+```
+/**
+ * Implements hook_regions_build_alter
+ */
+function example_regions_build_alter() {
+}
+```
+
+## hook_blocks_build_alter
+```
+/**
+ * Implements hook_blocks_build_alter
+ */
+function example_blocks_build_alter() {
+}
+```
+
+## hook_block_view_alter
+```
+/**
+ * Implements hook_block_view_alter
+ */
+function example_block_view_alter() {
+}
+```
+
+## hook_pre_process_route_change
+
+This hook can be implemented in one of two ways:
+
+ 1. To alter the destination path (optional, and to execute other custom code)
+ 2. To execute custom code
+
+```
+// OPTION 1
+
+/**
+ * Implements hook_pre_process_route_change
+ */
+function example_pre_process_route_change(newPath, oldPath) {
+  return new Promise(function(ok, err) {
+
+      // If something happened...
+      if (example.somethingHappened()) {
+
+        // Send them to a different path instead.
+        newPath = 'example-path';
+
+        // Do some other stuff.
+        example.doOtherStuff();
+
+      }
+
+      // Resolve the new path, even if it didn't change.
+      ok(newPath);
+
+  });
+}
+
+// OPTION 2
+
+/**
+ * Implements hook_pre_process_route_change
+ */
+function example_pre_process_route_change(newPath, oldPath) {
+
+  // Pre process initial route change upon application startup...
+  if (typeof oldPath === 'undefined') {
+
+  }
+  else {
+  
+  // Handle all other route changes...
+
+  }
+
+}
+```
+
+## hook_post_process_route_change
+```
+/**
+ * Implements hook_post_process_route_change().
+ */
+function example_post_process_route_change(route, newPath, oldPath) {
+
+  // Post process initial route change upon application startup...
+  if (typeof oldPath === 'undefined') {
+
+  }
+  else {
+    
+    // Handle all other route changes...
+
+  }
+
+}
+
+```
+
+## hook_entity_view
+```
+/**
+ * Implements hook_entity_view
+ */
+function example_entity_view() {
+}
+```
