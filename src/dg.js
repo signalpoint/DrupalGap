@@ -296,7 +296,10 @@ function drupalgap_bootstrap() {
     drupalgap_theme_registry_build();
 
     // Attach device back button handler (Android).
-    document.addEventListener('backbutton', drupalgap_back, false);
+    document.addEventListener('backbutton', function(e) {
+      drupalgap_back();
+      e.preventDefault();
+    }, false);
   }
   catch (error) { console.log('drupalgap_bootstrap - ' + error); }
 }
