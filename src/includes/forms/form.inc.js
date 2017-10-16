@@ -442,7 +442,7 @@ dg.formHasActions = function(form) {
   for (var name in form) {
     if (!form.hasOwnProperty(name)) { continue; }
     var element = form[name];
-    if (!element._theme || element._theme != 'container' || !element._children) { continue; }
+    if (!element || !element._theme || element._theme != 'container' || !element._children) { continue; }
     for (var _name in element._children) {
       if (!element._children.hasOwnProperty(_name)) { continue; }
       var _element = element._children[_name];
