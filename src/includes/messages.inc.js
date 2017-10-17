@@ -239,3 +239,38 @@ function drupalgap_toast(html) {
 function drupalgap_toast_is_shown() {
   return drupalgap.toast.shown;
 }
+
+/**
+ * Prompt's the user to input some text.
+ * @param {String} msg The message to prompt about
+ * @param {Object} options
+ *  {Function} onPrompt - the callback function to invoke. Sends an object in phonegap mode, or a string in web-app mode.
+ *  {String} title - the title of the box
+ *  {Array} buttonLabels - the button labels, separated by comma, defaults to ['Ok', 'Exit']]
+ *  {String} defaultText - the default text to place in the box
+ */
+function drupalgap_prompt(msg, options) {
+  var onPrompt = options.onPrompt ? options.onPrompt : function() {};
+  var title = options.title ? options.title : drupalgap.settings.title;
+  var buttonLabels = options.buttonLabels ? options.buttonLabels : [t('Ok'), t('Exit')];
+  var defaultText = options.defaultText ? options.defaultText : '';
+  var done = function(result) {
+    if (typeof result === 'object' && result != null) { onPrompt(result); }
+    else {
+      var send = {
+        buttonIndex: 2,
+        input1: ''
+      };
+      if (result != null) {
+        send.buttonIndex = 1;
+        send.input1 = result;
+      }
+      onPrompt(send);
+    }
+  };
+  if (navigator && navigator.notification) {
+    navigator.notification.prompt(msg, done, title, buttonLabels, defaultText);
+  }
+  else { done(prompt(msg, defaultText)); }
+}
+
