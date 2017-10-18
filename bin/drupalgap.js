@@ -1,4 +1,4 @@
-/*! drupalgap 2017-10-17 */
+/*! drupalgap 2017-10-18 */
 // Initialize the drupalgap json object.
 var drupalgap = drupalgap || drupalgap_init(); // Do not remove this line.
 
@@ -14406,9 +14406,7 @@ function user_services_postprocess(options, result) {
     if (options.service != 'user') { return; }
     var resources = ['login', 'logout', 'register'];
     // Only process login, logout and registration.
-    if (!in_array(options.resource, resources) || (arg(0) != 'user' && !in_array(arg(1), resources))) {
-      return;
-    }
+    if (!in_array(options.resource, resources)) { return; }
     // If there were any form errors, alert them to the user.
     if (!result.responseText) { return; }
     var response = JSON.parse(result.responseText);
