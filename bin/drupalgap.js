@@ -14146,7 +14146,6 @@ function user_profile_form_submit(form, form_state) {
  * @return {Object}
  */
 function user_pass_form(form, form_state) {
-  try {
     form.elements['name'] = {
       type: 'textfield',
       title: t('Username or e-mail address'),
@@ -14160,8 +14159,6 @@ function user_pass_form(form, form_state) {
       value: t('E-mail new password')
     };
     return form;
-  }
-  catch (error) { console.log('user_pass_form - ' + error); }
 }
 
 /**
@@ -14170,7 +14167,6 @@ function user_pass_form(form, form_state) {
  * @param {Object} form_state
  */
 function user_pass_form_submit(form, form_state) {
-  try {
     user_request_new_password(form_state.values['name'], {
         success: function(result) {
           if (result[0]) {
@@ -14183,11 +14179,12 @@ function user_pass_form_submit(form, form_state) {
               t('There was a problem sending an e-mail to your address.');
             drupalgap_set_message(msg, 'warning');
           }
-          drupalgap_goto('user/login');
+          var path = 'user/login';
+          if (form.action) { path = form.action; }
+          if (_GET('destination')) { path = _GET('destination'); }
+          drupalgap_goto(path, { reloadPage: true });
         }
     });
-  }
-  catch (error) { console.log('user_pass_form_submit - ' + error); }
 }
 
 
