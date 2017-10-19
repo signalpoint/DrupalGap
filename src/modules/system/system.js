@@ -150,8 +150,8 @@ function system_pre_process_route_change(newPath, oldPath) {
     for (var name in blocks) {
       if (!blocks.hasOwnProperty(name)) { continue; }
       var block = blocks[name];
-      var region = block.getRegion();
-      if (region.getHiddenBlocks().length == region.getBlocks().length) {
+      var region = block.getRegion(); // Upon initial boot, a block's region may not be set yet, so we check below.
+      if (region && region.getHiddenBlocks().length == region.getBlocks().length) {
         dg.removeBodyClass('no-' + region.get('id'));
       }
     }
