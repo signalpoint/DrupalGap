@@ -37,7 +37,7 @@ For more information, [see here](http://devgirl.org/2014/07/31/phonegap-develope
 
 First add the plugin with the terminal:
 
-`cordova plugin add org.apache.cordova.statusbar`
+`cordova plugin add cordova-plugin-sidebar`
 
 Then add preferences like this inside the `<widget>...</widget>`in your
 `config.xml` file:
