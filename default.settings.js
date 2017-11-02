@@ -5,7 +5,7 @@
 jDrupal.settings = {
 
   // Drupal site settings.
-  sitePath: '',
+  sitePath: '', /* The Drupal 8 site URL, e.g. https://example.com */
   basePath: '/',
 
   // Set to true to see debug info printed to the console.log().
