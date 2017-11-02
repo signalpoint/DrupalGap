@@ -198,8 +198,8 @@ $MODULE_NAME.routing = function() {
   return routes;
 };" > "$FILE_URI"
   
-  # find the line number after drupalgap.min.js include
-  INSERT_LINE=$(( `cat index.html | grep -n "drupalgap.min.js" | awk '{ print $1 }' | tr -d ':'` +1 ))
+  # Find the line number after the settings.js include.
+  INSERT_LINE=$(( `cat index.html | grep -n "settings.js" | awk '{ print $1 }' | tr -d ':'` +1 ))
   # insert the module include at that line
   sed -i "${INSERT_LINE}i \    <script src=\"$FILE_URI\"></script>" index.html
 
