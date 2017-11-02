@@ -15,7 +15,7 @@ example.pageNode = function(nid) {
       
         // Grab the node from the server, and fill the bucket with the node title.
         dg.nodeLoad(nid).then(function(node) {
-          fill(node.title);
+          fill(node.getTitle());
         });
   
       });
