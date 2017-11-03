@@ -1,74 +1,61 @@
-Also check out the [Buttons on Forms](../Forms/Buttons_on_Forms) page.
+This doc describes how to build buttons with DrupalGap.
+
+## Button Link
+
+The `dg.bl()` function is a quick way to create button links.
+
+Here's an example button that when clicked, will go to the app's user login page:
+
+```
+var linkText = dg.t('My Button Link');
+var linkPath = 'user/login';
+var linkHtml = dg.bl(linkText, linkPath);
+```
+
+Once you have the button's html, you can do whatever you want with it. A simple example is placing the html into the `_markup` within a render element.
+
+```
+var element = {};
+
+element.my_button_link = {
+  _markup: buttonLinkHtml
+};
+
+return element;
+```
 
 ## Button
-
-![Button Widget](http://drupalgap.org/sites/default/files/button-widget.png)
 
 Here's an example that creates a simple button. When the button is clicked, it will display a message.
 
 ```
-var content = {};
-content['my_button'] = {
-  theme: 'button',
-  text: 'My Button',
-  attributes: {
-    onclick: "drupalgap_alert('You clicked me!');"
+var element = {};
+
+element.my_button = {
+  _theme: 'button',
+  _value: dg.t('My Button'),
+  _attributes: {
+    onclick: "dg.alert(dg.t('You clicked me!'));"
   }
 };
-return content;
+
+return element;
 ```
 
-## Button Link
-
-![Button Link Widgets](http://drupalgap.org/sites/default/files/button-link-widget.png)
-
-Here's an example button link. When the button is clicked, the app will display node 123.
+Since creating buttons is such a common task, there's a shortcut to create a button's html by using `dg.b()`:
 
 ```
-var content = {};
-content['my_button_link'] = {
-  theme: 'button_link',
-  text: 'My Button Link',
-  path: 'node/123'
+var buttonHtml = dg.b(dg.t('My button'), {
+  _attributes: {
+      onclick: "dg.alert(dg.t('You clicked me!'));"
+    }
+});
+```
+
+Once you have the html, you can do whatever you want with it. A simple example is placing the html into the `_markup` within a render element.
+
+```
+element.my_button = {
+  _markup: buttonHtml
 };
-return content;
-```
-
-## Button Icons
-
-With [jQuery Mobile Icons](api.jquerymobile.com/icons/), we can use the `data-icon` attribute to set the icon on buttons.
-
-### Button Link with Icon
-
-![Button Widget with Icon](http://drupalgap.org/sites/default/files/button-widget-with-icon.png)
-
-```
-var content = {};
-content['my_button_link'] = {
-  theme: 'button_link',
-  text: 'My Button Link',
-  path: 'node/123',
-  attributes: {
-    'data-icon': 'cloud'
-  }
-};
-return content;
-```
-
-### Button Link with Only an Icon, no Text
-
-![Button Widget with no Text](http://drupalgap.org/sites/default/files/button-widget-no-text.png)
-
-```
-var content = {};
-content['my_button_link'] = {
-  theme: 'button_link',
-  text: 'My Button Link',
-  path: 'node/123',
-  attributes: {
-    'data-icon': 'cloud',
-    'data-iconpos': 'notext'
-  }
-};
-return content;
 ```
