@@ -10,7 +10,7 @@ http://example.com/app
 
 ### 2. Create a module
 
-Next, [create a custom DrupalGap module](../Modules/Create_a_Custom_Module) to power the app:
+Next, [create a custom DrupalGap module](Modules/Create_a_Custom_Module) to power the app:
 
 ```
 cd app
