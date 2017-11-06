@@ -30,8 +30,17 @@ dg.FormElementPrepare = function(FormElement, args) {
 
 };
 dg._formElementPrepare = function(FormElement, args) {
+
+  var element = args[1];
+
+  // Prep the element's attribute value if there is a _default_value and it hasn't already been set.
+  if (element && typeof element._default_value !== 'undefined' && typeof element._attributes.value === 'undefined') {
+    element._attributes.value = element._default_value;
+  }
+
+  // Attach the name, element and form to the FormElement object.
   FormElement.name = args[0];
-  FormElement.element = args[1]; // Holds the form element JSON object provided by the form builder.
+  FormElement.element = element; // Holds the form element JSON object provided by the form builder.
   FormElement.form = args[2];
   //FormElement.widgetType = 'FormElement';
 };

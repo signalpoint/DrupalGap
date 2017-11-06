@@ -136,3 +136,26 @@ dg.modules.system.blocks = function() {
   };
   return blocks;
 };
+
+/**
+ * Implements hook_pre_process_route_change
+ */
+function system_pre_process_route_change(newPath, oldPath) {
+
+  // Only make alterations to the 2nd route change and beyond, skip the initial route change during application startup.
+  if (typeof oldPath !== 'undefined') {
+
+    // Remove potential "no-[region:id]" class names from the body.before we change the route.
+    var blocks = dg.blocksLoad();
+    for (var name in blocks) {
+      if (!blocks.hasOwnProperty(name)) { continue; }
+      var block = blocks[name];
+      var region = block.getRegion(); // Upon initial boot, a block's region may not be set yet, so we check below.
+      if (region && region.getHiddenBlocks().length == region.getBlocks().length) {
+        dg.removeBodyClass('no-' + region.get('id'));
+      }
+    }
+
+  }
+
+}

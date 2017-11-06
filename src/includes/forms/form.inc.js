@@ -21,9 +21,10 @@ dg.theme_form = function(variables) {
   return dg.render({
     _markup: '<div ' + dg.attributes(variables._attributes) + '></div>',
     _postRender: [function() {
-      dg.addForm(variables._id, dg.applyToConstructor(factoryFunction)).getForm(variables).then(function(html) {
+      var formObj = dg.addForm(variables._id, dg.applyToConstructor(factoryFunction));
+      formObj.getForm(variables).then(function(html) {
         document.getElementById(variables._attributes.id).innerHTML = html;
-        dg.formAttachSubmissionHandler(formDomId);
+        if (dg.formHasActions(formObj.form)) { dg.formAttachSubmissionHandler(formDomId); }
         dg.runPostRenders();
       });
     }]
@@ -430,6 +431,30 @@ dg.loadForm = function(id) {
 dg.loadForms = function() { return this.forms; };
 dg.removeForm = function(id) { delete this.forms[id]; };
 dg.removeForms = function() { this.forms = {}; };
+
+/**
+ * Given a form, this will return true if it has an 'actions' element, false otherwise.
+ * @param form {Object} A form after it has been built, aka all elements are wrapped in containers.
+ * @returns {boolean}
+ */
+dg.formHasActions = function(form) {
+  var hasActions = false;
+  for (var name in form) {
+    if (!form.hasOwnProperty(name)) { continue; }
+    var element = form[name];
+    if (!element || !element._theme || element._theme != 'container' || !element._children) { continue; }
+    for (var _name in element._children) {
+      if (!element._children.hasOwnProperty(_name)) { continue; }
+      var _element = element._children[_name];
+      if (_element.name == 'actions') {
+        hasActions = true;
+        break;
+      }
+    }
+    if (hasActions) { break; }
+  }
+  return hasActions;
+};
 
 /**
  * Given a form id from the DOM, this will attach the internal submission handler event via JavaScript. The handler

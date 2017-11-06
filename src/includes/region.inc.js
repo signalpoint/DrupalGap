@@ -22,6 +22,8 @@ dg.Region = function(id, config) {
   if (!this._prefix) { this._prefix = ''; }
   if (!this._suffix) { this._suffix = ''; }
   if (!this._after) { this._after = ''; }
+
+  this._hidden_blocks = [];
 };
 
 /**
@@ -70,4 +72,18 @@ dg.Region.prototype.getBlocks = function() {
     result.push(sorted[sort]);
   }
   return result;
+};
+
+dg.Region.prototype.getHiddenBlocks = function() {
+  return this.get('hidden_blocks');
+};
+
+dg.Region.prototype.blockIsHidden = function(id) {
+  return jDrupal.inArray(id, this.getHiddenBlocks());
+};
+
+dg.Region.prototype.addHiddenBlock = function(id) {
+  if (!this.blockIsHidden(id)) {
+    this.getHiddenBlocks().push(id);
+  }
 };

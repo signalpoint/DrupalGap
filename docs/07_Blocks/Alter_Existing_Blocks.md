@@ -8,11 +8,6 @@ Here are a few examples of how to alter the builds for any block:
  */
 function my_module_blocks_build_alter(blocks) {
 
-  // Add some custom css classes to the block.
-  if (blocks.admin_menu) {
-    blocks.admin_menu._attributes['class'].push('medium-6', 'columns');
-  }
-
   // Move the logo block to the footer region for authenticated users.
   if (dg.currentUser().isAuthenticated()) {
     blocks.logo._region = 'footer';

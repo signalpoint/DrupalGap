@@ -1,32 +1,59 @@
 Ah, the dreaded white screen of death, le sigh.
 
-The WSOD is a common problem when first creating your app, or when first trying to run it in an emulator or compile it directly to your device. Where/when are you experiencing the WSOD?
+## Debugging the WSOD
 
-## cordova.js
+1. Set `jDrupal.settings.debug = true;` in your `settings.js` file
+2. Open the `Console` tab in your browser's development tools
+
+
+This allows you to see debug information and errors printed to the console log. It should reveal to you the error(s) causing the WSOD. Listed below are common WSOD conole log error messages and how to fix them.
+
+## Common WSOD Issues
+
+> Uncaught ReferenceError: jDrupal is not defined
+
+DrupalGap can't find jDrupal. First, make sure the `jdrupal.min.js` exists in your app's folder. If it doesn't, download jDrupal:
+
+```
+cd app
+wget https://raw.githubusercontent.com/signalpoint/jDrupal/8.x-1.x/jdrupal.min.js --no-check-certificate
+```
+
+Second, make sure `jdrupal.min.js` is included in your `index.html` file before the `drupalgap.min.js` file:
+
+```
+<script type="text/javascript" charset="utf-8" src="jdrupal.min.js"></script>
+```
+
+> GET https://example.com/jdrupal/connect?_format=json 403 (Forbidden)
+> GET https://example.com/jdrupal/connect?_format=json 404 (Not Found)
+> deviceready connect failed
+
+
+The jDrupal module for your Drupal 8 site is either not enabled, or not configured correctly. Refer to the [jDrupal README](http://cgit.drupalcode.org/jdrupal/tree/README.md) for more information.
+
+
+## WSOD while compiling to device
+
+The WSOD is a common problem when first compiling your app to an Android or iOS device. Again, the best way to debug this is to utilize your browser's `Console` tab in its development tools. In both cases, we're assuming your device is already connected to your computer via USB and you've successfully compiled the app, but are experiencing the WSOD.
+
+For Android devices, open Chrome, go to `Tools -> Inspect devices`, then click the `Console` tab to spot any errors.
+
+For iOS devices, open Safari, and use its developer tools to inspect your device, then click the `Console` tab to spot any errors.
+
+### cordova.js
 
 When we compile an app directly to our device for testing, we need to include the `cordova.js` file in the head of our index.html file. Take a look at the `cordova.index.html` file for an example of how to include the `cordova.js` file in your `index.html` file. If we don't include this file, and try to run an app directly on our device, we'll most likely get a WSOD.
 
-The `cordova.js` file is not required when building a web application.
+### Plugins
 
-## Ripple
+Did you install all the needed cordova plugins?
 
-Make sure you are accessing the app via the correct URL, for example:
-
-`http://www.example.com/app`
-
-It's worth noting that when testing an app inside of Ripple, the `cordova.js` file is most likely not needed. In most cases, it appears Ripple dynamically loads the `cordova.js` file into your app. Results may vary, so try including/excluding the `cordova.js` file in your `index.html` file for a fix.
-
-## Plugins
-
-When compiling directly to a device, did you [install the Cordova plugins](../../Compiling_a_Mobile_Application/Preparing_PhoneGap/Installing_PhoneGap) (step # 4)?
-
-## Accurately Debugging the WSOD
-
-First, be sure to set `jDrupal.settings.debug = true;` in your `settings.js` file, so you can watch debug information while it is printed to the console.
+## Digging deeper into the WSOD
 
 Next, stepping through the DrupalGap bootstrap process and printing messages to the `console.log()` each step of the way, is the absolute best way to debug the WSOD.
 
-You use can modify the `drupalgap.js` directly, or use `Grunt` or the makefile to `drupalgap.js` and `drupalgap.min.js` from the `src/` directory.
+You use can modify the `drupalgap.js` directly, or use `Grunt` to build the `drupalgap.js` and `drupalgap.min.js` from the `src/` directory.
 
 Once you're ready to place some `console.log()` statements in DrupalGap core, here are the first few functions that are called:
 

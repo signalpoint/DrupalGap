@@ -128,6 +128,7 @@ dg.setDocumentTitle = function(title) {
 };
 
 dg.setPageTitle = function(title) {
+  // @TODO this is wrong, we need to run it through the block render layer so hook alterations can be applied.
   var titleDiv = document.getElementById('title');
   if (titleDiv) { titleDiv.innerHTML = typeof title === 'string' ?
       dg.theme('title', { _title: title }) : dg.render(title); }
@@ -187,6 +188,19 @@ dg.attributesInit = function(element) {
   if (!attrs.class) { attrs.class = []; }
   else if (typeof attrs.class === 'string') { attrs.class = [attrs.class]; }
   element._attributes = attrs;
+};
+
+
+dg.setVar = function(name, value) {
+  return window.localStorage.setItem(name, JSON.stringify(value));
+};
+
+dg.getVar = function(name) {
+  return JSON.parse(window.localStorage.getItem(name));
+};
+
+dg.deleteVar = function(name) {
+  return window.localStorage.removeItem(name);
 };
 
 /**
@@ -252,6 +266,18 @@ dg.addClass = function(el, className) {
 
 dg.removeClass = function(el, className) {
   if (dg.hasClass(el, className)) { el.classList.remove(className); }
+};
+
+dg.getBody = function() {
+  return document.getElementsByTagName("BODY")[0];
+};
+
+dg.addBodyClass = function(className) {
+  dg.addClass(dg.getBody(), className);
+};
+
+dg.removeBodyClass = function(className) {
+  dg.removeClass(dg.getBody(), className);
 };
 
 /**

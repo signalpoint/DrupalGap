@@ -1,11 +1,8 @@
 // @inspiration http://krasimirtsonev.com/blog/article/A-modern-JavaScript-router-in-100-lines-history-api-pushState-hash-url
 
-// @TODO an individual Route item should be a JS Prototype instantiated by dg.bootstrap(),
-// and many of the helper functions below belong on that item prototype instead of in this
-// main router object.
-
 dg.router = {
   _activeRoute: null,
+  _stack: [],
   routes: [],
   mode: null,
   root: '/',
@@ -32,6 +29,10 @@ dg.router = {
     }
     return dg.removeQueryString(this.clearSlashes(fragment));
   },
+
+  /**
+   * @deprecated
+   */
   getFragment: function() {
     console.log('WARNING: getFragment() is deprecated, use getPath() instead.');
     return this.getPath();
@@ -63,26 +64,74 @@ dg.router = {
     return this;
   },
 
-  check: function(f) {
+  /**
+   * STACK
+   */
+  getStack: function() { return dg.router._stack; },
+  stackPush: function(route, path) {
+    dg.router.getStack().push({
+      key: route.key,
+      path: path
+    });
+  },
+  stackPop: function() { // @TODO figure out if the user is moving backwards
+    var stack = dg.router.getStack();
+    return stack.length ? stack.pop() : null;
+  },
 
-    var route = this.load(f);
-    if (route) {
+  /**
+   * Checks for a route to handle the path and executes the menu handler if one exists.
+   * @param {String} newPath The destination path.
+   * @param {String} oldPath The referral path (aka the last path).
+   * @returns {dg.router}
+   */
+  check: function(newPath, oldPath) {
+
+    var self = this;
+
+    if (newPath == '') { newPath = dg.getFrontPagePath(); }
+
+    // Give developers a chance to alter the path to check ,thereby potentially rerouting.
+    jDrupal.moduleInvokeAll('pre_process_route_change', newPath, oldPath).then(function(alters) {
+
+      // If anybody altered the path, take the first one, navigate to it and return, unless we're already there, then
+      // proceed with the original path.
+      if (alters && alters.length) {
+        for (var i = 0; i < alters.length; i++) {
+          var alter = alters[i];
+          if (!alter) { continue; }
+          if (alter != dg.getPath()) {
+            self.navigate(alter);
+            return;
+          }
+        }
+      }
+
+      // Try to load the route for this path, or throw a 404 if nobody can handle this.
+      var route = self.load(newPath);
+      if (!route) { // 404
+        console.log('dg.router.check() - 404?', newPath);
+        return;
+      }
+
+      // We have a route to handle the path...
 
       dg.removeForms();
 
-      var matches = this.matches(f).match;
+      var matches = self.matches(newPath).match;
 
       var menu_execute_active_handler = function(content) {
         dg.router.setActiveRoute(route);
+        dg.router.stackPush(route, dg.getPath());
         dg.content = content;
         dg.appRender();
-        jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath());
+        jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath(), oldPath);
       };
 
-      if (!route.defaults) { route = this.load(dg.getFrontPagePath()); }
+      if (!route.defaults) { route = self.load(dg.getFrontPagePath()); }
 
       //if (!route.defaults) { route = this.load('404'); } // @TODO properly handle 404
-      if (!this.meetsRequirements(route)) { route = this.load('403'); }
+      if (!self.meetsRequirements(route)) { route = self.load('403'); }
 
       if (route.defaults) {
 
@@ -117,16 +166,25 @@ dg.router = {
 
       }
 
-    }
+    });
+
     return this;
+
   },
+
+  /**
+   * Listens for a change to the route, and when it detects a change it calls "check" to see if anybody wants to handle
+   * the route.
+   * @returns {dg.router}
+   */
   listen: function() {
     var self = this;
     var current = self.getPath();
     var fn = function() {
       if(current !== self.getPath()) {
+        var old = current;
         current = self.getPath();
-        self.check(current);
+        self.check(current, old);
       }
     };
     clearInterval(this.interval);
@@ -162,9 +220,9 @@ dg.router = {
       // it only has to be computed once during bootstrap, then only the "f" needs to compute
       // a match count here.
       if (path && (
-          (f.match(/\//g) || []).length !=
-          (path.match(/\//g) || []).length
-      )) { continue; }
+              (f.match(/\//g) || []).length !=
+              (path.match(/\//g) || []).length
+          )) { continue; }
       var match = f.match(path);
       if (match) {
         return {
@@ -175,14 +233,15 @@ dg.router = {
     }
     return null;
   },
+
   navigate: function(path) {
     path = path ? path : '';
     if(this.mode === 'history') {
       var hPath = this.root + this.clearSlashes(path);
       history.pushState(
-        null,
-        null,
-        hPath
+          null,
+          null,
+          hPath
       );
     } else {
       if (dg.getPath() == path) { dg.reload(); } // Reload page.
@@ -203,6 +262,7 @@ dg.router = {
     if (route.requirements) {
       var requirements = route.requirements;
       if (requirements._role) { return dg.hasRole(requirements._role); }
+      else if (requirements._custom_access) { return requirements._custom_access(); }
     }
     return true;
   },
@@ -299,6 +359,21 @@ dg.router = {
     this.getChildRoutes(route).push(childKey);
   },
 
+  /**
+   * Saves a route as a child of a base route.
+   * @param route {String|Object} A child route key or object.
+   * @param baseRoute {String|Object} A base route key or object to use as the parent.
+   */
+  saveAsChildRoute: function(route, baseRoute) {
+    if (typeof route === 'string') { route = dg.router.loadRoute(route); }
+    if (typeof baseRoute === 'string') { baseRoute = dg.router.loadRoute(baseRoute); }
+    if (!route || !baseRoute) { return; }
+    if (!route.defaults._base_route) { route.defaults._base_route = baseRoute.key; }
+    if (!dg.router.hasChildRoutes(baseRoute)) { dg.router.initChildRoutes(baseRoute); }
+    dg.router.addChildRoute(baseRoute, route.key);
+    dg.router.saveRoute(baseRoute.key, baseRoute);
+  },
+
   getRouteKey: function(route) {
     if (!route) { route = this.getActiveRoute(); }
     return route.key;
@@ -316,7 +391,7 @@ dg.router = {
 
 };
 
- /**
+/**
  * Get the value of a query string
  * @see https://gomakethings.com/how-to-get-the-value-of-a-querystring-with-native-javascript/
  * @param  {String} field The field to get the value of
