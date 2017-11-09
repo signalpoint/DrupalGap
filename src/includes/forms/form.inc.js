@@ -421,13 +421,39 @@ dg.formSubmitButtonId = function(form) {
   return null;
 };
 
+/**
+ * Given a form id, and a function to build the form (function contains e.g. buildForm, validateForm, submitForm) this
+ * will instantiate a new dg.Form, set its id as a global variable and then return the dg.Form.
+ * @param {String} formId
+ * @param {Function }form
+ * @returns {dg.Form}
+ */
+dg.createForm = function(formId, form) {
+  form.prototype = new dg.Form(formId);
+  form.constructor = form;
+  window[formId] = form;
+  return form;
+};
+
 dg.addForm = function(id, form) {
   this.forms[id] = form;
   return this.forms[id];
 };
-dg.loadForm = function(id) {
-  return this.forms[id] ? this.forms[id] : null;
-};
+
+/**
+ * Given a form id, this will return true if its form builder function exists, false otherwise.
+ * @param id
+ * @returns {*}
+ */
+dg.formExists = function(id) { return jDrupal.functionExists(id); };
+
+/**
+ * Given a form id, this will return its Form instance if it exists, null otherwise.
+ * @param id
+ * @returns {Form|null}
+ */
+dg.loadForm = function(id) { return this.forms[id] ? this.forms[id] : null; };
+
 dg.loadForms = function() { return this.forms; };
 dg.removeForm = function(id) { delete this.forms[id]; };
 dg.removeForms = function() { this.forms = {}; };
