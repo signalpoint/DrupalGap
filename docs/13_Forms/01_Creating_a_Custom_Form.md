@@ -14,54 +14,58 @@ routes["my_module.say-hello"] = {
 
 ## Building the Form
 
-```
-/**
- * My form's constructor.
- */
-var MyModuleSayHelloForm = function() {
+1. decide on a *unique* name for our form such as `MyModuleSayHelloForm`
+2. add the `buildForm` handler function to specify what elements will be on the form to collect user input
+3. optional, attach a `validateForm` handler function for any custom validation to the form's input prior to submission
+4. add the `submitForm` handler functions  to decide what happens when the form is submitted
 
-  this.buildForm = function(form, formState) {
-    return new Promise(function(ok, err) {
-      form.name = {
-        _type: 'textfield',
-        _title: dg.t('Name'),
-        _required: true,
-        _title_placeholder: true
-      };
-      form.actions = {
-        _type: 'actions',
-        submit: {
-          _type: 'submit',
-          _value: dg.t('Say hello'),
-          _button_type: 'primary'
+Here's a code example:
+```
+dg.createForm('MyModuleSayHelloForm', function() {
+
+    this.buildForm = function(form, formState) {
+      return new Promise(function(ok, err) {
+        form.name = {
+          _type: 'textfield',
+          _title: dg.t('Name'),
+          _required: true,
+          _title_placeholder: true
+        };
+        form.actions = {
+          _type: 'actions',
+          submit: {
+            _type: 'submit',
+            _value: dg.t('Say hello'),
+            _button_type: 'primary'
+          }
+        };
+        ok(form);
+      });
+    };
+
+    this.validateForm = function(form, formState) {
+      return new Promise(function(ok, err) {
+        var name = formState.getValue('name');
+        if (name == 'bob') {
+          formState.setErrorByName('name', 'Sorry bob!');
         }
-      };
-      ok(form);
-    });
-  };
+        ok();
+      });
+    };
   
-  this.validateForm = function(form, formState) {
-    return new Promise(function(ok, err) {
-      if (formState.getValue('name') == 'bob') {
-        formState.setErrorByName('name', 'Sorry bob!');
-      }
-      ok();
-    });
-  };
+    this.submitForm = function(form, formState) {
+      return new Promise(function(ok, err) {
+        var msg = 'Hello ' + formState.getValue('name');
+        dg.alert(msg);
+        ok();
+      });
+    };
 
-  this.submitForm = function(form, formState) {
-    return new Promise(function(ok, err) {
-      var msg = 'Hello ' + formState.getValue('name');
-      dg.alert(msg);
-      ok();
-    });
-  };
-
-};
-// Extend the DrupalGap form prototype and attach my form's constructor.
-MyModuleSayHelloForm.prototype = new dg.Form('MyModuleSayHelloForm');
-MyModuleSayHelloForm.constructor = MyModuleSayHelloForm;
+});
 ```
+
+Once `dg.createForm()` is complete, `MyModuleSayHelloForm` will be available as a global variable for all to use and
+contain the `dg.Form` instance. Additionally, `dg.createForm()` returns the `dg.Form` instance for convenience.
 
 ## Form Validation
 
