@@ -19,9 +19,8 @@ Or manually create a `.js` file and copy/paste this snippet into it:
 `app/modules/custom/my_module/my_module.js`
 
 ```
-// Create the module and attach it to DrupalGap.
-var my_module = new dg.Module();
-dg.modules.my_module = my_module;
+// Create my module.
+dg.createModule('my_module');
 ```
 
 ### 2. Add it to index.html
