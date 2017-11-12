@@ -11,6 +11,17 @@ dg.Module.prototype.routing = function() {
   return null;
 };
 
-//dg.Module.prototype.blocks = function() {
-//  return null;
-//};
+/**
+ * Given a module name, this will create the corresponding DG8 module, attach it to the DOM and to the dg object, then
+ * it returns the dg.Module object.
+ * @param moduleName {String}
+ * @returns {dg.Module}
+ */
+dg.createModule = function(moduleName) {
+  var moduleExists = !!window[moduleName];
+  if (moduleExists) { return window[moduleName]; } // Don't let anyone overwrite a module.
+  var module = new dg.Module(); // Create the module.
+  window[moduleName] = module; // Attach it to the DOM.
+  dg.modules[moduleName] = module; // Attach a copy to DrupalGap.
+  return module;
+};
