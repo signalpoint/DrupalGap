@@ -33,4 +33,4 @@ Open the `index.html` file and include your module's **.js** file *after* the `s
 
 ## After Option A or B...
 
-Next, try [creating a custom route to display a page](Pages/Creating_a_Custom_Page).
+Next, try [creating a custom route to display a page](../Pages/Creating_a_Custom_Page).
