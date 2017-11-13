@@ -32,7 +32,8 @@ dg.modules.example.routing = function() {
         });
       }
     }
-  };  
+  };
+
   return routes;
 };
 ```
