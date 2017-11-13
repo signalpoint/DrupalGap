@@ -24,21 +24,6 @@ dg.modules.user.routing = function() {
       }
     }
   };
-  routes["user"] = {
-    "path": "/user\/(.*)",
-    "defaults": {
-      "_controller": function(uid) {
-        return new Promise(function(ok, err) {
-
-          dg.userLoad(uid).then(function(user) {
-            dg.entityRenderContent(user).then(ok);
-          });
-
-        });
-      },
-      "_title": "user"
-    }
-  };
   return routes;
 };
 
