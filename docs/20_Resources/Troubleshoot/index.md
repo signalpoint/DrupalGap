@@ -27,3 +27,7 @@ This probably means you forgot to include a theme's `.js` file in the `<head>` o
 > Uncaught TypeError: a.replace is not a function at Object.dg.getCamelCase
 
 This probably means you've created a `form.id` element on your form. The `id` element is reserved by DrupalGap, and overwriting it may lead to unintended consequences.
+
+> GET https://www.example.com/node/123?_format=json 406 (Not Acceptable)
+
+You need to enable the `Content` Resource at `admin/config/services/rest`, then enable `GET`, `JSON` and `cookie`.
