@@ -296,9 +296,14 @@ dg.router = {
     return path;
   },
 
+  /**
+   * Returns the active route object.
+   * @returns {object}
+   */
   getActiveRoute: function() {
     return this._activeRoute;
   },
+
   getRouteIndex: function(key) {
     var routes = this.getRoutes();
     for (var i = 0; i < routes.length; i++) {
