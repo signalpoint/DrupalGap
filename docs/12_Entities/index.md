@@ -1,24 +1,41 @@
-A typical mobile application for a Drupal website will want to have access to nodes, users, comments, etc. Luckily DrupalGap supports the Core Entity Bundles provided by Drupal.
+A typical mobile application for a Drupal website will want to have access to nodes, users, comments, etc. Luckily DrupalGap has some handy features to make that task easier.
 
-DrupalGap provides [built-in pages for your mobile app](Pages/Built_in_Pages) that support viewing and editing core entities. For example, here are some typical page paths within DrupalGap for viewing and editing entities:
+## Viewing Entities
 
-- `#node/123`
-- `#node/123/edit`
-- `#user/456`
-- `#user/456/edit`
+DrupalGap has a built in `_controller` for Routes that will load and deliver an entity to a `_handler`, which in turn can decide how to render the entity on the page.
 
-If you are familiar with the paths on your Drupal site, the DrupalGap paths above will look very familiar. So familiar in fact, they are the same paths used by Drupal!
-
-It is also easy to load entities from your Drupal site into your DrupalGap mobile application. These example functions are available within DrupalGap:
+As an example, here's a route (that you can attach to a custom module's `routing` function) to display Article nodes:
 
 ```
-jDrupal.nodeLoad(123).then(function(node) {
-  var msg = 'Loaded : ' + node.getTitle();
-  console.log(msg);
-});
+routes['article'] = {
+  path: "/article/(.*)",
+  defaults: {
+    _title: 'Article',
+    _entity_type: 'node',
+    _controller: dg.entityController,
+    _handler: my_module.articleController
+  }
+};
+```
 
-$.userLoad(456).then(function(account) {
-  var msg = 'Loaded : ' + account.getAccountName();
-  console.log(msg);
-});
+And then you can decide how to render the entity with your `_handler` function:
+
+```
+my_module.articleController = function(node, ok, error) {
+
+  // Update the page title with the article title.
+  dg.setTitle(node.getTitle() + '!');
+
+  // Build the element to render the article.
+  var element = {};
+
+  // Stringify the node and display it as markup.
+  element.foo = {
+    _markup: JSON.stringify(node)
+  };
+
+  // Send the element back to be rendered.
+  ok(element);
+
+};
 ```
