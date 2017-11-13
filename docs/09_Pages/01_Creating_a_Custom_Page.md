@@ -10,6 +10,8 @@ To create a custom page in our DrupalGap mobile application, follow these steps:
 
 ## 2. Add a route
 
+In your e.g. `my_module.js` file, you can declare route(s) to display page(s) within your app by implementing the `routing` function:
+
 ```
 /**
  * Defines custom routes for my_module.
