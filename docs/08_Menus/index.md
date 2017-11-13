@@ -13,4 +13,4 @@ DrupalGap comes packaged with a few system menus:
 - main_menu
 - navigation
 
-Similar to the example above, each of these menus also has a matching block that can be placed into a region wihtin our app's theme.
+Similar to the example above, each of these menus also has a matching block that can be placed into a region within our app's theme.
