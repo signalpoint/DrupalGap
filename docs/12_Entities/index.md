@@ -4,6 +4,8 @@ A typical mobile application for a Drupal website will want to have access to no
 
 DrupalGap has a built in `_controller` for Routes that will load and deliver an entity to a `_handler`, which in turn can decide how to render the entity on the page.
 
+### The Route
+
 As an example, here's a route (that you can attach to a custom module's `routing` function) to display Article nodes:
 
 ```
@@ -17,6 +19,8 @@ routes['article'] = {
   }
 };
 ```
+
+### The Handler for the Controller
 
 And then you can decide how to render the entity with your `_handler` function:
 
