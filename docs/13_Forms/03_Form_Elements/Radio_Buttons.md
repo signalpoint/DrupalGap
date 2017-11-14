@@ -4,12 +4,12 @@ Also, check out the [Radio Button Widget](../../Widgets/Radio_Button_Widget) pag
 
 ```
 form.elements.my_radio_buttons = {
-  title: 'Radio Station',
-  type: 'radios',
-  options: {
-    0: 'Rock and Roll',
-    1: 'Metal'
+  _title: dg.t('Radio Station'),
+  _type: 'radios',
+  _options: {
+    0: dg.t('Rock and Roll'),
+    1: dg.t('Metal')
   },
-  default_value:1
+  _default_value: 1
 };
 ```
