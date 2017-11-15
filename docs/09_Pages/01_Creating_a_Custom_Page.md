@@ -20,11 +20,11 @@ my_module.routing = function() {
   var routes = {};
 
   // My example page route.
-  routes["my_module.example"] = {
-    "path": "/hello-world",
-    "defaults": {
-      "_title": "Hello World",
-      "_controller": function() {
+  routes['my_module.example'] = {
+    path: '/hello-world',
+    defaults: {
+      _title: 'Hello World',
+      _controller: function() {
         return new Promise(function(ok, err) {
         
           // Make a greeting for the current user.
@@ -63,6 +63,4 @@ To view the newly created custom page, we could set our App's front page to the 
 dg.settings.front = 'hello-world';
 ```
 
-Now when we load the App, we should see our custom page:
-
-*Screenshot needed*
+Now when we load the App, we should see our custom page.
