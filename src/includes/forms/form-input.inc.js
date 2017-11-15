@@ -98,9 +98,7 @@ dg.theme_radios = function(variables) {
         name: variables._attributes.name
       }
     };
-    if (variables._default_value && variables._default_value[value]) {
-      checkboxVariables._default_value = variables._default_value[value];
-    }
+    if (variables._default_value == value) { radioVariables._attributes.checked = 'checked'; }
     html += '<div>' + dg.theme('radio', radioVariables) + '</div>';
   }
   return '<div ' + dg.attributes(variables._attributes) + '>' + html + '</div>';
