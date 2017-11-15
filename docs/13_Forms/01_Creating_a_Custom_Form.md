@@ -3,11 +3,11 @@ To create a custom form in DrupalGap, place code like this in your [custom Drupa
 ## Create a Custom Route to View the Form
 
 ```
-routes["my_module.say-hello"] = {
-  "path": "/say-hello",
-  "defaults": {
-    "_form": 'MyModuleSayHelloForm',
-    "_title": "Say hello"
+routes['my_module.say-hello'] = {
+  path: '/say-hello',
+  defaults: {
+    _title: "Say hello",
+    _form: 'MyModuleSayHelloForm',
   }
 };
 ```
