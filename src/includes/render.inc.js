@@ -111,17 +111,7 @@ dg.appRender = function(content) {
 
             // Build the block, render it and inject it into the DOM.
             visibility.block.buildWrapper().then(function(_block) {
-              var _id = dg.cleanCssIdentifier(_block.get('id'));
-              var el = document.getElementById(_id);
-              var rendered = dg.render(_block.get('content'));
-              if (el) { el.innerHTML = rendered; }
-              else {
-                // The element isn't in the DOM yet, set a timeout to wait for it.
-                setTimeout(function(elId) {
-                  var el = document.getElementById(elId);
-                  if (el) { el.innerHTML = rendered; }
-                }, 1, _id);
-              }
+              _block.render();
               finish(_block);
             });
 
