@@ -17,12 +17,6 @@ cd app
 ./dg create module example
 ```
 
-And then include it in the `<head>` of the app's `index.html` file:
-
-```
-<script src="modules/custom/example/example.js"></script>
-```
-
 ### 3. Create a route
 
 Next, we'll [create a route for the page](Pages/Creating_a_Custom_Page) in the `example.js` file:
@@ -47,6 +41,8 @@ example.routing = function() {
   return routes;
 };
 ```
+
+You'll notice the `create module` command has already provided the `routing` function for you. You can use it as a starting grounds.
 
 ### 4. Render the page
 
