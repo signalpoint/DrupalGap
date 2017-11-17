@@ -86,6 +86,20 @@ dg.Block.prototype.buildWrapper = function() {
   });
 };
 
+dg.Block.prototype.render = function() {
+  var _id = dg.cleanCssIdentifier(this.get('id'));
+  var el = document.getElementById(_id);
+  var rendered = dg.render(this.get('content'));
+  if (el) { el.innerHTML = rendered; }
+  else {
+    // The element isn't in the DOM yet, set a timeout to wait for it.
+    setTimeout(function(elId) {
+      var el = document.getElementById(elId);
+      if (el) { el.innerHTML = rendered; }
+    }, 1, _id);
+  }
+};
+
 /**
  * A stub function for a block's build.
  * @returns {*}
@@ -252,8 +266,19 @@ dg.blocksLoad = function() {
 };
 
 /**
- *
- * @param id
- * @returns {null}
+ * Given a block name (aka id), this will return the Block object if it exists, null otherwise.
+ * @param id {String} The block name/id.
+ * @returns {dg.Block|null}
  */
 dg.blockLoad = function(id) { return dg.blocks[id] ? dg.blocks[id] : null; };
+
+/**
+ * Given a block name, this will refresh its content. The block must already be on the page.
+ * @param name
+ */
+dg.blockRefresh = function(name) {
+  var block = dg.blockLoad(name);
+  block.buildWrapper().then(function(_block) {
+    block.render();
+  });
+};
