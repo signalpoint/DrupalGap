@@ -25,24 +25,22 @@ my_module.routing = function() {
     defaults: {
       _title: 'Hello World',
       _controller: function() {
-        return new Promise(function(ok, err) {
         
-          // Make a greeting for the current user.
-          var account = dg.currentUser();
-          var msg = account.isAuthenticated() ?
-            'Hello ' + account.getAccountName() :
-            'Hello World';
+        // Make a greeting for the current user.
+        var account = dg.currentUser();
+        var msg = account.isAuthenticated() ?
+          'Hello ' + account.getAccountName() :
+          'Hello World';
 
-          // Prepare our page's render element(s).
-          var element = {};
-          element['my_widget'] = {
-            _markup: '<p>' + msg + '</p>'
-          };
+        // Prepare our page's render element(s).
+        var element = {};
+        element['my_widget'] = {
+          _markup: '<p>' + msg + '</p>'
+        };
 
-          // Send the element back to be rendered on the page.
-          ok(element);
+        // Send the element back to be rendered on the page.
+        ok(element);
 
-        });
       }
     }
   };
@@ -64,3 +62,4 @@ dg.settings.front = 'hello-world';
 ```
 
 Now when we load the App, we should see our custom page.
+
