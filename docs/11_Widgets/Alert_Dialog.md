@@ -8,7 +8,9 @@ This function is asynchronous, so any code after it will continue to run. Howeve
 
 ```
 dg.alert(dg.t('Hello World'), {
-    alertCallback: function() { /* do something when the alert is closed... */ }
+    alertCallback: function() {
+      // do something when the alert is closed...
+    }
 });
 ```
 
