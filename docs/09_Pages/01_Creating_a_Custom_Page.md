@@ -25,26 +25,30 @@ my_module.routing = function() {
     defaults: {
       _title: 'Hello World',
       _controller: function() {
-        
+
+        // Prepare our page's render element.
+        var element = {};
+
         // Make a greeting for the current user.
         var account = dg.currentUser();
         var msg = account.isAuthenticated() ?
-          'Hello ' + account.getAccountName() :
-          'Hello World';
+          dg.t('Hello @name', {
+            '@name': account.getAccountName()
+          }) : dg.t('Hello World');
 
-        // Prepare our page's render element(s).
-        var element = {};
+        // Add the greeting as a message to our element.
         element['my_widget'] = {
-          _markup: '<p>' + msg + '</p>'
+          _theme: 'message',
+          _message: msg
         };
 
-        // Send the element back to be rendered on the page.
-        ok(element);
+        // Send it back to be rendered on the page.
+        return element;
 
       }
     }
   };
-  
+
   // Add another route here, if you want...
 
   // Returns the routes.

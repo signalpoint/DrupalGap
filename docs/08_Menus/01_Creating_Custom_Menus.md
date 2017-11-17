@@ -10,8 +10,8 @@ return new Promise(function(ok, err) {
   content['my_markup'] = {
     _theme: 'item_list',
     _items: [
-      dg.l('Food', 'food'),
-      dg.l('Beverage', 'beverage')
+      dg.l(dg.t('Food'), 'food'),
+      dg.l(dg.t('Beverage'), 'beverage')
     ]
   };
   ok(content);

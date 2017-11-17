@@ -49,24 +49,24 @@ You'll notice the `create module` command has already provided the `routing` fun
 Next, add this code inside the route's `_controller` function in the `example.js` file to render the page:
 
 ```
-return new Promise(function(ok, err) {
+// Prepare our page's render element.
+var element = {};
 
-  // Make a greeting for the current user.
-  var account = dg.currentUser();
-  var msg = account.isAuthenticated() ?
-    'Hello ' + account.getAccountName() :
-    'Hello World';
+// Make a greeting for the current user.
+var account = dg.currentUser();
+var msg = account.isAuthenticated() ?
+  dg.t('Hello @name', {
+    '@name': account.getAccountName()
+  }) : dg.t('Hello World');
 
-  // Prepare our page's render element.
-  var element = {};
-  element['my_widget'] = {
-    _markup: '<p>' + msg + '</p>'
-  };
+// Add the greeting as a message to our element.
+element['my_widget'] = {
+  _theme: 'message',
+  _message: msg
+};
 
-  // Send it back to be rendered on the page.
-  ok(element);
-
-});
+// Send it back to be rendered on the page.
+return element;
 ```
 
 ### 5. Run the App!
