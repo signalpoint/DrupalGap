@@ -6,10 +6,10 @@ First, we need to include the Google Maps Javascript File in the `index.html` fi
 
 ```
 <!-- Google Maps -->
-<script src="https://maps.googleapis.com/maps/api/js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=abc123"></script>
 ```
 
-This should go in the `<head>` of the of the `index.html` file (after the inclusion of the `drupalgap.min.js` file) for the app.
+This should go in the `<head>` of the of the `index.html` file (after the inclusion of the `drupalgap.min.js` file) for the app, and be sure to replace the value of `key` in the URL with your Google Maps API Key from the Google API Console.
 
 ## Create a Page to Display a Map
 
