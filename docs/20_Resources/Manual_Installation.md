@@ -1,13 +1,13 @@
-If the DrupalGap `install` script isn't working for you, you can try these terminal commands:
+To manually install DrupalGap 8, you can copy/paste these terminal commands once you `cd` into your Drupal root folder (or wherever you want to create the app, just replace `app` with your desired folder name):
 
 ```
 cd drupal
-wget https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip
+wget https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip || curl -O https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip
 unzip 8.x-1.x.zip
 mv DrupalGap-8.x-1.x/ app
 rm 8.x-1.x.zip
 cd app
-wget https://raw.githubusercontent.com/easystreet3/jDrupal/8.x-1.x/jdrupal.min.js --no-check-certificate
+wget https://raw.githubusercontent.com/easystreet3/jDrupal/8.x-1.x/jdrupal.min.js --no-check-certificate || curl -O https://raw.githubusercontent.com/easystreet3/jDrupal/8.x-1.x/jdrupal.min.js
 cp default.settings.js settings.js
 ```
 
@@ -15,8 +15,7 @@ When you're done, the sdk should live here:
 
 ```
 http://example.com/app/drupalgap.min.js
-http://example.com/app/jdrupal.min.js
-http://example.com/app/index.html
+http://example.com/app/...
 ...
 ```
 
