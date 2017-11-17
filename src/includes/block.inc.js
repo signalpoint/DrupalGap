@@ -86,6 +86,9 @@ dg.Block.prototype.buildWrapper = function() {
   });
 };
 
+/**
+ * Renders the block (after its buildWrapper has been ran) and injects it into the block's placeholder in the DOM.
+ */
 dg.Block.prototype.render = function() {
   var _id = dg.cleanCssIdentifier(this.get('id'));
   var el = document.getElementById(_id);
