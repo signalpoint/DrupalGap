@@ -254,9 +254,25 @@ dg.router = {
   getRoutes: function() {
     return this.routes;
   },
+
+
+
+  /**
+   * Returns the active route object.
+   * @returns {object}
+   */
+  getActiveRoute: function() {
+    return this._activeRoute;
+  },
+
+  /**
+   * Sets the active route object.
+   * @param {object} route
+   */
   setActiveRoute: function(route) {
     this._activeRoute = route;
   },
+
   meetsRequirements: function(route) {
     if (!route) { route = this.getActiveRoute(); }
     if (route.requirements) {
@@ -294,14 +310,6 @@ dg.router = {
     }
 
     return path;
-  },
-
-  /**
-   * Returns the active route object.
-   * @returns {object}
-   */
-  getActiveRoute: function() {
-    return this._activeRoute;
   },
 
   getRouteIndex: function(key) {
