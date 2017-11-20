@@ -4,9 +4,11 @@ When debugging and troubleshooting, it is advised to change your `index.html` fi
 
 ## Common errors
 
-> Set the sitePath in the settings.js file
+> settings.js file
 
-You either forgot to set the `sitePath` variable in the `settings.js` file, or there is a syntax error in your `settings.js` file.
+Double check the `sitePath` variable in the `settings.js` file is pointing to your Drupal 8 website.
+
+Be careful not to leave any syntax errors in your `settings.js` file, as this will most likely cause a WSOD for the app.
 
 > Testing connection...
 

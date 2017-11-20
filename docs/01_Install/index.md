@@ -13,27 +13,17 @@ Go to your Drupal root folder and run the DrupalGap `install` script, or you can
 
 ```
 cd drupal
-./modules/contrib/drupalgap/scripts/install app
+./modules/contrib/drupalgap/scripts/install app https://www.example.com
 ```
 
-### 4. Tell the SDK Where Drupal Lives
+This will create a folder called `app`, place the DrupalGap SDK inside of it, create a `settings.js` file for the app and then set the `sitePath` variable to `https://www.example.com`.
 
-1. Make a copy of the app's `default.settings.js` file and save it as `settings.js`
-2. Open the `settings.js` file and set the `sitePath` value to `http://example.com`
-3. Save the file
-
-```
-cd app
-cp default.settings.js settings.js
-vim settings.js
-```
-
-### 5. Done!
+## Done
 
 This sets up an empty web app. You can easily add [other types of apps](Introduction/Types_of_Applications) later, all with only `one set of code`.
 
 > Demo it in a browser by visiting:
 
 ```
-http://example.com/app
+https://www.example.com/app
 ```

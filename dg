@@ -171,24 +171,20 @@ $MODULE_NAME.routing = function() {
       \"_title\": \"Hello World\",
       \"_controller\": function() {
 
-        return new Promise(function(ok, err) {
+        // Make a greeting for the current user.
+        var account = dg.currentUser();
+        var msg = account.isAuthenticated() ?
+          'Hello ' + account.getAccountName() :
+          'Hello World';
 
-          // Make a greeting for the current user.
-          var account = dg.currentUser();
-          var msg = account.isAuthenticated() ?
-            'Hello ' + account.getAccountName() :
-            'Hello World';
+        // Prepare our page's render element.
+        var element = {};
+        element['my_widget'] = {
+          _markup: '<p>' + msg + '</p>'
+        };
 
-          // Prepare our page's render element.
-          var element = {};
-          element['my_widget'] = {
-            _markup: '<p>' + msg + '</p>'
-          };
-
-          // Send the element back to be rendered on the page.
-          ok(element);
-
-        });
+        // Send the element back to be rendered on the page.
+        ok(element);
 
       }
     }

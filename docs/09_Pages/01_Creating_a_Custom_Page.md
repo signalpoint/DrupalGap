@@ -20,33 +20,35 @@ my_module.routing = function() {
   var routes = {};
 
   // My example page route.
-  routes["my_module.example"] = {
-    "path": "/hello-world",
-    "defaults": {
-      "_title": "Hello World",
-      "_controller": function() {
-        return new Promise(function(ok, err) {
-        
-          // Make a greeting for the current user.
-          var account = dg.currentUser();
-          var msg = account.isAuthenticated() ?
-            'Hello ' + account.getAccountName() :
-            'Hello World';
+  routes['my_module.example'] = {
+    path: '/hello-world',
+    defaults: {
+      _title: 'Hello World',
+      _controller: function() {
 
-          // Prepare our page's render element(s).
-          var element = {};
-          element['my_widget'] = {
-            _markup: '<p>' + msg + '</p>'
-          };
+        // Prepare our page's render element.
+        var element = {};
 
-          // Send the element back to be rendered on the page.
-          ok(element);
+        // Make a greeting for the current user.
+        var account = dg.currentUser();
+        var msg = account.isAuthenticated() ?
+          dg.t('Hello @name', {
+            '@name': account.getAccountName()
+          }) : dg.t('Hello World');
 
-        });
+        // Add the greeting as a message to our element.
+        element['my_widget'] = {
+          _theme: 'message',
+          _message: msg
+        };
+
+        // Send it back to be rendered on the page.
+        return element;
+
       }
     }
   };
-  
+
   // Add another route here, if you want...
 
   // Returns the routes.
@@ -63,6 +65,5 @@ To view the newly created custom page, we could set our App's front page to the 
 dg.settings.front = 'hello-world';
 ```
 
-Now when we load the App, we should see our custom page:
+Now when we load the App, we should see our custom page.
 
-*Screenshot needed*

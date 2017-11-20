@@ -17,12 +17,6 @@ cd app
 ./dg create module example
 ```
 
-And then include it in the `<head>` of the app's `index.html` file:
-
-```
-<script src="modules/custom/example/example.js"></script>
-```
-
 ### 3. Create a route
 
 Next, we'll [create a route for the page](Pages/Creating_a_Custom_Page) in the `example.js` file:
@@ -48,29 +42,31 @@ example.routing = function() {
 };
 ```
 
+You'll notice the `create module` command has already provided the `routing` function for you. You can use it as a starting grounds.
+
 ### 4. Render the page
 
 Next, add this code inside the route's `_controller` function in the `example.js` file to render the page:
 
 ```
-return new Promise(function(ok, err) {
+// Prepare our page's render element.
+var element = {};
 
-  // Make a greeting for the current user.
-  var account = dg.currentUser();
-  var msg = account.isAuthenticated() ?
-    'Hello ' + account.getAccountName() :
-    'Hello World';
+// Make a greeting for the current user.
+var account = dg.currentUser();
+var msg = account.isAuthenticated() ?
+  dg.t('Hello @name', {
+    '@name': account.getAccountName()
+  }) : dg.t('Hello World');
 
-  // Prepare our page's render element.
-  var element = {};
-  element['my_widget'] = {
-    _markup: '<p>' + msg + '</p>'
-  };
+// Add the greeting as a message to our element.
+element['my_widget'] = {
+  _theme: 'message',
+  _message: msg
+};
 
-  // Send it back to be rendered on the page.
-  ok(element);
-
-});
+// Send it back to be rendered on the page.
+return element;
 ```
 
 ### 5. Run the App!

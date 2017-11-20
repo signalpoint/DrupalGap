@@ -1,5 +1,3 @@
-
-
 Blocks are located within regions, within a [theme](Themes). The content displayed inside the block is decided by whomever created the block.
 
 ## System Blocks
