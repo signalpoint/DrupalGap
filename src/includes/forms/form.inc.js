@@ -515,9 +515,17 @@ dg.loadFormFromInterface = function(form) {
   return dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(form._attributes.id)));
 };
 
-dg.isFormElement = function(prop, obj) {
-  return typeof obj == 'object' && obj.hasOwnProperty(prop) && prop.charAt(0) != '_';
+/**
+ * Given a form element name and a form, this will return true if an element on the form exists that matches the
+ * given name, false otherwise.
+ * @param name {Object}
+ * @param form {Object}
+ * @returns {boolean}
+ */
+dg.isFormElement = function(name, form) {
+  return typeof form == 'object' && form.hasOwnProperty(name) && name.charAt(0) != '_';
 };
+
 dg.isFormProperty = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
 };
