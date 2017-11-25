@@ -2,7 +2,7 @@
 
 # If the module is enabled, disable it (aka remove it's min.js file from the index.html file).
 File=index.html
-if grep -q "$PROJECT".min.js "$File"; then
+if grep -q "$PROJECT".min.js "$File" || grep -q "$PROJECT".js "$File" ; then
 
   # Ask for confirmation to disable.
   read -p "Disable $PROJECT, are you sure? " -n 1 -r
