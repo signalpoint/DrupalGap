@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # @TODO this file is getting huge, break it up into smaller scripts.
 
@@ -200,8 +200,16 @@ create)
     theme) drupalgap_create_theme $3;;
   esac
   ;;
+disable|dis)
+  (. ./scripts/dg/_init.sh $@ && ./scripts/dg/disable.sh $@)
+  ;;
 download|dl) ./scripts/dg/download.sh $@ ;;
-enable|en) ./scripts/dg/enable.sh $@ ;;
+enable|en)
+  (. ./scripts/dg/_init.sh $@ && ./scripts/dg/enable.sh $@)
+  ;;
+install)
+  (. ./scripts/dg/_init.sh $@ && ./scripts/dg/install.sh $@)
+  ;;
 update|up) ./scripts/dg/update.sh $@ ;;
 -*) usage "Unknown command: $1";;
 esac
