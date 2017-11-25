@@ -1,4 +1,4 @@
-Ah, the dreaded white screen of death, le sigh.
+Ah, the dreaded white screen of death, le sigh. This page should help in resolving the WSOD, and so should the [Troubleshoot Page](Resources/Troubleshoot).
 
 ## Debugging the WSOD
 
@@ -32,6 +32,9 @@ Second, make sure `jdrupal.min.js` is included in your `index.html` file before 
 
 The jDrupal module for your Drupal 8 site is either not enabled, or not configured correctly. Refer to the [jDrupal README](http://cgit.drupalcode.org/jdrupal/tree/README.md) for more information.
 
+> Failed to load resource: net::ERR_NETWORK_CHANGED
+
+If this mentions a `xhr network status problem for csrf token`, check that your Drupal site is online and that you have an Internet connection. If your app is behind a VPN, make sure you are connected to that as well.
 
 ## WSOD while compiling to device
 
