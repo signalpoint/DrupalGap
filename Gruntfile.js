@@ -7,10 +7,7 @@ var drupalgap_grunt_src = [
   'src/includes/entity.inc.js',
 
   'src/includes/forms/form.inc.js',
-  'src/includes/forms/form-element.inc.js',
-  'src/includes/forms/form-input.inc.js',
-  'src/includes/forms/form-state.inc.js',
-  'src/includes/forms/form-widget.inc.js',
+  'src/includes/forms/form-*.inc.js',
   'src/includes/forms/elements/element.*.js',
 
   'src/includes/field-definition.inc.js',

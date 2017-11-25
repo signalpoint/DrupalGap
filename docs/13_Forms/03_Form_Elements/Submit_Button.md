@@ -1,3 +1,19 @@
+## Add submit button to form
+
+Here's a quick example of a submit button that can be used within a `buildForm` function:
+
+```
+form.actions = {
+  _type: 'actions',
+  submit: {
+    _type: 'submit',
+    _value: dg.t('Save')
+  }
+};
+```
+
+## Submit button behavior
+
 DrupalGap automatically disables a form's submit button when the form is submitted. Upon any validation errors, DrupalGap will re-enable the submit button automatically.
 
 To control the status of a form's submit button, try these helper functions:

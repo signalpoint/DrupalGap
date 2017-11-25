@@ -159,3 +159,16 @@ function system_pre_process_route_change(newPath, oldPath) {
   }
 
 }
+
+/**
+ * A form submit handler for config forms. Iterates over each element on the form and sticks its form state value into
+ * local storage.
+ * @param form
+ * @param formState
+ */
+dg.modules.system.configFormSubmit = function(form, formState) {
+  for (var name in form) {
+    if (!dg.isFormElement(name, form) || name == 'actions') { continue; }
+    dg.setVar(name, formState.getValue(name));
+  }
+};
