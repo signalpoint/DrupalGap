@@ -15,64 +15,10 @@ DRUPALGAP_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.
 export APP_MODULES_DIRECTORY
 export APP_MODULES_CONTRIB_DIRECTORY
 export APP_MODULES_CUSTOM_DIRECTORY
-
-# UPDATE
-function drupalgap_update() {
-
-  # Create the drupalgap_backups directory if it doesn't already exit.
-  if [ ! -d "$APP_BACKUPS_DIRECTORY" ]
-    then
-      mkdir $APP_BACKUPS_DIRECTORY
-  fi
-
-  # Create a directory to store this round of backups.
-  TEMP_DIR="$APP_BACKUPS_DIRECTORY/"
-  TEMP_DIR+=$(date +%Y%m%d%H%M%S)
-  mkdir $TEMP_DIR
-
-  # Ask them if they're sure?
-  read -p "Are you sure you want to update the DrupalGap SDK? " -n 1 -r
-  echo    # (optional) move to a new line
-  if [[ ! $REPLY =~ ^[Yy]$ ]]
-  then
-    rmdir $TEMP_DIR
-    exit 1
-  fi
-
-  # Make a copy of the current bin directory.
-  cp -r drupalgap.js drupalgap.min.js $TEMP_DIR
-
-  # If drupalgap.js or drupalgap.min.js exist, remove them.
-  if [ -f drupalgap.js ]; then
-    rm drupalgap.js
-  fi
-  if [ -f drupalgap.min.js ]; then
-    rm drupalgap.min.js
-  fi
-
-  # Download the latest binaries.
-  wget "$DRUPALGAP_JS_URL" --no-check-certificate
-  wget "$DRUPALGAP_MIN_JS_URL" --no-check-certificate
-
-  # Let the developer know what happened.
-  echo -e "Backups saved to: $TEMP_DIR\nDrupalGap SDK update complete!"
-
-  # Warn the developer if their index.html file needs to be updated.
-  FOUND_BIN=false
-  if grep -Fq "drupalgap.js"  index.html
-  then
-      FOUND_BIN=true
-  fi
-  if ! $FOUND_BIN && grep -Fq "drupalgap.min.js" index.html
-  then
-      FOUND_BIN=true
-  fi
-  if ! $FOUND_BIN
-  then
-    echo "NOTE, update the index.html file to load: drupalgap.min.js"
-  fi
-
-}
+export APP_THEMES_DIRECTORY
+export APP_BACKUPS_DIRECTORY
+export DRUPALGAP_JS_URL
+export DRUPALGAP_MIN_JS_URL
 
 # MODULE CREATE
 function drupalgap_create_module() {
@@ -255,6 +201,7 @@ create)
   esac
   ;;
 download|dl) ./scripts/dg/download.sh $@ ;;
-update|up) drupalgap_update;;
+enable|en) ./scripts/dg/enable.sh $@ ;;
+update|up) ./scripts/dg/update.sh $@ ;;
 -*) usage "Unknown command: $1";;
 esac
