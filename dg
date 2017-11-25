@@ -11,64 +11,10 @@ APP_BACKUPS_DIRECTORY=".drupalgap-backups"
 DRUPALGAP_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.js"
 DRUPALGAP_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.min.js"
 
-# DL | DOWNLOAD
-function drupalgap_download_project() {
-
-  # Make sure they provided a project name.
-  if [ -z "$1" ]
-    then
-      echo -e "Missing project name... try this:\n./drupalgap dl foo"
-      exit 1
-  fi
-
-  # Create default directories if they don't exist.
-  if [ -d "$APP_MODULES_DIRECTORY" ]; then
-      mkdir "$APP_MODULES_DIRECTORY"
-  fi
-  if [ -d "$APP_MODULES_CONTRIB_DIRECTORY" ]; then
-      mkdir "$APP_MODULES_CONTRIB_DIRECTORY"
-  fi
-
-  # @TODO support Macs with curl instead of wget
-
-  # Grab the project name and determine the destination directory for it.
-  PROJECT="$1"
-  MODULE_DIR="$APP_MODULES_CONTRIB_DIRECTORY/$PROJECT"
-
-  # Check to see if the project already exists.
-  if [ -d "$MODULE_DIR" ]; then
-    read -p "The $PROJECT project already exists, overwrite it? " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ ! $REPLY =~ ^[Yy]$ ]]
-    then
-      exit 1
-    else
-      rm -rf "$MODULE_DIR"
-      echo "Removed $MODULE_DIR directory"
-    fi
-  fi
-
-  # Determine which branch to download.
-  BRANCH="8.x-1.x"
-  if [ $# -eq 2 ]; then
-    BRANCH=$2
-  fi
-
-  # Figure out the github.com zip file url.
-  ZIP_FILE_NAME="$BRANCH.zip"
-  USER_NAME="signalpoint"
-  URL="https://github.com/$USER_NAME/$PROJECT/archive/$ZIP_FILE_NAME"
-
-  # Go into the modules directory, then download and unzip the project,
-  # renaming it to the project name and then delete the zip file.
-  cd "$APP_MODULES_DIRECTORY"
-  wget "$URL" --no-check-certificate
-  unzip "$BRANCH"
-  rm "$ZIP_FILE_NAME"
-  mv "$PROJECT-$BRANCH" "$PROJECT"
-  echo "Downloaded $PROJECT to $MODULE_DIR"
-
-}
+# Export the globals so they can be shared in other scripts.
+export APP_MODULES_DIRECTORY
+export APP_MODULES_CONTRIB_DIRECTORY
+export APP_MODULES_CUSTOM_DIRECTORY
 
 # UPDATE
 function drupalgap_update() {
@@ -308,7 +254,7 @@ create)
     theme) drupalgap_create_theme $3;;
   esac
   ;;
-download|dl) drupalgap_download_project $2 $3;;
+download|dl) ./scripts/dg/download.sh $@ ;;
 update|up) drupalgap_update;;
 -*) usage "Unknown command: $1";;
 esac
