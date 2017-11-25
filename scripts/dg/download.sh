@@ -3,7 +3,7 @@
 # Make sure they provided a project name.
 if [ -z "$2" ]
   then
-    echo -e "Missing project name... try this:\n./drupalgap dl foo"
+    echo -e "Missing project name... try this:\n./dg dl foo"
     exit 1
 fi
 
