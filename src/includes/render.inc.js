@@ -200,20 +200,25 @@ dg.render = function(content, runPostRender) {
         console.log(content);
         content._markup = content.markup;
       }
-      if (content._postRender.length) {
-        for (var i = 0; i < content._postRender.length; i++) {
-          dg._postRender.push(content._postRender[i]);
-        }
-      }
+
+      // If we were given markup, just return it as is (wrapped by any prefix or suffix) right after we prep
+      //  any post renders.
       if (content._markup) {
+        dg.prepPostRenders(content);
         return prefix + content._markup + suffix;
       }
-      if (content._theme) {
-        return prefix + dg.theme(content._theme, content) + suffix;
+
+      // Check to see if the content has is an element (has a _theme,) or is a form element (has a _type),
+      // then render the content by calling the handler (wrapping that in any prefix or suffix), attach
+      // any post renders then return the generated markup.
+      var hasTheme = !!content._theme;
+      var hasType = !!content._type;
+      if (hasTheme || hasType) {
+        _html = prefix + dg.theme(hasTheme ? content._theme : content._type, content) + suffix;
+        dg.prepPostRenders(content);
+        return _html;
       }
-      if (content._type) {
-        return prefix + dg.theme(content._type, content) + suffix;
-      }
+
       // @TODO properly handle negative weights.
       var weighted = {};
       var weightedCount = 0;
@@ -253,6 +258,19 @@ dg.render = function(content, runPostRender) {
     }
   if (runPostRender) { setTimeout(dg.runPostRenders, 1); }
     return html;
+};
+
+/**
+ * Given a piece of content from within a render element, this will attach any of its post render handlers into
+ * the global post render queue.
+ * @param content
+ */
+dg.prepPostRenders = function(content) {
+  if (content._postRender.length) {
+    for (var i = 0; i < content._postRender.length; i++) {
+      dg._postRender.push(content._postRender[i]);
+    }
+  }
 };
 
 /**
