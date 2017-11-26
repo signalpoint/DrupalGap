@@ -1,0 +1,16 @@
+{
+  "name": "example",
+  "version": "0.0.0",
+  "description": "A module for DrupalGap 8.",
+  "main": "example.min.js",
+  "keywords": ["example"],
+  "devDependencies": {
+    "gulp": "~3.9.1",
+    "gulp-cli": "~1.4.0",
+    "gulp-concat": "~2.6.1",
+    "gulp-uglify": "~2.0.1",
+    "gulp-watch": "~4.3.11",
+    "gulp-minify": "0.0.15",
+    "gulp-rename": "~1.2.2"
+  }
+}
