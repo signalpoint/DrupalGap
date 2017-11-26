@@ -18,27 +18,27 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 ## Autocomplete Widget
 
-[![Autocomplete Widget](http://drupalgap.com/sites/default/files/autocomplete-mini.png)](Forms/Form_Elements/Autocomplete)
+[![Autocomplete Widget](http://drupalgap.org/sites/default/files/autocomplete-mini.png)](Forms/Form_Elements/Autocomplete)
 
 ## Button Widget
 
-[![Button Widget](http://drupalgap.com/sites/default/files/button-widget.png)](Widgets/Buttons)
+[![Button Widget](http://drupalgap.org/sites/default/files/button-widget.png)](Widgets/Buttons)
 
 ## Checkbox Widget
 
-[![Checkbox Widget](http://drupalgap.com/sites/default/files/checkbox.png)](Widgets/Checkbox_Widget)
+[![Checkbox Widget](http://drupalgap.org/sites/default/files/checkbox.png)](Widgets/Checkbox_Widget)
 
 ## Collapsible Widget
 
-[![Collapsible Widget](http://drupalgap.com/sites/default/files/collapsible-widget-open.png)](Widgets/Collapsible_Widget)
+[![Collapsible Widget](http://drupalgap.org/sites/default/files/collapsible-widget-open.png)](Widgets/Collapsible_Widget)
 
 ## Collapsibleset Widget
 
-[![Collapsibleset Widget](http://drupalgap.com/sites/default/files/collapsibleset-widget-open.png)](Widgets/Collapsibleset_Widget)
+[![Collapsibleset Widget](http://drupalgap.org/sites/default/files/collapsibleset-widget-open.png)](Widgets/Collapsibleset_Widget)
 
 ## Controlgroup Widget
 
-[![Controlgroup Widget](http://drupalgap.com/sites/default/files/controlgroup-widget.png)](Widgets/Controlgroup_Widget)
+[![Controlgroup Widget](http://drupalgap.org/sites/default/files/controlgroup-widget.png)](Widgets/Controlgroup_Widget)
 
 ## Grid Widget
 
@@ -46,35 +46,35 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 ## Header Widget
 
-[![Header Widget](http://drupalgap.com/sites/default/files/header-widget.png)](Widgets/Header_Widget)
+[![Header Widget](http://drupalgap.org/sites/default/files/header-widget.png)](Widgets/Header_Widget)
 
 ## HTML Widget
 
-[![HTML Widget](http://drupalgap.com/sites/default/files/html-widget.png)](Widgets/HTML_Widget)
+[![HTML Widget](http://drupalgap.org/sites/default/files/html-widget.png)](Widgets/HTML_Widget)
 
 ## List Widget
 
-[![List Widget](http://drupalgap.com/sites/default/files/list-widget.png)](Widgets/List_Widget)
+[![List Widget](http://drupalgap.org/sites/default/files/list-widget.png)](Widgets/List_Widget)
 
 ## Panel Widget
 
-[![Panel Widget](http://drupalgap.com/sites/default/files/panel.png)](Widgets/Panels)
+[![Panel Widget](http://drupalgap.org/sites/default/files/panel.png)](Widgets/Panels)
 
 ## Popup Widget
 
-[![Popup Widget](http://drupalgap.com/sites/default/files/popup-widget.png)](Widgets/Popup_Widget)
+[![Popup Widget](http://drupalgap.org/sites/default/files/popup-widget.png)](Widgets/Popup_Widget)
 
 ## Radio Button Widget
 
-[![Radio Button Widget](http://drupalgap.com/sites/default/files/radio-button-widget.png)](Widgets/Radio_Button_Widget)
+[![Radio Button Widget](http://drupalgap.org/sites/default/files/radio-button-widget.png)](Widgets/Radio_Button_Widget)
 
 ## Select List Widget
 
-[![Select List Widget](http://drupalgap.com/sites/default/files/selectmenu-widget.png)](Widgets/Select_List_Widget)
+[![Select List Widget](http://drupalgap.org/sites/default/files/selectmenu-widget.png)](Widgets/Select_List_Widget)
 
 ## Slider Widget
 
-[![Slider Widget](http://drupalgap.com/sites/default/files/slider.png)](Widgets/Slider_Widget)
+[![Slider Widget](http://drupalgap.org/sites/default/files/slider.png)](Widgets/Slider_Widget)
 
 ## Table Widget
 
@@ -82,7 +82,7 @@ Below are screen shots of various supported widgets. To see example code for a p
 
 ## Text Widget
 
-[![Text Widget](http://drupalgap.com/sites/default/files/textarea-widget.png)](Widgets/)
+[![Text Widget](http://drupalgap.org/sites/default/files/textarea-widget.png)](Widgets/)
 
 ## Views Widget
 

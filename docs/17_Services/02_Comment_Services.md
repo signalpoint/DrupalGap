@@ -7,7 +7,7 @@ See the [Comments](../Entities/Comments) page for more information.
 ```
 {
   'cid:'456',
-  'uri':'http://www.example.com/drupalgap/?q=drupalgap/comment/456'
+  'uri':'http://www.example.com/drupalgap/?q=drupalgap.orgment/456'
 }
 ```
 

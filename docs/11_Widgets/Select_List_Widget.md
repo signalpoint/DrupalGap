@@ -1,6 +1,6 @@
 Also checkout the [Select List Form Element](../Forms/Form_Elements/Select_Lists) to use this widget on a form.
 
-![Select List](http://drupalgap.com/sites/default/files/selectmenu-widget.png)
+![Select List](http://drupalgap.org/sites/default/files/selectmenu-widget.png)
 
 ## Render Array
 

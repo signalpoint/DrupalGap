@@ -8,7 +8,7 @@ Let's take a look at a simple example that follows along with the [Recent Articl
 
 ### Add an Exposed Filter to the Views JSON Page Display
 
-![Views JSON Display Button](http://drupalgap.com/sites/default/files/views-json-display-button.png)
+![Views JSON Display Button](http://drupalgap.org/sites/default/files/views-json-display-button.png)
 
 In this example we'll add an exposed filter on the Article content type's Tags field (a taxonomy term reference field):
 
@@ -26,7 +26,7 @@ Please note during # 6, *be careful not to accidentally overwrite any other disp
 3. Change the **Label** to **Tags**
 4. Click **Apply (all displays)**
 
-![Views Exposed Filter Config Form](http://drupalgap.com/sites/default/files/views-exposed-filter-config-form.png)
+![Views Exposed Filter Config Form](http://drupalgap.org/sites/default/files/views-exposed-filter-config-form.png)
 
 ### Set up the Exposed Form
 
@@ -36,7 +36,7 @@ Under the **Advanced** settings on our View we can ...
 2. Here we may optionally configure how aspects of the form (see screen shot below)
 3. When we're done, just click the **Apply (all displays) button**
 
-![Views Exposed Form Settings](http://drupalgap.com/sites/default/files/exposed-form-settings.png)
+![Views Exposed Form Settings](http://drupalgap.org/sites/default/files/exposed-form-settings.png)
 
 And finally click the **Save** button on the View.
 
@@ -44,7 +44,7 @@ And finally click the **Save** button on the View.
 
 Now if we were to navigate to the page in our app that contains the Views Render Array of our article's Views JSON, we'll see the exposed filter ready for use:
 
-![Views Exposed Filters](http://drupalgap.com/sites/default/files/views-exposed-filters.png)
+![Views Exposed Filters](http://drupalgap.org/sites/default/files/views-exposed-filters.png)
 
 ## Disabling Exposed Filters
 
