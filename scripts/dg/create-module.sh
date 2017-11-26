@@ -2,11 +2,8 @@
 
 MODULE_NAME="$3";
 MODULE_DIRECTORY="$APP_MODULES_CUSTOM_DIRECTORY/$MODULE_NAME"
-HOOK_MENU="$MODULE_NAME"
-HOOK_MENU+="_menu"
-PAGE_CALLBACK="$MODULE_NAME"
-PAGE_CALLBACK+="_page"
 FILE_URI="$MODULE_DIRECTORY/$MODULE_NAME.js"
+TEMPLATE_DIR="scripts/dg/templates/modules/gulp"
 
 # Create the app/modules directory if it doesn't exist.
 if [ ! -d "$APP_MODULES_DIRECTORY" ]; then
@@ -25,7 +22,36 @@ if [ -d "$MODULE_DIRECTORY" ]; then
 fi
 
 mkdir $MODULE_DIRECTORY
-echo "dg.createModule('$MODULE_NAME');
+
+while :; do
+  case $4 in
+    --gulp)
+
+      # A more complex module with a package.json and gulpfile.js with a src directory...
+
+      # Create _[module-name].js file.
+      echo "dg.createModule('$MODULE_NAME');" > "$MODULE_DIRECTORY/_$MODULE_NAME.js"
+
+      # Copy in the template package.json file.
+      cp "$TEMPLATE_DIR/package.json" "$MODULE_DIRECTORY/"
+
+      # Copy in the template gulpfile.js file.
+      cp "$TEMPLATE_DIR/gulpfile.js" "$MODULE_DIRECTORY/"
+
+      # Copy in the template src directory.
+      cp -r "$TEMPLATE_DIR/src" "$MODULE_DIRECTORY/src"
+
+      # Replace occurrences 'example' with the module name.
+      cd $MODULE_DIRECTORY
+      find . -type f -exec sed -i "s/example/$MODULE_NAME/g" {} +
+
+      break
+      ;;
+    *)
+
+      # A simple module...
+
+      echo "dg.createModule('$MODULE_NAME');
 
 $MODULE_NAME.routing = function() {
   var routes = {};
@@ -62,15 +88,20 @@ $MODULE_NAME.fooController = function() {
 
 };" > "$FILE_URI"
 
-# Find the line number after the settings.js include.
-INSERT_LINE=$(( `cat index.html | grep -n "settings.js" | awk '{ print $1 }' | tr -d ':'` +1 ))
-# insert the module include at that line
-sed -i "${INSERT_LINE}i \    <script src=\"$FILE_URI\"></script>" index.html
+      # Find the line number after the settings.js include.
+      INSERT_LINE=$(( `cat index.html | grep -n "settings.js" | awk '{ print $1 }' | tr -d ':'` +1 ))
+      # insert the module include at that line
+      sed -i "${INSERT_LINE}i \    <script src=\"$FILE_URI\"></script>" index.html
 
-echo "
+      echo "
 Created module in $MODULE_DIRECTORY
 
 The following has been added to your index.html:
 
 <script src=\"$FILE_URI\"></script>
 "
+
+
+      break
+  esac
+done
