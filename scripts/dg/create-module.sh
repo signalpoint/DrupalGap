@@ -30,7 +30,8 @@ while :; do
       # A more complex module with a package.json and gulpfile.js with a src directory...
 
       # Create _[module-name].js file.
-      echo "dg.createModule('$MODULE_NAME');" > "$MODULE_DIRECTORY/_$MODULE_NAME.js"
+      mkdir "$MODULE_DIRECTORY/src"
+      echo "dg.createModule('$MODULE_NAME');" > "$MODULE_DIRECTORY/src/_$MODULE_NAME.js"
 
       # Copy in the template package.json file.
       cp "$TEMPLATE_DIR/package.json" "$MODULE_DIRECTORY/"
@@ -39,11 +40,22 @@ while :; do
       cp "$TEMPLATE_DIR/gulpfile.js" "$MODULE_DIRECTORY/"
 
       # Copy in the template src directory.
-      cp -r "$TEMPLATE_DIR/src" "$MODULE_DIRECTORY/src"
+      cp -r "$TEMPLATE_DIR/src" "$MODULE_DIRECTORY/"
 
-      # Replace occurrences 'example' with the module name.
+      # Replace occurrences of 'example' with the module name.
       cd $MODULE_DIRECTORY
       find . -type f -exec sed -i "s/example/$MODULE_NAME/g" {} +
+      cd -
+
+      # Add to index.html.
+      source scripts/dg/functions/add-js-to-index-html.sh
+      add_js_to_index_html "$MODULE_DIRECTORY/$MODULE_NAME.min.js"
+
+      echo "Now run these terminal commands to compile the $MODULE_NAME.min.js file:
+
+cd $MODULE_DIRECTORY
+sudo npm install
+gulp"
 
       break
       ;;
