@@ -38,6 +38,8 @@ if [ -d "$MODULE_DIR" ]; then
   # Build the path to the module's .min.js file.
   FILE_URI="$MODULE_DIR/$PROJECT.min.js"
 
+  # Add to index.html.
+  source scripts/dg/functions/add-js-to-index-html.sh
   add_js_to_index_html $FILE_URI
 
   # If the module has a .min.css file, add it to the index.html file as well.
