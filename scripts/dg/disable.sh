@@ -13,7 +13,7 @@ if grep -q "$PROJECT".min.js "$File" || grep -q "$PROJECT".js "$File" ; then
   fi
 
   # We got confirmation, remove the project from the index.html file.
-  grep -v "$PROJECT" index.html > index-dg.html; mv index-dg.html index.html
+  grep -v "$PROJECT" index.html > index-dg-tmp.html; mv index-dg-tmp.html index.html
 
   # Inform the user what happened.
   echo "$PROJECT disabled."

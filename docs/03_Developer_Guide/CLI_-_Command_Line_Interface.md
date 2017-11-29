@@ -24,31 +24,68 @@ cd app
 ./dg
 ```
 
+If you get a message saying the CLI is ready, then you are good to go. Try some of the commands below:
+
 ### Download
 
-Use the download command to quickly grab a DrupalGap module or theme:
+Download a module:
 
 ```
-./dg dl telephone
+./dg dl dg_autocomplete
+```
+
+### Enable
+
+Enable a module:
+
+```
+./dg en dg_autocomplete
+```
+
+### Disable
+
+Disable a module:
+
+```
+./dg dis dg_autocomplete
 ```
 
 ### Update
 
-To update the DrupalGap SDK binary files, run this command:
+The DrupalGap CLI has the `update` command to help with updating the SDK, jDrupal and contributed modules.
 
-```
-./dg up
-```
-
-Backups will be saved in a directory called `.drupalgap-backups` if you need
-to roll back:
+Backups will be saved in a directory called `drupalgap-backups` within your home directory if you need to roll back:
 
 ```
 cd .drupalgap-backups
 ls -la
 ```
 
-### Create
+#### Update DrupalGap
+
+To update the `drupalgap.min.js` file, run this command:
+
+```
+./dg up
+```
+
+#### Update jDrupal
+
+To update the `jdrupal.min.js` file, run this command:
+
+```
+./dg up jdrupal
+```
+
+#### Update a Module
+
+To update an individual module, try this:
+
+```
+./dg up dg_autocomplete
+```
+
+### Create Module
 
 Use the create command to quickly create a custom module:
 

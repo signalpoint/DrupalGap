@@ -42,8 +42,8 @@ URL="https://github.com/$USER_NAME/$PROJECT/archive/$ZIP_FILE_NAME"
 # Go into the modules directory, then download and unzip the project,
 # renaming it to the project name and then delete the zip file.
 cd "$APP_MODULES_CONTRIB_DIRECTORY"
-wget "$URL" --no-check-certificate || curl -O "$URL"
-unzip "$BRANCH"
+wget -q "$URL" --no-check-certificate || curl -O "$URL"
+unzip -q "$BRANCH"
 rm "$ZIP_FILE_NAME"
 mv "$PROJECT-$BRANCH" "$PROJECT"
 echo "Downloaded $PROJECT to $MODULE_DIR"
