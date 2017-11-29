@@ -7,9 +7,10 @@ APP_MODULES_DIRECTORY="modules"
 APP_MODULES_CONTRIB_DIRECTORY="$APP_MODULES_DIRECTORY/contrib"
 APP_MODULES_CUSTOM_DIRECTORY="$APP_MODULES_DIRECTORY/custom"
 APP_THEMES_DIRECTORY="themes"
-APP_BACKUPS_DIRECTORY=".drupalgap-backups"
+APP_BACKUPS_DIRECTORY="$HOME/drupalgap-backups"
 DRUPALGAP_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.js"
 DRUPALGAP_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/DrupalGap/8.x-1.x/drupalgap.min.js"
+JDRUPAL_MIN_JS_URL="https://raw.githubusercontent.com/signalpoint/jDrupal/8.x-1.x/jdrupal.min.js"
 
 # Export the globals so they can be shared in other scripts.
 export APP_MODULES_DIRECTORY
@@ -19,6 +20,7 @@ export APP_THEMES_DIRECTORY
 export APP_BACKUPS_DIRECTORY
 export DRUPALGAP_JS_URL
 export DRUPALGAP_MIN_JS_URL
+export JDRUPAL_MIN_JS_URL
 
 # ...
 
