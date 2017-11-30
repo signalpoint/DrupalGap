@@ -41,7 +41,25 @@ dg.modules.system.routing = function() {
       _title: '403 - Access denied',
       _controller: function() {
         return new Promise(function(ok, err) {
-          ok(dg.t('You do not have access to this page.'));
+          var element = {
+            msg: {
+              _theme: 'message',
+              _type: 'warning',
+              _message: dg.t('You do not have access to this page.')
+            }
+          };
+          // @TODO not working for some reason.
+          //console.log(dg.currentUser().isAnonymous(),  dg.getPath());
+          //if (dg.currentUser().isAnonymous() && dg.getPath() != '403') {
+          //
+          //  element.login = {
+          //    _theme: 'form',
+          //    _id: 'UserLoginForm'
+          //  };
+          //
+          //}
+          //console.log(element);
+          ok(element);
         });
 
       }
