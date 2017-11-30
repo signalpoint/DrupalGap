@@ -280,8 +280,13 @@ dg.blockLoad = function(id) { return dg.blocks[id] ? dg.blocks[id] : null; };
  * @param name
  */
 dg.blockRefresh = function(name) {
+  dg.blockSetContent(name);
+};
+
+dg.blockSetContent = function(name, content) {
   var block = dg.blockLoad(name);
   block.buildWrapper().then(function(_block) {
+    if (content) { _block.set('content', content); }
     block.render();
   });
 };
