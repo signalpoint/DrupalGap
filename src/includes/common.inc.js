@@ -70,6 +70,27 @@ dg.arg = function(i, path) {
   return typeof parts[i] !== 'undefined' ? parts[i] : null;
 };
 
+dg.error = function(xhr, status, msg, options) {
+
+  // Try to load a route to handle the error status.
+  var route = dg.router.loadRoute('system.' + status); // @TODO add example docs for people to add/edit an error page.
+  if (!route) {
+    console.log(status, arguments);
+    dg.alert(msg);
+    return;
+  }
+
+  // @TODO this could use some handy hooks for other devs.
+
+  // @TODO instead of taking over the whole "main" block, allow someone to decide what to do
+
+  dg.setTitle(route.defaults._title);
+  route.defaults._controller().then(function(content) {
+    dg.blockSetContent('main', content);
+  });
+
+};
+
 /**
  * Returns true if the current page's route is the app's front page route.
  * @returns {boolean}
