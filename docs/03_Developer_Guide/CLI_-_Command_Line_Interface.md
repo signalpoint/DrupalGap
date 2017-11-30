@@ -85,6 +85,18 @@ To update an individual module, try this:
 ./dg up dg_autocomplete
 ```
 
+#### Update the CLI
+
+```
+cd app
+rm dg && rm -rf scripts/dg
+wget -q https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip || curl -O https://github.com/signalpoint/DrupalGap/archive/8.x-1.x.zip
+unzip -q 8.x-1.x.zip
+cp DrupalGap-8.x-1.x/dg .
+cp -r DrupalGap-8.x-1.x/scripts/dg scripts/
+rm 8.x-1.x.zip && rm -rf DrupalGap-8.x-1.x
+```
+
 ### Create Module
 
 Use the create command to quickly create a custom module:
