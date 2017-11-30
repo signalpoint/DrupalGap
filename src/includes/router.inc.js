@@ -91,7 +91,7 @@ dg.router = {
 
     if (newPath == '') { newPath = dg.getFrontPagePath(); }
 
-    // Give developers a chance to alter the path to check ,thereby potentially rerouting.
+    // Give developers a chance to alter the path to check, thereby potentially rerouting.
     jDrupal.moduleInvokeAll('pre_process_route_change', newPath, oldPath).then(function(alters) {
 
       // If anybody altered the path, take the first one, navigate to it and return, unless we're already there, then
