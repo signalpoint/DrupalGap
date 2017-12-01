@@ -1,13 +1,11 @@
 # DrupalGap CLI - Command Line Interface
 
-To help automate application development, DrupalGap comes with a command line
-interface (more commonly referred to as a CLI). With the DrupalGap CLI we can
-quickly take care of typical development and maintenance tasks.
+To help automate application development, DrupalGap comes with a command line interface (more commonly referred to as a
+CLI). With the DrupalGap CLI we can quickly take care of typical development and maintenance tasks.
 
 ## Setup
 
-To utilize the DrupalGap CLI, use your terminal window to make the `drupalgap`
-bash script executable:
+To utilize the DrupalGap CLI, use your terminal window to make the `drupalgap` bash script executable:
 
 ```
 cd app
@@ -16,8 +14,7 @@ chmod +x dg
 
 ## Usage
 
-To use the DrupalGap CLI, open a terminal window and navigate to your mobile
-app's directory:
+To use the DrupalGap CLI, open a terminal window and navigate to your mobile app's directory:
 
 ```
 cd app

@@ -211,15 +211,36 @@ dg.attributesInit = function(element) {
   element._attributes = attrs;
 };
 
-
+/**
+ * Given a name and value, this will save the value to local storage, keyed by name.
+ * @param name {String}
+ * @param value {*}
+ */
 dg.setVar = function(name, value) {
-  return window.localStorage.setItem(name, JSON.stringify(value));
+  window.localStorage.setItem(name, JSON.stringify(value));
 };
 
-dg.getVar = function(name) {
-  return JSON.parse(window.localStorage.getItem(name));
+/**
+ * Given a name, this will return its value from local storage, or null if it doesn't exist. Optionally pass in a
+ * default value to have it be saved in local storage when there is no value yet saved in local storage. This default
+ * value will be returned to you if you use it.
+ * @param name {String} The name to save the value under in local storage.
+ * @param defaultValue {*} Optional value to replace a null value.
+ * @returns {*}
+ */
+dg.getVar = function(name, defaultValue) {
+  var currentValue = JSON.parse(window.localStorage.getItem(name));
+  if (currentValue === null && typeof defaultValue !== 'undefined') {
+    dg.setVar(name, defaultValue);
+    return defaultValue;
+  }
+  return currentValue;
 };
 
+/**
+ * Given a name, delete its value from local storage.
+ * @param name {String}
+ */
 dg.deleteVar = function(name) {
   return window.localStorage.removeItem(name);
 };
