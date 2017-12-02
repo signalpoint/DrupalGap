@@ -184,80 +184,118 @@ dg.renderProperties = function() {
  * @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Render!Element!RenderElement.php/class/RenderElement/8
  */
 dg.render = function(content, runPostRender) {
-    var type = typeof content;
-    if (!content) { return ''; }
-    if (type === 'string') { return content; }
-    var html = '';
-    var _html = null;
-    if (type === 'object') {
-      var prefix = content._prefix ? content._prefix : '';
-      var suffix = content._suffix ? content._suffix : '';
-      if (typeof prefix === 'object') { prefix = dg.render(prefix); }
-      if (typeof suffix === 'object') { suffix = dg.render(suffix); }
-      if (typeof content._postRender === 'undefined') { content._postRender = []; }
-      if (content.markup) {
-        console.log('DEPRECATED: Use "_markup" instead of "markup" in this render array:');
-        console.log(content);
-        content._markup = content.markup;
-      }
 
-      // If we were given markup, just return it as is (wrapped by any prefix or suffix) right after we prep
-      //  any post renders.
-      if (content._markup) {
-        dg.prepPostRenders(content);
-        return prefix + content._markup + suffix;
-      }
+  // Determine the type of content coming in, a string, an object or an array.
+  var type = typeof content;
 
-      // Check to see if the content has is an element (has a _theme,) or is a form element (has a _type),
-      // then render the content by calling the handler (wrapping that in any prefix or suffix), attach
-      // any post renders then return the generated markup.
-      var hasTheme = !!content._theme;
-      var hasType = !!content._type;
-      if (hasTheme || hasType) {
-        _html = prefix + dg.theme(hasTheme ? content._theme : content._type, content) + suffix;
-        dg.prepPostRenders(content);
-        return _html;
-      }
+  // If the content was empty, make it an empty string.
+  if (!content) { return ''; }
 
-      // @TODO properly handle negative weights.
-      var weighted = {};
-      var weightedCount = 0;
-      html += prefix;
-      for (var index in content) {
-        if (!content.hasOwnProperty(index) || jDrupal.inArray(index, dg.renderProperties())) { continue; }
-        var piece = content[index];
-        var _type = typeof piece;
-        if (_type === 'object' && piece !== null) {
-          var weight = typeof piece._weight !== 'undefined' ? piece._weight : 0;
-          if (typeof weighted[weight] === 'undefined') { weighted[weight] = []; }
-          weighted[weight].push(dg.render(piece));
-          weightedCount++;
-        }
-        else if (_type === 'array') {
-          for (var i = 0; i < piece.length; i++) {
-            html += dg.render(piece[i]);
-          }
-        }
-        // @TODO this allows string to be embedded in render elements, but it breaks forms.
-        //else if (_type === 'string') { html += piece; }
-      }
-      if (weightedCount) {
-        for (var weight in weighted) {
-          if (!weighted.hasOwnProperty(weight)) { continue; }
-          for (var i = 0; i < weighted[weight].length; i++) {
-            html += weighted[weight][i];
-          }
-        }
-      }
-      html += suffix;
+  // If the content was a string, just return it right away, nothing more to do.
+  if (type === 'string') { return content; }
+
+  // Alright, we've got a complex piece of content, let's process it and build it's html, shall we?
+  var html = '';
+
+  // If we're dealing with a typical object...
+  if (type === 'object') {
+
+    // Handle any library/dependency attachments on the content by returning a placeholder element that will be
+    // overwritten with the rendered content after the attachment(s) resolve.
+    var hasAttachments = dg.hasAttachments(content);
+    if (hasAttachments) {
+      var randomId = jDrupal.userPassword();
+      var targetId = 'lib-' + randomId;
+      var format = content._format ? content._format : 'div';
+      return dg.render({
+        _markup: '<' + format + ' id="' + targetId + '"></' + format + '>',
+        _postRender: [function() {
+          dg.addAttachments(content).then(function() {
+            var libElement = document.getElementById(targetId);
+            delete content._attached;
+            libElement.outerHTML = dg.render(content, true);
+          });
+        }]
+      });
     }
-    else if (type === 'array') {
-      for (var i = 0; i < content.length; i++) {
-        html += dg.render(content[i]);
+
+    // Help dg7 developers get caught up with a common syntax error when working with dg8.
+    if (content.markup) {
+      console.log('Use "_markup" instead of "markup" in:', content);
+      content._markup = content.markup;
+    }
+
+    // Get the prefix and suffix if any, or set defaults if they weren't provided.
+    var prefix = content._prefix ? content._prefix : '';
+    var suffix = content._suffix ? content._suffix : '';
+    if (dg.isObject(prefix)) { prefix = dg.render(prefix); }
+    if (dg.isObject(suffix)) { suffix = dg.render(suffix); }
+
+    // Set up an empty post render array if one isn't already set.
+    if (dg.isUndefined(content._postRender)) { content._postRender = []; }
+
+    // If we were given markup, just return it as is (wrapped by any prefix or suffix) right after we prep it.
+    if (content._markup) {
+      dg.prepPostRenders(content);
+      if (runPostRender) { setTimeout(dg.runPostRenders, 1); }
+      return prefix + content._markup + suffix;
+    }
+
+    // Check to see if the content is a render element (has a _theme,) or is a form element (has a _type), then render
+    // the content by calling the handler (wrapping that in any prefix or suffix and prepping it), then return the
+    // generated markup.
+    var hasTheme = !!content._theme;
+    var hasType = !!content._type;
+    if (hasTheme || hasType) {
+      var _html = prefix + dg.theme(hasTheme ? content._theme : content._type, content) + suffix;
+      dg.prepPostRenders(content);
+      // @TODO there could be a missing call to dg.runPostRenders() if this is called after _attached has resolved.
+      return _html;
+    }
+
+    // Handle weights.
+    // @TODO properly handle negative weights.
+    var weight = null;
+    var weighted = {};
+    var weightedCount = 0;
+    html += prefix;
+    for (var index in content) {
+      if (!content.hasOwnProperty(index) || jDrupal.inArray(index, dg.renderProperties())) { continue; }
+      var piece = content[index];
+      var _type = typeof piece;
+      if (_type === 'object' && piece !== null) {
+        weight = typeof piece._weight !== 'undefined' ? piece._weight : 0;
+        if (dg.isUndefined(weighted[weight])) { weighted[weight] = []; }
+        weighted[weight].push(dg.render(piece));
+        weightedCount++;
+      }
+      else if (_type === 'array') {
+        for (var i = 0; i < piece.length; i++) {
+          html += dg.render(piece[i]);
+        }
+      }
+      // @TODO this allows string to be embedded in render elements, but it breaks forms.
+      //else if (_type === 'string') { html += piece; }
+    }
+    if (weightedCount) {
+      for (weight in weighted) {
+        if (!weighted.hasOwnProperty(weight)) { continue; }
+        for (var i = 0; i < weighted[weight].length; i++) {
+          html += weighted[weight][i];
+        }
       }
     }
+    html += suffix;
+  }
+  else if (type === 'array') {
+    for (var i = 0; i < content.length; i++) {
+      html += dg.render(content[i]);
+    }
+  }
+
   if (runPostRender) { setTimeout(dg.runPostRenders, 1); }
-    return html;
+
+  return html;
 };
 
 /**
@@ -285,8 +323,8 @@ dg.postRenderCount = function() {
  * This will run through any of the queued up `_postRender` functions then reset the queue.
  */
 dg.runPostRenders = function(timeout, milliseconds) {
-  if (typeof timeout === 'undefined') { timeout = false; }
-  if (typeof milliseconds === 'undefined') { milliseconds = 1; }
+  if (dg.isUndefined(timeout)) { timeout = false; }
+  if (dg.isUndefined(milliseconds)) { milliseconds = 1; }
   var done = function() {
     var count = dg.postRenderCount();
     if (count) {
