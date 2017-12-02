@@ -25,3 +25,14 @@ dg.createModule = function(moduleName) {
   dg.modules[moduleName] = module; // Attach a copy to DrupalGap.
   return module;
 };
+
+/**
+ * Given a module name and the name of a function within that module, this will call that function and return its
+ * result.
+ * @param moduleName
+ * @param functionName
+ */
+dg.invoke = function(moduleName, functionName) {
+  var module = jDrupal.moduleLoad(moduleName);
+  return module && module[functionName] ? module[functionName]() : null;
+};
