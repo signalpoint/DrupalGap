@@ -16,7 +16,9 @@ var drupalgap_grunt_src = [
   'src/includes/field-item-list-interface.inc.js',
   'src/includes/field-widget.inc.js',
 
+  'src/includes/dialogs.inc.js',
   'src/includes/go.inc.js',
+  'src/includes/libraries.inc.js',
   'src/includes/messages.inc.js',
   'src/includes/module.inc.js',
   'src/includes/region.inc.js',
@@ -26,7 +28,6 @@ var drupalgap_grunt_src = [
   'src/includes/theme.inc.js',
   'src/includes/user.inc.js',
   'src/includes/views.inc.js',
-  'src/includes/widgets.inc.js',
 
   'src/modules/admin/admin.js',
   'src/modules/core/core.js',
