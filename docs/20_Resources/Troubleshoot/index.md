@@ -33,3 +33,8 @@ This probably means you've created a `form.id` element on your form. The `id` el
 > GET https://www.example.com/node/123?_format=json 406 (Not Acceptable)
 
 You need to enable the `Content` Resource at `admin/config/services/rest`, then enable `GET`, `JSON` and `cookie`.
+
+> Uncaught (in promise) TypeError: Cannot read property 'js' of undefined
+> Uncaught (in promise) TypeError: Cannot read property 'css' of undefined
+
+On an `_attached` variable, you probably declared the library name as a string instead of an array.
