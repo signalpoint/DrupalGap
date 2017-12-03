@@ -216,7 +216,7 @@ dg.render = function(content, runPostRender) {
             libElement.outerHTML = dg.render(content, true);
           });
         }]
-      });
+      }, true); // @TODO I'm starting to think we should just run post renders every time.
     }
 
     // Help dg7 developers get caught up with a common syntax error when working with dg8.
