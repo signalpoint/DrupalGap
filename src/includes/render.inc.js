@@ -20,8 +20,9 @@ dg.appRender = function(content) {
     var innerHTML = '';
     var regionCount = theme.getRegionCount();
 
-    /**
-     * THIRD - Add region placeholders to html string and inject it into the app container div.
+    /**  3
+     * THIRD - Prepare region container html and placeholders within those regions for each of their blocks, then
+     * inject this container and placeholder html into the app's container div.
      */
 
     var finishBlocks = function(allBlocks) {
@@ -32,8 +33,7 @@ dg.appRender = function(content) {
         var regionBlocks = region.getBlocks();
         if (!regionBlocks.length) { continue; } // Skip regions without blocks.
 
-        // Open the region, render the placeholder for each of its block(s), then
-        // close the region.
+        // Open the region, render the placeholder for each of its block(s), then close the region.
         var regionFormat = region.get('format');
         innerHTML += region.get('before') + '<' + regionFormat  + ' ' + dg.attributes(region.get('attributes')) + '>' + region.get('prefix');
         for (var i = 0; i < regionBlocks.length; i++) {
@@ -59,7 +59,7 @@ dg.appRender = function(content) {
       var blocks = dg.blocksLoad();
       var blocksToRender = [];
 
-      /**
+      /**  5
        * FIFTH - Process the finished blocks one by one, while watching to see when all blocks have finished rendering,
        * at which point we can process any forms on the page.
        */
@@ -98,7 +98,7 @@ dg.appRender = function(content) {
         }
       };
 
-      /**
+      /**  4
        * FOURTH - Go over each block, then inject them into the DOM if they are visible, otherwise remove their
        * placeholder from the DOM.
        */
@@ -132,7 +132,7 @@ dg.appRender = function(content) {
 
     };
 
-    /**
+    /**  2
      * SECOND - Instantiate and invoke alterations on blocks.
      */
 
@@ -154,7 +154,7 @@ dg.appRender = function(content) {
 
     };
 
-    /**
+    /**  1
      * FIRST - Instantiate and invoke alterations of regions.
      */
 
