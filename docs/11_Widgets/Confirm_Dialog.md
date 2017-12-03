@@ -1,12 +1,2 @@
-```
-dg.confirm(dg.t('Are you sure?'), {
-  confirmCallback: function(button) {
-    if (button == 1) { // Ok.
-
-    }
-    else if (button == 2) { // Cancel.
-
-    }
-  }
-});
-```
+See the [dg_modal](https://www.drupalgap.org/project/dg_modal) or [dg_dialogs](https://www.drupalgap.org/project/dg_modal)
+modules to use a confirm dialog.
