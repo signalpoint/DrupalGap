@@ -219,7 +219,7 @@ dg.blocksLoad = function() {
 
         }
       }
-      if (blockCount == 0) { console.log(dg.t('No blocks found in settings.js for the theme: ' + themeName)); }
+      if (blockCount == 0) { console.log(dg.t('No blocks for @theme in settings.js', { '@theme': themeName } )); }
 
       //console.log('loaded the blocks from settings.js');
       //console.log(appBlocks);
@@ -289,4 +289,13 @@ dg.blockSetContent = function(name, content) {
     if (content) { _block.set('content', content); }
     block.render();
   });
+};
+
+/**
+ * Given a block machine name, this will return the block's element from the DOM.
+ * @param name
+ * @returns {Element}
+ */
+dg.getBlockFromDom = function(name) {
+  return document.querySelector('#' + dg.cleanCssIdentifier(name));
 };
