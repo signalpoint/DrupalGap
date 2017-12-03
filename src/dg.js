@@ -89,12 +89,11 @@ dg.bootstrap = function() {
   // If there's no front page specified, set it to the default dg dashboard.
   if (!dg.config('front')) { dg.config('front', 'dg'); }
 
+  // LIBRARIES - Gather libraries provided by modules.
   // @TODO Give modules a chance to alter libraries provided by other modules.
   // In order to accommodate this, the dg._libraries object needs to be filled here during the bootstrap, but the
   // libraries need to have a boolean property to indicate if it's been loaded or not, then dg.render() can set this
   // boolean to true when the "onload" is complete.
-
-  // LIBRARIES - Gather libraries provided by modules
   //var libraries = dg.getModuleLibraries(module);
   //if (libraries) {
   //  console.log(module + ' libraries', libraries);
@@ -103,7 +102,6 @@ dg.bootstrap = function() {
   //    var library = libraries[libraryName];
   //  }
   //}
-
   //jDrupal.moduleInvokeAll('libraries_alter', dg.getModuleLibraries());
 
   // Load the theme, then the blocks, and then add a default route, and start listening.
