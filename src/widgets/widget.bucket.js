@@ -1,8 +1,8 @@
 dg.theme_bucket = function(variables) {
-  if (!variables._attributes.id) { variables._attributes.id = 'bucket-' + jDrupal.userPassword(); }
   if (!variables._format) { variables._format = 'div'; }
-  if (!variables._grab) { return; }
   var format = variables._format;
+  if (!variables._attributes.id) { variables._attributes.id = format + '-' + jDrupal.userPassword(); }
+  if (!variables._grab) { return; }
   var element = {};
   var prefix = variables._prefix ? dg.render(variables._prefix) : '';
   var suffix = variables._suffix ? dg.render(variables._suffix) : '';
