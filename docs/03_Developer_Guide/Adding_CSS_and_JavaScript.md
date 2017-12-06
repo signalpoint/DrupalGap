@@ -76,7 +76,16 @@ my_module.libraries = function() {
 
 ```
 
-Notice how you can include one or more assets in the `js` and `css` properties?
+Notice how you can include one or more assets in the `js` and `css` properties? With this you can have a library load
+multiple `.js` or `.css` files into the DOM when it is used. Just add multiple entries to the `js` or `css` array when
+declaring your library in your module's `libraries()` function.
+
+It is **not recommended** to override the `onload` attribute for any of your libraries' assets, as you may experience
+unintended consequences. Instead implement `hook_library_onload()` to react to a library being loaded, or add an
+`onload` handler to your `_attached` (*see below*).
+
+Also check out `dg.addJs()` and `dg.addCss()` functions in the API for other ways to load `.js` and `.css` assets.
+
 
 ### Attaching a Library to a Render Array
 
@@ -159,12 +168,39 @@ Your friend's message of `Hello from your friend.` would show up in the paragrap
 `Hello from your other friend.` would show up in the console log. Not only that, but each friend had their `.css`
 file(s) loaded into the DOM too.
 
-## Summary
+## hook_library_loaded()
 
-You can also have a library load multiple `.js` or `.css` files into the DOM when it is used. Just add multiple entries
-to the `js` or `css` array when declaring your library in your module's `libraries()` function.
+With `hook_library_loaded()` you can react to an individual library being loaded:
 
-It is **not recommended** to override the `onload` attribute for any of your libraries' assets, as you may experience
-unintended consequences.
+```
+/**
+ * Implements hook_library_onload().
+ */
+function hook_library_onload(moduleName, libraryName) {
 
-Also check out `dg.addJs()` and `dg.addCss()` functions in the API for other ways to load `.js` and `.css` assets.
+  if (moduleName == 'my_module') {
+
+    if (libraryName == 'friend') {
+      console.log('Did you bring the pizza?');
+    }
+    else if (libraryName == 'other_friend') {
+      console.log('Did you bring the beer?');
+    }
+
+  }
+
+}
+```
+
+## onload()
+
+With an `onload` handler on your `_attached` property, you can react when all the libraries have been loaded:
+
+```
+_attached: {
+  my_module: ['friend', 'other_friend'],
+  onload: function() {
+    console.log('Both of my friends are here, let us party!);
+  }
+}
+```
