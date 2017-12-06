@@ -212,6 +212,7 @@ dg.render = function(content, runPostRender) {
         _postRender: [function() {
           dg.addAttachments(content).then(function() {
             var libElement = document.getElementById(targetId);
+            if (content._attached.onload) { setTimeout(content._attached.onload, 1); }
             delete content._attached;
             libElement.outerHTML = dg.render(content, true);
           });
@@ -293,7 +294,9 @@ dg.render = function(content, runPostRender) {
     }
   }
 
-  if (runPostRender) { setTimeout(dg.runPostRenders, 1); }
+  //if (runPostRender) {
+    setTimeout(dg.runPostRenders, 1);
+  //}
 
   return html;
 };
