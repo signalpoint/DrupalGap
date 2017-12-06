@@ -32,6 +32,14 @@ dg.isCompiled = function() {
 };
 
 /**
+ * Returns 'web' if running as a web application, otherwise it returns the platform name, e.g. 'android', 'ios'
+ * @returns {string}
+ */
+dg.platform = function() {
+  return dg.isCompiled() ? device.platform.toLowerCase() : 'web';
+};
+
+/**
  * Returns the current route.
  * @returns {Object}
  */
