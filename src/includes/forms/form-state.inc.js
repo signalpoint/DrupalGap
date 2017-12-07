@@ -48,16 +48,22 @@ dg.FormStateInterface.prototype.hasAnyErrors = function() {
   return hasError;
 };
 dg.FormStateInterface.prototype.getErrorMessages = function() {
-  var msg = '';
+  var useModal = !!dg.modal; // Support dg_modal.
+  var useBootstrap = !!dg_bootstrap; // Support dg_bootstrap.
   var errors = this.getErrors();
+  var items = [];
   for (error in errors) {
     if (!errors.hasOwnProperty(error)) { continue; }
-    msg += errors[error] + '\n';
+    items.push(errors[error]);
   }
-  return msg;
+  return useModal ?
+      dg.theme(useBootstrap ? 'bootstrap_item_list' : 'item_list', { _items: items }) :
+      items.join('\n');
 };
 dg.FormStateInterface.prototype.displayErrors = function() {
-  dg.alert(this.getErrorMessages());
+  dg.alert(this.getErrorMessages(), {
+    type: 'error' // Support dg_modal.
+  });
 };
 
 /**
