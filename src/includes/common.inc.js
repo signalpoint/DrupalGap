@@ -78,7 +78,16 @@ dg.arg = function(i, path) {
   return typeof parts[i] !== 'undefined' ? parts[i] : null;
 };
 
+/**
+ *
+ * @param xhr
+ * @param status
+ * @param msg
+ * @param options
+ */
 dg.error = function(xhr, status, msg, options) {
+
+  if (msg) { console.log(msg); }
 
   // Try to load a route to handle the error status.
   var route = dg.router.loadRoute('system.' + status); // @TODO add example docs for people to add/edit an error page.
