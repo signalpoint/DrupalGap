@@ -1,14 +1,20 @@
-To create a custom form in DrupalGap, place code like this in your [custom DrupalGap module](../Modules/Create_a_Custom_Module). We can add as many [Form Elements](Form_Elements) to the form as we'd like.
+To create a custom form in DrupalGap, place code like this in your [custom DrupalGap module](../Modules/Create_a_Custom_Module).
 
-## Create a Custom Route to View the Form
+## Create a Route to View the Form
 
 ```
-routes['my_module.say-hello'] = {
-  path: '/say-hello',
-  defaults: {
-    _title: "Say hello",
-    _form: 'MyModuleSayHelloForm',
-  }
+my_module.routing = function() {
+  var routes = {};
+
+  routes['my_module.say-hello'] = {
+    path: '/say-hello',
+    defaults: {
+      _title: "Say hello",
+      _form: 'MyModuleSayHelloForm',
+    }
+  };
+
+  return routes;
 };
 ```
 
@@ -19,7 +25,8 @@ routes['my_module.say-hello'] = {
 3. optional, attach a `validateForm` handler function for any custom validation to the form's input prior to submission
 4. add the `submitForm` handler functions  to decide what happens when the form is submitted
 
-Here's a code example:
+We can add as many [Form Elements](Form_Elements) to the form as we'd like, for example:
+
 ```
 dg.createForm('MyModuleSayHelloForm', function() {
 
@@ -52,7 +59,7 @@ dg.createForm('MyModuleSayHelloForm', function() {
         ok();
       });
     };
-  
+
     this.submitForm = function(form, formState) {
       return new Promise(function(ok, err) {
         var msg = 'Hello ' + formState.getValue('name');
