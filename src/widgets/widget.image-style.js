@@ -5,9 +5,12 @@ dg.theme_image_style = function(vars) {
 
 dg.imageStyleUrl = function(styleName, path) {
   var src = jDrupal.sitePath() + jDrupal.basePath() + path;
+  var common = 'sites/default/files/styles/' + styleName + '/public/';
   return src.indexOf('public://') != -1 ?
       src.replace(
           'public://',
-          'sites/default/files/styles/' + styleName + '/public/'
+          dg.isCompiled() ?
+            jDrupal.sitePath() + '/' + common :
+              common
       ) : src;
 };
