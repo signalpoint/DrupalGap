@@ -17,6 +17,7 @@ var drupalgap_grunt_src = [
   'src/includes/field-widget.inc.js',
 
   'src/includes/dialogs.inc.js',
+  'src/includes/dom.inc.js',
   'src/includes/go.inc.js',
   'src/includes/libraries.inc.js',
   'src/includes/messages.inc.js',
