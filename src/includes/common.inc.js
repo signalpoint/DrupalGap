@@ -135,6 +135,15 @@ dg.isObject = function(thing) {
 };
 
 /**
+ * Given something, this will return true if it an string, false otherwise.
+ * @param thing {*} The thing.
+ * @returns {boolean}
+ */
+dg.isString = function(thing) {
+  return typeof thing === 'string';
+};
+
+/**
  * Given something, this will return true if it is undefined, false otherwise.
  * @param thing {*} The thing.
  * @returns {boolean}
