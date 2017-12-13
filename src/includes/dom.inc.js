@@ -1,3 +1,7 @@
+/**
+ * CLASS FRIENDS
+ */
+
 dg.hasClass = function(el, className) {
   return el.classList.contains(className);
 };
@@ -21,6 +25,31 @@ dg.addBodyClass = function(className) {
 dg.removeBodyClass = function(className) {
   dg.removeClass(dg.getBody(), className);
 };
+
+/**
+ * ELEMENT BUDDIES
+ */
+
+dg.el = function(el) {
+  console.log('DEPRECATED: dg.el(), use dg:qs() instead');
+  return dg.qs(el);
+};
+dg.qs = function(el) {
+  if (dg.isString(el)) { el = document.querySelector(el); } // Convert selector string to element.
+  return el;
+};
+
+dg.show = function(el) {
+  dg.qs(el).style.display = 'block';
+};
+
+dg.hide = function(el) {
+  dg.qs(el).style.display = 'none';
+};
+
+/**
+ * LIBRARY GOODNESS
+ */
 
 /**
  * Adds a .js file to the head of the DOM.
