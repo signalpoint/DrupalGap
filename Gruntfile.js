@@ -2,6 +2,7 @@ var drupalgap_grunt_src = [
 
   'src/dg.js',
 
+  'src/includes/proxies.inc.js',
   'src/includes/block.inc.js',
   'src/includes/common.inc.js',
   'src/includes/entity.inc.js',
