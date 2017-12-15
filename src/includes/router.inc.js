@@ -342,6 +342,16 @@ dg.router = {
     else { this.getRoutes().push(route); }
   },
 
+  /**
+   * Deletes a route object from the routes collection. Primarily used to remove routes provided by DrupalGap core.
+   * Use with caution.
+   * @param key {String} The route key.
+   */
+  deleteRoute: function(key) {
+    var routeIndex = dg.router.getRouteIndex(key);
+    if (routeIndex != -1) { delete this.getRoutes()[routeIndex]; }
+  },
+
   hasBaseRoute: function(route) {
     if (!route) { route = this.getActiveRoute(); }
     return route.defaults._base_route ? true : false;
