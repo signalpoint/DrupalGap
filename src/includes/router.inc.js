@@ -327,7 +327,7 @@ dg.router = {
    */
   loadRoute: function(key) {
     var index = this.getRouteIndex(key);
-    return  index != -1 ? this.getRoutes()[index] : null;
+    return index != -1 ? this.getRoutes()[index] : null;
   },
 
   /**
@@ -349,7 +349,7 @@ dg.router = {
    */
   deleteRoute: function(key) {
     var routeIndex = dg.router.getRouteIndex(key);
-    if (routeIndex != -1) { delete this.getRoutes()[routeIndex]; }
+    if (routeIndex != -1) { this.getRoutes().splice(routeIndex, 1); }
   },
 
   hasBaseRoute: function(route) {
