@@ -60,7 +60,6 @@ dg.modules.system.blockPrimaryLocalTasks = function() {
             },
             _attributes: { class: [] } // Leave these for easy alterations down the line.
           });
-
         }
 
         // Render an item list for the local tasks and resolve it.
