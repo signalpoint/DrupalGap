@@ -99,7 +99,7 @@ dg.addAttachments = function(content) {
   return Promise.all(promises);
 
 
-  
+
 
   return;
 
