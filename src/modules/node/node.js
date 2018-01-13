@@ -1,20 +1,75 @@
 /**
- * Given a node, this determines if the current user has access to it. Returns
- * true if so, false otherwise. This function implementation is incomplete, use
- * with caution.
- * @param {Object} node
- * @return {Boolean}
+ * Determines whether the current user may perform the operation on the node.
+ *
+ * @param op
+ *   The operation to be performed on the node. Possible values are:
+ *   - "view"
+ *   - "update"
+ *   - "delete"
+ *   - "create"
+ * @param node
+ *   The node object on which the operation is to be performed, or node type
+ *   (e.g. 'forum') for "create" operation.
+ * @param account
+ *   Optional, a user object representing the user for whom the operations is to
+ *   be performed. Determines access for a user other than the current user.
+ *
+ * @return
+ *   true if the operation may be performed, false otherwise.
  */
-function node_access(node) {
+function node_access(op, node, account) {
   try {
-    if (
-      (
-        node.uid == Drupal.user.uid &&
-        user_access('edit own ' + node.type + ' content')
-      ) ||
-      user_access('edit any ' + node.type + ' content')
-    ) { return true; }
-    else { return false; }
+    if (empty(node) || !in_array(op, ['view', 'update', 'delete', 'create'])) {
+      // If there was no node to check against, or the op was not one of the
+      // supported ones, we return access denied.
+      return false;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty(account)) {
+      account = Drupal.user;
+    }
+
+    if (user_access('bypass node access', account)) {
+      return true;
+    }
+    if (!user_access('access content', account)) {
+      return false;
+    }
+
+    var type = typeof node === 'string' ? node : node.type;
+    if (typeof drupalgap.content_types_list[type] != 'undefined') {
+      if (op == 'create' && user_access('create ' + type + ' content', account)) {
+        return true;
+      }
+    }
+
+    if (op == 'update') {
+      if (user_access('edit any ' + node.type + ' content', account) || (user_access('edit own ' + node.type + ' content', account) && (Drupal.user.uid == node.uid))) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+
+    if (op == 'delete') {
+      if (user_access('delete any ' + node.type + ' content', account) || (user_access('delete own ' + node.type + ' content', account) && (Drupal.user.uid == node.uid))) {
+        return true;
+      }
+    }
+
+    // Check if authors can view their own unpublished nodes.
+    if (op == 'view' && !node.status && user_access('view own unpublished content', account) && account.uid == node.uid && account.uid != 0) {
+      return true;
+    }
+
+    if (op == 'view' && node.status) {
+      // The default behavior is to allow all users to view published nodes, so
+      // reflect that here.
+      return true;
+    }
+
+    return false;
   }
   catch (error) { console.log('node_access - ' + error); }
 }
@@ -171,7 +226,7 @@ function node_menu() {
         'weight': 0,
         'type': 'MENU_LOCAL_TASK',
         'access_callback': 'node_access',
-        'access_arguments': [1],
+        'access_arguments': ['update', 1],
         options: {reloadPage: true}
       }
     };
