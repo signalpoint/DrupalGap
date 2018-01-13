@@ -1112,7 +1112,7 @@ function drupalgap_menu_access(routerPath, path) {
             else {
               // Replace any integer arguments with the corresponding path argument.
               for (var i = 0; i < access_arguments.length; i++) {
-                if (is_int(access_arguments[i])) { access_arguments[i] = arg(i, path); }
+                if (is_int(access_arguments[i])) { access_arguments[i] = arg(access_arguments[i], path); }
               }
             }
             return fn.apply(null, Array.prototype.slice.call(access_arguments));
