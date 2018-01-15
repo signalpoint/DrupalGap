@@ -1,6 +1,6 @@
 /**
  * jDrupal Settings.
- * @see http://jdrupal.easystreet3.com
+ * @see http://jdrupal.tylerfrankenstein.com
  */
 jDrupal.settings = {
 
