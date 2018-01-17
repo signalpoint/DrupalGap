@@ -29,3 +29,16 @@ dg.goto('pizza', {
   }
 });
 ```
+
+# Destination
+
+With the `destination` query string parameter you can easily control where a form will redirect to upon submission. A
+common example is sending an anonymous user back to the page they were on upon a successful login:
+
+```
+var loginLink = dg.l(dg.t('Login'), 'user/login', {
+  _query: {
+    destination: dg.arg().join('/')
+  }
+});
+```
