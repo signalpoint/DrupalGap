@@ -1,7 +1,7 @@
 dg.theme_bucket = function(variables) {
   if (!variables._format) { variables._format = 'div'; }
   var format = variables._format;
-  if (!variables._attributes.id) { variables._attributes.id = format + '-' + jDrupal.userPassword(); }
+  if (!variables._attributes.id) { variables._attributes.id = format + '-' + dg.salt(); }
   if (!variables._grab) { return; }
   var element = {};
   var prefix = variables._prefix ? dg.render(variables._prefix) : '';

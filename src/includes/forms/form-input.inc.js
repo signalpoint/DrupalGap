@@ -19,7 +19,7 @@ dg.theme_actions = function(variables) {
  */
 dg.theme_checkbox = function(variables) {
   variables._attributes.type = 'checkbox';
-  if (!variables._attributes.id) { variables._attributes.id = 'checkbox-' + jDrupal.userPassword(); }
+  if (!variables._attributes.id) { variables._attributes.id = 'checkbox-' + dg.salt(); }
   if (variables._default_value) { variables._attributes.checked = 'checked'; }
   var label = variables._title ?
     ' <label for="' + variables._attributes.id + '">' + variables._title + '</label>' :

@@ -204,7 +204,7 @@ dg.render = function(content, runPostRender) {
     // overwritten with the rendered content after the attachment(s) resolve.
     var hasAttachments = dg.hasAttachments(content);
     if (hasAttachments) {
-      var randomId = jDrupal.userPassword();
+      var randomId = dg.salt();
       var targetId = 'lib-' + randomId;
       var format = content._format ? content._format : 'div';
       return dg.render({
