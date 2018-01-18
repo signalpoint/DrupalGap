@@ -100,6 +100,15 @@ function user_logout_pageshow() {
       success: function(data) {
         drupalgap_remove_pages_from_dom();
         drupalgap_goto(drupalgap.settings.front, { reloadPage:true });
+      },
+      error: function(data) {
+        // Even in case of error, reset the user just as user_logout() does in
+        // case of success.
+        Drupal.user = drupal_user_defaults();
+        Drupal.sessid = null;
+        // Same as success above.
+        drupalgap_remove_pages_from_dom();
+        drupalgap_goto(drupalgap.settings.front, { reloadPage:true });
       }
     });
   }
