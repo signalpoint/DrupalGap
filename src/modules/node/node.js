@@ -148,6 +148,8 @@ function node_menu() {
         title_arguments: [2],
         page_callback: 'node_add_page_by_type',
         page_arguments: [2],
+        access_callback: 'node_access',
+        access_arguments: ['create', 2],
         options: { reloadPage: true }
       },
       'node/%': {
