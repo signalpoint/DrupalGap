@@ -70,7 +70,7 @@ dg.appRender = function(content) {
 
         // If all the blocks in the region are hidden, remove the empty region from the DOM and add a css class to the
         // body to indicate the region isn't present
-        if (_region.getBlocks().length == region.getHiddenBlocks().length) {
+        if (_region.getBlocks().length == _region.getHiddenBlocks().length) {
           var _regionId = _region.get('id');
           dg.removeElement(dg.cleanCssIdentifier(_regionId));
           dg.addBodyClass('no-' + _regionId);
