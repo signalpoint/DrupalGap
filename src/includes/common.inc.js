@@ -406,8 +406,8 @@ dg.bl = function(text, path, options) { return this.l.apply(this, arguments); };
  * @param id
  */
 dg.removeElement = function(id) {
-  var elem = document.getElementById(id);
-  elem.parentElement.removeChild(elem);
+  var el = dg.qs('#' + id);
+  if (el) { el.parentElement.removeChild(el); }
 };
 
 /**
