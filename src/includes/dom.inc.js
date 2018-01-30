@@ -27,6 +27,24 @@ dg.removeBodyClass = function(className) {
 };
 
 /**
+ * ATTRIBUTES
+ */
+
+/**
+ * Adds attributes to an element.
+ * @param el {String|Object} A document query selector string or DOM element.
+ * @param vars {Object} A render element variables object containing an _attributes property.
+ */
+dg.addAttrs = function(el, vars) {
+  if (!vars._attributes) { return; }
+  el = dg.qs(el);
+  for (var name in vars._attributes) {
+    if (!vars._attributes.hasOwnProperty(name)) { continue; }
+    el.setAttribute(name, vars._attributes[name])
+  }
+};
+
+/**
  * ELEMENT BUDDIES
  */
 
