@@ -25,7 +25,7 @@ form.disableSubmitButton();
 
 // OR...
 
- // When you have a FormInterface object...
+// When you have a FormInterface object...
 dg.loadFormFromInterface(form).disableSubmitButton();
 ```
 
@@ -38,4 +38,10 @@ form.enableSubmitButton();
 
 // When you have a FormInterface object...
 dg.loadFormFromInterface(form).enableSubmitButton(); 
+```
+
+## Manually submit form
+```
+var form = dg.loadForm('MyCustomForm');
+form.submit();
 ```
