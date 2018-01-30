@@ -288,6 +288,13 @@ dg.Form.prototype.submitForm = function(form, form_state, options) {
   });
 };
 
+/**
+ * Submits the form.
+ */
+dg.Form.prototype.submit = function() {
+  return this._submission();
+};
+
 // dg core form UX submission handler
 dg.Form.prototype._submission = function() {
   var self = this;
@@ -389,17 +396,23 @@ dg.Form.prototype.getSubmitButtonSelector = function() {
   return '#' + dg.killCamelCase(this.getFormId()) + ' #' + dg.formSubmitButtonId(this);
 };
 
+dg.Form.prototype.getSubmitButton = function() {
+  return dg.qs(this.getSubmitButtonSelector());
+};
+
 /**
  * Disables the submit button on the form.
  */
 dg.Form.prototype.enableSubmitButton = function() {
-  document.querySelector(this.getSubmitButtonSelector()).disabled = false;
+  var btn = this.getSubmitButton();
+  if (btn) { btn.disabled = false; }
 };
 /**
  * Enables the submit button on the form.
  */
 dg.Form.prototype.disableSubmitButton = function() {
-  document.querySelector(this.getSubmitButtonSelector()).disabled = true;
+  var btn = this.getSubmitButton();
+  if (btn) { dg.qs(btn).disabled = true; }
 };
 
 /**
@@ -495,7 +508,8 @@ dg.formAttachSubmissionHandler = function(id) {
     // placed into the url for all to see, yikes, wtf.
     if (e.preventDefault) e.preventDefault();
     var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
-    _form._submission().then(
+    //_form._submission().then(
+    _form.submit().then(
         function() { },
         function() { }
     );
@@ -516,9 +530,9 @@ dg.loadFormFromInterface = function(form) {
 };
 
 /**
- * Given a form element name and a form, this will return true if an element on the form exists that matches the
- * given name, false otherwise.
- * @param name {Object}
+ * Given a form element name and a form, this will return true if an element on the form exists that matches the given
+ * name, false otherwise.
+ * @param name {*}
  * @param form {Object}
  * @returns {boolean}
  */
@@ -526,9 +540,17 @@ dg.isFormElement = function(name, form) {
   return typeof form == 'object' && form.hasOwnProperty(name) && name.charAt(0) != '_';
 };
 
-dg.isFormProperty = function(prop, obj) {
-  return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
+/**
+ * Given a form element name and a form, this will return true if an property on the form exists that matches the given
+ * name, false otherwise.
+ * @param name {*}
+ * @param form {Object}
+ * @returns {boolean}
+ */
+dg.isFormProperty = function(name, form) {
+  return form.hasOwnProperty(name) && name.charAt(0) == '_';
 };
+
 dg.setFormElementDefaults = function(name, el) {
   var attrs = el._attributes ? el._attributes : {};
   if (!attrs.id) { attrs.id = dg.formElementDomIdFromName(name); }
