@@ -1,8 +1,10 @@
 /**
  * Themes an item list.
  * @param {Object} variables
+ *  _type {String} The type of list, defaults to 'ul'.
  *  _title {String} The title for the list.
  *  _items {Array} An array of list items to render, or an array of strings to render.
+ *  _itemsType {String} The type of element to use for each item, defaults to 'li';
  *  _items_prefix {String} An html string to render immediately before the items, but after the title.
  *  _items_suffix {String} An html string to render immediately after the items.
  * @return {String}
