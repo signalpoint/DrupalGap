@@ -64,6 +64,15 @@ dg.qs = function(el) {
 };
 
 /**
+ * A shortcut function to call document.querySelectorAll().
+ * @param selectors {String} One or more CSS selctors separated by commas.
+ * @returns {Object}
+ */
+dg.qsa = function(selectors) {
+  return document.querySelectorAll(selectors);
+};
+
+/**
  * Shows an element.
  * @param el {String|Object} The element identifier or element object.
  */
