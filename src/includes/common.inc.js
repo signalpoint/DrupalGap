@@ -162,6 +162,15 @@ dg.isProperty = function(prop, obj) {
   return obj.hasOwnProperty(prop) && prop.charAt(0) == '_';
 };
 
+dg.removeFromArray = function(needle, haystack) {
+  for (var i = haystack.length - 1; i >= 0; i--) {
+    if (haystack[i] === needle) {
+      haystack.splice(i, 1);
+      break;
+    }
+  }
+};
+
 /**
  * Sets the current page title.
  * @param {String} title The title to set.
