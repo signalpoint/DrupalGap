@@ -94,7 +94,7 @@ dg.hide = function(el) {
  * @returns {boolean}
  */
 dg.isVisible = function(el) {
-  return dg.qs(el).style.display != 'none';
+  return !dg.inArray(dg.qs(el).style.display, ['none', '']);
 };
 
 /**
