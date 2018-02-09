@@ -74,7 +74,7 @@ dg.qsa = function(selectors) {
 
 /**
  * Shows an element.
- * @param el {String|Object} The element identifier or element object.
+ * @param el {String|Object} A css selector or element object.
  */
 dg.show = function(el) {
   dg.qs(el).style.display = 'block';
@@ -82,10 +82,19 @@ dg.show = function(el) {
 
 /**
  * Hides an element.
- * @param el {String|Object} The element identifier or element object.
+ * @param el {String|Object} A css selector or element object.
  */
 dg.hide = function(el) {
   dg.qs(el).style.display = 'none';
+};
+
+/**
+ * Returns true if the given element is visible, false otherwise.
+ * @param el {String|Object} A css selector or element object.
+ * @returns {boolean}
+ */
+dg.isVisible = function(el) {
+  return dg.qs(el).style.display != 'none';
 };
 
 /**
