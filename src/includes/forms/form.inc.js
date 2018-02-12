@@ -23,7 +23,7 @@ dg.theme_form = function(variables) {
     _postRender: [function() {
       var formObj = dg.addForm(variables._id, dg.applyToConstructor(factoryFunction));
       formObj.getForm(variables).then(function(html) {
-        document.getElementById(variables._attributes.id).innerHTML = html;
+        dg.qs('#' + variables._attributes.id).innerHTML = html;
         if (dg.formHasActions(formObj.form)) { dg.formAttachSubmissionHandler(formDomId); }
         dg.runPostRenders();
       });
@@ -311,11 +311,17 @@ dg.Form.prototype._submission = function() {
           return;
         }
         self._submitForm(self, formState).then(function() {
+
+          // Figure out our destination, or fallback to the form action, if any.
           var destination = dg._GET('destination') ? dg._GET('destination') : null;
           if (!destination && self.form._action) { destination = self.form._action; }
+
+          // If there was a destination specified, go there (keep in mind the router will then remove the form from
+          // dg.forms upon route change) and then resolve. Otherwise just resolve (which leaves the dg.forms entry in
+          // place).
           if (destination) { dg.goto(destination); }
-          //dg.removeForm(self.getFormId());
           ok();
+
         }).catch(function() {
           self.enableSubmitButton();
         });
@@ -331,7 +337,7 @@ dg.Form.prototype._validateForm = function() {
 
   // Prepare to handle any validation errors.
   var setError = function(name) {
-    formState.setErrorByName(name, dg.t('The "' + name + '" field is required'));
+    formState.setErrorByName(name, dg.t('The @name field is required.', { '@name': name }));
   };
 
   // Verify required elements have values. Keep in mind that most (if not all) form elements have been wrapped in a
@@ -449,8 +455,8 @@ dg.createForm = function(formId, form) {
 };
 
 dg.addForm = function(id, form) {
-  this.forms[id] = form;
-  return this.forms[id];
+  dg.forms[id] = form;
+  return dg.forms[id];
 };
 
 /**
@@ -465,11 +471,11 @@ dg.formExists = function(id) { return jDrupal.functionExists(id); };
  * @param id
  * @returns {Form|null}
  */
-dg.loadForm = function(id) { return this.forms[id] ? this.forms[id] : null; };
+dg.loadForm = function(id) { return dg.forms[id] ? dg.forms[id] : null; };
 
-dg.loadForms = function() { return this.forms; };
-dg.removeForm = function(id) { delete this.forms[id]; };
-dg.removeForms = function() { this.forms = {}; };
+dg.loadForms = function() { return dg.forms; };
+dg.removeForm = function(id) { delete dg.forms[id]; };
+dg.removeForms = function() { dg.forms = {}; };
 
 /**
  * Given a form, this will return true if it has an 'actions' element, false otherwise.
@@ -500,15 +506,16 @@ dg.formHasActions = function(form) {
  * function waits until submission then invokes DrupalGap's core form validation and submission system.
  */
 dg.formAttachSubmissionHandler = function(id) {
-  var form_html_id = dg.killCamelCase(id, '-');
-  var form = document.getElementById(form_html_id);
-  if (!form) { return false; }
+  var formHtmlId = dg.killCamelCase(id, '-');
+  var form = dg.qs('#' + formHtmlId);
+  if (!form) {
+    console.log('formAttachSubmissionHandler - failed to find form in DOM: ' + formHtmlId);
+    // @TODO why does this moment cause all the submission values to get set into the URL query string?
+    return false;
+  }
   function processForm(e) {
-    // @TODO if any developer has a JS error during form submission, form state values are
-    // placed into the url for all to see, yikes, wtf.
     if (e.preventDefault) e.preventDefault();
     var _form = dg.loadForm(jDrupal.ucfirst(dg.getCamelCase(this.id)));
-    //_form._submission().then(
     _form.submit().then(
         function() { },
         function() { }
