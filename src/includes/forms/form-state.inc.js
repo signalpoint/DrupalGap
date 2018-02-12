@@ -47,23 +47,33 @@ dg.FormStateInterface.prototype.hasAnyErrors = function() {
   }
   return hasError;
 };
+
+/**
+ * Gets the forms error messages and returns them in an array, or null if there are none.
+ * @returns {Array}
+ */
 dg.FormStateInterface.prototype.getErrorMessages = function() {
-  var useModal = !!dg.modal; // Support dg_modal.
-  var useBootstrap = !!dg_bootstrap; // Support dg_bootstrap.
   var errors = this.getErrors();
-  var items = [];
+  var messages = [];
   for (error in errors) {
     if (!errors.hasOwnProperty(error)) { continue; }
-    items.push(errors[error]);
+    messages.push(errors[error]);
   }
-  return useModal ?
-      dg.theme(useBootstrap ? 'bootstrap_item_list' : 'item_list', { _items: items }) :
-      items.join('\n');
+  return messages.length ? messages : null;
 };
+
+/**
+ * This will display the form errors (if any) in the messages block.
+ * @TODO this won't work when a form is loaded in a dg_modal, the message block won't be visible there!
+ */
 dg.FormStateInterface.prototype.displayErrors = function() {
-  dg.alert(this.getErrorMessages(), {
-    type: 'error' // Support dg_modal.
-  });
+  var messages = this.getErrorMessages();
+  if (messages) {
+    messages.forEach(function(message) { dg.setMessage(message, 'error'); });
+    dg.blockRefresh('messages');
+    var messagesBlock = dg.getBlockFromDom('messages');
+    if (messagesBlock) { messagesBlock.scrollIntoView(); }
+  }
 };
 
 /**
