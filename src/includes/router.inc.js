@@ -116,6 +116,7 @@ dg.router = {
 
       // We have a route to handle the path...
 
+      // Clear out any forms from the previous route, if any.
       dg.removeForms();
 
       var matches = self.matches(newPath).match;
