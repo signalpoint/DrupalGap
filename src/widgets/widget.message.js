@@ -9,7 +9,9 @@
 dg.theme_message = function(variables) {
   var format = variables._format ? variables._format : 'div';
   var type = variables._type ? variables._type : null; // @TODO we should be defaulting to 'status' here, right?
-  if (!jDrupal.inArray('messages', variables._attributes.class)) { variables._attributes.class.push('messages'); }
-  if (type && !jDrupal.inArray(type, variables._attributes.class)) { variables._attributes.class.push(type); }
-  return '<' + format + ' ' + dg.attributes(variables._attributes) + '>' + variables._message + '</' + format + '>';
+  var classes = variables._attributes.class;
+  var className = 'messages';
+  if (!dg.inArray(className, classes)) { classes.push(className); }
+  if (type && !dg.inArray(type, classes)) { classes.push(type); }
+  return '<' + format + ' ' + dg.attrs(variables) + '>' + variables._message + '</' + format + '>';
 };
