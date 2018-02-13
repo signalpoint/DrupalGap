@@ -66,12 +66,10 @@ dg.theme = function(hook, variables) {
     //var theme_function = drupalgap.settings.theme + '_' + hook;
     //if (!function_exists(theme_function)) {
       var theme_function = 'theme_' + hook;
-      if (!jDrupal.functionExists(dg[theme_function])) {
+      if (!dg[theme_function]) {
         var caller = null;
-        if (arguments.callee.caller) {
-          caller = arguments.callee.caller.name;
-        }
-        var msg = 'WARNING: ' + theme_function + '() does not exist.';
+        if (arguments.callee.caller) { caller = arguments.callee.caller.name; }
+        var msg = 'WARNING: dg.' + theme_function + '() does not exist.';
         if (caller) { msg += ' Called by: ' + caller + '().' }
         console.log(msg);
         return content;
