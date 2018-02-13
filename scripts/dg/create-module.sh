@@ -54,7 +54,7 @@ while :; do
       echo "Now run these terminal commands to compile the $MODULE_NAME.min.js file:
 
 cd $MODULE_DIRECTORY
-sudo npm install
+npm install
 gulp"
 
       break

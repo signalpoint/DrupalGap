@@ -6,6 +6,7 @@ var gulp = require('gulp'),
 
 var exampleModuleSrc = [
   './src/_example.js',
+  './src/classes/class.*.js',
   './src/blocks/blocks.*.js',
   './src/forms/form.*.js',
   './src/includes/include.*.js',
