@@ -254,7 +254,7 @@ dg.attributes = function(attributes) {
 };
 
 /**
- *
+ * Given a render element, this will initialize the _attributes object for it.
  * @param element {Object} A typical render element or widget.
  */
 dg.attributesInit = function(element) {
@@ -333,7 +333,9 @@ dg.getCamelCase = function(str) {
 dg.extend = function(obj1, obj2) {
   for (var name in obj2) {
     if (!obj2.hasOwnProperty(name)) { continue; }
-    obj1[name] = obj2[name];
+    var val = obj2[name];
+    if (!jDrupal.isEmpty(val)) { obj1[name] = val; }
+
   }
   return obj1;
 };
