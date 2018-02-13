@@ -40,7 +40,8 @@ dg.addAttrs = function(el, vars) {
   el = dg.qs(el);
   for (var name in vars._attributes) {
     if (!vars._attributes.hasOwnProperty(name)) { continue; }
-    el.setAttribute(name, vars._attributes[name])
+    var value = vars._attributes[name];
+    el.setAttribute(name, dg.isArray(value) ? value.join(' ') : value );
   }
 };
 
