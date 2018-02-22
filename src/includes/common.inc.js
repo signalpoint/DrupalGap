@@ -203,6 +203,7 @@ dg.setDocumentTitle = function(title) {
 
 dg.setPageTitle = function(title) {
   // @TODO this is wrong, we need to run it through the block render layer so hook alterations can be applied.
+  // @TODO we now have some handy functions for refreshing a block, use them to solve the issue mentioned above.
   var titleDiv = document.getElementById('title');
   if (titleDiv) { titleDiv.innerHTML = typeof title === 'string' ?
       dg.theme('title', { _title: title }) : dg.render(title); }
