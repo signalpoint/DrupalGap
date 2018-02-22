@@ -280,10 +280,14 @@ dg.blockLoad = function(id) { return dg.blocks[id] ? dg.blocks[id] : null; };
  * @param name
  */
 dg.blockRefresh = function(name) {
-  // Only the "main" block needs special consideration in that the active route's controller needs to be invoked and
-  // its result set onto the dg.content variable so that the page can be refreshed properly.
-  if (name == 'main') { dg.content = dg.getRoute().defaults._controller(); }
-  dg.blockSetContent(name);
+  // Only the "main" block needs special consideration in that the active route's handler needs to be invoked and its
+  // result set onto the dg.content variable so that the page can be refreshed properly.
+  if (name == 'main') {
+    dg.router.execute(function(content) {
+      dg.blockSetContent(name, content);
+    });
+  }
+  else { dg.blockSetContent(name); }
 };
 
 dg.blockSetContent = function(name, content) {
