@@ -28,7 +28,7 @@ dg.setMode = function(mode) { this.config('mode', mode); };
  * @return {Boolean}
  */
 dg.isCompiled = function() {
-  jDrupal.inArray(dg.getMode(), ['phonegap', 'cordova'])
+  return dg.inArray(dg.getMode(), ['phonegap', 'cordova']);
 };
 
 /**
