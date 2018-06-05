@@ -63,3 +63,14 @@ content['my_item_list'] = {
 };
 return content;
 ```
+
+## List Title
+
+With the `_h` option we can set the size of the header tag, which defaults to an `<h3></h3>` element:
+
+```
+_title: 'Instructions',
+_h: 1
+```
+
+In the above example, the title will be wrapped in an `<h1></h1`.
