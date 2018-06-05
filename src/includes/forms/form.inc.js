@@ -9,6 +9,7 @@ dg.forms = {}; // A global storage for active forms.
  * @returns {String}
  */
 dg.theme_form = function(variables) {
+  var debugPrefix = 'dg.theme_form - '; // Helps developers with broken forms.
 
   // Validate variables and figure out the Form instance's function name.
   var msg = '';
@@ -16,7 +17,7 @@ dg.theme_form = function(variables) {
   var factoryFunctionName = variables._id;
   var factoryFunction = window[factoryFunctionName];
   if (!factoryFunction) { msg = 'form id not found: ' + factoryFunctionName; }
-  if (msg != '') { console.log('dg.theme_form - ' + msg); return ''; }
+  if (msg != '') { console.log(debugPrefix + msg); return ''; }
 
   // Figure out an id for the form's wrapper div. If a node is attached to the form, use its node id for additional
   // context on the wrapper div's id. This helps one form power many nodes (e.g. webforms).
@@ -45,7 +46,9 @@ dg.theme_form = function(variables) {
         var form = formObj.form;
 
         // Set the form's html in the DOM.
-        dg.qs('#' + formWrapperId).innerHTML = html;
+        var formWrapper = dg.qs('#' + formWrapperId);
+        if (formWrapper) { formWrapper.innerHTML = html; }
+        else { console.log(debugPrefix + 'form wrapper missing: ' + formWrapperId); return; }
 
         // If the form has actions, attach submission handlers.
         if (dg.formHasActions(form)) {
