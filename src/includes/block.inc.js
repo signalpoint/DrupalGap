@@ -69,7 +69,7 @@ dg.Block.prototype.getRegion = function() {
 };
 
 /**
- * A wrapper function around to invoke the block's build function and hook_block_view_alter().
+ * A wrapper function to invoke the block's build function and hook_block_view_alter().
  * @returns {Promise}
  */
 dg.Block.prototype.buildWrapper = function() {
@@ -91,13 +91,13 @@ dg.Block.prototype.buildWrapper = function() {
  */
 dg.Block.prototype.render = function() {
   var _id = dg.cleanCssIdentifier(this.get('id'));
-  var el = document.getElementById(_id);
+  var el = dg.qs('#' + _id);
   var rendered = dg.render(this.get('content'));
   if (el) { el.innerHTML = rendered; }
   else {
     // The element isn't in the DOM yet, set a timeout to wait for it.
     setTimeout(function(elId) {
-      var el = document.getElementById(elId);
+      var el = dg.qs('#' + elId);
       if (el) { el.innerHTML = rendered; }
     }, 1, _id);
   }
@@ -280,7 +280,14 @@ dg.blockLoad = function(id) { return dg.blocks[id] ? dg.blocks[id] : null; };
  * @param name
  */
 dg.blockRefresh = function(name) {
-  dg.blockSetContent(name);
+  // Only the "main" block needs special consideration in that the active route's handler needs to be invoked and its
+  // result set onto the dg.content variable so that the page can be refreshed properly.
+  if (name == 'main') {
+    dg.router.execute(function(content) {
+      dg.blockSetContent(name, content);
+    });
+  }
+  else { dg.blockSetContent(name); }
 };
 
 dg.blockSetContent = function(name, content) {

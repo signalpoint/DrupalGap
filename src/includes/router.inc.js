@@ -119,16 +119,6 @@ dg.router = {
       // Clear out any forms from the previous route, if any.
       dg.removeForms();
 
-      var matches = self.matches(newPath).match;
-
-      var menu_execute_active_handler = function(content) {
-        dg.router.setActiveRoute(route);
-        dg.router.stackPush(route, dg.getPath());
-        dg.content = content;
-        dg.appRender();
-        jDrupal.moduleInvokeAll('post_process_route_change', route, dg.getPath(), oldPath);
-      };
-
       if (!route.defaults) { route = self.load(dg.getFrontPagePath()); }
 
       //if (!route.defaults) { route = this.load('404'); } // @TODO properly handle 404
@@ -140,36 +130,62 @@ dg.router = {
         dg.setTitle(route.defaults._title);
         dg.setDocumentTitle(route.defaults._title);
 
-        // Handle forms, apply page arguments or no arguments.
-        if (route.defaults._form) {
-          var id = route.defaults._form;
-          if (matches.length > 1) {
-            matches.shift();
-            dg.addForm(id, dg.applyToConstructor(window[id], matches)).getForm().then(menu_execute_active_handler);
-          }
-          else {
-            dg.addForm(id, new window[id]).getForm().then(menu_execute_active_handler);
-          }
-        }
-
-        // All other routes, apply page arguments or no arguments. We accept both render elements and
-        // promises to be returned from a controller.
-        else {
-          var controllerResult = null;
-          if (matches.length > 1) {
-            matches.shift();
-            controllerResult = route.defaults._controller.apply(null, matches);
-          }
-          else { controllerResult = route.defaults._controller(); }
-          if (jDrupal.isPromise(controllerResult)) { controllerResult.then(menu_execute_active_handler); }
-          else { menu_execute_active_handler(controllerResult); }
-        }
+        // Run the handler for the route and new path, when it calls back with the content we set the new active route,
+        // toss the path on the stack, set the global dg.content (used by the "main" block in the system module), tell
+        // the app to render itself, then give developers a chance to react to the completion of the route change.
+        dg.router.execute(function(content) {
+          var _newPath = dg.getPath();
+          dg.router.setActiveRoute(route);
+          dg.router.stackPush(route, _newPath);
+          dg.content = content;
+          dg.appRender();
+          jDrupal.moduleInvokeAll('post_process_route_change', route, _newPath, oldPath);
+        }, route, newPath);
 
       }
 
     });
 
     return this;
+
+  },
+
+  /**
+   * Given a optional route and corresponding path, this will run its handler (e.g. defaults._controller or
+   * defaults._form) and send the content from the handler back to the given callback.
+   * @param ok {Function} A callback function for when this is done.
+   * @param route {Object} Optional, defaults to the current route.
+   * @param path {String} Optional, defaults to the current path.
+   */
+  execute: function(ok, route, path) {
+
+    // Prep any defaults and grab the matches (if any) from the path.
+    if (!route) { route = dg.getRoute(); }
+    if (!path) { path = dg.getPath(); }
+    var matches = dg.router.matches(path).match;
+
+    // Handle forms, apply page arguments or no arguments.
+    if (route.defaults._form) {
+      var id = route.defaults._form;
+      if (matches.length > 1) {
+        matches.shift();
+        dg.addForm(id, dg.applyToConstructor(window[id], matches)).getForm().then(ok);
+      }
+      else { dg.addForm(id, new window[id]).getForm().then(ok); }
+    }
+
+    // All other routes, apply page arguments or no arguments. We accept both render elements and
+    // promises to be returned from a controller.
+    else {
+      var controllerResult = null;
+      if (matches.length > 1) {
+        matches.shift();
+        controllerResult = route.defaults._controller.apply(null, matches);
+      }
+      else { controllerResult = route.defaults._controller(); }
+      if (jDrupal.isPromise(controllerResult)) { controllerResult.then(ok); }
+      else { ok(controllerResult); }
+    }
 
   },
 
@@ -252,11 +268,10 @@ dg.router = {
     }
     return this;
   },
+
   getRoutes: function() {
     return this.routes;
   },
-
-
 
   /**
    * Returns the active route object.
