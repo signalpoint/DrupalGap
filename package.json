@@ -1,7 +1,7 @@
 {
-  "version": "7.0.0",
+  "version": "8.0.0",
   "name": "drupalgap",
-  "description": "An application development kit for Drupal 7.",
+  "description": "An application development kit for Drupal 8.",
   "main": "index.html",
   "repository": {
     "type": "git",
@@ -9,15 +9,15 @@
   },
   "keywords": [
     "drupal",
-    "jquerymobile",
-    "phonegap"
+    "phonegap",
+    "cordova"
   ],
   "license": "GNU",
   "author": "Tyler Frankenstein <email@tylerfrankenstein.com> (http://tylerfrankenstein.com/)",
   "bugs": {
     "url": "https://github.com/signalpoint/DrupalGap/issues"
   },
-  "homepage": "http://drupalgap.org",
+  "homepage": "https://www.drupalgap.org",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "^0.5.1",
