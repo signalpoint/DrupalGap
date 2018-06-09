@@ -28,7 +28,6 @@ var UserLoginForm = function() {
   };
 
   this.submitForm = function(form, formState) {
-    var self = this;
     return new Promise(function(ok, err) {
       jDrupal.userLogin(
         formState.getValue('name'),
@@ -37,9 +36,15 @@ var UserLoginForm = function() {
         if (dg.isFrontPage()) { dg.router.check(dg.getFrontPagePath()); }
         else if (dg.getPath() == form._action) { dg.router.check(form._action); }
         ok();
+      }, function(error) {
+        var pass = dg.qs('#edit-pass');
+        pass.value = '';
+        pass.focus();
+        var msg = JSON.parse(error.responseText).message;
+        !!dg.alert ? dg.alert(msg) : console.log(msg);
+        err();
       });
     });
-
   };
 
 };
