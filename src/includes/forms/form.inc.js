@@ -34,10 +34,8 @@ dg.theme_form = function(variables) {
       // Assemble the Form instance.
       var formObj = dg.addForm(factoryFunctionName, dg.applyToConstructor(factoryFunction));
 
-      // Attach the factory function name (aka the original form id) to the form's attributes, that way in the submit
-      // handler we have easy access to the original factory function name in case the developer attached a node context
-      // to the form.
-      formObj.form._attributes['data-id'] = factoryFunctionName;
+      // WARNING: don't do any customizations between the addForm() and getForm() calls here, put any extra stuff into
+      // getForm() so it's picked up by any usage of dg.theme_form() too.
 
       // Get the form's html.
       formObj.getForm(variables).then(function(html) {
@@ -52,7 +50,8 @@ dg.theme_form = function(variables) {
 
         // If the form has actions, attach submission handlers.
         if (dg.formHasActions(form)) {
-          dg.formAttachSubmissionHandler(form._attributes.id); }
+          dg.formAttachSubmissionHandler(form._attributes.id);
+        }
 
         // Run any post renders for good luck.
         dg.runPostRenders();
@@ -135,14 +134,19 @@ dg.Form.prototype.getForm = function() {
   return new Promise(function(ok, err) {
     var done = function() {
 
+      // Attach the factory function name (aka the original form id) to the form's attributes, that way in the submit
+      // handler we have easy access to the original factory function name in case the developer attached a node context
+      // to the form.
+      self.form._attributes['data-id'] = self.id;
+
       // Set up default values across each element.
       // @TODO this should be the FormElementPrepare prototype, or combination of.
-      for (name in self.form) {
+      for (var name in self.form) {
         if (!dg.isFormElement(name, self.form)) { continue; }
         var el = self.form[name];
         if (el._type == 'actions') {
           dg.setFormElementDefaults(name, el);
-          for (_name in el) {
+          for (var _name in el) {
             if (!dg.isFormElement(_name, el)) { continue; }
             dg.setFormElementDefaults(_name, el[_name]);
           }
