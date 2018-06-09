@@ -92,7 +92,7 @@ dg.appRender = function(content) {
           var forms = dg.loadForms();
           for (var id in forms) {
             if (!forms.hasOwnProperty(id)) { continue; }
-            dg.formAttachSubmissionHandler(id);
+            dg.formAttachSubmissionHandler(forms[id].getFormDomId());
           }
 
         }
