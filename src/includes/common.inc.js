@@ -40,6 +40,17 @@ dg.platform = function() {
 };
 
 /**
+ * Returns true if the device has a connection, false otherwise.
+ * @see https://github.com/apache/cordova-plugin-network-information
+ * @returns {boolean}
+ */
+dg.hasConnection = function() {
+  return dg.isCompiled() ?
+    navigator.connection.type != Connection.NONE :
+    true; // Assume web-apps always have connection, for now.
+};
+
+/**
  * Returns the current route.
  * @returns {Object}
  */
