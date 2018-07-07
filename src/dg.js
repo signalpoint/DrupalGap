@@ -34,7 +34,7 @@ dg.start = function() {
 };
 
 /**
- * Handles the moment the device is ready by running the bootstrap, then invoking hook_bootstrap() to see if any
+ * Handles the moment the device is ready by running the bootstrap, then invoking hook_deviceready() to see if any
  * developer wants to take over the "deviceready" process themselves, and often times no one does so by default we make
  * a Connect call to jDrupal, and upon connection simply continue onward by forcing a route change to the front page.
  */
