@@ -6,7 +6,7 @@
  */
 dg.goto = function(path, options) {
   path += dg.extractQueryString(options);
-  this.router.navigate(path);
+  dg.router.navigate(path);
 };
 
 dg.reload = function() {
