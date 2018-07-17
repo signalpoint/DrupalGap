@@ -449,7 +449,7 @@ dg.Form.prototype._submitForm = function() {
 };
 
 dg.Form.prototype.getSubmitButtonSelector = function() {
-  return '#' + dg.killCamelCase(this.getFormId()) + ' #' + dg.formSubmitButtonId(this);
+  return '#' + this.getFormDomId() + ' #' + dg.formSubmitButtonId(this);
 };
 
 dg.Form.prototype.getSubmitButton = function() {
@@ -559,7 +559,7 @@ dg.formHasActions = function(form) {
 dg.formAttachSubmissionHandler = function(id) {
   var form = dg.qs('#' + id);
   if (!form) {
-    console.log('formAttachSubmissionHandler - failed to find form in DOM: ' + id);
+    //console.log('formAttachSubmissionHandler - failed to find form in DOM: ' + id);
     // @TODO why does this moment cause all the submission values to get set into the URL query string?
     return false;
   }
