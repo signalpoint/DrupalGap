@@ -72,7 +72,7 @@ dg.FormStateInterface.prototype.displayErrors = function() {
     messages.forEach(function(message) { dg.setMessage(message, 'error'); });
     dg.blockRefresh('messages');
     var messagesBlock = dg.getBlockFromDom('messages');
-    if (messagesBlock) { messagesBlock.scrollIntoView(); }
+    if (messagesBlock) { messagesBlock.scrollIntoView(false); }
   }
 };
 
