@@ -51,7 +51,7 @@ dg.themeLoad = function() {
  * @return {String}
  */
 dg.theme = function(hook, variables) {
-  try {
+  //try {
 
     // @TODO add an `_access_callback` and `_access_arguments` properties, see Drupal's way before implementing
 
@@ -86,8 +86,8 @@ dg.theme = function(hook, variables) {
       return '<div ' + dg.attributes(variables._attributes) + '></div>';
     }
     return html;
-  }
-  catch (error) { console.log('dg.theme - ' + error); }
+  //}
+  //catch (error) { console.log('dg.theme - ' + error); }
 };
 
 /**
