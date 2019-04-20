@@ -118,7 +118,6 @@ dg.bootstrap = function() {
  * Forces a check on the router to refresh the current page or navigate to the current path.
  */
 dg.continue = function() {
-
   dg._continued = true;
   dg.router.check(dg.router.getPath());
 };
