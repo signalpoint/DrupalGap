@@ -35,7 +35,7 @@ dg.getQueryString = function(url) {
 };
 
 /**
- * Extracts a query string from a render element and returns it as a string.
+ * Extracts a query string from a render element or link options and returns it as a string.
  * @param variables {Object}
  * @returns {String}
  */
