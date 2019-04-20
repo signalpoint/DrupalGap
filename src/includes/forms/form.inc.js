@@ -72,6 +72,10 @@ dg.formDomIdFromId = function(formId) {
 };
 
 /**
+ * PROTOTYPE
+ */
+
+/**
  * The Form prototype.
  * @param id
  * @constructor
@@ -473,6 +477,10 @@ dg.Form.prototype.disableSubmitButton = function() {
 };
 
 /**
+ * HELPERS
+ */
+
+/**
  * Given a Form, this will return its' submit button id as a string, or null if it can't find it.
  * @param {dg.Form} form
  * @returns {string}
@@ -527,6 +535,34 @@ dg.loadForm = function(id) { return dg.forms[id] ? dg.forms[id] : null; };
 dg.loadForms = function() { return dg.forms; };
 dg.removeForm = function(id) { delete dg.forms[id]; };
 dg.removeForms = function() { dg.forms = {}; };
+
+/**
+ * Given a form id, this will return its form state.
+ * @param id {String} The form id.
+ * @returns {dg.FormStateInterface}
+ */
+dg.getFormState = function(id) {
+  return dg.loadForm(id).getFormState();
+};
+
+/**
+ * Given a form id, this will the values from its form state.
+ * @param id {String} The form id.
+ * @returns {Object} The raw form state values.
+ */
+dg.getFormStateValues = function(id) {
+  return dg.getFormState(id).getValues();
+};
+
+/**
+ * Given a form id and element name, this will the value from the element in its form state.
+ * @param id {String} The form id.
+ * @param name {String} The name of the form element.
+ * @returns {*} The value of the element.
+ */
+dg.getFormStateValue = function(id, name) {
+  return dg.getFormState(id).getValue(name);
+};
 
 /**
  * Given a form, this will return true if it has an 'actions' element, false otherwise.
