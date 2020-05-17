@@ -28,6 +28,8 @@ if [ -d "$MODULE_DIR" ]; then
   fi
 fi
 
+# TODO lookup default branch
+
 # Determine which branch to download.
 BRANCH="8.x-1.x"
 if [ $# -eq 3 ]; then
