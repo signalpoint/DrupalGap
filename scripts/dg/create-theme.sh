@@ -18,20 +18,15 @@ fi
 
 mkdir $THEME_DIRECTORY
 
-
 # WARNING: any changes here should be reflected in the "create a custom theme" docs.
 
-echo "// The $THEME_NAME theme constructor.
-dg.themes.$THEME_CLASS_NAME = function() {
+echo "dg.createTheme('$THEME_CLASS_NAME', function() {
   this.regions = {
     header: { },
     content: { },
     footer: { }
   };
-};
-// Extend the DrupalGap Theme prototype.
-dg.themes.$THEME_CLASS_NAME.prototype = new dg.Theme;
-dg.themes.$THEME_CLASS_NAME.prototype.constructor = dg.themes.$THEME_CLASS_NAME;" > "$FILE_URI"
+});" > "$FILE_URI"
 
 echo "1. Include it in the index.html file:
 

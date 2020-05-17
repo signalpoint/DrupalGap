@@ -36,21 +36,15 @@ app/themes/foo/foo.js
 In `foo.js`, make a constructor for the theme (the capitalized `Foo` is not a typo), and add 3 regions to it:
 
 ```
-// The foo theme constructor.
-dg.themes.Foo = function() {
+dg.createTheme('Foo', function() {
 
-  // The theme's regions.
   this.regions = {
     header: { },
     content: { },
     footer: { }
   };
-  
-};
 
-// Extend the DrupalGap Theme prototype.
-dg.themes.Foo.prototype = new dg.Theme;
-dg.themes.Foo.prototype.constructor = dg.themes.Foo;
+});
 ```
 
 #### 4. Load the theme

@@ -1,4 +1,16 @@
 /**
+ * Creates a theme (by extending the DrupalGap Theme prototype).
+ * @see docs/
+ * @param name {String} The theme's name.
+ * @param theme {Function}
+ */
+dg.createTheme = function(name, theme) {
+  dg.themes[name] = theme;
+  dg.themes[name].prototype = new dg.Theme;
+  dg.themes[name].prototype.constructor = dg.themes[name];
+};
+
+/**
  *
  * @constructor
  */
