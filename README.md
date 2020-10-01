@@ -1,4 +1,4 @@
-## What is DrupalGap?-Nice
+## What is DrupalGap?Nice
 
 > An open source application development kit for Drupal 7. [Try a demo...](http://demo.drupalgap.org) 
 
