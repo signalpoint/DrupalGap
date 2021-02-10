@@ -62,8 +62,9 @@ dg.bootstrap = function() {
 
   dg.router.config({});
 
-  // Assemble the routes provided by each module.
+  // Assemble the routes provided by each module and prepare to set aside any routes who's base route isn't ready yet.
   var modules = jDrupal.modulesLoad();
+  var routesWithMissingBase = [];
   for (var module in modules) {
     if (!modules.hasOwnProperty(module)) { continue; }
 
@@ -78,12 +79,29 @@ dg.bootstrap = function() {
         item.key = route;
         dg.router.add(item);
 
-        // If the route item has a base route specified, add the route item as a child of the base route.
-        var baseRoute = dg.router.getBaseRoute(item);
-        if (baseRoute) { dg.router.saveAsChildRoute(item, baseRoute); }
+        // If the route item has a base route specified, add the route item as a child of the base route, unless the
+        // base route wasn't ready, then set the route aside so we can deal with it later.
+        var hasBaseRoute = dg.router.hasBaseRoute(item);
+        if (hasBaseRoute) {
+          var baseRoute = dg.router.getBaseRoute(item);
+          baseRoute ? dg.router.saveAsChildRoute(item, baseRoute) : routesWithMissingBase.push(item);
+        }
+
       }
     }
 
+  }
+
+  // If any routes had a base route that wasn't ready, set their base route now that all routes are ready.
+  var routesWithMissingBaseCount = routesWithMissingBase.length;
+  if (routesWithMissingBaseCount) {
+    for (var i = 0; i < routesWithMissingBaseCount; i++) {
+      var item = routesWithMissingBase[i];
+      var baseRoute = dg.router.getBaseRoute(item);
+      if (baseRoute) {
+        dg.router.saveAsChildRoute(item, baseRoute);
+      }
+    }
   }
 
   // If there's no front page specified, set it to the default dg dashboard.
