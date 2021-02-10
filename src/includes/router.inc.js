@@ -370,7 +370,7 @@ dg.router = {
 
   hasBaseRoute: function(route) {
     if (!route) { route = this.getActiveRoute(); }
-    return route.defaults._base_route ? true : false;
+    return !!route.defaults._base_route;
   },
 
   getBaseRoute: function(route) {
@@ -381,11 +381,11 @@ dg.router = {
 
   hasChildRoutes: function(route) {
     if (!route) { route = this.getActiveRoute(); }
-    return route.defaults._child_routes ? true : false;
+    return !!route.defaults._child_routes;
   },
 
   initChildRoutes: function(route) {
-    route.defaults._child_routes = []
+    route.defaults._child_routes = [];
   },
 
   getChildRoutes: function(route) {
