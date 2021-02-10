@@ -1,4 +1,4 @@
-var minify = false;
+var minify = true;
 
 var gulp = require('gulp'),
     watch = require('gulp-watch'),
