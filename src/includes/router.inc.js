@@ -431,7 +431,7 @@ dg.router = {
 };
 
 /**
- * Get the value of a query string
+ * Get the value of a query string.
  * @see https://gomakethings.com/how-to-get-the-value-of-a-querystring-with-native-javascript/
  * @param  {String} field The field to get the value of
  * @param  {String} url   The URL to get the value from (optional)
