@@ -1,4 +1,4 @@
-The *Bucket Widget* is a very powerful widget. It allows you to place an empty `div` on the page, make an *async* call (like fetching data from Drupal, or requesting GPS coordinates), then render something and inject it into the empty div.
+The *Bucket Widget* is a very useful widget. It allows you to place an empty `div` on the page, make an *async* call (like fetching data from Drupal, or requesting GPS coordinates), then render something and inject it into the empty div.
  
 ```
 /**
@@ -10,15 +10,13 @@ example.pageNode = function(nid) {
   // Place an empty bucket on the page.
   element.foo = {
     _theme: 'bucket',
-    _grab: function() {
-      return new Promise(function(fill, dump) {
-      
-        // Grab the node from the server, and fill the bucket with the node title.
-        dg.nodeLoad(nid).then(function(node) {
-          fill(node.getTitle());
-        });
-  
+    _fill: function(ok) {
+
+      // Grab the node from the server, and fill the bucket with the node title.
+      dg.nodeLoad(nid).then(function(node) {
+        ok(node.getTitle());
       });
+
     }
   };
   
