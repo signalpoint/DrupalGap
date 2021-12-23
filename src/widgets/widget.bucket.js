@@ -1,20 +1,23 @@
-dg.theme_bucket = function(variables) {
-  if (!variables._format) { variables._format = 'div'; }
-  var format = variables._format;
-  if (!variables._attributes.id) { variables._attributes.id = format + '-' + dg.salt(); }
-  if (!variables._grab) { return; }
+dg.theme_bucket = function(vars) {
+  if (!vars._format) { vars._format = 'div'; }
+  var format = vars._format;
+  if (!vars._attributes.id) { vars._attributes.id = format + '-' + dg.salt(); }
+  if (!vars._grab && !vars._fill) { return; }
   var element = {};
-  var prefix = variables._prefix ? dg.render(variables._prefix) : '';
-  var suffix = variables._suffix ? dg.render(variables._suffix) : '';
+  var prefix = vars._prefix ? dg.render(vars._prefix) : '';
+  var suffix = vars._suffix ? dg.render(vars._suffix) : '';
   element.bucket = {
     _markup: prefix +
-    '<' + format + ' ' + dg.attributes(variables._attributes) + '></' + format + '>' +
+    '<' + format + ' ' + dg.attributes(vars._attributes) + '></' + format + '>' +
     suffix,
     _postRender: [function() {
-      variables._grab().then(function(content) {
-        document.getElementById(variables._attributes.id).innerHTML = dg.render(content);
-        if (dg.postRenderCount()) { dg.runPostRenders(); }
-      });
+        var p = null;
+        if (vars._grab) { p = vars._grab(); }
+        else if (vars._fill) { p = new Promise(vars._fill); }
+        p.then(function(content) {
+          dg.qs('#' + vars._attributes.id).innerHTML = dg.render(content);
+          if (dg.postRenderCount()) { dg.runPostRenders(); }
+        });
     }]
   };
   return dg.render(element);
