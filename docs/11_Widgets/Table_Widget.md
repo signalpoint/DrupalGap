@@ -1,4 +1,4 @@
-We can create tables in our app.
+Let's create some html tables for display...
 
 ```
 var content = {};
@@ -11,22 +11,17 @@ content['my_table'] = {
   ],
   _rows: [
     ['red', 'circle', 'small'],
-    ['green', 'square', 'medium'],
-    ['blue', 'triangle', 'large'],
+    ['green', 'square', 'medium']
   ]
 };
 return content;
 ```
 
-If you need custom attributes on a row, try this:
+If you need custom attributes on a table **row**, try this:
 
 ```
-var html = dg.theme('table', {
-  _header: [
-    dg.t('Color'),
-    dg.t('Shape'),
-    dg.t('Size')
-  ],
+//...
+
   _rows: [
     {
       _attributes: {
@@ -41,7 +36,39 @@ var html = dg.theme('table', {
         class: ['car']
       },
       _cols: ['green', 'square', 'medium']
+    }
+  ],
+
+//...
+
+```
+
+If you need custom attributes on a table **header**, try this:
+
+```
+//...
+
+  _header: [
+    {
+      _attributes: {
+        id: 'color-header'
+      },
+      _text: dg.t('Color')
     },
-  ]
-});
+    {
+      _attributes: {
+        id: 'shape-header'
+      },
+      _text: dg.t('Shape')
+    },
+    {
+      _attributes: {
+        id: 'size-header'
+      },
+      _text: dg.t('Size')
+    }
+  ],
+
+//...
+
 ```
