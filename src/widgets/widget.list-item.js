@@ -2,6 +2,7 @@
  *
  * @param variables
  *  _text {String} The text to appear within the item.
+ *  _itemType {String} The type of element to use on the item, defaults to 'li'.
  * @returns {*}
  */
 dg.theme_list_item = function(variables) {
