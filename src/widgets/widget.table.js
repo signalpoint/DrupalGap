@@ -13,7 +13,12 @@ dg.theme_table = function(vars) {
     html += '<thead><tr>';
     for (var i = 0; i < vars._header.length; i++) {
       var header = vars._header[i];
-      html += '<th scope="col">' + header + '</th>';
+      if (dg.isObject(header)) {
+        html += '<th ' + dg.attrs(header) + ' scope="col">' + header._text + '</th>';
+      }
+      else {
+        html += '<th scope="col">' + header + '</th>';
+      }
     }
     html += '</tr></thead>';
   }
