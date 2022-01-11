@@ -17,16 +17,16 @@ dg.theme_actions = function(variables) {
  *  _attributes {Object}
  * @returns {string}
  */
-dg.theme_checkbox = function(variables) {
-  variables._attributes.type = 'checkbox';
-  if (!variables._attributes.id) { variables._attributes.id = 'checkbox-' + dg.salt(); }
-  if (variables._default_value) { variables._attributes.checked = 'checked'; }
-  var label = variables._title ?
-    ' <label for="' + variables._attributes.id + '">' + variables._title + '</label>' :
+dg.theme_checkbox = function(vars) {
+  vars._attributes.type = 'checkbox';
+  if (!vars._attributes.id) { vars._attributes.id = 'checkbox-' + dg.salt(); }
+  if (vars._default_value) { vars._attributes.checked = 'checked'; }
+  var label = vars._title ?
+    ' <label for="' + vars._attributes.id + '">' + vars._title + '</label>' :
     '';
-  var prefix = variables._prefix ? variables._prefix : '';
-  var suffix = variables._suffix ? variables._suffix : '';
-  return prefix + '<input ' + dg.attributes(variables._attributes) + ' />' + label + suffix;
+  var prefix = vars._prefix ? vars._prefix : '';
+  var suffix = vars._suffix ? vars._suffix : '';
+  return prefix + '<input ' + dg.attributes(vars._attributes) + ' />' + label + suffix;
 };
 
 /**
