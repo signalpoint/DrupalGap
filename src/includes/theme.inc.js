@@ -104,7 +104,10 @@ dg.theme = function(hook, variables) {
     if (dg.themeHookRegistered(hook)) { module = dg.getThemeHook(hook); }
     else {
       var modules = jDrupal.moduleImplements(hook);
-      if (modules) { module = modules[0]; }
+      if (modules) {
+        module = modules[0];
+        if (module === 'user' && hook === 'password') { module = null; } // Hack: Prevent jDrupal 7's user_password() from consideration.
+      }
       dg.registerThemeHook(hook, module);
     }
 
