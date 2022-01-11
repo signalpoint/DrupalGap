@@ -65,6 +65,17 @@ dg.theme_checkboxes = function(variables) {
   }
   return '<div ' + dg.attributes(variables._attributes) + '>' + html + '</div>';
 };
+
+/**
+ * Renders a description for a form element.
+ * @param {type} vars
+ *  _description {String}
+ * @returns {String}
+ */
+dg.theme_description = function(vars) {
+  return '<small ' + dg.attrs(vars) + '>' + vars._description + '</small>';
+};
+
 dg.theme_email = function(variables) {
   variables._attributes.type = 'email';
   return '<input ' + dg.attributes(variables._attributes) + '/>';
