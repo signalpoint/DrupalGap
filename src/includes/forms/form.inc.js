@@ -244,13 +244,30 @@ dg.Form.prototype.getForm = function() {
               // Hidden and markup elements need nothing more.
               if (jDrupal.inArray(element._type,  ['hidden', 'markup'])) { continue; }
 
-              // Place the potential label, and element, as children to a container.
+              // Grab the attributes from the element.
+              var attrs = element._attributes;
+
+              // Are we using a placeholder?
+              var hasPlaceholder = !!attrs.placeholder;
+
+              // Is there a description present?
+              // If so, generate an id for it and add the "described by" accessibility attribute.
+              var hasDescription = !!element._description;
+              var descriptionId = hasDescription ? attrs.id + '-description' : null;
+              if (hasDescription) {
+                element._attributes['aria-describedby'] = descriptionId;
+              }
+
+              // Add the label, element and description as children to a container...
+
               var children = {
                 _attributes: {
                   'class': []
                 }
               };
-              if (element._title && !element._attributes.placeholder) {
+
+              // Label
+              if (element._title && !hasPlaceholder) {
                 if (element._type == 'checkbox') { /* single checkboxes provide their own label */ }
                 else {
                   children.label = {
@@ -263,7 +280,21 @@ dg.Form.prototype.getForm = function() {
                   };
                 }
               }
+
+              // Element
               children.element = el;
+
+              // Description
+              if (element._description) {
+                children.description = {
+                  _theme: 'description',
+                  _description: element._description,
+                  _attributes: {
+                    id: descriptionId
+                  }
+                };
+              }
+
               var container = { // @TODO we desperately need a function to instantiate a RenderElement
                 _theme: 'container',
                 _children: children,
@@ -272,6 +303,8 @@ dg.Form.prototype.getForm = function() {
                 },
                 _weight: element._weight
               };
+
+              // Set the container on the form as the element.
               self.form[name] = container;
 
               break;
