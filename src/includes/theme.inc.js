@@ -2,16 +2,13 @@ dg._themeRegistry = {};
 
 dg.getThemeRegistry = function() { return dg._themeRegistry; };
 dg.themeHookRegistered = function(hook) {
-  var registry = dg.getThemeRegistry();
-  return !!registry[hook];
+  return typeof dg.getThemeRegistry()[hook] !== 'undefined';
 };
 dg.registerThemeHook = function(hook, module) {
-  var registry = dg.getThemeRegistry();
-  registry[hook] = module;
+  dg.getThemeRegistry()[hook] = module;
 };
 dg.getThemeHook = function(hook) {
-  var registry = dg.getThemeRegistry();
-  return registry[hook];
+  return dg.getThemeRegistry()[hook];
 };
 
 /**
@@ -115,7 +112,7 @@ dg.theme = function(hook, variables) {
     // hook, otherwise use the implementation found within the dg namespace.
     var func = null;
     if (module) {
-      theme_function = modules[0] + '_' + hook;
+      theme_function = module + '_' + hook;
       func = window[theme_function];
     }
     else { func = dg[theme_function]; }
