@@ -11,19 +11,23 @@ dg.theme_actions = function(variables) {
  * Renders a checkbox.
  * @param variables
  *  _title {string} The title to use on the checkbox label.
+ *  _label {Object} An optional label for theme_label().
  *  _prefix {string} HTML to place before the input.
  *  _suffix {string} HTML to place before the input (or label).
  *  _default_value {*} Optional
- *  _attributes {Object}
  * @returns {string}
  */
 dg.theme_checkbox = function(vars) {
   vars._attributes.type = 'checkbox';
   if (!vars._attributes.id) { vars._attributes.id = 'checkbox-' + dg.salt(); }
   if (vars._default_value) { vars._attributes.checked = 'checked'; }
-  var label = vars._title ?
-    ' <label for="' + vars._attributes.id + '">' + vars._title + '</label>' :
-    '';
+  var label = vars._label;
+  if (!label) { label = { }; }
+  dg.elementAttributesInit(label);
+  if (!label._title) { label._title = vars._title; }
+  var labelAttrs = label._attributes;
+  if (!labelAttrs.for) { labelAttrs.for = vars._attributes.id; }
+  var label = dg.theme('label', label);
   var prefix = vars._prefix ? vars._prefix : '';
   var suffix = vars._suffix ? vars._suffix : '';
   return prefix + '<input ' + dg.attributes(vars._attributes) + ' />' + label + suffix;
@@ -68,6 +72,9 @@ dg.theme_email = function(variables) {
 dg.theme_hidden = function(variables) {
   variables._attributes.type = 'hidden';
   return '<input ' + dg.attributes(variables._attributes) + ' />';
+};
+dg.theme_label = function(vars) {
+  return ' <label ' + dg.attrs(vars) + '>' + vars._title + '</label>';
 };
 dg.theme_number = function(variables) {
   variables._attributes.type = 'number';
