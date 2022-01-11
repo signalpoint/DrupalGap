@@ -1,3 +1,19 @@
+dg._themeRegistry = {};
+
+dg.getThemeRegistry = function() { return dg._themeRegistry; };
+dg.themeHookRegistered = function(hook) {
+  var registry = dg.getThemeRegistry();
+  return !!registry[hook];
+};
+dg.registerThemeHook = function(hook, module) {
+  var registry = dg.getThemeRegistry();
+  registry[hook] = module;
+};
+dg.getThemeHook = function(hook) {
+  var registry = dg.getThemeRegistry();
+  return registry[hook];
+};
+
 /**
  * Creates a theme (by extending the DrupalGap Theme prototype).
  * @see docs/
@@ -73,31 +89,50 @@ dg.theme = function(hook, variables) {
     if (variables._markup) { return variables._markup; }
     var content = '';
 
-    // First see if the current theme implements the hook, if it does use it, if
-    // it doesn't fallback to the core theme implementation of the hook.
-    //var theme_function = drupalgap.settings.theme + '_' + hook;
-    //if (!function_exists(theme_function)) {
+      // Make sure there is a theme_*() function within the dg namespace for this hook.
       var theme_function = 'theme_' + hook;
       if (!dg[theme_function]) {
         var caller = null;
         if (arguments.callee.caller) { caller = arguments.callee.caller.name; }
         var msg = 'WARNING: dg.' + theme_function + '() does not exist.';
-        if (caller) { msg += ' Called by: ' + caller + '().' }
+        if (caller) { msg += ' Called by: ' + caller + '().'; }
         console.log(msg);
         return content;
       }
-    //}
 
     dg.setRenderElementDefaults(variables);
 
-    var html = dg[theme_function].call(null, variables);
+    // Utilizing the theme registry, determine if any module is implementing this theme hook.
+    var module = null;
+    if (dg.themeHookRegistered(hook)) { module = dg.getThemeHook(hook); }
+    else {
+      var modules = jDrupal.moduleImplements(hook);
+      if (modules) { module = modules[0]; }
+      dg.registerThemeHook(hook, module);
+    }
+
+    // If a module implements the theme hook, use that module's implementation of the theme
+    // hook, otherwise use the implementation found within the dg namespace.
+    var func = null;
+    if (module) {
+      theme_function = modules[0] + '_' + hook;
+      func = window[theme_function];
+    }
+    else { func = dg[theme_function]; }
+
+    // Invoke the theme function to get the html.
+    var html = func.call(null, variables);
+
+    // If a Promise came back, when it resolves, place its content within its element.
     if (html instanceof Promise) {
       html.then(function(data) {
-        document.getElementById(data.variables._attributes.id).innerHTML = dg.render(data.content);
+        dg.qs('#' + data.variables._attributes.id).innerHTML = dg.render(data.content);
       });
       return '<div ' + dg.attributes(variables._attributes) + '></div>';
     }
+
     return html;
+
   //}
   //catch (error) { console.log('dg.theme - ' + error); }
 };
