@@ -10,6 +10,9 @@ example.pageNode = function(nid) {
   // Place an empty bucket on the page.
   element.foo = {
     _theme: 'bucket',
+    _attributes: {
+      id: 'my-bucket'
+    },
     _fill: function(ok) {
 
       // Grab the node from the server, and fill the bucket with the node title.
@@ -31,4 +34,11 @@ By default a bucket uses a `div` wrapper, but you can override the `_format` pro
   _theme: 'bucket',
   _format: 'article'
   // ...
+```
+
+It's easy to refresh a bucket if the content has changed:
+
+```
+var myBucket = dg.getBucket('my-bucket');
+myBucket.refresh();
 ```
