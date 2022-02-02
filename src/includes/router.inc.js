@@ -110,7 +110,7 @@ dg.router = {
       // Try to load the route for this path, or throw a 404 if nobody can handle this.
       var route = self.load(newPath);
       if (!route) { // 404
-        console.log('dg.router.check() - 404?', newPath);
+        console.log('dg.router.check() - 404', newPath);
         return;
       }
 
