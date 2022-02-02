@@ -12,3 +12,12 @@ function core_rest_pre_process(xhr, data) { dg.spinnerShow(); }
  * @param xhr
  */
 function core_rest_post_process(xhr) { dg.spinnerHide(); }
+
+/**
+ * Implements hook_pre_process_route_change().
+ */
+function core_pre_process_route_change(newPath, oldPath) {
+
+  dg.clearBuckets();
+
+}
