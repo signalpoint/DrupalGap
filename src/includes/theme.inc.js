@@ -76,14 +76,16 @@ dg.themeLoad = function() {
  * @return {String}
  */
 dg.theme = function(hook, variables) {
+
   //try {
 
     // @TODO add an `_access_callback` and `_access_arguments` properties, see Drupal's way before implementing
 
-    // If there is HTML markup present, just return it as is. Otherwise, run
-    // the theme hook and send along the variables.
+    // If variables weren't included, set them as an empty object, otherwise if there is HTML markup present
+    // return it immediately.
     if (!variables) { variables = {}; }
-    if (variables._markup) { return variables._markup; }
+    else if (variables._markup) { return variables._markup; }
+
     var content = '';
 
       // Make sure there is a theme_*() function within the dg namespace for this hook.
@@ -96,6 +98,8 @@ dg.theme = function(hook, variables) {
         console.log(msg);
         return content;
       }
+
+    // The theme hook exists...
 
     dg.setRenderElementDefaults(variables);
 
