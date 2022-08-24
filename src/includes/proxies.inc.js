@@ -17,7 +17,16 @@ dg.isInt = function(thing) { return jDrupal.isInt(thing); };
  * Returns a random string of alpha numeric characters.
  * @see jDrupal.userPassword()
  */
-dg.salt = function() { return jDrupal.userPassword.apply(this, arguments); };
+dg.salt = function() {
+  var salt = dg.pepper();
+  return dg.isInt(salt[0]) ? dg.salt() : salt;
+};
+
+/**
+ * Returns a random string of alpha numeric characters.
+ * @see jDrupal.userPassword()
+ */
+dg.pepper = function() { return jDrupal.userPassword.apply(this, arguments); };
 
 dg.currentUser = function() { return jDrupal.currentUser(); };
 
