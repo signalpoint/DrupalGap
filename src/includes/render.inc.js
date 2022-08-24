@@ -173,7 +173,12 @@ dg.appRender = function(content) {
 };
 
 dg.renderProperties = function() {
-  return ['_prefix', '_suffix', '_preRender', '_postRender']
+  return [
+    '_prefix',
+    '_suffix',
+    '_preRender',
+    '_postRender'
+  ];
 };
 
 /**
@@ -275,8 +280,30 @@ dg.render = function(content, runPostRender) {
           html += dg.render(piece[i]);
         }
       }
-      // @TODO this allows string to be embedded in render elements, but it breaks forms.
-      //else if (_type === 'string') { html += piece; }
+      else if (_type === 'string') {
+
+        // The content is a plain string, however the Forms layer accidentally sends in objects and arrays
+        // that get picked up here and printed out. We work around that here by skipping the accidental
+        // objects and arrays.
+        // TODO delve into the Forms layer and stop accidentally sending objects and arrays that aren't part of
+        // the render process!
+        if (
+          type === 'object' &&
+          (content.role && content.role === 'form') || // skip forms
+          index === '_action' || // skip form action
+          piece === '' // skip empty pieces
+        ) { continue; }
+        else {
+          var constructorName = content.constructor.name;
+          if (constructorName && constructorName !== 'Array') {
+            weight = 0;
+            if (dg.isUndefined(weighted[weight])) { weighted[weight] = []; }
+            weighted[0].push(piece);
+            weightedCount++;
+          }
+        }
+
+      }
     }
     if (weightedCount) {
       for (weight in weighted) {
