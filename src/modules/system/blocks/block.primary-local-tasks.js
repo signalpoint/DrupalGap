@@ -1,36 +1,49 @@
 dg.modules.system.blockPrimaryLocalTasks = function() {
   return {
+
     build: function () {
+      var self = this;
       return new Promise(function(ok, err) {
 
-        // @TODO this needs to be turned into a widget so it can be dropped anywhere, f'in awesome!
-
         var content = {};
-        var items = [];
-        var route = dg.router.getActiveRoute();
+        var items = self.getItems();
 
-        // Figure out the base route depending on if the active route is a child, or
-        // has children..
-        var childRoutes = null;
-        var baseLinkText = null;
-        var baseLinkPath = null;
-        if (dg.router.hasBaseRoute(route)) { // Is a child...
-          var baseRoute = dg.router.getBaseRoute(route);
-          childRoutes = dg.router.getChildRoutes(baseRoute);
-          baseLinkText = dg.router.getRouteTitle(baseRoute);
-          baseLinkPath = dg.router.resolvePath(baseRoute);
-        }
-        else if (dg.router.hasChildRoutes(route)) { // Has children...
-          childRoutes = dg.router.getChildRoutes(route);
-          baseLinkText = dg.router.getRouteTitle(route);
-          baseLinkPath = dg.router.resolvePath(route);
+        // If we have any items, render an item list for the local tasks.
+        if (items) {
+          content.local_tasks = {
+            _theme: 'item_list',
+            _items: items
+          };
         }
 
-        // No base routes or child routes on this path, resolve nothing.
-        if (!childRoutes) {
-          ok('');
-          return;
-        }
+        ok(content);
+
+      });
+    },
+
+    getItems: function() {
+
+      var route = dg.router.getActiveRoute();
+      var items = [];
+
+      // Figure out the base route depending on if the active route is a child, or
+      // has children..
+      var childRoutes = null;
+      var baseLinkText = null;
+      var baseLinkPath = null;
+      if (dg.router.hasBaseRoute(route)) { // Is a child...
+        var baseRoute = dg.router.getBaseRoute(route);
+        childRoutes = dg.router.getChildRoutes(baseRoute);
+        baseLinkText = dg.router.getRouteTitle(baseRoute);
+        baseLinkPath = dg.router.resolvePath(baseRoute);
+      }
+      else if (dg.router.hasChildRoutes(route)) { // Has children...
+        childRoutes = dg.router.getChildRoutes(route);
+        baseLinkText = dg.router.getRouteTitle(route);
+        baseLinkPath = dg.router.resolvePath(route);
+      }
+
+      if (childRoutes) {
 
         // Add the base link.
         items.push({
@@ -62,14 +75,11 @@ dg.modules.system.blockPrimaryLocalTasks = function() {
           });
         }
 
-        // Render an item list for the local tasks and resolve it.
-        content.local_tasks = {
-          _theme: 'item_list',
-          _items: items
-        };
-        ok(content);
+      }
 
-      });
+      return items.length ? items : null;
+
     }
+
   };
 };
