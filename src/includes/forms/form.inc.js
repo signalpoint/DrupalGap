@@ -566,8 +566,30 @@ dg.formExists = function(id) { return jDrupal.functionExists(id); };
 dg.loadForm = function(id) { return dg.forms[id] ? dg.forms[id] : null; };
 
 dg.loadForms = function() { return dg.forms; };
+
+/**
+ * Deletes a form from memory.
+ * @param {type} id
+ */
 dg.removeForm = function(id) { delete dg.forms[id]; };
+
+/**
+ * Deletes all forms from memory.
+ */
 dg.removeForms = function() { dg.forms = {}; };
+
+/**
+ * Deletes a form from the DOM and from memory.
+ * @param {type} id
+ */
+dg.deleteForm = function(id) {
+  var form = dg.loadForm(id).form;
+  var domId = form._attributes.id;
+  var wrapper = dg.qs('#form-wrapper-' + domId);
+  var parent = wrapper.parentNode;
+  parent.removeChild(wrapper);
+  dg.removeForm(id);
+};
 
 /**
  * Given a form id, this will return its form state.
