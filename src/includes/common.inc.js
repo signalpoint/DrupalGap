@@ -363,6 +363,11 @@ dg.killCamelCase = function(str, separator) {
   return jDrupal.lcfirst(str).replace(/([A-Z])/g, separator + '$1').toLowerCase();
 };
 
+/**
+ * A shortcut for obj.hasOwnProperty(val).
+ */
+dg.hop = function(obj, val) { return obj.hasOwnProperty(val); };
+
 dg.inArray = function(needle, haystack) { return jDrupal.inArray(needle, haystack); };
 
 /**
