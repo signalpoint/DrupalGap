@@ -73,6 +73,8 @@ dg.qsa = function(selectors) {
   return document.querySelectorAll(selectors);
 };
 
+dg.qsi = function(id) { return document.getElementById(id); }
+
 /**
  * Shows an element.
  * @param el {String|Object} A css selector or element object.
