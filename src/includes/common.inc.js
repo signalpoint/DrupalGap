@@ -396,7 +396,6 @@ dg.elementAttributesInit = function(element) {
 /**
  * Returns html for a simple button.
  * @param text
- * @param path
  * @param options
  * @returns {String}
  */
