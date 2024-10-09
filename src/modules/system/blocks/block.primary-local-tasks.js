@@ -8,8 +8,9 @@ dg.modules.system.blockPrimaryLocalTasks = function() {
         var content = {};
         var items = self.getItems();
 
-        // If we have any items, render an item list for the local tasks.
-        if (items) {
+        // If we have more than one item, render an item list for the local tasks.
+        // We don't render a single item; it's redundant.
+        if (items && items.length > 1) {
           content.local_tasks = {
             _theme: 'item_list',
             _items: items
