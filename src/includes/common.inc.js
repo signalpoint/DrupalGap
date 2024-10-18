@@ -463,3 +463,18 @@ dg.t = function(text, args, options) {
 dg.formatPlural = function(count, singular, plural) {
   return parseInt(count) == 1 ?  singular : plural;
 };
+
+/**
+ * Returns a random string of alpha numeric characters.
+ * @see jDrupal.userPassword()
+ */
+dg.salt = function() {
+  var salt = dg.pepper();
+  return dg.isInt(salt[0]) ? dg.salt() : salt;
+};
+
+/**
+ * Returns a random string of alpha numeric characters.
+ * @see jDrupal.userPassword()
+ */
+dg.pepper = function() { return jDrupal.userPassword.apply(this, arguments); };
