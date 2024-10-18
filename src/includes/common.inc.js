@@ -470,8 +470,11 @@ dg.formatPlural = function(count, singular, plural) {
  */
 dg.salt = function() {
   var salt = dg.pepper();
-  return dg.isInt(salt[0]) ? dg.salt() : salt;
+  if (dg.isInt(salt[0]) || dg.inArray(salt, dg._salt)) { return dg.salt(); }
+  dg._salt.push(salt);
+  return salt;
 };
+dg.clearSalt = function() { dg._salt = []; };
 
 /**
  * Returns a random string of alpha numeric characters.

@@ -9,7 +9,8 @@ var dg = {
   _continued: false, // A marker to indicate when dg.continue() has been called at least once
   _postRenderMax: 128, // The max allowed post renders functions in the queue.
   _libraries: {}, // Tracks which libraries have been loaded.
-  _messages: [] // An array of individual message render elements to be displayed within the messages block.
+  _messages: [], // An array of individual message render elements to be displayed within the messages block.
+  _salt: []
 };
 // @TODO prefix all properties above with an underscore, then use dg.get() throughout the SDK.
 var drupalgap = dg;

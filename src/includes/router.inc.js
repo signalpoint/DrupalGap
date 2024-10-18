@@ -116,7 +116,10 @@ dg.router = {
 
       // We have a route to handle the path...
 
-      // Clear out any forms from the previous route, if any.
+      // Clear out...
+      // - salt and pepper
+      // - forms from the previous route, if any
+      dg.clearSalt();
       dg.removeForms();
 
       if (!route.defaults) { route = self.load(dg.getFrontPagePath()); }
