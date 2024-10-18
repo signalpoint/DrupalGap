@@ -356,4 +356,4 @@ dg.removeLibraries = function() {
 
   }
 
-}
+};
