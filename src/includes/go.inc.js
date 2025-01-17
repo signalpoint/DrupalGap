@@ -91,3 +91,5 @@ dg._removeUrlParameter = function(url, parameter) {
   }
   else { return url; }
 };
+
+dg.removeUrlParameter = function(key) { dg.setUrlParameter(key, null); };
