@@ -27,6 +27,12 @@ dg.theme_table = function(vars) {
 
     html += '<tbody>';
 
+    var renderCol = function(col) {
+      return dg.isObject(col) ?
+        '<td ' + dg.attrs(col) + '>' + col._data + '</td>' :
+        '<td>' + col + '</td>';
+    };
+
     for (var i = 0; i < vars._rows.length; i++) {
 
       var row = vars._rows[i];
@@ -35,7 +41,7 @@ dg.theme_table = function(vars) {
         html += '<tr ' + dg.attrs(row) + '>';
         for (var j = 0; j < row._cols.length; j++) {
           var col = row._cols[j];
-          html += '<td>' + col + '</td>';
+          html += renderCol(col);
         }
         html += '</tr>';
       }
@@ -44,7 +50,7 @@ dg.theme_table = function(vars) {
         html += '<tr>';
         for (var j = 0; j < row.length; j++) {
           var col = row[j];
-          html += '<td>' + col + '</td>';
+          html += renderCol(col);
         }
         html += '</tr>';
       }
