@@ -266,7 +266,13 @@ dg.render = function(content, runPostRender) {
     var weightedCount = 0;
     html += prefix;
     for (var index in content) {
-      if (!content.hasOwnProperty(index) || jDrupal.inArray(index, dg.renderProperties())) { continue; }
+      if (
+        !content.hasOwnProperty(index) ||
+        jDrupal.inArray(index, dg.renderProperties()) ||
+        index == '_node' || // Skip _node objects that anybody might attach.
+        index == '_uuid' || // Skip _uuid values that anybody might attach.
+        index == '_wrap' // Skip _wrap values that anybody might attach.
+      ) { continue; }
       var piece = content[index];
       var _type = typeof piece;
       if (_type === 'object' && piece !== null) {
