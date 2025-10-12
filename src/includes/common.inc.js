@@ -246,7 +246,7 @@ dg.attributes = function(attributes) {
         attrs += name + '="' + value.join(' ') + '" ';
       }
       else if (value === null) { attrs += ' ' + name + ' '; }
-      else if (value != '') {
+      else if (value !== '') {
         // @todo - if someone passes in a value with double quotes, this
         // will break. e.g.
         // 'onclick':'_drupalgap_form_submit("' + form.id + "');'
