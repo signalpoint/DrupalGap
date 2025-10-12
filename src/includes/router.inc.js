@@ -118,7 +118,7 @@ dg.router = {
 
       // Clear out...
       // - salt and pepper
-      // - forms from the previous route, if any
+      // - any forms
       dg.clearSalt();
       dg.removeForms();
 
