@@ -29,7 +29,7 @@ dg.addAttachments = function(content) {
           attachment[libraryDelta];
 
         if (dg.libraryLoaded(moduleName, libraryName)) {
-          console.log('library already loaded', moduleName, libraryName);
+//          console.log('library already loaded', moduleName, libraryName);
           librariesProcessed++;
           libraryDelta++;
           ok();
@@ -49,6 +49,31 @@ dg.addAttachments = function(content) {
         var cssAssetsProcessed = 0;
         var cssDelta = 0;
 
+        var areWeDone = function() {
+
+          // If we're not done, return...
+          if (jsAssetsProcessed != jsAssetCount || cssAssetsProcessed != cssAssetCount) {
+            return;
+          }
+
+          librariesProcessed++;
+          libraryDelta++;
+
+          // Mark the library as loaded.
+          var libs = dg.getLibraries();
+          if (!libs[moduleName]) { libs[moduleName] = {}; }
+          if (!libs[moduleName][libraryName]) { libs[moduleName][libraryName] = {}; }
+
+          // Give modules a chance to react to the completion of a loaded library..
+          jDrupal.moduleInvokeAll('library_onload', moduleName, libraryName);
+
+          if (librariesProcessed < libraryCount) {
+            loadLibrary();
+          }
+          else { ok(); }
+
+        };
+
         var loadJsAsset = function() {
 
           var jsAsset = library.js[jsDelta];
@@ -61,28 +86,14 @@ dg.addAttachments = function(content) {
           jsAsset._attributes.onload = function() {
             jsAssetsProcessed++;
             jsDelta++;
-//            console.log('loaded', jsAsset._attributes.src);
+//            console.log('+js', jsAsset._attributes.src);
             if (jsAssetsProcessed < jsAssetCount) {
 //              console.log('loaded a js asset, moving to the next');
               loadJsAsset();
             }
             else {
-//              console.log('all done loading js assets, moving to the next library');
-              librariesProcessed++;
-              libraryDelta++;
-
-              // Mark the library as loaded.
-              var libs = dg.getLibraries();
-              if (!libs[moduleName]) { libs[moduleName] = {}; }
-              if (!libs[moduleName][libraryName]) { libs[moduleName][libraryName] = {}; }
-
-              // Give modules a chance to react to the completion of a loaded library..
-              jDrupal.moduleInvokeAll('library_onload', moduleName, libraryName);
-
-              if (librariesProcessed < libraryCount) {
-                loadLibrary();
-              }
-              else { ok(); }
+//              console.log('all done loading js assets');
+              areWeDone();
             }
           };
           dg.addJs(jsAsset);
@@ -101,28 +112,14 @@ dg.addAttachments = function(content) {
           cssAsset._attributes.onload = function() {
             cssAssetsProcessed++;
             cssDelta++;
-//            console.log('loaded', cssAsset._attributes.href);
+//            console.log('+css', cssAsset._attributes.href);
             if (cssAssetsProcessed < cssAssetCount) {
 //              console.log('loaded a css asset, moving to the next');
               loadCssAsset();
             }
             else {
-//              console.log('all done loading css assets, moving to the next library');
-              librariesProcessed++;
-              libraryDelta++;
-
-              // Mark the library as loaded.
-              var libs = dg.getLibraries();
-              if (!libs[moduleName]) { libs[moduleName] = {}; }
-              if (!libs[moduleName][libraryName]) { libs[moduleName][libraryName] = {}; }
-
-              // Give modules a chance to react to the completion of a loaded library..
-              jDrupal.moduleInvokeAll('library_onload', moduleName, libraryName);
-
-              if (librariesProcessed < libraryCount) {
-                loadLibrary();
-              }
-              else { ok(); }
+//              console.log('all done loading css assets');
+              areWeDone();
             }
           };
           dg.addCss(cssAsset);
@@ -213,83 +210,188 @@ dg.libraryLoad = function(moduleName, libraryName) {
 
     // If the library has already been added, don't do it again, just resolve.
     if (dg.libraryLoaded(moduleName, libraryName)) {
-      console.log('library already added!', moduleName, libraryName);
+//      console.log('library already added!', moduleName, libraryName);
       ok();
       return;
     }
-    console.log('library not yet added', moduleName, libraryName);
+//    console.log('library not yet added', moduleName, libraryName);
 
     // Load up the library configuration from the module.
     var library = dg.getModuleLibrary(moduleName, libraryName);
 
-    // Specify which asset types we allow and count them.
-    var assetTypes = ['js', 'css'];
-    var assetTypesCount = assetTypes.length;
-    var assetType = null;
-    var assetCount = 0;
+    dg.libraryAdd(moduleName, libraryName, library, ok, err);
 
-    // First figure out how many assets we are going to load.
-    var assetsLoading = 0;
-    for (var i = 0; i < assetTypesCount; i++) {
-      assetType = assetTypes[i];
+    // ... ABSTRACT OUT ...
 
-      // If the module's library doesn't provide this asset type, then skip it.
-      if (!library[assetType]) { continue; }
+//    // Specify which asset types we allow and count them.
+//    var assetTypes = ['js', 'css'];
+//    var assetTypesCount = assetTypes.length;
+//    var assetType = null;
+//    var assetCount = 0;
+//
+//    // First figure out how many assets we are going to load.
+//    var assetsLoading = 0;
+//    for (var i = 0; i < assetTypesCount; i++) {
+//      assetType = assetTypes[i];
+//
+//      // If the module's library doesn't provide this asset type, then skip it.
+//      if (!library[assetType]) { continue; }
+//
+//      // The module's library has an asset(s) for this type, count how many.
+//      assetsLoading += library[assetType].length;
+//    }
+//
+//    // Iterate over the types of assets we allow...
+//
+//    for (var i = 0; i < assetTypesCount; i++) {
+//      assetType = assetTypes[i];
+//
+//      // If the module's library doesn't provide this asset type, then skip it.
+//      if (!library[assetType]) { continue; }
+//
+//      // The module's library has an asset(s) for this type, count how many.
+//      assetCount = library[assetType].length;
+//
+//      // Iterate over each asset of this type...
+//      for (var j = 0; j < assetCount; j++) {
+//        var asset = library[assetType][j];
+//
+//        // Set up our onload handler.
+//        asset._attributes.onload = function() { // @TODO allow library implementors to have their own onload too.
+//
+//          // Mark an asset as loaded.
+//          assetsLoading--;
+//          console.log('done loading asset, assets left: ' + assetsLoading);
+//
+//          // Once we're done loading all the assets...
+//          if (!assetsLoading) {
+//
+//            // Mark the library as loaded.
+//            var libs = dg.getLibraries();
+//            if (!libs[moduleName]) { libs[moduleName] = {}; }
+//            if (!libs[moduleName][libraryName]) { libs[moduleName][libraryName] = {}; }
+//
+//            // Give modules a chance to react to the completion of a loaded library..
+//            jDrupal.moduleInvokeAll('library_onload', moduleName, libraryName);
+//
+//            // Resolve.
+//            ok();
+//          }
+//
+//        };
+//
+//        console.log('loading asset', asset);
+//
+//        // Add the asset's file to the head, then circle back to the onload handler.
+//        console.log('LOADING: ' + moduleName + '/' + libraryName);
+//        assetType == 'js' ? dg.addJs(asset) : dg.addCss(asset);
+//
+//      }
+//
+//    }
 
-      // The module's library has an asset(s) for this type, count how many.
-      assetsLoading += library[assetType].length;
-    }
-
-    // Iterate over the types of assets we allow...
-
-    for (var i = 0; i < assetTypesCount; i++) {
-      assetType = assetTypes[i];
-
-      // If the module's library doesn't provide this asset type, then skip it.
-      if (!library[assetType]) { continue; }
-
-      // The module's library has an asset(s) for this type, count how many.
-      assetCount = library[assetType].length;
-
-      // Iterate over each asset of this type...
-      for (var j = 0; j < assetCount; j++) {
-        var asset = library[assetType][j];
-
-        // Set up our onload handler.
-        asset._attributes.onload = function() { // @TODO all library implementors to have their own onload too.
-
-          // Mark an asset as loaded.
-          assetsLoading--;
-          console.log('done loading asset, assets left: ' + assetsLoading);
-
-          // Once we're done loading all the assets...
-          if (!assetsLoading) {
-
-            // Mark the library as loaded.
-            var libs = dg.getLibraries();
-            if (!libs[moduleName]) { libs[moduleName] = {}; }
-            if (!libs[moduleName][libraryName]) { libs[moduleName][libraryName] = {}; }
-
-            // Give modules a chance to react to the completion of a loaded library..
-            jDrupal.moduleInvokeAll('library_onload', moduleName, libraryName);
-
-            // Resolve.
-            ok();
-          }
-
-        };
-
-        console.log('loading asset', asset);
-
-        // Add the asset's file to the head, then circle back to the onload handler.
-        console.log('LOADING: ' + moduleName + '/' + libraryName);
-        assetType == 'js' ? dg.addJs(asset) : dg.addCss(asset);
-
-      }
-
-    }
+    // ... ABSTRACT OUT ...
 
   });
+};
+dg.libraryAdd = function(moduleName, libraryName, library, ok, err) {
+
+  // Specify which asset types we allow and count them.
+  var assetTypes = ['js', 'css'];
+  var assetTypesCount = assetTypes.length;
+  var assetType = null;
+  var assetCount = 0;
+
+  // First figure out how many assets we are going to load.
+  var assetsLoading = 0;
+  for (var i = 0; i < assetTypesCount; i++) {
+
+    assetType = assetTypes[i];
+
+    // If the module's library doesn't provide this asset type, then skip it.
+    if (!library[assetType]) { continue; }
+
+    // The module's library has an asset(s) for this type, count how many.
+    assetsLoading += library[assetType].length;
+
+  }
+
+  // Iterate over the types of assets we allow...
+
+  for (var i = 0; i < assetTypesCount; i++) {
+
+    assetType = assetTypes[i];
+
+    // If the module's library doesn't provide this asset type, then skip it.
+    if (!library[assetType]) { continue; }
+
+    var isJs = assetType == 'js';
+    var isCss = assetType == 'css';
+
+    // The module's library has an asset(s) for this type, count how many.
+    assetCount = library[assetType].length;
+
+    // Iterate over each asset of this type...
+    for (var j = 0; j < assetCount; j++) {
+
+      var asset = library[assetType][j];
+
+      var assetPath = null;
+      if (isJs) { assetPath = asset._attributes.src.split('?')[0]; }
+      else if (isCss) { assetPath = asset._attributes.href.split('?')[0]; }
+
+      // DEBUG
+//      console.log(assetType, asset);
+      if (assetType == 'js') { console.log('js', assetPath); }
+      else if (assetType == 'css') { console.log('css', assetPath); }
+
+      // Already loaded in the DOM?
+      if (isJs && dg.jsIsLoaded(assetPath)) {
+//        console.log('JS ALREADY LOADED', assetPath);
+        assetsLoading--;
+        if (!assetsLoading) { ok(); break; } // break out if this was the last one
+        continue;
+      }
+      else if (isCss && dg.cssIsLoaded(assetPath)) {
+//        console.log('CSS ALREADY LOADED', assetPath);
+        assetsLoading--;
+        if (!assetsLoading) { ok(); break; } // break out if this was the last one
+        continue;
+      }
+
+      // Set up our onload handler.
+      asset._attributes.onload = function() { // @TODO allow library implementors to have their own onload too.
+
+        // Mark an asset as loaded.
+        assetsLoading--;
+//        console.log('done loading asset, assets left: ' + assetsLoading);
+
+        // Once we're done loading all the assets...
+        if (!assetsLoading) {
+
+          // Mark the library as loaded.
+          var libs = dg.getLibraries();
+          if (!libs[moduleName]) { libs[moduleName] = {}; }
+          if (!libs[moduleName][libraryName]) { libs[moduleName][libraryName] = {}; }
+
+          // Give modules a chance to react to the completion of a loaded library..
+          jDrupal.moduleInvokeAll('library_onload', moduleName, libraryName);
+
+          // Resolve.
+          ok();
+        }
+
+      };
+
+      // Add the asset's file to the head, then circle back to the onload handler.
+//      console.log('LOADING (' + libraryName + '):', assetPath);
+      if (isJs) { dg.addJs(asset); }
+      else if (isCss) { dg.addCss(asset); }
+
+    }
+
+  }
+
 };
 
 dg.libraryLoaded = function(moduleName, libraryName) {
